@@ -184,7 +184,7 @@ public class ViewUpdater {
 
             // If ClearFlash, register for proper repaint to clear highlight
             if (_clearFlash)
-                ViewUtils.runDelayed(() -> _rview.repaint(rect), 10, true);
+                ViewUtils.runDelayed(() -> _rview.repaint(rect), 10);
         }
     }
 

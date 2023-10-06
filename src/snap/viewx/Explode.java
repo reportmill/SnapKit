@@ -201,7 +201,7 @@ public class Explode extends View {
      */
     public void playDelayed(int aDelay)
     {
-        if (aDelay > 0) ViewUtils.runDelayed(() -> play(), aDelay, true);
+        if (aDelay > 0) ViewUtils.runDelayed(() -> play(), aDelay);
         else play();
     }
 

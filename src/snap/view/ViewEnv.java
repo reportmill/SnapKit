@@ -95,38 +95,27 @@ public abstract class ViewEnv {
     /**
      * Runs given runnable after delay.
      */
-    public void runDelayed(Runnable aRun, int aDelay, boolean inAppThread)
+    public void runDelayed(Runnable aRun, int aDelay)
     {
         TimerTask task = new TimerTask() {
-            public void run() {
-                if (inAppThread)
-                    runLater(aRun);
-                else aRun.run();
-            }
+            public void run() { runLater(aRun); }
         };
         _timer.schedule(task, aDelay);
     }
 
     /**
-     * Runs given runnable for given period after given delay with option to run once for every interval, even under load.
+     * Runs given runnable repeatedly every period milliseconds.
      */
-    public void runIntervals(Runnable aRun, int aPeriod, boolean doAll, boolean inAppThread)
+    public void runIntervals(Runnable aRun, int aPeriod)
     {
         // Create task
         TimerTask task = new TimerTask() { public void run()  {
-            if (inAppThread) {
-                if (doAll)
-                    runLater(aRun);
-                else runLaterAndWait(aRun);
-            }
-            else aRun.run();
+            runLater(aRun);
         }};
 
         // Add task and schedule
         _timerTasks.put(aRun, task);
-        if (doAll)
-            _timer.scheduleAtFixedRate(task, aPeriod, aPeriod);
-        else _timer.schedule(task, aPeriod, aPeriod);
+        _timer.schedule(task, aPeriod, aPeriod);
     }
 
     /**

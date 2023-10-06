@@ -767,26 +767,17 @@ public class ViewOwner extends PropObject {
     /**
      * Returns whether current thread is event thread.
      */
-    protected boolean isEventThread()
-    {
-        return _env.isEventThread();
-    }
+    protected boolean isEventThread()  { return _env.isEventThread(); }
 
     /**
      * Runs the given runnable in the next event.
      */
-    public void runLater(Runnable aRunnable)
-    {
-        _env.runLater(aRunnable);
-    }
+    public void runLater(Runnable aRunnable)  { _env.runLater(aRunnable); }
 
     /**
      * Runs the runnable after the given delay in milliseconds.
      */
-    public void runLaterDelayed(int aDelay, Runnable aRunnable)
-    {
-        _env.runDelayed(aRunnable, aDelay, true);
-    }
+    public void runDelayed(int aDelay, Runnable aRunnable)  { _env.runDelayed(aRunnable, aDelay); }
 
     /**
      * Invokes the given runnable for name once (cancels unexecuted previous runLater registered with same name).

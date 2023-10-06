@@ -1708,7 +1708,7 @@ public class TextArea extends View {
 
         // If Showing, make sure selection is visible
         if (aValue && getSelStart() != 0)
-            getEnv().runDelayed(() -> scrollSelToVisible(), 200, true);
+            getEnv().runDelayed(() -> scrollSelToVisible(), 200);
 
         // Manage listener for Window.Focus changes
         updateWindowFocusChangedLsnr();

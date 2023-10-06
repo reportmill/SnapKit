@@ -135,10 +135,10 @@ public class ViewUtils {
     /**
      * Runs given runnable after delay.
      */
-    public static void runDelayed(Runnable aRun, int aDelay, boolean inAppThread)
+    public static void runDelayed(Runnable aRun, int aDelay)
     {
         ViewEnv viewEnv = ViewEnv.getEnv();
-        viewEnv.runDelayed(aRun, aDelay, inAppThread);
+        viewEnv.runDelayed(aRun, aDelay);
     }
 
     /**

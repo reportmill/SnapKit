@@ -109,7 +109,7 @@ public class ViewTimer {
         // Initialize times and Schedule task
         _startTime = System.currentTimeMillis() - (_pauseTime>0 ? (_pauseTime - _startTime) : 0);
         _pauseTime = 0;
-        _env.runIntervals(_run, getPeriod(), false, true);
+        _env.runIntervals(_run, getPeriod());
     }
 
     /**
@@ -118,7 +118,7 @@ public class ViewTimer {
     public void start(int aDelay)
     {
         if (aDelay > 0)
-            _env.runDelayed(() -> start(), aDelay, true);
+            _env.runDelayed(() -> start(), aDelay);
         else start();
     }
 
@@ -128,7 +128,7 @@ public class ViewTimer {
     public synchronized void stop()
     {
         if (_run != null)
-            ViewEnv.getEnv().stopIntervals(_run);
+            _env.stopIntervals(_run);
         _run = null;
         _pauseTime = 0;
     }
