@@ -142,6 +142,75 @@ public class ViewUtils {
     }
 
     /**
+     * Invokes the given runnable after delay (cancels unexecuted previous runDelayed if still pending).
+     */
+    public static void runDelayedCancelPrevious(Runnable aRun, int aDelay)
+    {
+        synchronized (_runDelayedCancelPreviousRuns) {
+
+            // If runnable hasn't been registered yet, create and add and register it
+            RunDelayedRunnable runnable = _runDelayedCancelPreviousRuns.get(aRun);
+            if (runnable == null) {
+                _runDelayedCancelPreviousRuns.put(aRun, runnable = new RunDelayedRunnable(aRun, aDelay));
+                runDelayed(runnable, aDelay);
+            }
+
+            // Otherwise, reset init time
+            else {
+                runnable._initTime = System.currentTimeMillis();
+                runnable._delay = aDelay;
+            }
+        }
+    }
+
+    // Map of runDelayedCancelPrevious runnables
+    private static final Map<Runnable, RunDelayedRunnable> _runDelayedCancelPreviousRuns = new HashMap<>();
+
+    /**
+     * A wrapper Runnable for RunDelayedCancelPrevious.
+     */
+    private static class RunDelayedRunnable implements Runnable {
+
+        // The original runnable
+        private Runnable _runnable;
+
+        // The time that runnable was registered
+        private long _initTime;
+
+        // The time that runnable should delay
+        private int _delay;
+
+        /** Constructor. */
+        RunDelayedRunnable(Runnable aRunnable, int aDelay)
+        {
+            _initTime = System.currentTimeMillis();
+            _runnable = aRunnable;
+            _delay = aDelay;
+        }
+
+        /** Run. */
+        public void run()
+        {
+            // If trigger time is now in the future, register to come back
+            long now = System.currentTimeMillis();
+            long actualDelay = now - _initTime;
+            if (actualDelay < _delay) {
+                int remainingDelay = _delay - (int) actualDelay;
+                runDelayed(this, remainingDelay);
+                return;
+            }
+
+            // Remove from map
+            synchronized (_runDelayedCancelPreviousRuns) {
+                _runDelayedCancelPreviousRuns.remove(_runnable);
+            }
+
+            // Run
+            _runnable.run();
+        }
+    }
+
+    /**
      * Runs a runnable on next mouse release (assumes mouse is down).
      */
     public static void runOnMouseUp(Runnable aRun)

@@ -40,9 +40,6 @@ public class ViewOwner extends PropObject {
     // Whether initShowing has happened
     private boolean  _initShowingDone;
 
-    // Map of RunOne runnables
-    private final Map<String,Runnable> _runOnceMap = new HashMap<>();
-    
     // The view environment
     private ViewEnv  _env = ViewEnv.getEnv();
     
@@ -778,46 +775,6 @@ public class ViewOwner extends PropObject {
      * Runs the runnable after the given delay in milliseconds.
      */
     public void runDelayed(int aDelay, Runnable aRunnable)  { _env.runDelayed(aRunnable, aDelay); }
-
-    /**
-     * Invokes the given runnable for name once (cancels unexecuted previous runLater registered with same name).
-     */
-    public void runLaterOnce(String aName, Runnable aRunnable)
-    {
-        synchronized (_runOnceMap) {
-            RunLaterRunnable runnable = (RunLaterRunnable) _runOnceMap.get(aName);
-            if (runnable == null) {
-                _runOnceMap.put(aName, runnable = new RunLaterRunnable(aName, aRunnable));
-                runLater(runnable);
-            }
-            else runnable._runnable = aRunnable;
-        }
-    }
-
-    /**
-     * A wrapper Runnable for RunLaterOnce.
-     */
-    private class RunLaterRunnable implements Runnable {
-
-        // Ivars
-        String _name;
-        Runnable _runnable;
-
-        /** Constructor. */
-        RunLaterRunnable(String aName, Runnable aRunnable)  { _name = aName; _runnable = aRunnable; }
-
-        /** Run. */
-        public void run()
-        {
-            Runnable runnable;
-            synchronized (_runOnceMap) {
-                _runOnceMap.remove(_name);
-                runnable = _runnable;
-            }
-            if (runnable != null)
-                runnable.run();
-        }
-    }
 
     /**
      * Plays a beep.
