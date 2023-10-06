@@ -119,7 +119,7 @@ public abstract class ViewEnv {
     }
 
     /**
-     * Runs given runnable for given period after given delay with option to run once for every interval, even under load.
+     * Stops running given runnable.
      */
     public void stopIntervals(Runnable aRun)
     {
@@ -129,7 +129,7 @@ public abstract class ViewEnv {
     }
 
     /**
-     * Runs an runnable later and waits for it to finish.
+     * Runs a runnable later and waits for it to finish.
      */
     public synchronized void runLaterAndWait(Runnable aRun)
     {
