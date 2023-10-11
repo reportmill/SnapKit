@@ -132,6 +132,18 @@ public abstract class PropObject implements PropChange.DoChange {
     }
 
     /**
+     * Sets prop key values - might be an improper convenience.
+     */
+    public void setPropValues(Object ... keyValues)
+    {
+        for (int i = 0; i < keyValues.length; i++) {
+            String key = (String) keyValues[i];
+            Object value = keyValues[++i];
+            setPropValue(key, value);
+        }
+    }
+
+    /**
      * Returns whether give prop is set to default.
      */
     public boolean isPropDefault(String aPropName)

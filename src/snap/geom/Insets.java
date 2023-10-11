@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.geom;
+import snap.util.Convert;
 import snap.util.StringUtils;
 
 import java.util.Objects;
@@ -175,5 +176,18 @@ public class Insets implements Cloneable {
         else if (margins.length == 1)
             left = right = bottom = top;
         return new Insets(top, right, bottom, left);
+    }
+
+    /**
+     * Returns insets from given object.
+     */
+    public static Insets of(Object anObj)
+    {
+        if (anObj instanceof Insets || anObj == null)
+            return (Insets) anObj;
+        if (anObj instanceof String)
+            return get((String) anObj);
+        double val = Convert.doubleValue(anObj);
+        return new Insets(val);
     }
 }
