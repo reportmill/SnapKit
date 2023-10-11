@@ -503,6 +503,10 @@ public class ViewAnim implements XMLArchiver.Archivable {
      */
     public ViewAnim setValue(String aKey, Object aValue)
     {
+        // Handle Scale special
+        if (aKey.equals("Scale"))
+            return setScale(Convert.doubleValue(aValue));
+
         return setValue(aKey, null, aValue);
     }
 
@@ -760,6 +764,35 @@ public class ViewAnim implements XMLArchiver.Archivable {
         Integer[] times = timesSet.toArray(new Integer[0]);
         Arrays.sort(times);
         return times;
+    }
+
+    /**
+     * Sets props from items which can be times, keys, values.
+     */
+    public ViewAnim setProps(Object ... propItems)
+    {
+        for (int i = 0; i < propItems.length; i++) {
+            Object propItem = propItems[i];
+
+            // Handle Number: get anim for time and forward
+            if (propItem instanceof Number) {
+                int time = ((Number) propItem).intValue();
+                ViewAnim timeAnim = getAnim(time);
+                Object[] remainder = Arrays.copyOfRange(propItems, i + 1, propItems.length);
+                timeAnim.setProps(remainder);
+                return this;
+            }
+
+            // Handle String: get next item as value and set
+            if (propItem instanceof String) {
+                String propName = (String) propItem;
+                Object propVal2 = propItems[++i];
+                setValue(propName, propVal2);
+            }
+        }
+
+        // Return
+        return this;
     }
 
     /**

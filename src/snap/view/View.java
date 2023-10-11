@@ -2697,6 +2697,14 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
+     * Convenience to quickly set anim props.
+     */
+    public ViewAnim setAnimProps(Object ... propItems)
+    {
+        return getAnim(0).setProps(propItems);
+    }
+
+    /**
      * Play animations deep.
      */
     public void playAnimDeep()
