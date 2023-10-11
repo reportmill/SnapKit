@@ -44,4 +44,14 @@ public interface Paint extends XMLArchiver.Archivable {
      * Returns the snap version of this fill.
      */
     default Paint snap()  { return this; }
+
+    /**
+     * Returns a color from given object.
+     */
+    static Paint of(Object anObj)
+    {
+        if (anObj instanceof Paint || anObj == null)
+            return (Paint) anObj;
+        return Color.get(anObj);
+    }
 }

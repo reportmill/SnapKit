@@ -2993,12 +2993,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             // Border, BorderRadius, Fill, Effect, Opacity
             case Border_Prop: setBorder((Border) aValue); break;
             case BorderRadius_Prop: setBorderRadius(Convert.doubleValue(aValue)); break;
-            case Fill_Prop: setFill(aValue instanceof Paint ? (Paint) aValue : null); break;
+            case Fill_Prop: setFill(Paint.of(aValue)); break;
             case Effect_Prop: setEffect((Effect) aValue); break;
             case Opacity_Prop: setOpacity(Convert.doubleValue(aValue)); break;
 
             // Font, Text, ToolTip, Cursor, Clip
-            case Font_Prop: setFont((Font) aValue); break;
+            case Font_Prop: setFont(Font.of(aValue)); break;
             case Text_Prop: setText(Convert.stringValue(aValue)); break;
             case ToolTip_Prop: setToolTip(Convert.stringValue(aValue)); break;
             case Cursor_Prop: setCursor((Cursor) aValue); break;

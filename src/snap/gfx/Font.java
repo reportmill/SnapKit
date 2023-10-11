@@ -7,6 +7,7 @@ import snap.geom.Shape;
 import snap.props.PropObject;
 import snap.props.PropSet;
 import snap.util.*;
+import java.util.Arrays;
 
 /**
  * This class represents a font for use in rich text. Currently this is necessary because Java fonts are missing
@@ -450,5 +451,34 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
     {
         GFXEnv gfxEnv = GFXEnv.getEnv();
         return gfxEnv.getFontNames(aFamilyName);
+    }
+
+    /**
+     * Tries to return a font from given object.
+     */
+    public static Font of(Object anObj)
+    {
+        // Handle font or null
+        if (anObj instanceof Font || anObj == null)
+            return (Font) anObj;
+
+        // Handle string: try to pick off size
+        if (anObj instanceof String) {
+            String str = (String) anObj;
+            String[] parts = str.split("\\s");
+            if (parts.length > 1) {
+                 double size = Convert.doubleValue(parts[parts.length - 1]);
+                 if (size > 0) {
+                     parts = Arrays.copyOf(parts, parts.length - 1);
+                     String name = String.join("", parts);
+                     return getFont(name, size);
+                 }
+            }
+            return getFont(str, 12);
+        }
+
+        // Complain and return null
+        System.out.println("Font.of: Can't determine front from: " + anObj);
+        return null;
     }
 }
