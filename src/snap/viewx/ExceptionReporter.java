@@ -78,17 +78,28 @@ public class ExceptionReporter extends ViewOwner implements Thread.UncaughtExcep
     public void setInfo(String aStr)  { _info = aStr; }
 
     /**
-     * Creates a new exception reporter for given throwable.
+     * Shows exception reporter panel for given exception.
      */
     public void uncaughtException(Thread t, Throwable aThrowable)
     {
-        // Get root exception
-        while(aThrowable.getCause()!=null)
-            aThrowable = aThrowable.getCause();
-
         // Go ahead and print stack trace
         aThrowable.printStackTrace();
 
+        // Get root exception
+        Throwable throwable = aThrowable;
+        while (throwable.getCause() != null)
+            throwable = throwable.getCause();
+
+        // Get stack trace string and call
+        String exceptionString = StringUtils.getStackTraceString(throwable);
+        ViewUtils.runLater(() -> showExceptionPanelForExceptionString(exceptionString));
+    }
+
+    /**
+     * Shows exception reporter panel for given exception string.
+     */
+    private void showExceptionPanelForExceptionString(String exceptionString)
+    {
         // If exception reporting not enabled, just return (otherwise mark done, because we only offer this once)
         Prefs prefs = Prefs.getDefaultPrefs();
         if (_done || !prefs.getBoolean("ExceptionReportingEnabled", true))
@@ -111,7 +122,7 @@ public class ExceptionReporter extends ViewOwner implements Thread.UncaughtExcep
 
         // Get the backtrace of the throwable into a string and append it to our exception text
         eBuffer.append("Backtrace:\n");
-        eBuffer.append(StringUtils.getStackTraceString(aThrowable));
+        eBuffer.append(exceptionString);
 
         // Finally, set the exception text in the UI
         setViewValue("BacktraceText", eBuffer.toString());
