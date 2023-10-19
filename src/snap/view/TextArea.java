@@ -453,25 +453,25 @@ public class TextArea extends View {
      */
     protected void scrollSelToVisible()
     {
-        // Get selection rect. If empty, outset by 1. If abuts left border, make sure left border is visible.
+        // Get visible rect - if no reason to scroll, just return
+        Rect visRect = getClipAllBounds();
+        double viewW = getWidth();
+        double viewH = getHeight();
+        if (visRect == null || visRect.isEmpty() || visRect.width == viewW && visRect.height == viewH)
+            return;
+
+        // Get selection rect with healthy margin, constrained to bounds
         TextSel textSel = getSel();
         Rect selRect = textSel.getPath().getBounds();
-        if (selRect.isEmpty())
-            selRect.inset(-1, -2);
-        if (selRect.x - 1 <= _textBlock.getX()) {
-            selRect.setX(-getX());
-            selRect.setWidth(10);
-        }
+        selRect.inset(-72);
+        selRect.x = Math.max(selRect.x, 0);
+        selRect.y = Math.max(selRect.y, 0);
+        if (selRect.getMaxX() > viewW) selRect.width = viewW - selRect.x;
+        if (selRect.getMaxY() > viewH) selRect.height = viewH - selRect.y;
 
         // If selection rect not fully contained in visible rect, scrollRectToVisible
-        Rect visRect = getClipAllBounds();
-        if (visRect == null || visRect.isEmpty())
-            return;
-        if (!visRect.contains(selRect)) {
-            if (!selRect.intersects(visRect))
-                selRect.inset(0, -100);
+        if (!visRect.contains(selRect))
             scrollToVisible(selRect);
-        }
     }
 
     /**
