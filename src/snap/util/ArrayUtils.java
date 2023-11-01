@@ -349,6 +349,20 @@ public class ArrayUtils {
     }
 
     /**
+     * Returns whether two arrays are equal using identity check (==).
+     */
+    public static boolean equalsId(Object[] array1, Object[] array2)
+    {
+        if (array1 == array2) return true;
+        if (array1 == null || array2 == null || array1.length != array2.length)
+            return false;
+        for (int i = 0; i < array1.length; i++)
+            if (array1[i] != array2[i])
+                return false;
+        return true;
+    }
+
+    /**
      * Returns the index of the given object in the given array.
      */
     public static int indexOf(Object[] anArray, Object anObj)
