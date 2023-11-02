@@ -26,8 +26,8 @@ public class URLUtils {
     {
         // Get URL in normal form
         String urls = aURL.toExternalForm();
-        try { urls = URLDecoder.decode(urls, "UTF-8"); }
-        catch(Exception e) { }
+        //try { urls = URLDecoder.decode(urls, "UTF-8"); }
+        //catch(Exception e) { }
 
         // If jar or wsjar, just strip it
         if (aURL.getProtocol().equals("jar"))
