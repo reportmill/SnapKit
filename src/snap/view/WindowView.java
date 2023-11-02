@@ -227,7 +227,7 @@ public class WindowView extends ParentView {
         int winY = (int) getY();
         int winW = (int) getWidth();
         int winH = (int) getHeight();
-        StringBuffer sb = new StringBuffer().append(winX).append(' ').append(winY);
+        StringBuilder sb = new StringBuilder().append(winX).append(' ').append(winY);
         if (_saveSize)
             sb.append(' ').append(winW).append(' ').append(winH);
         Prefs.getDefaultPrefs().setValue(_saveName + "Loc", sb.toString());
@@ -724,11 +724,13 @@ public class WindowView extends ParentView {
      */
     public static <T extends ViewOwner> T getOpenWindowOwner(Class <T> aClass)
     {
-        for (WindowView win : _openWins) { View content = win.getContent();
-            ViewOwner ownr = content.getOwner();
-            if (ownr!=null && (aClass==null || aClass.isAssignableFrom(ownr.getClass())))
-                return (T)ownr;
+        for (WindowView window : _openWins) {
+            ViewOwner owner = window.getOwner();
+            if (owner != null && (aClass == null || aClass.isAssignableFrom(owner.getClass())))
+                return (T) owner;
         }
+
+        // Return not found
         return null;
     }
 
@@ -737,13 +739,15 @@ public class WindowView extends ParentView {
      */
     public static <T extends ViewOwner> T[] getOpenWindowOwners(Class <T> aClass)
     {
-        List <T> ownrs = new ArrayList<>();
-        for (WindowView win : _openWins) { View content = win.getContent();
-            ViewOwner ownr = content.getOwner();
-            if (ownr!=null && (aClass==null || aClass.isAssignableFrom(ownr.getClass())))
-                ownrs.add((T)ownr);
+        List <T> viewOwners = new ArrayList<>();
+        for (WindowView window : _openWins) {
+            ViewOwner owner = window.getOwner();
+            if (owner != null && (aClass == null || aClass.isAssignableFrom(owner.getClass())))
+                viewOwners.add((T) owner);
         }
-        return ownrs.toArray((T[])Array.newInstance(aClass, ownrs.size()));
+
+        // Return array
+        return viewOwners.toArray((T[]) Array.newInstance(aClass, viewOwners.size()));
     }
 
     /**
@@ -757,20 +761,20 @@ public class WindowView extends ParentView {
         // Modify x for given HPos
         switch(aPos.getHPos()) {
             case LEFT: x += aRect.x; break;
-            case CENTER: x += Math.round(aRect.x + (aRect.width-getWidth())/2); break;
+            case CENTER: x += Math.round(aRect.x + (aRect.width - getWidth()) / 2); break;
             case RIGHT: x += aRect.getMaxX() - getWidth(); break;
         }
 
         // Modify y for given VPos
         switch(aPos.getVPos()) {
             case TOP: y += aRect.y; break;
-            case CENTER: y += Math.round(aRect.y + (aRect.height-getHeight())/2); break;
+            case CENTER: y += Math.round(aRect.y + (aRect.height - getHeight()) / 2); break;
             case BOTTOM: y += aRect.getMaxY() - getHeight(); break;
         }
 
         // Return point
         return new Point(x,y);
-        }
+    }
 
     /**
      * A class to map snap Window functionality to native platform.
