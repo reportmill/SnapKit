@@ -151,10 +151,11 @@ public class AWTEnv extends GFXEnv {
     {
         // Get URL/URI and open with Desktop API
         try {
-            WebURL url = WebURL.getURL(aSource);
-            String urlStr = url != null ? url.getString() : null;
-            URI uri = urlStr != null ? new URI(urlStr) : null;
-            Desktop.getDesktop().browse(uri);
+            WebURL snapURL = WebURL.getURL(aSource);
+            URL javaURL = snapURL != null ? snapURL.getJavaURL() : null;
+            URI uri = javaURL != null ? javaURL.toURI() : null;
+            if (uri != null)
+                Desktop.getDesktop().browse(uri);
         }
 
         // If something goes wrong, just complain
