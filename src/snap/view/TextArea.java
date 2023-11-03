@@ -469,6 +469,12 @@ public class TextArea extends View {
         if (selRect.getMaxX() > viewW) selRect.width = viewW - selRect.x;
         if (selRect.getMaxY() > viewH) selRect.height = viewH - selRect.y;
 
+        // If sel rect covers whole width, cancel horizontal scroll
+        if (selRect.x == 0 && selRect.width == viewW) {
+            selRect.x = visRect.x;
+            selRect.width = visRect.width;
+        }
+
         // If selection rect not fully contained in visible rect, scrollRectToVisible
         if (!visRect.contains(selRect))
             scrollToVisible(selRect);
