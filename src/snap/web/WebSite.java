@@ -307,27 +307,27 @@ public abstract class WebSite {
         if (parentDir != null && !parentDir.getExists())
             parentDir.save();
 
-        // Create web request
-        WebRequest req = new WebRequest(aFile);
-        byte[] fileBytes = aFile.getBytes();
+        // Create PUT request for file
+        WebRequest putRequest = new WebRequest(aFile);
+        byte[] fileBytes = aFile.isFile() ? aFile.getBytes() : null;
         if (fileBytes == null)
             fileBytes = new byte[0];
-        req.setPutBytes(fileBytes);
+        putRequest.setPutBytes(fileBytes);
 
         // Send request and get response
-        WebResponse resp = getResponse(req);
+        WebResponse putResponse = getResponse(putRequest);
 
         // Just return if failed
-        int respCode = resp.getCode();
+        int respCode = putResponse.getCode();
         if (respCode != WebResponse.OK)
-            return resp;
+            return putResponse;
 
         // Set File.Exists and clear File.Modified since save succeeded
         aFile.setExists(true);
         aFile.setModified(false);
 
         // Update ModTime
-        long modTime = resp.getModTime();
+        long modTime = putResponse.getModTime();
         aFile.setModTime(modTime);
         if (modTime == 0)
             System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getUrlString());
@@ -339,7 +339,7 @@ public abstract class WebSite {
         }
 
         // Return
-        return resp;
+        return putResponse;
     }
 
     /**
