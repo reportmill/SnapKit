@@ -6,8 +6,8 @@ import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.geom.Rect;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
-
 import java.util.Objects;
 
 /**
@@ -1125,6 +1125,19 @@ public class TextField extends ParentView {
      * Returns a mapped property name.
      */
     public String getValuePropName()  { return "Text"; }
+
+    /**
+     * Override to customize for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Reset defaults
+        aPropSet.getPropForName(BorderRadius_Prop).setDefaultValue(DEFAULT_TEXT_FIELD_BORDER_RADIUS);
+    }
 
     /**
      * Standard toString implementation.

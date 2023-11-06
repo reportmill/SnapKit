@@ -3108,9 +3108,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         Border border = getBorder();
         if (border != null && !Objects.equals(border, getDefaultBorder()))
             e.add(anArchiver.toXML(border, this));
-        double borderRadius = getBorderRadius();
-        if (borderRadius > 0)
-            e.add(BorderRadius_Prop, borderRadius);
+        if (!isPropDefault(BorderRadius_Prop))
+            e.add(BorderRadius_Prop, getBorderRadius());
 
         // Archive Fill
         Paint fill = getFill();

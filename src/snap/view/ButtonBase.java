@@ -47,6 +47,7 @@ public class ButtonBase extends ParentView {
 
     // Constants for property defaults
     private static final boolean DEFAULT_SHOW_AREA = true;
+    private static final double DEFAULT_BUTTON_BORDER_RADIUS = 4;
 
     // Button states
     public static final int BUTTON_NORMAL = 0;
@@ -62,7 +63,7 @@ public class ButtonBase extends ParentView {
 
         // Set default properties
         _align = Pos.CENTER;
-        _borderRadius = 4;
+        _borderRadius = DEFAULT_BUTTON_BORDER_RADIUS;
         _showArea = DEFAULT_SHOW_AREA;
 
         // Config
@@ -401,6 +402,9 @@ public class ButtonBase extends ParentView {
     protected void initProps(PropSet aPropSet)
     {
         super.initProps(aPropSet);
+
+        // Update defaults
+        aPropSet.getPropForName(BorderRadius_Prop).setDefaultValue(DEFAULT_BUTTON_BORDER_RADIUS);
 
         // ShowArea
         aPropSet.addPropNamed(ShowArea_Prop, boolean.class);
