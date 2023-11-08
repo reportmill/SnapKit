@@ -131,14 +131,18 @@ public class FileSite extends WebSite {
         // Make sure parent directories exist
         File fileDir = javaFile.getParentFile();
         if (!fileDir.exists()) {
-            if (!fileDir.mkdirs())
-                System.err.println("FileSite.doPut: Error creating parent dir: " + fileDir.getPath());
+            if (!fileDir.mkdirs()) {
+                aResp.setException(new RuntimeException("FileSite.doPut: Error creating parent dir: " + fileDir.getPath()));
+                return;
+            }
         }
 
         // If directory, create
         if (snapFile != null && snapFile.isDir() && !javaFile.exists()) {
-            if (!javaFile.mkdir())
-                System.err.println("FileSite.doPut: Error creating dir: " + javaFile.getPath());
+            if (!javaFile.mkdir()) {
+                aResp.setException(new RuntimeException("FileSite.doPut: Error creating dir: " + javaFile.getPath()));
+                return;
+            }
         }
 
         // Otherwise, write bytes
