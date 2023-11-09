@@ -270,4 +270,26 @@ public class ProgressBar extends View {
             default: super.setPropValue(aPropName, aValue);
         }
     }
+
+    /**
+     * XML archival.
+     */
+    public XMLElement toXML(XMLArchiver anArchiver)
+    {
+        XMLElement e = super.toXML(anArchiver);
+        if (!isPropDefault(Indeterminate_Prop))
+            e.add(Indeterminate_Prop, isIndeterminate());
+        return e;
+    }
+
+    /**
+     * XML unarchival.
+     */
+    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        super.fromXML(anArchiver, anElement);
+        if (anElement.hasAttribute(Indeterminate_Prop))
+            setIndeterminate(anElement.getAttributeBoolValue(Indeterminate_Prop));
+        return this;
+    }
 }
