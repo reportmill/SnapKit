@@ -24,7 +24,7 @@ public class RecentFiles extends ViewOwner {
     public static WebFile[] getFiles()
     {
         WebURL[] urls = getURLs();
-        return ArrayUtils.mapNonNull(urls, url -> url.getFile(), WebFile.class);
+        return ArrayUtils.mapNonNull(urls, url -> createFileForURL(url), WebFile.class);
     }
 
     /**
@@ -177,6 +177,15 @@ public class RecentFiles extends ViewOwner {
 
         // Return
         return urlString;
+    }
+
+    /**
+     * Creates a file for given URL to avoid connection.
+     */
+    private static WebFile createFileForURL(WebURL aURL)
+    {
+        boolean isDir = aURL.getType().length() == 0;
+        return aURL.createFile(isDir);
     }
 
     /**
