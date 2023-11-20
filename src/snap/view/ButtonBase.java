@@ -396,6 +396,21 @@ public class ButtonBase extends ParentView {
     }
 
     /**
+     * Override to make sure button is no longer targeted.
+     */
+    @Override
+    public void setDisabled(boolean aValue)
+    {
+        // Do normal version
+        if (aValue == isDisabled()) return;
+        super.setDisabled(aValue);
+
+        // If disabled, turn off Targeted
+        if (aValue)
+            setTargeted(false);
+    }
+
+    /**
      * Override to add properties for this class.
      */
     @Override
@@ -408,6 +423,7 @@ public class ButtonBase extends ParentView {
 
         // ShowArea
         aPropSet.addPropNamed(ShowArea_Prop, boolean.class);
+        aPropSet.addPropNamed(Position_Prop, Pos.class);
     }
 
     /**
@@ -416,12 +432,15 @@ public class ButtonBase extends ParentView {
     @Override
     public Object getPropValue(String aPropName)
     {
-        // ShowArea
-        if (aPropName == ShowArea_Prop)
-            return isShowArea();
+        switch (aPropName) {
 
-        // Do normal version
-        return super.getPropValue(aPropName);
+            // ShowArea, Position
+            case ShowArea_Prop: return isShowArea();
+            case Position_Prop: return getPosition();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
     }
 
     /**
@@ -430,12 +449,15 @@ public class ButtonBase extends ParentView {
     @Override
     public void setPropValue(String aPropName, Object aValue)
     {
-        // ShowArea
-        if (aPropName == ShowArea_Prop)
-            setShowArea(Convert.boolValue(aValue));
+        switch (aPropName) {
 
-        // Do normal version
-        super.setPropValue(aPropName, aValue);
+            // ShowArea, Position
+            case ShowArea_Prop: setShowArea(Convert.boolValue(aValue)); break;
+            case Position_Prop: setPosition((Pos) aValue); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue); break;
+        }
     }
 
     /**
@@ -449,17 +471,17 @@ public class ButtonBase extends ParentView {
         // Archive Text
         String text = getText();
         if (text != null && text.length() > 0)
-            e.add("text", text);
+            e.add(Text_Prop, text);
 
         // Archive ImageName
-        String iname = getImageName();
-        if (iname != null)
-            e.add("image", iname);
+        String imageName = getImageName();
+        if (imageName != null)
+            e.add("Image", imageName);
 
         // Archive ShowArea, Position
         if (!isPropDefault(ShowArea_Prop))
             e.add(ShowArea_Prop, isShowArea());
-        if (getPosition() != null)
+        if (!isPropDefault(Position_Prop))
             e.add(Position_Prop, getPosition());
 
         // Return element
@@ -474,14 +496,12 @@ public class ButtonBase extends ParentView {
         // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive Text (or legacy 'value')
-        if (anElement.hasAttribute("text"))
-            setText(anElement.getAttributeValue("text"));
-        else if (anElement.hasAttribute("value"))
-            setText(anElement.getAttributeValue("value"));
+        // Unarchive Text
+        if (anElement.hasAttribute(Text_Prop))
+            setText(anElement.getAttributeValue(Text_Prop));
 
         // Unarchive ImageName
-        String imageName = anElement.getAttributeValue("image");
+        String imageName = anElement.getAttributeValue("Image");
         if (imageName != null) {
             setImageName(imageName);
             Image image = ViewArchiver.getImage(anArchiver, imageName);
@@ -492,9 +512,11 @@ public class ButtonBase extends ParentView {
         // Unarchive ShowArea, Position
         if (anElement.hasAttribute(ShowArea_Prop))
             setShowArea(anElement.getAttributeBoolValue(ShowArea_Prop));
-        if (anElement.hasAttribute("ShowBorder"))
-            setShowArea(anElement.getAttributeBoolValue("ShowBorder"));
         if (anElement.hasAttribute(Position_Prop))
             setPosition(anElement.getAttributeEnumValue(Position_Prop, Pos.class, null));
+
+        // Legacy
+        if (anElement.hasAttribute("ShowBorder"))
+            setShowArea(anElement.getAttributeBoolValue("ShowBorder"));
     }
 }
