@@ -309,24 +309,10 @@ public class ListUtils {
     }
 
     /**
-     * Joins a list of items by given delimiter using given function to get item strings.
+     * Converts a list of items to strings using given function, then joins strings by given delimiter.
      */
-    public static <T> String joinString(List<T> aList, String aDelim, Function<T,String> aFunc)
+    public static <T> String mapAndJoinStrings(List<T> aList, Function<T,String> aFunc, String aDelim)
     {
-        // Get vars
-        int size = aList.size();
-        if (size == 0) return "";
-        String str0 = aFunc.apply(aList.get(0));
-        StringBuilder sb = new StringBuilder(str0);
-
-        // Iterate over remaining items and add delim + func(item) for each
-        for (int i = 1; i < size; i++) {
-            T item = aList.get(i);
-            String itemStr = aFunc.apply(item);
-            sb.append(aDelim).append(itemStr);
-        }
-
-        // Return
-        return sb.toString();
+        return aList.stream().map(aFunc).collect(Collectors.joining(aDelim));
     }
 }
