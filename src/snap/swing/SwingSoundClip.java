@@ -195,8 +195,9 @@ public class SwingSoundClip extends SoundClip {
      */
     public void play(int aCount)
     {
-        getClip().setFramePosition(0);
-        getClip().loop(aCount);
+        Clip clip = getClip();
+        clip.setFramePosition(0);
+        new Thread(() -> clip.loop(aCount)).start();
     }
 
     /**
@@ -244,9 +245,46 @@ public class SwingSoundClip extends SoundClip {
      */
     public Clip getClip()
     {
-        // If clip is loaded, just return
         if (_clip != null) return _clip;
 
+        // Create clip
+        Clip clip = getClipImpl();
+
+        // Add listener?
+        //if (clip != null) clip.addLineListener(event -> processClipEvent(event));
+
+        // Set and return
+        return _clip = clip;
+    }
+
+    /**
+     * Returns the clip, creating it if requested.
+     */
+    protected Clip getClipImpl()
+    {
+        try {
+            // Get a clip resource
+            Clip clip = AudioSystem.getClip();
+
+            // Open the audio file
+            byte[] bytes = getBytes();
+            InputStream inputStream = new ByteArrayInputStream(bytes);
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(inputStream);
+
+            // Open the audio clip with the format from the audio file
+            clip.open(audioInputStream);
+            return clip;
+        }
+
+        // Complain
+        catch (Exception e) { e.printStackTrace(); return null; }
+    }
+
+    /**
+     * Returns the clip, creating it if requested.
+     */
+    protected Clip getClipImpl2()
+    {
         // Create audio input stream
         AudioInputStream audioStream;
         try {
@@ -280,46 +318,16 @@ public class SwingSoundClip extends SoundClip {
         }
 
         // Create clip
-        try {
-            _clip = (Clip) AudioSystem.getLine(lineInfo);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        // Add a line listener to send events to somebody when the sound finishes
-    /*_clip.addLineListener(new LineListener() {
-        public void update(LineEvent event)
-        {
-            // this could probably be ==
-            if (event.getType().equals(LineEvent.Type.STOP)) {
-                // notify rm listeners on the main thread
-                if (getListenerCount(RMSoundListener.class)>0) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            for(int i=0, iMax=getListenerCount(RMSoundListener.class); i<iMax; i++) {
-                                RMSoundListener listener = (RMSoundListener)getListener(RMSoundListener.class, i);
-                                listener.soundStopped(RMSoundShape.this);
-                            }
-                        }
-                    });
-                }
-                // flush the clip's resources
-                _clip.flush();
-            }
-        }
-    });*/
+        Clip clip;
+        try { clip = (Clip) AudioSystem.getLine(lineInfo); }
+        catch (Exception e) { e.printStackTrace(); return null; }
 
         // Have clip open stream
-        try {
-            _clip.open(audioStream);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        try { clip.open(audioStream); }
+        catch (Exception e) { e.printStackTrace(); return null; }
 
         // Return clip
-        return _clip;
+        return clip;
     }
 
     /**
@@ -384,4 +392,27 @@ public class SwingSoundClip extends SoundClip {
         return false;
     }
 
+    /**
+     * Handle clip events.
+     */
+//    private void processClipEvent(LineEvent event)
+//    {
+//        // this could probably be ==
+//        if (event.getType().equals(LineEvent.Type.STOP)) {
+//
+//            // int lsnrCount = getListenerCount(RMSoundListener.class);
+//            //if (lsnrCount == 0) return;
+//
+//            // notify rm listeners on the main thread
+//            SwingUtilities.invokeLater(() -> {
+//                for(int i = 0; i < lsnrCount; i++) {
+//                    RMSoundListener listener = getListener(RMSoundListener.class, i);
+//                    listener.soundStopped(RMSoundShape.this);
+//                }
+//            });
+//
+//            // flush the clip's resources
+//            _clip.flush();
+//        }
+//    }
 }
