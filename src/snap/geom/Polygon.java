@@ -266,7 +266,7 @@ public class Polygon extends Shape implements Cloneable {
         double v1y = y2 - y1;
 
         // Return angle between vectors
-        return Vect.getAngleBetween(v0x, v0y, v1x, v1y);
+        return Vector.getAngleBetween(v0x, v0y, v1x, v1y);
     }
 
     /**
