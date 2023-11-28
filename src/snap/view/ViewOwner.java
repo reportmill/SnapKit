@@ -88,6 +88,8 @@ public class ViewOwner extends PropObject {
     {
         _ui = aView;
         _ui.setOwner(this);
+        setFirstFocus(aView);
+        _ui.addPropChangeListener(pc -> setShowing(_ui.isShowing()), View.Showing_Prop);
     }
 
     /**
