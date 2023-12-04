@@ -7,6 +7,7 @@ import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
 import snap.util.ArrayUtils;
 import snap.util.FileUtils;
+import snap.util.SnapUtils;
 import java.io.File;
 import java.util.*;
 
@@ -329,8 +330,11 @@ public abstract class WebSite {
         // Update ModTime
         long modTime = putResponse.getModTime();
         aFile.setModTime(modTime);
-        if (modTime == 0)
-            System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getUrlString());
+        if (modTime == 0) {
+            if (!SnapUtils.isWebVM)
+                System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getUrlString());
+            modTime = System.currentTimeMillis();
+        }
 
         // If file created by save, reset parent contents to make sure it's there
         if (fileBeingCreatedBySave && parentDir != null) {
