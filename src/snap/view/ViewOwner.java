@@ -736,13 +736,28 @@ public class ViewOwner extends PropObject {
         // If already set, just return
         if (_win != null) return _win;
 
-        // Create window, set content to UI, set owner to this ViewOwner and return
-        _win = new WindowView();
+        // If UI already has window, return it
         View ui = getUI();
+        WindowView win = ui.getParent(WindowView.class);
+        if (win != null)
+            return win;
+
+        // Create window and init
+        _win = new WindowView();
+        initWindow(_win);
+
+        // Set content to UI and set owner to this ViewOwner
         _win.setContent(ui);
         _win.setOwner(this);
+
+        // Return
         return _win;
     }
+
+    /**
+     * Initialize window.
+     */
+    protected void initWindow(WindowView aWindow)  { }
 
     /**
      * Returns whether window is visible.
