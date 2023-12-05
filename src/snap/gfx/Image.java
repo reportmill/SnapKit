@@ -17,31 +17,34 @@ import java.util.List;
 public abstract class Image implements Loadable {
 
     // The image source
-    private Object  _source;
+    private Object _source;
 
     // The image source URL
-    private WebURL  _url;
+    private WebURL _url;
 
     // The image type
-    private String  _type;
+    private String _type;
 
     // The cached width/height
-    private double  _width = -1, _height = -1;
+    protected double _width, _height;
 
     // The pixel width/height
-    private int  _pw = -1, _ph = -1;
-
-    // The X/Y DPI
-    private double  _dpiX = -1, _dpiY = -1;
+    protected int _pixW, _pixH;
 
     // Whether image has alpha
-    private Boolean  _hasAlpha;
+    protected boolean _hasAlpha;
+
+    // The X/Y DPI
+    protected int _dpiX = 72, _dpiY = 72;
+
+    // The dpi scale (1 = normal, 2 = retina/hidpi)
+    protected int _dpiScale = 1;
 
     // The image source bytes
     private byte[]  _bytes;
 
     // Whether the image is loaded
-    private boolean  _loaded = true;
+    private boolean _loaded = true;
 
     // The decoded bytes
     private byte[]  _bytesRGB;
@@ -109,111 +112,47 @@ public abstract class Image implements Loadable {
     /**
      * Returns the width of given image.
      */
-    public double getWidth()
-    {
-        if (_width >= 0) return _width;
-        return _width = getWidthImpl();
-    }
+    public double getWidth()  { return _width; }
 
     /**
      * Returns the height of given image.
      */
-    public double getHeight()
-    {
-        if (_height >= 0) return _height;
-        return _height = getHeightImpl();
-    }
+    public double getHeight()  { return _height; }
 
     /**
      * Returns the width of given image in pixels.
      */
-    public int getPixWidth()
-    {
-        if (_pw >= 0) return _pw;
-        return _pw = getPixWidthImpl();
-    }
+    public int getPixWidth()  { return _pixW; }
 
     /**
      * Returns the height of given image in pixels.
      */
-    public int getPixHeight()
-    {
-        if (_ph >= 0) return _ph;
-        return _ph = getPixHeightImpl();
-    }
-
-    /**
-     * Returns the horizontal image DPI.
-     */
-    public double getDpiX()
-    {
-        if (_dpiX >= 0) return _dpiX;
-        return _dpiX = getDPIXImpl();
-    }
-
-    /**
-     * Returns the vertical image DPI.
-     */
-    public double getDpiY()
-    {
-        if (_dpiY >= 0) return _dpiY;
-        return _dpiY = getDPIYImpl();
-    }
+    public int getPixHeight()  { return _pixH; }
 
     /**
      * Returns whether image has alpha.
      */
-    public boolean hasAlpha()
-    {
-        if (_hasAlpha != null) return _hasAlpha;
-        return _hasAlpha = hasAlphaImpl();
-    }
+    public boolean hasAlpha()  { return _hasAlpha; }
+
+    /**
+     * Returns the horizontal image DPI.
+     */
+    public double getDpiX()  { return _dpiX; }
+
+    /**
+     * Returns the vertical image DPI.
+     */
+    public double getDpiY()  { return _dpiY; }
+
+    /**
+     * Returns the image dpi scale (1 = 72 dpi, 2 = Retina/HiDPI).
+     */
+    public double getDpiScale()  { return _dpiScale; }
 
     /**
      * Returns the native object.
      */
     public abstract Object getNative();
-
-    /**
-     * Returns the width of given image.
-     */
-    protected double getWidthImpl()
-    {
-        return getPixWidth() * 72 / getDpiX();
-    }
-
-    /**
-     * Returns the height of given image.
-     */
-    protected double getHeightImpl()
-    {
-        return getPixHeight() * 72 / getDpiY();
-    }
-
-    /**
-     * Returns the width of given image in pixels.
-     */
-    protected int getPixWidthImpl()  { return 0; }
-
-    /**
-     * Returns the height of given image in pixels.
-     */
-    protected int getPixHeightImpl()  { return 0; }
-
-    /**
-     * Returns the width of given image.
-     */
-    protected double getDPIXImpl()  { return 72; }
-
-    /**
-     * Returns the height of given image.
-     */
-    protected double getDPIYImpl()  { return 72; }
-
-    /**
-     * Returns whether image has alpha.
-     */
-    protected boolean hasAlphaImpl()  { return false; }
 
     /**
      * Returns the source bytes.
@@ -279,11 +218,9 @@ public abstract class Image implements Loadable {
         if (aValue == _loaded) return;
         _loaded = aValue;
 
-        // If setting, reset size, fire prop change, fire load listeners
-        if (aValue) {
-            _width = _height = -1;
+        // If setting, fire prop change, fire load listeners
+        if (aValue)
             fireLoadListeners();
-        }
     }
 
     /**
@@ -347,14 +284,6 @@ public abstract class Image implements Loadable {
      * Sets the image set.
      */
     protected void setImageSet(ImageSet anIS)  { _imgSet = anIS; }
-
-    /**
-     * Returns the image scale.
-     */
-    public double getDpiScale()
-    {
-        return getDpiX() != 72 ? getDpiX() / 72 : 1;
-    }
 
     /**
      * Returns a copy of this image scaled by given percent.

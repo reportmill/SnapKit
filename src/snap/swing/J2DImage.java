@@ -17,9 +17,6 @@ import snap.viewx.DialogBox;
  */
 public class J2DImage extends Image {
     
-    // The width/height dpi
-    private double _dpiX = 72, _dpiY = 72;
-    
     // The buffered image
     private BufferedImage  _native;
     
@@ -28,7 +25,19 @@ public class J2DImage extends Image {
      */
     public J2DImage(Object aSource)
     {
+        super();
+
+        // Set image source
         setSource(aSource);
+
+        // Load image and set properties
+        BufferedImage image = getNative();
+        _pixW = image.getWidth();
+        _pixH = image.getHeight();
+        _width = _pixW * 72d / _dpiX;
+        _height = _pixH * 72d / _dpiY;
+        _hasAlpha = image.getColorModel().hasAlpha();
+        _dpiScale = _dpiX != 72 ? _dpiX / 72 : 1;
     }
 
     /**
@@ -36,46 +45,29 @@ public class J2DImage extends Image {
      */
     public J2DImage(double aWidth, double aHeight, boolean hasAlpha, double dpiScale)
     {
+        super();
+
+        // Get image with/height
+        _width = (int) Math.round(aWidth);
+        _height = (int) Math.round(aHeight);
+
         // Get pixel width/height by rounding scaled width/height
-        int pixW = (int) Math.round(aWidth * dpiScale);
-        int pixH = (int) Math.round(aHeight * dpiScale);
+        _pixW = (int) Math.round(aWidth * dpiScale);
+        _pixH = (int) Math.round(aHeight * dpiScale);
 
         // Create internal buffered image for pixel width/height and alpha
+        _hasAlpha = hasAlpha;
         if (hasAlpha)
-            _native = new BufferedImage(pixW, pixH, BufferedImage.TYPE_INT_ARGB);
-        else _native = new BufferedImage(pixW, pixH, BufferedImage.TYPE_INT_RGB);
+            _native = new BufferedImage(_pixW, _pixH, BufferedImage.TYPE_INT_ARGB);
+        else _native = new BufferedImage(_pixW, _pixH, BufferedImage.TYPE_INT_RGB);
 
         // Reset dpi for scale
+        _dpiScale = (int) Math.round(dpiScale);
         if (dpiScale != 1) {
             _dpiX *= dpiScale;
             _dpiY *= dpiScale;
         }
     }
-
-    /**
-     * Returns the width of given image in pixels.
-     */
-    protected int getPixWidthImpl()  { return getNative().getWidth(); }
-
-    /**
-     * Returns the height of given image in pixels.
-     */
-    protected int getPixHeightImpl()  { return getNative().getHeight(); }
-
-    /**
-     * Returns the width of given image.
-     */
-    protected double getDPIXImpl()  { return _dpiX; }
-
-    /**
-     * Returns the height of given image.
-     */
-    protected double getDPIYImpl()  { return _dpiY; }
-
-    /**
-     * Returns whether image has alpha.
-     */
-    protected boolean hasAlphaImpl()  { return getNative().getColorModel().hasAlpha(); }
 
     /**
      * Returns the integer representing the color at the given x,y point.
@@ -369,32 +361,32 @@ public class J2DImage extends Image {
     private void getDPI(byte[] theBytes) throws IOException
     {
         // Get ImageIO Readers
-        InputStream istream = new ByteArrayInputStream(theBytes);
-        ImageInputStream stream = ImageIO.createImageInputStream(istream);
-        Iterator <ImageReader> readers = ImageIO.getImageReaders(stream);
+        InputStream inputStream = new ByteArrayInputStream(theBytes);
+        ImageInputStream imageInputStream = ImageIO.createImageInputStream(inputStream);
+        Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(imageInputStream);
 
         // Iterate over readers to find DPI
-        if (readers.hasNext()) {
-            ImageReader reader = readers.next();
-            reader.setInput(stream);
-            IIOMetadata mdata = reader.getImageMetadata(0);
-            IIOMetadataNode root = (IIOMetadataNode)mdata.getAsTree(IIOMetadataFormatImpl.standardMetadataFormatName);
+        if (imageReaders.hasNext()) {
+            ImageReader imageReader = imageReaders.next();
+            imageReader.setInput(imageInputStream);
+            IIOMetadata metadata = imageReader.getImageMetadata(0);
+            IIOMetadataNode rootNode = (IIOMetadataNode) metadata.getAsTree(IIOMetadataFormatImpl.standardMetadataFormatName);
 
             // Check for horizontal DPI
-            NodeList hps = root.getElementsByTagName("HorizontalPixelSize");
+            NodeList hps = rootNode.getElementsByTagName("HorizontalPixelSize");
             IIOMetadataNode hps2 = hps.getLength() > 0 ? (IIOMetadataNode) hps.item(0) : null;
             NamedNodeMap hnnm = hps2 != null ? hps2.getAttributes() : null;
             Node hitem = hnnm != null ? hnnm.item(0) : null;
             if (hitem != null)
-                _dpiX = Math.round(25.4/Double.parseDouble(hitem.getNodeValue()));
+                _dpiX = (int) Math.round(25.4 / Double.parseDouble(hitem.getNodeValue()));
 
             // Check for vertical DPI
-            NodeList vps = root.getElementsByTagName("VerticalPixelSize");
+            NodeList vps = rootNode.getElementsByTagName("VerticalPixelSize");
             IIOMetadataNode vps2 = vps.getLength()>0 ? (IIOMetadataNode) vps.item(0) : null;
-            NamedNodeMap vnnm = vps2!=null ? vps2.getAttributes() : null;
-            Node vitem = vnnm!=null ? vnnm.item(0) : null;
+            NamedNodeMap vnnm = vps2 != null ? vps2.getAttributes() : null;
+            Node vitem = vnnm != null ? vnnm.item(0) : null;
             if (vitem!=null)
-                _dpiY = Math.round(25.4/Double.parseDouble(vitem.getNodeValue()));
+                _dpiY = (int) Math.round(25.4 / Double.parseDouble(vitem.getNodeValue()));
         }
     }
 
@@ -410,33 +402,33 @@ public class J2DImage extends Image {
         // Read image (or images, if more than one)
         try {
             byte[] bytes = getBytes();
-            InputStream istream = new ByteArrayInputStream(bytes);
-            ImageReader reader = ImageIO.getImageReadersByFormatName("gif").next();
-            ImageInputStream stream = ImageIO.createImageInputStream(istream);
-            reader.setInput(stream);
+            InputStream inputStream = new ByteArrayInputStream(bytes);
+            ImageReader imageReader = ImageIO.getImageReadersByFormatName("gif").next();
+            ImageInputStream imageInputStream = ImageIO.createImageInputStream(inputStream);
+            imageReader.setInput(imageInputStream);
 
             // Read first image
-            BufferedImage img0 = reader.read(0);
-            _native = img0;
-            int imageW = img0.getWidth();
-            int imageH = img0.getHeight();
+            BufferedImage bufferedImage = imageReader.read(0);
+            _native = bufferedImage;
+            int imageW = bufferedImage.getWidth();
+            int imageH = bufferedImage.getHeight();
 
             // Read successive images
-            int count = reader.getNumImages(true);
-            for (int ind = 1; ind < count; ind++) {
+            int imageCount = imageReader.getNumImages(true);
+            for (int imageIndex = 1; imageIndex < imageCount; imageIndex++) {
 
                 // Read next image into J2DImage
-                BufferedImage bimg = reader.read(ind);
-                Image img2 = new J2DImage(bimg);
+                BufferedImage nextBufferedImage = imageReader.read(imageIndex);
+                Image nextImage = new J2DImage(nextBufferedImage);
 
                 // If partial, center in full image
-                if (img2.getPixWidth() != imageW || img2.getPixHeight() != imageH) {
-                    Point offset = getGIFOffset(reader.getImageMetadata(ind));
-                    img2 = img2.getFramedImage(imageW, imageH, offset.x, offset.y);
+                if (nextImage.getPixWidth() != imageW || nextImage.getPixHeight() != imageH) {
+                    Point offset = getGIFOffset(imageReader.getImageMetadata(imageIndex));
+                    nextImage = nextImage.getFramedImage(imageW, imageH, offset.x, offset.y);
                 }
 
                 // Add to images
-                images.add(img2);
+                images.add(nextImage);
             }
         }
 
@@ -446,6 +438,8 @@ public class J2DImage extends Image {
         // If multiple images, create set
         if (images.size() > 1)
             new ImageSet(images);
+
+        // Return
         return _native;
     }
 
