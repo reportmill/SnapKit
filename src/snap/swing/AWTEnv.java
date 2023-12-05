@@ -103,10 +103,11 @@ public class AWTEnv extends GFXEnv {
     /**
      * Creates image for width, height and alpha and dpi scale (0 = screen dpi, 1 = 72 dpi, 2 = 144 dpi).
      */
-    public Image getImageForSizeAndScale(double aWidth, double aHeight, boolean hasAlpha, double aScale)
+    public Image getImageForSizeAndDpiScale(double aWidth, double aHeight, boolean hasAlpha, double dpiScale)
     {
-        double scale = aScale <= 0? getScreenScale() : aScale;
-        return new J2DImage(aWidth, aHeight, hasAlpha, scale);
+        if (dpiScale <= 0)
+            dpiScale = getScreenScale();
+        return new J2DImage(aWidth, aHeight, hasAlpha, dpiScale);
     }
 
     /**

@@ -2,14 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
-
 import snap.util.FormatUtils;
 import snap.util.Loadable;
 import snap.util.SnapUtils;
 import snap.util.StringUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -147,7 +145,7 @@ public abstract class Image implements Loadable {
     /**
      * Returns the horizontal image DPI.
      */
-    public double getDPIX()
+    public double getDpiX()
     {
         if (_dpiX >= 0) return _dpiX;
         return _dpiX = getDPIXImpl();
@@ -156,7 +154,7 @@ public abstract class Image implements Loadable {
     /**
      * Returns the vertical image DPI.
      */
-    public double getDPIY()
+    public double getDpiY()
     {
         if (_dpiY >= 0) return _dpiY;
         return _dpiY = getDPIYImpl();
@@ -181,7 +179,7 @@ public abstract class Image implements Loadable {
      */
     protected double getWidthImpl()
     {
-        return getPixWidth() * 72 / getDPIX();
+        return getPixWidth() * 72 / getDpiX();
     }
 
     /**
@@ -189,18 +187,18 @@ public abstract class Image implements Loadable {
      */
     protected double getHeightImpl()
     {
-        return getPixHeight() * 72 / getDPIY();
+        return getPixHeight() * 72 / getDpiY();
     }
 
     /**
      * Returns the width of given image in pixels.
      */
-    protected abstract int getPixWidthImpl();
+    protected int getPixWidthImpl()  { return 0; }
 
     /**
      * Returns the height of given image in pixels.
      */
-    protected abstract int getPixHeightImpl();
+    protected int getPixHeightImpl()  { return 0; }
 
     /**
      * Returns the width of given image.
@@ -215,7 +213,7 @@ public abstract class Image implements Loadable {
     /**
      * Returns whether image has alpha.
      */
-    protected abstract boolean hasAlphaImpl();
+    protected boolean hasAlphaImpl()  { return false; }
 
     /**
      * Returns the source bytes.
@@ -353,66 +351,72 @@ public abstract class Image implements Loadable {
     /**
      * Returns the image scale.
      */
-    public double getScale()
+    public double getDpiScale()
     {
-        return getDPIX() != 72 ? getDPIX() / 72 : 1;
+        return getDpiX() != 72 ? getDpiX() / 72 : 1;
     }
 
     /**
-     * Returns a copy of this image at new size and scale.
+     * Returns a copy of this image scaled by given percent.
      */
-    public Image cloneForSizeAndScale(double aW, double aH, double aScale)
-    {
-        Image img2 = Image.getImageForSizeAndScale(aW, aH, hasAlpha(), aScale);
-        Painter pntr = img2.getPainter();
-        pntr.setImageQuality(1);
-        pntr.drawImage(this, 0, 0, aW, aH);
-        return img2;
-    }
-
-    /**
-     * Returns a new image scaled by given percent.
-     */
-    public Image getImageScaled(double aRatio)
+    public Image cloneForScale(double aRatio)
     {
         int newW = (int) Math.round(getPixWidth() * aRatio);
         int newH = (int) Math.round(getPixHeight() * aRatio);
-        return getImageForSize(newW, newH);
+        return cloneForSize(newW, newH);
     }
 
     /**
-     * Returns a new image at given size.
+     * Returns a copy of this image at new size.
      */
-    public Image getImageForSize(double aW, double aH)
+    public Image cloneForSize(double newW, double newH)
     {
-        int newW = (int) Math.round(aW);
-        int newH = (int) Math.round(aH);
-        Image img2 = Image.getImageForSize(newW, newH, hasAlpha());
-        Painter pntr = img2.getPainter();
+        double dpiScale = getDpiScale();
+        return cloneForSizeAndDpiScale(newW, newH, dpiScale);
+    }
+
+    /**
+     * Returns a copy of this image at new dpi scale.
+     */
+    public Image cloneForDpiScale(double dpiScale)
+    {
+        double imageW = getWidth();
+        double imageH = getHeight();
+        return cloneForSizeAndDpiScale(imageW, imageH, dpiScale);
+    }
+
+    /**
+     * Returns a copy of this image at new size and dpi scale.
+     */
+    public Image cloneForSizeAndDpiScale(double newW, double newH, double dpiScale)
+    {
+        Image cloneImage = Image.getImageForSizeAndDpiScale(newW, newH, hasAlpha(), dpiScale);
+        Painter pntr = cloneImage.getPainter();
         pntr.setImageQuality(1);
-        pntr.drawImage(this, 0, 0, getWidth(), getHeight(), 0, 0, newW, newH);
-        return img2;
+        pntr.drawImage(this, 0, 0, newW, newH);
+        return cloneImage;
     }
 
     /**
      * Returns a subimage from rectangle.
      */
-    public Image getSubimage(double aX, double aY, double aW, double aH)
+    public Image cloneForCropRect(double aX, double aY, double newW, double newH)
     {
-        Image img2 = Image.getImageForSize(Math.round(aW), Math.round(aH), hasAlpha());
-        img2.getPainter().drawImage(this, aX, aY, aW, aH, 0, 0, aW, aH);
-        return img2;
+        Image cloneImage = Image.getImageForSize(Math.round(newW), Math.round(newH), hasAlpha());
+        Painter pntr = cloneImage.getPainter();
+        pntr.drawImage(this, aX, aY, newW, newH, 0, 0, newW, newH);
+        return cloneImage;
     }
 
     /**
-     * Returns an image inside a larget image.
+     * Returns an image inside a larger image.
      */
     public Image getFramedImage(int aW, int aH, double aX, double aY)
     {
-        Image img2 = Image.getImageForSize(aW, aH, hasAlpha());
-        Painter pntr = img2.getPainter();
+        Image cloneImage = Image.getImageForSize(aW, aH, hasAlpha());
+        Painter pntr = cloneImage.getPainter();
         pntr.drawImage(this, aX, aY);
-        return img2;
+        return cloneImage;
     }
 
     /**
@@ -423,7 +427,7 @@ public abstract class Image implements Loadable {
         List<Image> images = new ArrayList<>(aCount);
         int w = getPixWidth() / aCount;
         for (int i = 0; i < aCount; i++) {
-            Image img = getSubimage(i * w, 0, w, getPixHeight());
+            Image img = cloneForCropRect(i * w, 0, w, getPixHeight());
             images.add(img);
         }
         ImageSet iset = new ImageSet(images);
@@ -535,18 +539,21 @@ public abstract class Image implements Loadable {
 
         // Get BaseURL directory
         WebFile file = aBaseURL.getFile();
-        if (file == null) return null;
+        if (file == null)
+            return null;
         WebFile dir = file.isDir() ? file : file.getParent();
-        if (dir == null) return null;
+        if (dir == null)
+            return null;
 
         // Get directory file for name
-        WebFile ifile = dir.getFileForName(aName);
-        if (ifile == null)
-            ifile = dir.getFileForName("pkg.images/" + aName);
-        if (ifile == null) return null;
+        WebFile imageFile = dir.getFileForName(aName);
+        if (imageFile == null)
+            imageFile = dir.getFileForName("pkg.images/" + aName);
+        if (imageFile == null)
+            return null;
 
         // Return image for file
-        return getImageForSource(ifile);
+        return getImageForSource(imageFile);
     }
 
     /**
@@ -554,15 +561,15 @@ public abstract class Image implements Loadable {
      */
     public static Image getImageForSize(double aWidth, double aHeight, boolean hasAlpha)
     {
-        return getImageForSizeAndScale(aWidth, aHeight, hasAlpha, 1);
+        return getImageForSizeAndDpiScale(aWidth, aHeight, hasAlpha, 1);
     }
 
     /**
      * Creates image for width, height, alpha and dpi scale (0 = screen dpi, 1 = 72 dpi, 2 = 144 dpi).
      */
-    public static Image getImageForSizeAndScale(double aWidth, double aHeight, boolean hasAlpha, double aScale)
+    public static Image getImageForSizeAndDpiScale(double aWidth, double aHeight, boolean hasAlpha, double aScale)
     {
-        return GFXEnv.getEnv().getImageForSizeAndScale(aWidth, aHeight, hasAlpha, aScale);
+        return GFXEnv.getEnv().getImageForSizeAndDpiScale(aWidth, aHeight, hasAlpha, aScale);
     }
 
     /**

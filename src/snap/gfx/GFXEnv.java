@@ -77,7 +77,7 @@ public abstract class GFXEnv {
     /**
      * Creates image for width, height and alpha and dpi scale (0 = screen dpi, 1 = 72 dpi, 2 = 144 dpi).
      */
-    public abstract Image getImageForSizeAndScale(double aWidth, double aHeight, boolean hasAlpha, double aScale);
+    public abstract Image getImageForSizeAndDpiScale(double aWidth, double aHeight, boolean hasAlpha, double dpiScale);
 
     /**
      * Returns a sound for given source.

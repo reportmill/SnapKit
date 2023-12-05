@@ -184,8 +184,8 @@ public class J2DPainter extends Painter {
     public void drawImage(Image img, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh)
     {
         // Correct source width/height for image dpi
-        if (img.getDPIX() != 72) sw *= img.getDPIX()/72;
-        if (img.getDPIY() != 72) sh *= img.getDPIY()/72;
+        if (img.getDpiX() != 72) sw *= img.getDpiX()/72;
+        if (img.getDpiY() != 72) sh *= img.getDpiY()/72;
 
         // Get points for corner as ints and draw image
         int sx1 = rnd(sx), sy1 = rnd(sy), sx2 = sx1 + rnd(sw), sy2 = sy1 + rnd(sh);

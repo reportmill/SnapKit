@@ -633,7 +633,7 @@ public class ViewUtils {
         }
 
         // Create image, paint view and return
-        Image img = Image.getImageForSizeAndScale(imageW, imageH, true, aScale);
+        Image img = Image.getImageForSizeAndDpiScale(imageW, imageH, true, aScale);
         Painter pntr = img.getPainter();
         pntr.translate(-imageX, -imageY);
         paintAll(aView, pntr);

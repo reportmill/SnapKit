@@ -18,13 +18,13 @@ import snap.viewx.DialogBox;
 public class J2DImage extends Image {
     
     // The width/height dpi
-    private double  _wdpi = 72, _hdpi = 72;
+    private double _dpiX = 72, _dpiY = 72;
     
     // The buffered image
     private BufferedImage  _native;
     
     /**
-     * Returns the native image object for image.
+     * Constructor for given source.
      */
     public J2DImage(Object aSource)
     {
@@ -32,23 +32,23 @@ public class J2DImage extends Image {
     }
 
     /**
-     * Returns the native image object for image.
+     * Constructor for size, alpha and dpi scale.
      */
-    public J2DImage(double aWidth, double aHeight, boolean hasAlpha, double aScale)
+    public J2DImage(double aWidth, double aHeight, boolean hasAlpha, double dpiScale)
     {
         // Get pixel width/height by rounding scaled width/height
-        int pw = (int) Math.round(aWidth*aScale);
-        int ph = (int) Math.round(aHeight*aScale);
+        int pixW = (int) Math.round(aWidth * dpiScale);
+        int pixH = (int) Math.round(aHeight * dpiScale);
 
         // Create internal buffered image for pixel width/height and alpha
         if (hasAlpha)
-            _native = new BufferedImage(pw, ph, BufferedImage.TYPE_INT_ARGB);
-        else _native = new BufferedImage(pw, ph, BufferedImage.TYPE_INT_RGB);
+            _native = new BufferedImage(pixW, pixH, BufferedImage.TYPE_INT_ARGB);
+        else _native = new BufferedImage(pixW, pixH, BufferedImage.TYPE_INT_RGB);
 
         // Reset dpi for scale
-        if (aScale!=1) {
-            _wdpi *= aScale;
-            _hdpi *= aScale;
+        if (dpiScale != 1) {
+            _dpiX *= dpiScale;
+            _dpiY *= dpiScale;
         }
     }
 
@@ -65,12 +65,12 @@ public class J2DImage extends Image {
     /**
      * Returns the width of given image.
      */
-    protected double getDPIXImpl()  { return _wdpi; }
+    protected double getDPIXImpl()  { return _dpiX; }
 
     /**
      * Returns the height of given image.
      */
-    protected double getDPIYImpl()  { return _hdpi; }
+    protected double getDPIYImpl()  { return _dpiY; }
 
     /**
      * Returns whether image has alpha.
@@ -141,9 +141,10 @@ public class J2DImage extends Image {
     public byte[] getBytesJPEG()
     {
         // If HiDPI, get 72 dpi image and return that instead
-        if (getScale() != 1) {
-            System.out.println("J2DImage.getBytesJPEG: Downsampling to 72 dpi since other dpi not suppored");
-            return cloneForSizeAndScale(getWidth(), getHeight(), 1).getBytesJPEG();
+        if (getDpiScale() != 1) {
+            System.out.println("J2DImage.getBytesJPEG: Downsampling to 72 dpi since other dpi not supported");
+            Image downSampledImage = cloneForDpiScale(1);
+            return downSampledImage.getBytesJPEG();
         }
 
         // Return JPEG bytes
@@ -156,9 +157,10 @@ public class J2DImage extends Image {
     public byte[] getBytesPNG()
     {
         // If HiDPI, get 72 dpi image and return that instead
-        if (getScale() != 1) {
-            System.out.println("J2DImage.getBytesPNG: Downsampling to 72 dpi since other dpi not suppored");
-            return cloneForSizeAndScale(getWidth(), getHeight(), 1).getBytesPNG();
+        if (getDpiScale() != 1) {
+            System.out.println("J2DImage.getBytesPNG: Downsampling to 72 dpi since other dpi not supported");
+            Image downSampledImage = cloneForDpiScale(1);
+            return downSampledImage.getBytesPNG();
         }
 
         // Return PNG bytes
@@ -174,7 +176,7 @@ public class J2DImage extends Image {
         Painter pntr = new J2DPainter(getNative().createGraphics());
 
         // If hidpi, scale default transform
-        double scale = getScale();
+        double scale = getDpiScale();
         if (scale!=1)
             pntr.transform(scale,0,0,scale,0,0);
 
@@ -384,7 +386,7 @@ public class J2DImage extends Image {
             NamedNodeMap hnnm = hps2 != null ? hps2.getAttributes() : null;
             Node hitem = hnnm != null ? hnnm.item(0) : null;
             if (hitem != null)
-                _wdpi = Math.round(25.4/Double.parseDouble(hitem.getNodeValue()));
+                _dpiX = Math.round(25.4/Double.parseDouble(hitem.getNodeValue()));
 
             // Check for vertical DPI
             NodeList vps = root.getElementsByTagName("VerticalPixelSize");
@@ -392,7 +394,7 @@ public class J2DImage extends Image {
             NamedNodeMap vnnm = vps2!=null ? vps2.getAttributes() : null;
             Node vitem = vnnm!=null ? vnnm.item(0) : null;
             if (vitem!=null)
-                _hdpi = Math.round(25.4/Double.parseDouble(vitem.getNodeValue()));
+                _dpiY = Math.round(25.4/Double.parseDouble(vitem.getNodeValue()));
         }
     }
 
