@@ -1169,8 +1169,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public boolean contains(Shape aShape)
     {
-        //if (isPickBounds()) return getBoundsInside().contains(aShape,1);
-        return getBoundsShape().contains(aShape);
+        Shape boundsShape = getBoundsShape();
+        return boundsShape.contains(aShape);
     }
 
     /**
@@ -1178,8 +1178,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public boolean intersects(Shape aShape)
     {
-        //if (isPickBounds()) return getBoundsInside().intersects(aShape,1);
-        return getBoundsShape().intersects(aShape, 1);
+        Shape boundsShape = getBoundsShape();
+        return boundsShape.intersects(aShape, 1);
     }
 
     /**
@@ -1277,20 +1277,27 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setVisible(boolean aValue)
     {
-        // Set value, fire prop change
+        // If already set, just return
         if (aValue == _visible) return;
+
+        // If setting not visible, repaint area of parent
+        if (!aValue)
+            repaintInParent(null);
+
+        // Set value and fire prop change
         firePropChange(Visible_Prop, _visible, _visible = aValue);
 
         // Update Showing
         setShowing(_visible && _parent != null && _parent.isShowing());
 
-        // Repaint in parent
-        repaintInParent(null);
+        // If setting visible, repaint area of parent
+        if (aValue)
+            repaintInParent(null);
 
         // Trigger Parent relayout
-        ParentView par = getParent();
-        if (par != null) {
-            par._children._managed = null;
+        ParentView parent = getParent();
+        if (parent != null) {
+            parent._children._managed = null;
             relayoutParent();
         }
     }
@@ -2298,8 +2305,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     protected void repaintInParent(Rect aRect)
     {
         // Get parent (just return if not set)
-        ParentView par = getParent();
-        if (par == null) return;
+        ParentView parent = getParent();
+        if (parent == null)
+            return;
 
         // Do normal repaint
         if (aRect == null)
@@ -2307,12 +2315,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         else repaint(aRect);
 
         // Get expanded repaint rect and rect in parent, and have parent repaint
-        Rect rectExp = getRepaintRect();
-        if (rectExp == null) return;
-        Rect parRect = localToParent(rectExp).getBounds();
-        parRect.snap();
-        parRect.inset(-1); // Shouldn't need this unless someone paints out of bounds (lookin at U, Button)
-        par.repaint(parRect);
+        Rect repaintRect = getRepaintRect();
+        if (repaintRect == null)
+            return;
+        Rect repaintRectInParent = localToParent(repaintRect).getBounds();
+        repaintRectInParent.snap();
+        repaintRectInParent.inset(-1); // Shouldn't need this unless someone paints out of bounds (lookin at U, Button)
+        parent.repaint(repaintRectInParent);
     }
 
     /**
@@ -2320,11 +2329,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Rect getRepaintRect()
     {
-        Rect rect = _repaintRect;
-        if (rect == null)
+        if (_repaintRect == null)
             return null;
-        Rect rectExp = getRepaintRectExpanded(rect);
-        return rectExp;
+        return getRepaintRectExpanded(_repaintRect);
     }
 
     /**
@@ -2333,20 +2340,20 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     protected Rect getRepaintRectExpanded(Rect aRect)
     {
         // If focused, combine with focus bounds
-        Rect rect = aRect;
+        Rect expandedRepaintRect = aRect;
         if (isFocused() && isFocusPainted()) {
             Effect focusEffect = ViewEffect.getFocusEffect();
-            rect = focusEffect.getBounds(rect);
+            expandedRepaintRect = focusEffect.getBounds(expandedRepaintRect);
         }
 
         // If effect, combine effect bounds
         else if (getEffect() != null) {
             Effect effect = getEffect();
-            rect = effect.getBounds(rect);
+            expandedRepaintRect = effect.getBounds(expandedRepaintRect);
         }
 
         // Return rect
-        return rect;
+        return expandedRepaintRect;
     }
 
     /**
@@ -2367,7 +2374,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // if already set, just return
         if (aValue == _focused) return;
 
-        // Set, fire prop change
+        // Set and fire prop change
         firePropChange(Focused_Prop, _focused, _focused = aValue);
 
         // Register for repaint
