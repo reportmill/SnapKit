@@ -309,9 +309,9 @@ public class ListUtils {
     }
 
     /**
-     * Converts a list of items to strings using given function, then joins strings by given delimiter.
+     * Maps a list of items to strings using given function, then joins them by given delimiter.
      */
-    public static <T> String mapAndJoinStrings(List<T> aList, Function<T,String> aFunc, String aDelim)
+    public static <T> String mapToStringsAndJoin(List<T> aList, Function<T,String> aFunc, String aDelim)
     {
         return aList.stream().map(aFunc).collect(Collectors.joining(aDelim));
     }

@@ -6,6 +6,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -481,22 +482,11 @@ public class ArrayUtils {
     }
 
     /**
-     * Joins an array of items by given delimiter using given function to get item strings.
+     * Maps an array of items to strings using given function, then joins them by given delimiter.
      */
-    public static <T> String joinString(T[] anArray, String aDelim, Function<T,String> aFunc)
+    public static <T> String mapToStringsAndJoin(T[] anArray, Function<T,String> aFunc, String aDelim)
     {
-        // Get vars
         if (anArray.length == 0) return "";
-        String str0 = aFunc.apply(anArray[0]);
-        StringBuilder sb = new StringBuilder(str0);
-
-        // Iterate over remaining items and add delim + func(item) for each
-        for (int i = 1; i < anArray.length; i++) {
-            String itemStr = aFunc.apply(anArray[i]);
-            sb.append(aDelim).append(itemStr);
-        }
-
-        // Return
-        return sb.toString();
+        return Stream.of(anArray).map(aFunc).collect(Collectors.joining(aDelim));
     }
 }
