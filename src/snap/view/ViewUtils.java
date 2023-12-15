@@ -480,7 +480,7 @@ public class ViewUtils {
         if (aFile.isRoot()) return RootFile;
         if (aFile.isDir()) return DirFile;
         if (aFile.getType().equals("class")) return ClassFile;
-        if (aFile.getType().equals("java")) return JavaFile;
+        if (aFile.getType().equals("java") || aFile.getType().equals("jepl")) return JavaFile;
         if (aFile.getType().equals("table")) return TableFile;
         return PlainFile;
     }
