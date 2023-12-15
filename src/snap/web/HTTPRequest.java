@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
+import snap.util.SnapUtils;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -145,10 +146,11 @@ public class HTTPRequest {
             connection.setRequestProperty("Cookie", getCookie());
 
         // If bytes are provided append them
-        if (getBytes() != null) {
+        byte[] putBytes = getBytes();
+        if (putBytes != null) {
             connection.setDoOutput(true);
             OutputStream outStream = connection.getOutputStream();
-            outStream.write(getBytes());
+            outStream.write(putBytes);
             outStream.flush();
         }
 
@@ -184,22 +186,12 @@ public class HTTPRequest {
 
         // Get ContentType, Length, LastModified
         resp._contentType = connection.getContentType();
-        resp._contentLength = snap.util.SnapUtils.isTeaVM? 0 : connection.getContentLength();
-        resp._lastModified = snap.util.SnapUtils.isTeaVM? 0 : connection.getLastModified();
+        resp._contentLength = SnapUtils.isTeaVM ? 0 : connection.getContentLength();
+        resp._lastModified = SnapUtils.isTeaVM || SnapUtils.isWebVM ? 0 : connection.getLastModified();
 
-        // Get input stream
+        // Get response bytes
         InputStream inputStream = connection.getInputStream();
-
-        // Read stream bytes - create byte array output stream to hold bytes read from input stream and buffer to hold chunk
-        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-        byte[] chunk = new byte[8192];
-
-        // Read contents of inputStream into ByteArrayOutputStream until EOF
-        for (int len = inputStream.read(chunk, 0, chunk.length); len > 0; len = inputStream.read(chunk, 0, chunk.length))
-            byteStream.write(chunk, 0, len);
-
-        // Get byte array output stream bytes
-        resp._bytes = byteStream.toByteArray();
+        resp._bytes = SnapUtils.getInputStreamBytes(inputStream);
 
         // Return response
         return resp;

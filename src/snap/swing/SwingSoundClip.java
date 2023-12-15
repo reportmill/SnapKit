@@ -121,16 +121,11 @@ public class SwingSoundClip extends SoundClip {
     public int bitRate()
     {
         switch (getSamplesPerSecond() / 5000) {
-            case 1:
-                return BitRate5k;
-            case 2:
-                return BitRate11k;
-            case 4:
-                return BitRate22k;
-            case 8:
-                return BitRate44k;
-            default:
-                return BitRateUndefined;
+            case 1: return BitRate5k;
+            case 2: return BitRate11k;
+            case 4: return BitRate22k;
+            case 8: return BitRate44k;
+            default: return BitRateUndefined;
         }
     }
 
@@ -143,11 +138,8 @@ public class SwingSoundClip extends SoundClip {
 
         // Create audio input stream
         AudioInputStream audioStream;
-        try {
-            audioStream = AudioSystem.getAudioInputStream(new ByteArrayInputStream(getBytes()));
-        } catch (Exception e) {
-            throw new Error(e);
-        }
+        try { audioStream = AudioSystem.getAudioInputStream(new ByteArrayInputStream(getBytes())); }
+        catch (Exception e) { throw new RuntimeException(e); }
 
         // Get audio format
         AudioFormat audioFormat = audioStream.getFormat();
@@ -170,7 +162,10 @@ public class SwingSoundClip extends SoundClip {
         _bitsPerSample = audioFormat.getSampleSizeInBits();
         _samplesPerSecond = (int) audioFormat.getSampleRate();
         _channelCount = audioFormat.getChannels();
-        _sampleBytes = SnapUtils.getBytes(audioStream);
+
+        // Get SampleBytes and SampleCount
+        try { _sampleBytes = SnapUtils.getInputStreamBytes(audioStream);  }
+        catch (IOException e) { throw new RuntimeException(e); }
         _sampleCount = _sampleBytes.length / audioFormat.getFrameSize();
     }
 

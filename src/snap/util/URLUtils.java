@@ -73,7 +73,7 @@ public class URLUtils {
     private static byte[] getBytes(URLConnection aConnection) throws IOException
     {
         InputStream stream = aConnection.getInputStream();  // Get stream for URL
-        byte bytes[] = SnapUtils.getBytesOrThrow(stream);  // Get bytes for stream, close and return bytes
+        byte[] bytes = SnapUtils.getInputStreamBytes(stream);  // Get bytes for stream, close and return bytes
         stream.close();
         return bytes;
     }

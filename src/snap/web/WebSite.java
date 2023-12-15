@@ -147,10 +147,7 @@ public abstract class WebSite {
      */
     public WebFile getRootDir()
     {
-        WebFile file = getFileForPath("/");
-        if (file == null)
-            file = createFileForPath("/", true);
-        return file;
+        return createFileForPath("/", true);
     }
 
     /**

@@ -152,7 +152,7 @@ public class ZipFileSite extends WebSite {
             try {
                 ZipEntry zentry = getEntries().get(path);
                 InputStream istream = _zipFile.getInputStream(zentry);
-                byte bytes[] = SnapUtils.getBytesOrThrow(istream);
+                byte[] bytes = SnapUtils.getInputStreamBytes(istream);
                 aResp.setBytes(bytes);
             }
             catch(IOException e) { aResp.setException(e); }

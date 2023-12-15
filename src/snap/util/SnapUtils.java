@@ -170,7 +170,7 @@ public class SnapUtils {
         if (aSource instanceof byte[])
             return (byte[]) aSource;
         if (aSource instanceof InputStream)
-            return getBytesOrThrow((InputStream) aSource);
+            return getInputStreamBytes((InputStream) aSource);
 
         // Handle File
         if (aSource instanceof File)
@@ -196,18 +196,7 @@ public class SnapUtils {
     /**
      * Returns bytes for an input stream.
      */
-    public static byte[] getBytes(InputStream aStream)
-    {
-        try { return getBytesOrThrow(aStream); }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Returns bytes for an input stream.
-     */
-    public static byte[] getBytesOrThrow(InputStream aStream) throws IOException
+    public static byte[] getInputStreamBytes(InputStream aStream) throws IOException
     {
         ByteArrayOutputStream bs = new ByteArrayOutputStream();
         byte[] chunk = new byte[8192];
