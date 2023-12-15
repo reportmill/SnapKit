@@ -7,7 +7,6 @@ import snap.geom.*;
 import snap.gfx.*;
 import snap.props.PropChangeListener;
 import snap.util.KeyChain;
-import snap.web.WebFile;
 
 /**
  * Utility methods for nodes.
@@ -21,9 +20,6 @@ public class ViewUtils {
     protected static boolean  _shiftDown;
     protected static boolean  _shortcutDown;
     
-    // Image Constants
-    private static Image  RootFile, DirFile, ClassFile, JavaFile, TableFile, PlainFile;
-
     /**
      * Returns whether alt is down.
      */
@@ -121,6 +117,15 @@ public class ViewUtils {
 
         // Return frame
         return rect;
+    }
+
+    /**
+     * Returns whether current thread is event dispatch thread.
+     */
+    public boolean isEventThread()
+    {
+        ViewEnv viewEnv = ViewEnv.getEnv();
+        return viewEnv.isEventThread();
     }
 
     /**
@@ -468,24 +473,6 @@ public class ViewUtils {
     }
 
     /**
-     * Returns the image for a file.
-     */
-    public static Image getFileIconImage(WebFile aFile)
-    {
-        // If first time, load files
-        if (RootFile == null)
-            loadFileIconImages();
-
-        // Handle File types
-        if (aFile.isRoot()) return RootFile;
-        if (aFile.isDir()) return DirFile;
-        if (aFile.getType().equals("class")) return ClassFile;
-        if (aFile.getType().equals("java") || aFile.getType().equals("jepl")) return JavaFile;
-        if (aFile.getType().equals("table")) return TableFile;
-        return PlainFile;
-    }
-
-    /**
      * Backdoor for protected View method.
      */
     public static void setParent(View aView, ParentView aParent)
@@ -578,17 +565,6 @@ public class ViewUtils {
 
         // Otherwise, complain
         else System.err.println("ViewUtils.replaceView: Unknown parent host class: " + par.getClass());
-    }
-
-    /** Loads the file icon images. */
-    private static void loadFileIconImages()
-    {
-        RootFile = Image.getImageForClassResource(ViewUtils.class, "RootFile.png");
-        DirFile = Image.getImageForClassResource(ViewUtils.class, "DirFile.png");
-        ClassFile = Image.getImageForClassResource(ViewUtils.class, "ClassFile.png");
-        JavaFile = Image.getImageForClassResource(ViewUtils.class, "JavaFile.png");
-        TableFile = Image.getImageForClassResource(ViewUtils.class, "TableFile.png");
-        PlainFile = Image.getImageForClassResource(ViewUtils.class, "PlainFile.png");
     }
 
     /**
