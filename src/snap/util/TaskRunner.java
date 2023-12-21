@@ -5,6 +5,7 @@ package snap.util;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
+import snap.view.ViewUtils;
 import java.util.function.Consumer;
 
 /**
@@ -13,7 +14,7 @@ import java.util.function.Consumer;
 public abstract class TaskRunner<T> implements TaskMonitor {
 
     // The name of this runner
-    private String _name = getClass().getSimpleName() + " Thread";
+    private String _name = getClass().getSimpleName();
 
     // The TaskMonitor
     private TaskMonitor _monitor = TaskMonitor.NULL;
@@ -217,7 +218,7 @@ public abstract class TaskRunner<T> implements TaskMonitor {
         // Create new thread to run this runner's run method then success/failure/finished method with result/exception
         _thread = new Thread(() -> {
             invokeRun();
-            invokeFinished();
+            ViewUtils.runLater(() -> invokeFinished());
         });
 
         // Start thread
@@ -319,7 +320,8 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     protected void invokeFinished()
     {
         // Update status
-        setStatus(_exception == null ? Status.Finished : Status.Failed);
+        if (getStatus() != Status.Cancelled)
+            setStatus(_exception == null ? Status.Finished : Status.Failed);
 
         // If cancelled, call cancelled
         if (getStatus() == Status.Cancelled) {

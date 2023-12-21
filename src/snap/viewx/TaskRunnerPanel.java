@@ -11,22 +11,15 @@ import snap.view.*;
 public abstract class TaskRunnerPanel<T> extends TaskRunner<T> {
 
     /**
-     * Creates a new TaskRunnerPanel.
+     * Constructor.
      */
     public TaskRunnerPanel()
     {
+        super();
     }
 
     /**
-     * Creates a new TaskRunnerPanel for given monitor.
-     */
-    public TaskRunnerPanel(TaskMonitor aTM)
-    {
-        super(aTM);
-    }
-
-    /**
-     * Creates a new TaskRunnerPanel for given monitor.
+     * Constructor for given view and title.
      */
     public TaskRunnerPanel(View aView, String aTitle)
     {
@@ -38,20 +31,17 @@ public abstract class TaskRunnerPanel<T> extends TaskRunner<T> {
      */
     public void failure(Exception e)
     {
-        TaskMonitorPanel jtm = getMonitor() instanceof TaskMonitorPanel ? (TaskMonitorPanel) getMonitor() : null;
-        View view = jtm != null ? jtm._view : null;
-        if (jtm != null) jtm.hide();
-        DialogBox db = new DialogBox("Checkout Error");
-        db.setErrorMessage(e.toString());
-        db.showMessageDialog(view);
-        e.printStackTrace();
-    }
+        // Hide task monitor panel
+        TaskMonitor monitor = getMonitor();
+        TaskMonitorPanel monitorPanel = monitor instanceof TaskMonitorPanel ? (TaskMonitorPanel) monitor : null;
+        if (monitorPanel != null)
+            monitorPanel.hide();
 
-    /**
-     * Runs the success method.
-     */
-    protected void invokeFinished()
-    {
-        ViewEnv.getEnv().runLater(() -> TaskRunnerPanel.super.invokeFinished());
+        // Show error panel?
+        //String title = getName() + " Error";
+        //DialogBox dialogBox = new DialogBox(title);
+        //dialogBox.setErrorMessage(e.toString());
+        //View monitorView = monitorPanel != null ? monitorPanel._view : null;
+        //dialogBox.showMessageDialog(monitorView);
     }
 }
