@@ -5,6 +5,7 @@ package snap.util;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
+import java.util.function.Consumer;
 
 /**
  * A class for running operations in the background.
@@ -12,34 +13,46 @@ import snap.props.PropChangeSupport;
 public abstract class TaskRunner<T> implements TaskMonitor {
 
     // The name of this runner
-    String _name = "TaskRunner Thread";
+    private String _name = getClass().getSimpleName() + " Thread";
 
     // The TaskMonitor
-    TaskMonitor _monitor = TaskMonitor.NULL;
+    private TaskMonitor _monitor = TaskMonitor.NULL;
 
     // The runner status
-    Status _status = Status.Idle;
+    private Status _status = Status.Idle;
 
     // The runner thread
-    Thread _thread;
+    private Thread _thread;
 
     // The runner start time (milliseconds)
-    long _startTime;
+    private long _startTime;
 
     // The runner end time (milliseconds)
-    long _endTime;
+    private long _endTime;
 
     // The result of the run method
-    T _result;
+    private T _result;
 
     // The exception thrown if run failed
-    Exception _exception;
+    private Exception _exception;
+
+    // The success handler
+    private Consumer<T> _successHandler;
+
+    // The failed handler
+    private Consumer<Exception> _failureHandler;
+
+    // The cancelled handler
+    private Runnable _cancelledHandler;
+
+    // The finished handler
+    private Runnable _finishedHandler;
 
     // The PropChangeSupport
-    PropChangeSupport _pcs = PropChangeSupport.EMPTY;
+    private PropChangeSupport _pcs = PropChangeSupport.EMPTY;
 
     // Constants for status
-    public enum Status {Idle, Running, Finished, Cancelled, Failed}
+    public enum Status { Idle, Running, Finished, Cancelled, Failed }
 
     // Constants for Runner PropertyChanges
     public static final String Progress_Prop = "Progress";
@@ -117,7 +130,8 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     public void endTask()
     {
         _monitor.endTask();
-        if (_monitor.isCancelled()) cancel();
+        if (_monitor.isCancelled())
+            cancel();
     }
 
     /**
@@ -130,7 +144,7 @@ public abstract class TaskRunner<T> implements TaskMonitor {
      */
     protected void setStatus(Status aStatus)
     {
-        if (aStatus == getStatus()) return;
+        if (aStatus == _status) return;
         firePropChange(Status_Prop, _status, _status = aStatus);
     }
 
@@ -142,12 +156,7 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     /**
      * Joins the runner.
      */
-    public TaskRunner<T> join()
-    {
-        try { _thread.join(); }
-        catch (Exception e) { }
-        return this;
-    }
+    public TaskRunner<T> join()  { return join(0); }
 
     /**
      * Joins the runner.
@@ -212,7 +221,8 @@ public abstract class TaskRunner<T> implements TaskMonitor {
         });
 
         // Start thread
-        //_thread.setName(getName()); TeaVM doesn't like this
+        if (!SnapUtils.isTeaVM)
+            _thread.setName(getName());
         _thread.start();
 
         // Return this runner
@@ -247,10 +257,7 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     /**
      * The method to run on failure.
      */
-    public void failure(Exception e)
-    {
-        e.printStackTrace();
-    }
+    public void failure(Exception e)  { }
 
     /**
      * The method to run when finished (after success()/failure() call).
@@ -268,6 +275,26 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     public Throwable getException()  { return _exception; }
 
     /**
+     * Sets the success handler.
+     */
+    public void setOnSuccess(Consumer<T> aHandler)  { _successHandler = aHandler; }
+
+    /**
+     * Sets the failure handler.
+     */
+    public void setOnFailure(Consumer<Exception> aHandler)  { _failureHandler = aHandler; }
+
+    /**
+     * Sets the cancelled handler.
+     */
+    public void setOnCancelled(Runnable aRun)  { _cancelledHandler = aRun; }
+
+    /**
+     * Sets the finished handler.
+     */
+    public void setOnFinished(Runnable aRun)  { _finishedHandler = aRun; }
+
+    /**
      * Runs the run method.
      */
     protected void invokeRun()
@@ -277,7 +304,7 @@ public abstract class TaskRunner<T> implements TaskMonitor {
         _startTime = getSystemTime();
         setStatus(Status.Running);
 
-        // Run run
+        // Call run()
         try { _result = run(); }
         catch (Exception e) { _exception = e; }
         catch (Throwable e) { _exception = new RuntimeException(e); }
@@ -294,12 +321,30 @@ public abstract class TaskRunner<T> implements TaskMonitor {
         // Update status
         setStatus(_exception == null ? Status.Finished : Status.Failed);
 
-        // Call success/failure
-        if (_exception == null)
-            success(_result);
-        else if (getStatus() == Status.Cancelled)
+        // If cancelled, call cancelled
+        if (getStatus() == Status.Cancelled) {
+            if (_cancelledHandler != null)
+                _cancelledHandler.run();
             cancelled(_exception);
-        else failure(_exception);
+        }
+
+        // Call success/failure
+        else if (_exception == null) {
+            if (_successHandler != null)
+                _successHandler.accept(_result);
+            success(_result);
+        }
+
+        // Call failure
+        else {
+            if (_failureHandler != null)
+                _failureHandler.accept(_exception);
+            failure(_exception);
+        }
+
+        // Call finished
+        if (_finishedHandler != null)
+            _finishedHandler.run();
         finished();
     }
 
