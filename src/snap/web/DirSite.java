@@ -89,9 +89,7 @@ public class DirSite extends WebSite {
     protected void doPut(WebRequest aReq, WebResponse aResp)
     {
         // Get file we're trying to save
-        WebURL fileURL = aReq.getURL();
-        String filePath = fileURL.getPath();
-        WebFile localFile = getFileForPath(filePath);
+        WebFile localFile = aReq.getFile(); //getFileForPath(fileURL.getPath());
 
         // Get remote file
         WebFile dirFile = createDirFileForPath(localFile.getPath(), localFile.isDir());
