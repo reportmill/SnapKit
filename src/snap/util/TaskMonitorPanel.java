@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.viewx;
-import snap.util.TaskMonitor;
+package snap.util;
 import snap.view.*;
+import snap.viewx.DialogBox;
 
 /**
- * A TaskMonitor implementation that shows task updates in a panel.
+ * A TaskMonitor implementation that shows task updates in a panel after a short delay.
  */
 public class TaskMonitorPanel extends ViewOwner implements TaskMonitor {
 
@@ -41,7 +41,7 @@ public class TaskMonitorPanel extends ViewOwner implements TaskMonitor {
     private ProgressBar  _progressBar;
 
     // The dialog box
-    private DialogBox  _dialogBox;
+    private DialogBox _dialogBox;
 
     // Whether monitor should print to standard out
     private boolean  DEBUG_MODE = false;

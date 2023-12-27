@@ -6,23 +6,19 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
 import snap.view.ViewUtils;
-import snap.viewx.TaskMonitorPanel;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
  * A class for running operations in the background.
  */
-public class TaskRunner<T> implements TaskMonitor {
+public class TaskRunner<T> {
 
     // The name of this runner
     private String _name = getClass().getSimpleName();
 
     // The supplier function for this task runner
     private Supplier<T> _taskFunction;
-
-    // The TaskMonitor
-    private TaskMonitor _monitor = TaskMonitor.NULL;
 
     // The runner status
     private Status _status = Status.Idle;
@@ -83,15 +79,6 @@ public class TaskRunner<T> implements TaskMonitor {
     }
 
     /**
-     * Constructor for given monitor.
-     */
-    public TaskRunner(TaskMonitor aMonitor)
-    {
-        super();
-        setMonitor(aMonitor);
-    }
-
-    /**
      * Returns the name of runner (and thread).
      */
     public String getName()  { return _name; }
@@ -105,54 +92,6 @@ public class TaskRunner<T> implements TaskMonitor {
      * Returns the task supplier function.
      */
     public Supplier<T> getTaskFunction()  { return _taskFunction; }
-
-    /**
-     * Returns the monitor.
-     */
-    public TaskMonitor getMonitor()  { return _monitor; }
-
-    /**
-     * Sets the monitor.
-     */
-    public void setMonitor(TaskMonitor aMonitor)  { _monitor = aMonitor; }
-
-    /**
-     * Advise the monitor of the total number of subtasks (invoke only once).
-     */
-    public void startTasks(int aTaskCount)
-    {
-        _monitor.startTasks(aTaskCount);
-    }
-
-    /**
-     * Begin processing a single task.
-     */
-    public void beginTask(String aTitle, int theTotalWork)
-    {
-        _monitor.beginTask(aTitle, theTotalWork);
-        if (_monitor.isCancelled())
-            cancel();
-    }
-
-    /**
-     * Denote that some work units have been completed.
-     */
-    public void updateTask(int theWorkDone)
-    {
-        _monitor.updateTask(theWorkDone);
-        if (_monitor.isCancelled())
-            cancel();
-    }
-
-    /**
-     * Finish the current task, so the next can begin.
-     */
-    public void endTask()
-    {
-        _monitor.endTask();
-        if (_monitor.isCancelled())
-            cancel();
-    }
 
     /**
      * Returns the status.
@@ -199,10 +138,7 @@ public class TaskRunner<T> implements TaskMonitor {
     /**
      * Whether runner has been cancelled.
      */
-    public boolean isCancelled()
-    {
-        return _monitor.isCancelled() || _status == Status.Cancelled;
-    }
+    public boolean isCancelled()  { return _status == Status.Cancelled; }
 
     /**
      * Returns the start time.
@@ -280,14 +216,7 @@ public class TaskRunner<T> implements TaskMonitor {
     /**
      * The method to run on failure.
      */
-    public void failure(Exception e)
-    {
-        // Hide task monitor panel
-        TaskMonitor monitor = getMonitor();
-        TaskMonitorPanel monitorPanel = monitor instanceof TaskMonitorPanel ? (TaskMonitorPanel) monitor : null;
-        if (monitorPanel != null)
-            monitorPanel.hide();
-    }
+    public void failure(Exception e)  { }
 
     /**
      * The method to run when finished (after success()/failure() call).

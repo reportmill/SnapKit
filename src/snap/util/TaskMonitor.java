@@ -12,28 +12,28 @@ public interface TaskMonitor {
     /**
      * Advise the monitor of the total number of subtasks (invoke only once).
      */
-    void startTasks(int aTaskCount);
+    default void startTasks(int aTaskCount)  { }
     
     /**
      * Begin processing a single task.
      */
-    void beginTask(String aTitle, int theTotalWork);
+    default void beginTask(String aTitle, int theTotalWork)  { }
     
     /**
      * Denote that some work units have been completed.
      */
-    void updateTask(int theWorkDone);
+    default void updateTask(int theWorkDone)  { }
     
     /**
      * Finish the current task, so the next can begin.
      */
-    void endTask();
+    default void endTask()  { }
     
     /**
      * Check for user task cancellation.
      * @return true if the user asked the process to stop working.
      */
-    boolean isCancelled();
+    default boolean isCancelled()  { return false; }
 
     /**
      * A simple progress reporter printing on a stream.
@@ -74,9 +74,6 @@ public interface TaskMonitor {
             _tasksDone++;
         }
 
-        /** Check for user task cancellation. */
-        public boolean isCancelled()  { return false; }
-
         /** Print string to output. */
         private void print(String aStr)
         {
@@ -88,11 +85,5 @@ public interface TaskMonitor {
     /**
      * An TaskMonitor that ignores everything.
      */
-    TaskMonitor NULL = new TaskMonitor() {
-        public void startTasks(int aTaskCount)  { }
-        public void beginTask(String aTitle, int theTotalWork)  { }
-        public void updateTask(int theWorkDone)  { }
-        public void endTask()  { }
-        public boolean isCancelled()  { return false; }
-    };
+    TaskMonitor NULL = new TaskMonitor() { };
 }
