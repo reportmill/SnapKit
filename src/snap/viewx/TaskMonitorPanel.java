@@ -6,7 +6,7 @@ import snap.util.TaskMonitor;
 import snap.view.*;
 
 /**
- * A TaskRunner implementation that runs success/failed/finished on application thread.
+ * A TaskMonitor implementation that shows task updates in a panel.
  */
 public class TaskMonitorPanel extends ViewOwner implements TaskMonitor {
 
@@ -47,7 +47,7 @@ public class TaskMonitorPanel extends ViewOwner implements TaskMonitor {
     private boolean  DEBUG_MODE = false;
 
     /**
-     * Creates a new TaskMonitorPanel for given monitor.
+     * Constructor for view and title.
      */
     public TaskMonitorPanel(View aView, String aTitle)
     {
@@ -110,46 +110,7 @@ public class TaskMonitorPanel extends ViewOwner implements TaskMonitor {
     public boolean isCancelled()  { return _cancelled; }
 
     /**
-     * Create UI.
-     */
-    protected View createUI()
-    {
-        Label tlabel = new Label();
-        tlabel.setText(_title);
-        _activityLabel = new Label();
-        _progressBar = new ProgressBar();
-        _progressBar.setPrefWidth(360);
-        ColView vbox = new ColView();
-        vbox.setSpacing(8);
-        vbox.addChild(tlabel);
-        vbox.addChild(_activityLabel);
-        vbox.addChild(_progressBar);
-        return vbox;
-    }
-
-    /**
-     * Override
-     */
-    public synchronized void resetLater()
-    {
-        if (_dialogBox == null && System.currentTimeMillis() - _startTime > _delay)
-            show();
-        else if (_dialogBox != null)
-            super.resetLater();
-    }
-
-    /**
-     * Reset UI controls.
-     */
-    protected void resetUI()
-    {
-        String countStr = String.format(" (%d of %d)", _tasksDone + 1, _tasksTotal);
-        setViewValue(_activityLabel, _taskTitle + countStr);
-        _progressBar.setProgress(_taskDone / (double) _taskTotal);
-    }
-
-    /**
-     * Show ProgressPane.
+     * Show panel.
      */
     protected void show()
     {
@@ -162,11 +123,56 @@ public class TaskMonitorPanel extends ViewOwner implements TaskMonitor {
     }
 
     /**
-     * Hide ProgressPane.
+     * Hide panel.
      */
-    protected void hide()
+    public void hide()
     {
         if (_dialogBox != null)
             _dialogBox.cancel();
+    }
+
+    /**
+     * Create UI.
+     */
+    @Override
+    protected View createUI()
+    {
+        // Create UI
+        Label titleLabel = new Label();
+        titleLabel.setText(_title);
+        _activityLabel = new Label();
+        _progressBar = new ProgressBar();
+        _progressBar.setPrefWidth(360);
+
+        // Create main col view with UI
+        ColView colView = new ColView();
+        colView.setSpacing(8);
+        colView.addChild(titleLabel);
+        colView.addChild(_activityLabel);
+        colView.addChild(_progressBar);
+        return colView;
+    }
+
+    /**
+     * Override
+     */
+    @Override
+    public synchronized void resetLater()
+    {
+        if (_dialogBox == null && System.currentTimeMillis() - _startTime > _delay)
+            show();
+        else if (_dialogBox != null)
+            super.resetLater();
+    }
+
+    /**
+     * Reset UI controls.
+     */
+    @Override
+    protected void resetUI()
+    {
+        String countStr = String.format(" (%d of %d)", _tasksDone + 1, _tasksTotal);
+        setViewValue(_activityLabel, _taskTitle + countStr);
+        _progressBar.setProgress(_taskDone / (double) _taskTotal);
     }
 }

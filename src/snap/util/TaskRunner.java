@@ -6,15 +6,20 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
 import snap.view.ViewUtils;
+import snap.viewx.TaskMonitorPanel;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * A class for running operations in the background.
  */
-public abstract class TaskRunner<T> implements TaskMonitor {
+public class TaskRunner<T> implements TaskMonitor {
 
     // The name of this runner
     private String _name = getClass().getSimpleName();
+
+    // The supplier function for this task runner
+    private Supplier<T> _taskFunction;
 
     // The TaskMonitor
     private TaskMonitor _monitor = TaskMonitor.NULL;
@@ -56,8 +61,8 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     public enum Status { Idle, Running, Finished, Cancelled, Failed }
 
     // Constants for Runner PropertyChanges
-    public static final String Progress_Prop = "Progress";
-    public static final String ActivityText_Prop = "ActivityText";
+    //public static final String Progress_Prop = "Progress";
+    //public static final String ActivityText_Prop = "ActivityText";
     public static final String Status_Prop = "Status";
 
     /**
@@ -66,6 +71,15 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     public TaskRunner()
     {
         super();
+    }
+
+    /**
+     * Constructor for given task function.
+     */
+    public TaskRunner(Supplier<T> aSupplier)
+    {
+        super();
+        _taskFunction = aSupplier;
     }
 
     /**
@@ -86,6 +100,11 @@ public abstract class TaskRunner<T> implements TaskMonitor {
      * Sets the name of runner (and thread).
      */
     public void setName(String aName)  { _name = aName; }
+
+    /**
+     * Returns the task supplier function.
+     */
+    public Supplier<T> getTaskFunction()  { return _taskFunction; }
 
     /**
      * Returns the monitor.
@@ -243,7 +262,10 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     /**
      * The method to run.
      */
-    public abstract T run() throws Exception;
+    public T run() throws Exception
+    {
+        return _taskFunction.get();
+    }
 
     /**
      * The method run on success.
@@ -258,7 +280,14 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     /**
      * The method to run on failure.
      */
-    public void failure(Exception e)  { }
+    public void failure(Exception e)
+    {
+        // Hide task monitor panel
+        TaskMonitor monitor = getMonitor();
+        TaskMonitorPanel monitorPanel = monitor instanceof TaskMonitorPanel ? (TaskMonitorPanel) monitor : null;
+        if (monitorPanel != null)
+            monitorPanel.hide();
+    }
 
     /**
      * The method to run when finished (after success()/failure() call).
@@ -276,24 +305,62 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     public Throwable getException()  { return _exception; }
 
     /**
+     * Returns the success handler.
+     */
+    public Consumer<T> getOnSuccess()  { return _successHandler; }
+
+    /**
      * Sets the success handler.
      */
-    public void setOnSuccess(Consumer<T> aHandler)  { _successHandler = aHandler; }
+    public synchronized void setOnSuccess(Consumer<T> aHandler)
+    {
+        _successHandler = aHandler;
+
+        // If already finished, call handler
+        if (_successHandler != null && _status == Status.Finished)
+            ViewUtils.runLater(() -> _successHandler.accept(_result));
+    }
+
+    /**
+     * Returns the failure handler.
+     */
+    public Consumer<Exception> getOnFailure(Consumer<Exception> aHandler)  { return _failureHandler; }
 
     /**
      * Sets the failure handler.
      */
-    public void setOnFailure(Consumer<Exception> aHandler)  { _failureHandler = aHandler; }
+    public synchronized void setOnFailure(Consumer<Exception> aHandler)
+    {
+        _failureHandler = aHandler;
+
+        // If already finished, call handler
+        if (_failureHandler != null && _status == Status.Failed)
+            ViewUtils.runLater(() -> _failureHandler.accept(_exception));
+    }
 
     /**
      * Sets the cancelled handler.
      */
-    public void setOnCancelled(Runnable aRun)  { _cancelledHandler = aRun; }
+    public synchronized void setOnCancelled(Runnable aRun)
+    {
+        _cancelledHandler = aRun;
+
+        // If already finished, call handler
+        if (_cancelledHandler != null && _status == Status.Cancelled)
+            ViewUtils.runLater(() -> _cancelledHandler.run());
+    }
 
     /**
      * Sets the finished handler.
      */
-    public void setOnFinished(Runnable aRun)  { _finishedHandler = aRun; }
+    public synchronized void setOnFinished(Runnable aRun)
+    {
+        _finishedHandler = aRun;
+
+        // If already finished, call handler
+        if (_finishedHandler != null && (_status == Status.Finished || _status == Status.Failed || _status == Status.Cancelled))
+            ViewUtils.runLater(() -> _finishedHandler.run());
+    }
 
     /**
      * Runs the run method.
@@ -317,7 +384,7 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     /**
      * Runs the success method.
      */
-    protected void invokeFinished()
+    protected synchronized void invokeFinished()
     {
         // Update status
         if (getStatus() != Status.Cancelled)
