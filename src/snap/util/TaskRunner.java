@@ -23,14 +23,11 @@ public class TaskRunner<T> {
     // The runner status
     private Status _status = Status.Idle;
 
+    // The TaskMonitor
+    private TaskMonitor _monitor;
+
     // The runner thread
     private Thread _thread;
-
-    // The runner start time (milliseconds)
-    private long _startTime;
-
-    // The runner end time (milliseconds)
-    private long _endTime;
 
     // The result of the run method
     private T _result;
@@ -57,8 +54,6 @@ public class TaskRunner<T> {
     public enum Status { Idle, Running, Finished, Cancelled, Failed }
 
     // Constants for Runner PropertyChanges
-    //public static final String Progress_Prop = "Progress";
-    //public static final String ActivityText_Prop = "ActivityText";
     public static final String Status_Prop = "Status";
 
     /**
@@ -94,6 +89,11 @@ public class TaskRunner<T> {
     public Supplier<T> getTaskFunction()  { return _taskFunction; }
 
     /**
+     * Sets the task supplier function.
+     */
+    public void setTaskFunction(Supplier<T> aSupplier)  { _taskFunction = aSupplier; }
+
+    /**
      * Returns the status.
      */
     public Status getStatus()  { return _status; }
@@ -106,6 +106,16 @@ public class TaskRunner<T> {
         if (aStatus == _status) return;
         firePropChange(Status_Prop, _status, _status = aStatus);
     }
+
+    /**
+     * Returns the monitor.
+     */
+    public TaskMonitor getMonitor()  { return _monitor; }
+
+    /**
+     * Sets the monitor.
+     */
+    public void setMonitor(TaskMonitor aMonitor)  { _monitor = aMonitor; }
 
     /**
      * Returns the thread.
@@ -139,31 +149,6 @@ public class TaskRunner<T> {
      * Whether runner has been cancelled.
      */
     public boolean isCancelled()  { return _status == Status.Cancelled; }
-
-    /**
-     * Returns the start time.
-     */
-    public long getStartTime()  { return _startTime; }
-
-    /**
-     * Returns the end time.
-     */
-    public long getEndTime()  { return _endTime; }
-
-    /**
-     * Returns the elapsed time.
-     */
-    public long getElapsedTime()
-    {
-        long endTime = isActive() ? getSystemTime() : getEndTime();
-        long startTime = getStartTime();
-        return endTime - startTime;
-    }
-
-    /**
-     * Returns the system time.
-     */
-    protected long getSystemTime()  { return System.currentTimeMillis(); }
 
     /**
      * Starts the runner.
@@ -298,16 +283,12 @@ public class TaskRunner<T> {
     {
         // Set start time and run status
         _exception = null;
-        _startTime = getSystemTime();
         setStatus(Status.Running);
 
         // Call run()
         try { _result = run(); }
         catch (Exception e) { _exception = e; }
         catch (Throwable e) { _exception = new RuntimeException(e); }
-
-        // Set end time
-        _endTime = getSystemTime();
     }
 
     /**
