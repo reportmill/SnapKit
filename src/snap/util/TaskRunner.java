@@ -133,7 +133,7 @@ public class TaskRunner<T> {
     public TaskRunner<T> join(int aTimeout)
     {
         try { _thread.join(aTimeout); }
-        catch (Exception e) { }
+        catch (Exception e) { throw new RuntimeException(e); }
         return this;
     }
 
@@ -302,29 +302,31 @@ public class TaskRunner<T> {
 
         // If cancelled, call cancelled
         if (getStatus() == Status.Cancelled) {
+            cancelled(_exception);
             if (_cancelledHandler != null)
                 _cancelledHandler.run();
-            cancelled(_exception);
         }
 
         // Call success/failure
         else if (_exception == null) {
+            success(_result);
             if (_successHandler != null)
                 _successHandler.accept(_result);
-            success(_result);
         }
 
         // Call failure
         else {
+            failure(_exception);
             if (_failureHandler != null)
                 _failureHandler.accept(_exception);
-            failure(_exception);
         }
 
         // Call finished
+        finished();
+        if (_monitor != null)
+            _monitor.setFinished(true);
         if (_finishedHandler != null)
             _finishedHandler.run();
-        finished();
     }
 
     /**
