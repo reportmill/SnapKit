@@ -13,9 +13,6 @@ public class TaskMonitorPanel extends TaskMonitor {
     // The view for progress pane to center on
     protected View _view;
 
-    // The title for progress pane window to show
-    private String _title;
-
     // The delay before task progress panel appears in milliseconds
     private int _delay = 200;
 
@@ -23,14 +20,22 @@ public class TaskMonitorPanel extends TaskMonitor {
     private TaskMonitorPanelViewOwner _viewOwner;
 
     /**
+     * Constructor.
+     */
+    public TaskMonitorPanel()
+    {
+        super();
+        _viewOwner = new TaskMonitorPanelViewOwner();
+    }
+
+    /**
      * Constructor for view and title.
      */
     public TaskMonitorPanel(View aView, String aTitle)
     {
-        super();
-        _viewOwner = new TaskMonitorPanelViewOwner();
+        this();
         _view = aView;
-        _title = aTitle;
+        setTitle(aTitle);
     }
 
     /**
@@ -44,18 +49,21 @@ public class TaskMonitorPanel extends TaskMonitor {
     protected void hide()  { _viewOwner.hideDialogBox(); }
 
     /**
-     * Advise the monitor of the total number of subtasks (invoke only once).
+     * Override to trigger showPanel.
      */
-    public void startTasks(int aTaskCount)
+    @Override
+    protected void setTasksTotal(int aValue)
     {
-        // Do normal version
-        super.startTasks(aTaskCount);
+        // If going from zero to non-zero, trigger showPanel after delay
+        if (getTasksTotal() == 0 && aValue != 0) {
+            ViewUtils.runDelayed(() -> {
+                if (!isFinished())
+                    showPanel();
+            }, _delay);
+        }
 
-        // Trigger showPanel after delay
-        ViewUtils.runDelayed(() -> {
-            if (!isFinished())
-                showPanel();
-        }, _delay);
+        // Do normal version
+        super.setTasksTotal(aValue);
     }
 
     /**
@@ -97,7 +105,7 @@ public class TaskMonitorPanel extends TaskMonitor {
         protected void showDialogBox()
         {
             _dialogBox = new DialogBox();
-            _dialogBox.setTitle(_title);
+            _dialogBox.setTitle(getTitle());
             _dialogBox.setContent(getUI());
             _dialogBox.setOptions("Cancel");
 
@@ -124,7 +132,7 @@ public class TaskMonitorPanel extends TaskMonitor {
         {
             // Create UI
             Label titleLabel = new Label();
-            titleLabel.setText(_title);
+            titleLabel.setText(getTitle());
             _activityLabel = new Label();
             _progressBar = new ProgressBar();
             _progressBar.setPrefWidth(360);

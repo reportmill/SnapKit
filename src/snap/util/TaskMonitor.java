@@ -2,7 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
-import snap.props.PropObject;
+import snap.props.*;
+import snap.view.View;
 import java.io.*;
 import java.util.Objects;
 
@@ -10,6 +11,9 @@ import java.util.Objects;
  * Interface for tracking the progress of arbitrary tasks.
  */
 public class TaskMonitor extends PropObject {
+
+    // A string to describe task
+    private String _title;
 
     // The total number of tasks
     private int _tasksTotal;
@@ -35,7 +39,14 @@ public class TaskMonitor extends PropObject {
     // An optional writer to output progress
     private Writer _writer;
 
+    // Another monitor if this monitor is linked
+    private TaskMonitor _monitor;
+
+    // A prop change listener
+    private PropChangeListener _monitorLsnr;
+
     // Constants for properties
+    public static final String Title_Prop = "Title";
     public static final String TasksTotal_Prop = "TasksTotal";
     public static final String TasksDone_Prop = "TasksDone";
     public static final String TaskTotal_Prop = "TaskTotal";
@@ -53,12 +64,35 @@ public class TaskMonitor extends PropObject {
     }
 
     /**
+     * Constructor for given title.
+     */
+    public TaskMonitor(String aTitle)
+    {
+        super();
+        setTitle(aTitle);
+    }
+
+    /**
      * Constructor for given writer.
      */
     public TaskMonitor(PrintStream aPrintStream)
     {
         super();
         _writer = new PrintWriter(aPrintStream);
+    }
+
+    /**
+     * Returns a string to describe task.
+     */
+    public String getTitle()  { return _title; }
+
+    /**
+     * Sets a string to describe task.
+     */
+    public void setTitle(String aValue)
+    {
+        if (Objects.equals(aValue, _taskTitle)) return;
+        firePropChange(Title_Prop, _title, _title = aValue);
     }
 
     /**
@@ -207,9 +241,62 @@ public class TaskMonitor extends PropObject {
     }
 
     /**
+     * Returns the next monitor in chain (if this monitor is linked to another).
+     */
+    public TaskMonitor getMonitor()  { return _monitor; }
+
+    /**
+     * Sets the next monitor in chain (if this monitor is linked to another).
+     */
+    public void setMonitor(TaskMonitor sourceMonitor)
+    {
+        // If already set, just return
+        if (sourceMonitor == _monitor) return;
+
+        // Stop listening to old monitor
+        if (_monitor != null)
+            _monitor.removePropChangeListener(_monitorLsnr);
+
+        // Set
+        _monitor = sourceMonitor;
+
+        // Start listening
+        if (_monitor != null) {
+            _monitor.addPropChangeListener(_monitorLsnr = this::monitorDidChange);
+
+            // Copy all props from other
+            Prop[] allProps = getPropSet().getProps();
+            for (Prop prop : allProps) {
+                Object value = _monitor.getPropValue(prop.getName());
+                setPropValue(prop.getName(), value);
+            }
+        }
+    }
+
+    /**
      * Returns the task progress.
      */
     public double getTaskProgress()  { return _taskDone / (double) _taskTotal; }
+
+    /**
+     * Creates a monitor panel to show progress.
+     */
+    public TaskMonitorPanel showProgressPanel(View aView)
+    {
+        TaskMonitorPanel taskMonitorPanel = new TaskMonitorPanel(aView, null);
+        taskMonitorPanel.setMonitor(this);
+        return taskMonitorPanel;
+    }
+
+    /**
+     * Called when source monitor changes.
+     */
+    private void monitorDidChange(PropChange aPC)
+    {
+        String propName = aPC.getPropName();
+        Object value = _monitor.getPropValue(propName);
+        setPropValue(propName, value);
+    }
 
     /**
      * Print string to output.
@@ -218,5 +305,70 @@ public class TaskMonitor extends PropObject {
     {
         try { _writer.write(aStr); _writer.write('\n'); _writer.flush(); }
         catch (IOException e) { throw new RuntimeException(e); }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        super.initProps(aPropSet);
+
+        // Title, TasksTotal, TasksDone, TaskTotal, TaskDone, TaskTitle, Cancelled, Finished
+        aPropSet.addPropNamed(Title_Prop, String.class, null);
+        aPropSet.addPropNamed(TasksTotal_Prop, int.class, 0);
+        aPropSet.addPropNamed(TasksDone_Prop, int.class, 0);
+        aPropSet.addPropNamed(TaskTotal_Prop, int.class, 0);
+        aPropSet.addPropNamed(TaskDone_Prop, int.class, 0);
+        aPropSet.addPropNamed(TaskTitle_Prop, String.class, null);
+        aPropSet.addPropNamed(Cancelled_Prop, boolean.class, false);
+        aPropSet.addPropNamed(Finished_Prop, boolean.class, false);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Title, TasksTotal, TasksDone, TaskTotal, TaskDone, TaskTitle, Cancelled, Finished
+            case Title_Prop: return getTitle();
+            case TasksTotal_Prop: return getTasksTotal();
+            case TasksDone_Prop: return getTasksDone();
+            case TaskTotal_Prop: return getTaskTotal();
+            case TaskDone_Prop: return getTaskDone();
+            case TaskTitle_Prop: return getTaskTitle();
+            case Cancelled_Prop: return isCancelled();
+            case Finished_Prop: return isFinished();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // Title, TasksTotal, TasksDone, TaskTotal, TaskDone, TaskTitle, Cancelled, Finished
+            case Title_Prop: setTitle(Convert.stringValue(aValue)); break;
+            case TasksTotal_Prop: setTasksTotal(Convert.intValue(aValue)); break;
+            case TasksDone_Prop: setTasksDone(Convert.intValue(aValue)); break;
+            case TaskTotal_Prop: setTaskTotal(Convert.intValue(aValue)); break;
+            case TaskDone_Prop: setTaskDone(Convert.intValue(aValue)); break;
+            case TaskTitle_Prop: setTaskTitle(Convert.stringValue(aValue)); break;
+            case Cancelled_Prop: setCancelled(Convert.boolValue(aValue)); break;
+            case Finished_Prop: setFinished(Convert.boolValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue); break;
+        }
     }
 }
