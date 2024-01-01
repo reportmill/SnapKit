@@ -123,21 +123,6 @@ public class TaskRunner<T> {
     public Thread getThread()  { return _thread; }
 
     /**
-     * Joins the runner.
-     */
-    public TaskRunner<T> join()  { return join(0); }
-
-    /**
-     * Joins the runner.
-     */
-    public TaskRunner<T> join(int aTimeout)
-    {
-        try { _thread.join(aTimeout); }
-        catch (Exception e) { throw new RuntimeException(e); }
-        return this;
-    }
-
-    /**
      * Returns whether thread is still active.
      */
     public boolean isActive()
@@ -212,6 +197,31 @@ public class TaskRunner<T> {
      * Returns the result.
      */
     public T getResult()  { return _result; }
+
+    /**
+     * Waits for this task runner to finish and return the result.
+     */
+    public T awaitResult()
+    {
+        assert (getStatus() != Status.Idle);
+        join();
+        return getResult();
+    }
+
+    /**
+     * Joins the runner.
+     */
+    public TaskRunner<T> join()  { return join(0); }
+
+    /**
+     * Joins the runner.
+     */
+    public TaskRunner<T> join(int aTimeout)
+    {
+        try { _thread.join(aTimeout); }
+        catch (Exception e) { throw new RuntimeException(e); }
+        return this;
+    }
 
     /**
      * Returns the exception.
