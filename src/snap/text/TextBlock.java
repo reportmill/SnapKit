@@ -179,9 +179,8 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void setString(String aString)
     {
-        setPropChangeEnabled(false);
+        // Used to worry about TextArea undo by bracketing with setPropChangeEnabled(false/true);
         replaceChars(aString, null, 0, length());
-        setPropChangeEnabled(true);
     }
 
     /**
