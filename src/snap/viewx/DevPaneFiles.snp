@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SplitView>
-  <ColView Margin="5" PrefWidth="300" GrowWidth="true" FillWidth="true">
-    <RowView Padding="4" Spacing="4" GrowWidth="true">
-      <Label text="Root File:" />
-      <TextField Name="RootFileText" PrefWidth="412" BorderRadius="3" />
+<SplitView DividerSpan="1">
+  <Font Name="Arial" Size="13" />
+  <ColView PrefWidth="300" GrowWidth="true" FillWidth="true">
+    <RowView Margin="8" GrowWidth="true">
+      <Label Margin="0,4,0,4" Text="Root File:" />
+      <TextField Name="RootFileText" Margin="0,4,0,4" PrefWidth="412" />
+      <Button Name="HomeButton" Margin="0,4,0,6" PrefWidth="24" PrefHeight="24" ToolTip="Go to Home Directory" image="Home.png" />
     </RowView>
-    <BoxView Name="SitePaneBox" GrowWidth="true" GrowHeight="true" />
+    <BrowserView Name="FileBrowser" Margin="8" GrowWidth="true" GrowHeight="true" PrefColCount="2" />
   </ColView>
-  <TextView Name="FileTextView" Margin="10" PrefWidth="60" GrowWidth="true" />
+  <ColView Margin="8" PrefWidth="60" GrowWidth="true">
+    <Label Name="FileLabel" Margin="4" />
+    <TextView Name="FileTextView" GrowWidth="true" GrowHeight="true" />
+  </ColView>
 </SplitView>

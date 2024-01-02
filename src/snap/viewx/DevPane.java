@@ -130,6 +130,7 @@ public class DevPane extends ViewOwner {
     {
         // Create TabView
         _tabView = new TabView();
+        _tabView.getTabBar().setTabMinWidth(80);
 
         // Create SplitView
         _splitView = new DPSplitView();
