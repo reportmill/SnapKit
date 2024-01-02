@@ -326,12 +326,12 @@ public abstract class WebSite {
 
         // Update ModTime
         long modTime = putResponse.getModTime();
-        aFile.setModTime(modTime);
         if (modTime == 0) {
             if (!SnapUtils.isWebVM)
                 System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getUrlString());
             modTime = System.currentTimeMillis();
         }
+        aFile.setModTime(modTime);
 
         // If file created by save, reset parent contents to make sure it's there
         if (fileBeingCreatedBySave && parentDir != null) {
