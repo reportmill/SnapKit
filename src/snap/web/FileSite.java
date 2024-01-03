@@ -8,13 +8,22 @@ import java.util.*;
 import snap.util.*;
 
 /**
- * A data source to read/write data and files to a file system.
+ * This class is a WebSite implementation for local file system.
  */
 public class FileSite extends WebSite {
 
     /**
+     * Constructor.
+     */
+    public FileSite()
+    {
+        super();
+    }
+
+    /**
      * Handle a get or head request.
      */
+    @Override
     protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
     {
         // Get URL, path and file
@@ -22,7 +31,7 @@ public class FileSite extends WebSite {
         String filePath = fileURL.getPath();
         if (filePath == null)
             filePath = "/";
-        File file = getJavaFile(filePath);
+        File file = getJavaFileForPath(filePath);
 
         // Handle NOT_FOUND
         if (!file.exists() || !file.canRead()) {
@@ -62,7 +71,7 @@ public class FileSite extends WebSite {
     protected FileHeader getFileHeader(String aPath, File aFile)
     {
         // Get standard file for path
-        File file = aFile != null ? aFile : getJavaFile(aPath);
+        File file = aFile != null ? aFile : getJavaFileForPath(aPath);
 
         // Get real path (fixes capitalization)
         String path = aPath;
@@ -115,18 +124,20 @@ public class FileSite extends WebSite {
     /**
      * Handle a POST request.
      */
+    @Override
     protected void doPost(WebRequest aReq, WebResponse aResp)  { doPut(aReq, aResp); }
 
     /**
      * Handle a PUT request.
      */
+    @Override
     protected void doPut(WebRequest aReq, WebResponse aResp)
     {
         // Get standard file
         WebURL pathURL = aReq.getURL();
         String path = pathURL.getPath();
         WebFile snapFile = aReq.getFile();
-        File javaFile = getJavaFile(path);
+        File javaFile = getJavaFileForPath(path);
 
         // Make sure parent directories exist
         File fileDir = javaFile.getParentFile();
@@ -155,17 +166,19 @@ public class FileSite extends WebSite {
         }
 
         // Return standard file modified time
-        aResp.setLastModTime(javaFile.lastModified());
+        long lastModTime = javaFile.lastModified();
+        aResp.setLastModTime(lastModTime);
     }
 
     /**
      * Handle a DELETE request.
      */
+    @Override
     protected void doDelete(WebRequest aReq, WebResponse aResp)
     {
         // Get standard file
         String path = aReq.getURL().getPath();
-        File file = getJavaFile(path);
+        File file = getJavaFileForPath(path);
 
         // Do delete
         FileUtils.deleteDeep(file);
@@ -174,6 +187,7 @@ public class FileSite extends WebSite {
     /**
      * Saves the modified time for a file to underlying file system.
      */
+    @Override
     protected void saveLastModTimeForFile(WebFile aFile, long aTime)
     {
         File file = aFile.getJavaFile();
@@ -184,19 +198,20 @@ public class FileSite extends WebSite {
     /**
      * Returns the Java file for a WebURL.
      */
-    protected File getJavaFile(WebURL aURL)
+    @Override
+    protected File getJavaFileForUrl(WebURL aURL)
     {
-        String path = aURL.getPath();
-        return getJavaFile(path);
+        String filePath = aURL.getPath();
+        return getJavaFileForPath(filePath);
     }
 
     /**
-     * Returns the Java file for RMFile.
+     * Returns the Java file for given path.
      */
-    protected File getJavaFile(String aPath)
+    protected File getJavaFileForPath(String filePath)
     {
         String sitePath = getPath();
-        String path = sitePath != null ? sitePath + aPath : aPath;
-        return new File(path);
+        String javaFilePath = sitePath != null ? sitePath + filePath : filePath;
+        return new File(javaFilePath);
     }
 }

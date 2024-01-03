@@ -493,7 +493,7 @@ public abstract class WebSite {
     /**
      * Returns a standard java.io.File, if available.
      */
-    protected File getJavaFile(WebURL aURL)
+    protected File getJavaFileForUrl(WebURL aURL)
     {
         // If URL.Source happens to be File, just return it
         Object src = aURL.getSource();

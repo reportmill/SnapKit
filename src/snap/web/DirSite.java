@@ -124,7 +124,7 @@ public class DirSite extends WebSite {
     /**
      * Override to get Java file from dir file.
      */
-    protected File getJavaFile(WebURL aURL)
+    protected File getJavaFileForUrl(WebURL aURL)
     {
         String filePath = aURL.getPath();
         WebFile dirFile = getDirFileForPath(filePath);

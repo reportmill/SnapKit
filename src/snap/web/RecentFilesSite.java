@@ -104,7 +104,7 @@ public class RecentFilesSite extends WebSite {
      * Override to get Java file from dir file.
      */
     @Override
-    protected File getJavaFile(WebURL aURL)
+    protected File getJavaFileForUrl(WebURL aURL)
     {
         WebFile file = aURL.getFile();
         WebFile realFile = file.getRealFile();

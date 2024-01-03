@@ -175,7 +175,7 @@ public class HTTPSite extends WebSite {
     /**
      * Override to return standard file for cache file.
      */
-    protected File getJavaFile(WebURL aURL)
+    protected File getJavaFileForUrl(WebURL aURL)
     {
         WebFile file = aURL.getFile();
         WebFile localFile = getLocalFile(file, false);

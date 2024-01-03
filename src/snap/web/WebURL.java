@@ -295,7 +295,7 @@ public class WebURL {
     public File getJavaFile()
     {
         WebSite site = getSite();
-        return site.getJavaFile(this);
+        return site.getJavaFileForUrl(this);
     }
 
     /**

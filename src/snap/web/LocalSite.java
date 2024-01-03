@@ -29,28 +29,25 @@ public class LocalSite extends FileSite {
     /**
      * Returns the Java file for path.
      */
-    protected File getJavaFile(String aPath)  { return new File(getPathInFileSystem() + aPath); }
+    @Override
+    protected File getJavaFileForPath(String aPath)
+    {
+        String filePath = getPathInFileSystem() + aPath;
+        return new File(filePath);
+    }
 
     /**
      * Returns the path of this data source in file system.
      */
-    protected String getPathInFileSystem()
+    private String getPathInFileSystem()
     {
+        if (_filePath != null) return _filePath;
+
         // If not set or if name has changed, reset cached FilePath
-        if (_filePath==null) {
-            File jdir = getHomeDir(true);
-            _filePath = new File(jdir, getPath()).getAbsolutePath();
-        }
+        File localSiteDir = FileUtils.getUserHomeDir("SnapCode", true);
+        String filePath = new File(localSiteDir, getPath()).getAbsolutePath();
 
         // Return file path
-        return _filePath;
-    }
-
-    /**
-     * Returns the SnapCode directory in user's home directory.
-     */
-    public static File getHomeDir(boolean doCreate)
-    {
-        return FileUtils.getUserHomeDir("SnapCode", doCreate);
+        return _filePath = filePath;
     }
 }
