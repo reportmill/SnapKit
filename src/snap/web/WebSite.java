@@ -235,7 +235,7 @@ public abstract class WebSite {
         }
 
         // Update properties file
-        file._modTime = fileHeader.getModTime();
+        file._lastModTime = fileHeader.getLastModTime();
         file._size = fileHeader.getSize();
         file.setMimeType(fileHeader.getMimeType());
 
@@ -252,7 +252,7 @@ public abstract class WebSite {
         WebURL url = aFile.getURL();
         WebResponse resp = url.getResponse();
         int respCode = resp.getCode();
-        long modTime = resp.getModTime();
+        long lastModTime = resp.getLastModTime();
 
         // Handle response
         if (respCode != WebResponse.OK) {
@@ -267,7 +267,7 @@ public abstract class WebSite {
         // Handle plain file
         if (aFile.isFile()) {
             byte[] bytes = resp.getBytes();
-            return new FileContents(bytes, modTime);
+            return new FileContents(bytes, lastModTime);
         }
 
         // Get file headers
@@ -282,7 +282,7 @@ public abstract class WebSite {
         Arrays.sort(files);
 
         // Return
-        return new FileContents(files, modTime);
+        return new FileContents(files, lastModTime);
     }
 
     /**
@@ -324,19 +324,19 @@ public abstract class WebSite {
         aFile.setExists(true);
         aFile.setModified(false);
 
-        // Update ModTime
-        long modTime = putResponse.getModTime();
-        if (modTime == 0) {
+        // Update LastModTime
+        long lastModTime = putResponse.getLastModTime();
+        if (lastModTime == 0) {
             if (!SnapUtils.isWebVM)
                 System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getUrlString());
-            modTime = System.currentTimeMillis();
+            lastModTime = System.currentTimeMillis();
         }
-        aFile.setModTime(modTime);
+        aFile.setLastModTime(lastModTime);
 
         // If file created by save, reset parent contents to make sure it's there
         if (fileBeingCreatedBySave && parentDir != null) {
             parentDir.resetContent();
-            parentDir.setModTime(modTime);
+            parentDir.setLastModTime(lastModTime);
         }
 
         // Return
@@ -383,8 +383,8 @@ public abstract class WebSite {
         WebFile parentDir = aFile.getParent();
         if (parentDir != null) {
             parentDir.resetContent();
-            long modTime = resp.getModTime();
-            parentDir.setModTime(modTime);
+            long lastModTime = resp.getLastModTime();
+            parentDir.setLastModTime(lastModTime);
         }
 
         // Return
@@ -477,7 +477,7 @@ public abstract class WebSite {
     /**
      * Saves the modified time for a file to underlying file system.
      */
-    protected void setModTimeForFile(WebFile aFile, long aTime) throws Exception
+    protected void saveLastModTimeForFile(WebFile aFile, long aTime) throws Exception
     {
     }
 

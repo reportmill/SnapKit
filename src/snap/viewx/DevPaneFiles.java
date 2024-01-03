@@ -97,7 +97,7 @@ public class DevPaneFiles extends ViewOwner {
         else sb.append("File count: ").append(selFile.getFiles().length).append('\n');
 
         // Add last modified date
-        Date lastModDate = selFile.getModDate();
+        Date lastModDate = selFile.getLastModDate();
         sb.append("Last Mod: ").append(lastModDate);
 
         // Return

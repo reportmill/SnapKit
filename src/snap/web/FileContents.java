@@ -11,20 +11,20 @@ public class FileContents {
     // The files
     private WebFile[]  _files;
 
-    // The mod time
-    private long  _modTime;
+    // The file last modified time
+    private long _lastModTime;
 
     /**
      * Constructor.
      */
-    public FileContents(Object theContents, long modTime)
+    public FileContents(Object theContents, long lastModTime)
     {
         if (theContents instanceof byte[])
             _bytes = (byte[]) theContents;
         else if (theContents instanceof WebFile[])
             _files = (WebFile[]) theContents;
         else throw new RuntimeException("FileContents.init: Unsupported contents: " + theContents);
-        _modTime = modTime;
+        _lastModTime = lastModTime;
     }
 
     /**
@@ -38,7 +38,7 @@ public class FileContents {
     public WebFile[] getFiles()  { return _files; }
 
     /**
-     * Returns the mod time.
+     * Returns the file last modified time.
      */
-    public long getModTime()  { return _modTime; }
+    public long getLastModTime()  { return _lastModTime; }
 }

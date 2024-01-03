@@ -75,7 +75,7 @@ public class FileSite extends WebSite {
 
         // Create and initialize FileHeader and return
         FileHeader fileHeader = new FileHeader(path, file.isDirectory());
-        fileHeader.setModTime(file.lastModified());
+        fileHeader.setLastModTime(file.lastModified());
         fileHeader.setSize(file.length());
         return fileHeader;
     }
@@ -155,7 +155,7 @@ public class FileSite extends WebSite {
         }
 
         // Return standard file modified time
-        aResp.setModTime(javaFile.lastModified());
+        aResp.setLastModTime(javaFile.lastModified());
     }
 
     /**
@@ -174,7 +174,7 @@ public class FileSite extends WebSite {
     /**
      * Saves the modified time for a file to underlying file system.
      */
-    protected void setModTimeForFile(WebFile aFile, long aTime)
+    protected void saveLastModTimeForFile(WebFile aFile, long aTime)
     {
         File file = aFile.getJavaFile();
         if (!file.setLastModified(aTime))

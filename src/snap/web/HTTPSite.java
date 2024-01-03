@@ -39,7 +39,7 @@ public class HTTPSite extends WebSite {
             return;
 
         // Configure response info (just return if isHead)
-        aResp.setModTime(httpResp.getLastModified());
+        aResp.setLastModTime(httpResp.getLastModified());
         aResp.setSize(httpResp.getContentLength());
         boolean isdir = isDir(url, httpResp);
         aResp.setDir(isdir);
@@ -136,7 +136,7 @@ public class HTTPSite extends WebSite {
             }
             String filePath = FilePathUtils.getChild(aPath, name);
             FileHeader file = new FileHeader(filePath, isDir);
-            file.setModTime(System.currentTimeMillis());
+            file.setLastModTime(System.currentTimeMillis());
             files.add(file);
         }
 

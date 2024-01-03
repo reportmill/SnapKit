@@ -55,7 +55,7 @@ public class DirSite extends WebSite {
         // If found, set response code to ok
         aResp.setCode(WebResponse.OK);
         aResp.setDir(dirFile.isDir());
-        aResp.setModTime(dirFile.getModTime());
+        aResp.setLastModTime(dirFile.getLastModTime());
         aResp.setSize(dirFile.getSize());
 
         // If Head, just return
@@ -100,7 +100,7 @@ public class DirSite extends WebSite {
         dirFile.save();
 
         // Update response
-        aResp.setModTime(dirFile.getModTime());
+        aResp.setLastModTime(dirFile.getLastModTime());
     }
 
     /**

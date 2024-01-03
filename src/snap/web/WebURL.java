@@ -333,7 +333,7 @@ public class WebURL {
 
         // Otherwise, return FileHeader.LastModTime
         FileHeader fileHeader = getFileHeader();
-        return fileHeader.getModTime();
+        return fileHeader.getLastModTime();
     }
 
     /**

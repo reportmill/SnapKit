@@ -29,7 +29,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     protected boolean  _dir;
 
     // The file last modified time
-    protected long  _modTime;
+    protected long _lastModTime;
 
     // The file size
     protected long  _size;
@@ -64,7 +64,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     // Constants for properties
     public static final String Bytes_Prop = "Bytes";
     public static final String Size_Prop = "Size";
-    public static final String ModTime_Prop = "ModTime";
+    public static final String LastModTime_Prop = "LastModTime";
     public static final String Modified_Prop = "Modified";
     public static final String Updater_Prop = "Updater";
     public static final String Exists_Prop = "Exists";
@@ -231,21 +231,43 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     }
 
     /**
-     * Returns the file modification time.
+     * Returns the file last modified time.
      */
-    public long getModTime()  { return _modTime; }
+    public long getLastModTime()  { return _lastModTime; }
 
     /**
-     * Sets the file modification time.
+     * Sets the file last modified time.
      */
-    protected void setModTime(long aValue)
+    protected void setLastModTime(long aValue)
     {
         // If already set, just return
-        if (aValue == _modTime) return;
+        if (aValue == _lastModTime) return;
 
         // Set value and fire prop change
-        firePropChange(ModTime_Prop, _modTime, _modTime = aValue);
+        firePropChange(LastModTime_Prop, _lastModTime, _lastModTime = aValue);
     }
+
+    /**
+     * Sets the file modification time in file and in site internal storage.
+     */
+    public void saveLastModTime(long aValue)
+    {
+        // Save LastModTime in site and set in file
+        try {
+            WebSite site = getSite();
+            site.saveLastModTimeForFile(this, aValue);
+            setLastModTime(aValue);
+        }
+        catch (Exception e) { System.err.println("WebFile.setModTimeSaved: " + e); }
+
+        // Set ModTime in file
+        setLastModTime(aValue);
+    }
+
+    /**
+     * Returns the modified date.
+     */
+    public Date getLastModDate()  { return new Date(_lastModTime); }
 
     /**
      * Returns the file size.
@@ -274,7 +296,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         FileContents fileContents = site.getContentsForFile(this);
         if (fileContents != null) {
             setExists(true);
-            _modTime = Math.max(_modTime, fileContents.getModTime());
+            _lastModTime = Math.max(_lastModTime, fileContents.getLastModTime());
             _bytes = fileContents.getBytes();
             _size = _bytes != null ? _bytes.length : 0;
         }
@@ -323,7 +345,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         FileContents fileContents = site.getContentsForFile(this);
         if (fileContents != null) {
             setExists(true);
-            _modTime = Math.max(_modTime, fileContents.getModTime());
+            _lastModTime = Math.max(_lastModTime, fileContents.getLastModTime());
             WebFile[] files = fileContents.getFiles();
             for (WebFile file : files) {
                 file.setParent(this);
@@ -361,7 +383,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     {
         resetContent();
         setExists(null);
-        _modTime = 0;
+        _lastModTime = 0;
         _size = 0;
     }
 
@@ -387,8 +409,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
             return;
         }
 
-        // Cache current ModTime
-        long oldModTime = getModTime();
+        // Cache current LastModTime
+        long oldLastModTime = getLastModTime();
 
         // Reset file
         reset();
@@ -404,9 +426,9 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
 
         // If File and ModTime changed, fire ModTime prop change
         else if (isFile()) {
-            long newModTime = getModTime();
-            if (oldModTime != 0 && oldModTime != newModTime)
-                firePropChange(ModTime_Prop, oldModTime, newModTime);
+            long newLastModTime = getLastModTime();
+            if (oldLastModTime != 0 && oldLastModTime != newLastModTime)
+                firePropChange(LastModTime_Prop, oldLastModTime, newLastModTime);
         }
     }
 
@@ -425,9 +447,9 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     public boolean isModifiedExternally()
     {
         WebURL url = getURL();
-        long modTime = getModTime();
-        long modTimeExternal = url.getLastModTime();
-        return modTime < modTimeExternal;
+        long lastModTime = getLastModTime();
+        long lastModTimeExternal = url.getLastModTime();
+        return lastModTime < lastModTimeExternal;
     }
 
     /**
@@ -515,32 +537,6 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      * Returns the real file.
      */
     public WebFile getRealFile()  { return _linkFile != null ? _linkFile : this; }
-
-    /**
-     * Sets the file modification time in file and in site internal storage.
-     */
-    public void setModTimeSaved(long aValue)
-    {
-        // Set ModTime in site
-        try {
-            WebSite site = getSite();
-            site.setModTimeForFile(this, aValue);
-        }
-        catch (Exception e) { System.err.println("WebFile.setModTimeSaved: " + e); }
-
-        // Set ModTime in file
-        setModTime(aValue);
-    }
-
-    /**
-     * Returns the modified date.
-     */
-    public Date getModDate()  { return new Date(_modTime); }
-
-    /**
-     * Conventional file method that simply wraps getModTime().
-     */
-    public long getLastModTime()  { return _modTime; }
 
     /**
      * An interface for classes that want to post modifications to files.

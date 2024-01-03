@@ -18,14 +18,11 @@ public class WebResponse {
     // The response code
     private int  _code = OK;
     
-    // The response time
-    private long  _time;
-    
     // Whether file is a directory
     private boolean  _dir;
     
-    // The file modified time
-    private long  _modTime;
+    // The file last modified time
+    private long _lastModTime;
     
     // The file size
     private long  _size;
@@ -108,11 +105,6 @@ public class WebResponse {
     public String getCodeString()  { return getCodeString(_code); }
 
     /**
-     * Returns the response time.
-     */
-    public long getTime()  { return _time; }
-
-    /**
      * Returns the path.
      */
     public String getPath()
@@ -174,14 +166,14 @@ public class WebResponse {
     public boolean isFile()  { return !_dir; }
 
     /**
-     * Returns the file modification time.
+     * Returns the file last modified time.
      */
-    public long getModTime()  { return _modTime; }
+    public long getLastModTime()  { return _lastModTime; }
 
     /**
-     * Sets the file modification time.
+     * Sets the file last modified time.
      */
-    public void setModTime(long aTime)  { _modTime = aTime; }
+    public void setLastModTime(long aTime)  { _lastModTime = aTime; }
 
     /**
      * Returns the file size.
@@ -203,7 +195,7 @@ public class WebResponse {
 
         // Create and return
         FileHeader fileHeader = new FileHeader(getPath(), isDir());
-        fileHeader.setModTime(getModTime());
+        fileHeader.setLastModTime(getLastModTime());
         fileHeader.setSize(getSize());
         fileHeader.setMimeType(getMimeType());
         return _fileHeader = fileHeader;
@@ -216,7 +208,7 @@ public class WebResponse {
     {
         _fileHeader = aFHdr;
         _dir = aFHdr.isDir();
-        _modTime = aFHdr.getModTime();
+        _lastModTime = aFHdr.getLastModTime();
         _size = aFHdr.getSize();
         _mimeType = aFHdr.getMimeType();
     }

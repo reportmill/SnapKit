@@ -232,7 +232,7 @@ public class DropBoxSite extends WebSite {
             if (mod != null && mod.endsWith("Z")) {
                 try {
                     Date date = _fmt.parse(mod);
-                    aResp.setModTime(date.getTime());
+                    aResp.setLastModTime(date.getTime());
                     System.out.println("Save ModTime: " + date);
                 }
                 catch (Exception e) { System.err.println(e); }
@@ -365,7 +365,7 @@ public class DropBoxSite extends WebSite {
             if (mod.endsWith("Z")) {
                 try {
                     Date date = _fmt.parse(mod);
-                    fileHeader.setModTime(date.getTime());
+                    fileHeader.setLastModTime(date.getTime());
                 }
                 catch (Exception e) { System.err.println(e); }
             }

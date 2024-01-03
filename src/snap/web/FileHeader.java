@@ -19,7 +19,7 @@ public class FileHeader extends PropObject {
     private boolean  _dir;
     
     // The file modified time
-    private long  _modTime;
+    private long _lastModTime;
     
     // The file size
     private long  _size;
@@ -48,7 +48,7 @@ public class FileHeader extends PropObject {
     {
         _path = aFile.getPath();
         _dir = aFile.isDir();
-        _modTime = aFile.getModTime();
+        _lastModTime = aFile.getLastModTime();
         _size = aFile.getSize();
     }
 
@@ -102,17 +102,17 @@ public class FileHeader extends PropObject {
     public boolean isRoot()  { return getPath().equals("/"); }
 
     /**
-     * Returns the file modification time.
+     * Returns the file last modified time.
      */
-    public long getModTime()  { return _modTime; }
+    public long getLastModTime()  { return _lastModTime; }
 
     /**
-     * Sets the file modification time.
+     * Sets the file last modified time.
      */
-    public void setModTime(long aTime)
+    public void setLastModTime(long aTime)
     {
-        if (aTime == _modTime) return;
-        firePropChange(LastModTime_Prop, _modTime, _modTime = aTime);
+        if (aTime == _lastModTime) return;
+        firePropChange(LastModTime_Prop, _lastModTime, _lastModTime = aTime);
     }
 
     /**
