@@ -31,10 +31,10 @@ public class FileSite extends WebSite {
         String filePath = fileURL.getPath();
         if (filePath == null)
             filePath = "/";
-        File file = getJavaFileForPath(filePath);
 
-        // Handle NOT_FOUND
-        if (!file.exists() || !file.canRead()) {
+        // Get Java file - if file doesn't exist or is not readable, return NOT_FOUND response
+        File javaFile = getJavaFileForPath(filePath);
+        if (!javaFile.exists() || !javaFile.canRead()) {
             aResp.setCode(WebResponse.NOT_FOUND);
             return;
         }
@@ -44,7 +44,7 @@ public class FileSite extends WebSite {
 
         // Configure response info (just return if isHead). Need to pre-create FileHeader to fix capitalization.
         aResp.setCode(WebResponse.OK);
-        FileHeader fileHeader = getFileHeader(filePath, file);
+        FileHeader fileHeader = getFileHeader(filePath, javaFile);
         aResp.setFileHeader(fileHeader);
         if (isHead)
             return;
@@ -52,7 +52,7 @@ public class FileSite extends WebSite {
         // If file, just set bytes
         if (aResp.isFile()) {
             try {
-                byte[] bytes = FileUtils.getBytesOrThrow(file);
+                byte[] bytes = FileUtils.getBytesOrThrow(javaFile);
                 aResp.setBytes(bytes);
             }
             catch(IOException e) { aResp.setException(e); }
@@ -60,59 +60,63 @@ public class FileSite extends WebSite {
 
         // If directory, configure directory info and return
         else {
-            FileHeader[] fileHeaders = getFileHeaders(filePath, file);
+            FileHeader[] fileHeaders = getFileHeaders(filePath, javaFile);
             aResp.setFileHeaders(fileHeaders);
         }
     }
 
     /**
-     * Returns the file header for given path.
+     * Returns the file header for given path and java file.
      */
-    protected FileHeader getFileHeader(String aPath, File aFile)
+    protected FileHeader getFileHeader(String aFilePath, File aJavaFile)
     {
         // Get standard file for path
-        File file = aFile != null ? aFile : getJavaFileForPath(aPath);
+        File javaFile = aJavaFile != null ? aJavaFile : getJavaFileForPath(aFilePath);
 
         // Get real path (fixes capitalization)
-        String path = aPath;
+        String filePath = aFilePath;
         try {
-            String canonicalPath = file.getCanonicalPath();
-            if (!canonicalPath.endsWith(path) && StringUtils.endsWithIC(canonicalPath, path))
-                path = canonicalPath.substring(canonicalPath.length() - path.length());
+            String canonicalPath = javaFile.getCanonicalPath();
+            if (!canonicalPath.endsWith(filePath) && StringUtils.endsWithIC(canonicalPath, filePath))
+                filePath = canonicalPath.substring(canonicalPath.length() - filePath.length());
         }
         catch(Exception e) { System.err.println("FileSite.getFileHeader:" + e); }
 
         // Create and initialize FileHeader and return
-        FileHeader fileHeader = new FileHeader(path, file.isDirectory());
-        fileHeader.setLastModTime(file.lastModified());
-        fileHeader.setSize(file.length());
+        FileHeader fileHeader = new FileHeader(filePath, javaFile.isDirectory());
+        fileHeader.setLastModTime(javaFile.lastModified());
+        fileHeader.setSize(javaFile.length());
+
+        // Return
         return fileHeader;
     }
 
     /**
      * Returns the child file headers at given path.
      */
-    protected FileHeader[] getFileHeaders(String aPath, File aFile)
+    protected FileHeader[] getFileHeaders(String dirFilePath, File aJavaDirFile)
     {
         // Get java file children (if null, just return)
-        File[] dirFiles = aFile.listFiles();
+        File[] dirFiles = aJavaDirFile.listFiles();
         if (dirFiles == null) {
-            System.err.println("FileSite.getFileHeaders: error from list files for file: " + aFile.getPath());
+            System.err.println("FileSite.getFileHeaders: error from list files for file: " + aJavaDirFile.getPath());
             return new FileHeader[0];
         }
 
         // Create return list
         List<FileHeader> fileHeaders = new ArrayList<>(dirFiles.length);
 
-        // Create files from child java files
-        for (File dirFile : dirFiles) {
+        // Create file headers from child java files
+        for (File childFile : dirFiles) {
 
             // Skip funky apple files
-            String fileName = dirFile.getName();
+            String fileName = childFile.getName();
             if (fileName.equalsIgnoreCase(".DS_Store"))
                 continue;
 
-            FileHeader fileHeader = getFileHeader(FilePathUtils.getChild(aPath, fileName), null);
+            // Get child file header and add to list
+            String childFilePath = FilePathUtils.getChild(dirFilePath, fileName);
+            FileHeader fileHeader = getFileHeader(childFilePath, null);
             if (fileHeader != null) // Happens with links
                 fileHeaders.add(fileHeader);
         }
