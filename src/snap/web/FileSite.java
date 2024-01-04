@@ -146,7 +146,7 @@ public class FileSite extends WebSite {
         }
 
         // If directory, create
-        if (javaFile.isDirectory() && !javaFile.exists()) {
+        if (aReq.isFileDir() && !javaFile.exists()) {
             if (!javaFile.mkdir()) {
                 aResp.setException(new RuntimeException("FileSite.doPut: Error creating dir: " + javaFile.getPath()));
                 return;

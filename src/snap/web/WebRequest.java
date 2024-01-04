@@ -83,6 +83,11 @@ public class WebRequest {
     }
 
     /**
+     * Returns whether a request file is directory (only valid if request was created from file).
+     */
+    public boolean isFileDir()  { return _file != null && _file.isDir(); }
+
+    /**
      * Returns the type of request.
      */
     public Type getType()  { return _type; }
