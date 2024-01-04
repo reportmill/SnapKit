@@ -64,6 +64,15 @@ public abstract class Prefs {
     }
 
     /**
+     * Returns a long value for given key.
+     */
+    public long getLong(String aKey, long aDefault)
+    {
+        Object val = getValue(aKey);
+        return val != null ? Convert.longValue(val) : aDefault;
+    }
+
+    /**
      * Returns a float value for given key.
      */
     public double getDouble(String aKey, double aDefault)

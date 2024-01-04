@@ -27,13 +27,12 @@ public class LocalSite extends FileSite {
     public String getURLScheme()  { return "local"; }
 
     /**
-     * Returns the Java file for path.
+     * Override to prepend site path.
      */
     @Override
-    protected File getJavaFileForPath(String aPath)
+    protected String getJavaFilePathForPath(String filePath)
     {
-        String filePath = getPathInFileSystem() + aPath;
-        return new File(filePath);
+        return getPathInFileSystem() + filePath;
     }
 
     /**
