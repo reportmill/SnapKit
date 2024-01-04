@@ -37,6 +37,7 @@ public class DirSite extends WebSite {
     /**
      * Handles a get or head request.
      */
+    @Override
     protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
     {
         // Get request file path
@@ -75,16 +76,9 @@ public class DirSite extends WebSite {
     }
 
     /**
-     * Handle POST request.
-     */
-    protected void doPost(WebRequest aReq, WebResponse aResp)
-    {
-        doPut(aReq, aResp);
-    }
-
-    /**
      * Handle PUT request.
      */
+    @Override
     protected void doPut(WebRequest aReq, WebResponse aResp)
     {
         // Get file we're trying to save
@@ -105,6 +99,7 @@ public class DirSite extends WebSite {
     /**
      * Handle DELETE request.
      */
+    @Override
     protected void doDelete(WebRequest aReq, WebResponse aResp)
     {
         // Get request file path
@@ -122,6 +117,7 @@ public class DirSite extends WebSite {
     /**
      * Override to get Java file from dir file.
      */
+    @Override
     protected File getJavaFileForUrl(WebURL aURL)
     {
         String filePath = aURL.getPath();

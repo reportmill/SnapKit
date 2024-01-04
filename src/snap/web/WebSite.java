@@ -386,7 +386,7 @@ public abstract class WebSite {
      */
     protected void doPost(WebRequest aReq, WebResponse aResp)
     {
-        System.err.println(getClass().getSimpleName() + ".doPost: Not supported (" + aReq.getURL().getSite() + ')');
+        doPut(aReq, aResp);
     }
 
     /**

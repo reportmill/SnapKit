@@ -127,12 +127,6 @@ public class FileSite extends WebSite {
     }
 
     /**
-     * Handle a POST request.
-     */
-    @Override
-    protected void doPost(WebRequest aReq, WebResponse aResp)  { doPut(aReq, aResp); }
-
-    /**
      * Handle a PUT request.
      */
     @Override

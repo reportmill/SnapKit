@@ -64,22 +64,6 @@ public class RecentFilesSite extends WebSite {
     }
 
     /**
-     * Override to suppress, since RecentFiles are really virtual files.
-     */
-    protected void doPost(WebRequest aReq, WebResponse aResp)  { }
-
-    /**
-     * Override to suppress, since RecentFiles are really virtual files.
-     */
-    @Override
-    protected void doPut(WebRequest aReq, WebResponse aResp)  { }
-
-    /**
-     * Override to suppress, since RecentFiles are really virtual files.
-     */
-    protected void doDelete(WebRequest aReq, WebResponse aResp)  { }
-
-    /**
      * Returns the recent files site for id.
      */
     public static RecentFilesSite getShared()

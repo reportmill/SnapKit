@@ -12,8 +12,17 @@ import snap.util.*;
 public class HTTPSite extends WebSite {
 
     /**
+     * Constructor.
+     */
+    public HTTPSite()
+    {
+        super();
+    }
+
+    /**
      * Handle a get or head request.
      */
+    @Override
     protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
     {
         // Create HTTPRequest for java.net.URL
@@ -147,11 +156,7 @@ public class HTTPSite extends WebSite {
     /**
      * Handle a POST request.
      */
-    protected void doPost(WebRequest aReq, WebResponse aResp)  { doPut(aReq, aResp); }
-
-    /**
-     * Handle a POST request.
-     */
+    @Override
     protected void doPut(WebRequest aReq, WebResponse aResp)
     {
         // Create/configure HTTP request
@@ -175,6 +180,7 @@ public class HTTPSite extends WebSite {
     /**
      * Override to return standard file for cache file.
      */
+    @Override
     protected File getJavaFileForUrl(WebURL aURL)
     {
         WebFile file = aURL.getFile();
@@ -185,6 +191,7 @@ public class HTTPSite extends WebSite {
     /**
      * Returns a local file for given file (with option to cache for future use).
      */
+    @Override
     public WebFile getLocalFile(WebFile aFile, boolean doCache)
     {
         WebFile cacheFile = getCacheFile(aFile.getPath());
