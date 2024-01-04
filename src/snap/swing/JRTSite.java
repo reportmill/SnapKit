@@ -58,11 +58,11 @@ public class JRTSite extends WebSite {
     @Override
     protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
     {
-        WebURL url = aReq.getURL();
-        String urlPath = url.getPath();
+        // Get request file path
+        String filePath = aReq.getFilePath();
 
         // Handle NOT_FOUND
-        Path modulePath = getModulePathForUrlPath(urlPath);
+        Path modulePath = getModulePathForUrlPath(filePath);
         if (!Files.exists(modulePath) || !Files.isReadable(modulePath)) {
             aResp.setCode(WebResponse.NOT_FOUND);
             return;
@@ -71,7 +71,7 @@ public class JRTSite extends WebSite {
         // Configure response info (just return if isHead). Need to pre-create FileHeader to fix capitalization.
         aResp.setCode(WebResponse.OK);
         boolean isDir = Files.isDirectory(modulePath);
-        FileHeader fileHeader = new FileHeader(urlPath, isDir);
+        FileHeader fileHeader = new FileHeader(filePath, isDir);
         aResp.setFileHeader(fileHeader);
         if (isHead)
             return;
@@ -87,7 +87,7 @@ public class JRTSite extends WebSite {
 
         // Handle Get directory: configure directory info and return
         else {
-            List<FileHeader> fileHeaders = getFileHeadersForUrlPath(urlPath);
+            List<FileHeader> fileHeaders = getFileHeadersForUrlPath(filePath);
             aResp.setFileHeaders(fileHeaders);
         }
     }

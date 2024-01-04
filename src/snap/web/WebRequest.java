@@ -70,6 +70,19 @@ public class WebRequest {
     }
 
     /**
+     * Returns the file path of request URL.
+     */
+    public String getFilePath()
+    {
+        if (_file != null)
+            return _file.getPath();
+        String urlPath = _url.getPath();
+        if (urlPath == null)
+            urlPath = "/";
+        return urlPath;
+    }
+
+    /**
      * Returns the type of request.
      */
     public Type getType()  { return _type; }

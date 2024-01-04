@@ -39,9 +39,8 @@ public class DirSite extends WebSite {
      */
     protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
     {
-        // Get URL and path
-        WebURL fileURL = aReq.getURL();
-        String filePath = fileURL.getPath();
+        // Get request file path
+        String filePath = aReq.getFilePath();
 
         // Get WebFile from Dir site
         WebFile dirFile = getDirFileForPath(filePath);
@@ -108,9 +107,8 @@ public class DirSite extends WebSite {
      */
     protected void doDelete(WebRequest aReq, WebResponse aResp)
     {
-        // Get file we're trying to save
-        WebURL fileURL = aReq.getURL();
-        String filePath = fileURL.getPath();
+        // Get request file path
+        String filePath = aReq.getFilePath();
 
         // Do Delete
         WebFile dirFile = getDirFileForPath(filePath);

@@ -418,8 +418,7 @@ public abstract class WebSite {
     protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
     {
         // Get file for Request.URL.Path
-        WebURL fileURL = aReq.getURL();
-        String filePath = fileURL.getPath();
+        String filePath = aReq.getFilePath();
         WebFile file = getFileForPathImpl(filePath);
 
         // If not found, return not found

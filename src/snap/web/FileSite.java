@@ -33,11 +33,8 @@ public class FileSite extends WebSite {
     @Override
     protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
     {
-        // Get URL, path and file
-        WebURL fileURL = aReq.getURL();
-        String filePath = fileURL.getPath();
-        if (filePath == null)
-            filePath = "/";
+        // Get request file path
+        String filePath = aReq.getFilePath();
 
         // Get Java file - if file doesn't exist or is not readable, return NOT_FOUND response
         File javaFile = getJavaFileForPath(filePath);
@@ -46,12 +43,9 @@ public class FileSite extends WebSite {
             return;
         }
 
-        // Handle UNAUTHORIZED
-        //if(!file.canRead()) { resp.setCode(WebResponse.UNAUTHORIZED); return resp; }
-
         // Configure response info (just return if isHead). Need to pre-create FileHeader to fix capitalization.
         aResp.setCode(WebResponse.OK);
-        FileHeader fileHeader = getFileHeader(filePath, javaFile);
+        FileHeader fileHeader = getFileHeaderForJavaFile(javaFile);
         aResp.setFileHeader(fileHeader);
         if (isHead)
             return;
@@ -67,7 +61,7 @@ public class FileSite extends WebSite {
 
         // If directory, configure directory info and return
         else {
-            FileHeader[] fileHeaders = getFileHeaders(filePath, javaFile);
+            FileHeader[] fileHeaders = getFileHeadersForJavaFile(javaFile);
             aResp.setFileHeaders(fileHeaders);
         }
     }
@@ -75,19 +69,14 @@ public class FileSite extends WebSite {
     /**
      * Returns the file header for given path and java file.
      */
-    protected FileHeader getFileHeader(String aFilePath, File aJavaFile)
+    protected FileHeader getFileHeaderForJavaFile(File javaFile)
     {
-        // Get standard file for path
-        File javaFile = aJavaFile != null ? aJavaFile : getJavaFileForPath(aFilePath);
+        // If file doesn't exist or is not readable, return null
+        if (!javaFile.exists() || !javaFile.canRead())
+            return null;
 
         // Get real path (fixes capitalization)
-        String filePath = aFilePath;
-        try {
-            String canonicalPath = javaFile.getCanonicalPath();
-            if (!canonicalPath.endsWith(filePath) && StringUtils.endsWithIC(canonicalPath, filePath))
-                filePath = canonicalPath.substring(canonicalPath.length() - filePath.length());
-        }
-        catch(Exception e) { System.err.println("FileSite.getFileHeader:" + e); }
+        String filePath = getPathForJavaFile(javaFile);
 
         // Create and initialize FileHeader and return
         FileHeader fileHeader = new FileHeader(filePath, javaFile.isDirectory());
@@ -107,12 +96,12 @@ public class FileSite extends WebSite {
     /**
      * Returns the child file headers at given path.
      */
-    protected FileHeader[] getFileHeaders(String dirFilePath, File aJavaDirFile)
+    protected FileHeader[] getFileHeadersForJavaFile(File parentFile)
     {
         // Get java file children (if null, just return)
-        File[] dirFiles = aJavaDirFile.listFiles();
+        File[] dirFiles = parentFile.listFiles();
         if (dirFiles == null) {
-            System.err.println("FileSite.getFileHeaders: error from list files for file: " + aJavaDirFile.getPath());
+            System.err.println("FileSite.getFileHeaders: error from list files for file: " + parentFile.getPath());
             return new FileHeader[0];
         }
 
@@ -128,8 +117,7 @@ public class FileSite extends WebSite {
                 continue;
 
             // Get child file header and add to list
-            String childFilePath = FilePathUtils.getChild(dirFilePath, fileName);
-            FileHeader fileHeader = getFileHeader(childFilePath, null);
+            FileHeader fileHeader = getFileHeaderForJavaFile(childFile);
             if (fileHeader != null) // Happens with links
                 fileHeaders.add(fileHeader);
         }
@@ -150,10 +138,8 @@ public class FileSite extends WebSite {
     @Override
     protected void doPut(WebRequest aReq, WebResponse aResp)
     {
-        // Get standard file
-        WebURL fileURL = aReq.getURL();
-        String filePath = fileURL.getPath();
-        WebFile snapFile = aReq.getFile();
+        // Get java file
+        String filePath = aReq.getFilePath();
         File javaFile = getJavaFileForPath(filePath);
 
         // Make sure parent directories exist
@@ -166,7 +152,7 @@ public class FileSite extends WebSite {
         }
 
         // If directory, create
-        if (snapFile != null && snapFile.isDir() && !javaFile.exists()) {
+        if (javaFile.isDirectory() && !javaFile.exists()) {
             if (!javaFile.mkdir()) {
                 aResp.setException(new RuntimeException("FileSite.doPut: Error creating dir: " + javaFile.getPath()));
                 return;
@@ -197,9 +183,8 @@ public class FileSite extends WebSite {
     @Override
     protected void doDelete(WebRequest aReq, WebResponse aResp)
     {
-        // Get standard file
-        WebURL fileURL = aReq.getURL();
-        String filePath = fileURL.getPath();
+        // Get java file
+        String filePath = aReq.getFilePath();
         File javaFile = getJavaFileForPath(filePath);
 
         // Do delete
@@ -222,9 +207,10 @@ public class FileSite extends WebSite {
             return;
         }
 
-        File file = aFile.getJavaFile();
-        if (!file.setLastModified(aTime))
-            System.err.println("FileSite.setModTimeForFile: Error setting mod time for file: " + file.getPath());
+        // Get java file and set last modified time
+        File javaFile = aFile.getJavaFile();
+        if (!javaFile.setLastModified(aTime))
+            System.err.println("FileSite.setModTimeForFile: Error setting mod time for file: " + javaFile.getPath());
     }
 
     /**
@@ -247,6 +233,28 @@ public class FileSite extends WebSite {
     }
 
     /**
+     * Returns the Java file for given path.
+     */
+    protected String getPathForJavaFile(File javaFile)
+    {
+        String filePath = javaFile.getPath();
+
+        // Try CanonicalPath (fixes capitalization)
+        try {
+            String canonicalPath = javaFile.getCanonicalPath();
+            if (!canonicalPath.endsWith(filePath) && StringUtils.endsWithIC(canonicalPath, filePath))
+                filePath = canonicalPath.substring(canonicalPath.length() - filePath.length());
+        }
+        catch(Exception e) { System.err.println("FileSite.getPathForJavaFile:" + e); }
+
+        // Get standardized path
+        String filePathStd = PathUtils.getNormalized(filePath);
+
+        // Return
+        return filePathStd;
+    }
+
+    /**
      * Returns the java file path for given site file path.
      */
     protected String getJavaFilePathForPath(String filePath)
@@ -264,7 +272,7 @@ public class FileSite extends WebSite {
     {
         filePath = getJavaFilePathForPath(filePath);
         long lastModTime = _lastModTimesPrefsNode.getLong(filePath, 0);
-        System.out.println("GetLastModTime: " + filePath + " = " + lastModTime);
+        //System.out.println("GetLastModTime: " + filePath + " = " + lastModTime);
         return lastModTime;
     }
 
@@ -277,6 +285,6 @@ public class FileSite extends WebSite {
         if (aValue == 0)
             _lastModTimesPrefsNode.remove(filePath);
         else _lastModTimesPrefsNode.setValue(filePath, aValue);
-        System.out.println("SetLastModTime: " + filePath + " = " + aValue);
+        //System.out.println("SetLastModTime: " + filePath + " = " + aValue);
     }
 }
