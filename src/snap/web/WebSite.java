@@ -5,7 +5,6 @@ package snap.web;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
-import snap.util.ArrayUtils;
 import snap.util.FileUtils;
 import snap.util.SnapUtils;
 import java.io.File;
@@ -248,48 +247,6 @@ public abstract class WebSite {
 
         // Return
         return file;
-    }
-
-    /**
-     * Returns the contents for given file.
-     */
-    protected FileContents getFileContents(WebFile aFile)
-    {
-        // Get request/response for file URL
-        WebURL url = aFile.getURL();
-        WebResponse resp = url.getResponse();
-        int respCode = resp.getCode();
-        long lastModTime = resp.getLastModTime();
-
-        // Handle response
-        if (respCode != WebResponse.OK) {
-            if (resp.getException() != null)
-                throw new ResponseException(resp);
-            System.err.println("WebSite.getContentsForFile: Response error: " + resp.getCodeString() + " (" + url.getString() + ')');
-            if (aFile.isDir())
-                return new FileContents(new WebFile[0], 0);
-            return null;
-        }
-
-        // Handle plain file
-        if (aFile.isFile()) {
-            byte[] bytes = resp.getBytes();
-            return new FileContents(bytes, lastModTime);
-        }
-
-        // Get file headers
-        FileHeader[] fileHeaders = resp.getFileHeaders();
-        if (fileHeaders == null)
-            return new FileContents(new WebFile[0], 0);
-
-        // Get files
-        WebFile[] files = ArrayUtils.map(fileHeaders, fhdr -> createFile(fhdr), WebFile.class);
-
-        // Sort files
-        Arrays.sort(files);
-
-        // Return
-        return new FileContents(files, lastModTime);
     }
 
     /**

@@ -291,15 +291,24 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         // If already set, just return
         if (_bytes != null) return _bytes;
 
-        // Get content bytes from site
-        WebSite site = getSite();
-        FileContents fileContents = site.getFileContents(this);
-        if (fileContents != null) {
-            setExists(true);
-            _lastModTime = Math.max(_lastModTime, fileContents.getLastModTime());
-            _bytes = fileContents.getBytes();
-            _size = _bytes != null ? _bytes.length : 0;
+        // Get URL response
+        WebURL url = getURL();
+        WebResponse resp = url.getResponse();
+
+        // Handle error response
+        int respCode = resp.getCode();
+        if (respCode != WebResponse.OK) {
+            if (resp.getException() != null)
+                throw new ResponseException(resp);
+            System.err.println("WebSite.getBytes: Response error: " + resp.getCodeString() + " (" + getUrlString() + ')');
+            return null;
         }
+
+        // Configure
+        setExists(true);
+        _lastModTime = Math.max(_lastModTime, resp.getLastModTime());
+        _bytes = resp.getBytes();
+        _size = _bytes != null ? _bytes.length : 0;
 
         // Return
         return _bytes;
@@ -340,22 +349,35 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         // If already set, just return
         if (_files != null) return _files;
 
-        // Get content files from site
-        WebSite site = getSite();
-        FileContents fileContents = site.getFileContents(this);
-        if (fileContents != null) {
-            setExists(true);
-            _lastModTime = Math.max(_lastModTime, fileContents.getLastModTime());
-            WebFile[] files = fileContents.getFiles();
-            for (WebFile file : files) {
-                file.setParent(this);
-                file.setExists(true);
-            }
-            _files = files;
+        // Get URL response
+        WebURL url = getURL();
+        WebResponse resp = url.getResponse();
+
+        // Handle error response
+        int respCode = resp.getCode();
+        if (respCode != WebResponse.OK) {
+            if (resp.getException() != null)
+                throw new ResponseException(resp);
+            System.err.println("WebSite.getFiles: Response error: " + resp.getCodeString() + " (" + getUrlString() + ')');
+            return _files = new WebFile[0];
         }
 
+        // Get content files from site
+        setExists(true);
+        _lastModTime = Math.max(_lastModTime, resp.getLastModTime());
+
+        // Get file headers
+        FileHeader[] fileHeaders = resp.getFileHeaders();
+        if (fileHeaders == null)
+            fileHeaders = new FileHeader[0];
+
+        // Get files sorted
+        WebSite site = getSite();
+        WebFile[] files = ArrayUtils.map(fileHeaders, fhdr -> site.createFile(fhdr), WebFile.class);
+        Arrays.sort(files);
+
         // Return
-        return _files;
+        return _files = files;
     }
 
     /**
