@@ -239,6 +239,13 @@ public abstract class WebSite {
         file._size = fileHeader.getSize();
         file.setMimeType(fileHeader.getMimeType());
 
+        // Set link
+        WebURL linkUrl = fileHeader.getLinkUrl();
+        if (linkUrl != null) {
+            WebFile linkFile = linkUrl.getFile();
+            file.setLinkFile(linkFile);
+        }
+
         // Return
         return file;
     }

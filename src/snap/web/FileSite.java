@@ -37,7 +37,7 @@ public class FileSite extends WebSite {
         String filePath = aReq.getFilePath();
 
         // Get Java file - if file doesn't exist or is not readable, return NOT_FOUND response
-        File javaFile = getJavaFileForPath(filePath);
+        File javaFile = getJavaFileForLocalPath(filePath);
         if (!javaFile.exists() || !javaFile.canRead()) {
             aResp.setCode(WebResponse.NOT_FOUND);
             return;
@@ -75,8 +75,8 @@ public class FileSite extends WebSite {
         if (!javaFile.exists() || !javaFile.canRead())
             return null;
 
-        // Get real path (fixes capitalization)
-        String filePath = getPathForJavaFile(javaFile);
+        // Get file path
+        String filePath = getLocalPathForJavaFile(javaFile);
 
         // Create and initialize FileHeader and return
         FileHeader fileHeader = new FileHeader(filePath, javaFile.isDirectory());
@@ -85,7 +85,7 @@ public class FileSite extends WebSite {
 
         // If WebVM, get LastModTime from cache
         if (SnapUtils.isWebVM) {
-            long lastModTime = getLastModTimeCached(filePath);
+            long lastModTime = getLastModTimeCached(javaFile);
             fileHeader.setLastModTime(lastModTime);
         }
 
@@ -140,7 +140,7 @@ public class FileSite extends WebSite {
     {
         // Get java file
         String filePath = aReq.getFilePath();
-        File javaFile = getJavaFileForPath(filePath);
+        File javaFile = getJavaFileForLocalPath(filePath);
 
         // Make sure parent directories exist
         File fileDir = javaFile.getParentFile();
@@ -172,7 +172,7 @@ public class FileSite extends WebSite {
         long lastModTime = javaFile.lastModified();
         if (SnapUtils.isWebVM) {
             lastModTime = System.currentTimeMillis();
-            setLastModTimeCached(filePath, lastModTime);
+            setLastModTimeCached(javaFile, lastModTime);
         }
         aResp.setLastModTime(lastModTime);
     }
@@ -185,14 +185,14 @@ public class FileSite extends WebSite {
     {
         // Get java file
         String filePath = aReq.getFilePath();
-        File javaFile = getJavaFileForPath(filePath);
+        File javaFile = getJavaFileForLocalPath(filePath);
 
         // Do delete
         FileUtils.deleteDeep(javaFile);
 
         // Remove cached LastModTime
         if (SnapUtils.isWebVM)
-            setLastModTimeCached(filePath, 0);
+            setLastModTimeCached(javaFile, 0);
     }
 
     /**
@@ -201,16 +201,16 @@ public class FileSite extends WebSite {
     @Override
     protected void saveLastModTimeForFile(WebFile aFile, long aTime)
     {
-        // Hack support to save last mod times
-        if (SnapUtils.isWebVM) {
-            setLastModTimeCached(aFile.getPath(), aTime);
-            return;
-        }
-
         // Get java file and set last modified time
         File javaFile = aFile.getJavaFile();
-        if (!javaFile.setLastModified(aTime))
-            System.err.println("FileSite.setModTimeForFile: Error setting mod time for file: " + javaFile.getPath());
+        if (!javaFile.setLastModified(aTime)) {
+            if (!SnapUtils.isWebVM)
+                System.err.println("FileSite.setModTimeForFile: Error setting mod time for file: " + javaFile.getPath());
+        }
+
+        // Hack support to save last mod times
+        if (SnapUtils.isWebVM)
+            setLastModTimeCached(javaFile, aTime);
     }
 
     /**
@@ -220,22 +220,49 @@ public class FileSite extends WebSite {
     protected File getJavaFileForUrl(WebURL aURL)
     {
         String filePath = aURL.getPath();
-        return getJavaFileForPath(filePath);
+        return getJavaFileForLocalPath(filePath);
     }
 
     /**
-     * Returns the Java file for given path.
+     * Returns the Java file for given local file path.
      */
-    protected File getJavaFileForPath(String filePath)
+    protected File getJavaFileForLocalPath(String filePath)
     {
         String javaFilePath = getJavaFilePathForPath(filePath);
         return new File(javaFilePath);
     }
 
     /**
-     * Returns the Java file for given path.
+     * Returns the local file path for given java file.
      */
-    protected String getPathForJavaFile(File javaFile)
+    protected String getLocalPathForJavaFile(File javaFile)
+    {
+        String filePath = getPathForJavaFile(javaFile);
+        String sitePath = getPath();
+        if (sitePath == null || sitePath.length() == 0 || sitePath.equals("/"))
+            return filePath;
+
+        // Trim prefix
+        int sitePathLength = sitePath.length();
+        if (sitePath.endsWith("/")) sitePathLength--;
+        return filePath.substring(sitePathLength);
+    }
+
+    /**
+     * Returns the java file path for given site file path.
+     */
+    protected String getJavaFilePathForPath(String filePath)
+    {
+        String sitePath = getPath();
+        if (sitePath == null)
+            return filePath;
+        return sitePath + filePath;
+    }
+
+    /**
+     * Returns the file path for given java file.
+     */
+    private static String getPathForJavaFile(File javaFile)
     {
         String filePath = javaFile.getPath();
 
@@ -255,22 +282,11 @@ public class FileSite extends WebSite {
     }
 
     /**
-     * Returns the java file path for given site file path.
-     */
-    protected String getJavaFilePathForPath(String filePath)
-    {
-        String sitePath = getPath();
-        if (sitePath == null)
-            return filePath;
-        return sitePath + filePath;
-    }
-
-    /**
      * Hack for get/set last mod time in cheerpJ.
      */
-    private long getLastModTimeCached(String filePath)
+    private static long getLastModTimeCached(File javaFile)
     {
-        filePath = getJavaFilePathForPath(filePath);
+        String filePath = javaFile.getPath();
         long lastModTime = _lastModTimesPrefsNode.getLong(filePath, 0);
         //System.out.println("GetLastModTime: " + filePath + " = " + lastModTime);
         return lastModTime;
@@ -279,9 +295,9 @@ public class FileSite extends WebSite {
     /**
      * Hack for get/set last mod time in cheerpJ.
      */
-    private void setLastModTimeCached(String filePath, long aValue)
+    private static void setLastModTimeCached(File javaFile, long aValue)
     {
-        filePath = getJavaFilePathForPath(filePath);
+        String filePath = javaFile.getPath();
         if (aValue == 0)
             _lastModTimesPrefsNode.remove(filePath);
         else _lastModTimesPrefsNode.setValue(filePath, aValue);

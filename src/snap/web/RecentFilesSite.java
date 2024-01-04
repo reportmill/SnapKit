@@ -2,8 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
-import snap.util.ArrayUtils;
-import java.io.File;
 
 /**
  * This WebSite manages recent files.
@@ -31,57 +29,38 @@ public class RecentFilesSite extends WebSite {
     }
 
     /**
-     * Override to create RootDir file.
+     * Handles a get or head request.
      */
     @Override
-    protected WebFile getFileForPathImpl(String filePath) throws ResponseException
+    protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
     {
-        // Handle RootDir
-        if (filePath.equals("/"))
-            return createFileForPath("/", true);
+        // Get file path - if not root dir, complain
+        String filePath = aReq.getFilePath();
+        if (!filePath.equals("/"))
+            throw new RuntimeException("RecentFilesSite: doGetOrHead: Requesting file for illegal path: " + filePath);
 
-        // Handle any other path: Return first (any) RootDir file with matching name
-        WebFile rootDir = getRootDir();
-        WebFile[] rootDirFiles = rootDir.getFiles();
-        WebFile rootDirFile = ArrayUtils.findMatch(rootDirFiles, file -> file.getPath().equals(filePath));
-        if (rootDirFile != null)
-            return rootDirFile;
+        // Create file header and set in response
+        FileHeader fileHeader = new FileHeader("/", true);
+        aResp.setFileHeader(fileHeader);
 
-        // This should never happen
-        System.err.println("RecentFilesSite.getFileForPathImpl: Can't find file for path: " + filePath);
-        return null;
-    }
+        // If Head, just return
+        if (isHead)
+            return;
 
-    /**
-     * Override to provide root dir files.
-     */
-    @Override
-    protected FileContents getContentsForFile(WebFile aFile)
-    {
-        String filePath = aFile.getPath();
+        // Get recent files
+        WebFile[] recentFiles = RecentFiles.getFiles();
+        FileHeader[] fileHeaders = new FileHeader[recentFiles.length];
 
-        // Handle RootDir
-        if (filePath.equals("/")) {
-
-            // Get recent file
-            WebFile[] recentFiles = RecentFiles.getFiles();
-            WebFile[] rootDirFiles = new WebFile[recentFiles.length];
-
-            // Iterate over rootDir files and recent files and set each as link
-            for (int i = 0; i < recentFiles.length; i++) {
-                WebFile recentFile = recentFiles[i];
-                String rootDirPath = "/RecentFile-" + i + "-" + recentFile.getName();
-                WebFile rootDirFile = rootDirFiles[i] = createFileForPath(rootDirPath, false);
-                rootDirFile.setLinkFile(recentFile);
-            }
-
-            // Return
-            return new FileContents(rootDirFiles, 0);
+        // Iterate over rootDir files and recent files and set each as link
+        for (int i = 0; i < recentFiles.length; i++) {
+            WebURL recentFileURL = recentFiles[i].getURL();
+            String recentFilePath = "/RecentFile-" + i + "-" + recentFileURL.getFilename();
+            FileHeader fileHdr = fileHeaders[i] = new FileHeader(recentFilePath, false);
+            fileHdr.setLinkUrl(recentFileURL);
         }
 
-        // Should never happen
-        System.err.println("RecentFilesSite.getContentsForFile: Shouldn't need contents for file: " + aFile.getPath());
-        return null;
+        // Set FileHeaders
+        aResp.setFileHeaders(fileHeaders);
     }
 
     /**
@@ -99,19 +78,6 @@ public class RecentFilesSite extends WebSite {
      * Override to suppress, since RecentFiles are really virtual files.
      */
     protected void doDelete(WebRequest aReq, WebResponse aResp)  { }
-
-    /**
-     * Override to get Java file from dir file.
-     */
-    @Override
-    protected File getJavaFileForUrl(WebURL aURL)
-    {
-        WebFile file = aURL.getFile();
-        WebFile realFile = file.getRealFile();
-        if (realFile != file)
-            return realFile.getJavaFile();
-        return null;
-    }
 
     /**
      * Returns the recent files site for id.

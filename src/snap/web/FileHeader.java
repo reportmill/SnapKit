@@ -26,6 +26,9 @@ public class FileHeader extends PropObject {
     
     // The MIME type
     private String  _mimeType;
+
+    // The link url
+    private WebURL _linkUrl;
     
     // Constants for properties
     final public static String LastModTime_Prop = "LastModTime";
@@ -146,6 +149,16 @@ public class FileHeader extends PropObject {
         if (Objects.equals(aMIMEType, _mimeType)) return;
         firePropChange(MIMEType_Prop, _mimeType, _mimeType = aMIMEType);
     }
+
+    /**
+     * Returns the link URL.
+     */
+    public WebURL getLinkUrl()  { return _linkUrl; }
+
+    /**
+     * Sets the link URL.
+     */
+    public void setLinkUrl(WebURL aURL)  { _linkUrl = aURL; }
 
     /**
      * Returns a string representation of file.
