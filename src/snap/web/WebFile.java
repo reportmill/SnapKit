@@ -293,7 +293,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
 
         // Get content bytes from site
         WebSite site = getSite();
-        FileContents fileContents = site.getContentsForFile(this);
+        FileContents fileContents = site.getFileContents(this);
         if (fileContents != null) {
             setExists(true);
             _lastModTime = Math.max(_lastModTime, fileContents.getLastModTime());
@@ -342,7 +342,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
 
         // Get content files from site
         WebSite site = getSite();
-        FileContents fileContents = site.getContentsForFile(this);
+        FileContents fileContents = site.getFileContents(this);
         if (fileContents != null) {
             setExists(true);
             _lastModTime = Math.max(_lastModTime, fileContents.getLastModTime());

@@ -253,7 +253,7 @@ public abstract class WebSite {
     /**
      * Returns the contents for given file.
      */
-    protected FileContents getContentsForFile(WebFile aFile)
+    protected FileContents getFileContents(WebFile aFile)
     {
         // Get request/response for file URL
         WebURL url = aFile.getURL();
@@ -422,39 +422,7 @@ public abstract class WebSite {
     /**
      * Handles a get or head request.
      */
-    protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
-    {
-        // Get file for Request.URL.Path
-        String filePath = aReq.getFilePath();
-        WebFile file = getFileForPathImpl(filePath);
-
-        // If not found, return not found
-        if (file == null) {
-            aResp.setCode(WebResponse.NOT_FOUND);
-            return;
-        }
-
-        // Create FileHeader for file and set in Response
-        FileHeader fileHeader = new FileHeader(file);
-        aResp.setFileHeader(fileHeader);
-
-        // If Head, just return
-        if (isHead)
-            return;
-
-        // Handle plain file contents
-        if (file.isFile()) {
-            byte[] bytes = file.getBytes();
-            aResp.setBytes(bytes);
-        }
-
-        // Handle directory file contents
-        else {
-            WebFile[] dirFiles = file.getFiles();
-            FileHeader[] fileHeaders = ArrayUtils.map(dirFiles, dirFile -> new FileHeader(dirFile), FileHeader.class);
-            aResp.setFileHeaders(fileHeaders);
-        }
-    }
+    protected abstract void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead);
 
     /**
      * Handle a get request.
