@@ -169,7 +169,7 @@ public class DropBoxSite extends WebSite {
         }
 
         // Set FileHeaders
-        aResp.setFileHeaders(fileHeaders);
+        aResp.setFileHeaders(fileHeaders.toArray(new FileHeader[0]));
     }
 
     /**

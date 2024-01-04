@@ -227,15 +227,6 @@ public class WebResponse {
     }
 
     /**
-     * Sets the files (for directory request).
-     */
-    @Deprecated
-    public void setFileHeaders(List<FileHeader> theFile)
-    {
-        _fileHeaders = theFile.toArray(new FileHeader[0]);
-    }
-
-    /**
      * Returns the bytes.
      */
     public byte[] getBytes()  { return _bytes; }
