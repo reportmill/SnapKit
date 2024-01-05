@@ -88,7 +88,7 @@ public class RecentFilesSitePane extends WebSitePane {
         // Get RootDir and reset files to make sure we have latest RecentFiles
         WebSite recentFilesSite = getSite();
         WebFile rootDir = recentFilesSite.getRootDir();
-        rootDir.resetContent();
+        rootDir.reset();
 
         // Get valid files
         WebFile[] recentFiles = rootDir.getFiles();

@@ -160,7 +160,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         // Get path, site, URL and return
         WebSite site = getSite();
         String filePath = getPath();
-        return _url = site.getURL(filePath);
+        return _url = site.getUrlForPath(filePath);
     }
 
     /**
@@ -216,17 +216,17 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     /**
      * Sets whether file is known to exist at site.
      */
-    protected void setExists(Boolean aValue)
+    protected void setExists(boolean aValue)
     {
         // If already set, just return
-        if (aValue == _exists) return;
+        if (_exists != null && aValue == _exists) return;
 
         // Set value
         Boolean oldExists = _exists;
         _exists = aValue;
 
         // Fire prop change if changing real value
-        if (oldExists != null && _exists != null)
+        if (oldExists != null)
             firePropChange(Exists_Prop, oldExists, _exists);
     }
 
@@ -403,33 +403,26 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public void reset()
     {
-        resetContent();
-        setExists(null);
-        _lastModTime = 0;
-        _size = 0;
-    }
-
-    /**
-     * Resets the file to unloaded state so files/bytes are cleared (to reload when next called).
-     */
-    public void resetContent()
-    {
         _bytes = null;
         _files = null;
         _updater = null;
+        _exists = null;
+        _lastModTime = 0;
+        _size = 0;
         setModified(false);
+
+        // Notify site
+        _site.fileDidReset(this);
     }
 
     /**
-     * Resets a file with check to have parent resetContent() if file is deleted.
+     * Resets a file with check to make sure Exists and LastModTime properties are updated (and prop changes fired) if appropriate.
      */
-    public void reload()
+    public void resetAndVerify()
     {
-        // If file hasn't really been loaded, just reset content and return
-        if (!isVerified()) {
-            resetContent();
+        // If file hasn't really been loaded, just return
+        if (!isVerified() || !getExists())
             return;
-        }
 
         // Cache current LastModTime
         long oldLastModTime = getLastModTime();
@@ -437,19 +430,18 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         // Reset file
         reset();
 
-        // If file was deleted, reset parent content and fire Saved prop change
-        boolean isDeleted = !getExists();
-        if (isDeleted) {
+        // If file was deleted, reset parent and fire Exists prop change
+        if (!getExists()) {
             WebFile parent = getParent();
             if (parent != null)
-                parent.resetContent();
-            setExists(false);
+                parent.resetAndVerify();
+            firePropChange(Exists_Prop, true, false);
         }
 
-        // If File and ModTime changed, fire ModTime prop change
-        else if (isFile()) {
+        // If LastModTime changed, fire LastModTime prop change
+        else {
             long newLastModTime = getLastModTime();
-            if (oldLastModTime != 0 && oldLastModTime != newLastModTime)
+            if (oldLastModTime != newLastModTime)
                 firePropChange(LastModTime_Prop, oldLastModTime, newLastModTime);
         }
     }
@@ -643,7 +635,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
 
         // If root path, eval with site
         if (aPath.startsWith("/"))
-            return getSite().getURL(aPath);
+            return getSite().getUrlForPath(aPath);
 
         // Otherwise create global URL and eval
         String urlStr = PathUtils.getChild(getURL().getString(), aPath);

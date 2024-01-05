@@ -147,6 +147,18 @@ public class DirSite extends WebSite {
     }
 
     /**
+     * Override to forward to dir file.
+     */
+    @Override
+    protected void fileDidReset(WebFile aFile)
+    {
+        super.fileDidReset(aFile);
+        WebFile dirFile = getDirFileForPath(aFile.getPath());
+        if (dirFile != null)
+            dirFile.reset();
+    }
+
+    /**
      * Returns a new FileHeader for given file.
      */
     private FileHeader createFileHeaderForFile(String parentFilePath, WebFile aFile)

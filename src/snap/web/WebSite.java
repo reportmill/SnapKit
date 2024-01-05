@@ -175,7 +175,7 @@ public abstract class WebSite {
     protected WebFile getFileForPathImpl(String filePath) throws ResponseException
     {
         // Get path URL and Head response
-        WebURL url = getURL(filePath);
+        WebURL url = getUrlForPath(filePath);
         WebResponse resp = url.getHead();
 
         // If not found, return null
@@ -297,11 +297,9 @@ public abstract class WebSite {
         }
         aFile.setLastModTime(lastModTime);
 
-        // If file created by save, reset parent contents to make sure it's there
-        if (fileBeingCreatedBySave && parentDir != null) {
-            parentDir.resetContent();
-            parentDir.setLastModTime(lastModTime);
-        }
+        // If file created by save, reset parent
+        if (fileBeingCreatedBySave && parentDir != null)
+            parentDir.resetAndVerify();
 
         // Return
         return putResponse;
@@ -343,13 +341,10 @@ public abstract class WebSite {
         aFile.setExists(false);
         aFile.reset();
 
-        // If not root, have parent resetContent() (so file will be removed from parent files) and update ModTime
+        // If not root, have parent reset
         WebFile parentDir = aFile.getParent();
-        if (parentDir != null) {
-            parentDir.resetContent();
-            long lastModTime = resp.getLastModTime();
-            parentDir.setLastModTime(lastModTime);
-        }
+        if (parentDir != null)
+            parentDir.resetAndVerify();
 
         // Return
         return resp;
@@ -441,14 +436,14 @@ public abstract class WebSite {
     /**
      * Returns a URL for the given file path.
      */
-    public WebURL getURL(String aPath)
+    public WebURL getUrlForPath(String aFilePath)
     {
         // If given path is already full URL string, return URL for it
-        if (aPath.indexOf(':') >= 0)
-            return WebURL.getURL(aPath);
+        if (aFilePath.indexOf(':') >= 0)
+            return WebURL.getURL(aFilePath);
 
         // Get file path
-        String filePath = PathUtils.getNormalized(aPath);
+        String filePath = PathUtils.getNormalized(aFilePath);
         WebURL siteURL = getURL();
         String siteUrlString = siteURL.getString();
         if (siteURL.getPath() != null)
@@ -488,13 +483,13 @@ public abstract class WebSite {
     /**
      * Returns a WebSite that can be used for storing persistent support files.
      */
-    public WebSite getSandbox()
+    public WebSite getSandboxSite()
     {
         // If already set, just return
         if (_sandbox != null) return _sandbox;
 
         // Get sandbox file: ~/Snapcode/Sandboxes/<site_name>
-        String sandboxName = getSandboxName();
+        String sandboxName = getSandboxSiteName();
         File snapCodeDir = FileUtils.getUserHomeDir("SnapCode", false);
         File sandboxesDir = new File(snapCodeDir, "Sandboxes");
         File sandboxDir = new File(sandboxesDir, sandboxName);
@@ -510,7 +505,7 @@ public abstract class WebSite {
     /**
      * Returns a unique name for the Sandbox site.
      */
-    protected String getSandboxName()
+    protected String getSandboxSiteName()
     {
         // Get site URL and construct filename string from scheme/host/path
         String sandboxName = "";
@@ -551,14 +546,14 @@ public abstract class WebSite {
     }
 
     /**
-     * Clears site caches.
-     */
-    public synchronized void refresh()  { }
-
-    /**
      * Flushes any unsaved changes to backing store.
      */
     public void flush() throws Exception  { }
+
+    /**
+     * Called to notify site when file is reset.
+     */
+    protected void fileDidReset(WebFile aFile)  { }
 
     /**
      * Fires a property change for given property name, old value, new value and index.

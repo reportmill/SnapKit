@@ -207,7 +207,7 @@ public class HTTPSite extends WebSite {
      */
     private WebFile getCacheFile(String aPath)
     {
-        WebSite sandboxSite = getSandbox();
+        WebSite sandboxSite = getSandboxSite();
         WebFile sandboxCacheFile = sandboxSite.getFileForPath("/Cache" + aPath);
         if (sandboxCacheFile == null)
             sandboxCacheFile = sandboxSite.createFileForPath("/Cache" + aPath, false);

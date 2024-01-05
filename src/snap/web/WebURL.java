@@ -449,7 +449,7 @@ public class WebURL {
 
         WebSite site = getSite();
         String parPath = PathUtils.getParent(path);
-        return site.getURL(parPath);
+        return site.getUrlForPath(parPath);
     }
 
     /**
@@ -460,7 +460,7 @@ public class WebURL {
         String path = getPath();
         String childPath = PathUtils.getChild(path, aName);
         WebSite site = getSite();
-        return site.getURL(childPath);
+        return site.getUrlForPath(childPath);
     }
 
     /**
