@@ -29,8 +29,12 @@ public class DirSite extends WebSite {
     public WebFile getDir()
     {
         if (_dir != null) return _dir;
+
+        // Get dir
         WebURL siteURL = getURL();
-        WebFile dir = siteURL.getFile();
+        WebFile dir = siteURL.createFile(true);
+
+        // Set and return
         return _dir = dir;
     }
 
@@ -93,7 +97,8 @@ public class DirSite extends WebSite {
         dirFile.save();
 
         // Update response
-        aResp.setLastModTime(dirFile.getLastModTime());
+        long lastModTime = dirFile.getLastModTime();
+        aResp.setLastModTime(lastModTime);
     }
 
     /**

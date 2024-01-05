@@ -236,7 +236,7 @@ public class ZipFileSite extends WebSite {
 
         // Turn on file trimming if system jar
         String urls = aURL.getString().toLowerCase();
-        _jar = urls.endsWith(".jar") || urls.endsWith(".jar.pack.gz");
+        _jar = urls.endsWith(".jar");
         _trim = _jar && (urls.contains("/rt.jar") || urls.contains("/jfxrt.jar"));
     }
 

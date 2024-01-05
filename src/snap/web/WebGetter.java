@@ -145,10 +145,8 @@ public class WebGetter {
         // Get parentSiteURL, scheme, path and type
         WebURL parentSiteURL = aSiteURL.getSiteURL();
         String scheme = aSiteURL.getScheme();
-        String path = aSiteURL.getPath();
-        if (path == null)
-            path = "";
-        String type = FilePathUtils.getExtension(path).toLowerCase();
+        String sitePath = aSiteURL.getPath(); if (sitePath == null) sitePath = "";
+        String fileType = FilePathUtils.getExtension(sitePath).toLowerCase();
 
         // Try platform env
         WebSite site = GFXEnv.getEnv().createSiteForURL(aSiteURL);
@@ -156,24 +154,23 @@ public class WebGetter {
             return site;
 
         // Handle ZipSite and JarSite
-        if (type.equals("zip") || type.equals("jar") || path.endsWith(".jar.pack.gz") || type.equals("gfar"))
+        if (fileType.equals("zip") || fileType.equals("jar") || fileType.equals("gfar"))
             return new ZipFileSite();
 
         // Handle DirSite
         if (parentSiteURL != null && parentSiteURL.getPath() != null)
             return new DirSite();
 
-        // Handle FileSite
-        if (scheme.equals("file"))
-            return new FileSite();
+        // Handle FileSite: If no site path, use FileSite, otherwise use DirSite
+        if (scheme.equals("file")) {
+            if (sitePath.length() == 0 || sitePath.equals("/"))
+                return new FileSite();
+            return new DirSite();
+        }
 
         // Handle HTTPSite
         if (scheme.equals("http") || scheme.equals("https"))
             return new HTTPSite();
-
-        // Handle LocalSite
-        if (scheme.equals("local"))
-            return new LocalSite();
 
         // Return site
         System.err.println("WebGetter: Site not found for " + aSiteURL);

@@ -491,18 +491,22 @@ public abstract class WebSite {
         // If already set, just return
         if (_sandbox != null) return _sandbox;
 
-        // Get sandbox url
+        // Get sandbox file: ~/Snapcode/Sandboxes/<site_name>
         String sandboxName = getSandboxName();
-        String sandboxUrlStr = "local:/Sandboxes/" + sandboxName;
-        WebURL sandboxURL = WebURL.getURL(sandboxUrlStr);
+        File snapCodeDir = FileUtils.getUserHomeDir("SnapCode", false);
+        File sandboxesDir = new File(snapCodeDir, "Sandboxes");
+        File sandboxDir = new File(sandboxesDir, sandboxName);
 
-        // Get, set, return
+        // Get sandbox site
+        WebURL sandboxURL = WebURL.getURL(sandboxDir);
         WebSite sandboxSite = sandboxURL.getAsSite();
+
+        // Set and return
         return _sandbox = sandboxSite;
     }
 
     /**
-     * Creates a WebSite that can be used for storing persistent support files.
+     * Returns a unique name for the Sandbox site.
      */
     protected String getSandboxName()
     {
@@ -512,7 +516,7 @@ public abstract class WebSite {
         // Add URL.Scheme
         WebURL url = getURL();
         String scheme = url.getScheme();
-        if (!scheme.equals("local"))
+        if (!scheme.equals("file"))
             sandboxName += scheme + '/';
 
         // Add URL.Host
@@ -525,10 +529,8 @@ public abstract class WebSite {
         if (path != null && path.length() > 1)
             sandboxName += path.substring(1);
 
-        // If filename string ends with /bin or /, trim
-        if (sandboxName.endsWith("/bin"))
-            sandboxName = sandboxName.substring(0, sandboxName.length() - 4);
-        else if (sandboxName.endsWith("/"))
+        // If filename string ends with /, trim
+        if (sandboxName.endsWith("/"))
             sandboxName = sandboxName.substring(0, sandboxName.length() - 1);
 
         // Replace '/' & '.' separators with '_'
