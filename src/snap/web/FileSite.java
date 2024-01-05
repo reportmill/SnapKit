@@ -193,8 +193,11 @@ public class FileSite extends WebSite {
      * Saves the modified time for a file to underlying file system.
      */
     @Override
-    protected void saveLastModTimeForFile(WebFile aFile, long aTime)
+    protected void saveLastModTimeForFile(WebFile aFile, long aTime) throws Exception
     {
+        // Set in file
+        aFile.setLastModTime(aTime);
+
         // Get java file and set last modified time
         File javaFile = aFile.getJavaFile();
         if (!javaFile.setLastModified(aTime)) {
@@ -205,6 +208,9 @@ public class FileSite extends WebSite {
         // Hack support to save last mod times
         if (SnapUtils.isWebVM)
             setLastModTimeCached(javaFile, aTime);
+
+        // Do normal version
+        super.saveLastModTimeForFile(aFile, aTime);
     }
 
     /**

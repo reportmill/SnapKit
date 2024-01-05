@@ -120,6 +120,22 @@ public class DirSite extends WebSite {
     }
 
     /**
+     * Override to forward to dir site.
+     */
+    @Override
+    protected void saveLastModTimeForFile(WebFile aFile, long aTime) throws Exception
+    {
+        // Forward to dir site
+        WebSite dirSite = getDir().getSite();
+        WebFile dirFile = getDirFileForPath(aFile.getPath());
+        if (dirFile != null)
+            dirSite.saveLastModTimeForFile(dirFile, aTime);
+
+        // Do normal version
+        super.saveLastModTimeForFile(aFile, aTime);
+    }
+
+    /**
      * Override to get Java file from dir file.
      */
     @Override

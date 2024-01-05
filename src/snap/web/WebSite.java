@@ -410,6 +410,8 @@ public abstract class WebSite {
      */
     protected void saveLastModTimeForFile(WebFile aFile, long aTime) throws Exception
     {
+        // Set in file - subclasses should save to real file
+        aFile.setLastModTime(aTime);
     }
 
     /**
