@@ -136,15 +136,6 @@ public class FileSite extends WebSite {
         String filePath = aReq.getFilePath();
         File javaFile = getJavaFileForLocalPath(filePath);
 
-        // Make sure parent directories exist
-        File fileDir = javaFile.getParentFile();
-        if (!fileDir.exists()) {
-            if (!fileDir.mkdirs()) {
-                aResp.setException(new RuntimeException("FileSite.doPut: Error creating parent dir: " + fileDir.getPath()));
-                return;
-            }
-        }
-
         // If directory, create
         if (aReq.isFileDir() && !javaFile.exists()) {
             if (!javaFile.mkdir()) {
