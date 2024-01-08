@@ -300,7 +300,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         if (respCode != WebResponse.OK) {
             if (resp.getException() != null)
                 throw new ResponseException(resp);
-            System.err.println("WebSite.getBytes: Response error: " + resp.getCodeString() + " (" + getUrlString() + ')');
+            System.err.println("WebFile.getBytes: Response error: " + resp.getCodeString() + " (" + getUrlString() + ')');
             return null;
         }
 
@@ -358,7 +358,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         if (respCode != WebResponse.OK) {
             if (resp.getException() != null)
                 throw new ResponseException(resp);
-            System.err.println("WebSite.getFiles: Response error: " + resp.getCodeString() + " (" + getUrlString() + ')');
+            System.err.println("WebFile.getFiles: Response error: " + resp.getCodeString() + " (" + getUrlString() + ')');
             return _files = new WebFile[0];
         }
 

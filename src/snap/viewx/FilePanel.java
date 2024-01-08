@@ -391,6 +391,11 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
+     * Returns the current selected site pane.
+     */
+    public WebSitePane getSelSitePane()  { return _sitePane; }
+
+    /**
      * Sets the SitePane.
      */
     private void setSitePane(WebSitePane aSitePane)
