@@ -47,7 +47,10 @@ public abstract class GFXEnv {
     /**
      * Returns resource for class and path.
      */
-    public abstract URL getResource(Class<?> aClass, String aPath);
+    public URL getResource(Class<?> aClass, String aPath)
+    {
+        return aClass.getResource(aPath);
+    }
 
     /**
      * Returns a list of all system fontnames (excludes any that don't start with capital A-Z).
@@ -127,7 +130,20 @@ public abstract class GFXEnv {
     /**
      * Returns the root URL string of classes.
      */
-    public abstract String getClassRoot();
+    public String getClassRoot()
+    {
+        Class<?> thisClass = getClass();
+        String className = thisClass.getName();
+        String simpleName = thisClass.getSimpleName();
+
+        // Get URL
+        URL classFileUrl = thisClass.getResource(simpleName + ".class");
+        String classFilePath = classFileUrl.toString();
+        String classRootPath = classFilePath.substring(0, classFilePath.length() - className.length() - 1);
+
+        // Return
+        return classRootPath;
+    }
 
     /**
      * This is really just here to help with TeaVM.

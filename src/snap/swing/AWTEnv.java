@@ -35,32 +35,6 @@ public class AWTEnv extends GFXEnv {
     }
 
     /**
-     * Returns resource for class and path.
-     */
-    public URL getResource(Class<?> aClass, String aPath)
-    {
-        return aClass.getResource(aPath);
-    }
-
-    /**
-     * Returns the root URL classes in Snap Jar as string.
-     */
-    public String getClassRoot()
-    {
-        Class<?> cls = getClass();
-        String className = cls.getName();
-        String simpleName = cls.getSimpleName();
-
-        // Get URL
-        URL url = cls.getResource(simpleName + ".class");
-        String urls = url.toString();
-        String urls2 = urls.substring(0, urls.length() - className.length() - 1);
-
-        // Return
-        return urls2;
-    }
-
-    /**
      * Returns a list of all system fontnames (excludes any that don't start with capital A-Z).
      */
     public String[] getFontNames()
