@@ -105,6 +105,10 @@ public class TaskRunner<T> {
     {
         if (aStatus == _status) return;
         firePropChange(Status_Prop, _status, _status = aStatus);
+
+        // Forward Cancelled to monitor
+        if (aStatus == Status.Cancelled && _monitor != null)
+            _monitor.setCancelled(true);
     }
 
     /**
@@ -160,8 +164,15 @@ public class TaskRunner<T> {
      */
     public void cancel()
     {
-        // Set Status to Cancelled and interrupt
         setStatus(Status.Cancelled);
+    }
+
+    /**
+     * Terminates this runner (clients should try cancel first).
+     */
+    public void terminate()
+    {
+        cancel();
         getThread().interrupt();
     }
 
@@ -174,24 +185,24 @@ public class TaskRunner<T> {
     }
 
     /**
-     * The method run on success.
+     * This method is called on success.
      */
-    public void success(T aResult)  { }
+    protected void success(T aResult)  { }
 
     /**
-     * The method to run when cancelled.
+     * This method is called when cancelled.
      */
-    public void cancelled(Exception e)  { }
+    protected void cancelled(Exception e)  { }
 
     /**
-     * The method to run on failure.
+     * This method is called on failure.
      */
-    public void failure(Exception e)  { }
+    protected void failure(Exception e)  { }
 
     /**
-     * The method to run when finished (after success()/failure() call).
+     * This method is called when finished (after success()/failure() call).
      */
-    public void finished()  { }
+    protected void finished()  { }
 
     /**
      * Returns the result.
