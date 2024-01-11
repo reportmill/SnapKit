@@ -170,7 +170,7 @@ public abstract class WebSite {
     }
 
     /**
-     * Returns the individual file with the given path.
+     * Returns the file for given path (null if not found).
      */
     protected WebFile getFileForPathImpl(String filePath) throws ResponseException
     {
@@ -194,7 +194,7 @@ public abstract class WebSite {
         FileHeader fileHeader = resp.getFileHeader();
 
         // Create file (might as well set URL)
-        WebFile file = createFile(fileHeader);
+        WebFile file = getFileForFileHeader(fileHeader);
         file._url = url;
 
         // Return
@@ -202,39 +202,21 @@ public abstract class WebSite {
     }
 
     /**
-     * Returns a new file for given path, regardless of whether it exists on site.
+     * Returns the file for given file header.
      */
-    public WebFile createFileForPath(String aPath, boolean isDir)
-    {
-        FileHeader fileHeader = new FileHeader(aPath, isDir);
-        return createFile(fileHeader);
-    }
-
-    /**
-     * Returns a new file for given file header, regardless of whether it exists on site.
-     */
-    protected synchronized WebFile createFile(FileHeader fileHeader)
+    protected WebFile getFileForFileHeader(FileHeader fileHeader)
     {
         // Get file from cache
         String filePath = PathUtils.getNormalized(fileHeader.getPath());
-        WebFile file = _files.get(filePath);
-
-        // If not found, create and add to cache
-        if (file == null) {
-
-            // Create/config
-            file = new WebFile();
-            file._path = filePath;
-            file._dir = fileHeader.isDir();
-            file._site = this;
-
-            // Put in cache, start listening to file changes
-            _files.put(filePath, file);
-            file.addPropChangeListener(_fileLsnr);
-        }
+        boolean isDir = fileHeader.isDir();
+        WebFile file = createFileForPath(filePath, isDir);
 
         // Update properties file
         file._lastModTime = fileHeader.getLastModTime();
+        if (file._lastModTime == 0) {
+            file._lastModTime = System.currentTimeMillis();
+            System.out.println("WebSite.createFileForFileHeader: Zero LastModTime provided for file: " + this);
+        }
         file._size = fileHeader.getSize();
         file.setMimeType(fileHeader.getMimeType());
 
@@ -244,6 +226,31 @@ public abstract class WebSite {
             WebFile linkFile = linkUrl.getFile();
             file.setLinkFile(linkFile);
         }
+
+        // Return
+        return file;
+    }
+
+    /**
+     * Creates a file for given path, regardless of whether it is known to actually exist in site.
+     */
+    public synchronized WebFile createFileForPath(String aPath, boolean isDir)
+    {
+        // Get file from cache - just return if found
+        String filePath = PathUtils.getNormalized(aPath);
+        WebFile file = _files.get(filePath);
+        if (file != null)
+            return file;
+
+        // Create and configure new file
+        file = new WebFile();
+        file._path = filePath;
+        file._dir = isDir;
+        file._site = this;
+
+        // Add to cache and start listening to file changes
+        _files.put(filePath, file);
+        file.addPropChangeListener(_fileLsnr);
 
         // Return
         return file;

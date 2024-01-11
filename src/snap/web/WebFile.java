@@ -196,6 +196,18 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     public boolean isVerified()  { return _exists != null; }
 
     /**
+     * Verifies the file.
+     */
+    private void verify()
+    {
+        // Explicitly fetch file
+        WebSite site = getSite();
+        String filePath = getPath();
+        WebFile file = site.getFileForPath(filePath);
+        _exists = file != null;
+    }
+
+    /**
      * Returns whether file exists in site.
      */
     public boolean getExists()
@@ -203,11 +215,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         // If already set, just return
         if (_exists != null) return _exists;
 
-        // Explicitly fetch file
-        WebSite site = getSite();
-        String filePath = getPath();
-        WebFile file = site.getFileForPath(filePath);
-        _exists = file != null;
+        // Verify file
+        verify();
 
         // Return
         return _exists;
@@ -233,7 +242,16 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     /**
      * Returns the file last modified time.
      */
-    public long getLastModTime()  { return _lastModTime; }
+    public long getLastModTime()
+    {
+        if (_lastModTime > 0) return _lastModTime;
+
+        // Verify file
+        verify();
+
+        // Return
+        return _lastModTime;
+    }
 
     /**
      * Sets the file last modified time.
@@ -373,7 +391,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
 
         // Get files sorted
         WebSite site = getSite();
-        WebFile[] files = ArrayUtils.map(fileHeaders, fhdr -> site.createFile(fhdr), WebFile.class);
+        WebFile[] files = ArrayUtils.map(fileHeaders, fhdr -> site.getFileForFileHeader(fhdr), WebFile.class);
         Arrays.sort(files);
 
         // Return
