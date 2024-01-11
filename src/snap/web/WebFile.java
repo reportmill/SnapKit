@@ -548,8 +548,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         firePropChange(Updater_Prop, _updater, _updater = anUpdater);
 
         // Update modified
-        if (anUpdater != null)
-            setModified(true);
+        setModified(anUpdater != null);
     }
 
     /**

@@ -56,6 +56,7 @@ public class RecentFilesSite extends WebSite {
             WebURL recentFileURL = recentFiles[i].getURL();
             String recentFilePath = "/RecentFile-" + i + "-" + recentFileURL.getFilename();
             FileHeader fileHdr = fileHeaders[i] = new FileHeader(recentFilePath, false);
+            fileHdr.setLastModTime(1000);
             fileHdr.setLinkUrl(recentFileURL);
         }
 
