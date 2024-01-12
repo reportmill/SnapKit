@@ -10,6 +10,7 @@ import snap.props.UndoSet;
 import snap.props.Undoer;
 import snap.text.*;
 import snap.util.*;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -47,11 +48,8 @@ public class TextArea extends View {
     // The Selection color
     private Color  _selColor = new Color(181, 214, 254, 255);
 
-    // The text pane undoer
+    // The text undoer
     private Undoer  _undoer;
-
-    // The index of the last replace so we can commit undo changes if not adjacent
-    private int  _lastReplaceIndex;
 
     // The mouse down point
     private double  _downX, _downY;
@@ -120,6 +118,7 @@ public class TextArea extends View {
 
         // Create/set Undoer
         _undoer = new Undoer();
+        _undoer.setAutoSave(true);
         _undoer.addPropChangeListener(pc -> undoerUndoAvailableChanged(), Undoer.UndoAvailable_Prop);
     }
 
@@ -820,10 +819,6 @@ public class TextArea extends View {
         if (strLen == 0 && aStart == anEnd)
             return;
 
-        // If change is not adjacent to last change, call UndoerSaveChanges
-        if ((strLen > 0 && aStart != _lastReplaceIndex) || (strLen == 0 && anEnd != _lastReplaceIndex))
-            undoerSaveChanges();
-
         // Get style (might need SelStyle if replacing empty selection)
         TextStyle style = aStyle;
         if (style == null) {
@@ -847,9 +842,6 @@ public class TextArea extends View {
                 start += delta;
             setSel(start, getSelEnd() + delta);
         }
-
-        // Update LastReplaceIndex
-        _lastReplaceIndex = aStart + strLen;
     }
 
     /**
@@ -1016,13 +1008,17 @@ public class TextArea extends View {
      */
     public void clear()
     {
+        // Disable undo
         Undoer undoer = getUndoer();
-        if (undoer != null && undoer.isEnabled())
-            undoer.disable();
-        else undoer = null;
-        _textBlock.clear();
         if (undoer != null)
-            undoer.enable();
+            undoer.disable();
+
+        // Clear text
+        _textBlock.clear();
+
+        // Reset undo
+        if (undoer != null)
+            undoer.reset();
     }
 
     /**
@@ -1413,9 +1409,6 @@ public class TextArea extends View {
             return;
         }
 
-        // Clear last undo set so paste doesn't get lumped in to coalescing
-        undoerSaveChanges();
-
         // Get clipboard content
         Object content = getClipboardContent(clipboard);
 
@@ -1469,19 +1462,16 @@ public class TextArea extends View {
      */
     public boolean undo()
     {
-        // Flush outstanding changes
-        undoerSaveChanges();
-
-        // Do undo
+        // Do undo - just return if no undo
         UndoSet undoSet = _undoer.undo();
-
-        // Complain if no undos
-        boolean didUndo = undoSet != null;
-        if (!didUndo)
+        if (undoSet == null) {
             ViewUtils.beep();
+            return false;
+        }
 
-        // Return
-        return didUndo;
+        // Set selection and return
+        setTextSelForUndoSet(undoSet, false);
+        return true;
     }
 
     /**
@@ -1489,19 +1479,41 @@ public class TextArea extends View {
      */
     public boolean redo()
     {
-        // Flush outstanding changes
-        undoerSaveChanges();
-
-        // Do undo
+        // Do undo - just return if no undo
         UndoSet undoSet = _undoer.redo();
-
-        // Complain if no redos
-        boolean didRedo = undoSet != null;
-        if (!didRedo)
+        if (undoSet == null) {
             ViewUtils.beep();
+            return false;
+        }
 
-        // Return
-        return didRedo;
+        // Set selection and return
+        setTextSelForUndoSet(undoSet, true);
+        return true;
+    }
+
+    /**
+     * Sets the selection from undo set.
+     */
+    private void setTextSelForUndoSet(UndoSet undoSet, boolean isRedo)
+    {
+        // Set selection
+        List<PropChange> propChanges = undoSet.getChanges();
+        for (PropChange propChange : propChanges) {
+            String propName = propChange.getPropName();
+            if (propName == TextBlock.Chars_Prop) {
+                CharSequence addString = (CharSequence) (isRedo ? propChange.getNewValue() : propChange.getOldValue());
+                int startIndex = propChange.getIndex();
+                int endIndex = startIndex + (addString != null ? addString.length() : 0);
+                setSel(startIndex, endIndex);
+                break;
+            }
+            else if (propName == TextBlock.Style_Prop) {
+                TextBlockUtils.StyleChange styleChange = (TextBlockUtils.StyleChange) propChange;
+                int startIndex = styleChange.getStart();
+                int endIndex = styleChange.getEnd();
+                setSel(startIndex, endIndex);
+            }
+        }
     }
 
     /**
@@ -1525,61 +1537,8 @@ public class TextArea extends View {
                 return;
         }
 
-        // Get ActiveUndoSet - if no previous changes, set UndoSelection
-        UndoSet activeUndoSet = undoer.getActiveUndoSet();
-        if (activeUndoSet.getChangeCount() == 0) {
-            Object undoSelection = getUndoSelection();
-            activeUndoSet.setUndoSelection(undoSelection);
-        }
-
         // Add property
         undoer.addPropChange(anEvent);
-    }
-
-    /**
-     * Saves changes to undoer.
-     */
-    public void undoerSaveChanges()
-    {
-        Undoer undoer = getUndoer();
-        if (undoer == null) return;
-        UndoSet activeUndoSet = undoer.getActiveUndoSet();
-        activeUndoSet.setRedoSelection(getUndoSelection());
-        undoer.saveChanges();
-    }
-
-    /**
-     * Returns a selection object for undoer.
-     */
-    protected Object getUndoSelection()
-    {
-        return new UndoTextSel();
-    }
-
-    /**
-     * A class to act as text selection.
-     */
-    public class UndoTextSel implements Undoer.Selection {
-
-        // Ivars
-        public int start = getSelStart();
-        public int end = getSelEnd();  // Use ivars to avoid min()
-
-        // SetSel
-        public void setSelection()
-        {
-            TextArea.this.setSel(start, end);
-        }
-
-        // Equals
-        public boolean equals(Object anObj)
-        {
-            UndoTextSel other = anObj instanceof UndoTextSel ? (UndoTextSel) anObj : null;
-            return other != null && start == other.start && end == other.end;
-        }
-
-        // HashCode
-        public int hashCode()  { return start + end; }
     }
 
     /**

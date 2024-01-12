@@ -3,6 +3,7 @@
  */
 package snap.props;
 import snap.util.ListUtils;
+import snap.view.ViewUtils;
 import java.util.*;
 
 /**
@@ -19,11 +20,17 @@ public class Undoer extends PropObject {
     // The list of redo sets
     private List<UndoSet> _redoSets = new ArrayList<>();
 
+    // Whether to auto save changes - this should default to true!!!
+    private boolean _autoSave;
+
     // Whether undoer is disabled
     private int _disabled = 0;
 
     // Whether an undo is currently available
     private boolean _undoAvailable;
+
+    // The run to auto save
+    private Runnable _autoSaveRun;
 
     // Constants for properties
     public static final String UndoAvailable_Prop = "UndoAvailable";
@@ -39,19 +46,7 @@ public class Undoer extends PropObject {
     /**
      * Returns the active undo set.
      */
-    public UndoSet getActiveUndoSet()
-    {
-        return _activeUndoSet;
-    }
-
-    /**
-     * Sets the active event (presumably from undo sets list).
-     */
-    public void setActiveUndoSet(UndoSet anUndoSet)
-    {
-        _activeUndoSet = anUndoSet;
-        _undoSets.remove(anUndoSet);
-    }
+    public UndoSet getActiveUndoSet()  { return _activeUndoSet; }
 
     /**
      * Sets the title of the current undo.
@@ -89,12 +84,9 @@ public class Undoer extends PropObject {
     }
 
     /**
-     * Returns the list of objects that should be selected after current undo is fired.
+     * Sets whether to auto save changes.
      */
-    public Object getUndoSelection()
-    {
-        return _activeUndoSet._undoSelection;
-    }
+    public void setAutoSave(boolean aValue)  { _autoSave = aValue; }
 
     /**
      * Sets the list of objects that should be selected after current undo is fired.
@@ -107,18 +99,12 @@ public class Undoer extends PropObject {
     /**
      * Returns the list of objects that should be selected after current undo is redone.
      */
-    public Object getRedoSelection()
-    {
-        return _activeUndoSet._redoSelection;
-    }
+    public Object getRedoSelection()  { return _activeUndoSet._redoSelection; }
 
     /**
      * Sets the list of objects that should be selected after current undo is redone.
      */
-    public void setRedoSelection(Object aList)
-    {
-        _activeUndoSet._redoSelection = aList;
-    }
+    public void setRedoSelection(Object aList)  { _activeUndoSet._redoSelection = aList; }
 
     /**
      * Adds a property change.
@@ -129,9 +115,25 @@ public class Undoer extends PropObject {
         if (!isEnabled())
             return;
 
+        // If active set is empty, attempt to merge with last undo set
+        boolean didMerge = false;
+        if (_activeUndoSet.isEmpty()) {
+            UndoSet lastUndoSet = getUndoSetLast();
+            if (lastUndoSet != null && !lastUndoSet._closed && !ViewUtils.isMouseDown())
+                didMerge = lastUndoSet.mergePropChange(anEvent);
+        }
+
         // Add change
-        _activeUndoSet.addPropChange(anEvent);
+        if (!didMerge)
+            _activeUndoSet.addPropChange(anEvent);
         resetUndoAvailable();
+
+        // If AutoSave, register to call saveChange()
+        if (_autoSave && _autoSaveRun == null) {
+            if (ViewUtils.isMouseDown())
+                ViewUtils.runOnMouseUp(_autoSaveRun = this::saveChanges);
+            else ViewUtils.runLater(_autoSaveRun = this::saveChanges);
+        }
     }
 
     /**
@@ -139,8 +141,8 @@ public class Undoer extends PropObject {
      */
     public void saveChanges()
     {
-        // If changed objects still exist, push them onto _undos stack
-        if (_activeUndoSet.getChangeCount() > 0) {
+        // If active undo set has changes, add it to UndoSets and create new one
+        if (!_activeUndoSet.isEmpty()) {
 
             // Add current undo
             _undoSets.add(_activeUndoSet);
@@ -152,10 +154,11 @@ public class Undoer extends PropObject {
             _redoSets.clear();
         }
 
-        // If no changed objects, just reset current undo
+        // If no outstanding changes, just reset current undo
         else _activeUndoSet.reset();
 
         resetUndoAvailable();
+        _autoSaveRun = null;
     }
 
     /**
@@ -173,6 +176,7 @@ public class Undoer extends PropObject {
         UndoSet undoSet = null;
         if (_undoSets.size() > 0) {
             undoSet = _undoSets.remove(_undoSets.size() - 1);
+            undoSet._closed = true;
             _redoSets.add(undoSet);
             undoSet.undo();
         }
@@ -231,6 +235,7 @@ public class Undoer extends PropObject {
         _activeUndoSet.reset();
         _undoSets.clear();
         _redoSets.clear();
+        _disabled = 0;
         resetUndoAvailable();
     }
 
@@ -239,7 +244,7 @@ public class Undoer extends PropObject {
      */
     public boolean hasUndos()
     {
-        return _undoSets.size() > 0 || getActiveUndoSet().getChangeCount() > 0;
+        return _undoSets.size() > 0 || !_activeUndoSet.isEmpty();
     }
 
     /**
@@ -277,7 +282,7 @@ public class Undoer extends PropObject {
      * An interface for undo/redo selection.
      */
     public interface Selection {
-        public void setSelection();
+        void setSelection();
     }
 
     /**

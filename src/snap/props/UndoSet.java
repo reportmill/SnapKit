@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
+import snap.util.ListUtils;
 import java.util.*;
 
 /**
@@ -21,8 +22,8 @@ public class UndoSet {
     // The objects to be selected if redo is selected
     protected Object  _redoSelection;
 
-    // Whether this event has been coalesced
-    private boolean _coalesced;
+    // Whether this set is fully closed (can't try to merge)
+    protected boolean _closed;
 
     /**
      * Creates a new empty undo set.
@@ -34,59 +35,32 @@ public class UndoSet {
     /**
      * Returns the undo title.
      */
-    public String getUndoTitle()
-    {
-        return _undoTitle;
-    }
+    public String getUndoTitle()  { return _undoTitle; }
 
     /**
      * Returns the full title of this undo when used for undo.
      */
-    public String getFullUndoTitle()
-    {
-        return _undoTitle == null ? "Undo" : "Undo " + _undoTitle;
-    }
+    public String getFullUndoTitle()  { return _undoTitle == null ? "Undo" : "Undo " + _undoTitle; }
 
     /**
      * Returns the full title of this undo when used for redo.
      */
-    public String getFullRedoTitle()
-    {
-        return _undoTitle == null ? "Redo" : "Redo " + _undoTitle;
-    }
+    public String getFullRedoTitle()  { return _undoTitle == null ? "Redo" : "Redo " + _undoTitle; }
+
+    /**
+     * Returns whether this set has no changes.
+     */
+    public boolean isEmpty()  { return _changes.size() == 0; }
 
     /**
      * Returns the number of changes.
      */
-    public int getChangeCount()
-    {
-        return _changes.size();
-    }
-
-    /**
-     * Returns the individual change at given index.
-     */
-    public PropChange getChange(int anIndex)
-    {
-        return _changes.get(anIndex);
-    }
+    public int getChangeCount()  { return _changes.size(); }
 
     /**
      * Returns the selection to be set if undo is executed.
      */
-    public List<PropChange> getChanges()
-    {
-        return _changes;
-    }
-
-    /**
-     * Returns the last change.
-     */
-    public PropChange getChangeLast()
-    {
-        int cc = getChangeCount();
-        return cc > 0 ? getChange(cc - 1) : null;
-    }
+    public List<PropChange> getChanges()  { return _changes; }
 
     /**
      * Returns the selection to be set if undo is executed.
@@ -97,27 +71,37 @@ public class UndoSet {
     }
 
     /**
-     * Sets the selection to be set if undo is executed.
-     */
-    public void setUndoSelection(Object aSelection)
-    {
-        _undoSelection = aSelection;
-    }
-
-    /**
      * Returns the selection to be set if redo is executed.
      */
-    public Object getRedoSelection()
-    {
-        return _redoSelection == null ? _undoSelection : _redoSelection;
-    }
+    public Object getRedoSelection()  { return _redoSelection == null ? _undoSelection : _redoSelection; }
 
     /**
-     * Sets the selection to be set if redo is executed.
+     * Tries to merge property change.
      */
-    public void setRedoSelection(Object aSelection)
+    public boolean mergePropChange(PropChange newPC)
     {
-        _redoSelection = aSelection;
+        // Iterate over changes and if duplicate exists, coalesce (go backward so we only check last same prop name event)
+        for (int i = _changes.size() - 1; i >= 0; i--) {
+            PropChange oldPC = _changes.get(i);
+
+            // If source and prop are equal, try merge
+            if (oldPC.getSource() == newPC.getSource() && oldPC.getPropName().equals(newPC.getPropName())) {
+
+                // If merge successful, replace event
+                PropChange mergePC = oldPC.merge(newPC);
+                if (mergePC == null)
+                    return false;
+
+                // Remove old event and add new
+                _changes.remove(i);
+                if (!Objects.equals(mergePC.getOldValue(), mergePC.getNewValue()))
+                    _changes.add(mergePC);
+                return true;
+            }
+        }
+
+        // Return no merge
+        return false;
     }
 
     /**
@@ -154,7 +138,7 @@ public class UndoSet {
         // Iterate over changes and execute
         for (int i = _changes.size() - 1; i >= 0; i--) {
             PropChange pce = _changes.get(i);
-            System.out.println("Undoing " + toString(pce, true));
+            System.out.println("Undoing " + getPropChangeString(pce, true));
             pce.undoChange();
         }
 
@@ -170,7 +154,7 @@ public class UndoSet {
     {
         // Iterate over changes and execute
         for (PropChange pce : _changes) {
-            System.out.println("Redoing " + toString(pce, false));
+            System.out.println("Redoing " + getPropChangeString(pce, false));
             pce.redoChange();
         }
 
@@ -192,27 +176,25 @@ public class UndoSet {
     /**
      * Standard toString implementation.
      */
+    @Override
     public String toString()
     {
-        StringBuffer sb = new StringBuffer("UndoSet(" + getUndoTitle() + "): ");
-        for (PropChange pce : getChanges())
-            sb.append(toString(pce, true)).append(", ");
-        if (getChangeCount() > 0)
-            sb.delete(sb.length() - 2, sb.length());
-        return sb.toString();
+        String undoTitle = "UndoSet(" + getUndoTitle() + "): ";
+        String propChangesStr = ListUtils.mapToStringsAndJoin(getChanges(), pc -> getPropChangeString(pc, true), ", ");
+        return undoTitle + propChangesStr;
     }
 
     /**
      * Returns a string for a property change event.
      */
-    public String toString(PropChange anEvent, boolean doUndo)
+    private static String getPropChangeString(PropChange anEvent, boolean doUndo)
     {
         String source = anEvent.getSource().getClass().getSimpleName();
-        String pname = anEvent.getPropName();
-        Object oV = anEvent.getOldValue();
-        String oS = oV != null ? oV.toString().replace("\n", "\\n") : null;
-        Object nV = anEvent.getNewValue();
-        String nS = nV != null ? nV.toString().replace("\n", "\\n") : null;
-        return String.format("%s %s (set %s to %s)", source, pname, doUndo ? nS : oS, doUndo ? oS : nS);
+        String propName = anEvent.getPropName();
+        Object oldValue = anEvent.getOldValue();
+        Object newValue = anEvent.getNewValue();
+        String oldValueStr = oldValue != null ? oldValue.toString().replace("\n", "\\n") : null;
+        String newValueStr = newValue != null ? newValue.toString().replace("\n", "\\n") : null;
+        return String.format("%s %s (set %s to %s)", source, propName, doUndo ? newValueStr : oldValueStr, doUndo ? oldValueStr : newValueStr);
     }
 }
