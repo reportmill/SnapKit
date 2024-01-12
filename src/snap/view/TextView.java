@@ -175,21 +175,6 @@ public class TextView extends ParentView {
     public void setTextFill(Paint aColor)  { _textArea.setTextFill(aColor); }
 
     /**
-     * Returns the undoer.
-     */
-    public Undoer getUndoer()  { return _textArea.getUndoer(); }
-
-    /**
-     * Called to undo the last edit operation in the editor.
-     */
-    public boolean undo()  { return _textArea.undo(); }
-
-    /**
-     * Called to redo the last undo operation in the editor.
-     */
-    public boolean redo()  { return _textArea.redo(); }
-
-    /**
      * Returns the width needed to display all characters.
      */
     protected double getPrefWidthImpl(double aH)

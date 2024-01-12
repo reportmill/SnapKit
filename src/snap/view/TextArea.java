@@ -48,9 +48,6 @@ public class TextArea extends View {
     // The Selection color
     private Color  _selColor = new Color(181, 214, 254, 255);
 
-    // The text undoer
-    private Undoer  _undoer;
-
     // The mouse down point
     private double  _downX, _downY;
 
@@ -115,11 +112,7 @@ public class TextArea extends View {
         // Create/set default TextBlock
         _textBlock = new TextBox();
         _textBlock.getSourceText().addPropChangeListener(_sourceTextPropLsnr);
-
-        // Create/set Undoer
-        _undoer = new Undoer();
-        _undoer.setAutoSave(true);
-        _undoer.addPropChangeListener(pc -> undoerUndoAvailableChanged(), Undoer.UndoAvailable_Prop);
+        _textBlock.activateUndo();
     }
 
     /**
@@ -153,15 +146,14 @@ public class TextArea extends View {
         _textBlock = aTextBlock;
 
         // Add PropChangeListener
-        if (_textBlock != null)
-            _textBlock.getSourceText().addPropChangeListener(_sourceTextPropLsnr);
+        _textBlock.getSourceText().addPropChangeListener(_sourceTextPropLsnr);
 
         // Reset selection (to line end if single-line, otherwise text start)
         int selIndex = getLineCount() == 1 && length() < 40 ? length() : 0;
         setSel(selIndex);
 
-        // FirePropChange
-        //firePropChange(TextBlock_Prop, oldSourceText, aTextBlock);
+        // Activate undo
+        _textBlock.getSourceText().activateUndo();
 
         // Relayout parent, repaint
         relayoutParent();
@@ -1008,17 +1000,7 @@ public class TextArea extends View {
      */
     public void clear()
     {
-        // Disable undo
-        Undoer undoer = getUndoer();
-        if (undoer != null)
-            undoer.disable();
-
-        // Clear text
         _textBlock.clear();
-
-        // Reset undo
-        if (undoer != null)
-            undoer.reset();
     }
 
     /**
@@ -1455,51 +1437,45 @@ public class TextArea extends View {
     /**
      * Returns the undoer.
      */
-    public Undoer getUndoer()  { return _undoer; }
+    public Undoer getUndoer()  { return _textBlock.getSourceText().getUndoer(); }
 
     /**
-     * Called to undo the last edit operation in the editor.
+     * Called to undo the last text change.
      */
-    public boolean undo()
+    public void undo()
     {
-        // Do undo - just return if no undo
-        UndoSet undoSet = _undoer.undo();
-        if (undoSet == null) {
-            ViewUtils.beep();
-            return false;
-        }
-
-        // Set selection and return
-        setTextSelForUndoSet(undoSet, false);
-        return true;
+        UndoSet undoSet = _textBlock.getSourceText().undo();
+        if (undoSet != null)
+            setTextSelForUndoSet(undoSet, false);
+        else ViewUtils.beep();
     }
 
     /**
-     * Called to redo the last undo operation in the editor.
+     * Called to redo the last text change.
      */
-    public boolean redo()
+    public void redo()
     {
-        // Do undo - just return if no undo
-        UndoSet undoSet = _undoer.redo();
-        if (undoSet == null) {
-            ViewUtils.beep();
-            return false;
-        }
-
-        // Set selection and return
-        setTextSelForUndoSet(undoSet, true);
-        return true;
+        UndoSet undoSet = _textBlock.getSourceText().redo();
+        if (undoSet != null)
+            setTextSelForUndoSet(undoSet, true);
+        else ViewUtils.beep();
     }
 
     /**
-     * Sets the selection from undo set.
+     * Sets the selection from given UndoSet.
      */
     private void setTextSelForUndoSet(UndoSet undoSet, boolean isRedo)
     {
-        // Set selection
+        // Get prop changes (reverse if redo)
         List<PropChange> propChanges = undoSet.getChanges();
+        if (isRedo)
+            propChanges = ListUtils.getReverse(propChanges);
+
+        // Iterate over prop changes
         for (PropChange propChange : propChanges) {
             String propName = propChange.getPropName();
+
+            // Handle Chars prop: Set sel to new add chars
             if (propName == TextBlock.Chars_Prop) {
                 CharSequence addString = (CharSequence) (isRedo ? propChange.getNewValue() : propChange.getOldValue());
                 int startIndex = propChange.getIndex();
@@ -1507,6 +1483,8 @@ public class TextArea extends View {
                 setSel(startIndex, endIndex);
                 break;
             }
+
+            // Handle Style prop: Set sel to char range
             else if (propName == TextBlock.Style_Prop) {
                 TextBlockUtils.StyleChange styleChange = (TextBlockUtils.StyleChange) propChange;
                 int startIndex = styleChange.getStart();
@@ -1517,47 +1495,10 @@ public class TextArea extends View {
     }
 
     /**
-     * Adds a property change to undoer.
-     */
-    protected void undoerAddPropChange(PropChange anEvent)
-    {
-        // Get undoer (just return if null or disabled)
-        Undoer undoer = getUndoer();
-        if (undoer == null || !undoer.isEnabled())
-            return;
-
-        // If TextBlock.TextModified, just return
-        String propName = anEvent.getPropName();
-        if (propName == TextBlock.TextModified_Prop)
-            return;
-
-        // If PlainText Style_Prop or LineStyle_Prop, just return
-        if (!isRichText()) {
-             if (propName == TextBlock.Style_Prop || propName == TextBlock.LineStyle_Prop)
-                return;
-        }
-
-        // Add property
-        undoer.addPropChange(anEvent);
-    }
-
-    /**
-     * Called when Undoer.UndoAvailable changes.
-     */
-    private void undoerUndoAvailableChanged()
-    {
-        boolean textModified = _undoer.isUndoAvailable();
-        _textBlock.setTextModified(textModified);
-    }
-
-    /**
      * Called when SourceText changes (chars added, updated or deleted).
      */
     protected void sourceTextDidPropChange(PropChange aPC)
     {
-        // Add property change
-        undoerAddPropChange(aPC);
-
         // Forward on to listeners
         firePropChange(aPC);
 

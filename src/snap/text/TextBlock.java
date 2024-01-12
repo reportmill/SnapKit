@@ -11,6 +11,8 @@ import snap.gfx.Painter;
 import snap.gfx.Stroke;
 import snap.props.PropChange;
 import snap.props.PropObject;
+import snap.props.UndoSet;
+import snap.props.Undoer;
 import snap.util.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +52,9 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
     // The pref width of the text block
     protected double _prefW = -1;
+
+    // The text undoer
+    private Undoer _undoer = Undoer.DISABLED_UNDOER;
 
     // Whether property change is enabled
     protected boolean  _propChangeEnabled = true;
@@ -789,9 +794,17 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void clear()
     {
+        // Disable undo
+        Undoer undoer = getUndoer();
+        undoer.disable();
+
+        // Remove chars and reset style
         removeChars(0, length());
         setStyle(getDefaultStyle(), 0, 0);
         setLineStyle(getDefaultLineStyle(), 0, 0);
+
+        // Reset undo
+        undoer.reset();
     }
 
     /**
@@ -1313,6 +1326,69 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      * Returns underlined runs for text box.
      */
     public TextRun[] getUnderlineRuns(Rect aRect)  { return TextBlockUtils.getUnderlineRuns(this, aRect); }
+
+    /**
+     * Called to activate undo.
+     */
+    public void activateUndo()
+    {
+        _undoer = new Undoer();
+        _undoer.setAutoSave(true);
+        _undoer.addPropChangeListener(pc -> setTextModified(_undoer.isUndoAvailable()), Undoer.UndoAvailable_Prop);
+    }
+
+    /**
+     * Returns the text undoer.
+     */
+    public Undoer getUndoer()  { return _undoer; }
+
+    /**
+     * Called to undo the last text change.
+     */
+    public UndoSet undo()  { return _undoer.undo(); }
+
+    /**
+     * Called to redo the last text change.
+     */
+    public UndoSet redo()  { return _undoer.redo(); }
+
+    /**
+     * Adds a property change to undoer.
+     */
+    protected void undoerAddPropChange(PropChange anEvent)
+    {
+        // Get undoer (just return if null or disabled)
+        Undoer undoer = getUndoer();
+        if (!undoer.isEnabled())
+            return;
+
+        // If TextBlock.TextModified, just return
+        String propName = anEvent.getPropName();
+        if (propName == TextBlock.TextModified_Prop)
+            return;
+
+        // If PlainText Style_Prop or LineStyle_Prop, just return
+        if (!isRichText()) {
+            if (propName == TextBlock.Style_Prop || propName == TextBlock.LineStyle_Prop)
+                return;
+        }
+
+        // Add property
+        undoer.addPropChange(anEvent);
+    }
+
+    /**
+     * Override to register undo.
+     */
+    @Override
+    protected void firePropChange(PropChange aPC)
+    {
+        // Do normal version
+        super.firePropChange(aPC);
+
+        // Register undo
+        undoerAddPropChange(aPC);
+    }
 
     /**
      * Returns a copy of this text for given char range.

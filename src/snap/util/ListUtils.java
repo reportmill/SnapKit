@@ -144,15 +144,16 @@ public class ListUtils {
     /**
      * Reverses the items in the given list.
      */
-    public static <T> List<T> reverse(List<T> aList)
-    {
-        for (int i = 0, max = aList.size(), iMax = max / 2; i < iMax; i++) {
-            int oppositeIndex = max - i - 1;
-            T original = aList.set(i, aList.get(oppositeIndex));
-            aList.set(oppositeIndex, original);
-        }
+    public static void reverse(List<?> aList)  { Collections.reverse(aList); }
 
-        return aList;
+    /**
+     * Returns the reversed list.
+     */
+    public static <T> List<T> getReverse(List<T> aList)
+    {
+        List<T> copy = new ArrayList<>(aList);
+        Collections.reverse(copy);
+        return copy;
     }
 
     /**

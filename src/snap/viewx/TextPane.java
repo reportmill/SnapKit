@@ -6,6 +6,7 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Image;
 import snap.props.PropChange;
+import snap.props.Undoer;
 import snap.text.TextBlock;
 import snap.text.TextDoc;
 import snap.text.TextLine;
@@ -127,8 +128,9 @@ public class TextPane extends ViewOwner {
         setViewValue("FontSizeText", textArea.getFont().getSize());
 
         // Update UndoButton, RedoButton
-        setViewEnabled("UndoButton", textArea.getUndoer().hasUndos());
-        setViewEnabled("RedoButton", textArea.getUndoer().hasRedos());
+        Undoer undoer = textArea.getUndoer();
+        setViewEnabled("UndoButton", undoer.hasUndos());
+        setViewEnabled("RedoButton", undoer.hasRedos());
 
         // Update SelectionText
         setViewText("SelectionText", getSelectionInfo());
@@ -154,19 +156,11 @@ public class TextPane extends ViewOwner {
         if (anEvent.equals("PasteButton"))
             textArea.paste();
 
-        // Handle UndoButton
-        if (anEvent.equals("UndoButton")) {
-            if (textArea.getUndoer().hasUndos())
-                textArea.undo();
-            else beep();
-        }
-
-        // Handle RedoButton
-        if (anEvent.equals("RedoButton")) {
-            if (textArea.getUndoer().hasRedos())
-                textArea.redo();
-            else beep();
-        }
+        // Handle UndoButton, RedoButton
+        if (anEvent.equals("UndoButton"))
+            textArea.undo();
+        if (anEvent.equals("RedoButton"))
+            textArea.redo();
 
         // Handle FontSizeText
         if (anEvent.equals("FontSizeText")) {

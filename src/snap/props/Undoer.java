@@ -11,14 +11,14 @@ import java.util.*;
  */
 public class Undoer extends PropObject {
 
-    // The current undo set to add new property changes to
-    private UndoSet _activeUndoSet = new UndoSet();
-
     // The list of undo sets
-    private List<UndoSet> _undoSets = new ArrayList<>();
+    private List<UndoSet> _undoSets;
 
     // The list of redo sets
-    private List<UndoSet> _redoSets = new ArrayList<>();
+    private List<UndoSet> _redoSets;
+
+    // The current undo set to add new property changes to
+    private UndoSet _activeUndoSet;
 
     // Whether to auto save changes - this should default to true!!!
     private boolean _autoSave;
@@ -35,12 +35,19 @@ public class Undoer extends PropObject {
     // Constants for properties
     public static final String UndoAvailable_Prop = "UndoAvailable";
 
+    // A shared instance of an Undoer that is disabled
+    public static final Undoer DISABLED_UNDOER = new DisabledUndoer();
+
     /**
      * Constructor.
      */
     public Undoer()
     {
         super();
+
+        _undoSets = new ArrayList<>();
+        _redoSets = new ArrayList<>();
+        _activeUndoSet = new UndoSet();
     }
 
     /**
@@ -70,18 +77,12 @@ public class Undoer extends PropObject {
     /**
      * Returns the last undo.
      */
-    public UndoSet getUndoSetLast()
-    {
-        return ListUtils.getLast(_undoSets);
-    }
+    public UndoSet getUndoSetLast()  { return ListUtils.getLast(_undoSets); }
 
     /**
      * Returns the last redo.
      */
-    public UndoSet getRedoSetLast()
-    {
-        return ListUtils.getLast(_redoSets);
-    }
+    public UndoSet getRedoSetLast()  { return ListUtils.getLast(_redoSets); }
 
     /**
      * Sets whether to auto save changes.
@@ -91,10 +92,7 @@ public class Undoer extends PropObject {
     /**
      * Sets the list of objects that should be selected after current undo is fired.
      */
-    public void setUndoSelection(Object aList)
-    {
-        _activeUndoSet._undoSelection = aList;
-    }
+    public void setUndoSelection(Object aList)  { _activeUndoSet._undoSelection = aList; }
 
     /**
      * Returns the list of objects that should be selected after current undo is redone.
@@ -291,5 +289,15 @@ public class Undoer extends PropObject {
     public String toString()
     {
         return String.format("Undoer { UndoCount=%d, RedoCount=%d }", getUndoSets().size(), getRedoSets().size());
+    }
+
+    /**
+     * This Undoer subclass is disabled.
+     */
+    private static class DisabledUndoer extends Undoer {
+        @Override
+        public boolean isEnabled()  { return false; }
+        @Override
+        public void addPropChangeListener(PropChangeListener aPCL)  { }
     }
 }
