@@ -107,31 +107,50 @@ public class Undoer extends PropObject {
     /**
      * Adds a property change.
      */
-    public void addPropChange(PropChange anEvent)
+    public void addPropChange(PropChange propChange)
     {
         // If undoer is disabled, just return
         if (!isEnabled())
             return;
 
-        // If active set is empty, attempt to merge with last undo set
-        boolean didMerge = false;
-        if (_activeUndoSet.isEmpty()) {
-            UndoSet lastUndoSet = getUndoSetLast();
-            if (lastUndoSet != null && !lastUndoSet._closed && !ViewUtils.isMouseDown())
-                didMerge = lastUndoSet.mergePropChange(anEvent);
-        }
-
-        // Add change
+        // Add or merge change
+        boolean didMerge = mergePropChange(propChange);
         if (!didMerge)
-            _activeUndoSet.addPropChange(anEvent);
-        resetUndoAvailable();
+            _activeUndoSet.addPropChange(propChange);
 
         // If AutoSave, register to call saveChange()
         if (_autoSave && _autoSaveRun == null) {
             if (ViewUtils.isMouseDown())
-                ViewUtils.runOnMouseUp(_autoSaveRun = this::saveChanges);
+                ViewUtils.runOnMouseUp(_autoSaveRun = this::saveChangesAndClose);
             else ViewUtils.runLater(_autoSaveRun = this::saveChanges);
         }
+
+        // Reset UndoAvailable
+        resetUndoAvailable();
+    }
+
+    /**
+     * Tries to merge the prop change event.
+     */
+    private boolean mergePropChange(PropChange propChange)
+    {
+        // If ActiveUndoSet is not empty, just return false
+        if (!_activeUndoSet.isEmpty())
+            return false;
+
+        // LastUndoSet is null or closed, just return false
+        UndoSet lastUndoSet = getUndoSetLast();
+        if (lastUndoSet == null || lastUndoSet._closed)
+            return false;
+
+        // If Mouse is down, just return false
+        if (ViewUtils.isMouseDown()) {
+            lastUndoSet._closed = true;
+            return false;
+        }
+
+        // Try to merge and return result
+        return lastUndoSet.mergePropChange(propChange);
     }
 
     /**
@@ -157,6 +176,17 @@ public class Undoer extends PropObject {
 
         resetUndoAvailable();
         _autoSaveRun = null;
+    }
+
+    /**
+     * Saves changes and closes last undo set.
+     */
+    private void saveChangesAndClose()
+    {
+        saveChanges();
+        UndoSet lastUndoSet = getUndoSetLast();
+        if (lastUndoSet != null)
+            lastUndoSet._closed = true;
     }
 
     /**
