@@ -17,6 +17,9 @@ public class FormatUtils {
     // A map of known Decimal formats for pattern
     private static Map<String, DecimalFormat> _formats = new HashMap<>();
 
+    // A map of known Decimal formats for pattern
+    private static Map<String, DateFormat> _dateFormats = new HashMap<>();
+
     // A simple date format
     private static SimpleDateFormat  _dateFormat;
 
@@ -87,11 +90,31 @@ public class FormatUtils {
     }
 
     /**
-     * Formats a Date to a reasonable precision.
+     * Returns a date format for given pattern.
+     */
+    public static DateFormat getDateFormat(String aPattern)
+    {
+        DateFormat fmt = _dateFormats.get(aPattern);
+        if (fmt == null)
+            _dateFormats.put(aPattern, fmt = new SimpleDateFormat(aPattern));
+        return fmt;
+    }
+
+    /**
+     * Formats a Date to a standard pattern: .
      */
     public static String formatDate(Date aDate)
     {
         DateFormat dateFormat = getDateFormat();
+        return dateFormat.format(aDate);
+    }
+
+    /**
+     * Formats a Date to a reasonable precision.
+     */
+    public static String formatDate(Date aDate, String aPattern)
+    {
+        DateFormat dateFormat = getDateFormat(aPattern);
         return dateFormat.format(aDate);
     }
 
