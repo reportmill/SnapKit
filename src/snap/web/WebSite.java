@@ -223,7 +223,7 @@ public abstract class WebSite {
         // Set link
         WebURL linkUrl = fileHeader.getLinkUrl();
         if (linkUrl != null) {
-            WebFile linkFile = linkUrl.getFile();
+            WebFile linkFile = linkUrl.createFile(isDir);
             file.setLinkFile(linkFile);
         }
 

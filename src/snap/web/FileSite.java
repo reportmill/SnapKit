@@ -279,6 +279,10 @@ public class FileSite extends WebSite {
     {
         String filePath = javaFile.getPath();
         long lastModTime = _lastModTimesPrefsNode.getLong(filePath, 0);
+        if (lastModTime == 0) {
+            lastModTime = System.currentTimeMillis();
+            setLastModTimeCached(javaFile, lastModTime);
+        }
         //System.out.println("GetLastModTime: " + filePath + " = " + lastModTime);
         return lastModTime;
     }
