@@ -172,4 +172,9 @@ public abstract class GFXEnv {
      * Sets the Browser window.location.hash (if running in browser).
      */
     public void setBrowserWindowLocationHash(String aString)  { }
+
+    /**
+     * Executes a process.
+     */
+    public Object execProcess(String[] args)  { return null; }
 }
