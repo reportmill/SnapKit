@@ -53,9 +53,10 @@ public class RecentFilesSite extends WebSite {
 
         // Iterate over rootDir files and recent files and set each as link
         for (int i = 0; i < recentFiles.length; i++) {
-            WebURL recentFileURL = recentFiles[i].getURL();
+            WebFile recentFile = recentFiles[i];
+            WebURL recentFileURL = recentFile.getURL();
             String recentFilePath = "/RecentFile-" + i + "-" + recentFileURL.getFilename();
-            FileHeader fileHdr = fileHeaders[i] = new FileHeader(recentFilePath, false);
+            FileHeader fileHdr = fileHeaders[i] = new FileHeader(recentFilePath, recentFile.isDir());
             fileHdr.setLastModTime(1000);
             fileHdr.setLinkUrl(recentFileURL);
         }
