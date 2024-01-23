@@ -605,6 +605,10 @@ public class WindowView extends ParentView {
         else {
             _openWins.remove(this);
             _eventDispatcher.dispatchMouseMoveOutsideWindow();
+
+            // Register to check later to exit if still no open windows
+            if (_openWins.size() == 0)
+                ViewUtils.runDelayed(() -> checkForExitWhenAllWindowsClosed(), 250);
         }
     }
 
@@ -774,6 +778,15 @@ public class WindowView extends ParentView {
 
         // Return point
         return new Point(x,y);
+    }
+
+    /**
+     * Called when all windows closed to exit if still no windows after half second.
+     */
+    private static void checkForExitWhenAllWindowsClosed()
+    {
+        if (_openWins.size() == 0)
+            System.exit(0);
     }
 
     /**
