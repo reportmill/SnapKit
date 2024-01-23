@@ -6,6 +6,7 @@
       <Label Margin="0,4,0,4" Text="Root File:" />
       <TextField Name="RootFileText" Margin="0,4,0,4" PrefWidth="412" />
       <Button Name="HomeButton" Margin="0,4,0,6" PrefWidth="24" PrefHeight="24" ToolTip="Go to Home Directory" image="Home.png" />
+      <Button Name="DeleteButton" Margin="0,10,0,6" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" ToolTip="Delete selected file" image="Edit_Delete.png" ShowArea="false" />
     </RowView>
     <BrowserView Name="FileBrowser" Margin="8" GrowWidth="true" GrowHeight="true" PrefColCount="2" />
   </ColView>

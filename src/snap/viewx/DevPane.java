@@ -22,6 +22,9 @@ public class DevPane extends ViewOwner {
     // The TabView
     private TabView  _tabView;
 
+    // The Files inspector
+    private DevPaneFiles _filesInsp;
+
     // The ViewOwners inspector
     private DevPaneViewOwners _viewOwnersInsp;
 
@@ -33,9 +36,6 @@ public class DevPane extends ViewOwner {
 
     // The Console inspector
     private DevPaneConsole _consoleInsp;
-
-    // The Files inspector
-    private DevPaneFiles _filesInsp;
 
     // The Exception inspector
     private DevPaneExceptions  _exceptionInsp;
@@ -56,11 +56,11 @@ public class DevPane extends ViewOwner {
         _content = _rootView.getContent();
 
         // Set DevPanes
+        _filesInsp = new DevPaneFiles();
         _viewOwnersInsp = new DevPaneViewOwners(this);
         _viewsInsp = new DevPaneViews(this);
         _graphicsInsp = new DevPaneGraphics(this);
         _consoleInsp = new DevPaneConsole();
-        _filesInsp = new DevPaneFiles();
     }
 
     /**
@@ -147,11 +147,11 @@ public class DevPane extends ViewOwner {
     {
         // Add tabs
         Tab.Builder tabBuilder = new Tab.Builder(_tabView.getTabBar());
+        tabBuilder.title("Files").contentOwner(_filesInsp).add();
         tabBuilder.title("View Owners").contentOwner(_viewOwnersInsp).add();
         tabBuilder.title("Views").contentOwner(_viewsInsp).add();
         tabBuilder.title("Graphics").contentOwner(_graphicsInsp).add();
         tabBuilder.title("Console").contentOwner(_consoleInsp).add();
-        tabBuilder.title("Files").contentOwner(_filesInsp).add();
 
         // Create CloseBox for TabView.TabBar
         CloseBox closeBox = new CloseBox();

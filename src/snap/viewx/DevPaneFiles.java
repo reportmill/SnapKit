@@ -167,6 +167,10 @@ public class DevPaneFiles extends ViewOwner {
             setSelFile(getHomeDir());
         }
 
+        // Handle DeleteButton
+        if (anEvent.equals("DeleteButton"))
+            deleteSelFile();
+
         // Handle FileBrowser
         if (anEvent.equals("FileBrowser")) {
 
@@ -190,6 +194,26 @@ public class DevPaneFiles extends ViewOwner {
         _fileBrowser.setItems(rootFiles);
         setSelFile(null);
         resetLater();
+    }
+
+    /**
+     * Called to delete selected file.
+     */
+    private void deleteSelFile()
+    {
+        WebFile selFile = getSelFile();
+        String title = "Delete file: " + selFile.getName();
+        String msg = "Are you sure you want to delete file: " + selFile.getName() + "?";
+        boolean returnValue = DialogBox.showConfirmDialog(getUI(), title, msg);
+        if (!returnValue)
+            return;
+
+        // Delete file
+        WebFile parent = selFile.getParent();
+        selFile.delete();
+        parent.resetAndVerify();
+        setSelFile(parent);
+        _fileBrowser.updateItems(new WebFile[] { parent });
     }
 
     /**

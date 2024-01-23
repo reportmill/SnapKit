@@ -239,8 +239,11 @@ public abstract class WebSite {
         // Get file from cache - just return if found
         String filePath = PathUtils.getNormalized(aPath);
         WebFile file = _files.get(filePath);
-        if (file != null)
+        if (file != null) {
+            if (!file.isVerified() || !file.getExists())
+                file._dir = isDir;
             return file;
+        }
 
         // Create and configure new file
         file = new WebFile();
