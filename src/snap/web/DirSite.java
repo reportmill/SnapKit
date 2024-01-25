@@ -114,9 +114,6 @@ public class DirSite extends WebSite {
         WebFile dirFile = getDirFileForPath(filePath);
         if (dirFile != null)
             dirFile.delete();
-
-        // Update response
-        System.out.println("DirSite.doDelete: Probably need to do something more here");
     }
 
     /**
