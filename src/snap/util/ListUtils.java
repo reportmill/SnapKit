@@ -280,6 +280,16 @@ public class ListUtils {
     }
 
     /**
+     * Returns a mapped array for given original list and Function, removing nulls.
+     */
+    public static <T,R> R[] mapNonNullToArray(Collection<T> aList, Function<? super T, ? extends R> aFunction, Class<R> aClass)
+    {
+        Stream<R> filteredStream = aList.stream().map(aFunction);
+        Stream<R> filteredNonNull = filteredStream.filter(item -> item != null);
+        return filteredNonNull.toArray(size -> (R[]) Array.newInstance(aClass, size));
+    }
+
+    /**
      * Returns whether given collection has match for given predicate.
      */
     public static <T> boolean hasMatch(Collection<T> aList, Predicate<? super T> aPred)
