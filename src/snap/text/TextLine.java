@@ -233,9 +233,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     {
         for (TextRun run : getRuns())
             run.setStyle(aStyle);
-        _width = _height = -1;
-        _tokens = null;
-        _textMetrics = null;
+        updateLineStyle();
     }
 
     /**
@@ -707,10 +705,23 @@ public class TextLine implements CharSequenceX, Cloneable {
             length += run.length();
         }
 
+        // Update line style
+        updateLineStyle();
+    }
+
+    /**
+     * Updates line style.
+     */
+    protected void updateLineStyle()
+    {
         // Clear Width, Tokens
         _width = _height = -1;
         _tokens = null;
         _textMetrics = null;
+
+        // Update Lines
+        if (_textBlock != null)
+            _textBlock.resetLineYForLinesAfterIndex(getIndex());
     }
 
     /**

@@ -1304,6 +1304,20 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
+     * Resets Line Y positions for lines after given line index.
+     */
+    protected void resetLineYForLinesAfterIndex(int lineIndex)
+    {
+        // Iterate over lines beyond given lineIndex and reset Y (stop if line is already reset)
+        for (int i = lineIndex + 1, iMax = _lines.size(); i < iMax; i++) {
+            TextLine line = getLine(i);
+            if (line._y == -1)
+                return;
+            line._y = -1;
+        }
+    }
+
+    /**
      * Updates Lines (Index, Start) from index line to text end.
      */
     protected void updateLines(int anIndex)
