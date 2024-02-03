@@ -2,249 +2,116 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
-import java.util.*;
 import snap.gfx.Color;
-import snap.text.TextDoc;
-import snap.text.TextStyle;
-import snap.util.*;
-import snap.view.*;
+import snap.view.ColView;
+import snap.view.View;
+import snap.view.ViewUtils;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * A TextView subclass with methods to act like a terminal/console.
+ * A view to show console items evaluation.
  */
-public class ConsoleView extends TextArea {
+class ConsoleView extends ColView {
 
-    // The location of the start of next input
-    private int  _inputLoc;
-    
-    // List of previous commands
-    private List <String>  _cmdHistory = new ArrayList<>();
-    
-    // Index of command
-    private int  _cmdHistoryIndex;
-    
-    // The prompt
-    private String  _prompt;
+    // A cache of views for console items
+    private Map<Object,View> _itemViewsCache = new HashMap<>();
 
     /**
-     * Creates new ConsoleView.
+     * Constructor.
      */
     public ConsoleView()
     {
-        setFill(Color.WHITE);
-        setEditable(true);
+        super();
+        setSpacing(6);
+        setFill(new Color(.99));
 
-        // Set RichText by default
-        TextDoc richText = new TextDoc(true);
-        setSourceText(richText);
+        // Set Padding to match TextArea
+        setPadding(5, 5, 5, 5);
     }
 
     /**
-     * Returns the prompt.
+     * Resets the display.
      */
-    public String getPrompt()  { return _prompt; }
-
-    /**
-     * Sets the prompt.
-     */
-    public void setPrompt(String aPrompt)
+    public void resetDisplay()
     {
-        _prompt = aPrompt;
-        if (getTextBlock().length() == 0)
-            append(getPrompt());
+        removeChildren();
+        _itemViewsCache.clear();
     }
 
     /**
-     * Returns the location of the end of the last text appended to console.
+     * Called by shell when there is output.
      */
-    public int getInputLocation()  { return _inputLoc; }
+    public void showObject(Object aValue)
+    {
+        // synchronized (_outputList) {
+        //     if (_outputList.size() + getChildCount() > MAX_OUTPUT_COUNT)
+        //         cancelRun();
+        //     _outputList.add(aValue);
+        //     if (_outputList.size() == 1)
+        //         ViewUtils.runLater(() -> showObjectInEventThread());
+        // }
+
+        // Add output
+        ViewUtils.runLater(() -> showObjectInEventThread(aValue));
+
+        // Yield to show output
+        Thread.yield();
+    }
 
     /**
-     * Handles key events.
+     * Called by shell when there is output.
      */
-    protected void keyPressed(ViewEvent anEvent)
+    private void showObjectInEventThread()
     {
-        // Get key info
-        int keyCode = anEvent.getKeyCode();
-        int inputLoc = getInputLocation();
+        // synchronized (_outputList) {
+        //     for (Object out : _outputList)
+        //         processOutputInEventThread(out);
+        //     _outputList.clear();
+        // }
+    }
 
-        // Handle delete at or before input location
-        if ((keyCode==KeyCode.BACK_SPACE || keyCode==KeyCode.DELETE) && getSelStart()<=inputLoc) {
-            ViewUtils.beep();
-            return;
+    /**
+     * Called by shell when there is output.
+     */
+    private void showObjectInEventThread(Object anObj)
+    {
+        // Get view for output object and add
+        View replView = getViewForReplValue(anObj);
+        if (!replView.isShowing())
+            addChild(replView);
+    }
+
+    /**
+     * Creates a view for given Repl value.
+     */
+    protected View getViewForReplValue(Object aValue)
+    {
+        // Handle simple value: just create/return new view
+        if (isSimpleValue(aValue))
+            return ConsoleViewUtils.createBoxViewForValue(aValue);
+
+        // Handle other values: Get cached view and create if not yet cached
+        View view = _itemViewsCache.get(aValue);
+        if (view == null) {
+            view = ConsoleViewUtils.createBoxViewForValue(aValue);
+            _itemViewsCache.put(aValue, view);
         }
 
-        // Handle command-k
-        if (keyCode==KeyCode.K && anEvent.isMetaDown()) {
-            clearConsole();
-            return;
-        }
-
-        // Handle special keys
-        else switch (keyCode) {
-            case KeyCode.UP: setCommandHistoryPrevious(); anEvent.consume(); break;
-            case KeyCode.DOWN: setCommandHistoryNext(); anEvent.consume(); break;
-            default: super.keyPressed(anEvent);
-        }
-
-        // Reset input location
-        _inputLoc = inputLoc;
-
-        // Handle Enter action
-        if (keyCode==KeyCode.ENTER)
-            processEnterAction();
+        // Return
+        return view;
     }
 
     /**
-     * Called when a key is typed.
+     * Returns whether given value is simple (String, Number, Boolean, Character, Date).
      */
-    protected void keyTyped(ViewEvent anEvent)
+    protected boolean isSimpleValue(Object anObj)
     {
-        // Get keyCode and input location
-        int keyCode = anEvent.getKeyCode();
-        int inputLoc = getInputLocation();
-
-        // Handle cursor out of range
-        if (getSelStart()<inputLoc)
-            setSel(length());
-
-        super.keyTyped(anEvent);
-        _inputLoc = inputLoc;
-    }
-
-    /**
-     * Called when enter is hit.
-     */
-    protected void processEnterAction()
-    {
-        // Get command string
-        String cmd = getInput().trim();
-
-        // Execute command
-        String results = executeCommand(cmd);
-
-        // Append results and new prompt
-        append(results);
-        if (!results.endsWith("\n"))
-            append("\n");
-        append(getPrompt());
-    }
-
-    /**
-     * Appends a string.
-     */
-    public void append(String aString)  { addChars(aString); }
-
-    /**
-     * Override to update input location.
-     */
-    public void replaceChars(String aString, TextStyle aStyle, int aStart, int anEnd, boolean doUpdateSel)
-    {
-        super.replaceChars(aString, aStyle, aStart, anEnd, doUpdateSel);
-        _inputLoc = length();
-    }
-
-    /**
-     * Gets input String from console starting at current input location.
-     */
-    public String getInput()
-    {
-        String input = getText().subSequence(getInputLocation(), length()).toString();
-        _inputLoc = length();
-        return input;
-    }
-
-    /**
-     * Executes command.
-     */
-    public String executeCommand(String aCommand)
-    {
-        // Trim command
-        aCommand = aCommand.trim();
-
-        // Do real execute command
-        String response = executeCommandImpl(aCommand);
-        if (response==null)
-            response = "Command not found";
-
-        // Append last command
-        _cmdHistory.add(aCommand);
-        _cmdHistoryIndex = _cmdHistory.size();
-
-        // Return response
-        return response;
-    }
-
-    /**
-     * Executes command.
-     */
-    protected String executeCommandImpl(String aCommand)
-    {
-        // Handle help
-        if (aCommand.startsWith("help"))
-            return executeHelp(aCommand.substring(4));
-
-        // Handle print command
-        if (aCommand.startsWith("print "))
-            return executePrint(aCommand.substring(6));
-        if (aCommand.startsWith("p "))
-            return executePrint(aCommand.substring(2));
-
-        // Handle clear
-        if (aCommand.startsWith("clear")) {
-            getEnv().runLater(() -> clearConsole());
-            return "";
-        }
-
-        // Return null since command not found
-        return null;
-    }
-
-    /**
-     * Execute a help command.
-     */
-    public String executeHelp(String aCommand)
-    {
-        return "print [ expression ]\nclear";
-    }
-
-    /**
-     * Executes a print command.
-     */
-    public String executePrint(String aCommand)
-    {
-        Object value = KeyChain.getValue(new Object(), aCommand);
-        if (value instanceof Number)
-            value = Convert.getBigDecimal(value);
-        return value.toString();
-    }
-
-    /**
-     * Clears the console.
-     */
-    public void clearConsole()
-    {
-        clear(); _inputLoc = 0;
-        append(_prompt);
-    }
-
-    /**
-     * Sets a command from history.
-     */
-    public void setCommandHistoryPrevious()
-    {
-        _cmdHistoryIndex = MathUtils.clamp(_cmdHistoryIndex-1, 0, _cmdHistory.size());
-        String command = _cmdHistoryIndex<_cmdHistory.size() ? _cmdHistory.get(_cmdHistoryIndex) : "";
-        replaceChars(command, null, getInputLocation(), length(), true);
-    }
-
-    /**
-     * Sets a command from history.
-     */
-    public void setCommandHistoryNext()
-    {
-        _cmdHistoryIndex = MathUtils.clamp(_cmdHistoryIndex+1, 0, _cmdHistory.size());
-        String command = _cmdHistoryIndex<_cmdHistory.size() ? _cmdHistory.get(_cmdHistoryIndex) : "";
-        replaceChars(command, null, getInputLocation(), length(), true);
+        return anObj instanceof Boolean ||
+                anObj instanceof Number ||
+                anObj instanceof String ||
+                anObj instanceof Date;
     }
 }

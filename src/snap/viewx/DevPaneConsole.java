@@ -2,7 +2,6 @@ package snap.viewx;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.text.TextBlock;
-import snap.text.TextBox;
 import snap.text.TextLineStyle;
 import snap.text.TextStyle;
 import snap.util.Convert;
@@ -19,7 +18,7 @@ import java.io.PrintStream;
 public class DevPaneConsole extends ViewOwner {
 
     // The ConsoleView
-    private static ConsoleView  _consoleView;
+    private static DevPaneConsoleTextArea _consoleTextArea;
 
     // A counter of current input
     private int  _inputIndex = 1;
@@ -42,11 +41,11 @@ public class DevPaneConsole extends ViewOwner {
     protected View createUI()
     {
         // Create ConsoleView
-        _consoleView = new DevConsoleView();
-        setFirstFocus(_consoleView);
+        _consoleTextArea = new DevConsoleView();
+        setFirstFocus(_consoleTextArea);
 
         // Create ScrollView for ConsoleView
-        ScrollView scroll = new ScrollView(_consoleView);
+        ScrollView scroll = new ScrollView(_consoleTextArea);
 
         // Create BoxView for ScrollView
         BoxView boxView = new BoxView(scroll, true, true);
@@ -61,8 +60,8 @@ public class DevPaneConsole extends ViewOwner {
     protected void initUI()
     {
         if (_stdOut != null) {
-            _consoleView.addChars(_stdOut._sb.toString(), _stdOut._textStyle);
-            _consoleView.addChars(_stdErr._sb.toString(), _stdErr._textStyle);
+            _consoleTextArea.addChars(_stdOut._sb.toString(), _stdOut._textStyle);
+            _consoleTextArea.addChars(_stdErr._sb.toString(), _stdErr._textStyle);
         }
     }
 
@@ -79,7 +78,7 @@ public class DevPaneConsole extends ViewOwner {
     /**
      * A ConsoleView subclass that works with scanner.
      */
-    private class DevConsoleView extends ConsoleView {
+    private class DevConsoleView extends DevPaneConsoleTextArea {
 
         /**
          * Constructor.
@@ -173,8 +172,8 @@ public class DevPaneConsole extends ViewOwner {
         public void writeString(String aString)
         {
             // Write buff to console
-            if (_consoleView != null)
-                _consoleView.addChars(aString, _textStyle);
+            if (_consoleTextArea != null)
+                _consoleTextArea.addChars(aString, _textStyle);
             else _sb.append(aString);
         }
     }
