@@ -185,6 +185,8 @@ public class RecentFiles extends ViewOwner {
     private static WebFile createFileForURL(WebURL aURL)
     {
         boolean isDir = aURL.getType().length() == 0;
+        if (aURL.getSite() == null)
+            return null;
         return aURL.createFile(isDir);
     }
 
