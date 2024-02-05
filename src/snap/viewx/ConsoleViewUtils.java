@@ -26,7 +26,7 @@ class ConsoleViewUtils {
     // Try to install SnapCharts helper.
     static {
         try {
-            Class<Console.Helper> helperClass = (Class<Console.Helper>) Class.forName("snapcharts.app.QuickChartsUtils");
+            Class<Console.Helper> helperClass = (Class<Console.Helper>) Class.forName("snapcharts.charts.SnapChartsUtils");
             _helper = helperClass.getConstructor().newInstance();
         }
         catch (Exception ignore) { }
