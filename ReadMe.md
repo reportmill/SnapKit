@@ -10,21 +10,36 @@ The drawback is deployment: browser deployment is impossible to beat. This situa
 Java Client adoption and prevented it from being a serious contender for most new development.
 SnapKit is designed to resolve this with no compromises.
 
+* [Overview](#Overview)
+* [SnapKit Inspirations](#Inspirations)
+* [SnapKit Advantages](#Advantages)
+* [The ViewOwner](#ViewOwner)
+* [Graphics Package](#GraphicsPackage)
+* [View Package](#ViewPackage)
+* [SnapBuilder UI Builder](#SnapBuilder)
+* [Integrated Runtime Dev Tools](#DevTools)
+* [3D Graphics Package](#Gfx3dPackage)
+* [Parser Package](#ParsePackage)
+* [Properties Package](#PropsPackage)
+* [Maven and Gradle](#Gradle)
+
 Check out demos of [SnapKit running in the browser](http://www.reportmill.com/snaptea/):
 
 [ ![SnapKit](https://reportmill.com/snaptea/Samples.png)](http://www.reportmill.com/snaptea/)
 
-## Everything in its place
+
+## <a name="Overview">Everything in its place</a>
 
 SnapKit runs optimally everywhere via a high level design where low-level functionality (such as painting, user
 input, system clipboard, drag-and-drop and windowing) is provided via interfaces to the native platform implementation.
-This makes SnapKit itself comparatively small and simple, light-weight and performant. When compiled to the browser
-(via [TeaVM](http://teavm.org)), many apps are only 1 MB in size.
+This makes SnapKit itself comparatively small and simple, light-weight and performant. SnapKit apps run very well in
+the browser with zero modification with the [CheerpJ browser JVM](https://leaningtech.com/what-is-cheerpj/). When
+compiled to the browser with a transpiler (via [TeaVM](http://teavm.org)), many apps are only 1 MB in size.
 
-## So much to love about Swing
+## <a name="Inspirations">SnapKit Inspirations</a>
 
-SnapKit is primarily inspired by Swing, still a favorite with remaining Java desktop developers, despite its age and lack
-of care and attention. Indeed, there are still many things to love about Swing:
+SnapKit is strongly inspired by both Swing and JavaFX. Swing is still a favorite with Java desktop developers, despite
+its age and lack of recent updates. There are still many things developers love:
 
 - Solid view hierarchy and set of controls/components
 
@@ -39,11 +54,8 @@ of care and attention. Indeed, there are still many things to love about Swing:
 - It handles property changes in conventional Java property change manner
 
 - It binds easily with POJOs
-	
 
-## And much to love about JavaFX
-
-JavaFX rewrote the rulebook for Java UI by doing everything different. Still, there was much to love:
+When JavaFX was introduced it rewrote the rulebook for Java UI with dramatic changes, often for the better:
 
 - Easily mix graphics and app controls
 
@@ -58,10 +70,11 @@ JavaFX rewrote the rulebook for Java UI by doing everything different. Still, th
 - It has support for easily defining UI in a separate text file (FXML)
 
 
-## What's to love about SnapKit?
+## <a name="Advantages">SnapKit Advantages</a>
 
-SnapKit tries to be more of a "Swing 2.0". More precisely, it keeps the basic simplicity and standard conventions
-of Swing while adding the visual richness of JavaFX and bringing the whole thing to the browser:
+SnapKit is the right blend of modern and conventional. SnapKit tries to be more of a "Swing 2.0". More precisely, it
+keeps the basic simplicity and standard conventions of Swing while adding the visual richness of JavaFX and bringing the
+whole thing to the browser:
 
 - It provides all the most popular features of Swing and JavaFX (above)
 
@@ -76,12 +89,13 @@ of Swing while adding the visual richness of JavaFX and bringing the whole thing
 - The ViewEvent class unifies all input events for more consistent handling
 
     
-## The ViewOwner
+## <a name="ViewOwner">The ViewOwner</a>
 
-Now here's the thing that really hurt Swing: There was no standard convention for the basics of UI management: Create, Init, Reset, Respond (otherwise known as a "Controller").
+The one thing that may have hurt Swing and JavaFX the most is that there is no standard class to manage the basics of UI
+management: Create, Init, Reset, Respond (otherwise known as the "Controller" in MVC).
     
 This resulted in confusing controller code, with UI controls often having code for all four functions
-in the same place. This is initially simple and attractive, but falls apart when dozens of inter-dependent
+in the same place. Initially this can be deceptively simple and attractive, but falls apart when dozens of inter-dependent
 controls are present and order-dependent updates are necessary.
 
 Here is a simple Swing example that quickly gets out of control when extended to many
@@ -148,7 +162,7 @@ is called automatically when the user interacts with any UI (or explicitly via r
 place to look for all get/set code between controls and the model.
     
     
-## ViewOwner "Universal Accessors"
+## <a name="UniversalAccessors">ViewOwner "Universal Accessors"</a>
 
 As a convenience, ViewOwner will let you get/set values using standard methods and support all controls, which
 avoids having to lookup or remember specific get/set methods for controls. It also provides common type conversions
@@ -181,7 +195,7 @@ public void respondUI(ViewEvent anEvent)
 In addition to get/setViewValue(), there are methods for get/set other View properties: Enabled, Visible, Text, SelectedItem, SelectedIndex.
 
 
-## The Graphics Package
+## <a name="GraphicsPackage">The Graphics Package</a>
 
 One of the great aspects of Swing is the separation and synergy between the core graphics layer (Java2D) and
 the UI layer. SnapKit provides this same separation with the snap.gfx package that contains:
@@ -213,7 +227,7 @@ the UI layer. SnapKit provides this same separation with the snap.gfx package th
 - SoundClip for playing sounds
 
 
-## The View Package
+## <a name="ViewPackage">The View Package</a>
 
 And the essentail part of a good UI kit is the set of classes that model the scene graph and
 standard UI controls.
@@ -347,7 +361,7 @@ This serialization is done by simply defining each serializable property of an o
 
 Here is an example class that can automatically read/write sparse JSON/XML, handle clipboard copy/pase and handle undo:
 
-```
+```java
 /**
  * This class supports automatic read/write (JSON/XML), clipboard copy/pase, user
  * undo/redo and automatic clone()/equals()/hashCode()/toString() implementations.
@@ -408,5 +422,23 @@ public class MyClass extends PropObject {
             default: super.setPropValue(aPropName, aValue); break;
         }
     }
+}
+```
+
+## <a name="Gradle">Including SnapKit with Gradle and Maven</a>
+
+SnapKit can easily be included with build tools like Gradle by referencing the maven package:
+
+```
+repositories {
+
+    // Maven package repo at reportmill.com
+    maven { url 'https://reportmill.com/maven' }
+}
+
+dependencies {
+
+    // Latest release: https://github.com/reportmill/SnapKit/releases
+    implementation 'com.reportmill:snapkit:2024.02'
 }
 ```
