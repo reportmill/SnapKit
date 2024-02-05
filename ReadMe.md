@@ -11,24 +11,24 @@ Java Client adoption and prevented it from being a serious contender for most ne
 SnapKit is designed to resolve this with no compromises.
 
 * [Overview](#Overview)
-* [SnapKit Inspirations](#Inspirations)
-* [SnapKit Advantages](#Advantages)
-* [The ViewOwner](#ViewOwner)
-* [Graphics Package](#GraphicsPackage)
-* [View Package](#ViewPackage)
-* [SnapBuilder UI Builder](#SnapBuilder)
-* [Integrated Runtime Dev Tools](#DevTools)
-* [3D Graphics Package](#Gfx3dPackage)
-* [Parser Package](#ParsePackage)
-* [Properties Package](#PropsPackage)
-* [Maven and Gradle](#Gradle)
+* [SnapKit Inspirations](#snapKit-inspirations)
+* [SnapKit Advantages](#snapKit-advantages)
+* [The ViewOwner](#the-viewowner)
+* [The Graphics Package](#the-graphics-package)
+* [The View Package](#the-view-package)
+* [The SnapBuilder UI Builder](#the-snapbuilder-ui-builder)
+* [Integrated Runtime Developer Tools](#integrated-runtime-developer-tools)
+* [3D Graphics Package](#the-3d-graphics-package)
+* [The Parser Package](#the-parser-package)
+* [The Properties Package](#the-properties-package)
+* [Including SnapKit with Gradle and Maven](#including-snapkit-with-gradle-and-maven)
 
 Check out demos of [SnapKit running in the browser](http://www.reportmill.com/snaptea/):
 
 [ ![SnapKit](https://reportmill.com/snaptea/Samples.png)](http://www.reportmill.com/snaptea/)
 
 
-## <a name="Overview">Everything in its place</a>
+## Overview
 
 SnapKit runs optimally everywhere via a high level design where low-level functionality (such as painting, user
 input, system clipboard, drag-and-drop and windowing) is provided via interfaces to the native platform implementation.
@@ -36,7 +36,7 @@ This makes SnapKit itself comparatively small and simple, light-weight and perfo
 the browser with zero modification with the [CheerpJ browser JVM](https://leaningtech.com/what-is-cheerpj/). When
 compiled to the browser with a transpiler (via [TeaVM](http://teavm.org)), many apps are only 1 MB in size.
 
-## <a name="Inspirations">SnapKit Inspirations</a>
+## SnapKit Inspirations
 
 SnapKit is strongly inspired by both Swing and JavaFX. Swing is still a favorite with Java desktop developers, despite
 its age and lack of recent updates. There are still many things developers love:
@@ -70,7 +70,7 @@ When JavaFX was introduced it rewrote the rulebook for Java UI with dramatic cha
 - It has support for easily defining UI in a separate text file (FXML)
 
 
-## <a name="Advantages">SnapKit Advantages</a>
+## SnapKit Advantages
 
 SnapKit is the right blend of modern and conventional. SnapKit tries to be more of a "Swing 2.0". More precisely, it
 keeps the basic simplicity and standard conventions of Swing while adding the visual richness of JavaFX and bringing the
@@ -89,7 +89,7 @@ whole thing to the browser:
 - The ViewEvent class unifies all input events for more consistent handling
 
     
-## <a name="ViewOwner">The ViewOwner</a>
+## The ViewOwner
 
 The one thing that may have hurt Swing and JavaFX the most is that there is no standard class to manage the basics of UI
 management: Create, Init, Reset, Respond (otherwise known as the "Controller" in MVC).
@@ -195,7 +195,7 @@ public void respondUI(ViewEvent anEvent)
 In addition to get/setViewValue(), there are methods for get/set other View properties: Enabled, Visible, Text, SelectedItem, SelectedIndex.
 
 
-## <a name="GraphicsPackage">The Graphics Package</a>
+## The Graphics Package
 
 One of the great aspects of Swing is the separation and synergy between the core graphics layer (Java2D) and
 the UI layer. SnapKit provides this same separation with the snap.gfx package that contains:
@@ -227,7 +227,7 @@ the UI layer. SnapKit provides this same separation with the snap.gfx package th
 - SoundClip for playing sounds
 
 
-## <a name="ViewPackage">The View Package</a>
+## The View Package
 
 And the essentail part of a good UI kit is the set of classes that model the scene graph and
 standard UI controls.
@@ -274,7 +274,7 @@ standard UI controls.
 
 - DialogBox, FormBuilder: For quickly generating UI for common user input
 
-## <a name="SnapBuilder">SnapBuilder for Building UI</a>
+## The SnapBuilder UI Builder
 
 Because the best line of code is the one you don't have to write, UI is almost always created using the UI builder
 and stored in simple XML files ('.snp' files). Simply create/save a .snp file with the same name as your custom ViewOwner class, and the default ViewOwner.createUI() method will load it.
@@ -284,7 +284,7 @@ As a bonus, you can run SnapBuilder in the browser and even open any UI file fro
 
 [ ![SnapBuilder](https://reportmill.com/snaptea/SnapBuilder/SnapBuilder.gif)](https://reportmill.com/snaptea/SnapBuilder/)
     
-## <a name="DevTools">Integrated Developer Tools</a>
+## Integrated Runtime Developer Tools
 
 If you double-tap the control key in any SnapKit app, a developer console will appear. There are many features
 here to make it easier to debug visual layouts and explore new or large code bases:
@@ -302,7 +302,7 @@ here to make it easier to debug visual layouts and explore new or large code bas
 - Enable Frames-Per-Second paint speed measurement tool
 
 
-## <a name="Gfx3dPackage">The 3D Graphics Package</a>
+## The 3D Graphics Package
 
 The SnapKit **[snap.gfx3d](https://github.com/reportmill/SnapKit/tree/master/src/snap/gfx3d)** package provides a
 elegant 3D api based on OpenGL that uses JOGL on the desktop and WebGL in the browser. This allows
@@ -320,7 +320,7 @@ The 3D package has:
 
 [ ![Sample 3D](http://reportmill.com/SnapCharts/Sample3D.png)](https://reportmill.com/SnapCharts/)
 
-## <a name="ParsePackage">The Parser Package</a>
+## The Parser Package
 
 The SnapKit **[snap.parse](https://github.com/reportmill/SnapKit/tree/master/src/snap/parse)** package
 dynamically generates parsers based on conventional grammar files combined with a rule handler class.
@@ -329,7 +329,7 @@ package to parse PDF and Java are available in separate SnapKit dependent projec
 
 See [SnapCode](https://github.com/reportmill/SnapCode) and [SnapPDF](https://github.com/reportmill/SnapPDF).
 
-## <a name="PropsPackage">The Properties Package</a>
+## The Properties Package
 
 The SnapKit **[snap.props](https://github.com/reportmill/SnapKit/tree/master/src/snap/props)** package provides
 an easy way to serialize Java objects and provides automatic support for read/write (JSON/XML), copy/paste,
@@ -425,7 +425,7 @@ public class MyClass extends PropObject {
 }
 ```
 
-## <a name="Gradle">Including SnapKit with Gradle and Maven</a>
+## Including SnapKit with Gradle and Maven
 
 SnapKit can easily be included with build tools like Gradle by referencing the maven package:
 
