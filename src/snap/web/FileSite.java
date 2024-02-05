@@ -4,7 +4,6 @@
 package snap.web;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
 import snap.util.*;
 
 /**
@@ -75,6 +74,11 @@ public class FileSite extends WebSite {
         if (!javaFile.exists() || !javaFile.canRead())
             return null;
 
+        // If funky apple file, return null
+        String fileName = javaFile.getName();
+        if (fileName.equalsIgnoreCase(".DS_Store"))
+            return null;
+
         // Get file path
         String filePath = getLocalPathForJavaFile(javaFile);
 
@@ -98,6 +102,13 @@ public class FileSite extends WebSite {
      */
     protected FileHeader[] getFileHeadersForJavaFile(File parentFile)
     {
+        // Workaround for WebVM bug on root dir
+        if (SnapUtils.isWebVM && parentFile.getPath().equals("/")) {
+            File f1 = new File("/app"), f2 = new File("/files");
+            File[] files = new File[] { f1, f2 };
+            return ArrayUtils.mapNonNull(files, file -> getFileHeaderForJavaFile(file), FileHeader.class);
+        }
+
         // Get java file children (if null, just return)
         File[] dirFiles = parentFile.listFiles();
         if (dirFiles == null) {
@@ -105,25 +116,8 @@ public class FileSite extends WebSite {
             return new FileHeader[0];
         }
 
-        // Create return list
-        List<FileHeader> fileHeaders = new ArrayList<>(dirFiles.length);
-
-        // Create file headers from child java files
-        for (File childFile : dirFiles) {
-
-            // Skip funky apple files
-            String fileName = childFile.getName();
-            if (fileName.equalsIgnoreCase(".DS_Store"))
-                continue;
-
-            // Get child file header and add to list
-            FileHeader fileHeader = getFileHeaderForJavaFile(childFile);
-            if (fileHeader != null) // Happens with links
-                fileHeaders.add(fileHeader);
-        }
-
-        // Return
-        return fileHeaders.toArray(new FileHeader[0]);
+        // Return file headers for files
+        return ArrayUtils.mapNonNull(dirFiles, file -> getFileHeaderForJavaFile(file), FileHeader.class);
     }
 
     /**
