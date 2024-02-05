@@ -1,8 +1,15 @@
 Copyright (c) Since 2009, ReportMill Software, Inc.
 All rights reserved.
 
+ReportMill intends for SnapKit to be free for any use that needs it to be free.
+Please interpret that liberally: If you have any doubt, contact ReportMill to
+receive an explicit and free license/waiver for your use case.
 
-SnapKit is available via either of two licenses:
+For commercial for-profit entities deriving significant value and/or revenue from SnapKit,
+contact ReportMill directly for a license to meet your needs and provide for the
+health and future development of this project.
+
+In accordance with this, SnapKit is available via either of two licenses:
 
     1. Free GNU General Public License v3.0
        (https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -10,13 +17,9 @@ SnapKit is available via either of two licenses:
     2. Purchased Commercial Unlimited Use and Redistribution License
        (http://reportmill.com/legal/ISV_License.html)
 
-ReportMill intends for SnapKit to be free for any use that needs it to be free.
-Please interpret that liberally: If you have any doubt, contact ReportMill to
-receive a waiver/license for your use case.
-
-For commercial entities in need of a license, contact ReportMill directly for
-a license to meet your needs and provide for the health and future of the
-project.
+Other options are available upon request to meet individual needs. Please contact us
+if we can help with specific requirements for the mutual benefit of SnapKit and the
+community.
 
 Jeff Martin <jeff@reportmill.com>
 ReportMill Software, Inc.
