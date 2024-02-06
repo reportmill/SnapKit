@@ -23,15 +23,6 @@ class ConsoleViewUtils {
     private static final Color DEFAULT_TEXTAREA_FILL = new Color(.95);
     private static final Color DEFAULT_TEXTAREA_TEXTFILL = Color.GRAY2;
 
-    // Try to install SnapCharts helper.
-    static {
-        try {
-            Class<Console.Helper> helperClass = (Class<Console.Helper>) Class.forName("snapcharts.charts.SnapChartsUtils");
-            _helper = helperClass.getConstructor().newInstance();
-        }
-        catch (Exception ignore) { }
-    }
-
     /**
      * Override to support custom content views for response values.
      */
@@ -53,6 +44,10 @@ class ConsoleViewUtils {
         // Handle ViewOwner
         if (value instanceof ViewOwner)
             return createContentViewForViewOwner((ViewOwner) value);
+
+        // If snapcharts class, try to install snapcharts helper
+        if (_helper == null && value != null && value.getClass().getName().startsWith("snapcharts"))
+            installSnapChartsHelper();
 
         // Try SnapCharts helper for Chart, DataSet
         if (_helper != null) {
@@ -207,5 +202,17 @@ class ConsoleViewUtils {
         if (!valueStr.startsWith(className))
             valueStr = className + ": " + aValue;
         return valueStr;
+    }
+
+    /**
+     * This method tries to install snapcharts helper.
+     */
+    private static void installSnapChartsHelper()
+    {
+        try {
+            Class<Console.Helper> helperClass = (Class<Console.Helper>) Class.forName("snapcharts.charts.SnapChartsUtils");
+            _helper = helperClass.getConstructor().newInstance();
+        }
+        catch (Exception ignore) { }
     }
 }
