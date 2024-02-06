@@ -396,8 +396,14 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      */
     public void expandItem(T anItem)
     {
-        // If not expandable, just return
-        if (!isParent(anItem) || isExpanded(anItem) || !getItemsList().contains(anItem)) return;
+        // If not a parent or already expanded, just return
+        if (!isParent(anItem) || isExpanded(anItem))
+            return;
+
+        // Make sure parent is expanded
+        T parent = getParent(anItem);
+        if (parent != null && !isExpanded(parent))
+            expandItem(parent);
 
         // Set item expanded state, reset items and update given item
         setExpanded(anItem, true);
