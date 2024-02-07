@@ -1,4 +1,5 @@
 package snap.util;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -55,6 +56,36 @@ public interface Selectable<T> {
         List<T> items = getItemsList(); if (items==null) return;
         int ind = items.indexOf(anItem);
         setSelIndex(ind);
+    }
+
+    /**
+     * Removes a given item.
+     */
+    default boolean removeItem(T anItem)
+    {
+        List<T> itemsList = getItemsList();
+        List<T> newItemsList = new ArrayList<>(itemsList);
+        boolean didRemove = newItemsList.remove(anItem);
+        if (didRemove)
+            setItemsList(newItemsList);
+        return didRemove;
+    }
+
+    /**
+     * Removes a given item and updates selection.
+     */
+    default void removeItemAndUpdateSel(T anItem)
+    {
+        boolean isSelected = anItem == getSelItem();
+        int selIndex = getSelIndex();
+
+        removeItem(anItem);
+
+        // If item was selected, update to select next item (or previous if last item, or none if only item)
+        if (isSelected) {
+            int newSelIndex = Math.min(selIndex, getItemsList().size() - 1);
+            setSelIndex(newSelIndex);
+        }
     }
 
     /**
