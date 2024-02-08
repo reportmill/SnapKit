@@ -128,7 +128,8 @@ public class HTTPRequest {
         resp._time = System.currentTimeMillis();
 
         // Get connection
-        HttpURLConnection connection = (HttpURLConnection)getURL().openConnection();
+        URL url = getURL();
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
         // Set request method
         String method = getMethod();
@@ -143,8 +144,9 @@ public class HTTPRequest {
         }
 
         // Append cookies
-        if (getCookie() != null)
-            connection.setRequestProperty("Cookie", getCookie());
+        String cookie = getCookie();
+        if (cookie != null)
+            connection.setRequestProperty("Cookie", cookie);
 
         // If bytes are provided append them
         byte[] putBytes = getBytes();
@@ -155,17 +157,9 @@ public class HTTPRequest {
             outStream.flush();
         }
 
-        // Connect
-        else connection.connect();
-
         // Get the response code
         resp._code = connection.getResponseCode();
         resp._message = connection.getResponseMessage();
-
-        // If not HttpURLConnection?
-        //if(connection instanceof HttpURLConnection) { HttpURLConnection huc = (HttpURLConnection)connection;
-        //resp._code = huc.getResponseCode(); resp._message = huc.getResponseMessage(); }
-        //else { resp._code = HTTPResponse.OK; resp._message = "OK"; }
 
         // Get headers and cookies
         for (int i = 1; true; i++) {
