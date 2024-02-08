@@ -131,8 +131,9 @@ public class HTTPRequest {
         HttpURLConnection connection = (HttpURLConnection)getURL().openConnection();
 
         // Set request method
-        if (!getMethod().equals("GET"))
-            connection.setRequestMethod(getMethod());
+        String method = getMethod();
+        if (!method.equals("GET"))
+            connection.setRequestMethod(method);
 
         // Append additional headers
         List<HTTPRequest.Header> headers = getHeaders();
@@ -190,8 +191,10 @@ public class HTTPRequest {
         resp._lastModified = SnapUtils.isTeaVM || SnapUtils.isWebVM ? 0 : connection.getLastModified();
 
         // Get response bytes
-        InputStream inputStream = connection.getInputStream();
-        resp._bytes = SnapUtils.getInputStreamBytes(inputStream);
+        if (!method.equals("HEAD")) {
+            InputStream inputStream = connection.getInputStream();
+            resp._bytes = SnapUtils.getInputStreamBytes(inputStream);
+        }
 
         // Return response
         return resp;
