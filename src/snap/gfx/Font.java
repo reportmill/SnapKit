@@ -47,11 +47,11 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
         try {
             FontFile arialFontFile = FontFile.getArialFontFile();
             Arial10 = new Font(arialFontFile,10d);
-            Arial11 = Arial10.deriveFont(11d);
-            Arial12 = Arial10.deriveFont(12d);
-            Arial13 = Arial10.deriveFont(13d);
-            Arial14 = Arial10.deriveFont(14d);
-            Arial16 = Arial10.deriveFont(16d);
+            Arial11 = Arial10.copyForSize(11d);
+            Arial12 = Arial10.copyForSize(12d);
+            Arial13 = Arial10.copyForSize(13d);
+            Arial14 = Arial10.copyForSize(14d);
+            Arial16 = Arial10.copyForSize(16d);
         }
         catch(Throwable t) {
             t.printStackTrace();
@@ -308,17 +308,20 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns a font with the same family as the receiver but with the given size.
      */
-    public Font deriveFont(double aPointSize)
+    public Font copyForSize(double aPointSize)
     {
-        return aPointSize == _size ? this : new Font(_fontFile, aPointSize);
+        if (aPointSize == _size)
+            return this;
+        return new Font(_fontFile, aPointSize);
     }
 
     /**
      * Returns a font with the same family as the receiver but with size adjusted by given scale factor.
      */
-    public Font scaleFont(double aScale)
+    public Font copyForScale(double aScale)
     {
-        return aScale == 1 ? this : new Font(_fontFile, _size * aScale);
+        double newSize = _size * aScale;
+        return copyForSize(newSize);
     }
 
     /**

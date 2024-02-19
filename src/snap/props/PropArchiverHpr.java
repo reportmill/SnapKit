@@ -131,7 +131,7 @@ public class PropArchiverHpr {
         {
             switch (aPropName) {
                 case Name_Prop: _real = new Font(Convert.stringValue(aValue), 12); break;
-                case Size_Prop: _real = _real.deriveFont(Convert.doubleValue(aValue)); break;
+                case Size_Prop: _real = _real.copyForSize(Convert.doubleValue(aValue)); break;
                 default: super.setPropValue(aPropName, aValue);
             }
         }

@@ -1042,7 +1042,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         for (TextLine line : getLines()) {
             for (TextRun run : line.getRuns()) {
                 TextStyle runStyle = run.getStyle();
-                TextStyle runStyleScaled = runStyle.copyFor(run.getFont().scaleFont(aScale));
+                TextStyle runStyleScaled = runStyle.copyFor(run.getFont().copyForScale(aScale));
                 run.setStyle(runStyleScaled);
             }
         }

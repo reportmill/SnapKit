@@ -212,7 +212,7 @@ public class TextBox extends TextBlock {
         // If FontScale is set, replace style with scaled style
         double fontScale = getFontScale();
         if (fontScale != 1)
-            theStyle = theStyle.copyFor(theStyle.getFont().scaleFont(fontScale));
+            theStyle = theStyle.copyFor(theStyle.getFont().copyForScale(fontScale));
 
         // Do normal version
         super.addChars(theChars, theStyle, anIndex);

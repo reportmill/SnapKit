@@ -219,7 +219,7 @@ public class Styler {
     {
         Font font = getFont();
         double size = isRelative ? font.getSize() + aSize : aSize;
-        Font font2 = font.deriveFont(size);
+        Font font2 = font.copyForSize(size);
         setFont(font2);
     }
 

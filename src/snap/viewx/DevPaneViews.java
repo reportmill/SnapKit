@@ -247,7 +247,7 @@ public class DevPaneViews extends ViewOwner {
             _textView.setText(xml);
             double size = xml.length() > 800 ? 11 : xml.length() > 400 ? 12 : xml.length() > 200 ? 13 : 14;
             if (_textView.getFont().getSize()!=size)
-                _textView.setFont(_textView.getFont().deriveFont(size));
+                _textView.setFont(_textView.getFont().copyForSize(size));
             _updateXML = false;
         }
     }

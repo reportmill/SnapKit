@@ -419,7 +419,7 @@ public class StringView extends View implements Cloneable {
             // Reset fontScale to mid-point of fsHi and fsLo
             double fontScale = (scaleLow + scaleHigh) / 2;
             double fontSize2 = fontSize * fontScale;
-            setFont(font.deriveFont(fontSize2));
+            setFont(font.copyForSize(fontSize2));
 
             double textW = getTextWidth();
             double textH = getTextHeight();
