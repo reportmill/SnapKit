@@ -239,6 +239,21 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
+     * Returns the default font.
+     */
+    public Font getDefaultFont()  { return getDefaultStyle().getFont(); }
+
+    /**
+     * Sets the default font.
+     */
+    public void setDefaultFont(Font aFont)
+    {
+        TextStyle oldTextStyle = getDefaultStyle();
+        TextStyle newTextStyle = oldTextStyle.copyFor(aFont);
+        setDefaultStyle(newTextStyle);
+    }
+
+    /**
      * Returns the current style for TextDoc parent/container (probably a TextArea).
      */
     public TextStyle getParentTextStyle()  { return _parentTextStyle; }
