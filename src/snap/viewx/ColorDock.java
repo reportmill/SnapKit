@@ -94,8 +94,8 @@ public class ColorDock extends View {
      */
     public void setColor(Color aColor, int anIndex)
     {
-        // If beyond 1000, just bail
-        if (anIndex > 1000) return;
+        // If invalid index, just bail
+        if (anIndex < 0 || anIndex > 1000) return;
 
         // Fill list to index
         while(anIndex >= _colors.size())
