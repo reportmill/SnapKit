@@ -424,8 +424,12 @@ public class WindowView extends ParentView {
      */
     public void showCentered(View aView)
     {
-        Point pnt = getScreenLocation(aView, Pos.CENTER, 0, 0);
-        show(null, pnt.x, pnt.y);
+        // Make sure this happens in event thread
+        if (!ViewUtils.isEventThread()) { ViewUtils.runLater(() -> showCentered(aView)); return; }
+
+        // Calculate screen location for view center and show
+        Point screenLoc = getScreenLocation(aView, Pos.CENTER, 0, 0);
+        show(null, screenLoc.x, screenLoc.y);
     }
 
     /**
@@ -433,6 +437,9 @@ public class WindowView extends ParentView {
      */
     public void show(View aView, double aX, double aY)
     {
+        // Make sure this happens in event thread
+        if (!ViewUtils.isEventThread()) { ViewUtils.runLater(() -> show(aView, aX, aY)); return; }
+
         // Set ClientView
         _clientView = aView;
 
@@ -489,6 +496,10 @@ public class WindowView extends ParentView {
      */
     public void show()
     {
+        // Make sure this happens in event thread
+        if (!ViewUtils.isEventThread()) { ViewUtils.runLater(this::show); return; }
+
+        // Forward to helper
         getHelper().show();
     }
 

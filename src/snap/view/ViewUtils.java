@@ -122,7 +122,7 @@ public class ViewUtils {
     /**
      * Returns whether current thread is event dispatch thread.
      */
-    public boolean isEventThread()
+    public static boolean isEventThread()
     {
         ViewEnv viewEnv = ViewEnv.getEnv();
         return viewEnv.isEventThread();
