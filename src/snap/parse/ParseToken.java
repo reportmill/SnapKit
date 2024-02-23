@@ -113,9 +113,11 @@ public interface ParseToken {
         {
             if (_string != null) return _string;
 
+            if (_startCharIndex == _endCharIndex)
+                return "";
+
             CharSequence chars = _text.subSequence(_startCharIndex, _endCharIndex);
-            String string = chars.toString();
-            return _string = string;
+            return _string = chars.toString();
         }
 
         /** Returns the string. */
