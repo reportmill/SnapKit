@@ -42,6 +42,13 @@ public class FileSite extends WebSite {
             return;
         }
 
+        // If case doesn't match, return not found - case-insensitive file systems could be supported, but it could get tricky
+        String filePathReal = getPathForJavaFile(javaFile);
+        if (!filePath.equals(filePathReal)) {
+            aResp.setCode(WebResponse.NOT_FOUND);
+            return;
+        }
+
         // Configure response info (just return if isHead). Need to pre-create FileHeader to fix capitalization.
         aResp.setCode(WebResponse.OK);
         FileHeader fileHeader = getFileHeaderForJavaFile(javaFile);
