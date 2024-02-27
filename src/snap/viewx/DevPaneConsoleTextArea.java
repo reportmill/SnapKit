@@ -75,7 +75,7 @@ public class DevPaneConsoleTextArea extends TextArea {
         }
 
         // Handle command-k
-        if (keyCode==KeyCode.K && anEvent.isMetaDown()) {
+        if (keyCode==KeyCode.K && anEvent.isShortcutDown()) {
             clearConsole();
             return;
         }
