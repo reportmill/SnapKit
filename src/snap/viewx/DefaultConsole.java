@@ -1,4 +1,5 @@
 package snap.viewx;
+import snap.util.SnapUtils;
 import snap.view.View;
 import snap.view.ViewOwner;
 import snap.view.ViewUtils;
@@ -119,6 +120,7 @@ public class DefaultConsole extends ViewOwner implements Console {
         consoleView.setPrefSize(700, 900);
         if (defaultConsole instanceof ViewOwner) {
             ViewOwner viewOwner = (ViewOwner) defaultConsole;
+            viewOwner.getWindow().setMaximized(SnapUtils.isWebVM);
             ViewUtils.runLater(() -> viewOwner.setWindowVisible(true));
         }
     }
