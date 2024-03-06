@@ -229,19 +229,6 @@ public class Tokenizer {
     public final void setLineIndex(int aValue)  { _lineIndex = aValue; }
 
     /**
-     * Returns the current line start index.
-     */
-    public final int getLineStart()  { return _lineStart; }
-
-    /**
-     * Returns the current column index in the current line.
-     */
-    public final int getColumnIndex()
-    {
-        return getCharIndex() - getLineStart();
-    }
-
-    /**
      * Returns the next token.
      */
     public ParseToken getNextToken()

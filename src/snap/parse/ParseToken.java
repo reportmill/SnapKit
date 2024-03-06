@@ -142,7 +142,6 @@ public interface ParseToken {
         public Builder startCharIndex(int aValue)  { _token._startCharIndex = aValue; return this; }
         public Builder endCharIndex(int aValue)  { _token._endCharIndex = aValue; return this; }
         public Builder lineIndex(int aValue)  { _token._lineIndex = aValue; return this; }
-        public Builder startCharIndexInLine(int aValue)  { _token._startCharIndexInLine = aValue; return this; }
 
         // Build method
         public ParseToken build()  { return _token; }

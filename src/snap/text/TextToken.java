@@ -28,9 +28,6 @@ public class TextToken implements Cloneable {
     // The index of token in line
     protected int  _index;
 
-    // The TextRun
-    private TextRun  _textRun;
-
     // An override TextStyle (optional)
     private TextStyle _textStyle;
 
@@ -58,14 +55,13 @@ public class TextToken implements Cloneable {
     /**
      * Constructor.
      */
-    public TextToken(TextLine aTextLine, int startCharIndex, int endCharIndex, TextRun aTextRun)
+    public TextToken(TextLine aTextLine, int startCharIndex, int endCharIndex, TextStyle aTextStyle)
     {
         _textLine = aTextLine;
         _startCharIndex = startCharIndex;
         _endCharIndex = endCharIndex;
-        _textRun = aTextRun;
-        _textStyle = aTextRun.getStyle();
-        _color = aTextRun.getColor();
+        _textStyle = aTextStyle;
+        _color = _textStyle.getColor();
     }
 
     /**
@@ -82,6 +78,11 @@ public class TextToken implements Cloneable {
      * Returns the TextLine.
      */
     public TextLine getTextLine()  { return _textLine; }
+
+    /**
+     * Returns the line index.
+     */
+    public int getLineIndex()  { return _textLine.getIndex(); }
 
     /**
      * Returns the start char index of token in line.
@@ -102,11 +103,6 @@ public class TextToken implements Cloneable {
      * Returns the index of token in line.
      */
     public int getIndex()  { return _index; }
-
-    /**
-     * Returns the TextRun.
-     */
-    public TextRun getTextRun()  { return _textRun; }
 
     /**
      * Returns the TextStyle for token.
@@ -226,14 +222,14 @@ public class TextToken implements Cloneable {
     protected double getWidthForLineRange(int startCharIndex, int endCharIndex, boolean trimCharSpacing)
     {
         // Get run info
-        TextStyle runStyle = _textRun.getStyle();
-        double charSpacing = runStyle.getCharSpacing();
+        TextStyle textStyle = getTextStyle();
+        double charSpacing = textStyle.getCharSpacing();
 
         // Iterate over chars
         double tokenW = 0;
         for (int i = startCharIndex; i < endCharIndex; i++) {
             char loopChar = _textLine.charAt(i);
-            tokenW += runStyle.getCharAdvance(loopChar) + charSpacing;
+            tokenW += textStyle.getCharAdvance(loopChar) + charSpacing;
         }
 
         // If TrimCharSpacing, remove extra spacing
@@ -401,32 +397,32 @@ public class TextToken implements Cloneable {
         int lineLength = aTextLine.length();
 
         // Get Run info
-        TextRun run = aTextLine.getRun(0);
-        int runEnd = run.getEndCharIndex();
+        TextRun textRun = aTextLine.getRun(0);
+        int textRunEnd = textRun.getEndCharIndex();
 
         // Iterate over line chars
         while (tokenStart < lineLength) {
 
             // Find token start: Skip past whitespace
-            while (tokenStart < runEnd && Character.isWhitespace(aTextLine.charAt(tokenStart)))
+            while (tokenStart < textRunEnd && Character.isWhitespace(aTextLine.charAt(tokenStart)))
                 tokenStart++;
 
             // Find token end: Skip to first non-whitespace char
             int tokenEnd = tokenStart;
-            while (tokenEnd < runEnd && !Character.isWhitespace(aTextLine.charAt(tokenEnd)))
+            while (tokenEnd < textRunEnd && !Character.isWhitespace(aTextLine.charAt(tokenEnd)))
                 tokenEnd++;
 
             // If chars found, create/add token
             if (tokenStart < tokenEnd) {
-                TextToken token = new TextToken(aTextLine, tokenStart, tokenEnd, run);
+                TextToken token = new TextToken(aTextLine, tokenStart, tokenEnd, textRun.getStyle());
                 tokens.add(token);
                 tokenStart = tokenEnd;
             }
 
             // If at RunEnd but not LineEnd, update Run info with next run
-            if (tokenStart == runEnd && tokenStart < lineLength) {
-                run = run.getNext();
-                runEnd = run.getEndCharIndex();
+            if (tokenStart == textRunEnd && tokenStart < lineLength) {
+                textRun = textRun.getNext();
+                textRunEnd = textRun.getEndCharIndex();
             }
         }
 
@@ -441,18 +437,17 @@ public class TextToken implements Cloneable {
     {
         TextToken[] tokens = aTextLine.getTokens();
         TextRun textRun = aTextLine.getRun(0);
-        TextStyle runStyle = textRun.getStyle();
-        double charSpacing = runStyle.getCharSpacing();
+        TextStyle textStyle = textRun.getStyle();
+        double charSpacing = textStyle.getCharSpacing();
         int charIndex = 0;
         double tokenX = 0;
 
         for (TextToken token : tokens) {
 
-            // Update runStyle
-            if (token.getTextRun() != textRun) {
-                textRun = token.getTextRun();
-                runStyle = textRun.getStyle();
-                charSpacing = runStyle.getCharSpacing();
+            // Update textStyle
+            if (token.getTextStyle() != textStyle) {
+                textStyle = token.getTextStyle();
+                charSpacing = textStyle.getCharSpacing();
             }
 
             // Find token start: Skip past whitespace
@@ -461,7 +456,7 @@ public class TextToken implements Cloneable {
                 char loopChar = aTextLine.charAt(charIndex);
                 if (loopChar == '\t')
                     tokenX = aTextLine.getXForTabAtIndexAndX(charIndex, tokenX);
-                else tokenX += runStyle.getCharAdvance(loopChar) + charSpacing;
+                else tokenX += textStyle.getCharAdvance(loopChar) + charSpacing;
                 charIndex++;
             }
 

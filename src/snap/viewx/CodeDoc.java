@@ -52,6 +52,7 @@ public class CodeDoc extends TextDoc {
         // Get iteration vars
         List<TextToken> tokens = new ArrayList<>();
         TextRun textRun = aTextLine.getRun(0);
+        TextStyle textStyle = textRun.getStyle();
 
         // Get first token in line
         Exception exception = null;
@@ -70,7 +71,7 @@ public class CodeDoc extends TextDoc {
             int tokenEnd = parseToken.getEndCharIndex();
 
             // Create TextToken
-            TextToken textToken = new TextToken(aTextLine, tokenStart, tokenEnd, textRun);
+            TextToken textToken = new TextToken(aTextLine, tokenStart, tokenEnd, textStyle);
             textToken.setName(parseToken.getName());
             tokens.add(textToken);
 
@@ -92,7 +93,7 @@ public class CodeDoc extends TextDoc {
         if (exception != null) {
             int tokenStart = _tokenizer.getCharIndex();
             int tokenEnd = aTextLine.length();
-            TextToken textToken = new TextToken(aTextLine, tokenStart, tokenEnd, textRun);
+            TextToken textToken = new TextToken(aTextLine, tokenStart, tokenEnd, textStyle);
             tokens.add(textToken);
         }
 
