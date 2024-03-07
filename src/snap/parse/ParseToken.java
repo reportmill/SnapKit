@@ -34,19 +34,9 @@ public interface ParseToken {
     int getLineIndex();
 
     /**
-     * Returns the start char index of this token in line.
-     */
-    int getStartCharIndexInLine();
-
-    /**
      * Returns the column index.
      */
-    default int getColumnIndex()
-    {
-        int textStartCharIndex = getStartCharIndex();
-        int lineStartCharIndex = getStartCharIndexInLine();
-        return textStartCharIndex - lineStartCharIndex;
-    }
+    int getColumnIndex();
 
     /**
      * Returns the string.
@@ -76,8 +66,8 @@ public interface ParseToken {
         // The line index
         protected int  _lineIndex;
 
-        // The line start char index
-        protected int  _startCharIndexInLine;
+        // The column index
+        protected int  _columnIndex;
 
         // The string
         protected String  _string;
@@ -105,8 +95,8 @@ public interface ParseToken {
         /** Returns the line index. */
         public int getLineIndex()  { return _lineIndex; }
 
-        /** Returns the line start. */
-        public int getStartCharIndexInLine()  { return _startCharIndexInLine; }
+        /** Returns the column index. */
+        public int getColumnIndex()  { return _columnIndex; }
 
         /** Returns the string. */
         public String getString()
@@ -141,7 +131,6 @@ public interface ParseToken {
         public Builder pattern(String aString)  { _token._pattern = aString; return this; }
         public Builder startCharIndex(int aValue)  { _token._startCharIndex = aValue; return this; }
         public Builder endCharIndex(int aValue)  { _token._endCharIndex = aValue; return this; }
-        public Builder lineIndex(int aValue)  { _token._lineIndex = aValue; return this; }
 
         // Build method
         public ParseToken build()  { return _token; }

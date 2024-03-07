@@ -334,7 +334,7 @@ public class Tokenizer {
         token._startCharIndex = aStart;
         token._endCharIndex = anEnd;
         token._lineIndex = _lineIndex;
-        token._startCharIndexInLine = _lineStart;
+        token._columnIndex = _lineStart - aStart;
         return token;
     }
 
