@@ -298,15 +298,31 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Adds characters with attributes to this text at given index.
+     * Adds characters to this text.
      */
     public void addChars(CharSequence theChars)
     {
-        addChars(theChars, null, length());
+        addChars(theChars, length());
     }
 
     /**
-     * Adds characters with attributes to this text at given index.
+     * Adds characters with given style to this text.
+     */
+    public void addChars(CharSequence theChars, TextStyle theStyle)
+    {
+        addChars(theChars, theStyle, length());
+    }
+
+    /**
+     * Adds characters to this text at given index.
+     */
+    public void addChars(CharSequence theChars, int anIndex)
+    {
+        addChars(theChars, null, anIndex);
+    }
+
+    /**
+     * Adds characters with given style to this text at given index.
      */
     public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
     {

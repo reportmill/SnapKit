@@ -68,7 +68,7 @@ public class TextBox extends TextBlock {
     public TextBox(CharSequence theChars)
     {
         this();
-        addChars(theChars, null, 0);
+        addChars(theChars);
     }
 
     /**

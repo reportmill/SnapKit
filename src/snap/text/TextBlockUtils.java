@@ -243,7 +243,7 @@ public class TextBlockUtils {
     {
         // Get map for run attributes
         TextStyle style = textBlock.getDefaultStyle();
-        TextLineStyle lstyle = null;
+        TextLineStyle lineStyle = null;
 
         // Iterate over child elements to snag common attributes
         for (int i = 0, iMax = anElement.size(); i < iMax; i++) {
@@ -254,10 +254,10 @@ public class TextBlockUtils {
                 String str = e.getValue();
                 if (str == null || str.length() == 0) continue;
                 int len = textBlock.length();
-                textBlock.addChars(str, style, len);
-                if (lstyle != null) {
-                    textBlock.setLineStyle(lstyle, len, len + str.length());
-                    lstyle = null;
+                textBlock.addChars(str, style);
+                if (lineStyle != null) {
+                    textBlock.setLineStyle(lineStyle, len, len + str.length());
+                    lineStyle = null;
                 }
             }
 
@@ -281,7 +281,7 @@ public class TextBlockUtils {
 
             // Unarchive pgraph element
             else if (e.getName().equals("pgraph"))
-                lstyle = anArchiver.fromXML(e, TextLineStyle.class, null);
+                lineStyle = anArchiver.fromXML(e, TextLineStyle.class, null);
 
                 // Unarchive underline element
             else if (e.getName().equals("underline")) {
@@ -353,7 +353,7 @@ public class TextBlockUtils {
 
             if (oldValue != null)
                 textBlock.removeChars(index, index + ((CharSequence) oldValue).length());
-            else textBlock.addChars((CharSequence) newValue, null, index);
+            else textBlock.addChars((CharSequence) newValue, index);
         }
 
         public PropChange merge(PropChange anEvent)
