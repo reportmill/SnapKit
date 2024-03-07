@@ -825,19 +825,33 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     /**
      * Returns the block at the given char index.
      */
-    public TextLine getLineForCharIndex(int anIndex)
+    public TextLine getLineForCharIndex(int charIndex)
     {
-        // Iterate over lines and return line containing char index
-        for (TextLine line : _lines)
-            if (anIndex < line.getEndCharIndex())
-                return line;
+        // Check for index outside bounds or index at end
+        int length = length();
+        if (charIndex < 0 || charIndex >= length) {
+            if (charIndex == length)
+                return getLastLine();
+            throw new IndexOutOfBoundsException("Index " + charIndex + " outside bounds " + length);
+        }
 
-        // If index of text end, return last
-        if (anIndex == length())
-            return getLastLine();
+        // Get Low/high indexes
+        int lowIndex = 0;
+        int highIndex = getLineCount() - 1;
 
-        // Complain
-        throw new IndexOutOfBoundsException("Index " + anIndex + " beyond " + length());
+        // Iterate over lines until found
+        while (lowIndex <= highIndex) {
+            int midIndex = (lowIndex + highIndex) / 2;
+            TextLine textLine = getLine(midIndex);
+            if (charIndex < textLine.getStartCharIndex())
+                highIndex = midIndex - 1;
+            else if (charIndex >= textLine.getEndCharIndex())
+                lowIndex = midIndex + 1;
+            else return textLine;
+        }
+
+        // Should be impossible - lines would have to be misconfigured
+        throw new IndexOutOfBoundsException("Index not found " + charIndex + " beyond " + length());
     }
 
     /**
