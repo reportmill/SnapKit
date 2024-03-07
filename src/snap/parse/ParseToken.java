@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.parse;
+import snap.util.CharRange;
 
 /**
  * Represents an individual 'word' from parsed text.
@@ -63,11 +64,8 @@ public interface ParseToken {
         // The end char index
         protected int  _endCharIndex;
 
-        // The line index
-        protected int  _lineIndex;
-
-        // The column index
-        protected int  _columnIndex;
+        // The CharRange line to get LineIndex and ColumnIndex
+        private CharRange _charRangeLine;
 
         // The string
         protected String  _string;
@@ -93,10 +91,25 @@ public interface ParseToken {
         public int getEndCharIndex()  { return _endCharIndex; }
 
         /** Returns the line index. */
-        public int getLineIndex()  { return _lineIndex; }
+        public int getLineIndex()
+        {
+            CharRange charRangeLine = getCharRangeLine();
+            return charRangeLine.getLineIndex();
+        }
 
         /** Returns the column index. */
-        public int getColumnIndex()  { return _columnIndex; }
+        public int getColumnIndex()
+        {
+            CharRange charRangeLine = getCharRangeLine();
+            return charRangeLine.getColumnIndex();
+        }
+
+        /** Returns the CharRangeLine. */
+        private CharRange getCharRangeLine()
+        {
+            if (_charRangeLine != null) return _charRangeLine;
+            return _charRangeLine = CharRange.getCharRangeLineForCharIndex(_text, _startCharIndex);
+        }
 
         /** Returns the string. */
         public String getString()

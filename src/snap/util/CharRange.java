@@ -52,6 +52,16 @@ public interface CharRange extends CharSequenceX {
     }
 
     /**
+     * Returns a char range for line at given char index.
+     */
+    static CharRange getCharRangeLineForCharIndex(CharSequence theChars, int charIndex)
+    {
+        if (theChars instanceof CharSequenceX)
+            return ((CharSequenceX) theChars).getCharRangeLineForCharIndex(charIndex);
+        return CharRange.newCharRangeLineForCharsAndCharIndex(theChars, charIndex);
+    }
+
+    /**
      * Creates a CharRange for given chars and start/end char indexes.
      */
     static CharRange newCharRangeLineForCharsAndCharIndex(CharSequence theChars, int charIndex)
@@ -60,7 +70,7 @@ public interface CharRange extends CharSequenceX {
         int lineStartCharIndex = 0;
         int nextLineStartCharIndex = CharSequenceUtils.indexAfterNewline(theChars, lineStartCharIndex);
         int lineIndex = 0;
-        while (nextLineStartCharIndex >= 0 && nextLineStartCharIndex < charIndex) {
+        while (nextLineStartCharIndex > 0 && nextLineStartCharIndex < charIndex) {
             lineStartCharIndex = nextLineStartCharIndex;
             lineIndex++;
             nextLineStartCharIndex = CharSequenceUtils.indexAfterNewline(theChars, lineStartCharIndex);

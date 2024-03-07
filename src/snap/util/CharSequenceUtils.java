@@ -53,6 +53,15 @@ public class CharSequenceUtils {
     }
 
     /**
+     * Returns index just beyond next newline (or carriage-return/newline) in given chars starting at given char index.
+     */
+    public static int indexAfterNewlineOrEnd(CharSequence theChars, int aStart)
+    {
+        int index = indexAfterNewline(theChars, aStart);
+        return index > 0 ? index : theChars.length();
+    }
+
+    /**
      * Returns index of the previous newline (or carriage-return/newline) in given chars starting at given char index.
      */
     public static int lastIndexOfNewline(CharSequence theChars, int aStart)

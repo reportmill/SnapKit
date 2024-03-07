@@ -22,9 +22,6 @@ public class Tokenizer {
     // The current char index
     protected int  _charIndex;
 
-    // The current line index and line start char index
-    protected int  _lineIndex, _lineStart;
-
     // The list of regular expression objects
     private List<Regex>  _regexList = new ArrayList<>();
 
@@ -61,7 +58,7 @@ public class Tokenizer {
     {
         _input = anInput;
         _length = _input.length();
-        _charIndex = _lineIndex = _lineStart = 0;
+        _charIndex = 0;
 
         // Reset matchers
         for (Regex regex : _regexList)
@@ -133,8 +130,6 @@ public class Tokenizer {
         if (eatChar == '\n' || eatChar == '\r') {
             if (eatChar == '\r' && hasChar() && getChar() == '\n')
                 _charIndex++;
-            _lineIndex++;
-            _lineStart = _charIndex;
         }
 
         // Return
@@ -142,20 +137,9 @@ public class Tokenizer {
     }
 
     /**
-     * Returns the next given number of chars as a string.
-     */
-    public final String getChars(int aValue)
-    {
-        return _input.subSequence(_charIndex, _charIndex + aValue).toString();
-    }
-
-    /**
      * Returns the current parse char location.
      */
-    public final int getCharIndex()
-    {
-        return _charIndex;
-    }
+    public final int getCharIndex()  { return _charIndex; }
 
     /**
      * Sets the current parse char location.
@@ -163,7 +147,6 @@ public class Tokenizer {
     public void setCharIndex(int aValue)
     {
         _charIndex = aValue;
-        _lineStart = aValue;
     }
 
     /**
@@ -217,16 +200,6 @@ public class Tokenizer {
         if (_regexes != null) return _regexes;
         return _regexes = _regexList.toArray(new Regex[0]);
     }
-
-    /**
-     * Returns the current line index.
-     */
-    public final int getLineIndex()  { return _lineIndex; }
-
-    /**
-     * Returns the current line index.
-     */
-    public final void setLineIndex(int aValue)  { _lineIndex = aValue; }
 
     /**
      * Returns the next token.
@@ -333,8 +306,6 @@ public class Tokenizer {
         token._pattern = aPattern;
         token._startCharIndex = aStart;
         token._endCharIndex = anEnd;
-        token._lineIndex = _lineIndex;
-        token._columnIndex = _lineStart - aStart;
         return token;
     }
 

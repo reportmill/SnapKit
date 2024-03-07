@@ -125,18 +125,8 @@ public class CodeTokenizer extends Tokenizer {
 
             // Update CharIndex to line end
             int tokenStart = _charIndex;
-            _charIndex += 2;
-            _charIndex = CharSequenceUtils.indexAfterNewline(getInput(), _charIndex);
-
-            // If no newline in input, set to end
-            if (_charIndex < 0)
-                _charIndex = length();
-
-                // Otherwise, update LineIndex, LineStart for next line
-            else {
-                _lineIndex++;
-                _lineStart = _charIndex;
-            }
+            CharSequence inputChars = getInput();
+            _charIndex = CharSequenceUtils.indexAfterNewlineOrEnd(inputChars, _charIndex);
 
             // Create/return new special token
             return createToken(SINGLE_LINE_COMMENT, null, tokenStart, _charIndex, null);
