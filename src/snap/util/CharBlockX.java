@@ -66,7 +66,7 @@ public class CharBlockX extends PropObject implements CharBlock {
     }
 
     /**
-     * Updates Lines (Index, Start) from index line to text end.
+     * Updates Lines from index line to text end to account for changed line.
      */
     protected void updateLines(int anIndex)
     {
@@ -77,10 +77,18 @@ public class CharBlockX extends PropObject implements CharBlock {
         // Iterate over lines beyond BaseLine and update Index, Start, Length and Y
         for (int i = anIndex + 1, iMax = _lines.size(); i < iMax; i++) {
             CharLineX line = (CharLineX) getLine(i);
-            line._index = i;
-            line._startCharIndex = _length;
+            updateLine(line, i, _length);
             _length += line.length();
         }
+    }
+
+    /**
+     * Updates an individual line for new index and start char index.
+     */
+    protected void updateLine(CharLineX textLine, int newIndex, int newStartCharIndex)
+    {
+        textLine._index = newIndex;
+        textLine._startCharIndex = newStartCharIndex;
     }
 
     /**

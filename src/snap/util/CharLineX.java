@@ -9,7 +9,7 @@ package snap.util;
 public class CharLineX implements CharLine {
 
     // The source char lines
-    protected CharBlock _charBlock;
+    protected CharBlockX _charBlock;
 
     // A string builder to hold line chars
     private StringBuilder _sb = new StringBuilder();
@@ -23,7 +23,7 @@ public class CharLineX implements CharLine {
     /**
      * Constructor.
      */
-    public CharLineX(CharBlock charBlock, int startCharIndex)
+    public CharLineX(CharBlockX charBlock, int startCharIndex)
     {
         super();
         _charBlock = charBlock;
@@ -35,6 +35,36 @@ public class CharLineX implements CharLine {
      */
     @Override
     public CharBlock getCharBlock()  { return _charBlock; }
+
+    /**
+     * Adds characters to this line at given index.
+     */
+    protected void addChars(CharSequence theChars, int anIndex)
+    {
+        // Add chars and update text
+        _sb.insert(anIndex, theChars);
+        updateText();
+    }
+
+    /**
+     * Removes characters in given range.
+     */
+    public void removeChars(int aStart, int anEnd)
+    {
+        // Remove chars and update text
+        _sb.delete(aStart, anEnd);
+        updateText();
+    }
+
+    /**
+     * Updates text.
+     */
+    protected void updateText()
+    {
+        // Update Lines
+        if (_charBlock != null)
+            _charBlock.updateLines(getIndex());
+    }
 
     /**
      * Returns the index of this line

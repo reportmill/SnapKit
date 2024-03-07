@@ -1378,11 +1378,19 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         // Iterate over lines beyond BaseLine and update Index, Start, Length and Y
         for (int i = anIndex + 1, iMax = _lines.size(); i < iMax; i++) {
             TextLine line = getLine(i);
-            line._index = i;
-            line._startCharIndex = _length;
-            line._y = -1;
+            updateLine(line, i, _length);
             _length += line.length();
         }
+    }
+
+    /**
+     * Updates an individual line for new index and start char index.
+     */
+    protected void updateLine(TextLine textLine, int newIndex, int newStartCharIndex)
+    {
+        textLine._index = newIndex;
+        textLine._startCharIndex = newStartCharIndex;
+        textLine._y = -1;
     }
 
     /**
