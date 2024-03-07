@@ -17,61 +17,6 @@ public class RichTextLine extends TextLine {
     }
 
     /**
-     * Adds characters with attributes to this line at given index.
-     */
-    @Override
-    public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
-    {
-        // Get run at index for style and add length
-        TextRun run = getRunForCharIndexAndStyle(anIndex, theStyle);
-        run.addLength(theChars.length());
-
-        // Add chars
-        _sb.insert(anIndex, theChars);
-        updateRuns(run.getIndex());
-        updateText();
-    }
-
-    /**
-     * Returns the run to add chars to for given style and char index.
-     * Will try to use any adjacent run with conforming style, otherwise, will create/add new.
-     */
-    private TextRun getRunForCharIndexAndStyle(int charIndex, TextStyle aStyle)
-    {
-        // Get run at index (just return if style is null or equal)
-        TextRun run = getRunForCharIndex(charIndex);
-        if (aStyle == null || aStyle.equals(run.getStyle()))
-            return run;
-
-        // If empty, just set style and return
-        if (run.length() == 0) {
-            run.setStyle(aStyle);
-            return run;
-        }
-
-        // If charIndex at run end and next run has same style, return it instead
-        if (charIndex == run.getEndCharIndex()) {
-            TextRun nextRun = run.getNext();
-            if (nextRun != null && aStyle.equals(nextRun.getStyle()))
-                return nextRun;
-        }
-
-        // Get index to insert new run (need to split run if charIndex in middle)
-        int newRunIndex = run.getIndex();
-        if (charIndex > run.getStartCharIndex()) {
-            newRunIndex++;
-            if (charIndex < run.getEndCharIndex())
-                splitRunForCharIndex(run, charIndex - run.getStartCharIndex());
-        }
-
-        // Create new run for new chars, add and return
-        TextRun newRun = createRun();
-        newRun.setStyle(aStyle);
-        addRun(newRun, newRunIndex);
-        return newRun;
-    }
-
-    /**
      * Removes characters in given range.
      */
     @Override

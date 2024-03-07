@@ -112,17 +112,33 @@ public class TextLine implements CharSequenceX, Cloneable {
     public int getIndex()  { return _index; }
 
     /**
-     * Adds characters with attributes to this line at given index.
+     * Adds characters to this line at given index.
      */
-    public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
+    protected void addChars(CharSequence theChars, int anIndex)
     {
         // Add length to run
-        TextRun run = getRun(0);
+        TextRun run = getRunForCharIndex(anIndex);
         run.addLength(theChars.length());
 
         // Add chars
         _sb.insert(anIndex, theChars);
+
+        // Update runs and text
+        updateRuns(run.getIndex());
         updateText();
+    }
+
+    /**
+     * Adds characters with text style to this line at given index.
+     */
+    protected void addCharsWithStyle(CharSequence theChars, TextStyle aStyle, int anIndex)
+    {
+        // Add characters
+        addChars(theChars, anIndex);
+
+        // Set style
+        if (aStyle != null && !aStyle.equals(getRunForCharIndex(anIndex).getStyle()))
+            setStyle(aStyle, anIndex, anIndex + theChars.length());
     }
 
     /**
@@ -234,6 +250,18 @@ public class TextLine implements CharSequenceX, Cloneable {
         for (TextRun run : getRuns())
             run.setStyle(aStyle);
         updateLineStyle();
+    }
+
+    /**
+     * Sets the style for the given range.
+     */
+    protected void setStyle(TextStyle aStyle, int startCharIndex, int endCharIndex)
+    {
+        // Forward to textBlock - though I think it should be the other way around
+        int lineStartCharIndex = getStartCharIndex();
+        int startCharIndexInText = lineStartCharIndex + startCharIndex;
+        int endCharIndexInText = lineStartCharIndex + endCharIndex;
+        _textBlock.setStyle(aStyle, startCharIndexInText, endCharIndexInText);
     }
 
     /**

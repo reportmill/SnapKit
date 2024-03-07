@@ -113,9 +113,18 @@ public class TextBox extends TextBlock {
      * Override to forward to source text block.
      */
     @Override
-    public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
+    public void addChars(CharSequence theChars, int anIndex)
     {
-        _sourceText.addChars(theChars, theStyle, anIndex);
+        _sourceText.addChars(theChars, anIndex);
+    }
+
+    /**
+     * Override to forward to source text block.
+     */
+    @Override
+    public void addCharsWithStyle(CharSequence theChars, TextStyle theStyle, int anIndex)
+    {
+        _sourceText.addCharsWithStyle(theChars, theStyle, anIndex);
     }
 
     /**
@@ -215,7 +224,11 @@ public class TextBox extends TextBlock {
             theStyle = theStyle.copyFor(theStyle.getFont().copyForScale(fontScale));
 
         // Do normal version
-        super.addChars(theChars, theStyle, anIndex);
+        super.addChars(theChars, anIndex);
+
+        // If style is provided and different from insertion style, set style
+        if (theStyle != null && !theStyle.equals(getStyleForCharIndex(anIndex)))
+            super.setStyle(theStyle, anIndex, anIndex + theChars.length());
 
         // If linked, remove any lines below bounds
         if (isLinked())

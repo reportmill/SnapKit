@@ -254,7 +254,7 @@ public class TextBlockUtils {
                 String str = e.getValue();
                 if (str == null || str.length() == 0) continue;
                 int len = textBlock.length();
-                textBlock.addChars(str, style);
+                textBlock.addCharsWithStyle(str, style);
                 if (lineStyle != null) {
                     textBlock.setLineStyle(lineStyle, len, len + str.length());
                     lineStyle = null;
