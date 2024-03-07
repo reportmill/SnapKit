@@ -41,8 +41,11 @@ public class CharSequenceUtils {
     {
         for (int i = aStart, iMax = theChars.length(); i < iMax; i++) {
             char c = theChars.charAt(i);
-            if (c == '\r')
-                return i + 1 < iMax && theChars.charAt(i + 1) == '\n' ? (i + 2) : (i + 1);
+            if (c == '\r') {
+                if (i + 1 < iMax && theChars.charAt(i + 1) == '\n')
+                    return i + 2;
+                return i + 1;
+            }
             if (c == '\n')
                 return i + 1;
         }
