@@ -1,8 +1,9 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.util;
+package snap.text;
 import snap.props.PropObject;
+import snap.util.CharSequenceX;
 import java.util.ArrayList;
 import java.util.List;
 

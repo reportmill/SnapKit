@@ -39,6 +39,14 @@ public interface CharSequenceX extends CharSequence {
     }
 
     /**
+     * Returns index just beyond next newline (or carriage-return/newline) starting at given char index or chars end if no newline.
+     */
+    default int indexAfterNewlineOrEnd(int aStart)
+    {
+        return CharSequenceUtils.indexAfterNewlineOrEnd(this, aStart);
+    }
+
+    /**
      * Returns index of the previous newline (or carriage-return/newline) starting at given char index.
      */
     default int lastIndexOfNewline(int aStart)
@@ -115,6 +123,11 @@ public interface CharSequenceX extends CharSequence {
      */
     default CharRange getCharRangeLineForCharIndex(int charIndex)
     {
+        // If this CharSequence is CharRange for a line, just return it
+        if (this instanceof CharRange && indexAfterNewlineOrEnd(0) == length())
+            return (CharRange) this;
+
+        // Create CharRange for line containing char index
         return CharRange.newCharRangeLineForCharsAndCharIndex(this, charIndex);
     }
 }

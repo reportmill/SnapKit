@@ -1,7 +1,8 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.util;
+package snap.text;
+import snap.util.CharSequenceX;
 
 /**
  * This class represents a line of chars in a CharBlock.
