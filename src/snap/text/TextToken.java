@@ -5,8 +5,6 @@ package snap.text;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.util.StringUtils;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class represents a 'word' in a TextLine.
@@ -392,53 +390,9 @@ public class TextToken implements Cloneable {
     }
 
     /**
-     * Returns the tokens.
-     */
-    public static TextToken[] createTokensForTextLine(TextLine aTextLine)
-    {
-        // Loop vars
-        List<TextToken> tokens = new ArrayList<>();
-        int tokenStart = 0;
-        int lineLength = aTextLine.length();
-
-        // Get Run info
-        TextRun textRun = aTextLine.getRun(0);
-        int textRunEnd = textRun.getEndCharIndex();
-
-        // Iterate over line chars
-        while (tokenStart < lineLength) {
-
-            // Find token start: Skip past whitespace
-            while (tokenStart < textRunEnd && Character.isWhitespace(aTextLine.charAt(tokenStart)))
-                tokenStart++;
-
-            // Find token end: Skip to first non-whitespace char
-            int tokenEnd = tokenStart;
-            while (tokenEnd < textRunEnd && !Character.isWhitespace(aTextLine.charAt(tokenEnd)))
-                tokenEnd++;
-
-            // If chars found, create/add token
-            if (tokenStart < tokenEnd) {
-                TextToken token = new TextToken(aTextLine, tokenStart, tokenEnd, textRun.getStyle());
-                tokens.add(token);
-                tokenStart = tokenEnd;
-            }
-
-            // If at RunEnd but not LineEnd, update Run info with next run
-            if (tokenStart == textRunEnd && tokenStart < lineLength) {
-                textRun = textRun.getNext();
-                textRunEnd = textRun.getEndCharIndex();
-            }
-        }
-
-        // Return
-        return tokens.toArray(new TextToken[0]);
-    }
-
-    /**
      * Sets the X values for tokens in line.
      */
-    public static void setTokensX(TextLine aTextLine)
+    private static void setTokensX(TextLine aTextLine)
     {
         TextToken[] tokens = aTextLine.getTokens();
         TextRun textRun = aTextLine.getRun(0);

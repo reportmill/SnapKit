@@ -9,7 +9,6 @@ import snap.gfx.Painter;
 import snap.props.PropChange;
 import snap.util.XMLArchiver;
 import snap.util.XMLElement;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -137,6 +136,50 @@ public class TextBlockUtils {
                 lineMaxX = textLine.getX() + textLine.getWidthNoWhiteSpace();
             aPntr.drawLine(lineX, lineY, lineMaxX, lineY);
         }
+    }
+
+    /**
+     * Returns the tokens.
+     */
+    public static TextToken[] createTokensForTextLine(TextLine aTextLine)
+    {
+        // Loop vars
+        List<TextToken> tokens = new ArrayList<>();
+        int tokenStart = 0;
+        int lineLength = aTextLine.length();
+
+        // Get Run info
+        TextRun textRun = aTextLine.getRun(0);
+        int textRunEnd = textRun.getEndCharIndex();
+
+        // Iterate over line chars
+        while (tokenStart < lineLength) {
+
+            // Find token start: Skip past whitespace
+            while (tokenStart < textRunEnd && Character.isWhitespace(aTextLine.charAt(tokenStart)))
+                tokenStart++;
+
+            // Find token end: Skip to first non-whitespace char
+            int tokenEnd = tokenStart;
+            while (tokenEnd < textRunEnd && !Character.isWhitespace(aTextLine.charAt(tokenEnd)))
+                tokenEnd++;
+
+            // If chars found, create/add token
+            if (tokenStart < tokenEnd) {
+                TextToken token = new TextToken(aTextLine, tokenStart, tokenEnd, textRun.getStyle());
+                tokens.add(token);
+                tokenStart = tokenEnd;
+            }
+
+            // If at RunEnd but not LineEnd, update Run info with next run
+            if (tokenStart == textRunEnd && tokenStart < lineLength) {
+                textRun = textRun.getNext();
+                textRunEnd = textRun.getEndCharIndex();
+            }
+        }
+
+        // Return
+        return tokens.toArray(new TextToken[0]);
     }
 
     /**

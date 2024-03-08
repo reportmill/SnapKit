@@ -1349,7 +1349,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     protected TextToken[] createTokensForTextLine(TextLine aTextLine)
     {
-        return TextToken.createTokensForTextLine(aTextLine);
+        return TextBlockUtils.createTokensForTextLine(aTextLine);
     }
 
     /**
