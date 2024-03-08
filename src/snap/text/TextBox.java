@@ -799,7 +799,7 @@ public class TextBox extends TextBlock {
         while (lastLine.getMaxY() > getHeight()) {
 
             // If line 0, just remove chars
-            int lineIndex = lastLine.getIndex();
+            int lineIndex = lastLine.getLineIndex();
             if (lineIndex == 0) {
                 lastLine.removeChars(0, lastLine.length());
                 break;

@@ -15,8 +15,8 @@ public class TextLine implements CharSequenceX, Cloneable {
     // The TextBlock that contains this line
     protected TextBlock _textBlock;
 
-    // The StringBuffer that holds line chars
-    protected StringBuffer  _sb = new StringBuffer();
+    // The StringBuilder that holds line chars
+    protected StringBuilder _sb = new StringBuilder();
 
     // The char index of the start of this line in text
     protected int  _startCharIndex;
@@ -31,7 +31,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     protected TextLineStyle  _lineStyle;
 
     // The index of this line in text
-    protected int  _index;
+    protected int _lineIndex;
 
     // The X location of line in block
     protected double _x;
@@ -109,7 +109,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Returns the index of this line in text.
      */
-    public int getIndex()  { return _index; }
+    public int getLineIndex()  { return _lineIndex; }
 
     /**
      * Adds characters to this line at given index.
@@ -645,7 +645,7 @@ public class TextLine implements CharSequenceX, Cloneable {
      */
     public TextLine getNext()
     {
-        int nextIndex = _index + 1;
+        int nextIndex = _lineIndex + 1;
         return _textBlock != null && nextIndex < _textBlock.getLineCount() ? _textBlock.getLine(nextIndex) : null;
     }
 
@@ -654,7 +654,7 @@ public class TextLine implements CharSequenceX, Cloneable {
      */
     public TextLine getPrevious()
     {
-        int prevIndex = _index - 1;
+        int prevIndex = _lineIndex - 1;
         return _textBlock != null && prevIndex >= 0 ? _textBlock.getLine(prevIndex) : null;
     }
 
@@ -749,7 +749,7 @@ public class TextLine implements CharSequenceX, Cloneable {
 
         // Update Lines
         if (_textBlock != null)
-            _textBlock.resetLineYForLinesAfterIndex(getIndex());
+            _textBlock.resetLineYForLinesAfterIndex(getLineIndex());
     }
 
     /**
@@ -764,7 +764,7 @@ public class TextLine implements CharSequenceX, Cloneable {
 
         // Update Lines
         if (_textBlock != null)
-            _textBlock.updateLines(getIndex());
+            _textBlock.updateLines(getLineIndex());
     }
 
     /**
@@ -856,8 +856,8 @@ public class TextLine implements CharSequenceX, Cloneable {
         try { clone = (TextLine) super.clone(); }
         catch (Exception e) { throw new RuntimeException(e); }
 
-        // Clone StringBuffer, Runs
-        clone._sb = new StringBuffer(_sb);
+        // Clone StringBuilder, Runs
+        clone._sb = new StringBuilder(_sb);
         if (_runs != null) {
             clone._runs = _runs.clone();
             for (int i = 0; i < _runs.length; i++) {
@@ -891,7 +891,7 @@ public class TextLine implements CharSequenceX, Cloneable {
         sb.append("Start=").append(getStartCharIndex());
         sb.append(", End=").append(getEndCharIndex());
         sb.append(", Length=").append(length());
-        sb.append(", Index=").append(getIndex());
+        sb.append(", Index=").append(getLineIndex());
 
         // Append String
         String string = getString().replace("\n", "\\n");

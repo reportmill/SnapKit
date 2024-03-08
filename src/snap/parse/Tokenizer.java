@@ -300,7 +300,7 @@ public class Tokenizer {
      */
     protected ParseToken createToken(String aName, String aPattern, int aStart, int anEnd, ParseToken aSpecialToken)
     {
-        ParseToken.BasicToken token = new ParseToken.BasicToken();
+        ParseTokenImpl token = new ParseTokenImpl();
         token._text = _input;
         token._name = aName;
         token._pattern = aPattern;

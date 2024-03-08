@@ -77,8 +77,8 @@ public class SpellCheck {
                 continue;
 
             // Get the selection's start line index and end line index
-            int startLineIndex = textBox.getLineForCharIndex(wordStart).getIndex();
-            int endLineIndex = textBox.getLineForCharIndex(wordEnd).getIndex();
+            int startLineIndex = textBox.getLineForCharIndex(wordStart).getLineIndex();
+            int endLineIndex = textBox.getLineForCharIndex(wordEnd).getLineIndex();
 
             // Iterate over selected lines
             for (int i = startLineIndex; i <= endLineIndex; i++) {

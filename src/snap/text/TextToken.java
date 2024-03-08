@@ -82,7 +82,12 @@ public class TextToken implements Cloneable {
     /**
      * Returns the line index.
      */
-    public int getLineIndex()  { return _textLine.getIndex(); }
+    public int getLineIndex()  { return _textLine.getLineIndex(); }
+
+    /**
+     * Returns the column index.
+     */
+    public int getColumnIndex()  { return _startCharIndex; }
 
     /**
      * Returns the start char index of token in line.

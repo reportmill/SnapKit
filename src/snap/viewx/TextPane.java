@@ -249,7 +249,7 @@ public class TextPane extends ViewOwner {
     {
         StringBuilder sb = new StringBuilder();
         TextLine textLine = getTextArea().getLineForCharIndex(getTextArea().getSelStart());
-        sb.append("Line ").append(textLine.getIndex() + 1);
+        sb.append("Line ").append(textLine.getLineIndex() + 1);
         sb.append(", Col ").append(getTextArea().getSelStart() - textLine.getStartCharIndex());
         return sb.toString();
     }
@@ -291,7 +291,7 @@ public class TextPane extends ViewOwner {
         TextArea textArea = getTextArea();
         TextSel sel = textArea.getSel();
         TextLine selStartLine = sel.getStartLine();
-        int selStartLineIndex = selStartLine.getIndex() + 1;
+        int selStartLineIndex = selStartLine.getLineIndex() + 1;
         int selStart = sel.getStart();
         int col = selStart - selStartLine.getStartCharIndex();
 

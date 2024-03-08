@@ -382,7 +382,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         if (nextLine == null || startCharIndex < textLine.length() && textLine.isLastCharNewline()) {
             nextLine = textLine.clone();
             nextLine.removeChars(0, nextLine.length());
-            addLine(nextLine, textLine.getIndex() + 1);
+            addLine(nextLine, textLine.getLineIndex() + 1);
         }
 
         // Get last run
@@ -474,7 +474,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             // ... and either (1) line is first line or (2) previous line wrapped or (3) not last line
             TextLine previousLine = textLine.getPrevious();
             if (previousLine == null || !previousLine.isLastCharNewline() || textLine != getLastLine()) {
-                removeLine(textLine.getIndex());
+                removeLine(textLine.getLineIndex());
                 return;
             }
         }
@@ -524,7 +524,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         remainderLine.removeChars(0, anIndex);
 
         // Add remainder
-        addLine(remainderLine, textLine.getIndex() + 1);
+        addLine(remainderLine, textLine.getLineIndex() + 1);
 
         // Return
         return remainderLine;
@@ -545,7 +545,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             textLine.addChars(textRun.getString(), textLine.length());
 
         // Remove NextLine
-        removeLine(nextLine.getIndex());
+        removeLine(nextLine.getLineIndex());
     }
 
     /**
@@ -724,8 +724,8 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     private void setLineStyleRich(TextLineStyle aStyle, int aStart, int anEnd)
     {
         // Get start/end line indexes for char range
-        int startLineIndex = getLineForCharIndex(aStart).getIndex();
-        int endLineIndex = getLineForCharIndex(anEnd).getIndex();
+        int startLineIndex = getLineForCharIndex(aStart).getLineIndex();
+        int endLineIndex = getLineForCharIndex(anEnd).getLineIndex();
 
         // Iterate over lines and set new style
         for (int i = startLineIndex; i <= endLineIndex; i++) {
@@ -745,8 +745,8 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     private void setLineStyleValueRich(String aKey, Object aValue, int aStart, int anEnd)
     {
         // Get start/end line indexes
-        int startLineIndex = getLineForCharIndex(aStart).getIndex();
-        int endLineIndex = getLineForCharIndex(anEnd).getIndex();
+        int startLineIndex = getLineForCharIndex(aStart).getLineIndex();
+        int endLineIndex = getLineForCharIndex(anEnd).getLineIndex();
 
         // Iterate over lines and set value independently for each
         for (int i = startLineIndex; i <= endLineIndex; i++) {
@@ -1388,7 +1388,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     protected void updateLine(TextLine textLine, int newIndex, int newStartCharIndex)
     {
-        textLine._index = newIndex;
+        textLine._lineIndex = newIndex;
         textLine._startCharIndex = newStartCharIndex;
         textLine._y = -1;
     }
@@ -1471,8 +1471,8 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         textCopy._lines.remove(0);
 
         // Get start/end line indexes
-        int startLineIndex = getLineForCharIndex(aStart).getIndex();
-        int endLineIndex = getLineForCharIndex(aEnd).getIndex();
+        int startLineIndex = getLineForCharIndex(aStart).getLineIndex();
+        int endLineIndex = getLineForCharIndex(aEnd).getLineIndex();
 
         // Iterate over lines and add
         for (int i = startLineIndex; i <= endLineIndex; i++) {
