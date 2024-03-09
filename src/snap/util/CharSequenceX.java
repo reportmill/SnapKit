@@ -117,17 +117,4 @@ public interface CharSequenceX extends CharSequence {
     {
         return CharSequenceUtils.isWhiteSpace(this);
     }
-
-    /**
-     * Returns a char range for line at given char index.
-     */
-    default CharRange getCharRangeLineForCharIndex(int charIndex)
-    {
-        // If this CharSequence is CharRange for a line, just return it
-        if (this instanceof CharRange && indexAfterNewlineOrEnd(0) == length())
-            return (CharRange) this;
-
-        // Create CharRange for line containing char index
-        return CharRange.newCharRangeLineForCharsAndCharIndex(this, charIndex);
-    }
 }
