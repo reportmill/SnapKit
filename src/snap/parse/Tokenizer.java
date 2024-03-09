@@ -350,7 +350,7 @@ public class Tokenizer {
     /**
      * Creates a new token for given properties.
      */
-    protected ParseToken createTokenForProps(String aName, String aPattern, int aStart, int anEnd)
+    public ParseToken createTokenForProps(String aName, String aPattern, int aStart, int anEnd)
     {
         ParseTokenImpl token = new ParseTokenImpl();
         token._tokenLine = getTokenLine();
