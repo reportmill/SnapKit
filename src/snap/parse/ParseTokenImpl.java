@@ -1,13 +1,12 @@
 package snap.parse;
-import snap.util.CharRange;
 
 /**
  * A basic implementation of a Token.
  */
 public class ParseTokenImpl implements ParseToken {
 
-    // The text that provided this token
-    protected CharSequence _text;
+    // The token line that holds this token
+    protected TokenLine _tokenLine;
 
     // The name this token matches
     protected String _name;
@@ -21,9 +20,6 @@ public class ParseTokenImpl implements ParseToken {
     // The end char index
     protected int _endCharIndex;
 
-    // The CharRange line to get LineIndex and ColumnIndex
-    private CharRange _charRangeLine;
-
     // The string
     protected String _string;
 
@@ -34,6 +30,11 @@ public class ParseTokenImpl implements ParseToken {
     {
         super();
     }
+
+    /**
+     * Returns the token line that holds this token.
+     */
+    public TokenLine getTokenLine()  { return _tokenLine; }
 
     /**
      * Returns the name.
@@ -58,28 +59,15 @@ public class ParseTokenImpl implements ParseToken {
     /**
      * Returns the line index.
      */
-    public int getLineIndex()
-    {
-        CharRange charRangeLine = getCharRangeLine();
-        return charRangeLine.getLineIndex();
-    }
+    public int getLineIndex()  { return _tokenLine.getLineIndex(); }
 
     /**
      * Returns the column index.
      */
     public int getColumnIndex()
     {
-        CharRange charRangeLine = getCharRangeLine();
-        return charRangeLine.getColumnIndex();
-    }
-
-    /**
-     * Returns the CharRangeLine.
-     */
-    private CharRange getCharRangeLine()
-    {
-        if (_charRangeLine != null) return _charRangeLine;
-        return _charRangeLine = CharRange.getCharRangeLineForCharIndex(_text, _startCharIndex);
+        int tokenLineStartCharIndex = _tokenLine.getStartCharIndex();
+        return _startCharIndex - tokenLineStartCharIndex;
     }
 
     /**
@@ -92,8 +80,9 @@ public class ParseTokenImpl implements ParseToken {
         if (_startCharIndex == _endCharIndex)
             return "";
 
-        CharSequence chars = _text.subSequence(_startCharIndex, _endCharIndex);
-        return _string = chars.toString();
+        CharSequence inputChars = _tokenLine._chars;
+        CharSequence tokenChars = inputChars.subSequence(_startCharIndex, _endCharIndex);
+        return _string = tokenChars.toString();
     }
 
     /**

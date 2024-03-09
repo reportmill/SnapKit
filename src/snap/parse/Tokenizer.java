@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.parse;
+import snap.util.CharSequenceUtils;
 import snap.util.ListUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,12 @@ public class Tokenizer {
     // A map of char to matchers
     private Regex[][]  _charMatchers = new Regex[128][];
 
+    // The current token line
+    protected TokenLine _tokenLine;
+
+    // The current token doc
+    private TokenDoc _tokenDoc;
+
     // Constants for common special token names
     public static final String SINGLE_LINE_COMMENT = "SingleLineComment";
     public static final String MULTI_LINE_COMMENT = "MultiLineComment";
@@ -59,6 +66,9 @@ public class Tokenizer {
         _input = anInput;
         _length = _input.length();
         _charIndex = 0;
+        _tokenDoc = null;
+        _tokenLine = null;
+        getTokenLine();
 
         // Reset matchers
         for (Regex regex : _regexList)
@@ -126,10 +136,12 @@ public class Tokenizer {
         // Get next char
         char eatChar = _input.charAt(_charIndex++);
 
-        // If newline, look for Windows sister newline char and eat that too
+        // If newline, look for Windows sister newline char and eat that too and clear token line
         if (eatChar == '\n' || eatChar == '\r') {
             if (eatChar == '\r' && hasChar() && getChar() == '\n')
                 _charIndex++;
+            _tokenLine = null;
+            getTokenLine();
         }
 
         // Return
@@ -208,6 +220,10 @@ public class Tokenizer {
     {
         // Get next special token
         ParseToken specialToken = getNextSpecialToken();
+        if (specialToken != null) {
+            TokenLine tokenLine = getTokenLine();
+            tokenLine.addSpecialToken(specialToken);
+        }
 
         // Get list of matchers for next char
         char nextChar = hasChar() ? getChar() : 0;
@@ -248,7 +264,7 @@ public class Tokenizer {
         // Create new token for match
         String matchName = match.getName();
         String matchPattern = match.getPattern();
-        ParseToken token = createToken(matchName, matchPattern, _charIndex, matchEnd, specialToken);
+        ParseToken token = createTokenForProps(matchName, matchPattern, _charIndex, matchEnd);
 
         // Reset end and return
         _charIndex = matchEnd;
@@ -296,12 +312,48 @@ public class Tokenizer {
     }
 
     /**
-     * Creates a new token.
+     * Returns the current token line.
      */
-    protected ParseToken createToken(String aName, String aPattern, int aStart, int anEnd, ParseToken aSpecialToken)
+    public TokenLine getTokenLine()
+    {
+        if (_tokenLine != null) return _tokenLine;
+
+        // Create new token line
+        TokenDoc tokenDoc = getTokenDoc();
+        TokenLine lastLine = tokenDoc.getLastLine();
+        int startCharIndex = lastLine != null ? lastLine.getEndCharIndex() : 0;
+        int endCharIndex = CharSequenceUtils.indexAfterNewlineOrEnd(_input, startCharIndex);
+        TokenLine tokenLine = tokenDoc.addLineForCharRange(startCharIndex, endCharIndex);
+
+        // Set and return
+        return _tokenLine = tokenLine;
+    }
+
+    /**
+     * Returns the current token doc.
+     */
+    public TokenDoc getTokenDoc()
+    {
+        if (_tokenDoc != null) return _tokenDoc;
+        return _tokenDoc = new TokenDoc(_input);
+    }
+
+    /**
+     * Sets the token doc start line index.
+     */
+    public void setTokenDocStartLineIndex(int lineIndex)
+    {
+        TokenDoc tokenDoc = getTokenDoc();
+        tokenDoc._startLineIndex = lineIndex;
+    }
+
+    /**
+     * Creates a new token for given properties.
+     */
+    protected ParseToken createTokenForProps(String aName, String aPattern, int aStart, int anEnd)
     {
         ParseTokenImpl token = new ParseTokenImpl();
-        token._text = _input;
+        token._tokenLine = getTokenLine();
         token._name = aName;
         token._pattern = aPattern;
         token._startCharIndex = aStart;

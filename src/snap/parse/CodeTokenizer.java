@@ -127,9 +127,11 @@ public class CodeTokenizer extends Tokenizer {
             int tokenStart = _charIndex;
             CharSequence inputChars = getInput();
             _charIndex = CharSequenceUtils.indexAfterNewlineOrEnd(inputChars, _charIndex);
+            _tokenLine = null;
+            getTokenLine();
 
             // Create/return new special token
-            return createToken(SINGLE_LINE_COMMENT, null, tokenStart, _charIndex, null);
+            return createTokenForProps(SINGLE_LINE_COMMENT, null, tokenStart, _charIndex);
         }
 
         // Return not found
@@ -167,6 +169,6 @@ public class CodeTokenizer extends Tokenizer {
         }
 
         // Create and return token
-        return createToken(MULTI_LINE_COMMENT, null, start, _charIndex, null);
+        return createTokenForProps(MULTI_LINE_COMMENT, null, start, _charIndex);
     }
 }

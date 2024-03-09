@@ -105,44 +105,11 @@ public class Parser {
     /**
      * Sets the current parse string.
      */
-    public Parser setInput(CharSequence aSequence)
+    public void setInput(CharSequence aSequence)
     {
         _input = aSequence;
         getTokenizer().setInput(_input);
-        setCharIndex(0);
-        return this;
-    }
-
-    /**
-     * CharSequence method.
-     */
-    public final int length()
-    {
-        return getTokenizer().length();
-    }
-
-    /**
-     * CharSequence method.
-     */
-    public final char charAt(int anIndex)
-    {
-        return getTokenizer().charAt(anIndex);
-    }
-
-    /**
-     * Returns the current parse char.
-     */
-    public final char getChar()
-    {
-        return getTokenizer().getChar();
-    }
-
-    /**
-     * Returns the char at the current index plus offset.
-     */
-    public final char eatChar()
-    {
-        return getTokenizer().eatChar();
+        clearTokens();
     }
 
     /**
@@ -159,8 +126,7 @@ public class Parser {
     public void setCharIndex(int aLoc)
     {
         getTokenizer().setCharIndex(aLoc);
-        _lookAheadTokens.clear();
-        _token = null;
+        clearTokens();
     }
 
     /**
@@ -186,10 +152,7 @@ public class Parser {
     /**
      * Creates the tokenizer instance.
      */
-    protected Tokenizer createTokenizer()
-    {
-        return new Tokenizer();
-    }
+    protected Tokenizer createTokenizer()  { return new Tokenizer(); }
 
     /**
      * Sets the tokenizer.
@@ -204,7 +167,8 @@ public class Parser {
      */
     public ParseToken getToken()
     {
-        return _token != null ? _token : (_token = getNextToken());
+        if (_token != null) return _token;
+        return _token = getNextToken();
     }
 
     /**
@@ -212,9 +176,13 @@ public class Parser {
      */
     protected ParseToken getNextToken()
     {
+        // If LookAheadTokens has available token, remove and return it
         if (_lookAheadTokens.size() > 0)
             return _lookAheadTokens.remove(0);
-        return getTokenizer().getNextToken();
+
+        // Get next token
+        Tokenizer tokenizer = getTokenizer();
+        return tokenizer.getNextToken();
     }
 
     /**
@@ -224,15 +192,22 @@ public class Parser {
     {
         if (anIndex == 0)
             return getToken();
-        while (anIndex > _lookAheadTokens.size())
-            _lookAheadTokens.add(getTokenizer().getNextToken());
+
+        // While not enough lookahead tokens, get and add next token
+        while (anIndex > _lookAheadTokens.size()) {
+            Tokenizer tokenizer = getTokenizer();
+            ParseToken nextToken = tokenizer.getNextToken();
+            _lookAheadTokens.add(nextToken);
+        }
+
+        // Return lookahead token
         return _lookAheadTokens.get(anIndex - 1);
     }
 
     /**
      * Clears any currently set tokens.
      */
-    public void clearTokens()
+    protected void clearTokens()
     {
         _lookAheadTokens.clear();
         _token = null;
