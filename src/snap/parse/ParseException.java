@@ -53,7 +53,7 @@ public class ParseException extends RuntimeException {
         ParseToken token = _parser.getToken();
         int charIndex = token != null ? token.getStartCharIndex() : _parser.getTokenizer().getCharIndex();
         int lineIndex = token != null ? token.getLineIndex() : 0;
-        int colIndex = token != null ? token.getColumnIndex() : 0;
+        int colIndex = token != null ? token.getStartCharIndexInLine() : 0;
 
         // Get Error region
         CharSequence inputText = _parser.getInput();

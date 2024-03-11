@@ -47,12 +47,12 @@ public class ParseTokenImpl implements ParseToken {
     public String getPattern()  { return _pattern; }
 
     /**
-     * Returns the char start.
+     * Returns the start char index of this token in text.
      */
     public int getStartCharIndex()  { return _startCharIndex; }
 
     /**
-     * Returns the char end.
+     * Returns the end char index of this token in text.
      */
     public int getEndCharIndex()  { return _endCharIndex; }
 
@@ -62,9 +62,9 @@ public class ParseTokenImpl implements ParseToken {
     public int getLineIndex()  { return _tokenLine.getLineIndex(); }
 
     /**
-     * Returns the column index.
+     * Returns the start char index of this token in line.
      */
-    public int getColumnIndex()
+    public int getStartCharIndexInLine()
     {
         int tokenLineStartCharIndex = _tokenLine.getStartCharIndex();
         return _startCharIndex - tokenLineStartCharIndex;

@@ -18,10 +18,10 @@ public class TextToken implements Cloneable {
     protected TextLine  _textLine;
 
     // The start char index in line
-    private int  _startCharIndex;
+    private int _startCharIndexInLine;
 
     // The end char index in line
-    private int  _endCharIndex;
+    private int _endCharIndexInLine;
 
     // The index of token in line
     protected int  _index;
@@ -53,11 +53,11 @@ public class TextToken implements Cloneable {
     /**
      * Constructor.
      */
-    public TextToken(TextLine aTextLine, int startCharIndex, int endCharIndex, TextStyle aTextStyle)
+    public TextToken(TextLine aTextLine, int startCharIndexInLine, int endCharIndexInLine, TextStyle aTextStyle)
     {
         _textLine = aTextLine;
-        _startCharIndex = startCharIndex;
-        _endCharIndex = endCharIndex;
+        _startCharIndexInLine = startCharIndexInLine;
+        _endCharIndexInLine = endCharIndexInLine;
         _textStyle = aTextStyle;
         _color = _textStyle.getColor();
     }
@@ -83,24 +83,29 @@ public class TextToken implements Cloneable {
     public int getLineIndex()  { return _textLine.getLineIndex(); }
 
     /**
-     * Returns the column index.
-     */
-    public int getColumnIndex()  { return _startCharIndex; }
-
-    /**
      * Returns the start char index of token in line.
      */
-    public int getStartCharIndex()  { return _startCharIndex; }
+    public int getStartCharIndexInLine()  { return _startCharIndexInLine; }
 
     /**
      * Returns the end char index of token in line.
      */
-    public int getEndCharIndex()  { return _endCharIndex; }
+    public int getEndCharIndexInLine()  { return _endCharIndexInLine; }
+
+    /**
+     * Returns the start char index of token in text.
+     */
+    public int getStartCharIndex()  { return _startCharIndexInLine + _textLine.getStartCharIndex(); }
+
+    /**
+     * Returns the end char index of token in text.
+     */
+    public int getEndCharIndex()  { return _endCharIndexInLine + _textLine.getEndCharIndex(); }
 
     /**
      * Returns the length of token.
      */
-    public int getLength()  { return _endCharIndex - _startCharIndex; }
+    public int getLength()  { return _endCharIndexInLine - _startCharIndexInLine; }
 
     /**
      * Returns the index of token in line.
@@ -164,7 +169,7 @@ public class TextToken implements Cloneable {
         if (_width >= 0) return _width;
 
         // Get, set, return
-        double tokenW = getWidthForLineRange(_startCharIndex, _endCharIndex, true);
+        double tokenW = getWidthForLineRange(_startCharIndexInLine, _endCharIndexInLine, true);
         return _width = tokenW;
     }
 
@@ -251,13 +256,13 @@ public class TextToken implements Cloneable {
         // Weirdo
         if (charIndex < 0) {
             double charX = getX();
-            double charsW = getWidthForLineRange(_startCharIndex + charIndex, _startCharIndex, false);
+            double charsW = getWidthForLineRange(_startCharIndexInLine + charIndex, _startCharIndexInLine, false);
             return charX - charsW;
         }
 
         // Normal version
         double charX = getX();
-        double charsW = getWidthForLineRange(_startCharIndex, _startCharIndex + charIndex, false);
+        double charsW = getWidthForLineRange(_startCharIndexInLine, _startCharIndexInLine + charIndex, false);
         return charX + charsW;
     }
 
@@ -290,7 +295,7 @@ public class TextToken implements Cloneable {
         if (_string != null) return _string;
 
         // Get string and append hyphen if set
-        String string = _textLine.subSequence(_startCharIndex, _endCharIndex).toString();
+        String string = _textLine.subSequence(_startCharIndexInLine, _endCharIndexInLine).toString();
         if(isHyphenated())
             string += '-';
 
@@ -304,7 +309,7 @@ public class TextToken implements Cloneable {
     public TextToken copyFromCharIndex(int charIndex)
     {
         TextToken copy = clone();
-        copy._startCharIndex = _startCharIndex + charIndex;
+        copy._startCharIndexInLine = _startCharIndexInLine + charIndex;
         copy._width = -1;
         copy._x = getXForCharIndex(charIndex);
         return copy;
@@ -316,7 +321,7 @@ public class TextToken implements Cloneable {
     public TextToken copyToCharIndex(int charIndex)
     {
         TextToken copy = clone();
-        copy._endCharIndex = _startCharIndex + charIndex;
+        copy._endCharIndexInLine = _startCharIndexInLine + charIndex;
         copy._width = -1;
         return copy;
     }
@@ -335,7 +340,7 @@ public class TextToken implements Cloneable {
      */
     public int getSplittableCharIndex()
     {
-        int hyph = TextHyphenDict.getShared().getHyphen(_textLine, _startCharIndex, _endCharIndex);
+        int hyph = TextHyphenDict.getShared().getHyphen(_textLine, _startCharIndexInLine, _endCharIndexInLine);
         if (hyph >= getLength())
             return 0;
         return hyph;
@@ -381,8 +386,8 @@ public class TextToken implements Cloneable {
     public String toStringProps()
     {
         StringBuffer sb = new StringBuffer();
-        StringUtils.appendProp(sb, "StartCharIndex", _startCharIndex);
-        StringUtils.appendProp(sb, "EndCharIndex", _endCharIndex);
+        StringUtils.appendProp(sb, "StartCharIndex", _startCharIndexInLine);
+        StringUtils.appendProp(sb, "EndCharIndex", _endCharIndexInLine);
         StringUtils.appendProp(sb, "Index", _index);
         StringUtils.appendProp(sb, "X", _x);
         StringUtils.appendProp(sb, "String", getString());
@@ -410,7 +415,7 @@ public class TextToken implements Cloneable {
             }
 
             // Find token start: Skip past whitespace
-            int tokenStart = token.getStartCharIndex();
+            int tokenStart = token.getStartCharIndexInLine();
             while (charIndex < tokenStart) {
                 char loopChar = aTextLine.charAt(charIndex);
                 if (loopChar == '\t')
@@ -425,7 +430,7 @@ public class TextToken implements Cloneable {
             // Update token Width
             double tokenW = token.getWidth();
             tokenX += tokenW + charSpacing;
-            charIndex = token.getEndCharIndex();
+            charIndex = token.getEndCharIndexInLine();
         }
     }
 }

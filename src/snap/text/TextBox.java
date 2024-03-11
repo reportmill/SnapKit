@@ -281,7 +281,7 @@ public class TextBox extends TextBlock {
                     moveMinimumLineEndCharsToNextLine(textLine, lastToken);
 
                 // Otherwise, move last token (and trailing chars) to next line
-                else moveLineCharsToNextLine(textLine, lastToken.getStartCharIndex());
+                else moveLineCharsToNextLine(textLine, lastToken.getStartCharIndexInLine());
             }
         }
 
@@ -298,7 +298,7 @@ public class TextBox extends TextBlock {
         while (isHyphenate() && token.isSplittable()) {
             token = token.copyForSplittable();
             if (!isHitRight(token.getMaxX(), textLine.getY(), textLine.getHeight())) {
-                moveLineCharsToNextLine(textLine, token.getEndCharIndex());
+                moveLineCharsToNextLine(textLine, token.getEndCharIndexInLine());
                 textLine.getLastToken().setHyphenated(true);
                 return;
             }
@@ -316,7 +316,7 @@ public class TextBox extends TextBlock {
             }
 
             // Move chars to next line
-            moveLineCharsToNextLine(textLine, token.getStartCharIndex() + newLength);
+            moveLineCharsToNextLine(textLine, token.getStartCharIndexInLine() + newLength);
         }
     }
 

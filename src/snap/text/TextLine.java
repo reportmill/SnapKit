@@ -517,9 +517,9 @@ public class TextLine implements CharSequenceX, Cloneable {
         // Iterate over tokens (backwards) and return first token that starts at or before char index
         for (int i = tokens.length - 1; i >= 0; i--) {
             TextToken token = tokens[i];
-            if (charIndex > token.getEndCharIndex())
+            if (charIndex > token.getEndCharIndexInLine())
                 break;
-            if (charIndex >= token.getStartCharIndex())
+            if (charIndex >= token.getStartCharIndexInLine())
                 return token;
         }
 
@@ -542,7 +542,7 @@ public class TextLine implements CharSequenceX, Cloneable {
         // Iterate over tokens (backwards) and return first token that starts at or before char index
         for (int i = tokens.length - 1; i >= 0; i--) {
             TextToken token = tokens[i];
-            if (charIndex >= token.getStartCharIndex())
+            if (charIndex >= token.getStartCharIndexInLine())
                 return token;
         }
 
@@ -561,7 +561,7 @@ public class TextLine implements CharSequenceX, Cloneable {
         double charSpacing = textStyle.getCharSpacing();
 
         // Init charX to token start X
-        int startCharIndex = textToken != null ? textToken.getStartCharIndex() : 0;
+        int startCharIndex = textToken != null ? textToken.getStartCharIndexInLine() : 0;
         double charX = textToken != null ? textToken.getX() : 0;
 
         // Iterate over subsequent chars after token start and add advance
@@ -611,7 +611,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     {
         // Get token for x coord
         TextToken token = getTokenForX(anX);
-        int charIndex = token != null ? token.getStartCharIndex() : 0;
+        int charIndex = token != null ? token.getStartCharIndexInLine() : 0;
         TextStyle textStyle = token != null ? token.getTextStyle() : getRun(0).getStyle();
         double charSpacing = textStyle.getCharSpacing();
 

@@ -19,12 +19,12 @@ public interface ParseToken {
     String getPattern();
 
     /**
-     * Returns the start char index of this token in input.
+     * Returns the start char index of this token in text.
      */
     int getStartCharIndex();
 
     /**
-     * Returns the end char index of this token in input.
+     * Returns the end char index of this token in text.
      */
     int getEndCharIndex();
 
@@ -34,9 +34,9 @@ public interface ParseToken {
     int getLineIndex();
 
     /**
-     * Returns the column index.
+     * Returns the start char index of this token in line.
      */
-    int getColumnIndex();
+    int getStartCharIndexInLine();
 
     /**
      * Returns the string.
