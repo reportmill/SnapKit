@@ -4,15 +4,19 @@
 package snap.text;
 import snap.gfx.Color;
 import snap.gfx.Font;
+import snap.parse.ParseToken;
 import snap.util.StringUtils;
 
 /**
  * This class represents a 'word' in a TextLine.
  */
-public class TextToken implements Cloneable {
+public class TextToken implements ParseToken, Cloneable {
 
     // The token name
-    private String  _name;
+    protected String  _name;
+
+    // The token pattern
+    protected String  _pattern;
 
     // The TextLine
     protected TextLine  _textLine;
@@ -71,6 +75,17 @@ public class TextToken implements Cloneable {
      * Sets the token name.
      */
     public void setName(String aName)  { _name = aName; }
+
+    /**
+     * Returns the regex pattern that defines this token.
+     */
+    @Override
+    public String getPattern()  { return _pattern; }
+
+    /**
+     * Sets the regex pattern that defines this token.
+     */
+    public void setPattern(String aPattern)  { _pattern = aPattern; }
 
     /**
      * Returns the TextLine.
