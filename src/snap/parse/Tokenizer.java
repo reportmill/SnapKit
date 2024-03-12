@@ -4,10 +4,7 @@
 package snap.parse;
 import snap.util.ArrayUtils;
 import snap.util.CharSequenceUtils;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A class to extract tokens from a char sequence.
@@ -233,7 +230,7 @@ public class Tokenizer {
     /**
      * Returns list of Regex for a starting char.
      */
-    public Regex[] getRegexesForStartChar(char aChar)
+    private Regex[] getRegexesForStartChar(char aChar)
     {
         // Get cached regex array for char, just return if found
         Regex[] regexesForChar = _charMatchers[aChar];
@@ -244,30 +241,10 @@ public class Tokenizer {
         if (aChar == 0)
             return _charMatchers[aChar] = new Regex[0];
 
-        // Get Regexes and string for char
-        List<Regex> regexList = new ArrayList<>();
+        // Get matching Regexes for char
         String charStr = Character.toString(aChar);
-
-        // Iterate over all regexes to find those that start with given literal char
-        for (Regex regex : getRegexes()) {
-
-            // If regex char matches given char, add to list
-            char loopChar = regex.getLiteralChar();
-            if (loopChar == aChar)
-                regexList.add(regex);
-
-            // Check "char.startsWith(regex)"
-            else if (loopChar == 0) {
-                Pattern p = regex.getPatternCompiled();
-                Matcher m = p.matcher(charStr);
-                m.matches();
-                if (m.hitEnd())
-                    regexList.add(regex);
-            }
-        }
-
-        // Get, set, return regex array
-        return _charMatchers[aChar] = regexList.toArray(new Regex[0]);
+        Regex[] matchingRegexes = ArrayUtils.filter(_regexes, regex -> regex.isMatchingStartChar(aChar, charStr));
+        return _charMatchers[aChar] = matchingRegexes;
     }
 
     /**
