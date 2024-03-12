@@ -2,8 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.parse;
+import snap.util.ArrayUtils;
 import snap.util.CharSequenceUtils;
-import snap.util.ListUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -14,6 +14,9 @@ import java.util.regex.Pattern;
  */
 public class Tokenizer {
 
+    // An array of regexes
+    private Regex[] _regexes = new Regex[0];
+
     // The tokenizer input
     private CharSequence  _input;
 
@@ -22,12 +25,6 @@ public class Tokenizer {
 
     // The current char index
     protected int  _charIndex;
-
-    // The list of regular expression objects
-    private List<Regex>  _regexList = new ArrayList<>();
-
-    // An array of regexes
-    private Regex[]  _regexes;
 
     // A map of char to matchers
     private Regex[][]  _charMatchers = new Regex[128][];
@@ -51,36 +48,50 @@ public class Tokenizer {
     }
 
     /**
+     * Returns the array of regexes.
+     */
+    public Regex[] getRegexes()  { return _regexes; }
+
+    /**
+     * Sets the array of regexes.
+     */
+    public void setRegexes(Regex[] theRegexes)  { _regexes = theRegexes; }
+
+    /**
+     * Sets regexes for pattern rules in given rule.
+     */
+    public void setRegexesForPatternRulesInRule(ParseRule aRule)
+    {
+        ParseRule[] patternRules = ParseUtils.getPatternRulesForRule(aRule);
+        Regex[] regexes = ArrayUtils.map(patternRules, rule -> new Regex(rule.getName(), rule.getPattern()), Regex.class);
+        setRegexes(regexes);
+    }
+
+    /**
      * Returns the current tokenizer input.
      */
-    public CharSequence getInput()
-    {
-        return _input;
-    }
+    public CharSequence getInput()  { return _input; }
 
     /**
      * Sets the current tokenizer input.
      */
     public void setInput(CharSequence anInput)
     {
+        // Set input
         _input = anInput;
         _length = _input.length();
-        _charIndex = 0;
+
+        // Reset char index
+        setCharIndex(0);
+
+        // Reset token doc, line
         _tokenDoc = null;
         _tokenLine = null;
         getTokenLine();
 
         // Reset matchers
-        for (Regex regex : _regexList)
+        for (Regex regex : _regexes)
             regex.getMatcher().reset(_input);
-    }
-
-    /**
-     * Returns the input subsequence for the given range of characters in input.
-     */
-    public CharSequence getInput(int aStart, int anEnd)
-    {
-        return _input.subSequence(aStart, anEnd);
     }
 
     /**
@@ -162,58 +173,6 @@ public class Tokenizer {
     }
 
     /**
-     * Adds a pattern.
-     */
-    public void addPattern(String aName, String aPattern)
-    {
-        // Get unique pattern string - if already in list, just return
-        String pattern = aPattern.intern();
-        for (Regex regex : _regexList)
-            if (regex.getPattern() == pattern)
-                return;
-
-        // Create and add new regex
-        Regex regex = new Regex(aName, pattern);
-        _regexList.add(regex);
-        _regexes = null;
-    }
-
-    /**
-     * Adds patterns to this tokenizer for given rule.
-     */
-    public void addPatternsForRule(ParseRule aRule)
-    {
-        addPatternsForRule(aRule, new ArrayList<>(128));
-    }
-
-    /**
-     * Adds patterns to this tokenizer for given rule.
-     */
-    private void addPatternsForRule(ParseRule aRule, List<ParseRule> theRules)
-    {
-        theRules.add(aRule);
-        if (aRule.getPattern() != null)
-            addPattern(aRule.getName(), aRule.getPattern());
-
-        ParseRule r0 = aRule.getChild0();
-        if (r0 != null && !ListUtils.containsId(theRules, r0))
-            addPatternsForRule(r0, theRules);
-
-        ParseRule r1 = aRule.getChild1();
-        if (r1 != null && !ListUtils.containsId(theRules, r1))
-            addPatternsForRule(r1, theRules);
-    }
-
-    /**
-     * Returns the array of regexes (creating it if missing).
-     */
-    protected Regex[] getRegexes()
-    {
-        if (_regexes != null) return _regexes;
-        return _regexes = _regexList.toArray(new Regex[0]);
-    }
-
-    /**
      * Returns the next token.
      */
     public ParseToken getNextToken()
@@ -256,7 +215,7 @@ public class Tokenizer {
                 return null;
 
             // Get next chars and let tokenizerFailed() decide whether to throw, stop or provide alt token
-            String nextChars = getInput(_charIndex, Math.min(_charIndex + 30, length())).toString();
+            String nextChars = getInput().subSequence(_charIndex, Math.min(_charIndex + 30, length())).toString();
             ParseToken nextToken = tokenizerFailed(nextChars);
             return nextToken;
         }
@@ -336,15 +295,6 @@ public class Tokenizer {
     {
         if (_tokenDoc != null) return _tokenDoc;
         return _tokenDoc = new TokenDoc(_input);
-    }
-
-    /**
-     * Sets the token doc start line index.
-     */
-    public void setTokenDocStartLineIndex(int lineIndex)
-    {
-        TokenDoc tokenDoc = getTokenDoc();
-        tokenDoc._startLineIndex = lineIndex;
     }
 
     /**

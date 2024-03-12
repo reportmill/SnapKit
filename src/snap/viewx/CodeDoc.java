@@ -6,8 +6,10 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.parse.CodeTokenizer;
 import snap.parse.ParseToken;
+import snap.parse.Regex;
 import snap.parse.Tokenizer;
 import snap.text.*;
+import snap.util.ArrayUtils;
 import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +41,8 @@ public class CodeDoc extends TextDoc {
         _tokenizer.setReadSingleLineComments(true);
         _tokenizer.setReadMultiLineComments(true);
         String[] javaTokenPatterns = getPatterns();
-        for (String token : javaTokenPatterns)
-            _tokenizer.addPattern(token, token);
+        Regex[] regexes = ArrayUtils.map(javaTokenPatterns, pattern -> new Regex(pattern, pattern), Regex.class);
+        _tokenizer.setRegexes(regexes);
     }
 
     /**
@@ -149,7 +151,7 @@ public class CodeDoc extends TextDoc {
     {
         // Handle comments
         String tokenName = aToken.getName();
-        if (tokenName == CodeTokenizer.SINGLE_LINE_COMMENT || tokenName == CodeTokenizer.MULTI_LINE_COMMENT)
+        if (tokenName == Tokenizer.SINGLE_LINE_COMMENT || tokenName == Tokenizer.MULTI_LINE_COMMENT)
             return COMMENT_COLOR;
 
         // Handle reserved words

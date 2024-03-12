@@ -142,7 +142,7 @@ public class Parser {
 
         // Add Patterns for Rule
         ParseRule rule = getRule();
-        tokenizer.addPatternsForRule(rule);
+        tokenizer.setRegexesForPatternRulesInRule(rule);
 
         // Set, return
         setTokenizer(tokenizer);

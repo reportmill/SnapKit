@@ -3,14 +3,12 @@
  */
 package snap.parse;
 import snap.parse.ParseRule.Op;
-import snap.util.ListUtils;
+import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -18,75 +16,105 @@ import java.util.stream.Stream;
  */
 public class ParseUtils {
 
-    // Written rules
-    private List<ParseRule>  _rules = new ArrayList<>();
+    /**
+     * Returns all unique rules nested in given rule.
+     */
+    public static ParseRule[] getAllRulesForRule(ParseRule aRule)
+    {
+        Set<ParseRule> allRules = new HashSet<>();
+        findAllRulesForRule(aRule, allRules);
+        return allRules.toArray(new ParseRule[0]);
+    }
 
     /**
-     * Writes a rule to a file.
+     * Finds all unique rules nested in given rule and adds to given set.
      */
-    public void write(ParseRule aRule, WebFile aFile)
+    private static void findAllRulesForRule(ParseRule aRule, Set<ParseRule> allRules)
     {
-        addRule(aRule);
-        aFile.setText(getString());
-        try { aFile.save(); }
-        catch (Exception e) { throw new RuntimeException(e); }
+        allRules.add(aRule);
+
+        // Recurse into rule nested left / right rules
+        ParseRule rule0 = aRule.getChild0();
+        if (rule0 != null && !allRules.contains(rule0))
+            findAllRulesForRule(rule0, allRules);
+        ParseRule rule1 = aRule.getChild1();
+        if (rule1 != null && !allRules.contains(rule1))
+            findAllRulesForRule(rule1, allRules);
+    }
+
+    /**
+     * Returns all rules with a name for given top level rule.
+     */
+    public static ParseRule[] getNamedRulesForRule(ParseRule aRule)
+    {
+        ParseRule[] allRules = getAllRulesForRule(aRule);
+        return ArrayUtils.filter(allRules, rule -> rule.getName() != null);
+    }
+
+    /**
+     * Returns all rules with a pattern for given top level rule.
+     */
+    public static ParseRule[] getPatternRulesForRule(ParseRule aRule)
+    {
+        ParseRule[] allRules = getAllRulesForRule(aRule);
+        return ArrayUtils.filter(allRules, rule -> rule.getPattern() != null);
     }
 
     /**
      * Prints the names of all rules.
      */
-    public void printAllRuleNames(ParseRule aRule, int namesPerLine)
+    public static void printAllRuleNames(ParseRule aRule, int namesPerLine)
     {
-        // Add all rules recursively
-        addRule(aRule);
-
-        // Get array of names
-        Stream<ParseRule> rulesWithNameStream = _rules.stream().filter(r -> r.getName() != null);
-        Stream<String> nonNullNamesStream = rulesWithNameStream.map(r -> '"' + r.getName() + '"');
-        String[] nonNullNames = nonNullNamesStream.toArray(size -> new String[size]);
+        // Get all rule names in quotes
+        ParseRule[] namedRules = getNamedRulesForRule(aRule);
+        String[] quotedRuleNames = ArrayUtils.map(namedRules, rule -> '"' + rule.getName() + '"', String.class);
 
         // Iterate over names and print with newline for every namesPerLine
-        for (int i = 0; i < nonNullNames.length; i++) {
-            System.out.print(nonNullNames[i] + ", ");
+        for (int i = 0; i < quotedRuleNames.length; i++) {
+            System.out.print(quotedRuleNames[i] + ", ");
             if (i > 0 && i % namesPerLine == 0) System.out.println();
         }
     }
 
     /**
-     * Write a ParseRule.
+     * Writes a rule to a file.
      */
-    public void addRule(ParseRule aRule)
+    public static void writeAllRulesForRuleToFile(ParseRule aRule, WebFile aFile)
     {
-        if (ListUtils.containsId(_rules, aRule)) return;
-        _rules.add(aRule);
-        ParseRule r0 = aRule.getChild0();
-        if (r0 != null) addRule(r0);
-        ParseRule r1 = aRule.getChild1();
-        if (r1 != null) addRule(r1);
+        // Get string for given rule
+        ParseRule[] allRules = ParseUtils.getAllRulesForRule(aRule);
+        String rulesString = getStringForRules(allRules);
+
+        // Set in file
+        aFile.setText(rulesString);
+        try { aFile.save(); }
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**
      * Returns a string for the currently loaded set of rules.
      */
-    public String getString()
+    public static String getStringForRules(ParseRule[] theRules)
     {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append('\n');
 
         // Write normal rules
-        for (ParseRule rule : _rules)
+        for (ParseRule rule : theRules) {
             if (rule.getName() != null && rule.getPattern() == null) {
                 String s = getString(rule), s2 = s.replaceAll("\\s+", " ").trim();
                 if (s2.length() <= 120) s = s2 + "\n\n";
                 sb.append(s);
             }
+        }
 
         // Write Regex rules
-        for (ParseRule rule : _rules)
+        for (ParseRule rule : theRules) {
             if (rule.getPattern() != null && rule.getName() != null) {
                 String s = getString(rule);
                 sb.append(s);
             }
+        }
 
         return sb.toString();
     }

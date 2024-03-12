@@ -47,7 +47,7 @@ public class Regex {
     public Regex(String aName, String aPattern)
     {
         setName(aName);
-        setPattern(aPattern);
+        setPattern(aPattern.intern());
     }
 
     /**
