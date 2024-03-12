@@ -115,7 +115,7 @@ public class TextToken implements ParseToken, Cloneable {
     /**
      * Returns the end char index of token in text.
      */
-    public int getEndCharIndex()  { return _endCharIndexInLine + _textLine.getEndCharIndex(); }
+    public int getEndCharIndex()  { return _endCharIndexInLine + _textLine.getStartCharIndex(); }
 
     /**
      * Returns the length of token.
