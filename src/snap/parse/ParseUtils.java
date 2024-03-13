@@ -9,7 +9,6 @@ import snap.web.WebFile;
 import snap.web.WebURL;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * Reads/Writes ParseRules from/to file.
@@ -21,7 +20,7 @@ public class ParseUtils {
      */
     public static ParseRule[] getAllRulesForRule(ParseRule aRule)
     {
-        Set<ParseRule> allRules = new HashSet<>();
+        Set<ParseRule> allRules = new LinkedHashSet<>();
         findAllRulesForRule(aRule, allRules);
         return allRules.toArray(new ParseRule[0]);
     }
@@ -139,10 +138,9 @@ public class ParseUtils {
      */
     private static String getStringBody(ParseRule aRule)
     {
-        // If pattern, just return pattern quoted string
-        if (aRule.getPattern() != null) return getPatternQuoted(aRule.getPattern());
+        ParseRule.Op ruleOp = aRule.getOp();
 
-        switch (aRule.getOp()) {
+        switch (ruleOp) {
 
             // Handle Or
             case Or: {
@@ -165,32 +163,19 @@ public class ParseUtils {
             }
 
             // Handle ZeroOrOne
-            case ZeroOrOne: {
-                ParseRule c = aRule.getChild0();
-                String s = c.getName() != null ? c.getName() : c.toString();
-                if (c.getName() == null && (c.getOp() == Op.Or || c.getOp() == Op.And)) s = '(' + s + ')';
-                return s + '?';
-            }
-
-            // Handle ZeroOrMore
-            case ZeroOrMore: {
-                ParseRule c = aRule.getChild0();
-                String s = c.getName() != null ? c.getName() : c.toString();
-                if (c.getName() == null && (c.getOp() == Op.Or || c.getOp() == Op.And)) s = '(' + s + ')';
-                return s + '*';
-            }
-
-            // Handle OneOrMore
+            case ZeroOrOne:
+            case ZeroOrMore:
             case OneOrMore: {
-                ParseRule c = aRule.getChild0();
-                String s = c.getName() != null ? c.getName() : c.toString();
-                if (c.getName() == null && (c.getOp() == Op.Or || c.getOp() == Op.And)) s = '(' + s + ')';
-                return s + '+';
+                ParseRule childRule = aRule.getChild0();
+                String ruleString = childRule.getName() != null ? childRule.getName() : childRule.toString();
+                if (childRule.getName() == null && (childRule.getOp() == Op.Or || childRule.getOp() == Op.And))
+                    ruleString = '(' + ruleString + ')';
+                char opChar = ruleOp == Op.ZeroOrOne ? '?' : ruleOp == Op.ZeroOrMore ? '*' : '+';
+                return ruleString + opChar;
             }
 
             // Handle Pattern
-            case Pattern:
-                return getPatternQuoted(aRule.getPattern());
+            case Pattern: return getPatternQuoted(aRule.getPattern());
 
             // Handle LookAhead
             case LookAhead: {
@@ -201,8 +186,7 @@ public class ParseUtils {
             }
 
             // Default
-            default:
-                throw new RuntimeException("ParseUtils.getStringBody: Unsupported Op " + aRule.getOp());
+            default: throw new RuntimeException("ParseUtils.getStringBody: Unsupported Op " + aRule.getOp());
         }
     }
 
@@ -211,7 +195,7 @@ public class ParseUtils {
      * */
     private static String getPatternQuoted(String aStr)
     {
-        StringBuffer sb = new StringBuffer().append('"'); boolean isEscape = false;
+        StringBuilder sb = new StringBuilder().append('"'); boolean isEscape = false;
         for(int i = 0; i < aStr.length(); i++) {
             char c = aStr.charAt(i);
             if(isEscape) { sb.append(c); isEscape = false; }
@@ -259,19 +243,16 @@ public class ParseUtils {
     }
 
     /**
-     * Returns the handler classes for a parent class.
+     * Searches given class for inner handler classes and installs instance in rule.
      */
-    public static Class<? extends ParseHandler<?>>[] getHandlerClassesInsideClass(Class<?> aClass)
+    public static void installHandlersForParentClass(Class<?> aClass, ParseRule aRule)
     {
-        // Get array of inner classes. TeaVM doesn't support this yet
-        Class<?>[] innerClasses = aClass.getDeclaredClasses();
+        // Get handler classes
+        Class<? extends ParseHandler<?>>[] handlerClasses = getHandlerClassesInsideClass(aClass);
 
-        // Filter to only get real ParseHandler subclasses
-        Stream<Class<?>> handlerClassesStream = Arrays.stream(innerClasses).filter(c -> isHandlerClass(c));
-        Class<? extends ParseHandler<?>>[] handlerClasses = handlerClassesStream.toArray(size -> new Class[size]);
-
-        // Return
-        return handlerClasses;
+        // Iterate over handler classes and install in rule for each
+        for(Class<? extends ParseHandler<?>> handlerClass : handlerClasses)
+            installHandlerForClass(handlerClass, aRule);
     }
 
     /**
@@ -298,19 +279,6 @@ public class ParseUtils {
     }
 
     /**
-     * Searches given class for inner handler classes and installs instance in rule.
-     */
-    public static void installHandlersForParentClass(Class<?> aClass, ParseRule aRule)
-    {
-        // Get handler classes
-        Class<? extends ParseHandler<?>>[] handlerClasses = getHandlerClassesInsideClass(aClass);
-
-        // Iterate over handler classes and install in rule for each
-        for(Class<? extends ParseHandler<?>> handlerClass : handlerClasses)
-            installHandlerForClass(handlerClass, aRule);
-    }
-
-    /**
      * Prints handler classes so parsers can include as constant and avoid reflection for handler install.
      */
     public static void printHandlerClassesForParentClass(Class<?> aClass, int classesPerLine)
@@ -330,21 +298,17 @@ public class ParseUtils {
     /**
      * Returns the handler classes for a parent class.
      */
+    private static Class<? extends ParseHandler<?>>[] getHandlerClassesInsideClass(Class<?> aClass)
+    {
+        Class<?>[] innerClasses = aClass.getDeclaredClasses();
+        return (Class<? extends ParseHandler<?>>[]) ArrayUtils.filter(innerClasses, c -> isHandlerClass(c));
+    }
+
+    /**
+     * Returns the handler classes for a parent class.
+     */
     private static boolean isHandlerClass(Class<?> aClass)
     {
         return ParseHandler.class.isAssignableFrom(aClass) && !Modifier.isAbstract(aClass.getModifiers());
     }
-
-    /**
-     * Test.
-     */
-    public static void main(String[] args)
-    {
-        //WebFile file = WebURL.getURL("/tmp/KeyChain.txt").createFile(false);
-        //new ParseUtils().write(new snap.util.KeyChainParser().getRule(), file);
-        //System.out.println(KeyChain.getValue(new Object(), "1+1*2+3"));
-        //System.out.println(KeyChain.getValue(new Object(), "1+2"));
-        //new ParseUtils().write(new ParseRuleParser().getRule(), WebURL.getURL("/tmp/ParseRuleParser.txt").createFile(false));
-    }
-
 }
