@@ -327,8 +327,7 @@ public class WebURL {
         // Handle URL
         if (_src instanceof URL) {
             URL url = getJavaURL();
-            try { return url.openConnection().getLastModified(); }
-            catch (IOException e) { return 0; }
+            return URLUtils.getLastModTime(url);
         }
 
         // Otherwise, return FileHeader.LastModTime

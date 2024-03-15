@@ -59,12 +59,20 @@ public class URLUtils {
     public static byte[] getBytes(URL aURL) throws IOException
     {
         // If url is file, return bytes for file
-        if (aURL.getProtocol().equals("file"))
-            return FileUtils.getBytesOrThrow(getFile(aURL));
+        if (aURL.getProtocol().equals("file")) {
+            File file = getFile(aURL);
+            assert (file != null);
+            return FileUtils.getBytesOrThrow(file);
+        }
 
-        // Get connection, stream, stream bytes, then close stream and return bytes
-        URLConnection conn = aURL.openConnection();
-        return getBytes(conn);
+        // Get URL connection and lastModified time
+        URLConnection urlConnection = aURL.openConnection();
+
+        // Some servers require a User-Agent header
+        urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (SnapKit)");
+
+        // Get last mod time
+        return getBytes(urlConnection);
     }
 
     /**
@@ -83,7 +91,16 @@ public class URLUtils {
      */
     public static long getLastModTime(URL aURL)
     {
-        try { return aURL.openConnection().getLastModified(); }
+        try {
+            // Get URL connection and lastModified time
+            URLConnection urlConnection = aURL.openConnection();
+
+            // Some servers require a User-Agent header
+            urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (SnapKit)");
+
+            // Return last mod time
+            return urlConnection.getLastModified();
+        }
         catch(IOException e) { return 0; }
     }
 
@@ -139,23 +156,28 @@ public class URLUtils {
         }
 
         // Get the destination file that URL should be saved to
-        File file = getLocalFileDestination(aURL, aFile);
+        File localFile = getLocalFileDestination(aURL, aFile);
 
         // Create directories for this file
-        file.getParentFile().mkdirs();
+        localFile.getParentFile().mkdirs();
 
         // Get URL connection and lastModified time
-        URLConnection conn = aURL.openConnection();
-        long lastMod = conn.getLastModified();
+        URLConnection urlConnection = aURL.openConnection();
+
+        // Some servers require a User-Agent header
+        urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (SnapKit)");
+
+        // Get last mod time
+        long lastModTime = urlConnection.getLastModified();
 
         // If local file doesn't exist or is older than URL, rewrite it
-        if (!file.exists() || (lastMod>0 && file.lastModified()<lastMod)) {
-            byte[] bytes = getBytes(conn);
-            FileUtils.writeBytes(file, bytes);
+        if (!localFile.exists() || (lastModTime > 0 && localFile.lastModified() < lastModTime)) {
+            byte[] bytes = getBytes(urlConnection);
+            FileUtils.writeBytes(localFile, bytes);
         }
 
-        // Return file
-        return file;
+        // Return
+        return localFile;
     }
 
     /**
