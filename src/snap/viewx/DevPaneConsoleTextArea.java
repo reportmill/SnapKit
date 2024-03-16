@@ -138,9 +138,9 @@ public class DevPaneConsoleTextArea extends TextArea {
     /**
      * Override to update input location.
      */
-    public void replaceChars(String aString, TextStyle aStyle, int aStart, int anEnd, boolean doUpdateSel)
+    public void replaceChars(CharSequence theChars, TextStyle aStyle, int aStart, int anEnd, boolean doUpdateSel)
     {
-        super.replaceChars(aString, aStyle, aStart, anEnd, doUpdateSel);
+        super.replaceChars(theChars, aStyle, aStart, anEnd, doUpdateSel);
         _inputLoc = length();
     }
 

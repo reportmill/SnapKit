@@ -749,28 +749,28 @@ public class TextArea extends View {
     /**
      * Adds the given string to end of text.
      */
-    public void addChars(String aStr, Object... theAttrs)
+    public void addChars(CharSequence theChars, Object... theAttrs)
     {
         int len = length();
         TextStyle style = getStyleForCharIndex(len).copyFor(theAttrs);
-        replaceChars(aStr, style, len, len, true);
+        replaceChars(theChars, style, len, len, true);
     }
 
     /**
      * Adds the given string with given style to text at given index.
      */
-    public void addChars(String aStr, TextStyle aStyle)
+    public void addChars(CharSequence theChars, TextStyle aStyle)
     {
         int length = length();
-        replaceChars(aStr, aStyle, length, length, true);
+        replaceChars(theChars, aStyle, length, length, true);
     }
 
     /**
      * Adds the given string with given style to text at given index.
      */
-    public void addChars(String aStr, TextStyle aStyle, int anIndex)
+    public void addChars(CharSequence theChars, TextStyle aStyle, int anIndex)
     {
-        replaceChars(aStr, aStyle, anIndex, anIndex, true);
+        replaceChars(theChars, aStyle, anIndex, anIndex, true);
     }
 
     /**
@@ -794,20 +794,20 @@ public class TextArea extends View {
     /**
      * Replaces the current selection with the given string.
      */
-    public void replaceChars(String aString)
+    public void replaceChars(CharSequence theChars)
     {
         int selStart = getSelStart();
         int selEnd = getSelEnd();
-        replaceChars(aString, null, selStart, selEnd, true);
+        replaceChars(theChars, null, selStart, selEnd, true);
     }
 
     /**
      * Replaces the current selection with the given string.
      */
-    public void replaceChars(String aString, TextStyle aStyle, int aStart, int anEnd, boolean doUpdateSel)
+    public void replaceChars(CharSequence theChars, TextStyle aStyle, int aStart, int anEnd, boolean doUpdateSel)
     {
         // Get string length (if no string length and no char range, just return)
-        int strLen = aString != null ? aString.length() : 0;
+        int strLen = theChars != null ? theChars.length() : 0;
         if (strLen == 0 && aStart == anEnd)
             return;
 
@@ -820,7 +820,7 @@ public class TextArea extends View {
         }
 
         // Forward to TextBlock replaceChars()
-        _textBlock.replaceChars(aString, style, aStart, anEnd);
+        _textBlock.replaceChars(theChars, style, aStart, anEnd);
 
         // Update selection to be at end of new string
         if (doUpdateSel)
