@@ -254,8 +254,8 @@ public abstract class ButtonPainter {
     public static class Classic extends ButtonPainter {
 
         // Button background fill (gradient, light gray top to dark gray bottom)
-        private static Color _bfc1 = Color.get("#e8e8e8");
-        private static Color _bfc2 = Color.get("#d3d3d3");
+        private static Color _bfc1 = Color.get("#f4");
+        private static Color _bfc2 = Color.get("#e0");
         private static GradientPaint.Stop[]  _bfillStops = GradientPaint.getStops(0, _bfc1, 1, _bfc2);
         private static GradientPaint BUTTON_FILL = new GradientPaint(.5, 0, .5, 1, _bfillStops);
 
