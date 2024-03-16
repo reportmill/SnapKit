@@ -2,8 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import java.util.Arrays;
-
 import snap.geom.Insets;
 import snap.gfx.*;
 import snap.util.*;
@@ -13,20 +11,17 @@ import snap.util.*;
  */
 public class MenuBar extends ParentView {
 
-    // The menubar fill
-    static Color c1 = new Color("#F9"), c2 = new Color("#EF"), c3 = new Color("#EA");
-    static Color c4 = new Color("#E6"), c5 = new Color("#E1");
-    static GradientPaint.Stop stops[] = GradientPaint.getStops(new double[] { 0,.25,.5,.75,1 }, c1, c2, c3, c4, c5);
-    static GradientPaint MENU_BAR_PAINT = new GradientPaint(0,0,0,1,stops);
-    static Font MENU_BAR_FONT = new Font("Arial", 13);
+    // Constants for properties
+    public static Font MENU_BAR_FONT = new Font("Arial", 13);
+    public static Insets DEFAULT_MENU_BAR_PADDING = new Insets(2, 10, 2, 10);
 
     /**
-     * Creates a new MenuBarNode.
+     * Constructor.
      */
     public MenuBar()
     {
-        setFill(MENU_BAR_PAINT);
-        setPadding(0,10,0,10);
+        super();
+        _padding = DEFAULT_MENU_BAR_PADDING;
         setFont(MENU_BAR_FONT);
     }
 
@@ -35,18 +30,9 @@ public class MenuBar extends ParentView {
      */
     public Menu[] getMenus()
     {
-        return Arrays.copyOf(getChildren(), getChildCount(), Menu[].class);
+        View[] children = getChildren();
+        return ArrayUtils.filterByClass(children, Menu.class);
     }
-
-    /**
-     * Returns the number of menus.
-     */
-    public int getMenuCount()  { return getChildCount(); }
-
-    /**
-     * Override to return child as Menu.
-     */
-    public Menu getMenu(int anIndex)  { return (Menu)getChild(anIndex); }
 
     /**
      * Adds a Menu.
@@ -79,8 +65,8 @@ public class MenuBar extends ParentView {
      */
     protected void processEvent(ViewEvent anEvent)
     {
-        for (View item : getChildren()) {
-            MenuItem match = getMatchingMenuItem((MenuItem) item, anEvent);
+        for (Menu menu : getMenus()) {
+            MenuItem match = getMatchingMenuItem(menu, anEvent);
             if (match != null) {
                 match.fireActionEvent(anEvent);
                 anEvent.consume(); return;
@@ -151,11 +137,6 @@ public class MenuBar extends ParentView {
     protected void layoutImpl()  { RowView.layout(this, true); }
 
     /**
-     * Override to return default.
-     */
-    public Paint getDefaultFill()  { return MENU_BAR_PAINT; }
-
-    /**
      * Returns the default font.
      */
     public Font getDefaultFont()  { return MENU_BAR_FONT; }
@@ -166,8 +147,8 @@ public class MenuBar extends ParentView {
     protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     {
         // Archive children
-        for (int i = 0, iMax = getMenuCount(); i < iMax; i++) { Menu child = getMenu(i);
-            anElement.add(anArchiver.toXML(child, this)); }
+        for (Menu childMenu : getMenus())
+            anElement.add(anArchiver.toXML(childMenu, this));
     }
 
     /**
