@@ -166,6 +166,11 @@ public class ParentView extends View {
     }
 
     /**
+     * Returns the children in paint order.
+     */
+    protected View[] getChildrenInPaintOrder()  { return getChildren(); }
+
+    /**
      * Returns the child with given name.
      */
     public View getChildForName(String aName)
@@ -398,36 +403,40 @@ public class ParentView extends View {
     protected void paintChildren(Painter aPntr)
     {
         // If view clip set, save painter state and set
-        Shape vclip = getClip();
-        if (vclip != null) {
+        Shape viewClip = getClip();
+        if (viewClip != null) {
             aPntr.save();
-            aPntr.clip(vclip);
+            aPntr.clip(viewClip);
         }
 
         // Get painter clip
-        Shape pclip = aPntr.getClip();
+        Shape pntrClip = aPntr.getClip();
+
+        // Get children in paint order
+        View[] children = getChildrenInPaintOrder();
 
         // Iterate over children and paint any that intersect clip
-        View[] children = getChildren();
         for (View child : children) {
 
-            // If not visible or paintable, just continue
+            // If child not visible or paintable, just skip
             if (!child.isVisible() || !child.isPaintable())
                 continue;
 
-            // If child hit by clip, paint
-            Rect clipBnds = child.parentToLocal(pclip).getBounds();
+            // If child not hit by clip, skip
+            Rect clipBnds = child.parentToLocal(pntrClip).getBounds();
             Rect childBnds = child.getBoundsLocal();
-            if (clipBnds.intersectsRectAndNotEmpty(childBnds)) {
-                aPntr.save();
-                aPntr.transform(child.getLocalToParent());
-                child.paintAll(aPntr);
-                aPntr.restore();
-            }
+            if (!clipBnds.intersectsRectAndNotEmpty(childBnds))
+                continue;
+
+            // Paint child
+            aPntr.save();
+            aPntr.transform(child.getLocalToParent());
+            child.paintAll(aPntr);
+            aPntr.restore();
         }
 
         // If ClipToBounds, Restore original clip
-        if (vclip != null)
+        if (viewClip != null)
             aPntr.restore();
     }
 
