@@ -276,8 +276,11 @@ public abstract class WebSite {
 
         // If parent dir doesn't exist, save it (to make sure it exists)
         WebFile parentDir = aFile.getParent();
-        if (parentDir != null && !parentDir.getExists())
-            parentDir.save();
+        if (parentDir != null && !parentDir.getExists()) {
+            WebResponse resp = parentDir.save();
+            if (resp.getCode() != WebResponse.OK)
+                return resp;
+        }
 
         // Create PUT request for file
         WebRequest putRequest = new WebRequest(aFile);
