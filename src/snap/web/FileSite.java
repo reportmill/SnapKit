@@ -149,7 +149,7 @@ public class FileSite extends WebSite {
         else {
             byte[] fileBytes = aReq.getSendBytes();
             if (fileBytes != null) {
-                try { FileUtils.writeBytesSafely(javaFile, fileBytes); }
+                try { FileUtils.writeBytes(javaFile, fileBytes); }
                 catch(IOException e) { aResp.setException(e); return; }
             }
         }
