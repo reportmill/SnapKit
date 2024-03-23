@@ -224,6 +224,11 @@ public abstract class Image implements Loadable {
     }
 
     /**
+     * Waits for image load.
+     */
+    public void waitForImageLoad()  { }
+
+    /**
      * Returns an RGB integer for given x, y.
      */
     public abstract int getRGB(int aX, int aY);
@@ -411,7 +416,7 @@ public abstract class Image implements Loadable {
     public String toStringProps()
     {
         // Append Width, Height
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(" Width:").append(FormatUtils.formatNum("#.##", getWidth()));
         sb.append(", Height:").append(FormatUtils.formatNum("#.##", getHeight()));
 

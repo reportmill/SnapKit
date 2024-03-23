@@ -1,7 +1,6 @@
 package snap.viewx;
 import snap.view.*;
 import snap.web.*;
-
 import java.util.Date;
 import java.util.Objects;
 
@@ -121,6 +120,9 @@ public class DevPaneFiles extends ViewOwner {
         TextView textView = getView("FileTextView", TextView.class);
         TextArea textArea = textView.getTextArea();
         textArea.setPadding(4, 4, 4, 4);
+
+        // Add drag listener to content view
+        getUI().addEventHandler(e -> handleDragEvent(e), DragEvents);
     }
 
     @Override
@@ -239,6 +241,74 @@ public class DevPaneFiles extends ViewOwner {
                 setViewValue("FileTextView", fileText);
             }
         }
+    }
+
+    /**
+     * Called when content gets drag event.
+     */
+    private void handleDragEvent(ViewEvent anEvent)
+    {
+        // Handle drag over: Accept
+        if (anEvent.isDragOver()) {
+            if (isSupportedDragEvent(anEvent))
+                anEvent.acceptDrag();
+            return;
+        }
+
+        // Handle drop
+        if (anEvent.isDragDrop()) {
+            if (!isSupportedDragEvent(anEvent))
+                return;
+            anEvent.acceptDrag();
+            Clipboard clipboard = anEvent.getClipboard();
+            ClipboardData clipboardData = clipboard.getFiles().get(0);
+            dropFile(clipboardData);
+            anEvent.dropComplete();
+        }
+    }
+
+    /**
+     * Returns whether event is supported drag event.
+     */
+    private boolean isSupportedDragEvent(ViewEvent anEvent)
+    {
+        Clipboard clipboard = anEvent.getClipboard();
+        return clipboard.hasFiles();
+    }
+
+    /**
+     * Called to handle a file drop on top graphic.
+     */
+    private void dropFile(ClipboardData clipboardData)
+    {
+        // If clipboard data not loaded, come back when it is
+        if (!clipboardData.isLoaded()) {
+            clipboardData.addLoadListener(f -> dropFile(clipboardData));
+            return;
+        }
+
+        // Get destination file
+        WebFile selDir = getSelDir();
+        WebFile destFile = selDir.getSite().createFileForPath(selDir.getDirPath() + clipboardData.getName(), false);
+
+        // Get drop file bytes
+        byte[] dropFileBytes = clipboardData.getBytes();
+        if (dropFileBytes == null) {
+            System.err.println("DevPaneFiles.dropFile: No bytes for drop file: " + clipboardData.getName());
+            return;
+        }
+
+        // If old file exists, delete it (shouldn't need this)
+        long oldSize = 0;
+        if (destFile.getExists()) {
+            oldSize = destFile.getSize();
+            destFile.delete();
+        }
+
+        // Set bytes and save file
+        destFile.setBytes(dropFileBytes);
+        destFile.save();
+        System.out.println("Saved drop file:  " + destFile.getPath() + ", old-size: " + oldSize + ", new-size: " + dropFileBytes.length);
     }
 
     /**
