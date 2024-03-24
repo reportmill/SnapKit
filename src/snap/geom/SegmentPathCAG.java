@@ -16,7 +16,7 @@ public class SegmentPathCAG {
     public static Shape addShapes(Shape aShape1, Shape aShape2)
     {
         // Simple case: If shapes don't intersect, just add them and return
-        if (!aShape1.intersects(aShape2)) {
+        if (!aShape1.intersectsShape(aShape2)) {
             Path2D path = new Path2D(aShape1);
             path.appendShape(aShape2);
             return path;
@@ -74,7 +74,7 @@ public class SegmentPathCAG {
     public static Shape subtractShapes(Shape aShape1, Shape aShape2)
     {
         // Simple case: If shapes don't intersect, return shape 1 (should be null)
-        if (!aShape1.intersects(aShape2))
+        if (!aShape1.intersectsShape(aShape2))
             return aShape1;
 
         // If either shape contains the other, return concatenated shape
@@ -137,7 +137,7 @@ public class SegmentPathCAG {
         // Simple cases
         if (aShape1 instanceof Rect && aShape2 instanceof Rect)
             return ((Rect) aShape1).getIntersectRect((Rect)aShape2);
-        if (!aShape1.intersects(aShape2))
+        if (!aShape1.intersectsShape(aShape2))
             return new Rect();
         if (aShape1.contains(aShape2))
             return aShape2;

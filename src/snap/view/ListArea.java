@@ -565,7 +565,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
             return;
 
         // If totally out of view, add buffer. Then scroll rect to visible
-        if (!scrollBounds.intersects(vrect))
+        if (!scrollBounds.intersectsShape(vrect))
             scrollBounds.inset(0,-4 * getRowHeight());
         scrollToVisible(scrollBounds);
         repaint();

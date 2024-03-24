@@ -408,7 +408,7 @@ public class AWT {
          */
         public boolean intersects(double x, double y, double w, double h)
         {
-            return _shp.intersects(new Rect(x, y, w, h));
+            return _shp.intersectsShape(new Rect(x, y, w, h));
         }
 
         /**
@@ -416,7 +416,7 @@ public class AWT {
          */
         public boolean intersects(Rectangle2D r)
         {
-            return _shp.intersects(awtToSnapRect(r));
+            return _shp.intersectsShape(awtToSnapRect(r));
         }
 
         /**

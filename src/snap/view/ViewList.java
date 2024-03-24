@@ -170,7 +170,7 @@ public class ViewList {
             if (aClass != null && !aClass.isInstance(child))
                 continue;
             Shape shapeInChild = child.parentToLocal(aShape);
-            if (child.intersects(shapeInChild))
+            if (child.intersectsShape(shapeInChild))
                 return (T) child;
         }
 
@@ -195,7 +195,7 @@ public class ViewList {
             if (aClass != null && !aClass.isInstance(child))
                 continue;
             Shape shapeInChild = child.parentToLocal(aShape);
-            if (child.intersects(shapeInChild)) {
+            if (child.intersectsShape(shapeInChild)) {
                 if (hit == Collections.EMPTY_LIST) hit = new ArrayList<>();
                 hit.add((T)child);
             }

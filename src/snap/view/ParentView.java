@@ -370,10 +370,10 @@ public class ParentView extends View {
     /**
      * Override to forward to children.
      */
-    public boolean intersects(Shape aShape)
+    public boolean intersectsShape(Shape aShape)
     {
         // Do normal version (just return if miss or this ParentView has border/fill)
-        boolean hit = super.intersects(aShape);
+        boolean hit = super.intersectsShape(aShape);
         if (!hit || getBorder() != null || getFill() != null)
             return hit;
 

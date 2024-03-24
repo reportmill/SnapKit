@@ -202,7 +202,7 @@ public abstract class Shape {
     /**
      * Returns whether this shape intersects given shape.
      */
-    public boolean intersects(Shape aShape)
+    public boolean intersectsShape(Shape aShape)
     {
         // If given shape is segment, do segment version instead
         if (aShape instanceof Segment)
@@ -215,7 +215,7 @@ public abstract class Shape {
 
         // If other shape bounds contains this shape bounds, have other shape do check
         if (bnds1.containsRect(bnds0))
-            return aShape.intersects(this);
+            return aShape.intersectsShape(this);
 
         // Get path iterator and declare iter vars
         PathIter pathIter = aShape.getPathIter(null);
@@ -418,7 +418,7 @@ public abstract class Shape {
     /**
      * Returns whether shape with line width intersects point.
      */
-    public boolean intersects(double aX, double aY, double aLineWidth)
+    public boolean intersectsXY(double aX, double aY, double aLineWidth)
     {
         // If extended bounds don't contain point, return false
         if (!getBounds().getInsetRect(-aLineWidth/2).contains(aX,aY))
@@ -432,21 +432,21 @@ public abstract class Shape {
     /**
      * Returns whether shape with line width intersects shape.
      */
-    public boolean intersects(Shape aShape, double aLineWidth)
+    public boolean intersectsShape(Shape aShape, double aLineWidth)
     {
         // If linewidth is small return normal version
         if (aLineWidth<=1)
-            return intersects(aShape);
+            return intersectsShape(aShape);
 
         // If bounds don't intersect, return false
-        if (!getBounds().getInsetRect(-aLineWidth/2).intersects(aShape))
+        if (!getBounds().getInsetRect(-aLineWidth/2).intersectsShape(aShape))
             return false;
 
         // We need to outset of shape or the other
         Shape shp1 = this;
         Shape shp2 = aShape; //double ins = -aLineWidth/2;
         //if (aShape.isPolygonal()) shp2 = getInsetShape(ins); else shp1 = getInsetShape(ins);
-        return shp1.intersects(shp2);
+        return shp1.intersectsShape(shp2);
     }
 
     /**

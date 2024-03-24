@@ -1167,7 +1167,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether view contains shape.
      */
-    public boolean contains(Shape aShape)
+    public boolean containsShape(Shape aShape)
     {
         Shape boundsShape = getBoundsShape();
         return boundsShape.contains(aShape);
@@ -1176,10 +1176,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether view intersects shape.
      */
-    public boolean intersects(Shape aShape)
+    public boolean intersectsShape(Shape aShape)
     {
         Shape boundsShape = getBoundsShape();
-        return boundsShape.intersects(aShape, 1);
+        return boundsShape.intersectsShape(aShape, 1);
     }
 
     /**

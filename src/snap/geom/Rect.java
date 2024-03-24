@@ -89,11 +89,11 @@ public class Rect extends RectBase {
     /**
      * Override to omptimize rect-to-rect case.
      */
-    public boolean intersects(Shape aShape)
+    public boolean intersectsShape(Shape aShape)
     {
         if (aShape instanceof Rect)
             return intersectsRect((Rect)aShape);
-        return super.intersects(aShape);
+        return super.intersectsShape(aShape);
     }
 
     /**
@@ -134,11 +134,11 @@ public class Rect extends RectBase {
     /**
      * Returns whether shape with line width intersects shape.
      */
-    public boolean intersects(Shape aShape, double aLineWidth)
+    public boolean intersectsShape(Shape aShape, double aLineWidth)
     {
         if (aShape instanceof Rect)
             return getInsetRect(-aLineWidth/2).intersectsRect((Rect)aShape);
-        return super.intersects(aShape, aLineWidth);
+        return super.intersectsShape(aShape, aLineWidth);
     }
 
     /**

@@ -94,7 +94,7 @@ public abstract class PainterImpl extends Painter {
         Shape mshp = aShape.copyFor(_gstate.xform);
 
         // If shape not in clip, clip
-        if (!_gstate.clip.contains(mshp) && _gstate.clip.intersects(mshp))
+        if (!_gstate.clip.contains(mshp) && _gstate.clip.intersectsShape(mshp))
             mshp = Shape.intersectShapes(_gstate.clip, mshp);
 
         // If no marked shape yet, just set
