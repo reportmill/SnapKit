@@ -92,6 +92,11 @@ public class EventDispatcher {
     }
 
     /**
+     * Returns the last mouse pressed view.
+     */
+    public View getMousePressView()  { return _mousePressView; }
+
+    /**
      * Returns the popup window, if one was added to root view during last event.
      */
     public PopupWindow getPopup()  { return _popup; }
