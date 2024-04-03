@@ -81,39 +81,37 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
         // Iterate over children to calculate/set child X & Width
         for (ViewProxy<?> child : children) {
 
-            // Calc X accounting for margin and alignment
+            // Initialize child X to left margin
             Insets childMarg = child.getMargin();
             double leftMarg = Math.max(ins.left, childMarg.left);
             double rightMarg = Math.max(ins.right, childMarg.right);
             double margW = leftMarg + rightMarg;
-
-            // Declare/init child X and Width
             double childX = leftMarg;
-            double childW;
 
-            // If Parent.Width not set, set width to Child.PrefWidth
+            // Initialize child width to max width
+            double childMaxW = Math.max(viewW - margW, 0);
+            double childW = childMaxW;
+
+            // If Parent.Width not set, just set width to Child.PrefWidth
             if (viewW < 0) {
                 double childH = child.getHeight();
                 childW = child.getBestWidth(childH);
             }
 
-            // Otherwise, if Parent.FillWidth or Child.GrowWidth, set to max width
-            else if (isFillWidth || child.isGrowWidth()) {
-                childW = Math.max(viewW - margW, 0);
-            }
+            // Otherwise, if not FillWidth, set width to Child.PrefWidth and align X
+            else if (!(isFillWidth || child.isGrowWidth())) {
 
-            // Otherwise, set width to Child.PrefWidth and adjust X
-            else {
-                double childMaxW = Math.max(viewW - margW, 0);
+                // Set child width to Child.PrefWidth
                 double childH = child.getHeight();
                 childW = child.getBestWidth(childH);
-                childW = Math.min(childW, childMaxW);
 
-                // Calc X accounting for margin and alignment
-                if (childW < childMaxW) {
-                    double alignX2 = Math.max(alignX, child.getLeanXAsDouble());
-                    double shiftX = Math.round((viewW - childW) * alignX2);
-                    childX = Math.max(childX, shiftX);
+                // Constrain child width to max child width or if space available and align set, shift X
+                if (childW > childMaxW)
+                    childW = childMaxW;
+                else if (childW < childMaxW) {
+                    double childAlignX = Math.max(alignX, child.getLeanXAsDouble());
+                    if (childAlignX > 0)
+                        childX += Math.round((childMaxW - childW) * childAlignX);
                 }
             }
 

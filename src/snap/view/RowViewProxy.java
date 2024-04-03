@@ -138,39 +138,37 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
         // Iterate over children to calculate/set child Y & Height
         for (ViewProxy<?> child : children) {
 
-            // Calc Y accounting for margin and alignment
+            // Initialize child Y to top margin
             Insets childMarg = child.getMargin();
             double topMarg = Math.max(ins.top, childMarg.top);
             double btmMarg = Math.max(ins.bottom, childMarg.bottom);
             double margH = topMarg + btmMarg;
-
-            // Declare/init child Y and Height
             double childY = topMarg;
-            double childH;
 
-            // If Parent.Height not set, set height to Child.PrefHeight
+            // Initialize child Height to max height
+            double childMaxH = Math.max(viewH - margH, 0);
+            double childH = childMaxH;
+
+            // If Parent.Height not set, just set height to Child.PrefHeight
             if (viewH < 0) {
                 double childW = child.getWidth();
                 childH = child.getBestHeight(childW);
             }
 
-            // Otherwise, if Parent.FillHeight or Child.GrowHeight, set to max height
-            else if (isFillHeight || child.isGrowHeight()) {
-                childH = Math.max(viewH - margH, 0);
-            }
+            // Otherwise, if not FillHeight, set height to Child.PrefHeight and align Y
+            else if (!(isFillHeight || child.isGrowHeight())) {
 
-            // Otherwise, set height to Child.PrefHeight and adjust Y
-            else {
-                double childMaxH = Math.max(viewH - margH, 0);
+                // Set child height to Child.PrefHeight
                 double childW = child.getWidth();
                 childH = child.getBestHeight(childW);
-                childH = Math.min(childH, childMaxH);
 
-                // Calc y accounting for margin and alignment
-                if (childH < childMaxH) {
-                    double alignY2 = Math.max(alignY, child.getLeanYAsDouble());
-                    double shiftY = Math.round((viewH - childH) * alignY2);
-                    childY = Math.max(childY, shiftY);
+                // Constrain child height to max child height or if space available and align set, shift Y
+                if (childH > childMaxH)
+                    childH = childMaxH;
+                else if (childH < childMaxH) {
+                    double chldAlignY = Math.max(alignY, child.getLeanYAsDouble());
+                    if (chldAlignY > 0)
+                        childY += Math.round((childMaxH - childH) * chldAlignY);
                 }
             }
 
