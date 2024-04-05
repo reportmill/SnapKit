@@ -71,6 +71,15 @@ public class ParseTokenImpl implements ParseToken {
     }
 
     /**
+     * Returns the start char index of this token in line.
+     */
+    public int getEndCharIndexInLine()
+    {
+        int tokenLineStartCharIndex = _tokenLine.getStartCharIndex();
+        return _endCharIndex - tokenLineStartCharIndex;
+    }
+
+    /**
      * Returns the string.
      */
     public String getString()

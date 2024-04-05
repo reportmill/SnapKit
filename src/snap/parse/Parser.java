@@ -27,6 +27,9 @@ public class Parser {
     // The list of current look ahead tokens
     private List<ParseToken>  _lookAheadTokens = new ArrayList<>();
 
+    // The last successfully parsed token
+    private ParseToken _lastValidToken;
+
     // Whether an exception was hit on last parse
     private boolean  _exceptionHitOnLastParse;
 
@@ -205,12 +208,18 @@ public class Parser {
     }
 
     /**
+     * Returns the last successfully parsed token.
+     */
+    public ParseToken getLastValidToken()  { return _lastValidToken; }
+
+    /**
      * Clears any currently set tokens.
      */
     protected void clearTokens()
     {
         _lookAheadTokens.clear();
         _token = null;
+        _lastValidToken = null;
     }
 
     /**
@@ -387,6 +396,7 @@ public class Parser {
                 }
 
                 // Clear token and return
+                _lastValidToken = _token;
                 _token = null; //getNextToken();
                 return node;
             }

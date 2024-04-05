@@ -10,13 +10,16 @@ import snap.util.CharSequenceUtils;
 public class ParseException extends RuntimeException {
 
     // The message
-    String _msg;
+    private String _msg;
 
     // The parser
-    Parser _parser;
+    private Parser _parser;
 
     // The failed rule
-    ParseRule _rule;
+    private ParseRule _rule;
+
+    // The char index
+    private int _charIndex;
 
     /**
      * Creates a new parse exception.
@@ -41,7 +44,8 @@ public class ParseException extends RuntimeException {
      */
     public String getMessage()
     {
-        return _msg != null ? _msg : (_msg = createMessage());
+        if (_msg != null) return _msg;
+        return _msg = createMessage();
     }
 
     /**
@@ -49,18 +53,22 @@ public class ParseException extends RuntimeException {
      */
     protected String createMessage()
     {
+        // Get last valid token
+        ParseToken token = _parser.getLastValidToken();
+        if (token == null)
+            token = _parser.getToken();
+
         // Get some useful line/char positions
-        ParseToken token = _parser.getToken();
-        int charIndex = token != null ? token.getStartCharIndex() : _parser.getTokenizer().getCharIndex();
+        _charIndex = token != null ? token.getEndCharIndex() : _parser.getTokenizer().getCharIndex();
         int lineIndex = token != null ? token.getLineIndex() : 0;
-        int colIndex = token != null ? token.getStartCharIndexInLine() : 0;
+        int colIndex = token != null ? token.getEndCharIndexInLine() : 0;
 
         // Get Error region
         CharSequence inputText = _parser.getInput();
-        int lineEnd = CharSequenceUtils.indexOfNewline(inputText, charIndex);
+        int lineEnd = CharSequenceUtils.indexOfNewline(inputText, _charIndex);
         if (lineEnd < 0)
             lineEnd = inputText.length();
-        CharSequence errorChars = inputText.subSequence(charIndex, lineEnd);
+        CharSequence errorChars = inputText.subSequence(_charIndex, lineEnd);
 
         // Basic message
         String ruleName = _rule.getName() != null ? _rule.getName() : _rule.toString();
@@ -71,4 +79,8 @@ public class ParseException extends RuntimeException {
         return msg;
     }
 
+    /**
+     * Returns the char index.
+     */
+    public int getCharIndex()  { return _charIndex; }
 }

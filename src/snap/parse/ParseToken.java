@@ -39,6 +39,11 @@ public interface ParseToken {
     int getStartCharIndexInLine();
 
     /**
+     * Returns the end char index of this token in line.
+     */
+    int getEndCharIndexInLine();
+
+    /**
      * Returns the string.
      */
     String getString();
