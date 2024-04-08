@@ -35,7 +35,7 @@ public class ViewUpdater {
     private Runnable  _updateRunShared = () -> updateViews();
 
     // The timer for animated views
-    private ViewTimer  _timer = new ViewTimer(25, t -> updateLater());
+    private ViewTimer  _timer = new ViewTimer(this::updateLater, 25);
     
     // The ViewUpdater.Lister that is notified on certain update actions
     private ViewUpdater.Listener  _lsnr;

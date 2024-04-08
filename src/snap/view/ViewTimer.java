@@ -2,12 +2,14 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import java.util.function.Consumer;
 
 /**
  * A Timer to fire on node event thread.
  */
 public class ViewTimer {
+
+    // The run to be called on each frame
+    private Runnable _run;
 
     // The delay
     private int  _period = 40;
@@ -24,24 +26,25 @@ public class ViewTimer {
     // The number of times the timer has fired
     private int  _count;
     
-    // To be called on each frame
-    private Consumer<ViewTimer> _onFire;
-    
     // The run that fires over intervals
-    private Runnable  _run;
+    private Runnable _timerRun;
     
     // The environment
     private ViewEnv  _env = ViewEnv.getEnv();
     
     /**
-     * Creates a new ViewTimer.
+     * Constructor for runnable and period.
      */
-    public ViewTimer() { }
+    public ViewTimer(Runnable onFire, int aPeriod)
+    {
+        _period = aPeriod;
+        _run = onFire;
+    }
 
     /**
-     * Creates a new ViewTimer for period and action.
+     * Returns the run to be called.
      */
-    public ViewTimer(int aPeriod, Consumer<ViewTimer> onFire)  { _period = aPeriod; _onFire = onFire; }
+    public Runnable getRun()  { return _run; }
 
     /**
      * Returns the time in milliseconds between firings.
@@ -62,31 +65,22 @@ public class ViewTimer {
     }
 
     /**
-     * Returns the on frame.
+     * Returns whether timer is running.
      */
-    public Consumer<ViewTimer> getOnFire()  { return _onFire; }
-
-    /**
-     * Sets the on frame.
-     */
-    public void setOnFire(Consumer <ViewTimer> onFire)  { _onFire = onFire; }
+    public boolean isRunning()  { return _timerRun != null; }
 
     /**
      * Returns whether timer is running.
      */
-    public boolean isRunning()  { return _run!=null; }
-
-    /**
-     * Returns whether timer is running.
-     */
-    public boolean isPaused()  { return _pauseTime>0; }
+    public boolean isPaused()  { return _pauseTime > 0; }
 
     /**
      * Returns the elapsed time.
      */
     public int getTime()
     {
-        if (_time > 0) return _time;
+        if (_time > 0)
+            return _time;
         return (int) (System.currentTimeMillis() - _startTime);
     }
 
@@ -101,15 +95,15 @@ public class ViewTimer {
     public synchronized void start()
     {
         // If task already present, return
-        if (_run != null) return;
+        if (_timerRun != null) return;
 
         // Create task and schedule
-        _run = () -> sendEvent();
+        _timerRun = this::sendEvent;
 
         // Initialize times and Schedule task
         _startTime = System.currentTimeMillis() - (_pauseTime>0 ? (_pauseTime - _startTime) : 0);
         _pauseTime = 0;
-        _env.runIntervals(_run, getPeriod());
+        _env.runIntervals(_timerRun, getPeriod());
     }
 
     /**
@@ -118,7 +112,7 @@ public class ViewTimer {
     public void start(int aDelay)
     {
         if (aDelay > 0)
-            _env.runDelayed(() -> start(), aDelay);
+            _env.runDelayed(this::start, aDelay);
         else start();
     }
 
@@ -127,16 +121,20 @@ public class ViewTimer {
      */
     public synchronized void stop()
     {
-        if (_run != null)
-            _env.stopIntervals(_run);
-        _run = null;
+        if (_timerRun != null)
+            _env.stopIntervals(_timerRun);
+        _timerRun = null;
         _pauseTime = 0;
     }
 
     /**
      * Pauses the timer (next play will start from previous time).
      */
-    public void pause()  { stop(); _pauseTime = System.currentTimeMillis(); }
+    public void pause()
+    {
+        stop();
+        _pauseTime = System.currentTimeMillis();
+    }
 
     /**
      * Sends the event.
@@ -144,11 +142,11 @@ public class ViewTimer {
     protected void sendEvent()
     {
         // If no run, just return. Can happen because final interval fires?
-        if (_run == null) return; //System.out.println("ViewTimer.sendEvent: Run is null - shouldn't happen");
+        if (_timerRun == null) return; //System.out.println("ViewTimer.sendEvent: Run is null - shouldn't happen");
 
         // Set time and fire
         _time = (int) (System.currentTimeMillis() - _startTime);
-        _onFire.accept(this);
+        _run.run();
         _count++;
         _time = -1;
     }
