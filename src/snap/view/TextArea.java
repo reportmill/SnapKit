@@ -51,8 +51,8 @@ public class TextArea extends View {
     // The mouse down point
     private double  _downX, _downY;
 
-    // The animator for caret blinking
-    private ViewTimer  _caretTimer;
+    // The runnable for caret flashing
+    private Runnable _caretRun;
 
     // Whether to show text insertion point caret
     private boolean  _showCaret;
@@ -1282,7 +1282,7 @@ public class TextArea extends View {
     /**
      * Returns whether caret is flashing.
      */
-    public boolean isCaretAnim()  { return _caretTimer!=null; }
+    public boolean isCaretAnim()  { return _caretRun != null; }
 
     /**
      * Sets whether caret is flashing.
@@ -1294,15 +1294,15 @@ public class TextArea extends View {
 
         // If setting
         if (aValue) {
-            _caretTimer = new ViewTimer(500, t -> setShowCaret(!isShowCaret()));
-            _caretTimer.start();
+            _caretRun = () -> setShowCaret(!isShowCaret());
+            runIntervals(_caretRun, 500);
             setShowCaret(true);
         }
 
         // If stopping
         else {
-            _caretTimer.stop();
-            _caretTimer = null;
+            stopIntervals(_caretRun);
+            _caretRun = null;
             setShowCaret(false);
         }
 

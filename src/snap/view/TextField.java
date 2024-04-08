@@ -41,9 +41,9 @@ public class TextField extends ParentView {
     
     // The mouse down point
     private double  _downX;
-    
-    // The animator for caret blinking
-    private ViewTimer  _caretTimer;
+
+    // The runnable for caret flashing
+    private Runnable _caretRun;
     
     // Whether to hide caret
     private boolean  _hideCaret;
@@ -1013,10 +1013,7 @@ public class TextField extends ParentView {
     /**
      * Returns whether ProgressBar is animating.
      */
-    private boolean isCaretAnim()
-    {
-        return _caretTimer != null;
-    }
+    private boolean isCaretAnim()  { return _caretRun != null; }
 
     /**
      * Sets anim.
@@ -1028,17 +1025,14 @@ public class TextField extends ParentView {
 
         // Handle on
         if (aValue) {
-            _caretTimer = new ViewTimer(500, t -> {
-                _hideCaret = !_hideCaret;
-                repaint();
-            });
-            _caretTimer.start();
+            _caretRun = () -> { _hideCaret = !_hideCaret; repaint(); };
+            runIntervals(_caretRun, 500);
         }
 
         // Handle off
         else {
-            _caretTimer.stop();
-            _caretTimer = null;
+            stopIntervals(_caretRun);
+            _caretRun = null;
             _hideCaret = false;
             repaint();
         }

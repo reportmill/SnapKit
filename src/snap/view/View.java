@@ -2522,6 +2522,22 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
+     * Runs given runnable repeatedly every period milliseconds.
+     */
+    public void runIntervals(Runnable aRun, int aPeriod)
+    {
+        getEnv().runIntervals(aRun, aPeriod);
+    }
+
+    /**
+     * Stops running given runnable.
+     */
+    public void stopIntervals(Runnable aRun)
+    {
+        getEnv().stopIntervals(aRun);
+    }
+
+    /**
      * Returns the text value of this view.
      */
     public String getText()  { return null; }
