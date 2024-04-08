@@ -101,7 +101,7 @@ public class Color implements Paint, XMLArchiver.Archivable {
     /**
      * Creates a color with the given cyan, magenta, yellow, black and alpha values (0-1). Bogus right now.
      */
-    public Color(double c, double m, double y, double k, double a)  { _red =1-c; _green =1-m; _blue =1-y; _alpha = a; }
+    public Color(double c, double m, double y, double k, double a)  { _red = 1 - c; _green = 1 - m; _blue = 1 - y; _alpha = a; }
 
     /**
      * Creates a new color from the given hex string.
@@ -119,27 +119,31 @@ public class Color implements Paint, XMLArchiver.Archivable {
     /**
      * Creates a new Color from given ColorSpace, components array and alpha.
      */
-    public Color(ColorSpace aCS, float comps[], double alpha)
+    public Color(ColorSpace aCS, float[] comps, double alpha)
     {
         String errStr = "";
-        int n = aCS.getNumComponents();
-        _comps = new float[n];
+        int componentCount = aCS.getNumComponents();
+        _comps = new float[componentCount];
 
         // Set Components and check ranges
-        for (int i=0; i<n; i++) {
-            if (comps[i]<0.0 || comps[i]>1.0) errStr += "Component " + i + " ";
+        for (int i = 0; i < componentCount; i++) {
+            if (comps[i] < 0.0 || comps[i] > 1.0)
+                errStr += "Component " + i + " ";
             else _comps[i] = comps[i];
         }
 
         // Set alpha
-        if (alpha<0.0 || alpha>1.0) errStr += "Alpha";
+        if (alpha < 0.0 || alpha > 1.0)
+            errStr += "Alpha";
         else _alpha = alpha;
 
         // Complain
-        if (errStr!="") throw new IllegalArgumentException("Color param outside of expected range: " + errStr);
+        if (errStr != "")
+            throw new IllegalArgumentException("Color param outside of expected range: " + errStr);
 
         // Set ColorSpace and RGB values
-        _cspace = aCS; float rgb[] = aCS.toRGB(comps);
+        _cspace = aCS;
+        float[] rgb = aCS.toRGB(comps);
         _red = rgb[0]; _green = rgb[1]; _blue = rgb[2];
     }
 
@@ -189,7 +193,7 @@ public class Color implements Paint, XMLArchiver.Archivable {
     public int getRGB()
     {
         int r = getRedInt(), g = getGreenInt(), b = getBlueInt();
-        return ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | ((b & 0xFF) << 0);
+        return ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
     }
 
     /**
@@ -198,7 +202,7 @@ public class Color implements Paint, XMLArchiver.Archivable {
     public int getRGBA()
     {
         int r = getRedInt(), g = getGreenInt(), b = getBlueInt(), a = getAlphaInt();
-        return ((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | ((b & 0xFF) << 0);
+        return ((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
     }
 
     /**
@@ -301,7 +305,7 @@ public class Color implements Paint, XMLArchiver.Archivable {
     public String toHexString()
     {
         // Allocate string buffer and get integer rgba components
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int r = getRedInt(), g = getGreenInt(), b = getBlueInt(), a = getAlphaInt();
 
         // Add r, g, b components (and alpha, if not full) and return string
@@ -319,12 +323,13 @@ public class Color implements Paint, XMLArchiver.Archivable {
     public float[] getComponents(ColorSpace cspace, float[] compArray)
     {
         ColorSpace cs = getColorSpace();
-        float f[] = getComponents();
-        float tmp[] = cs.toCIEXYZ(f);
-        float tmpout[] = cspace.fromCIEXYZ(tmp);
-        if (compArray==null) compArray = new float[tmpout.length + 1];
-        for (int i=0;i<tmpout.length;i++) compArray[i] = tmpout[i];
-        compArray[tmpout.length] = (float)_alpha;
+        float[] f = getComponents();
+        float[] tmp = cs.toCIEXYZ(f);
+        float[] tmpout = cspace.fromCIEXYZ(tmp);
+        if (compArray == null)
+            compArray = new float[tmpout.length + 1];
+        System.arraycopy(tmpout, 0, compArray, 0, tmpout.length);
+        compArray[tmpout.length] = (float) _alpha;
         return compArray;
     }
 
@@ -335,11 +340,12 @@ public class Color implements Paint, XMLArchiver.Archivable {
     public float[] getColorComponents(ColorSpace cspace, float[] compArray)
     {
         ColorSpace cs = getColorSpace();
-        float f[] = getComponents();
-        float tmp[] = cs.toCIEXYZ(f);
-        float tmpout[] = cspace.fromCIEXYZ(tmp);
-        if (compArray==null) return tmpout;
-        for (int i=0;i<tmpout.length;i++) compArray[i] = tmpout[i];
+        float[] f = getComponents();
+        float[] tmp = cs.toCIEXYZ(f);
+        float[] tmpout = cspace.fromCIEXYZ(tmp);
+        if (compArray == null)
+            return tmpout;
+        System.arraycopy(tmpout, 0, compArray, 0, tmpout.length);
         return compArray;
     }
 
@@ -363,18 +369,20 @@ public class Color implements Paint, XMLArchiver.Archivable {
     public static Color get(Object anObj)
     {
         // Handle colors
-        if (anObj instanceof Color) return (Color)anObj;
+        if (anObj instanceof Color)
+            return (Color)anObj;
 
         // Handle string
-        if (anObj instanceof String) { String cs = (String)anObj; cs.trim();
+        if (anObj instanceof String) {
+            String colorStr = ((String) anObj).trim();
 
             // Try normal string constructor
-            try { return new Color(cs); }
-            catch(Exception e) { }
+            try { return new Color(colorStr); }
+            catch(Exception ignore) { }
 
             // Try to lookup color by name
-            cs = cs.toUpperCase();
-            switch(cs) {
+            colorStr = colorStr.toUpperCase();
+            switch(colorStr) {
                 case "WHITE": return Color.WHITE;
                 case "BLACK": return Color.BLACK;
                 case "RED": return Color.RED;
@@ -396,21 +404,23 @@ public class Color implements Paint, XMLArchiver.Archivable {
             }
 
             // Look in colors list
-            for (int i=0; i<_colors.length; i+=2)
-                if (cs.equals(_colors[i]))
-                    return get(_colors[i+1]);
+            for (int i = 0; i < _colors.length; i += 2)
+                if (colorStr.equals(_colors[i]))
+                    return get(_colors[i + 1]);
 
             // Handle "LIGHT " or "DARK " anything
-            if (cs.startsWith("LIGHT ")) { Color c = get(cs.substring(6));
-                return c!=null ? c.brighter() : null; }
-            if (cs.startsWith("DARK ")) { Color c = get(cs.substring(5));
-                return c!=null ? c.darker() : null; }
+            if (colorStr.startsWith("LIGHT ")) { Color color = get(colorStr.substring(6));
+                return color != null ? color.brighter() : null; }
+            if (colorStr.startsWith("DARK ")) { Color color = get(colorStr.substring(5));
+                return color != null ? color.darker() : null; }
         }
 
         // Treat numbers as 32bit RGBA ints
-        if (anObj instanceof Number) { Number number = (Number)anObj; int rgba = number.intValue();
-            float comps[] = new float[4];
-            for (int i=0; i<4; ++i) { comps[i] = (rgba & 0xff) / 255f; rgba >>= 8; }
+        if (anObj instanceof Number) {
+            Number number = (Number) anObj;
+            int rgba = number.intValue();
+            float[] comps = new float[4];
+            for (int i = 0; i < 4; ++i) { comps[i] = (rgba & 0xff) / 255f; rgba >>= 8; }
             return new Color(comps[3], comps[2], comps[1], comps[0]);
         }
 
@@ -423,7 +433,7 @@ public class Color implements Paint, XMLArchiver.Archivable {
      */
     public static Color getRandom()
     {
-        return new Color(MathUtils.randomFloat(1), MathUtils.randomFloat(1), MathUtils.randomFloat(1));
+        return new Color(Math.random(), Math.random(), Math.random());
     }
 
     /**
@@ -455,7 +465,7 @@ public class Color implements Paint, XMLArchiver.Archivable {
     }
 
     // Some colors:
-    static String _colors[] = {
+    private static String[] _colors = {
         "BEIGE", "#F5F5DC", "BROWN", "#A52A2A", "CRIMSON", "#DC143C", "FUCHSIA", "#FF00FF", "GOLD", "#FFD700",
         "GOLDENROD", "#DAA520", "HOTPINK", "#FF69B4", "INDIGO", "#4B0082", "IVORY", "#FFFFF0",
         "KHAKI", "#F0E68C", "LAVENDER", "#E6E6FA", "LIME", "#00FF00", "MAROON", "#800000", "NAVY", "#000080",

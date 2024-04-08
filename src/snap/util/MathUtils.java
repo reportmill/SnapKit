@@ -303,10 +303,36 @@ public class MathUtils {
     }
 
     /**
-     * Returns a random float up to given value.
+     * Returns a random int value between zero and given max.
      */
-    public static float randomFloat(float aVal)
+    public static double randomIntForMax(double aMax)
     {
-        return Math.abs(_random.nextInt()) / (float) Integer.MAX_VALUE * aVal;
+        return randomIntForRange(0, aMax);
+    }
+
+    /**
+     * Returns a random double value between zero and given max.
+     */
+    public static double randomDoubleForMax(double aMax)
+    {
+        return randomDoubleForRange(0, aMax);
+    }
+
+    /**
+     * Returns a random int value for given range.
+     */
+    public static int randomIntForRange(double aMin, double aMax)
+    {
+        double doubleVal = randomDoubleForRange(aMin, aMax);
+        return (int) Math.round(doubleVal);
+    }
+
+    /**
+     * Returns a random double value for given range.
+     */
+    public static double randomDoubleForRange(double aMin, double aMax)
+    {
+        double f = Math.random() / Math.nextDown(1.0);
+        return aMin * (1.0 - f) + aMax * f;
     }
 }
