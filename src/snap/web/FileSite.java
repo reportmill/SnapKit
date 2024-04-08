@@ -136,9 +136,10 @@ public class FileSite extends WebSite {
         // Get java file
         String filePath = aReq.getFilePath();
         File javaFile = getJavaFileForLocalPath(filePath);
+        boolean fileExists = javaFile.exists();
 
-        // If directory, create
-        if (aReq.isFileDir() && !javaFile.exists()) {
+        // If directory and missing, create directory
+        if (aReq.isFileDir() && !fileExists) {
             if (!javaFile.mkdir()) {
                 aResp.setException(new RuntimeException("FileSite.doPut: Error creating dir: " + javaFile.getPath()));
                 return;
@@ -156,10 +157,18 @@ public class FileSite extends WebSite {
 
         // Get last modified time from java file and set in response
         long lastModTime = javaFile.lastModified();
+
+        // Hack for WebVM missing mod times: Set LastModTime to current time, and if file update parent as well, if file being created
         if (SnapUtils.isWebVM) {
             lastModTime = System.currentTimeMillis();
             setLastModTimeCached(javaFile, lastModTime);
+            if (!fileExists) {
+                File parentFile = javaFile.getParentFile();
+                setLastModTimeCached(parentFile, lastModTime);
+            }
         }
+
+        // Set LastModTime in response
         aResp.setLastModTime(lastModTime);
     }
 
@@ -176,9 +185,12 @@ public class FileSite extends WebSite {
         // Do delete
         FileUtils.deleteDeep(javaFile);
 
-        // Remove cached LastModTime
-        if (SnapUtils.isWebVM)
+        // Hack for WebVM missing mod times: Remove cached LastModTime and update parent
+        if (SnapUtils.isWebVM) {
             setLastModTimeCached(javaFile, 0);
+            File parentFile = javaFile.getParentFile();
+            setLastModTimeCached(parentFile, System.currentTimeMillis());
+        }
     }
 
     /**
