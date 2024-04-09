@@ -302,13 +302,29 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void addChars(CharSequence theChars)
     {
-        addChars(theChars, length());
+        addCharsWithStyle(theChars, null, length());
     }
 
     /**
      * Adds characters to this text at given index.
      */
     public void addChars(CharSequence theChars, int anIndex)
+    {
+        addCharsWithStyle(theChars, null, anIndex);
+    }
+
+    /**
+     * Adds characters with given style to this text.
+     */
+    public void addCharsWithStyle(CharSequence theChars, TextStyle theStyle)
+    {
+        addCharsWithStyle(theChars, theStyle, length());
+    }
+
+    /**
+     * Adds characters with given style to this text at given index.
+     */
+    public void addCharsWithStyle(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
         // If no chars, just return
         if (theChars == null) return;
@@ -342,7 +358,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             }
 
             // Add chars to line
-            addCharsToLine(chars, null, charIndex, textLine, newlineIndex > 0);
+            addCharsToLine(chars, theStyle, charIndex, textLine, newlineIndex > 0);
 
             // Set start to last end
             charIndexInChars += chars.length();
@@ -405,26 +421,6 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             // Get previous run
             lastRun = lastRun.getPrevious();
         }
-    }
-
-    /**
-     * Adds characters with given style to this text.
-     */
-    public void addCharsWithStyle(CharSequence theChars, TextStyle theStyle)
-    {
-        addCharsWithStyle(theChars, theStyle, length());
-    }
-
-    /**
-     * Adds characters with given style to this text at given index.
-     */
-    public void addCharsWithStyle(CharSequence theChars, TextStyle theStyle, int anIndex)
-    {
-        addChars(theChars, anIndex);
-
-        // If style is provided and different from insertion style, set style
-        if (theStyle != null && !theStyle.equals(getStyleForCharIndex(anIndex)))
-            setStyle(theStyle, anIndex, anIndex + theChars.length());
     }
 
     /**
@@ -542,7 +538,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         // Iterate over NextLine runs and add chars for each
         TextRun[] textRuns = nextLine.getRuns();
         for (TextRun textRun : textRuns)
-            textLine.addChars(textRun.getString(), textLine.length());
+            textLine.addCharsWithStyle(textRun.getString(), textRun.getStyle(), textLine.length());
 
         // Remove NextLine
         removeLine(nextLine.getLineIndex());

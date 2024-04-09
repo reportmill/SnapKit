@@ -112,12 +112,12 @@ public class TextLine implements CharSequenceX, Cloneable {
     public int getLineIndex()  { return _lineIndex; }
 
     /**
-     * Adds characters to this line at given index.
+     * Adds characters with text style to this line at given index.
      */
-    protected void addChars(CharSequence theChars, int anIndex)
+    protected void addCharsWithStyle(CharSequence theChars, TextStyle aStyle, int anIndex)
     {
         // Add length to run
-        TextRun run = getRunForCharIndex(anIndex);
+        TextRun run = getRunForCharIndexAndStyle(anIndex, aStyle);
         run.addLength(theChars.length());
 
         // Add chars
@@ -129,16 +129,42 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Adds characters with text style to this line at given index.
+     * Returns the run to add chars to for given style and char index.
+     * Will try to use any adjacent run with conforming style, otherwise, will create/add new.
      */
-    protected void addCharsWithStyle(CharSequence theChars, TextStyle aStyle, int anIndex)
+    private TextRun getRunForCharIndexAndStyle(int charIndex, TextStyle aStyle)
     {
-        // Add characters
-        addChars(theChars, anIndex);
+        // Get run at index (just return if style is null or equal)
+        TextRun run = getRunForCharIndex(charIndex);
+        if (aStyle == null || aStyle.equals(run.getStyle()))
+            return run;
 
-        // Set style
-        if (aStyle != null && !aStyle.equals(getRunForCharIndex(anIndex).getStyle()))
-            setStyle(aStyle, anIndex, anIndex + theChars.length());
+        // If empty, just set style and return
+        if (run.length() == 0) {
+            run.setStyle(aStyle);
+            return run;
+        }
+
+        // If charIndex at run end and next run has same style, return it instead
+        if (charIndex == run.getEndCharIndex()) {
+            TextRun nextRun = run.getNext();
+            if (nextRun != null && aStyle.equals(nextRun.getStyle()))
+                return nextRun;
+        }
+
+        // Get index to insert new run (need to split run if charIndex in middle)
+        int newRunIndex = run.getIndex();
+        if (charIndex > run.getStartCharIndex()) {
+            newRunIndex++;
+            if (charIndex < run.getEndCharIndex())
+                splitRunForCharIndex(run, charIndex - run.getStartCharIndex());
+        }
+
+        // Create new run for new chars, add and return
+        TextRun newRun = createRun();
+        newRun.setStyle(aStyle);
+        addRun(newRun, newRunIndex);
+        return newRun;
     }
 
     /**
