@@ -16,11 +16,12 @@ SnapKit is designed to resolve this with no compromises.
 * [The ViewOwner](#the-viewowner)
 * [The Graphics Package](#the-graphics-package)
 * [The View Package](#the-view-package)
-* [The SnapBuilder UI Builder](#the-snapbuilder-ui-builder)
-* [Integrated Runtime Developer Tools](#integrated-runtime-developer-tools)
-* [3D Graphics Package](#the-3d-graphics-package)
+* [The Text Package](#the-text-package)
 * [The Parser Package](#the-parser-package)
 * [The Properties Package](#the-properties-package)
+* [3D Graphics Package](#the-3d-graphics-package)
+* [The SnapBuilder UI Builder](#the-snapbuilder-ui-builder)
+* [Integrated Runtime Developer Tools](#integrated-runtime-developer-tools)
 * [Including SnapKit with Gradle and Maven](#including-snapkit-with-gradle-and-maven)
 
 Check out demos of [SnapKit running in the browser](http://www.reportmill.com/snaptea/):
@@ -42,33 +43,21 @@ SnapKit is strongly inspired by both Swing and JavaFX. Swing is still a favorite
 its age and lack of recent updates. There are still many things developers love:
 
 - Solid view hierarchy and set of controls/components
-
 - Relatively easy to create and update UI and respond to user input and UI changes
-
 - Full set of geometric shape primitives: Line, Rect, Ellipse, Path, Polygon, etc.
-
 - Easily set component borders, fills, and fonts with simple API
-
 - The whole convenient painting model - just override paint() to customize
-
 - It handles property changes in conventional Java property change manner
-
 - It binds easily with POJOs
 
 When JavaFX was introduced it rewrote the rulebook for Java UI with dramatic changes, often for the better:
 
 - Easily mix graphics and app controls
-
 - Easily add gradients, textures, effects
-
 - Set arbitrary transforms (rotate, scale, skew) on any node
-
 - It has built-in binding support to easily wire values across objects
-
 - It has a full set of nodes for easy layout: Box, BorderView, StackPane, etc.
-
 - It has support for easily defining UI in a separate text file (FXML)
-
 
 ## SnapKit Advantages
 
@@ -76,16 +65,11 @@ SnapKit is the right blend of modern and conventional. SnapKit tries to be more 
 keeps the basic simplicity and standard conventions of Swing while adding the visual richness of JavaFX and bringing the
 whole thing to the browser:
 
-- It provides all the most popular features of Swing and JavaFX (above)
-
+- It provides all the essential features of Swing and JavaFX (above)
 - It runs on top of Swing, JavaFX and HTML DOM
-
 - It is easily portable to any future UI kit and platform
-
-- The base class is called View. Now that puts the V in MVC!
-
-- The ViewOwner class provides control functionally (whoops, there goes the C)
-
+- The base class is called View (that puts the V in MVC!)
+- The ViewOwner class provides control functionally
 - The ViewEvent class unifies all input events for more consistent handling
 
     
@@ -108,9 +92,15 @@ _textField = new JTextField();
 // Init UI
 _textField.setText("Initial Value");
 
-// Respond/Update UI (TextField only)
+// Respond UI
 _textField.addActionListener(event -> {
     _myModel.updatePropertyForTextField(_textField.getText());
+    SwingUtilities.invokeLater(this::updateUI);
+});
+
+// Update UI
+public void updateUI()
+{
     _textField.setText(_myModel.getPropertyForTextField());
 });
 ```
@@ -192,8 +182,8 @@ public void respondUI(ViewEvent anEvent)
 }
 ```
 
-In addition to get/setViewValue(), there are methods for get/set other View properties: Enabled, Visible, Text, SelectedItem, SelectedIndex.
-
+In addition to get/setViewValue(), there are methods for get/set other View properties: Enabled, Visible, Text,
+SelectedItem, SelectedIndex.
 
 ## The Graphics Package
 
@@ -201,29 +191,14 @@ One of the great aspects of Swing is the separation and synergy between the core
 the UI layer. SnapKit provides this same separation with the snap.gfx package that contains:
 
 - Full set of geometric primitives: Rect, Point, Size, Insets, Pos (for alignment)
-
 - Transform for arbitrary transforms and coordinate conversions: rotate, scale, skew
-
 - Full set of Shape primitives: Rect, RoundRect, Arc, Ellipse, Line, Path, Polygon
-
 - Paint define fill styles with common subclasses: Color, GradientPaint, ImagePaint
-
 - Stroke for defining outline style, and Border for a stroke in a specific Paint
-
 - Effects for rich rendering: Shadow, Reflect, Emboss, Blur
-
 - Font and FontFile objects (wrap around platform fonts)
-
 - Painter capable of rendering shapes, images and text with transform, fill, stroke, effect
-
 - Image object (wraps around platform image)
-
-- RichText object for managing large text content with attributes
-
-- TextStyle object to manage a set of attributes: font, color, underline, hyper links, format, etc.
-
-- TextBox object for managing RichText in a geometric region (with spelling and hyphenation)
-
 - SoundClip for playing sounds
 
 
@@ -233,97 +208,56 @@ And the essentail part of a good UI kit is the set of classes that model the sce
 standard UI controls.
 
 - View for managing hierarchy of coordinate systems, drawing and input events
-
 - Full set of classes for graphics primitives: RectView, ShapeView, ImageView, StringView
-
 - Label: Convenient View+StringView+View layout to easily label UI
-
 - ButtonBase: Embeds Label for simple, flexible and customizable buttons
-
 - Button subclasses: Button, CheckBox, ToggleButton RadioButton, MenuButton, MenuItem
-
 - TextField for editing simple text values (with flexible background label for prompts, icons, etc.)
-
 - TextView: Comprehensive rich text editing with style setting, spellcheck, etc.
-
 - ComboBox, Slider, Spinner, ThumbWheel for modifying values with more advanced UI
-
 - ListView, TableView, TreeView, BrowserView for displaying large sets of objects
-
 - ParentView for Views that manage children (and ChildView for views that allow others to add them)
-
 - Box, VBox, HBox, BorderView, StackView, SpringView to facilitate layout
-
 - ScrollView, SplitView, TabView, TitleView
-
 - DocView, PageView: represent a real world document and page
-
 - ViewOwner: integrated controller class to manage UI creation, initialization, updates, bindings and events
-
 - RootPane: Manages view event dispatch and hierarchy updates, layout and painting
-
 - WindowView: Maps to a platform window
-
 - MenuItem, Menu, MenuBar
-
 - ProgressBar, Separator
-
 - ViewArchiver for reading/writing views from simple XML files
-
 - ViewEvent for encapsulating all input events in unified object
-
 - DialogBox, FormBuilder: For quickly generating UI for common user input
 
-## The SnapBuilder UI Builder
+## The Text Package
 
-Because the best line of code is the one you don't have to write, UI is almost always created using the UI builder
-and stored in simple XML files ('.snp' files). Simply create/save a .snp file with the same name as your custom ViewOwner class, and the default ViewOwner.createUI() method will load it.
+The **[snap.text](https://github.com/reportmill/SnapKit/tree/master/src/snap/text)** package provides all
+the classes necessary to efficiently display and edit large text files and rich text files. There is even
+fundamental support for text with 'tokens' (like source code text files), to efficiently support working
+with large source files and providing syntax coloring and symbol highlighting.
 
-As a bonus, you can run SnapBuilder in the browser and even open any UI file from a running application using the 
-"Developer Tools Console", also available in any running app (see below).
-
-[ ![SnapBuilder](https://reportmill.com/snaptea/SnapBuilder/SnapBuilder.gif)](https://reportmill.com/snaptea/SnapBuilder/)
-    
-## Integrated Runtime Developer Tools
-
-If you double-tap the control key in any SnapKit app, a developer console will appear. There are many features
-here to make it easier to debug visual layouts and explore new or large code bases:
-
-- Mouse-Over to select and inspect any individual nested ViewOwner controller and UI
-
-- Mouse-Over to select and inspect any View
-
-- Open any UI in the UI Builder, or controller in GitHub code, or View JavaDoc
-
-- Select different UI themes (standard, light, dark, light-blue, etc.)
-
-- Enable debug flashing of repaint regions to ensure efficient repaints
-
-- Enable Frames-Per-Second paint speed measurement tool
-
-
-## The 3D Graphics Package
-
-The SnapKit **[snap.gfx3d](https://github.com/reportmill/SnapKit/tree/master/src/snap/gfx3d)** package provides a
-elegant 3D api based on OpenGL that uses JOGL on the desktop and WebGL in the browser. This allows
-for write-once-run-anywhere 3D. There is also a simple built-in renderer that renders 3D using standard 2D
-graphics (this avoids unnecessary external JOGL dependencies when 3D isn't really needed and can actually look better
-in PDF, SVG or print).
-
-The 3D package has:
-
-- Basic geometry classes for matrices, vectors and points
-
-- Fundamental scene elements for Camera, Lights and Scene
-
-- Fundamental VertexArray class to model and render and mesh of triangles, lines and points
-
-[ ![Sample 3D](http://reportmill.com/SnapCharts/Sample3D.png)](https://reportmill.com/SnapCharts/)
+- TextRun: Manages a group of characters with a display style
+- TextLine: Manages a paragraph of text (with multiple runs)
+- TextBlock: Manages a block of text lines in a text document
+- TextBox: Manages a text block in a box or path (providing text wrapping)
+- RichText: Manages large text content with attributes
+- TextStyle: Manages a group of text display attributes
+- TextLineStyle: Manages a group of text paragraph attributes (indent, spacing)
+- TextToken: Manages a group of characters in a line that represent a word or code part
 
 ## The Parser Package
 
 The SnapKit **[snap.parse](https://github.com/reportmill/SnapKit/tree/master/src/snap/parse)** package
 dynamically generates parsers based on conventional grammar files combined with a rule handler class.
+Separating the grammar from the handler code makes the parser much easier to read, write and maintain.
+
+- Parser: Processes the rules of a grammar to parse a file
+- ParseRule: Represents an individual parse rule with ops for: And, Or, ZeroOrOne, ZeroOrMore, OneOrMore, Pattern, Lookahead
+- ParseHandler: Processes individual parsed nodes for an individual rule to generate an AST
+- Tokenizer: Reads from input to generate individual parse tokens
+- ParseToken: Represents a parsed token
+- Regex: Represents a regex pattern
+
 Several parsers are included in SnapKit to parse JSON, XML and Java expressions. Other parsers based on this
 package to parse PDF and Java are available in separate SnapKit dependent projects.
 
@@ -336,13 +270,9 @@ an easy way to serialize Java objects and provides automatic support for read/wr
 undo/redo and more. Specifically the props support provides the following:
 
 - Read/write an object graph to XML and JSON
-
 - "Sparce Serialization" (only write attributes that have changed from default)
-
 - Clipboard copy/paste an object or object graph
-
 - Undo/Redo support
-
 - Automatic support for clone(), equals(), hashCode() and toString()
 
 This serialization is done by simply defining each serializable property of an object in this fashion:
@@ -424,6 +354,46 @@ public class MyClass extends PropObject {
     }
 }
 ```
+
+## The 3D Graphics Package
+
+The SnapKit **[snap.gfx3d](https://github.com/reportmill/SnapKit/tree/master/src/snap/gfx3d)** package provides a
+elegant 3D api based on OpenGL that uses JOGL on the desktop and WebGL in the browser. This allows
+for write-once-run-anywhere 3D. There is also a simple built-in renderer that renders 3D using standard 2D
+graphics (this avoids unnecessary external JOGL dependencies when 3D isn't really needed and can actually look better
+in PDF, SVG or print).
+
+The 3D package has:
+
+- Basic geometry classes for matrices, vectors and points
+
+- Fundamental scene elements for Camera, Lights and Scene
+
+- Fundamental VertexArray class to model and render and mesh of triangles, lines and points
+
+[ ![Sample 3D](http://reportmill.com/SnapCharts/Sample3D.png)](https://reportmill.com/SnapCharts/)
+
+## The SnapBuilder UI Builder
+
+Because the best line of code is the one you don't have to write, UI is almost always created using the UI builder
+and stored in simple XML files ('.snp' files). Simply create/save a .snp file with the same name as your custom ViewOwner class, and the default ViewOwner.createUI() method will load it.
+
+As a bonus, you can run SnapBuilder in the browser and even open any UI file from a running application using the
+"Developer Tools Console", also available in any running app (see below).
+
+[ ![SnapBuilder](https://reportmill.com/snaptea/SnapBuilder/SnapBuilder.gif)](https://reportmill.com/snaptea/SnapBuilder/)
+
+## Integrated Runtime Developer Tools
+
+If you double-tap the control key in any SnapKit app, a developer console will appear. There are many features
+here to make it easier to debug visual layouts and explore new or large code bases:
+
+- Mouse-Over to select and inspect any individual nested ViewOwner controller and UI
+- Mouse-Over to select and inspect any View
+- Open any UI in the UI Builder, or controller in GitHub code, or View JavaDoc
+- Select different UI themes (standard, light, dark, light-blue, etc.)
+- Enable debug flashing of repaint regions to ensure efficient repaints
+- Enable Frames-Per-Second paint speed measurement tool
 
 ## Including SnapKit with Gradle and Maven
 
