@@ -19,7 +19,8 @@ SnapKit is designed to resolve this with no compromises.
 * [The Text Package](#the-text-package)
 * [The Parser Package](#the-parser-package)
 * [The Properties Package](#the-properties-package)
-* [3D Graphics Package](#the-3d-graphics-package)
+* [The 3D Graphics Package](#the-3d-graphics-package)
+* [The Web Package](#the-web-package)
 * [The SnapBuilder UI Builder](#the-snapbuilder-ui-builder)
 * [Integrated Runtime Developer Tools](#integrated-runtime-developer-tools)
 * [Including SnapKit with Gradle and Maven](#including-snapkit-with-gradle-and-maven)
@@ -204,8 +205,7 @@ the UI layer. SnapKit provides this same separation with the snap.gfx package th
 
 ## The View Package
 
-And the essentail part of a good UI kit is the set of classes that model the scene graph and
-standard UI controls.
+The essentail part of a good UI kit is the set of classes that model the scene graph and standard UI controls.
 
 - View for managing hierarchy of coordinate systems, drawing and input events
 - Full set of classes for graphics primitives: RectView, ShapeView, ImageView, StringView
@@ -247,7 +247,7 @@ with large source files and providing syntax coloring and symbol highlighting.
 
 ## The Parser Package
 
-The SnapKit **[snap.parse](https://github.com/reportmill/SnapKit/tree/master/src/snap/parse)** package
+The **[snap.parse](https://github.com/reportmill/SnapKit/tree/master/src/snap/parse)** package
 dynamically generates parsers based on conventional grammar files combined with a rule handler class.
 Separating the grammar from the handler code makes the parser much easier to read, write and maintain.
 
@@ -265,7 +265,7 @@ See [SnapCode](https://github.com/reportmill/SnapCode) and [SnapPDF](https://git
 
 ## The Properties Package
 
-The SnapKit **[snap.props](https://github.com/reportmill/SnapKit/tree/master/src/snap/props)** package provides
+The **[snap.props](https://github.com/reportmill/SnapKit/tree/master/src/snap/props)** package provides
 an easy way to serialize Java objects and provides automatic support for read/write (JSON/XML), copy/paste,
 undo/redo and more. Specifically the props support provides the following:
 
@@ -357,7 +357,7 @@ public class MyClass extends PropObject {
 
 ## The 3D Graphics Package
 
-The SnapKit **[snap.gfx3d](https://github.com/reportmill/SnapKit/tree/master/src/snap/gfx3d)** package provides a
+The **[snap.gfx3d](https://github.com/reportmill/SnapKit/tree/master/src/snap/gfx3d)** package provides a
 elegant 3D api based on OpenGL that uses JOGL on the desktop and WebGL in the browser. This allows
 for write-once-run-anywhere 3D. There is also a simple built-in renderer that renders 3D using standard 2D
 graphics (this avoids unnecessary external JOGL dependencies when 3D isn't really needed and can actually look better
@@ -366,12 +366,25 @@ in PDF, SVG or print).
 The 3D package has:
 
 - Basic geometry classes for matrices, vectors and points
-
 - Fundamental scene elements for Camera, Lights and Scene
-
 - Fundamental VertexArray class to model and render and mesh of triangles, lines and points
 
 [ ![Sample 3D](http://reportmill.com/SnapCharts/Sample3D.png)](https://reportmill.com/SnapCharts/)
+
+## The Web Package
+
+The **[snap.web](https://github.com/reportmill/SnapKit/tree/master/src/snap/web)** package provides a
+set of classes to abstract and unify interactions with URLs, files and sites (file systems).
+
+- WebURL: Represents a URL for a file from a site
+- WebFile: Represents a file and can return contents (file) or child files (dir)
+- WebSite: Represents a file system or web site and can create or find files by path
+- FileSite, HTTPSite, ZipSite: Implementations of WebSite to support local, remote and compressed files
+
+These classes make it easy to ambiguously work with files regardless of whether they are from the local file system
+or from a remote HTTP site or even from a Zip archive file, Github repository or DropBox account. The package provides
+unique shared instances of WebFile and WebSite to make it easy to track changes across different modules of code that
+work with the same files and sites.
 
 ## The SnapBuilder UI Builder
 
