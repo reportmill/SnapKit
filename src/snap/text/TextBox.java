@@ -681,13 +681,14 @@ public class TextBox extends TextBlock {
     {
         // If WrapLines and given Width doesn't match current Width, setWidth
         if (isWrapLines() && !MathUtils.equals(aW, getWidth()) && aW > 0) { //double oldW = getWidth();
+            super.setHeight(Float.MAX_VALUE);
             setWidth(aW);
-            double prefH = getPrefHeight(aW); //setWidth(oldW); Should really reset old width - but why would they ask,
+            double prefH = getPrefHeight(); //setWidth(oldW); Should really reset old width - but why would they ask,
             return prefH;                     // if they didn't plan to use this width?
         }
 
         // Return normal version
-        return super.getPrefHeight();
+        return getPrefHeight();
     }
 
     /**
