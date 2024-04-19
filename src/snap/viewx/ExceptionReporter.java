@@ -12,7 +12,7 @@ import snap.web.WebURL;
  * Activate by setting in thread:
  * 
  *   ExceptionReporter er = new ExceptionReporter("AppName");
- *   er.setURL("http://www.reportmill.com/cgi-bin/SendMail.py");
+ *   er.setURL("https://www.reportmill.com/cgi-bin/SendMail.py");
  *   er.setToAddress("support@domain.com")
  *   er.setInfo("MyApp Version X, Build Date: " + MyUtils.getBuildDate());
  *   Thread.setDefaultUncaughtExceptionHandler(er);
@@ -23,7 +23,7 @@ public class ExceptionReporter extends ViewOwner implements Thread.UncaughtExcep
     private String  _appName = "Application";
     
     // The URL to post send mail request to
-    private String  _url = "http://www.reportmill.com/cgi-bin/SendMail.py";
+    private String  _url = "https://www.reportmill.com/cgi-bin/SendMail.py";
     
     // The user to send mail to
     private String  _toAddr = "support@domain.com";
