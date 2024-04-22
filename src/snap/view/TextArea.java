@@ -826,11 +826,11 @@ public class TextArea extends View {
         if (doUpdateSel)
             setSel(aStart + strLen);
 
-            // Otherwise, if replace was before current selection, adjust current selection
-        else if (aStart <= getSelEnd()) {
+        // Otherwise, if replace was before current selection, adjust current selection
+        else if (aStart < getSelEnd()) {
             int delta = strLen - (anEnd - aStart);
             int start = getSelStart();
-            if (aStart <= start)
+            if (aStart < start)
                 start += delta;
             setSel(start, getSelEnd() + delta);
         }
