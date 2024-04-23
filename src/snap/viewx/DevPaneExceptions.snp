@@ -26,8 +26,9 @@
         <Label Text="Email:" />
         <TextField Name="UserEmailText" PrefWidth="200" GrowWidth="true" GrowHeight="true" />
       </RowView>
-      <RowView Margin="8,20,8,20" Spacing="5">
-        <Button Name="SendExceptionButton" PrefWidth="100" PrefHeight="24" Text="Send Exception" />
+      <RowView Margin="8,5,8,5" Padding="10" Spacing="5" GrowWidth="true">
+        <EtchBorder />
+        <Button Name="SendExceptionButton" PrefWidth="100" PrefHeight="24" LeanX="CENTER" Text="Send Exception" />
         <Label Name="SendStatusLabel" />
       </RowView>
       <Button Name="ClearAllButton" Margin="8,20,8,20" PrefWidth="100" PrefHeight="24" Text="Clear All" />

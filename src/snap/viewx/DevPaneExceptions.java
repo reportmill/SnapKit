@@ -45,11 +45,15 @@ public class DevPaneExceptions extends ViewOwner {
     private static String _appInfo;
 
     // Whether to ignore successive exceptions
-    private static boolean _ignoreSuccessiveExceptions = true;
+    private static boolean _ignoreSuccessiveExceptions;
+
+    // Whether exception was hit
+    private static boolean _exceptionWasHit;
 
     // Constants
     private static final String EXCEPTION_USER_NAME_KEY = "ExceptionUserName";
     private static final String EXCEPTION_USER_EMAIL_KEY = "ExceptionEmail";
+    private static final String IGNORE_SUCCESSIVE_EXCEPTIONS_KEY = "IgnoreSuccessiveExceptions";
 
     /**
      * Constructor.
@@ -113,6 +117,7 @@ public class DevPaneExceptions extends ViewOwner {
         Prefs prefs = Prefs.getDefaultPrefs();
         _userName = prefs.getString(EXCEPTION_USER_NAME_KEY, "");
         _userEmail = prefs.getString(EXCEPTION_USER_EMAIL_KEY, "");
+        _ignoreSuccessiveExceptions = prefs.getBoolean(IGNORE_SUCCESSIVE_EXCEPTIONS_KEY, false);
     }
 
     /**
@@ -140,7 +145,7 @@ public class DevPaneExceptions extends ViewOwner {
         // Update SendExceptionButton, SendStatusLabel, IgnoreSuccessiveCheckBox, ClearAllButton
         setViewEnabled("SendExceptionButton", thrownException != null);
         setViewValue("SendStatusLabel", getSendStatus());
-        setViewValue("IgnoreSuccessiveCheckBox", _ignoreSuccessiveExceptions);
+        setViewValue("IgnoreSuccessiveCheckBox", isIgnoreSuccessiveExceptions());
         setViewEnabled("ClearAllButton", _thrownExceptions.length > 0);
     }
 
@@ -181,7 +186,7 @@ public class DevPaneExceptions extends ViewOwner {
 
         // Handle IgnoreSuccessiveCheckBox
         else if (anEvent.equals("IgnoreSuccessiveCheckBox"))
-            _ignoreSuccessiveExceptions = anEvent.getBoolValue();
+            setIgnoreSuccessiveExceptions(anEvent.getBoolValue());
 
         // Handle TriggerNPEButton
         else if (anEvent.equals("TriggerNPEButton")) {
@@ -229,9 +234,16 @@ public class DevPaneExceptions extends ViewOwner {
      */
     public static void showException(Throwable anExc)
     {
+        // If an exception has already been hit and user wants to ignore successive exceptions, just print stack trace and return
+        if (_exceptionWasHit && _ignoreSuccessiveExceptions) {
+            anExc.printStackTrace();
+            return;
+        }
+
         //anExc.fillInStackTrace();
         ThrownException thrownException = new ThrownException(anExc);
         _thrownExceptions = ArrayUtils.add(_thrownExceptions, thrownException, 0);
+        _exceptionWasHit = true;
 
         // Show Exception Pane
         View currentView = DevPane.getDefaultDevPaneView();
@@ -325,6 +337,20 @@ public class DevPaneExceptions extends ViewOwner {
      * Sets the AppInfo.
      */
     public static void setAppInfo(String aValue)  { _appInfo = aValue; }
+
+    /**
+     * Returns whether to ignore previous exceptions.
+     */
+    public static boolean isIgnoreSuccessiveExceptions()  { return _ignoreSuccessiveExceptions; }
+
+    /**
+     * Sets whether to ignore previous exceptions.
+     */
+    public static void setIgnoreSuccessiveExceptions(boolean aValue)
+    {
+        if (aValue == _ignoreSuccessiveExceptions) return;;
+        _ignoreSuccessiveExceptions = aValue;
+    }
 
     /**
      * Send exception.
