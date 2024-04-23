@@ -53,6 +53,7 @@ public class WebResponse {
     public static final int NOT_FOUND = 404;
     public static final int METHOD_NOT_ALLOWED = 405;
     public static final int EXCEPTION_THROWN = 420;
+    public static final int INTERNAL_SERVER_ERROR = 500;
 
     /**
      * Creates a new WebResponse for given request.
@@ -349,6 +350,7 @@ public class WebResponse {
             case FORBIDDEN: return "Client is forbidden from accessing valid URL";
             case NOT_FOUND: return "File not Found";
             case METHOD_NOT_ALLOWED: return "Method Not Allowed";
+            case INTERNAL_SERVER_ERROR: return "Internal Server Error";
             default: return "Unknown error code";
         }
     }

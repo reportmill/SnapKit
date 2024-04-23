@@ -3,7 +3,11 @@ import snap.geom.Pos;
 import snap.gfx.Color;
 import snap.gfx.Painter;
 import snap.gfx.Stroke;
+import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.view.*;
+
+import java.util.List;
 
 /**
  * A view to allow inspection of View hierarchy.
@@ -40,6 +44,9 @@ public class DevPane extends ViewOwner {
     // The Exception inspector
     private DevPaneExceptions  _exceptionInsp;
 
+    // The array of all panes
+    private ViewOwner[] _allPanes;
+
     // Constants
     private static int DEFAULT_HEIGHT = 300;
     protected static Stroke HIGHLIGHT_BORDER_STROKE = Stroke.getStrokeRound(3);
@@ -61,6 +68,10 @@ public class DevPane extends ViewOwner {
         _viewsInsp = new DevPaneViews(this);
         _graphicsInsp = new DevPaneGraphics(this);
         _consoleInsp = new DevPaneConsole();
+        _exceptionInsp = new DevPaneExceptions(this);
+
+        // Set All Panes array
+        _allPanes = new ViewOwner[] { _filesInsp, _viewOwnersInsp, _viewsInsp, _graphicsInsp, _consoleInsp, _exceptionInsp };
     }
 
     /**
@@ -69,21 +80,25 @@ public class DevPane extends ViewOwner {
     public View getContent()  { return _content; }
 
     /**
-     * Shows an exception.
+     * Shows the tab for given class.
      */
-    public void showException(Exception anExc)
+    public void showTabForClass(Class<?> aClass)
     {
-        // If first exception, create UI, add TabView, select it
-        if (_exceptionInsp == null) {
-            getUI();
-            _exceptionInsp = new DevPaneExceptions();
-            _tabView.addTab("Exceptions", _exceptionInsp.getUI());
-            _tabView.setSelIndex(_tabView.getTabCount()-1);
-        }
+        getUI();
+        List<Tab> tabs = _tabView.getTabBar().getTabs();
+        int selIndex = ListUtils.findMatchIndex(tabs, tab -> aClass.isInstance(tab.getContentOwner()));
+        _tabView.setSelIndex(selIndex);
 
-        // Show Exception
-        _exceptionInsp.showException(anExc);
-        System.out.println("ShowException: Forwarded");
+        if (!isShowing())
+            runLater(() -> setDevPaneShowing(_rootView, true));
+    }
+
+    /**
+     * Returns the pane for given class.
+     */
+    public <T extends ViewOwner> T getPaneForClass(Class<T> aClass)
+    {
+        return (T) ArrayUtils.findMatch(_allPanes, pane -> aClass.isInstance(pane));
     }
 
     /**
@@ -152,6 +167,7 @@ public class DevPane extends ViewOwner {
         tabBuilder.title("Views").contentOwner(_viewsInsp).add();
         tabBuilder.title("Graphics").contentOwner(_graphicsInsp).add();
         tabBuilder.title("Console").contentOwner(_consoleInsp).add();
+        tabBuilder.title("Exceptions").contentOwner(_exceptionInsp).add();
 
         // Create CloseBox for TabView.TabBar
         CloseBox closeBox = new CloseBox();
@@ -233,15 +249,18 @@ public class DevPane extends ViewOwner {
     /**
      * Sets a DevPane visible for view.
      */
-    public static void showException(View aView, Exception anExc)
+    public static void showException(Throwable anException)
     {
-        ViewUtils.runLater(() -> {
-            setDevPaneShowing(aView, true);
-            ViewUtils.runLater(() -> {
-                DevPane devPane = getDevPane(aView);
-                devPane.showException(anExc);
-            });
-        });
+        DevPaneExceptions.showException(anException);
+    }
+
+    /**
+     * Returns the current default dev pane view.
+     */
+    public static View getDefaultDevPaneView()
+    {
+        WindowView[] windows = WindowView.getOpenWindows();
+        return windows.length > 0 ? windows[0].getRootView() : null;
     }
 
     /**
