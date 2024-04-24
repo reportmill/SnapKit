@@ -4,7 +4,7 @@
   <Label Padding="8,8,0,12" Text="Exception was thrown:">
     <Font Name="Arial Bold" Size="14" />
   </Label>
-  <RowView FillHeight="true">
+  <RowView GrowHeight="true" FillHeight="true">
     <ColView PrefWidth="200" Margin="8" FillWidth="true">
       <Label Margin="4" Text="History:" />
       <ListView Name="ThrownListView" GrowHeight="true" />

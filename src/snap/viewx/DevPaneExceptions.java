@@ -11,11 +11,8 @@ import java.util.Objects;
  */
 public class DevPaneExceptions extends ViewOwner {
 
-    // The DevPane
-    private DevPane  _devPane;
-
     // The selected index
-    private int _selIndex;
+    private int _selIndex = -1;
 
     // The status of the last send
     private String _sendStatus;
@@ -58,10 +55,9 @@ public class DevPaneExceptions extends ViewOwner {
     /**
      * Constructor.
      */
-    public DevPaneExceptions(DevPane devPane)
+    public DevPaneExceptions()
     {
         super();
-        _devPane = devPane;
     }
 
     /**
@@ -110,6 +106,7 @@ public class DevPaneExceptions extends ViewOwner {
     protected void initUI()
     {
         _thrownExceptionsList = getView("ThrownListView", ListView.class);
+        _thrownExceptionsList.getListArea().setItemTextFunction(ThrownException::getTitle);
         _stackTraceText = getView("StackTraceText", TextView.class);
         _descriptionText = getView("DescriptionText", TextView.class);
 
@@ -129,7 +126,6 @@ public class DevPaneExceptions extends ViewOwner {
         // Update ThrownListView
         int selIndex = getSelIndex();
         _thrownExceptionsList.setSelIndex(selIndex);
-        _thrownExceptionsList.getListArea().setItemTextFunction(ThrownException::getTitle);
 
         // Update StackTraceText, DescriptionText
         ThrownException thrownException = getSelThrownException();
@@ -201,6 +197,7 @@ public class DevPaneExceptions extends ViewOwner {
     private void thrownExceptionsDidChange()
     {
         _thrownExceptionsList.setItems(_thrownExceptions);
+        _thrownExceptionsList.setSelIndex(_thrownExceptions.length > 0 ? 0 : -1);
         resetLater();
     }
 

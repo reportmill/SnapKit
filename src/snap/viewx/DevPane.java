@@ -68,7 +68,7 @@ public class DevPane extends ViewOwner {
         _viewsInsp = new DevPaneViews(this);
         _graphicsInsp = new DevPaneGraphics(this);
         _consoleInsp = new DevPaneConsole();
-        _exceptionInsp = new DevPaneExceptions(this);
+        _exceptionInsp = new DevPaneExceptions();
 
         // Set All Panes array
         _allPanes = new ViewOwner[] { _filesInsp, _viewOwnersInsp, _viewsInsp, _graphicsInsp, _consoleInsp, _exceptionInsp };
