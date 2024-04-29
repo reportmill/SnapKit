@@ -197,8 +197,7 @@ public class DevPaneExceptions extends ViewOwner {
     private void thrownExceptionsDidChange()
     {
         _thrownExceptionsList.setItems(_thrownExceptions);
-        _thrownExceptionsList.setSelIndex(_thrownExceptions.length > 0 ? 0 : -1);
-        resetLater();
+        setSelIndex(_thrownExceptions.length > 0 ? 0 : -1);
     }
 
     /**
@@ -231,11 +230,12 @@ public class DevPaneExceptions extends ViewOwner {
      */
     public static void showException(Throwable anExc)
     {
-        // If an exception has already been hit and user wants to ignore successive exceptions, just print stack trace and return
-        if (_exceptionWasHit && _ignoreSuccessiveExceptions) {
-            anExc.printStackTrace();
+        // Print to console
+        anExc.printStackTrace();
+
+        // If an exception has already been hit and user wants to ignore successive exceptions, just return
+        if (_exceptionWasHit && _ignoreSuccessiveExceptions)
             return;
-        }
 
         //anExc.fillInStackTrace();
         ThrownException thrownException = new ThrownException(anExc);
