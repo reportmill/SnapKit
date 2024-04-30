@@ -279,12 +279,42 @@ public class ViewUtils {
     }
 
     /**
-     * Paint nodes.
+     * Deprecated - use paintView().
      */
-    public static void paintAll(View aView, Painter aPntr)
+    @Deprecated
+    public static void paintAll(View aView, Painter aPntr)  { paintView(aView, aPntr); }
+
+    /**
+     * Paints given view.
+     */
+    public static void paintView(View aView, Painter aPntr)
     {
         aPntr.save();
         layoutDeep(aView);
+        aView.paintAll(aPntr);
+        aPntr.restore();
+    }
+
+    /**
+     * Paints a given view in another view.
+     */
+    public static void paintViewInView(View aView, View aParentView, Painter aPntr)
+    {
+        // Get transform from view to parentView
+        View parentView = aView.isAncestor(aParentView) ? aParentView : aView.getParent();
+        Transform viewToParentTransform = aView.getLocalToParent(parentView);
+
+        // Paint view with transform
+        paintViewWithTransform(aView, viewToParentTransform, aPntr);
+    }
+
+    /**
+     * Paints given view with transform.
+     */
+    public static void paintViewWithTransform(View aView, Transform transform, Painter aPntr)
+    {
+        aPntr.save();
+        aPntr.transform(transform);
         aView.paintAll(aPntr);
         aPntr.restore();
     }
@@ -612,7 +642,7 @@ public class ViewUtils {
         Image img = Image.getImageForSizeAndDpiScale(imageW, imageH, true, aScale);
         Painter pntr = img.getPainter();
         pntr.translate(-imageX, -imageY);
-        paintAll(aView, pntr);
+        paintView(aView, pntr);
 
         // Create ImageBox for image and image bounds
         ImageBox imgBox = new ImageBox(img, viewW, viewH);
