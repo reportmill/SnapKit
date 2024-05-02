@@ -70,7 +70,7 @@ public class DevPaneExceptions extends ViewOwner {
      */
     public void setSelIndex(int aValue)
     {
-        int value = Math.max(aValue, _thrownExceptions.length - 1);
+        int value = Math.min(aValue, _thrownExceptions.length - 1);
         if (aValue == _selIndex) return;
         _selIndex = value;
         resetLater();
