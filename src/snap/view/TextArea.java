@@ -796,9 +796,17 @@ public class TextArea extends View {
      */
     public void replaceChars(CharSequence theChars)
     {
-        int selStart = getSelStart();
-        int selEnd = getSelEnd();
-        replaceChars(theChars, null, selStart, selEnd, true);
+        int startCharIndex = getSelStart();
+        int endCharIndex = getSelEnd();
+        replaceChars(theChars, null, startCharIndex, endCharIndex, true);
+    }
+
+    /**
+     * Replaces the current selection with the given string.
+     */
+    public void replaceChars(CharSequence theChars, int startCharIndex, int endCharIndex)
+    {
+        replaceChars(theChars, null, startCharIndex, endCharIndex, true);
     }
 
     /**
