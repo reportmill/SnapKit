@@ -94,14 +94,15 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * Returns the root ViewAnim.
      */
-    public ViewAnim getRoot()  { return _parent != null ? _parent : this; }
+    public ViewAnim getRoot()  { return _parent != null ? _parent.getRoot() : this; }
 
     /**
      * Returns the root ViewAnim.
      */
     public ViewAnim getRoot(int aTime)
     {
-        return getRoot().getAnim(aTime);
+        ViewAnim rootAnim = getRoot();
+        return rootAnim.getAnim(aTime);
     }
 
     /**
@@ -180,7 +181,10 @@ public class ViewAnim implements XMLArchiver.Archivable {
     public ViewAnim getAnim(int aTime)
     {
         // If this anim covers time, just return
-        if (aTime <= getEnd()) return this;
+        if (aTime <= getEnd()) {
+            ViewAnim rootAnim = getRoot();
+            return aTime <= 0 || rootAnim == this ? rootAnim : rootAnim.getAnim(aTime);
+        }
 
         // Get anim for time and return if found
         for (ViewAnim anim : _anims) {
