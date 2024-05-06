@@ -29,6 +29,18 @@ public enum VPos {
     /**
      * Returns the VPos.
      */
+    public static VPos of(Object anObj)
+    {
+        if (anObj instanceof VPos || anObj == null)
+            return (VPos) anObj;
+
+        String str = anObj.toString().trim();
+        return get(str);
+    }
+
+    /**
+     * Returns the VPos.
+     */
     public static VPos get(String aStr)
     {
         try { VPos.valueOf(aStr); }

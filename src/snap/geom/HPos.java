@@ -27,6 +27,18 @@ public enum HPos {
     /**
      * Returns the HPos.
      */
+    public static HPos of(Object anObj)
+    {
+        if (anObj instanceof HPos || anObj == null)
+            return (HPos) anObj;
+
+        String str = anObj.toString().trim();
+        return get(str);
+    }
+
+    /**
+     * Returns the HPos.
+     */
     public static HPos get(String aStr)
     {
         try { HPos.valueOf(aStr); }

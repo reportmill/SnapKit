@@ -3001,15 +3001,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case TransY_Prop: setTransY(Convert.doubleValue(aValue)); break;
 
             // Align, Margin, Padding, Spacing, Vertical
-            case Align_Prop: setAlign((Pos) aValue); break;
+            case Align_Prop: setAlign(Pos.of(aValue)); break;
             case Margin_Prop: setMargin(Insets.of(aValue)); break;
             case Padding_Prop: setPadding(Insets.of(aValue)); break;
             case Spacing_Prop: setSpacing(Convert.doubleValue(aValue)); break;
             case Vertical_Prop: setVertical(Convert.boolValue(aValue));
 
             // Alignment: LeanX, LeanY, GrowWidth, GrowHeight
-            case LeanX_Prop: setLeanX((HPos) aValue); break;
-            case LeanY_Prop: setLeanY((VPos) aValue); break;
+            case LeanX_Prop: setLeanX(HPos.of(aValue)); break;
+            case LeanY_Prop: setLeanY(VPos.of(aValue)); break;
             case GrowWidth_Prop: setGrowWidth(Convert.boolValue(aValue)); break;
             case GrowHeight_Prop: setGrowHeight(Convert.boolValue(aValue)); break;
 

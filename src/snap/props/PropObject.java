@@ -132,6 +132,29 @@ public abstract class PropObject implements PropChange.DoChange {
     }
 
     /**
+     * Returns the props string.
+     */
+    public String getPropsString()
+    {
+        // Get props
+        Prop[] props = getPropSet().getArchivalProps();
+        StringBuilder sb = new StringBuilder();
+
+        // Iterate over props and append string if changed
+        for (Prop prop : props) {
+            if (!prop.isRelation() && !prop.isArray() && !isPropDefault(prop.getName())) {
+                Object propValue = getPropValue(prop.getName());
+                String propValueStr = StringCodec.SHARED.codeString(propValue);
+                if (sb.length() > 0) sb.append("; ");
+                sb.append(prop.getName()).append(": ").append(propValueStr);
+            }
+        }
+
+        // Return string
+        return sb.toString();
+    }
+
+    /**
      * Sets prop values for JSON/CSS style string, e.g.: "Name: AgeText; Margin: 4; PrefWidth: 24;"
      */
     public void setPropsString(String propsString)

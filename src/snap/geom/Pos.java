@@ -144,6 +144,18 @@ public enum Pos {
     }
 
     /**
+     * Returns the Pos for an object.
+     */
+    public static Pos of(Object anObj)
+    {
+        if (anObj instanceof Pos || anObj == null)
+            return (Pos) anObj;
+
+        String str = anObj.toString().trim();
+        return get(str);
+    }
+
+    /**
      * Returns the Pos for a string.
      */
     public static Pos get(String aString)
