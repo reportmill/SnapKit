@@ -236,4 +236,23 @@ public abstract class Border extends PropObject implements Cloneable, XMLArchive
     {
         return new Borders.BevelBorder();
     }
+
+    /**
+     * Creates a border from given string.
+     */
+    public static Border of(Object anObj)
+    {
+        // Handle Border or null
+        if (anObj instanceof Border || anObj == null)
+            return (Border) anObj;
+
+        // Parse string
+        String str = anObj.toString().trim();
+        String[] parts = str.split("\\s");
+
+        // Assume color string or "color width" string
+        Color color = Color.get(parts[0]);
+        double width = Math.max(parts.length > 1 ? Convert.doubleValue(parts[1]) : 1, 1);
+        return createLineBorder(color, width);
+    }
 }

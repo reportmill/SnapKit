@@ -61,4 +61,23 @@ public class Effect extends PropObject implements XMLArchiver.Archivable {
     {
         return this;
     }
+
+    /**
+     * Parses an effect from given object.
+     */
+    public static Effect of(Object anObj)
+    {
+        // Handle Effect or null
+        if (anObj instanceof Effect || anObj == null)
+            return (Effect) anObj;
+
+        String str = anObj.toString().trim().toLowerCase();
+        switch (str) {
+            case "shadow": return new ShadowEffect();
+            case "blur": return new BlurEffect();
+            case "emboss": return new EmbossEffect();
+            case "reflect": return new ReflectEffect();
+            default: System.err.println("Effect.of: Invalid effect string: " + anObj); return null;
+        }
+    }
 }

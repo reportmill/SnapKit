@@ -132,6 +132,36 @@ public abstract class PropObject implements PropChange.DoChange {
     }
 
     /**
+     * Sets prop values for JSON/CSS style string, e.g.: "Name: AgeText; Margin: 4; PrefWidth: 24;"
+     */
+    public void setPropsString(String propsString)
+    {
+        // Get individual prop/value strings (separated by semi-colons)
+        String[] propStrings = propsString.split(";");
+
+        // Iterate over prop strings and add each
+        for (String propString : propStrings) {
+
+            // Get "name:value" string parts
+            String[] nameValueStrings = propString.split(":");
+
+            // If both prop/value parts found, get prop name and set value
+            if (nameValueStrings.length == 2) {
+                String propName = nameValueStrings[0].trim();
+                Prop prop = getPropForName(propName);
+                if (prop != null)
+                    setPropValue(prop.getName(), nameValueStrings[1]);
+
+                // If prop not found for name, complain
+                else System.err.println("PropObject.setPropsString: Unknown prop name: " + propName);
+            }
+
+            // If "name:value" parts not found, complain
+            else System.err.println("PropObject.setPropsString: Invalid prop string: " + propString);
+        }
+    }
+
+    /**
      * Sets prop key values - might be an improper convenience.
      */
     public void setPropValues(Object ... keyValues)

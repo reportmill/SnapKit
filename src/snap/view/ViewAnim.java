@@ -4,6 +4,7 @@
 package snap.view;
 import snap.gfx.Color;
 import snap.gfx.Paint;
+import snap.props.Prop;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.*;
@@ -764,6 +765,69 @@ public class ViewAnim implements XMLArchiver.Archivable {
         Integer[] times = timesSet.toArray(new Integer[0]);
         Arrays.sort(times);
         return times;
+    }
+
+    /**
+     * Configures this anim from given JSON/CSS style string, e.g.: "time: 300; scale: 2; time: 600; scale: 1; time: 1200; rotate: 360"
+     */
+    public ViewAnim setAnimString(String animString)
+    {
+        // Get individual prop/value strings (separated by semi-colons)
+        String[] propStrings = animString.split(";");
+        ViewAnim anim = this;
+
+        // Iterate over prop strings and add each
+        for (String propString : propStrings) {
+
+            // Get "name:value" string parts
+            String[] nameValueStrings = propString.split(":");
+
+            // If both prop/value parts found, get prop name and set value
+            if (nameValueStrings.length == 2) {
+                String propName = nameValueStrings[0].trim();
+
+                // Handle "time"
+                if (propName.equalsIgnoreCase("time")) {
+                    int newTime = Convert.intValue(nameValueStrings[1]);
+                    anim = anim.getAnim(newTime);
+                }
+
+                // Handle "scale"
+                else if (propName.equalsIgnoreCase("scale")) {
+                    double scale = Convert.doubleValue(nameValueStrings[1]);
+                    anim.setScale(scale);
+                }
+
+                // Handle "loopcount"
+                else if (propName.equalsIgnoreCase("loopcount")) {
+                    int loopCount = Convert.intValue(nameValueStrings[1]);
+                    anim = anim.setLoopCount(loopCount);
+                }
+
+                // Handle prop
+                else {
+                    Prop prop = _view.getPropForName(propName);
+                    if (prop != null) {
+                        Object value = nameValueStrings[1];
+                        Class<?> propClass = prop.getPropClass();
+                        if (propClass == double.class)
+                            value = Convert.doubleValue(value);
+                        else if (propClass == Paint.class || propClass == Color.class)
+                            value = Color.get(value);
+                        anim.setValue(prop.getName(), value);
+                    }
+
+                    // If prop not found for name, complain
+                    else System.err.println("PropObject.setPropsString: Unknown prop name: " + propName);
+                }
+            }
+
+            // If "name:value" parts not found, complain
+            else System.err.println("PropObject.setPropsString: Invalid prop string: " + propString);
+        }
+
+        // Return
+        return anim;
     }
 
     /**

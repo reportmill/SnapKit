@@ -2722,6 +2722,14 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Convenience to quickly set anim props.
      */
+    public ViewAnim setAnimString(String animString)
+    {
+        return getAnim(0).setAnimString(animString);
+    }
+
+    /**
+     * Convenience to quickly set anim props.
+     */
     public ViewAnim setAnimProps(Object ... propItems)
     {
         return getAnim(0).setProps(propItems);
@@ -3014,10 +3022,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case PrefHeight_Prop: setPrefHeight(Convert.doubleValue(aValue)); break;
 
             // Border, BorderRadius, Fill, Effect, Opacity
-            case Border_Prop: setBorder((Border) aValue); break;
+            case Border_Prop: setBorder(Border.of(aValue)); break;
             case BorderRadius_Prop: setBorderRadius(Convert.doubleValue(aValue)); break;
             case Fill_Prop: setFill(Paint.of(aValue)); break;
-            case Effect_Prop: setEffect((Effect) aValue); break;
+            case Effect_Prop: setEffect(Effect.of(aValue)); break;
             case Opacity_Prop: setOpacity(Convert.doubleValue(aValue)); break;
 
             // Font, Text, ToolTip, Cursor, Clip

@@ -60,6 +60,7 @@ public class PropSet {
         _props = Arrays.copyOf(_props, length + 1);
         _props[length] = aProp;
         _propsMap.put(aProp.getName(), aProp);
+        _propsMap.put(aProp.getName().toLowerCase(), aProp);
 
         // Clear caches
         clearCaches();
