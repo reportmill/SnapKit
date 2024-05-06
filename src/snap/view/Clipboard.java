@@ -4,9 +4,9 @@
 package snap.view;
 import java.io.File;
 import java.util.*;
-
 import snap.geom.Point;
 import snap.gfx.*;
+import snap.util.ArrayUtils;
 import snap.util.Loadable;
 import snap.web.MIMEType;
 
@@ -16,19 +16,22 @@ import snap.web.MIMEType;
 public abstract class Clipboard implements Loadable {
     
     // The drag image
-    Image                       _img;
+    private Image _dragImage;
     
     // The point that the drag image should be dragged by
-    Point _imgOffset = new Point();
+    private Point _dragImageOffset = new Point();
     
     // The ClipboardData objects
-    Map <String,ClipboardData>  _cdatas = new TreeMap<>();
+    private Map <String,ClipboardData> _clipboardDatas = new TreeMap<>();
     
     // Constants for clipboard types
     public static String  STRING = "text/plain";
     public static String  FILE_LIST = "snap/files";
     public static String  IMAGE = "snap/image";
     public static String  COLOR = "snap/color";
+
+    // Constant for Image MimeTypes
+    private static final String[] IMAGE_MIME_TYPES = { MIMEType.PNG, MIMEType.JPEG, MIMEType.GIF };
 
     /**
      * Returns the clipboard content.
@@ -38,7 +41,7 @@ public abstract class Clipboard implements Loadable {
     /**
      * Returns the clipboard content.
      */
-    protected boolean hasDataImpl(String aMimeType)  { return _cdatas.containsKey(aMimeType); }
+    protected boolean hasDataImpl(String aMimeType)  { return _clipboardDatas.containsKey(aMimeType); }
 
     /**
      * Returns the clipboard content.
@@ -50,7 +53,7 @@ public abstract class Clipboard implements Loadable {
      */
     protected ClipboardData getDataImpl(String aMimeType)
     {
-        return _cdatas.get(aMimeType);
+        return _clipboardDatas.get(aMimeType);
     }
 
     /**
@@ -61,9 +64,9 @@ public abstract class Clipboard implements Loadable {
         if (theData instanceof File)
             theData = Collections.singletonList(theData);
 
-        ClipboardData cdata = ClipboardData.get(theData);
-        if (cdata!=null)
-            addData(cdata.getMIMEType(), cdata);
+        ClipboardData clipboardData = ClipboardData.get(theData);
+        if (clipboardData != null)
+            addData(clipboardData.getMIMEType(), clipboardData);
     }
 
     /**
@@ -72,15 +75,15 @@ public abstract class Clipboard implements Loadable {
     public void addData(String aMimeType, Object theData)
     {
         // Sanity check MIMEType should have / char
-        if (aMimeType.indexOf('/')<0) {
+        if (aMimeType.indexOf('/') < 0) {
             System.err.println("Clipboard.addData: invalid MIME type format: " + aMimeType); return; }
 
         // Get ClipboardData for given MIME type and data
-        ClipboardData cdata = theData instanceof ClipboardData ? (ClipboardData)theData :
+        ClipboardData clipboardData = theData instanceof ClipboardData ? (ClipboardData) theData :
             new ClipboardData(aMimeType, theData);
 
         // Call real addData() implementation
-        addDataImpl(aMimeType, cdata);
+        addDataImpl(aMimeType, clipboardData);
     }
 
     /**
@@ -88,26 +91,26 @@ public abstract class Clipboard implements Loadable {
      */
     protected void addDataImpl(String aMimeType, ClipboardData theData)
     {
-        _cdatas.put(aMimeType, theData);
+        _clipboardDatas.put(aMimeType, theData);
     }
 
     /**
      * Clears the data in the clipboard.
      */
-    public void clearData()  { _cdatas.clear(); }
+    public void clearData()  { _clipboardDatas.clear(); }
 
     /**
      * Returns the ClipboardDatas managed by this default implementation.
      */
-    public Map <String,ClipboardData> getClipboardDatas()  { return _cdatas; }
+    public Map <String,ClipboardData> getClipboardDatas()  { return _clipboardDatas; }
 
     /**
      * Returns the data for given MIME type as string.
      */
     public String getDataString(String aMimeType)
     {
-        ClipboardData data = getData(aMimeType);
-        return data!=null ? data.getString() : null;
+        ClipboardData clipboardData = getData(aMimeType);
+        return clipboardData != null ? clipboardData.getString() : null;
     }
 
     /**
@@ -115,8 +118,8 @@ public abstract class Clipboard implements Loadable {
      */
     public byte[] getDataBytes(String aMimeType)
     {
-        ClipboardData data = getData(aMimeType);
-        return data!=null ? data.getBytes() : null;
+        ClipboardData clipboardData = getData(aMimeType);
+        return clipboardData != null ? clipboardData.getBytes() : null;
     }
 
     /**
@@ -139,8 +142,8 @@ public abstract class Clipboard implements Loadable {
      */
     public List <ClipboardData> getFiles()
     {
-        ClipboardData cdata = getData(FILE_LIST);
-        return cdata!=null ? cdata.getFiles() : null;
+        ClipboardData clipboardData = getData(FILE_LIST);
+        return clipboardData != null ? clipboardData.getFiles() : null;
     }
 
     /**
@@ -148,8 +151,8 @@ public abstract class Clipboard implements Loadable {
      */
     public List <File> getJavaFiles()
     {
-        ClipboardData cdata = getData(FILE_LIST);
-        return cdata!=null ? cdata.getJavaFiles() : null;
+        ClipboardData clipboardData = getData(FILE_LIST);
+        return clipboardData != null ? clipboardData.getJavaFiles() : null;
     }
 
     /**
@@ -162,11 +165,7 @@ public abstract class Clipboard implements Loadable {
             return true;
 
         // Iterate over common image types and return true if any supported
-        String types[] = new String[] { MIMEType.PNG, MIMEType.JPEG, MIMEType.GIF };
-        for (String type : types)
-            if (hasData(type))
-                return true;
-        return false;
+        return ArrayUtils.hasMatch(IMAGE_MIME_TYPES, this::hasData);
     }
 
     /**
@@ -175,16 +174,21 @@ public abstract class Clipboard implements Loadable {
     public Image getImage()
     {
         // If Clipboard is image, return true
-        ClipboardData data = getData(IMAGE);
-        if (data!=null)
-            return data.getImage();
+        ClipboardData clipboardData = getData(IMAGE);
+        if (clipboardData != null)
+            return clipboardData.getImage();
 
         // Iterate over common image types and if found, return image
-        String types[] = new String[] { MIMEType.PNG, MIMEType.JPEG, MIMEType.GIF };
-        for (String type : types)
-            if (hasData(type))
-                return getImage(type);
-        return null;
+        String imageType = getImageType();
+        return imageType != null ? getImage(imageType) : null;
+    }
+
+    /**
+     * Returns the image mime type.
+     */
+    private String getImageType()
+    {
+        return ArrayUtils.findMatch(IMAGE_MIME_TYPES, this::hasData);
     }
 
     /**
@@ -192,9 +196,9 @@ public abstract class Clipboard implements Loadable {
      */
     public Image getImage(String aMimeType)
     {
-        ClipboardData cdata = getData(aMimeType);
-        byte bytes[] = cdata.getBytes();
-        return Image.getImageForSource(bytes);
+        ClipboardData clipboardData = getData(aMimeType);
+        byte[] imageBytes = clipboardData.getBytes();
+        return Image.getImageForSource(imageBytes);
     }
 
     /**
@@ -202,11 +206,8 @@ public abstract class Clipboard implements Loadable {
      */
     public ClipboardData getImageData()
     {
-        String types[] = new String[] { MIMEType.PNG, MIMEType.JPEG, MIMEType.GIF };
-        for (String type : types)
-            if (hasData(type))
-                return getData(type);
-        return null;
+        String imageType = getImageType();
+        return imageType != null ? getData(imageType) : null;
     }
 
     /**
@@ -219,34 +220,37 @@ public abstract class Clipboard implements Loadable {
      */
     public Color getColor()
     {
-        String cstr = getDataString(COLOR);
-        return cstr!=null ? Color.get(cstr) : null;
+        String colorStr = getDataString(COLOR);
+        return colorStr != null ? Color.get(colorStr) : null;
     }
 
     /**
      * Returns the drag image.
      */
-    public Image getDragImage()  { return _img; }
+    public Image getDragImage()  { return _dragImage; }
 
     /**
      * Sets the drag image.
      */
     public void setDragImage(Image anImage)
     {
-        _img = anImage;
-        if (anImage!=null)
-            setDragImageOffset(anImage.getWidth()/2,anImage.getHeight()/2);
+        _dragImage = anImage;
+        if (anImage != null) {
+            double imageW = anImage.getWidth();
+            double imageH = anImage.getHeight();
+            setDragImageOffset(imageW / 2, imageH / 2);
+        }
     }
 
     /**
      * Returns the drag image offset.
      */
-    public Point getDragImageOffset()  { return _imgOffset; }
+    public Point getDragImageOffset()  { return _dragImageOffset; }
 
     /**
      * Sets the drag image offset.
      */
-    public void setDragImageOffset(Point aPnt)  { _imgOffset = aPnt; }
+    public void setDragImageOffset(Point aPnt)  { _dragImageOffset = aPnt; }
 
     /**
      * Sets the drag image offset.
@@ -297,8 +301,9 @@ public abstract class Clipboard implements Loadable {
      */
     public static Clipboard getCleared()
     {
-        Clipboard cb = get(); cb.clearData();
-        return cb;
+        Clipboard clipboard = get();
+        clipboard.clearData();
+        return clipboard;
     }
 
     /**
