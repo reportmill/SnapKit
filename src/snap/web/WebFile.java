@@ -697,4 +697,13 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     {
         return "WebFile: " + getUrlString() + (isDir() ? "/" : "");
     }
+
+    /**
+     * Returns a WebFile for given Java file.
+     */
+    public static WebFile getFileForJavaFile(File aFile)
+    {
+        WebURL fileUrl = WebURL.getURL(aFile);
+        return fileUrl != null ? fileUrl.getFile() : null;
+    }
 }
