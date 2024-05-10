@@ -5,6 +5,7 @@ package snap.text;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
+import snap.util.CharSequenceUtils;
 import snap.util.CharSequenceX;
 
 /**
@@ -124,15 +125,19 @@ public class TextRun implements CharSequenceX, Cloneable {
         // If already set, just return
         if (_width >= 0) return _width;
 
+        // Get end char index (minus newline)
+        int endCharIndex = length();
+        while (endCharIndex > 0 && CharSequenceUtils.isLineEndChar(charAt(endCharIndex - 1)))
+            endCharIndex--;
+
         // Iterate over chars and accumulate width
         double width = 0;
-        int runCharLength = length();
-        for (int i = 0; i < runCharLength; i++)
+        for (int i = 0; i < endCharIndex; i++)
             width += _style.getCharAdvance(charAt(i));
 
         // Add char spacing
-        if (runCharLength > 1)
-            width += (runCharLength - 1) * getCharSpacing();
+        if (endCharIndex > 1 && getCharSpacing() > 0)
+            width += (endCharIndex - 1) * getCharSpacing();
 
         // Set and return
         return _width = width;
@@ -146,11 +151,13 @@ public class TextRun implements CharSequenceX, Cloneable {
         double trailingWidth = 0;
 
         // Get end (ignore newline)
-        int endCharIndex = length() - 1;
+        int endCharIndex = length();
+        while (endCharIndex > 0 && CharSequenceUtils.isLineEndChar(charAt(endCharIndex - 1)))
+            endCharIndex--;
 
         // Remove width of trailing whitespace chars
-        while (endCharIndex >= 0 && Character.isWhitespace(charAt(endCharIndex))) {
-            trailingWidth += _style.getCharAdvance(charAt(endCharIndex--));
+        while (endCharIndex > 0 && Character.isWhitespace(charAt(endCharIndex - 1))) {
+            trailingWidth += _style.getCharAdvance(charAt(--endCharIndex));
             if (endCharIndex > 0)
                 trailingWidth += getCharSpacing();
         }
