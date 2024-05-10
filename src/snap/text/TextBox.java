@@ -733,7 +733,7 @@ public class TextBox extends TextBlock {
 
                 // If no line-wrap and PrefWidth almost TextBox.Width, stop
                 if (!isWrapLines()) {
-                    double prefW = getPrefWidth(-1);
+                    double prefW = getPrefWidth();
                     double diffW = textW - prefW;
                     if (diffW < 1)
                         break;

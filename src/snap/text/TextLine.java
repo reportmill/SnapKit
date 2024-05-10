@@ -360,17 +360,18 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Returns the width of line from given index.
      */
-    public double getWidth(int anIndex)
+    public double getWidthForStartCharIndex(int startCharIndex)
     {
-        // If index 0, use cached
-        if (anIndex <= 0) return getWidth();
+        // If index 0, return cached version
+        if (startCharIndex <= 0)
+            return getWidth();
 
         // Calculate
         double width = 0;
         TextRun[] runs = getRuns();
         for (TextRun run : runs) {
-            if (anIndex < run.getEndCharIndex())
-                width += run.getWidth(anIndex - run.getStartCharIndex());
+            if (startCharIndex < run.getEndCharIndex())
+                width += run.getWidthForStartCharIndex(startCharIndex - run.getStartCharIndex());
         }
 
         // Return
@@ -378,19 +379,12 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Returns the width without whitespace.
+     * Returns the width of the trailing whitespace.
      */
-    public double getWidthNoWhiteSpace()
+    public double getTrailingWhitespaceWidth()
     {
-        int length = length();
-        int lengthNoWhiteSpace = length;
-        while (lengthNoWhiteSpace > 0 && Character.isWhitespace(charAt(lengthNoWhiteSpace - 1)))
-            lengthNoWhiteSpace--;
-
-        if (lengthNoWhiteSpace == length)
-            return getWidth();
-
-        return getXForCharIndex(lengthNoWhiteSpace) - getX();
+        TextRun lastRun = getLastRun();
+        return lastRun.getTrailingWhitespaceWidth();
     }
 
     /**

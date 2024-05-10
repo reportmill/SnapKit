@@ -124,9 +124,39 @@ public class TextRun implements CharSequenceX, Cloneable {
         // If already set, just return
         if (_width >= 0) return _width;
 
-        // Calculate, set, return
-        double width = getWidth(0);
+        // Iterate over chars and accumulate width
+        double width = 0;
+        int runCharLength = length();
+        for (int i = 0; i < runCharLength; i++)
+            width += _style.getCharAdvance(charAt(i));
+
+        // Add char spacing
+        if (runCharLength > 1)
+            width += (runCharLength - 1) * getCharSpacing();
+
+        // Set and return
         return _width = width;
+    }
+
+    /**
+     * Returns the width of the trailing whitespace.
+     */
+    public double getTrailingWhitespaceWidth()
+    {
+        double trailingWidth = 0;
+
+        // Get end (ignore newline)
+        int endCharIndex = length() - 1;
+
+        // Remove width of trailing whitespace chars
+        while (endCharIndex >= 0 && Character.isWhitespace(charAt(endCharIndex))) {
+            trailingWidth += _style.getCharAdvance(charAt(endCharIndex--));
+            if (endCharIndex > 0)
+                trailingWidth += getCharSpacing();
+        }
+
+        // Return
+        return trailingWidth;
     }
 
     /**
@@ -137,10 +167,11 @@ public class TextRun implements CharSequenceX, Cloneable {
     /**
      * Returns the width of run from given index.
      */
-    public double getWidth(int anIndex)
+    public double getWidthForStartCharIndex(int anIndex)
     {
-        // If zero, return cached
-        if (anIndex <= 0 && _width >= 0) return getWidth();
+        // If zero, return cached version
+        if (anIndex <= 0 && _width >= 0)
+            return getWidth();
 
         // Calculate
         double width = 0;

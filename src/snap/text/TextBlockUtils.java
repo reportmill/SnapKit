@@ -130,10 +130,8 @@ public class TextBlockUtils {
 
             // Get underline endpoints and draw line
             double lineX = textLine.getTextX() + run.getX();
-            double lineMaxX = lineX + run.getWidth();
+            double lineMaxX = lineX + run.getWidth() - run.getTrailingWhitespaceWidth();
             double lineY = textLine.getTextBaseline() + underlineOffset;
-            if (run.getEndCharIndex() == textLine.getEndCharIndex())
-                lineMaxX = textLine.getX() + textLine.getWidthNoWhiteSpace();
             aPntr.drawLine(lineX, lineY, lineMaxX, lineY);
         }
     }

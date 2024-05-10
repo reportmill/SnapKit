@@ -1299,26 +1299,32 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         if (_prefW >= 0) return _prefW;
 
         // Calc, set, return
-        TextLine line = getLineLongest();
-        double prefW = Math.ceil(line != null ? line._width : 0);
+        TextLine longestLine = getLineLongest();
+        double longestLineW = longestLine != null ? longestLine.getWidth() : 0;
+        double prefW = Math.ceil(longestLineW);
         return _prefW = prefW;
     }
 
     /**
-     * Returns the width of text from given index.
+     * Returns the width of text from given start char index.
      */
-    public double getPrefWidth(int anIndex)
+    public double getPrefWidthForStartCharIndex(int startCharIndex)
     {
-        // If given char index 0, do cached version
-        if (anIndex <= 0) return getPrefWidth();
+        // If given char index 0, return cached version
+        if (startCharIndex <= 0)
+            return getPrefWidth();
 
-        // Iterate over lines and get max line width
-        double prefW = 0;
-        for (TextLine line : _lines) {
-            if (anIndex < line.getEndCharIndex()) {
-                double lineW = line.getWidth(anIndex - line.getStartCharIndex());
-                prefW = Math.max(prefW, lineW);
-            }
+        // Get line for startCharIndex
+        TextLine textLine = getLineForCharIndex(startCharIndex);
+        int startCharIndexInLine = startCharIndex - textLine.getStartCharIndex();
+        double prefW = textLine.getWidthForStartCharIndex(startCharIndexInLine) - textLine.getTrailingWhitespaceWidth();
+
+        // Iterate till end looking for longer line
+        TextLine nextLine = textLine.getNext();
+        while (nextLine != null) {
+            double lineW = nextLine.getWidth() - nextLine.getTrailingWhitespaceWidth();
+            prefW = Math.max(prefW, lineW);
+            nextLine = nextLine.getNext();
         }
 
         // Return
