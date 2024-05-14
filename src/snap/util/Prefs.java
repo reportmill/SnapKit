@@ -10,7 +10,20 @@ public abstract class Prefs {
 
     // The default preferences
     private static Prefs  _defaultPrefs;
-    
+
+    /**
+     * Constructor.
+     */
+    public Prefs()
+    {
+        super();
+    }
+
+    /**
+     * Returns the name.
+     */
+    public String getName()  { return "Unknown"; }
+
     /**
      * Returns a value for given string.
      */

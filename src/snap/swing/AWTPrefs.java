@@ -15,7 +15,7 @@ public class AWTPrefs extends Prefs {
     private static Map<String, AWTPrefs> _shared = new HashMap<>();
 
     /**
-     * Creates new AWTPrefs.
+     * Constructor.
      */
     private AWTPrefs(String aName)
     {
@@ -26,6 +26,12 @@ public class AWTPrefs extends Prefs {
         if (aName != null)
             _prefs = _prefs.node(aName);
     }
+
+    /**
+     * Override to return name.
+     */
+    @Override
+    public String getName()  { return _prefs.name(); }
 
     /**
      * Creates new AWTPrefs.
