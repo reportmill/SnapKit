@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
-import java.util.List;
 import snap.util.FilePathUtils;
 import snap.util.JSValue;
 import snap.util.JSParser;
@@ -124,9 +123,9 @@ public class WebResponse {
     }
 
     /**
-     * Returns the path file type (extension in lowercase, no dot).
+     * Returns the file type (extension in lowercase, no dot).
      */
-    public String getPathType()
+    public String getFileType()
     {
         String path = getPath();
         return FilePathUtils.getType(path);
