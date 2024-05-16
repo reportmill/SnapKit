@@ -2516,26 +2516,27 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view environment.
      */
-    public ViewEnv getEnv()
-    {
-        return ViewEnv.getEnv();
-    }
+    public ViewEnv getEnv()  { return ViewEnv.getEnv(); }
+
+    /**
+     * Runs the given runnable in the next event.
+     */
+    public void runLater(Runnable aRunnable)  { getEnv().runLater(aRunnable); }
+
+    /**
+     * Runs the runnable after the given delay in milliseconds.
+     */
+    public void runDelayed(Runnable aRunnable, int aDelay)  { getEnv().runDelayed(aRunnable, aDelay); }
 
     /**
      * Runs given runnable repeatedly every period milliseconds.
      */
-    public void runIntervals(Runnable aRun, int aPeriod)
-    {
-        getEnv().runIntervals(aRun, aPeriod);
-    }
+    public void runIntervals(Runnable aRun, int aPeriod)  { getEnv().runIntervals(aRun, aPeriod); }
 
     /**
      * Stops running given runnable.
      */
-    public void stopIntervals(Runnable aRun)
-    {
-        getEnv().stopIntervals(aRun);
-    }
+    public void stopIntervals(Runnable aRun)  { getEnv().stopIntervals(aRun); }
 
     /**
      * Returns the text value of this view.

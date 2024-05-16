@@ -791,7 +791,7 @@ public class ViewOwner extends PropObject {
     /**
      * Runs the runnable after the given delay in milliseconds.
      */
-    public void runDelayed(int aDelay, Runnable aRunnable)  { _env.runDelayed(aRunnable, aDelay); }
+    public void runDelayed(Runnable aRunnable, int aDelay)  { _env.runDelayed(aRunnable, aDelay); }
 
     /**
      * Plays a beep.

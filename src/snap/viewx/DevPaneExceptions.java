@@ -221,7 +221,7 @@ public class DevPaneExceptions extends ViewOwner {
         TaskRunner<String> sendExceptionRunner = sendException(thrownException);
         sendExceptionRunner.setOnSuccess(str -> {
             setSendStatus(str);
-            runDelayed(5000, () -> setSendStatus(null));
+            runDelayed(() -> setSendStatus(null), 5000);
         });
     }
 
