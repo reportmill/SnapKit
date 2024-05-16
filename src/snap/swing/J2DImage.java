@@ -2,6 +2,7 @@ package snap.swing;
 import java.awt.image.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import javax.imageio.*;
 import javax.imageio.metadata.*;
 import javax.imageio.stream.ImageInputStream;
@@ -20,26 +21,6 @@ public class J2DImage extends Image {
     // The buffered image
     private BufferedImage  _native;
     
-    /**
-     * Constructor for given source.
-     */
-    public J2DImage(Object aSource)
-    {
-        super();
-
-        // Set image source
-        setSource(aSource);
-
-        // Load image and set properties
-        BufferedImage image = getNative();
-        _pixW = image.getWidth();
-        _pixH = image.getHeight();
-        _width = _pixW * 72d / _dpiX;
-        _height = _pixH * 72d / _dpiY;
-        _hasAlpha = image.getColorModel().hasAlpha();
-        _dpiScale = _dpiX != 72 ? _dpiX / 72 : 1;
-    }
-
     /**
      * Constructor for size, alpha and dpi scale.
      */
@@ -67,6 +48,43 @@ public class J2DImage extends Image {
             _dpiX *= dpiScale;
             _dpiY *= dpiScale;
         }
+    }
+
+    /**
+     * Constructor for given source.
+     */
+    public J2DImage(Object aSource)
+    {
+        super();
+
+        // Set image source
+        setSource(aSource);
+
+        // Initialize size to placeholder 20 x 20
+        _width = _height = 20;
+        _pixW = _pixH = 20;
+
+        // Load image and set properties
+        setLoaded(false);
+        CompletableFuture.runAsync(this::loadImage);
+    }
+
+    /**
+     * Called to load image in background.
+     */
+    private void loadImage()
+    {
+        // Load image
+        BufferedImage image = getNative();
+        _pixW = image.getWidth();
+        _pixH = image.getHeight();
+        _width = _pixW * 72d / _dpiX;
+        _height = _pixH * 72d / _dpiY;
+        _hasAlpha = image.getColorModel().hasAlpha();
+        _dpiScale = _dpiX != 72 ? _dpiX / 72 : 1;
+
+        // Set loaded
+        setLoaded(true);
     }
 
     /**

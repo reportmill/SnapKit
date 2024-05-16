@@ -58,6 +58,9 @@ public abstract class Image implements Loadable {
     // Loadable Support
     private Loadable.Support  _loadLsnrs = new Loadable.Support(this);
 
+    // Whether waiting for image load
+    private boolean _waitingForImageLoad;
+
     // Supported image type strings
     private static String[]  _types = {"gif", "jpg", "jpeg", "png", "tif", "tiff", "bmp"};
 
@@ -221,12 +224,34 @@ public abstract class Image implements Loadable {
         // If setting, fire prop change, fire load listeners
         if (aValue)
             fireLoadListeners();
+
+        // If another thread is waiting for image load, wake thread
+        if (_waitingForImageLoad)
+            wakeForImageLoad();
     }
 
     /**
-     * Waits for image load.
+     * Override to wait.
      */
-    public void waitForImageLoad()  { }
+    public synchronized void waitForImageLoad()
+    {
+        if (!isLoaded()) {
+            try {
+                _waitingForImageLoad = true;
+                wait();
+                _waitingForImageLoad = false;
+            }
+            catch (Exception e) { System.out.println("CJImage.waitForImageLoad: Failure: " + e.getMessage()); }
+        }
+    }
+
+    /**
+     * Stop wait.
+     */
+    private synchronized void wakeForImageLoad()
+    {
+        notify();
+    }
 
     /**
      * Returns an RGB integer for given x, y.
