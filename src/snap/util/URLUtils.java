@@ -4,6 +4,7 @@
 package snap.util;
 import java.io.*;
 import java.net.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Utilities for URL.
@@ -196,5 +197,27 @@ public class URLUtils {
 
         // Return file
         return file;
+    }
+
+    /**
+     * Prime network connections: Java desktop seems to take a second+ to do first URL fetch.
+     */
+    public static void primeNetworkConnection()
+    {
+        if (SnapUtils.isWebVM) return;
+        CompletableFuture.runAsync(URLUtils::primeNetworkConnectionImpl);
+    }
+
+    /**
+     * Prime network connections: Java desktop seems to take a second+ to do first URL fetch.
+     */
+    private static void primeNetworkConnectionImpl()
+    {
+        try {
+            URL url = new URL("https://www.cloudflare.com");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.getResponseCode();
+        }
+        catch (Exception e) { System.err.println(e.getMessage()); }
     }
 }
