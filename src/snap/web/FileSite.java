@@ -81,11 +81,6 @@ public class FileSite extends WebSite {
         if (!javaFile.exists() || !javaFile.canRead())
             return null;
 
-        // If funky apple file, return null
-        String fileName = javaFile.getName();
-        if (fileName.equalsIgnoreCase(".DS_Store"))
-            return null;
-
         // Get file path
         String filePath = getLocalPathForJavaFile(javaFile);
 
