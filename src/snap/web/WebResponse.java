@@ -128,7 +128,7 @@ public class WebResponse {
     public String getFileType()
     {
         String path = getPath();
-        return FilePathUtils.getType(path);
+        return FilePathUtils.getFileType(path);
     }
 
     /**

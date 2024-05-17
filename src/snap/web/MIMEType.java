@@ -38,13 +38,12 @@ public class MIMEType {
     }
 
     /**
-     * Returns the MIME type for string path, extension, type.
+     * Returns the file type for string path, extension, type.
      */
     public static String getType(String aStr)
     {
         // Get type for given string
-        String type = FilePathUtils.getType(aStr);
-        if (type.length()==0) type = aStr.toLowerCase();
+        String type = FilePathUtils.getFileType(aStr);
 
         // Return type
         switch (type) {

@@ -62,7 +62,7 @@ public class FilePathUtils {
     /**
      * Returns the file type of the given string path (everything after last '.' in lowercase).
      */
-    public static String getType(String aPath)
+    public static String getFileType(String aPath)
     {
         String ext = getExtension(aPath);
         return ext.toLowerCase();

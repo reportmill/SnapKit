@@ -89,7 +89,7 @@ class WebSitePaneUtils {
         // If file not found and isSaving, create file
         if (inputTextFile == null && sitePane.isSaving()) {
             WebSite site = sitePane.getSite();
-            boolean isDir = FilePathUtils.getType(inputTextPath).length() == 0;
+            boolean isDir = FilePathUtils.getFileType(inputTextPath).length() == 0;
             inputTextFile = site.createFileForPath(inputTextPath, isDir);
         }
 

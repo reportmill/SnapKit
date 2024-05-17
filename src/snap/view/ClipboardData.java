@@ -117,12 +117,13 @@ public class ClipboardData {
     }
 
     /**
-     * Returns the file extension.
+     * Returns the file type.
      */
-    public String getExtension()
+    public String getFileType()
     {
-        if (getName() != null && getName().indexOf('.') > 0)
-            return FilePathUtils.getExtension(getName());
+        String filename = getName();
+        if (filename != null && filename.indexOf('.') > 0)
+            return FilePathUtils.getFileType(filename);
         if (_mimeType != null)
             return MIMEType.getExtension(_mimeType);
         return null;
