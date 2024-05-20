@@ -1,5 +1,6 @@
 package snap.viewx;
 import snap.util.SnapUtils;
+import snap.view.ScrollView;
 import snap.view.View;
 import snap.view.ViewOwner;
 import snap.view.ViewUtils;
@@ -80,7 +81,12 @@ public class DefaultConsole extends ViewOwner implements Console {
      * Create UI.
      */
     @Override
-    protected View createUI()  { return _consoleView; }
+    protected View createUI()
+    {
+        ScrollView scrollView = new ScrollView(_consoleView);
+        _consoleView.setGrowWidth(true);
+        return scrollView;
+    }
 
     /**
      * Returns the shared console.
@@ -117,7 +123,8 @@ public class DefaultConsole extends ViewOwner implements Console {
     {
         Console defaultConsole = getShared();
         View consoleView = defaultConsole.getConsoleView();
-        consoleView.setPrefSize(700, 900);
+        if (!SnapUtils.isWebVM)
+            consoleView.setPrefSize(700, 900);
         if (defaultConsole instanceof ViewOwner) {
             ViewOwner viewOwner = (ViewOwner) defaultConsole;
             viewOwner.getWindow().setMaximized(SnapUtils.isWebVM);
