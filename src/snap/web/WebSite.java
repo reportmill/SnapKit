@@ -69,40 +69,24 @@ public abstract class WebSite {
     }
 
     /**
-     * Returns the URL root.
+     * Returns the site URL address string.
      */
-    public String getURLString()
-    {
-        WebURL url = getURL();
-        return url.getString();
-    }
+    public String getUrlAddress()  { return _url.getString(); }
 
     /**
      * Returns the name for this data source.
      */
-    public String getName()
-    {
-        WebURL url = getURL();
-        return url.getPath() != null ? url.getFilename() : url.getHost();
-    }
+    public String getName()  { return _url.getPath() != null ? _url.getFilename() : getHostName(); }
 
     /**
      * Returns the host name.
      */
-    public String getHostName()
-    {
-        WebURL url = getURL();
-        return url.getHost();
-    }
+    public String getHostName()  { return _url.getHost(); }
 
     /**
      * Returns the data source name-space and name in standard path form.
      */
-    public String getPath()
-    {
-        WebURL url = getURL();
-        return url.getPath();
-    }
+    public String getPath()  { return _url.getPath(); }
 
     /**
      * Returns the user name.
@@ -602,9 +586,10 @@ public abstract class WebSite {
     /**
      * Standard toString implementation.
      */
+    @Override
     public String toString()
     {
         String className = getClass().getSimpleName();
-        return className + ": " + getURLString();
+        return className + ": " + getUrlAddress();
     }
 }
