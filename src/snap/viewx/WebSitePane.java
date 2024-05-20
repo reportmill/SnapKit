@@ -266,7 +266,7 @@ public class WebSitePane extends ViewOwner {
         // If Types set, do simple version on URLs to avoid resolving files
         String[] types = getTypes();
         if (types != null) {
-            WebURL[] validUrlsForSite = ArrayUtils.filter(recentUrlsForSite, url -> ArrayUtils.contains(types, url.getType()));
+            WebURL[] validUrlsForSite = ArrayUtils.filter(recentUrlsForSite, url -> ArrayUtils.contains(types, url.getFileType()));
             return validUrlsForSite;
         }
 

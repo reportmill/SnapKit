@@ -156,7 +156,7 @@ public class RecentFiles extends ViewOwner {
     {
         // Get URL String for type
         WebURL[] recentUrls = getURLs();
-        return ArrayUtils.filter(recentUrls, url -> ArrayUtils.contains(theTypes, url.getType()));
+        return ArrayUtils.filter(recentUrls, url -> ArrayUtils.contains(theTypes, url.getFileType()));
     }
 
     /**
@@ -184,7 +184,7 @@ public class RecentFiles extends ViewOwner {
      */
     private static WebFile createFileForURL(WebURL aURL)
     {
-        boolean isDir = aURL.getType().length() == 0;
+        boolean isDir = aURL.getFileType().length() == 0;
         if (aURL.getSite() == null)
             return null;
         return aURL.createFile(isDir);

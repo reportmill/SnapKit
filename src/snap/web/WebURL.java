@@ -138,10 +138,10 @@ public class WebURL {
     /**
      * Returns the file type (extension without the '.').
      */
-    public String getType()
+    public String getFileType()
     {
         String filePath = getPath();
-        return FilePathUtils.getExtension(filePath).toLowerCase();
+        return FilePathUtils.getFileType(filePath);
     }
 
     /**
