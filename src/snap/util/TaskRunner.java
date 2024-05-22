@@ -6,8 +6,8 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
 import snap.view.ViewUtils;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * A class for running operations in the background.
@@ -17,8 +17,8 @@ public class TaskRunner<T> {
     // The name of this runner
     private String _name = getClass().getSimpleName();
 
-    // The supplier function for this task runner
-    private Supplier<T> _taskFunction;
+    // The function for this task runner
+    private Callable<T> _taskFunction;
 
     // The runner status
     private Status _status = Status.Idle;
@@ -67,7 +67,7 @@ public class TaskRunner<T> {
     /**
      * Constructor for given task function.
      */
-    public TaskRunner(Supplier<T> aSupplier)
+    public TaskRunner(Callable<T> aSupplier)
     {
         super();
         _taskFunction = aSupplier;
@@ -86,12 +86,12 @@ public class TaskRunner<T> {
     /**
      * Returns the task supplier function.
      */
-    public Supplier<T> getTaskFunction()  { return _taskFunction; }
+    public Callable<T> getTaskFunction()  { return _taskFunction; }
 
     /**
-     * Sets the task supplier function.
+     * Sets the task callable function.
      */
-    public void setTaskFunction(Supplier<T> aSupplier)  { _taskFunction = aSupplier; }
+    public void setTaskFunction(Callable<T> aSupplier)  { _taskFunction = aSupplier; }
 
     /**
      * Returns the status.
@@ -181,7 +181,7 @@ public class TaskRunner<T> {
      */
     public T run() throws Exception
     {
-        return _taskFunction.get();
+        return _taskFunction.call();
     }
 
     /**
