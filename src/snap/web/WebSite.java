@@ -289,7 +289,7 @@ public abstract class WebSite {
         long lastModTime = putResponse.getLastModTime();
         if (lastModTime == 0) {
             if (!SnapUtils.isWebVM)
-                System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getUrlString());
+                System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getUrlAddress());
             lastModTime = System.currentTimeMillis();
         }
         aFile.setLastModTime(lastModTime);

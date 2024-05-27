@@ -232,8 +232,8 @@ public class DevPaneFiles extends ViewOwner {
                 return;
 
             // If zip or jar or alt-key down, set as root
-            if (selFile.getType().equals("zip") || selFile.getType().equals("jar") || anEvent.isAltDown())
-                setRootUrlString(selFile.getUrlString());
+            if (selFile.getFileType().equals("zip") || selFile.getFileType().equals("jar") || anEvent.isAltDown())
+                setRootUrlString(selFile.getUrlAddress());
 
             // Otherwise open file text
             else if (selFile.isFile()) {
@@ -351,7 +351,6 @@ public class DevPaneFiles extends ViewOwner {
     private WebFile getHomeDir()
     {
         String homeDirPath = System.getProperty("user.home");
-        WebURL homeDirUrl = WebURL.getURL(homeDirPath);
-        return homeDirUrl != null ? homeDirUrl.getFile() : null;
+        return WebFile.getFileForPath(homeDirPath);
     }
 }

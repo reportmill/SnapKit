@@ -5,6 +5,7 @@ package snap.web;
 import snap.props.PropObject;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
+import snap.util.FileUtils;
 import snap.util.StringUtils;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -134,7 +135,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     /**
      * Returns the file type (extension without the '.').
      */
-    public String getType()
+    public String getFileType()
     {
         String filePath = getPath();
         return FilePathUtils.getExtension(filePath).toLowerCase();
@@ -164,9 +165,9 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     }
 
     /**
-     * Returns the URL string.
+     * Returns the URL address string.
      */
-    public String getUrlString()
+    public String getUrlAddress()
     {
         WebURL url = getURL();
         return url.getString();
@@ -318,7 +319,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         if (respCode != WebResponse.OK) {
             if (resp.getException() != null)
                 throw new ResponseException(resp);
-            System.err.println("WebFile.getBytes: Response error: " + resp.getCodeString() + " (" + getUrlString() + ')');
+            System.err.println("WebFile.getBytes: Response error: " + resp.getCodeString() + " (" + getUrlAddress() + ')');
             return null;
         }
 
@@ -376,7 +377,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         if (respCode != WebResponse.OK) {
             if (resp.getException() != null)
                 throw new ResponseException(resp);
-            System.err.println("WebFile.getFiles: Response error: " + resp.getCodeString() + " (" + getUrlString() + ')');
+            System.err.println("WebFile.getFiles: Response error: " + resp.getCodeString() + " (" + getUrlAddress() + ')');
             return _files = new WebFile[0];
         }
 
@@ -695,7 +696,43 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public String toString()
     {
-        return "WebFile: " + getUrlString() + (isDir() ? "/" : "");
+        return "WebFile: " + getUrlAddress() + (isDir() ? "/" : "");
+    }
+
+    /**
+     * Returns a WebFile for given source.
+     */
+    public static WebFile getFileForSource(Object fileSource)
+    {
+        WebURL url = WebURL.getURL(fileSource);
+        return url != null ? url.getFile() : null;
+    }
+
+    /**
+     * Returns a WebFile for given file path.
+     */
+    public static WebFile getFileForPath(String filePath)
+    {
+        WebURL url = WebURL.getURL(filePath);
+        return url != null ? url.getFile() : null;
+    }
+
+    /**
+     * Creates a WebFile for given file path.
+     */
+    public static WebFile createFileForPath(String filePath, boolean isDir)
+    {
+        WebURL url = WebURL.getURL(filePath);
+        return url != null ? url.createFile(isDir) : null;
+    }
+
+    /**
+     * Create a temp WebFile for given file name.
+     */
+    public static WebFile createTempFileForName(String filename, boolean isDir)
+    {
+        String tempFilePath = FileUtils.getTempFile(filename).getPath();
+        return createFileForPath(tempFilePath, isDir);
     }
 
     /**

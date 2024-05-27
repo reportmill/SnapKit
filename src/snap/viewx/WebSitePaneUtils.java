@@ -166,7 +166,7 @@ class WebSitePaneUtils {
         if (theTypes == null || theTypes.length == 0)
             return true;
 
-        return aFile.isFile() && ArrayUtils.contains(theTypes, aFile.getType());
+        return aFile.isFile() && ArrayUtils.contains(theTypes, aFile.getFileType());
     }
 
     /**
