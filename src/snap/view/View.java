@@ -422,16 +422,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
-     * Sets the size to preferred size.
-     */
-    public void setSizeToPrefSize()
-    {
-        double prefW = getPrefWidth();
-        double prefH = getPrefHeight();
-        setSize(prefW, prefH);
-    }
-
-    /**
      * Returns the bounds.
      */
     public Rect getBounds()
@@ -1886,6 +1876,16 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
+     * Sets the size to preferred size.
+     */
+    public void setSizeToPrefSize()
+    {
+        double prefW = getPrefWidth();
+        double prefH = getPrefHeight();
+        setSize(prefW, prefH);
+    }
+
+    /**
      * Returns the best width for view - accounting for pref/min/max.
      */
     public double getBestWidth(double aH)
@@ -1941,6 +1941,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         double bestH = getBestHeight(-1);
         double bestW = getBestWidth(bestH);
         return new Size(bestW, bestH);
+    }
+
+    /**
+     * Sets the size to best size.
+     */
+    public void setSizeToBestSize()
+    {
+        Size bestSize = getBestSize();
+        setSize(bestSize);
     }
 
     /**
