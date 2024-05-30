@@ -36,8 +36,11 @@ public class Explode extends View {
     // The function to be called when done
     private Runnable _onDone;
 
-    // Whether to remove when finished
-    private boolean _removeOnDone, _restoreOnDone;
+    // Whether to remove view when finished
+    private boolean _removeOnDone;
+
+    // Whether to restore view opacity when finished
+    private boolean _restoreOnDone;
 
     // Whether to reverse (construct)
     private boolean _reverse;
@@ -61,6 +64,14 @@ public class Explode extends View {
     /**
      * Constructor.
      */
+    public Explode(View aView, int aGridWidth, int aGridHeight)
+    {
+        this(aView, aGridWidth, aGridHeight, null);
+    }
+
+    /**
+     * Constructor.
+     */
     public Explode(View aView, int aGridWidth, int aGridHeight, Runnable aRun)
     {
         _view = aView;
@@ -78,6 +89,16 @@ public class Explode extends View {
         _image = anImage;
         return this;
     }
+
+    /**
+     * Sets whether to remove view when explode is done.
+     */
+    public void removeOnDone()  { _removeOnDone = true; }
+
+    /**
+     * Sets whether to restore view opacity when finished.
+     */
+    public void restoreOnDone()  { _restoreOnDone = true; }
 
     /**
      * Sets the view that to holds this view for display.
@@ -173,16 +194,6 @@ public class Explode extends View {
     {
         if (getParent() == null)
             configure();
-        getAnim(0).play();
-    }
-
-    /**
-     * Plays explosion animation and removes view when done.
-     */
-    public void playAndRemove()
-    {
-        _removeOnDone = true;
-        configure();
         getAnim(0).play();
     }
 
