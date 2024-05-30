@@ -16,6 +16,9 @@ public class TaskMonitorPanel extends TaskMonitor {
     // The delay before task progress panel appears in milliseconds
     private int _delay = 200;
 
+    // Whether panel has already shown
+    private boolean _didShow;
+
     // The ViewOwner for UI
     private TaskMonitorPanelViewOwner _viewOwner;
 
@@ -41,7 +44,12 @@ public class TaskMonitorPanel extends TaskMonitor {
     /**
      * Show panel.
      */
-    protected void showPanel()  { _viewOwner.showDialogBox(); }
+    protected void showPanel()
+    {
+        if (_didShow) return;
+        _didShow = true;
+        _viewOwner.showDialogBox();
+    }
 
     /**
      * Hide panel.
@@ -49,18 +57,33 @@ public class TaskMonitorPanel extends TaskMonitor {
     protected void hide()  { _viewOwner.hideDialogBox(); }
 
     /**
-     * Override to trigger showPanel.
+     * Check for whether panel should show.
+     */
+    protected void checkForShowPanel()
+    {
+        if (!isFinished())
+            showPanel();
+    }
+
+    /**
+     * Override to register for showPanel check.
+     */
+    @Override
+    public void setMonitor(TaskMonitor sourceMonitor)
+    {
+        super.setMonitor(sourceMonitor);
+        ViewUtils.runDelayed(this::checkForShowPanel, _delay);
+    }
+
+    /**
+     * Override to register for showPanel check.
      */
     @Override
     protected void setTasksTotal(int aValue)
     {
         // If going from zero to non-zero, trigger showPanel after delay
-        if (getTasksTotal() == 0 && aValue != 0) {
-            ViewUtils.runDelayed(() -> {
-                if (!isFinished())
-                    showPanel();
-            }, _delay);
-        }
+        if (getTasksTotal() == 0 && aValue != 0)
+            ViewUtils.runDelayed(this::checkForShowPanel, _delay);
 
         // Do normal version
         super.setTasksTotal(aValue);
