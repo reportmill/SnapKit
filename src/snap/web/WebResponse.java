@@ -138,7 +138,7 @@ public class WebResponse {
     {
         if (_mimeType != null) return _mimeType;
         String path = getPath();
-        String mimeType = MIMEType.getType(path);
+        String mimeType = MIMEType.getMimeTypeForPath(path);
         return _mimeType = mimeType;
     }
 

@@ -138,7 +138,7 @@ public class FileHeader extends PropObject {
     public String getMimeType()
     {
         if (_mimeType != null) return _mimeType;
-        return _mimeType = MIMEType.getType(getPath());
+        return _mimeType = MIMEType.getMimeTypeForPath(getPath());
     }
 
     /**

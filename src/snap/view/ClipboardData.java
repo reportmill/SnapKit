@@ -56,7 +56,7 @@ public class ClipboardData {
         _source = aSource;
         _mimeType = aMimeType;
         if (_mimeType == null)
-            _mimeType = MIMEType.UKNOWN;
+            _mimeType = MIMEType.UNKNOWN;
         if (_source instanceof String)
             _string = (String) _source;
     }
@@ -125,7 +125,7 @@ public class ClipboardData {
         if (filename != null && filename.indexOf('.') > 0)
             return FilePathUtils.getFileType(filename);
         if (_mimeType != null)
-            return MIMEType.getExtension(_mimeType);
+            return MIMEType.getFileTypeForMimeType(_mimeType);
         return null;
     }
 
@@ -199,9 +199,14 @@ public class ClipboardData {
         if (_source instanceof byte[] || _source instanceof InputStream)
             return _bytes = SnapUtils.getBytes(_source);
 
+        // Handle file
+        if (_source instanceof File)
+            return _bytes = FileUtils.getBytes((File) _source);
+
         // Handle get bytes from Source URL
-        if (getSourceURL() != null)
-            return _bytes = getSourceURL().getBytes();
+        WebURL sourceUrl = getSourceURL();
+        if (sourceUrl != null)
+            return _bytes = sourceUrl.getBytes();
 
         // Complain and return null
         System.err.println("ClipboardData.getBytes: Bytes not available for source " + _source);
@@ -235,7 +240,7 @@ public class ClipboardData {
         if (_source instanceof List) {
             List<?> list = (List<?>) _source;
             for (Object file : list)
-                files.add(ClipboardData.get(file));
+                files.add(ClipboardData.getClipboardDataForObject(file));
         }
 
         // Return
@@ -275,7 +280,7 @@ public class ClipboardData {
     /**
      * Returns a ClipboardData for given object.
      */
-    public static ClipboardData get(Object theData)
+    public static ClipboardData getClipboardDataForObject(Object theData)
     {
         // Handle ClipboardData
         if (theData instanceof ClipboardData)
@@ -288,7 +293,7 @@ public class ClipboardData {
         // Handle File
         if (theData instanceof File) {
             File file = (File) theData;
-            String mimeType = MIMEType.getType(file.getPath());
+            String mimeType = MIMEType.getMimeTypeForPath(file.getPath());
             return new ClipboardData(mimeType, file);
         }
 

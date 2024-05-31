@@ -61,10 +61,7 @@ public abstract class Clipboard implements Loadable {
      */
     public void addData(Object theData)
     {
-        if (theData instanceof File)
-            theData = Collections.singletonList(theData);
-
-        ClipboardData clipboardData = ClipboardData.get(theData);
+        ClipboardData clipboardData = ClipboardData.getClipboardDataForObject(theData);
         if (clipboardData != null)
             addData(clipboardData.getMIMEType(), clipboardData);
     }
