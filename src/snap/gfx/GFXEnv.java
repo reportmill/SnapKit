@@ -103,6 +103,11 @@ public abstract class GFXEnv {
     public abstract void openURL(Object aSource);
 
     /**
+     * Tries to open the given file source with the platform reader.
+     */
+    public void downloadFile(WebFile aFile)  { System.err.println("GFXEnv.downloadFile: Not implemented"); }
+
+    /**
      * Tries to open the given file source with the platform text file reader.
      */
     public void openTextFile(Object aSource)  { openFile(aSource); }
