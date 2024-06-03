@@ -20,6 +20,7 @@ public class MIMEType {
     public static final String WAV = "audio/x-wav";
     public static final String MP3 = "audio/mpeg";
     public static final String SETTINGS = "application/settings";
+    public static final String ZIP = "application/zip";
     public static final String UNKNOWN = "application/octet-stream";
     
     /**
@@ -36,6 +37,7 @@ public class MIMEType {
             case MD: return "md";
             case PDF: return "pdf";
             case TEXT: return "txt";
+            case ZIP: return "zip";
             default: return null;
         }
     }
@@ -61,11 +63,12 @@ public class MIMEType {
             case "png": return PNG;
             case "gif": return GIF;
             case "html": return HTML;
+            case "java": return JAVA;
             case "md": return MD;
             case "midi": return MIDI;
             case "pdf": return PDF;
             case "txt": return TEXT;
-            case "java": return JAVA;
+            case "zip": return ZIP;
             default: return null;
         }
     }
