@@ -61,7 +61,7 @@ public class TaskMonitorPanel extends TaskMonitor {
      */
     protected void checkForShowPanel()
     {
-        if (!isFinished())
+        if (!isFinished() && !isCancelled())
             showPanel();
     }
 
@@ -87,6 +87,17 @@ public class TaskMonitorPanel extends TaskMonitor {
 
         // Do normal version
         super.setTasksTotal(aValue);
+    }
+
+    /**
+     * Override to hide panel.
+     */
+    @Override
+    public void setCancelled(boolean aValue)
+    {
+        super.setCancelled(aValue);
+        if (aValue)
+            hide();
     }
 
     /**

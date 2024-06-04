@@ -337,6 +337,8 @@ public class TaskRunner<T> {
 
         // Call failure
         else {
+            if (_monitor != null)
+                _monitor.setCancelled(true);
             failure(_exception);
             if (_failureHandler != null)
                 _failureHandler.accept(_exception);
