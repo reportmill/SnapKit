@@ -161,7 +161,13 @@ public class FileUtils {
     {
         // Hack for TeaVM, WebVM
         if (SnapUtils.isTeaVM) return new File("/");
-        if (SnapUtils.isWebVM) return new File("/files/snaptmp/");
+        if (SnapUtils.isWebVM) {
+            File tempDir = new File("/files/snaptmp/");
+            if (!tempDir.exists())
+                if (!tempDir.mkdirs())
+                    System.err.println("Could not create temp dir: " + tempDir);
+            return tempDir;
+        }
 
         String tmpDirStr = System.getProperty("java.io.tmpdir");
         return new File(tmpDirStr);
