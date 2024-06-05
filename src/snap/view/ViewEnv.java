@@ -3,8 +3,10 @@
  */
 package snap.view;
 import java.util.*;
+import java.util.function.Consumer;
 import snap.geom.Rect;
 import snap.util.*;
+import snap.web.WebFile;
 import snap.web.WebURL;
 
 /**
@@ -195,6 +197,11 @@ public abstract class ViewEnv {
      * Activates the App giving focus to given node.
      */
     public void activateApp(View aView)  { complain("activateWindow"); }
+
+    /**
+     * Shows a file picker.
+     */
+    public void showFilePicker(String[] fileTypes, Consumer<WebFile> pickedFileHandler)  { }
 
     /** Returns a "not implemented" exception for string (method name). */
     RuntimeException notImpl(String s)  { return new RuntimeException(getMsg(s)); }
