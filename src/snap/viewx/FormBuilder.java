@@ -86,11 +86,13 @@ public class FormBuilder extends ViewOwner {
      */
     public TextArea addTextArea(String aTitle)
     {
-        TextArea text = new TextArea();
-        text.setText(aTitle);
+        TextArea textArea = new TextArea();
+        textArea.setWrapLines(true);
+        textArea.setMaxWidth(400);
         if (_font != null)
-            text.setFont(_font);
-        return addView(text);
+            textArea.getTextBlock().setDefaultFont(_font);
+        textArea.setText(aTitle);
+        return addView(textArea);
     }
 
     /**

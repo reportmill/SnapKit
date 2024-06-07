@@ -483,12 +483,10 @@ public class DialogBox extends FormBuilder {
         // If image provided, reset pane to RowView containing image and original root pane
         Image dialogImage = getImage();
         if (dialogImage != null) {
+            ImageView dialogImageView = new ImageView(dialogImage);
             RowView rowView = new RowView();
-            rowView.setPadding(15, 0, 0, 20);
-            rowView.setSpacing(20);
-            rowView.setAlign(Pos.TOP_CENTER);
-            rowView.addChild(new ImageView(dialogImage));
-            rowView.addChild(formView);
+            rowView.setPropsString("Padding:15,0,0,20; Spacing:20; Align:TOP_CENTER;");
+            rowView.setChildren(dialogImageView, formView);
             formView = rowView;
         }
 
