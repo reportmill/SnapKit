@@ -3,7 +3,6 @@
  */
 package snap.viewx;
 import snap.geom.HPos;
-import snap.geom.Pos;
 import snap.gfx.*;
 import snap.util.ArrayUtils;
 import snap.view.*;
@@ -44,16 +43,16 @@ public class DialogBox extends FormBuilder {
     protected boolean  _cancelled;
 
     // The confirm button
-    private Button  _confirmBtn;
+    private Button _confirmButton;
 
     // The cancel button
-    private Button  _cancelBtn;
+    private Button _cancelButton;
 
     // The box to hold the buttons
     private RowView  _buttonBox;
 
     // Index of selected option
-    private int  _index = DialogBox.CANCEL_OPTION;
+    private int _selOptionIndex = DialogBox.CANCEL_OPTION;
 
     // Constants for DialogBox type
     public enum Type { Message, Confirm, Option, Input }
@@ -253,7 +252,7 @@ public class DialogBox extends FormBuilder {
         if (aValue == isConfirmEnabled()) return;
         _confirmEnabled = aValue;
         if (isUISet())
-            _confirmBtn.setEnabled(aValue);
+            _confirmButton.setEnabled(aValue);
     }
 
     /**
@@ -273,12 +272,12 @@ public class DialogBox extends FormBuilder {
     /**
      * Returns the confirm button.
      */
-    public Button getConfirmButton()  { return _confirmBtn; }
+    public Button getConfirmButton()  { return _confirmButton; }
 
     /**
      * Returns the cancel button.
      */
-    public Button getCancelButton()  { return _cancelBtn; }
+    public Button getCancelButton()  { return _cancelButton; }
 
     /**
      * Returns the button box.
@@ -329,7 +328,7 @@ public class DialogBox extends FormBuilder {
         // Show panel
         if (!showPanel(aView))
             return -1;
-        return _index;
+        return _selOptionIndex;
     }
 
     /**
@@ -392,7 +391,7 @@ public class DialogBox extends FormBuilder {
     public void confirm()
     {
         _cancelled = false;
-        _index = 0;
+        _selOptionIndex = 0;
         hide();
     }
 
@@ -450,14 +449,14 @@ public class DialogBox extends FormBuilder {
         }
 
         // Set ConfirmButton (and maybe FirstFocus)
-        _confirmBtn = (Button) _buttonBox.getChild(titles.length - 1);
-        _confirmBtn.setDefaultButton(true);
+        _confirmButton = (Button) _buttonBox.getChild(titles.length - 1);
+        _confirmButton.setDefaultButton(true);
         if (getFirstFocus() == null)
-            setFirstFocus(_confirmBtn);
-        _confirmBtn.setEnabled(isConfirmEnabled());
+            setFirstFocus(_confirmButton);
+        _confirmButton.setEnabled(isConfirmEnabled());
 
         // Set CancelButton
-        _cancelBtn = _buttonBox.getChildCount() > 1 ? (Button) _buttonBox.getChild(0) : null;
+        _cancelButton = _buttonBox.getChildCount() > 1 ? (Button) _buttonBox.getChild(0) : null;
     }
 
     /**
@@ -525,14 +524,8 @@ public class DialogBox extends FormBuilder {
     public void respondUI(ViewEvent anEvent)
     {
         // Handle Okay, EnterAction
-        if (anEvent.getView() == _confirmBtn || anEvent.equals("EnterAction")) {
-            if (!isConfirmEnabled()) {
-                beep();
-                return;
-            }
-            confirm();
-            anEvent.consume();
-        }
+        if (anEvent.getView() == _confirmButton || anEvent.equals("EnterAction"))
+            handleConfirmOrEnterAction(anEvent);
 
         // Handle Cancel, EscapeAction
         else if (anEvent.equals("Cancel") || anEvent.equals("EscapeAction")) {
@@ -541,35 +534,60 @@ public class DialogBox extends FormBuilder {
         }
 
         // Handle Option buttons
-        else if (anEvent.getView() instanceof Button) {
-            View btn = anEvent.getView();
-            String name = btn.getName();
-            String[] options = getOptions();
-            for (int i = 0; i < options.length; i++) {
-                if (name.equals(options[i])) {
-                    _index = i;
-                    hide();
-                }
-            }
-        }
+        else if (anEvent.getView() instanceof Button)
+            handleOptionButtonActionEvent(anEvent);
 
         // Handle TextFields: If original event was Enter key and ConfirmEnabled, confirm
-        else if (anEvent.getView() instanceof TextField) {
-            boolean enterAction = false;
-            for (ViewEvent viewEvent = anEvent; viewEvent != null; viewEvent = viewEvent.getParentEvent())
-                if (viewEvent.isEnterKey()) enterAction = true;
-            if (!enterAction)
-                return;
-            if (!isConfirmEnabled()) {
-                beep();
-                return;
-            }
-            confirm();
-            anEvent.consume();
-        }
+        else if (anEvent.getView() instanceof TextField)
+            handleTextFieldActionEvent(anEvent);
 
         // Do normal version
         else super.respondUI(anEvent);
+    }
+
+    /**
+     * Called on ConfirmButton or EnterAction.
+     */
+    private void handleConfirmOrEnterAction(ViewEvent anEvent)
+    {
+        // If confirm not possible, just beep and return
+        if (!isConfirmEnabled()) {
+            beep();
+            return;
+        }
+
+        // Confirm and consume event
+        confirm();
+        anEvent.consume();
+    }
+
+    /**
+     * Called when TextField gets Action event.
+     */
+    private void handleTextFieldActionEvent(ViewEvent anEvent)
+    {
+        // If Action event parent was EnterKey, handle confirm
+        for (ViewEvent viewEvent = anEvent; viewEvent != null; viewEvent = viewEvent.getParentEvent()) {
+            if (viewEvent.isEnterKey()) {
+                handleConfirmOrEnterAction(viewEvent);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Called when OptionButton gets Action event.
+     */
+    private void handleOptionButtonActionEvent(ViewEvent anEvent)
+    {
+        View optionButton = anEvent.getView();
+        String optionName = optionButton.getName();
+        String[] options = getOptions();
+        int matchIndex = ArrayUtils.findMatchIndex(options, option -> optionName.equals(option));
+        if (matchIndex >= 0) {
+            _selOptionIndex = matchIndex;
+            hide();
+        }
     }
 
     /**
