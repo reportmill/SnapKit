@@ -291,7 +291,7 @@ public class TaskMonitor extends PropObject {
     /**
      * Called when source monitor changes.
      */
-    private void monitorDidChange(PropChange aPC)
+    protected void monitorDidChange(PropChange aPC)
     {
         String propName = aPC.getPropName();
         Object value = _monitor.getPropValue(propName);

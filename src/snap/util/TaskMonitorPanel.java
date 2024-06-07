@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+import snap.props.PropChange;
 import snap.view.*;
 import snap.viewx.DialogBox;
 
@@ -48,6 +49,7 @@ public class TaskMonitorPanel extends TaskMonitor {
     {
         if (_didShow) return;
         _didShow = true;
+        ViewUtils.runLater(this::checkForHidePanel);
         _viewOwner.showDialogBox();
     }
 
@@ -63,6 +65,15 @@ public class TaskMonitorPanel extends TaskMonitor {
     {
         if (!isFinished() && !isCancelled())
             showPanel();
+    }
+
+    /**
+     * Check for whether panel should hide.
+     */
+    private void checkForHidePanel()
+    {
+        if (isFinished() || isCancelled())
+            hide();
     }
 
     /**
@@ -97,7 +108,7 @@ public class TaskMonitorPanel extends TaskMonitor {
     {
         super.setCancelled(aValue);
         if (aValue)
-            hide();
+            ViewUtils.runLater(this::hide);
     }
 
     /**
@@ -108,7 +119,17 @@ public class TaskMonitorPanel extends TaskMonitor {
     {
         super.setFinished(aValue);
         if (aValue)
-            hide();
+            ViewUtils.runLater(this::hide);
+    }
+
+    /**
+     * Override to reset UI if needed.
+     */
+    @Override
+    protected void monitorDidChange(PropChange aPC)
+    {
+        super.monitorDidChange(aPC);
+        _viewOwner.resetLater();
     }
 
     /**
@@ -178,15 +199,6 @@ public class TaskMonitorPanel extends TaskMonitor {
             colView.addChild(_activityLabel);
             colView.addChild(_progressBar);
             return colView;
-        }
-
-        /**
-         * Initialize when showing.
-         */
-        @Override
-        protected void initShowing()
-        {
-            addPropChangeListener(pc -> resetLater());
         }
 
         /**
