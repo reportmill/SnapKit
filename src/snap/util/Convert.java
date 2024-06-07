@@ -26,8 +26,11 @@ public class Convert {
             return !MathUtils.equalsZero(((Number) anObj).floatValue());
 
         // If string and "false", return false
-        if (anObj instanceof String && StringUtils.equalsIC((String) anObj, "false"))
-            return false;
+        if (anObj instanceof String) {
+            String str = ((String) anObj).trim();
+             if (StringUtils.equalsIC(str, "false"))
+                return false;
+        }
 
         // Return true if non-null
         return anObj != null;

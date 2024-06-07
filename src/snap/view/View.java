@@ -201,6 +201,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public static final String Margin_Prop = "Margin";
     public static final String Padding_Prop = "Padding";
     public static final String Spacing_Prop = "Spacing";
+    public static final String Managed_Prop = "Managed";
     public static final String Parent_Prop = "Parent";
     public static final String Showing_Prop = "Showing";
     public static final String Text_Prop = "Text";
@@ -2841,12 +2842,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         aPropSet.addPropNamed(TransX_Prop, double.class, 0d);
         aPropSet.addPropNamed(TransY_Prop, double.class, 0d);
 
-        // Align, Margin, Padding, Spacing, Vertical
+        // Align, Margin, Padding, Spacing, Vertical, Managed
         aPropSet.addPropNamed(Align_Prop, Pos.class);
         aPropSet.addPropNamed(Margin_Prop, Insets.class);
         aPropSet.addPropNamed(Padding_Prop, Insets.class);
         aPropSet.addPropNamed(Spacing_Prop, double.class);
         aPropSet.addPropNamed(Vertical_Prop, boolean.class);
+        aPropSet.addPropNamed(Managed_Prop, boolean.class);
 
         // LeanX, LeanY, GrowWidth, GrowHeight
         aPropSet.addPropNamed(LeanX_Prop, HPos.class, null);
@@ -2926,6 +2928,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case Padding_Prop: return getPadding();
             case Spacing_Prop: return getSpacing();
             case Vertical_Prop: return isVertical();
+            case Managed_Prop: return isManaged();
 
             // LeanX, LeanY, GrowWidth, GrowHeight
             case LeanX_Prop: return getLeanX();
@@ -3016,6 +3019,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case Padding_Prop: setPadding(Insets.of(aValue)); break;
             case Spacing_Prop: setSpacing(Convert.doubleValue(aValue)); break;
             case Vertical_Prop: setVertical(Convert.boolValue(aValue));
+            case Managed_Prop: setManaged(Convert.boolValue(aValue));
 
             // Alignment: LeanX, LeanY, GrowWidth, GrowHeight
             case LeanX_Prop: setLeanX(HPos.of(aValue)); break;

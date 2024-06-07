@@ -247,6 +247,14 @@ public class DevPane extends ViewOwner {
     }
 
     /**
+     * Toggles DevPane showing.
+     */
+    public static void toggleDevPaneShowing(View aView)
+    {
+        setDevPaneShowing(aView, !isDevPaneShowing(aView));
+    }
+
+    /**
      * Sets a DevPane visible for view.
      */
     public static void showException(Throwable anException)
