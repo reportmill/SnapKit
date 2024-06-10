@@ -75,7 +75,8 @@ public class Prop {
         _array = isArrayClass(aClass);
 
         // If PropClass is viable instance, set to DefaultPropClass
-        boolean isAbstract = aClass.isInterface() || Modifier.isAbstract(aClass.getModifiers()) || aClass == Object.class;
+        boolean isAbstract = aClass.isInterface() || Modifier.isAbstract(aClass.getModifiers()) || aClass == Object.class ||
+            aClass.isArray() && Modifier.isAbstract(aClass.getComponentType().getModifiers()); // Hack for CheerpJ - can go soon
         if (!isAbstract || PropArchiverHpr.getProxyClassForClass(aClass) != null)
             _defaultPropClass = aClass;
     }
@@ -95,7 +96,6 @@ public class Prop {
 
     /**
      * Returns whether prop is always instance of PropClass (subclasses not allowed).
-     *
      * This undoubtedly needs to be a real property one day (PropClassVaries?).
      */
     public boolean isPropClassConstant()  { return _propClass == _defaultPropClass; }
@@ -252,7 +252,7 @@ public class Prop {
             return true;
 
         // Additional relation classes
-        Class<? extends PropObjectProxy> proxyClass = PropArchiverHpr.getProxyClassForClass(aClass);
+        Class<? extends PropObjectProxy<?>> proxyClass = PropArchiverHpr.getProxyClassForClass(aClass);
         if (proxyClass != null)
             return true;
 
