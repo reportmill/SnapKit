@@ -162,7 +162,7 @@ public class FileUtils {
         // Hack for TeaVM, WebVM
         if (SnapUtils.isTeaVM) return new File("/");
         if (SnapUtils.isWebVM) {
-            File tempDir = new File("/files/snaptmp/");
+            File tempDir = new File("/files/temp/");
             if (!tempDir.exists())
                 if (!tempDir.mkdirs())
                     System.err.println("Could not create temp dir: " + tempDir);

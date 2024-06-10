@@ -139,7 +139,7 @@ public class SnapUtils {
     {
         // Hack for TeaVM, WebVM
         if (isTeaVM) return "/";
-        if (isWebVM) return "/files/snaptmp/";
+        if (isWebVM) return "/files/temp/";
 
         // Get System property and make sure it ends with dir char
         String tempDir = System.getProperty("java.io.tmpdir");
