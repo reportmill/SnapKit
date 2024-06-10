@@ -1370,7 +1370,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setManaged(boolean aValue)
     {
-        _managed = aValue;
+        if (aValue == _managed) return;
+        firePropChange(Managed_Prop, _managed, _managed = aValue);
         ParentView par = getParent();
         if (par != null) {
             par._children._managed = null;
@@ -3018,8 +3019,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case Margin_Prop: setMargin(Insets.of(aValue)); break;
             case Padding_Prop: setPadding(Insets.of(aValue)); break;
             case Spacing_Prop: setSpacing(Convert.doubleValue(aValue)); break;
-            case Vertical_Prop: setVertical(Convert.boolValue(aValue));
-            case Managed_Prop: setManaged(Convert.boolValue(aValue));
+            case Vertical_Prop: setVertical(Convert.boolValue(aValue)); break;
+            case Managed_Prop: setManaged(Convert.boolValue(aValue)); break;
 
             // Alignment: LeanX, LeanY, GrowWidth, GrowHeight
             case LeanX_Prop: setLeanX(HPos.of(aValue)); break;
