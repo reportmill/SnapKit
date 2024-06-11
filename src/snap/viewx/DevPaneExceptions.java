@@ -79,7 +79,7 @@ public class DevPaneExceptions extends ViewOwner {
     /**
      * Returns the selected exception.
      */
-    public ThrownException getSelThrownException()
+    private ThrownException getSelThrownException()
     {
         int selIndex = getSelIndex();
         return selIndex >= 0 ? _thrownExceptions[selIndex] : null;
@@ -108,7 +108,9 @@ public class DevPaneExceptions extends ViewOwner {
         _thrownExceptionsList = getView("ThrownListView", ListView.class);
         _thrownExceptionsList.getListArea().setItemTextFunction(ThrownException::getTitle);
         _stackTraceText = getView("StackTraceText", TextView.class);
+        _stackTraceText.getTextBlock().setRichText(false);
         _descriptionText = getView("DescriptionText", TextView.class);
+        _descriptionText.getTextBlock().setRichText(false);
 
         // Initialize UserName, UserEmail
         Prefs prefs = Prefs.getDefaultPrefs();
@@ -151,43 +153,41 @@ public class DevPaneExceptions extends ViewOwner {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle ThrownListView
-        if (anEvent.equals("ThrownListView"))
-            setSelIndex(anEvent.getSelIndex());
+        switch (anEvent.getName()) {
 
-        // Handle DescriptionText
-        else if (anEvent.equals("DescriptionText")) {
-            ThrownException thrownException = getSelThrownException();
-            thrownException.setDescriptionText(anEvent.getStringValue());
-        }
+            // Handle ThrownListView
+            case "ThrownListView": setSelIndex(anEvent.getSelIndex()); break;
 
-        // Handle UserNameText, UserEmailText
-        else if (anEvent.equals("UserNameText"))
-            setUserName(anEvent.getStringValue());
-        else if (anEvent.equals("UserEmailText"))
-            setUserEmail(anEvent.getStringValue());
+            // Handle DescriptionText
+            case "DescriptionText": {
+                ThrownException thrownException = getSelThrownException();
+                thrownException.setDescriptionText(anEvent.getStringValue());
+                break;
+            }
 
-        // Handle SendExceptionButton
-        else if (anEvent.equals("SendExceptionButton")) {
-            ThrownException thrownException = getSelThrownException();
-            thrownException.setDescriptionText(_descriptionText.getText());
-            runLater(this::handleSendExceptionButton);
-        }
+            // Handle UserNameText, UserEmailText
+            case "UserNameText": setUserName(anEvent.getStringValue()); break;
+            case "UserEmailText": setUserEmail(anEvent.getStringValue()); break;
 
-        // Handle ClearAllButton
-        else if (anEvent.equals("ClearAllButton")) {
-            _thrownExceptions = new ThrownException[0];
-            thrownExceptionsDidChange();
-        }
+            // Handle SendExceptionButton
+            case "SendExceptionButton": {
+                ThrownException thrownException = getSelThrownException();
+                thrownException.setDescriptionText(_descriptionText.getText());
+                runLater(this::handleSendExceptionButton);
+                break;
+            }
 
-        // Handle IgnoreSuccessiveCheckBox
-        else if (anEvent.equals("IgnoreSuccessiveCheckBox"))
-            setIgnoreSuccessiveExceptions(anEvent.getBoolValue());
+            // Handle ClearAllButton
+            case "ClearAllButton":
+                _thrownExceptions = new ThrownException[0];
+                thrownExceptionsDidChange();
+                break;
 
-        // Handle TriggerNPEButton
-        else if (anEvent.equals("TriggerNPEButton")) {
-            String str = null;
-            assert (str != null);
+            // Handle IgnoreSuccessiveCheckBox
+            case "IgnoreSuccessiveCheckBox": setIgnoreSuccessiveExceptions(anEvent.getBoolValue()); break;
+
+            // Handle TriggerNPEButton
+            case "TriggerNPEButton": String str = null; str.length(); break;
         }
     }
 
