@@ -177,7 +177,7 @@ public class RecentFilesSitePane extends WebSitePane {
                 resetFilesUI();
             }, View.Action);
             Menu contextMenu = menuBuilder.buildMenu("ContextMenu", null);
-            contextMenu.show(anEvent.getView(), anEvent.getX(), anEvent.getY());
+            contextMenu.showMenuAtXY(anEvent.getView(), anEvent.getX(), anEvent.getY());
         }
     }
 

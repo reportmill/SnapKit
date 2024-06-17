@@ -14,22 +14,23 @@ import snap.util.*;
 public class Menu extends MenuItem {
 
     // List of MenuItems
-    List<MenuItem>  _items = new ArrayList<>();
+    private List<MenuItem> _items = new ArrayList<>();
 
     // The Arrow graphic
-    static Polygon  _arrow = new Polygon(0, 0, 9, 5, 0, 10);
+    private static Polygon _arrow = new Polygon(0, 0, 9, 5, 0, 10);
 
     // The PopupWindow
-    private PopupWindow  _popupWindow;
+    private PopupWindow _popupWindow;
 
     // A listener to close popup
-    private EventListener  _itemFiredActionListener = e -> itemFiredActionEvent(e);
+    private EventListener _itemFiredActionListener = this::itemFiredActionEvent;
 
     /**
      * Constructor.
      */
     public Menu()
     {
+        super();
         setFont(MenuBar.MENU_BAR_FONT);
     }
 
@@ -143,10 +144,22 @@ public class Menu extends MenuItem {
     /**
      * Show menu.
      */
-    public void show(View aView, double aX, double aY)
+    public void showMenu()
     {
-        PopupWindow pop = getPopup();
-        pop.show(aView, aX, aY);
+        ParentView parentView = getParent();
+        double menuX = parentView instanceof ColView ? getWidth() - 1 : 0;
+        double menuY = parentView instanceof MenuBar ? getHeight() - 1 : 0;
+        showMenuAtXY(this, menuX, menuY);
+    }
+
+    /**
+     * Show menu.
+     */
+    public void showMenuAtXY(View aView, double menuX, double menuY)
+    {
+        if (isShowing()) return;
+        PopupWindow popupWindow = getPopup();
+        popupWindow.show(aView, menuX, menuY);
     }
 
     /**
@@ -172,10 +185,7 @@ public class Menu extends MenuItem {
     /**
      * Returns whether popup is showing.
      */
-    public boolean isPopupShowing()
-    {
-        return _popupWindow != null && _popupWindow.isShowing();
-    }
+    public boolean isPopupShowing()  { return _popupWindow != null && _popupWindow.isShowing(); }
 
     /**
      * Hides this menu and parent menus.
@@ -214,9 +224,8 @@ public class Menu extends MenuItem {
     @Override
     protected void fireActionEvent(ViewEvent anEvent)
     {
-        double x = getParent() instanceof ColView ? getWidth() - 1 : 0;
-        double y = getParent() instanceof MenuBar ? getHeight() - 1 : 0;
-        show(this, x, y);
+        // Show menu
+        showMenu();
     }
 
     /**
@@ -229,20 +238,23 @@ public class Menu extends MenuItem {
         if (aValue == _targeted) return;
         super.setTargeted(aValue);
 
-        // Handle when in MenuBar
-        if (getParent() instanceof MenuBar && aValue) {
-            MenuBar mbar = (MenuBar) getParent();
-            Menu showing = mbar.getMenuShowing();
-            if (showing == null) return;
-            showing.hide();
-            fireActionEvent(null);
-        }
+        // Handle targeted true
+        if (aValue) {
 
-        // Handle when in Menu
-        if (getParent() instanceof ColView) {
-            if (aValue)
-                fireActionEvent(null);
-            //else hide();
+            // Handle when in MenuBar
+            ParentView parentView = getParent();
+            if (parentView instanceof MenuBar) {
+                MenuBar menuBar = (MenuBar) parentView;
+                Menu menuShowing = menuBar.getMenuShowing();
+                if (menuShowing == null)
+                    return;
+                menuShowing.hide();
+                showMenu();
+            }
+
+            // Handle when in Menu
+            if (parentView instanceof ColView)
+                showMenu();
         }
     }
 

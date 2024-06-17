@@ -154,7 +154,7 @@ public class MenuButton extends ButtonBase {
 
         // Show menu
         double menuY = getHeight();
-        menu.show(this, 0, menuY);
+        menu.showMenuAtXY(this, 0, menuY);
         menu.getPopup().addPropChangeListener(pc -> ViewUtils.runLater(() -> hideMenu()), Showing_Prop);
     }
 

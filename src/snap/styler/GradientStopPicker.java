@@ -315,7 +315,7 @@ public class GradientStopPicker extends ParentView {
                 MenuItem mitem = new MenuItem(); mitem.setText("Delete Color Stop");
                 mitem.addEventHandler(e -> deleteColorStop(), Action);
                 pmenu.addItem(mitem);
-                pmenu.show(anEvent.getView(), pt.x, pt.y);
+                pmenu.showMenuAtXY(anEvent.getView(), pt.x, pt.y);
                 anEvent.consume(); // Consume event.
             }
 
