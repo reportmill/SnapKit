@@ -157,7 +157,7 @@ public class Menu extends MenuItem {
      */
     public void showMenuAtXY(View aView, double menuX, double menuY)
     {
-        if (isShowing()) return;
+        if (isPopupShowing()) return;
         PopupWindow popupWindow = getPopup();
         popupWindow.show(aView, menuX, menuY);
     }
