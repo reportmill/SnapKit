@@ -97,7 +97,7 @@ public class ZipFileSite extends WebSite {
             return;
 
         // Get path and add entry to entries and path to dirs lists
-        String filePath = FilePathUtils.getStandardizedPath('/' + anEntry.getName());
+        String filePath = FilePathUtils.getNormalizedPath('/' + anEntry.getName());
         _entries.put(filePath, anEntry);
         addDirListPath(filePath);
     }
@@ -125,7 +125,7 @@ public class ZipFileSite extends WebSite {
     protected void addDirListPath(String aPath)
     {
         if (aPath.length() <= 1) return;
-        String path = FilePathUtils.getStandardizedPath(aPath);
+        String path = FilePathUtils.getNormalizedPath(aPath);
 
         List <String> dirList = getDirList(path);
         if (!dirList.contains(path))

@@ -101,7 +101,7 @@ public class HTTPSite extends WebSite {
         List<FileHeader> files = new ArrayList<>();
 
         // If ".index" file exists, load children
-        String indexFilePath = FilePathUtils.getChild(aPath, ".index");
+        String indexFilePath = FilePathUtils.getChildPath(aPath, ".index");
         WebFile indexFile = getFileForPath(indexFilePath);
         if(indexFile != null) {
             String indexFileString = StringUtils.getISOLatinString(indexFile.getBytes());
@@ -110,7 +110,7 @@ public class HTTPSite extends WebSite {
                 if (fileEntry.length() == 0)
                     continue;
                 String[] fileInfo = fileEntry.split("\t");
-                String filePath = FilePathUtils.getChild(aPath, fileInfo[0]);
+                String filePath = FilePathUtils.getChildPath(aPath, fileInfo[0]);
                 FileHeader file = new FileHeader(filePath, false);
                 files.add(file);
             }
@@ -143,7 +143,7 @@ public class HTTPSite extends WebSite {
                 isDir = true;
                 name = name.substring(0, name.length()-1);
             }
-            String filePath = FilePathUtils.getChild(aPath, name);
+            String filePath = FilePathUtils.getChildPath(aPath, name);
             FileHeader file = new FileHeader(filePath, isDir);
             file.setLastModTime(System.currentTimeMillis());
             files.add(file);

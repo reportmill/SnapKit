@@ -656,7 +656,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
             return getSite().getUrlForPath(aPath);
 
         // Otherwise create global URL and eval
-        String urlStr = PathUtils.getChild(getURL().getString(), aPath);
+        String urlStr = FilePathUtils.getChildPath(getURL().getString(), aPath);
         return WebURL.getURL(urlStr);
     }
 

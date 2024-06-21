@@ -161,7 +161,7 @@ public class DirSite extends WebSite {
     private FileHeader createFileHeaderForFile(String parentFilePath, WebFile aFile)
     {
         FileHeader fileHeader = new FileHeader(aFile);
-        String filePath = FilePathUtils.getChild(parentFilePath, aFile.getName());
+        String filePath = FilePathUtils.getChildPath(parentFilePath, aFile.getName());
         fileHeader.setPath(filePath);
         return fileHeader;
     }

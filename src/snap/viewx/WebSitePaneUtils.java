@@ -63,7 +63,7 @@ class WebSitePaneUtils {
 
         // Get path
         WebFile selDir = sitePane.getSelDir();
-        String inputTextPath = FilePathUtils.getChild(selDir.getPath(), inputText);
+        String inputTextPath = FilePathUtils.getChildPath(selDir.getPath(), inputText);
         return inputTextPath;
     }
 

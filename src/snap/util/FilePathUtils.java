@@ -17,13 +17,33 @@ public class FilePathUtils {
     public static final char      PATH_SEPARATOR_CHAR = SnapUtils.isWindows ? ';' : ':'; //java.io.File.pathSeparator;
 
     /**
+     * Returns the path in standard unix format (forward slash separator with leading slash and no trailing slash).
+     */
+    public static String getNormalizedPath(String aPath)
+    {
+        // Get path with standard separator
+        String filePath = aPath;
+        if (File.separatorChar != '/')
+            filePath = filePath.replace(File.separatorChar, '/');
+
+        // Make sure path starts with slash, but doesn't end with slash
+        if (!filePath.startsWith("/"))
+            filePath = '/' + filePath;
+        if (filePath.length() > 1 && filePath.endsWith("/"))
+            filePath = filePath.substring(0, filePath.length()-1);
+
+        // Return
+        return filePath;
+    }
+
+    /**
      * Returns the file name component of the given string path (everything after last file separator).
      */
     public static String getFilename(String aPath)
     {
-        String path = getStandardizedPath(aPath);
-        int index = getFilenameCharIndex(path);
-        return index == 0 ? path : path.substring(index);
+        String filePath = getNormalizedPath(aPath);
+        int filenameCharIndex = getFilenameCharIndex(filePath);
+        return filenameCharIndex == 0 ? filePath : filePath.substring(filenameCharIndex);
     }
 
     /**
@@ -31,9 +51,9 @@ public class FilePathUtils {
      */
     public static String getFilenameSimple(String aPath)
     {
-        String filename = getFilename(getStandardizedPath(aPath));
-        int index = filename.lastIndexOf('.');
-        return index < 0 ? filename : filename.substring(0, index);
+        String filename = getFilename(aPath);
+        int extensionIndex = filename.lastIndexOf('.');
+        return extensionIndex < 0 ? filename : filename.substring(0, extensionIndex);
     }
 
     /**
@@ -41,11 +61,9 @@ public class FilePathUtils {
      */
     private static int getFilenameCharIndex(String aPath)
     {
-        String path = getStandardizedPath(aPath);
-        int index = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
-        if (index<0)
-            index = path.lastIndexOf(SEPARATOR);
-        return Math.max(index+1, 0);
+        String filePath = getNormalizedPath(aPath);
+        int separatorIndex = filePath.lastIndexOf('/');
+        return separatorIndex + 1;
     }
 
     /**
@@ -73,8 +91,8 @@ public class FilePathUtils {
      */
     public static String getPathWithoutExtension(String aPath)
     {
-        String ext = getExtension(aPath);
-        return ext.length() > 0 ? aPath.substring(0, aPath.length() - ext.length() - 1) : aPath;
+        String extension = getExtension(aPath);
+        return !extension.isEmpty() ? aPath.substring(0, aPath.length() - extension.length() - 1) : aPath;
     }
 
     /**
@@ -82,21 +100,24 @@ public class FilePathUtils {
      */
     public static String getParentPath(String aPath)
     {
-        int index = getFilenameCharIndex(aPath);
-        return index > 0 && aPath.length() > 1 ? getStandardizedPath(aPath.substring(0, index)) : "";
+        String filePath = getNormalizedPath(aPath);
+        int lastSeparatorIndex = filePath.lastIndexOf('/');
+        if (lastSeparatorIndex > 0)
+            filePath = filePath.substring(0, lastSeparatorIndex);
+        else filePath = filePath.length() > 1 ? "/" : "";
+        return filePath;
     }
 
     /**
      * Returns a path with a filename or relative path added.
      */
-    public static String getChild(String aPath, String aChildPath)
+    public static String getChildPath(String aPath, String aChildPath)
     {
-        String path = getStandardizedPath(aPath);
-        if (path.endsWith("/") ^ aChildPath.startsWith("/"))
-            return path + aChildPath;
-        if (aChildPath.startsWith("/"))
-            return path + aChildPath.substring(1);
-        return path + '/' + aChildPath;
+        String parentPath = getNormalizedPath(aPath);
+        String childPath = getNormalizedPath(aChildPath);
+        if (parentPath.length() <= 1)
+            return childPath;
+        return parentPath + childPath;
     }
 
     /**
@@ -104,10 +125,8 @@ public class FilePathUtils {
      */
     public static String getPeerPath(String aPath, String aName)
     {
-        String parent = getParentPath(aPath);
-        if (parent.length() == 0)
-            parent = "/";
-        return getChild(parent, aName);
+        String parentPath = getParentPath(aPath);
+        return getChildPath(parentPath, aName);
     }
 
     /**
@@ -122,31 +141,19 @@ public class FilePathUtils {
     }
 
     /**
-     * Returns the path in a standard, normal format (strips any trailing file separators).
-     */
-    public static String getStandardizedPath(String aPath)
-    {
-        // Get path stripped of trailing file separator
-        String standardizedPath = aPath;
-        if ((standardizedPath.endsWith("/") || standardizedPath.endsWith("\\")) && standardizedPath.length() > 1)
-            standardizedPath = standardizedPath.substring(0, standardizedPath.length() - 1);
-        else if (standardizedPath.endsWith(SEPARATOR) && standardizedPath.length() > SEPARATOR.length())
-            standardizedPath = standardizedPath.substring(0, standardizedPath.length() - SEPARATOR.length());
-
-        // Return
-        return standardizedPath;
-    }
-
-    /**
      * Returns a native path for given absolute path using platform native File separator char.
      */
     public static String getNativePath(String aPath)
     {
         if (SEPARATOR_CHAR == '/') return aPath;
-        String path = aPath.replace('/', SEPARATOR_CHAR);
-        if (path.length() > 2 && path.charAt(2) == ':')
-            path = path.substring(1);
-        return path;
+        String filePath = aPath.replace('/', SEPARATOR_CHAR);
+
+        // If Windows drive designator, remove leading backslash - this is bogus
+        if (filePath.length() > 2 && filePath.charAt(2) == ':')
+            filePath = filePath.substring(1);
+
+        // Return
+        return filePath;
     }
 
     /**
@@ -156,10 +163,7 @@ public class FilePathUtils {
     {
         if (SEPARATOR_CHAR == '/')
             return thePaths;
-        String[] npaths = new String[thePaths.length];
-        for (int i = 0; i<thePaths.length; i++)
-            npaths[i] = getNativePath(thePaths[i]);
-        return npaths;
+        return ArrayUtils.map(thePaths, path -> getNativePath(path), String.class);
     }
 
     /**
@@ -167,21 +171,7 @@ public class FilePathUtils {
      */
     public static String getJoinedPath(String[] thePaths)
     {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0, iMax = thePaths.length; i < iMax; i++)
-            sb.append(i == 0 ? "" : PATH_SEPARATOR).append(thePaths[i]);
-        return sb.toString();
-    }
-
-    /**
-     * Returns the Files for given paths.
-     */
-    public static File[] getFilesForPaths(String[] thePaths)
-    {
-        File[] files = new File[thePaths.length];
-        for (int i = 0; i < thePaths.length; i++)
-            files[i] = new File(thePaths[i]);
-        return files;
+        return StringUtils.join(thePaths, PATH_SEPARATOR);
     }
 
     /**
@@ -198,9 +188,6 @@ public class FilePathUtils {
      */
     public static URL[] getUrlsForPaths(String[] thePaths)
     {
-        URL[] urls = new URL[thePaths.length];
-        for (int i = 0; i < thePaths.length; i++)
-            urls[i] = getUrlForPath(thePaths[i]);
-        return urls;
+        return ArrayUtils.map(thePaths, path -> getUrlForPath(path), URL.class);
     }
 }

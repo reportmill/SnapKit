@@ -238,7 +238,7 @@ public class FileSite extends WebSite {
     {
         String filePath = getPathForJavaFile(javaFile);
         String sitePath = getPath();
-        if (sitePath == null || sitePath.length() == 0 || sitePath.equals("/"))
+        if (sitePath == null || sitePath.isEmpty() || sitePath.equals("/"))
             return filePath;
 
         // Trim prefix
@@ -273,11 +273,8 @@ public class FileSite extends WebSite {
         }
         catch(Exception e) { System.err.println("FileSite.getPathForJavaFile:" + e); }
 
-        // Get standardized path
-        String filePathStd = PathUtils.getNormalized(filePath);
-
-        // Return
-        return filePathStd;
+        // Return normalized path
+        return FilePathUtils.getNormalizedPath(filePath);
     }
 
     /**

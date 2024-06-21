@@ -442,13 +442,13 @@ public class WebURL {
      */
     public WebURL getParent()
     {
-        String path = getPath();
-        if (path.equals("/"))
+        String urlPath = getPath();
+        if (urlPath.equals("/"))
             return null;
 
         WebSite site = getSite();
-        String parPath = PathUtils.getParent(path);
-        return site.getUrlForPath(parPath);
+        String parentPath = FilePathUtils.getParentPath(urlPath);
+        return site.getUrlForPath(parentPath);
     }
 
     /**
@@ -457,7 +457,7 @@ public class WebURL {
     public WebURL getChild(String aName)
     {
         String path = getPath();
-        String childPath = PathUtils.getChild(path, aName);
+        String childPath = FilePathUtils.getChildPath(path, aName);
         WebSite site = getSite();
         return site.getUrlForPath(childPath);
     }

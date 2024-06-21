@@ -5,6 +5,7 @@ package snap.web;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
+import snap.util.FilePathUtils;
 import snap.util.FileUtils;
 import snap.util.SnapUtils;
 import java.io.File;
@@ -139,7 +140,7 @@ public abstract class WebSite {
     public synchronized WebFile getFileForPath(String aPath) throws ResponseException
     {
         // Get file from cache (just return if found and previously verified and exists)
-        String filePath = PathUtils.getNormalized(aPath);
+        String filePath = FilePathUtils.getNormalizedPath(aPath);
         WebFile file = _files.get(filePath);
         if (file != null && file.isVerified() && file.getExists())
             return file;
@@ -191,7 +192,7 @@ public abstract class WebSite {
     protected WebFile getFileForFileHeader(FileHeader fileHeader)
     {
         // Get file from cache
-        String filePath = PathUtils.getNormalized(fileHeader.getPath());
+        String filePath = FilePathUtils.getNormalizedPath(fileHeader.getPath());
         boolean isDir = fileHeader.isDir();
         WebFile file = createFileForPath(filePath, isDir);
 
@@ -221,7 +222,7 @@ public abstract class WebSite {
     public synchronized WebFile createFileForPath(String aPath, boolean isDir)
     {
         // Get file from cache - just return if found
-        String filePath = PathUtils.getNormalized(aPath);
+        String filePath = FilePathUtils.getNormalizedPath(aPath);
         WebFile file = _files.get(filePath);
         if (file != null) {
             if (!file.isVerified() || !file.getExists())
@@ -440,7 +441,7 @@ public abstract class WebSite {
             return WebURL.getURL(aFilePath);
 
         // Get file path
-        String filePath = PathUtils.getNormalized(aFilePath);
+        String filePath = FilePathUtils.getNormalizedPath(aFilePath);
         WebURL siteURL = getURL();
         String siteUrlString = siteURL.getString();
         if (siteURL.getPath() != null)
@@ -514,9 +515,9 @@ public abstract class WebSite {
             sandboxName += scheme + '/';
 
         // Add URL.Host
-        String host = url.getHost();
-        if (host != null && host.length() > 0)
-            sandboxName += host + '/';
+        String hostname = url.getHost();
+        if (hostname != null && !hostname.isEmpty())
+            sandboxName += hostname + '/';
 
         // Add URL.Path
         String path = url.getPath();
