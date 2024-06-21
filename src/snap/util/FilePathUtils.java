@@ -27,7 +27,7 @@ public class FilePathUtils {
             filePath = filePath.replace(File.separatorChar, '/');
 
         // Make sure path starts with slash, but doesn't end with slash
-        if (!filePath.startsWith("/"))
+        if (!filePath.startsWith("/") && !isProbablyUrl(filePath))
             filePath = '/' + filePath;
         if (filePath.length() > 1 && filePath.endsWith("/"))
             filePath = filePath.substring(0, filePath.length()-1);
@@ -190,4 +190,17 @@ public class FilePathUtils {
     {
         return ArrayUtils.map(thePaths, path -> getUrlForPath(path), URL.class);
     }
+
+    /**
+     * Returns whether given URL string is probably a URL.
+     */
+    private static boolean isProbablyUrl(String aPath)
+    {
+        int colonIndex = aPath.indexOf(':');
+        if (colonIndex < 0)
+            return false;
+        String protocol = aPath.substring(0, colonIndex).toLowerCase();
+        return ArrayUtils.contains(KNOWN_PROTOCOLS, protocol);
+    }
+    private static String[] KNOWN_PROTOCOLS = { "file", "http", "https" };
 }
