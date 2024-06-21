@@ -528,8 +528,8 @@ public abstract class WebSite {
         if (sandboxName.endsWith("/"))
             sandboxName = sandboxName.substring(0, sandboxName.length() - 1);
 
-        // Replace '/' & '.' separators with '_'
-        sandboxName = sandboxName.replace('.', '_').replace('/', '_');
+        // Replace '/', '.' and ':' separators with '_'
+        sandboxName = sandboxName.replace('.', '_').replace('/', '_').replace(':', '_');
 
         // Return
         return sandboxName;
