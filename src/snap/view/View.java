@@ -2629,9 +2629,29 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected void fireActionEvent(ViewEvent anEvent)
     {
-        ViewEvent event = ViewEvent.createEvent(this, null, Action, null);
+        fireActionEventForEventAndAction(anEvent, null);
+    }
+
+    /**
+     * Fires an action event for given source event and optional shared action.
+     * This should mostly be called in response to user input events (mouse, key) when a complete change has been made
+     * to the primary value of a control view.
+     */
+    protected void fireActionEventForEventAndAction(ViewEvent anEvent, SharedAction sharedAction)
+    {
+        ViewEvent event = ViewEvent.createEvent(this, sharedAction, Action, null);
         if (anEvent != null)
             event.setParentEvent(anEvent);
+
+        // If shared action is set, do proper dispatch
+        if (sharedAction != null) {
+            event.setSharedAction(sharedAction);
+            WindowView window = getWindow();
+            EventDispatcher eventDispatcher = window != null ? window.getDispatcher() : null;
+            if (eventDispatcher != null)
+                eventDispatcher.dispatchEvent(event);
+            return;
+        }
 
         // Dispatch to View
         dispatchEventToView(event);

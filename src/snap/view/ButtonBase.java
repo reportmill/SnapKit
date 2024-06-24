@@ -28,6 +28,9 @@ public class ButtonBase extends ParentView {
     
     // The position of the button when in a group (determines corner rendering)
     private Pos  _pos;
+
+    // The shared action
+    private SharedAction _sharedAction;
     
     // Whether button is pressed
     private boolean  _pressed;
@@ -190,6 +193,19 @@ public class ButtonBase extends ParentView {
     }
 
     /**
+     * Returns the shared action (if set).
+     */
+    public SharedAction getSharedAction()  { return _sharedAction; }
+
+    /**
+     * Sets the shared action (if set).
+     */
+    public void setSharedAction(SharedAction sharedAction)
+    {
+        _sharedAction = sharedAction;
+    }
+
+    /**
      * Returns whether button is pressed (visibly).
      */
     public boolean isPressed()  { return _pressed; }
@@ -272,9 +288,10 @@ public class ButtonBase extends ParentView {
     /**
      * Override to consume event.
      */
-    protected void fireActionEvent(ViewEvent anEvent)
+    @Override
+    protected void fireActionEventForEventAndAction(ViewEvent anEvent, SharedAction sharedAction)
     {
-        super.fireActionEvent(anEvent);
+        super.fireActionEventForEventAndAction(anEvent, sharedAction != null ? sharedAction : _sharedAction);
         if (anEvent != null)
             anEvent.consume();
     }

@@ -105,6 +105,7 @@ public class TextArea extends View {
     {
         super();
         _padding = DEFAULT_TEXT_AREA_PADDING;
+        enableEvents(Action);
 
         // Configure
         setFocusPainted(false);
@@ -1108,6 +1109,7 @@ public class TextArea extends View {
             case KeyPress: keyPressed(anEvent); break;
             case KeyType: keyTyped(anEvent); break;
             case KeyRelease: keyReleased(anEvent); break;
+            case Action: processActionEvent(anEvent);
         }
 
         // Consume all mouse events
@@ -1219,6 +1221,28 @@ public class TextArea extends View {
     protected void keyReleased(ViewEvent anEvent)
     {
         _keys.keyReleased(anEvent);
+    }
+
+    /**
+     * Called when action event is received.
+     */
+    protected void processActionEvent(ViewEvent anEvent)
+    {
+        // Get shared action name
+        SharedAction action = anEvent.getSharedAction();
+        String actionName = action !=  null ? action.getName() : null;
+        if (actionName == null)
+            return;
+
+        // Handle shared actions
+        switch (action.getName()) {
+            case SharedAction.Cut_Action_Name: cut(); anEvent.consume(); break;
+            case SharedAction.Copy_Action_Name: copy(); anEvent.consume(); break;
+            case SharedAction.Paste_Action_Name: paste(); anEvent.consume(); break;
+            case SharedAction.SelectAll_Action_Name: selectAll(); anEvent.consume(); break;
+            case SharedAction.Undo_Action_Name: undo(); anEvent.consume(); break;
+            case SharedAction.Redo_Action_Name: redo(); anEvent.consume(); break;
+        }
     }
 
     /**

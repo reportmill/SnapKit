@@ -138,15 +138,19 @@ public class EventDispatcher {
         if (anEvent.isMouseEvent() || anEvent.isScroll())
             dispatchMouseEvent(anEvent);
 
-            // Dispatch Key events
+        // Dispatch Key events
         else if (anEvent.isKeyEvent())
             dispatchKeyEvent(anEvent);
 
-            // Dispatch DragTartget events
+        // Dispatch Action events
+        else if (anEvent.isActionEvent())
+            dispatchActionEvent(anEvent);
+
+        // Dispatch DragTartget events
         else if (anEvent.isDragEvent())
             dispatchDragTargetEvent(anEvent);
 
-            // Dispatch DragSource events
+        // Dispatch DragSource events
         else if (anEvent.isDragSourceEvent())
             dispatchDragSourceEvent(anEvent);
 
@@ -383,6 +387,38 @@ public class EventDispatcher {
         // Iterate back up and see if any parents should handle
         for (int i = pars.length - 1; i >= 0; i--) {
             View view = pars[i];
+            if (view.getEventAdapter().isEnabled(anEvent.getType())) {
+                ViewEvent event = anEvent.copyForView(view);
+                view.processEventHandlers(event);
+                if (event.isConsumed())
+                    return;
+            }
+        }
+    }
+
+    /**
+     * Dispatch Action event.
+     */
+    public void dispatchActionEvent(ViewEvent anEvent)
+    {
+        // If popup window, try to dispatch on main window first
+        View clientView = _win.getClientView();
+        WindowView clientWindow = clientView != null ? clientView.getWindow() : null;
+        if (clientWindow != null) {
+            clientWindow.dispatchEventToWindow(anEvent);
+            if (anEvent.isConsumed())
+                return;
+        }
+
+        // Get current focused view and array of parents
+        View focusedView = _win.getFocusedView();
+        if (focusedView == null)
+            focusedView = _win.getContent(); // This is bogus
+        View[] parentsArray = getParents(focusedView);
+
+        // Iterate back up and see if any parents should handle
+        for (int i = parentsArray.length - 1; i >= 0; i--) {
+            View view = parentsArray[i];
             if (view.getEventAdapter().isEnabled(anEvent.getType())) {
                 ViewEvent event = anEvent.copyForView(view);
                 view.processEventHandlers(event);

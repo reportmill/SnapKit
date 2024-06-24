@@ -45,6 +45,9 @@ public abstract class ViewEvent implements Cloneable {
     // The KeyCombo for event (if Key event)
     private KeyCombo  _keyCombo;
 
+    // The shared action (if action event for SharedAction)
+    private SharedAction _sharedAction;
+
     // Constants for double/triple click constraints
     private static int  CLICK_TIME = 500;
     private static double  CLICK_DIST = 1;
@@ -145,6 +148,16 @@ public abstract class ViewEvent implements Cloneable {
      * Returns whether event is action event.
      */
     public boolean isActionEvent()  { return getType() == Type.Action; }
+
+    /**
+     * Returns the shared action, if set.
+     */
+    public SharedAction getSharedAction()  { return _sharedAction; }
+
+    /**
+     * Sets the shared action, if set.
+     */
+    protected void setSharedAction(SharedAction sharedAction)  { _sharedAction = sharedAction; }
 
     /**
      * Returns whether event is mouse event.

@@ -90,6 +90,7 @@ public class TextField extends ParentView {
         setActionable(true);
         enableEvents(MouseEvents);
         enableEvents(KeyEvents);
+        enableEvents(Action);
 
         // Configure label and set
         _label = new Label();
@@ -772,6 +773,7 @@ public class TextField extends ParentView {
             case KeyPress: keyPressed(anEvent); break;
             case KeyType: keyTyped(anEvent); break;
             case KeyRelease: keyReleased(anEvent); break;
+            case Action: processActionEvent(anEvent);
         }
 
         // Consume all mouse events
@@ -976,6 +978,26 @@ public class TextField extends ParentView {
     protected void keyReleased(ViewEvent anEvent)
     {
         setCaretAnim();
+    }
+
+    /**
+     * Called when action event is received.
+     */
+    protected void processActionEvent(ViewEvent anEvent)
+    {
+        // Get shared action name
+        SharedAction action = anEvent.getSharedAction();
+        String actionName = action !=  null ? action.getName() : null;
+        if (actionName == null)
+            return;
+
+        // Handle shared actions
+        switch (action.getName()) {
+            case SharedAction.Cut_Action_Name: cut(); anEvent.consume(); break;
+            case SharedAction.Copy_Action_Name: copy(); anEvent.consume(); break;
+            case SharedAction.Paste_Action_Name: paste(); anEvent.consume(); break;
+            case SharedAction.SelectAll_Action_Name: selectAll(); anEvent.consume(); break;
+        }
     }
 
     /**
