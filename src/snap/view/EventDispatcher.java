@@ -155,7 +155,7 @@ public class EventDispatcher {
             dispatchDragSourceEvent(anEvent);
 
             // All other events just go to the view
-        else anEvent.getView().dispatchEventToView(anEvent);
+        else anEvent.getView().processEventAll(anEvent);
     }
 
     /**
@@ -322,7 +322,7 @@ public class EventDispatcher {
 
                 // Dispatch MouseExit event
                 ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseExit, null);
-                view.dispatchEventToView(e2);
+                view.processEventAll(e2);
             } else break;
         }
 
@@ -335,7 +335,7 @@ public class EventDispatcher {
 
             // Dispatch MouseEnter event
             ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseEnter, null);
-            view.dispatchEventToView(e2);
+            view.processEventAll(e2);
         }
 
         // Update CurrentCursor
@@ -365,15 +365,16 @@ public class EventDispatcher {
         View focusedView = _win.getFocusedView();
         if (focusedView == null)
             focusedView = _win.getContent(); // This is bogus
-        View[] pars = getParents(focusedView);
+        View[] parentsArray = getParents(focusedView);
 
         // Iterate down and see if any should filter
-        for (View view : pars)
+        for (View view : parentsArray) {
             if (view.getEventAdapter().isEnabled(anEvent.getType())) {
                 ViewEvent e2 = anEvent.copyForView(view);
                 view.processEventFilters(e2);
                 if (e2.isConsumed()) return;
             }
+        }
 
         // If key pressed and tab and FocusedView.FocusKeysEnabled, switch focus
         if (anEvent.isKeyPress() && anEvent.isTabKey() && focusedView != null && focusedView.isFocusKeysEnabled()) {
@@ -385,8 +386,8 @@ public class EventDispatcher {
         }
 
         // Iterate back up and see if any parents should handle
-        for (int i = pars.length - 1; i >= 0; i--) {
-            View view = pars[i];
+        for (int i = parentsArray.length - 1; i >= 0; i--) {
+            View view = parentsArray[i];
             if (view.getEventAdapter().isEnabled(anEvent.getType())) {
                 ViewEvent event = anEvent.copyForView(view);
                 view.processEventHandlers(event);
@@ -435,21 +436,22 @@ public class EventDispatcher {
     {
         // Handle DragGesture
         if (anEvent.isDragGesture()) {
-            for (View view = _mousePressView; view != null; view = view.getParent())
+            for (View view = _mousePressView; view != null; view = view.getParent()) {
                 if (view.getEventAdapter().isEnabled(DragGesture)) {
                     _dragSourceView = view;
                     ViewEvent event = anEvent.copyForView(view);
-                    view.dispatchEventToView(event);
+                    view.processEventAll(event);
                     if (event.isConsumed())
                         break;
                 }
+            }
         }
 
         // Handle DragSource
         else if (_dragSourceView != null) {
             if (_dragSourceView.getEventAdapter().isEnabled(anEvent.getType())) {
                 ViewEvent event = anEvent.copyForView(_dragSourceView);
-                _dragSourceView.dispatchEventToView(event);
+                _dragSourceView.processEventAll(event);
             }
             if (anEvent.isDragSourceEnd())
                 _dragSourceView = null;
@@ -474,7 +476,7 @@ public class EventDispatcher {
                     continue;
                 ViewEvent e2 = anEvent.copyForView(view);
                 e2._type = DragExit;
-                view.dispatchEventToView(e2);
+                view.processEventAll(e2);
                 if (e2.isConsumed()) anEvent.consume();
             } else break;
         }
@@ -488,7 +490,7 @@ public class EventDispatcher {
                 continue;
             ViewEvent e2 = anEvent.copyForView(view);
             e2._type = DragEnter;
-            view.dispatchEventToView(e2);
+            view.processEventAll(e2);
             if (e2.isConsumed()) anEvent.consume();
         }
 
@@ -497,7 +499,7 @@ public class EventDispatcher {
             for (View view = _dragOverView; view != null; view = view.getParent()) {
                 if (view.getEventAdapter().isEnabled(anEvent.getType())) {
                     ViewEvent e2 = anEvent.copyForView(view);
-                    view.dispatchEventToView(e2);
+                    view.processEventAll(e2);
                     if (e2.isConsumed())
                         anEvent.consume();
                     break;

@@ -2654,13 +2654,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         }
 
         // Dispatch to View
-        dispatchEventToView(event);
+        processEventAll(event);
     }
 
     /**
-     * Sends an event to this view through processEvent methods.
+     * Top level process event method (calls filters and handlers).
      */
-    public void dispatchEventToView(ViewEvent anEvent)
+    public void processEventAll(ViewEvent anEvent)
     {
         // Forward to Filters - just return if consumed
         processEventFilters(anEvent);

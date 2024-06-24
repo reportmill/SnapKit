@@ -513,8 +513,8 @@ public abstract class ViewEvent implements Cloneable {
     /** Returns the event key char. */
     public char getKeyChar()
     {
-        String s = getKeyString();
-        return s != null && s.length() > 0 ? s.charAt(0) : (char) 0;
+        String keyString = getKeyString();
+        return keyString != null && !keyString.isEmpty() ? keyString.charAt(0) : (char) 0;
     }
 
     /** Returns the event key char. */
@@ -607,10 +607,10 @@ public abstract class ViewEvent implements Cloneable {
     {
         ViewEvent copy = clone(); //getEnv().createEvent(aView, getEvent(), getType(), name);
         copy.setView(aView);
-        String name = getName();
-        if (name == null || name.length() == 0 || name.equals(getView().getName()))
-            name = aView.getName();
-        copy.setName(name);
+        String eventName = getName();
+        if (eventName == null || eventName.isEmpty() || eventName.equals(getView().getName()))
+            eventName = aView.getName();
+        copy.setName(eventName);
         copy.setXY(aX, aY);
         if (aClickCount > 0)
             copy.setClickCount(aClickCount);
@@ -622,7 +622,8 @@ public abstract class ViewEvent implements Cloneable {
      */
     public ViewEvent clone()
     {
-        ViewEvent copy = null; try { copy = (ViewEvent)super.clone(); }
+        ViewEvent copy;
+        try { copy = (ViewEvent)super.clone(); }
         catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
         copy.setParentEvent(this);
         return copy;
@@ -657,7 +658,7 @@ public abstract class ViewEvent implements Cloneable {
     {
         String str = getClass().getSimpleName() + " { ";
         str += "Type:" + getType();
-        if (getName() != null && getName().length() > 0)
+        if (getName() != null && !getName().isEmpty())
             str += ", Name:" + getName();
         if (isMouseEvent())
             str += ", X:" + getX() + ", Y:" + getY() + ", ClickCount:" + getClickCount();
@@ -711,12 +712,12 @@ public abstract class ViewEvent implements Cloneable {
     }
 
     /** Prints "not implemented" for string (method name). */
-    void complain(String s)
+    private void complain(String s)
     {
         String msg = getClass().getSimpleName() + ": Not implemented:" + s;
-        if (!_cmpln.contains(msg))
+        if (!_oldComplaints.contains(msg))
             System.err.println(msg);
-        _cmpln.add(msg);
+        _oldComplaints.add(msg);
     }
-    static Set _cmpln = new HashSet();
+    private static Set<String> _oldComplaints = new HashSet<>();
 }

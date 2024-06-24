@@ -465,7 +465,7 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
 
         // Create event and fire
         ViewEvent event = ViewEvent.createEvent(_win, anEvent, aType, null);
-        _win.dispatchEventToView(event);
+        _win.processEventAll(event);
 
         // If Window Close, update JFrame.DefaultCloseOperation
         if (aType == ViewEvent.Type.WinClose && _winNtv instanceof JFrame && event.isConsumed())
