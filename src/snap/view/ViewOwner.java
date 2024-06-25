@@ -389,7 +389,7 @@ public class ViewOwner extends PropObject {
      */
     public void setViewItems(Object anObj, Object[] theItems)
     {
-        Selectable selectable = getView(anObj, Selectable.class);
+        Selectable<Object> selectable = getView(anObj, Selectable.class);
         selectable.setItems(theItems);
     }
 
@@ -398,7 +398,7 @@ public class ViewOwner extends PropObject {
      */
     public int getViewSelIndex(Object anObj)
     {
-        Selectable selectable = getView(anObj, Selectable.class);
+        Selectable<?> selectable = getView(anObj, Selectable.class);
         return selectable.getSelIndex();
     }
 
@@ -408,7 +408,7 @@ public class ViewOwner extends PropObject {
     public void setViewSelIndex(Object anObj, int aValue)
     {
         boolean old = setSendEventDisabled(true);
-        Selectable selectable = getView(anObj, Selectable.class);
+        Selectable<?> selectable = getView(anObj, Selectable.class);
         selectable.setSelIndex(aValue);
         setSendEventDisabled(old);
     }
@@ -424,7 +424,7 @@ public class ViewOwner extends PropObject {
     public void setViewSelItem(Object anObj, Object anItem)
     {
         boolean old = setSendEventDisabled(true);
-        Selectable selectable = getView(anObj, Selectable.class);
+        Selectable<Object> selectable = getView(anObj, Selectable.class);
         selectable.setSelItem(anItem);
         setSendEventDisabled(old);
     }
@@ -562,17 +562,9 @@ public class ViewOwner extends PropObject {
     }
 
     /**
-     * A hook to allow subclasses to wrap respondUI invocation easier.
+     * A wrapper to call respondUI() properly so resulting view action events are ignored.
      */
     protected void invokeRespondUI(ViewEvent anEvent)
-    {
-        this.respondUI(anEvent);
-    }
-
-    /**
-     * Sends an event to this ViewOwner through processEvent method.
-     */
-    public void dispatchEventToOwner(ViewEvent anEvent)
     {
         // If send event is disabled, just return
         if (isSendEventDisabled()) return;
@@ -582,7 +574,7 @@ public class ViewOwner extends PropObject {
 
         // Call respondUI
         try {
-            invokeRespondUI(anEvent);
+            this.respondUI(anEvent);
         }
 
         // Always clear SendEventDisabled
@@ -597,6 +589,14 @@ public class ViewOwner extends PropObject {
     }
 
     /**
+     * Sends an event to this ViewOwner through processEvent method.
+     */
+    public void dispatchEventToOwner(ViewEvent anEvent)
+    {
+        invokeRespondUI(anEvent);
+    }
+
+    /**
      * Enables events on given object.
      */
     public void enableEvents(Object anObj, ViewEvent.Type ... theTypes)
@@ -608,15 +608,6 @@ public class ViewOwner extends PropObject {
 
         // Add EventHandler
         view.addEventHandler(_viewEventListener, theTypes);
-    }
-
-    /**
-     * Enables events on given object.
-     */
-    public void disableEvents(Object anObj, ViewEvent.Type ... theTypes)
-    {
-        View view = getView(anObj);
-        view.removeEventHandler(_viewEventListener, theTypes);
     }
 
     /**
@@ -666,7 +657,7 @@ public class ViewOwner extends PropObject {
         KeyCombo keyCombo = KeyCombo.get(aKey);
 
         // If first, do init
-        if (_keyFilters.size() == 0) {
+        if (_keyFilters.isEmpty()) {
             View ui = getUI();
             ui.addEventFilter(e -> checkKeyActions(e, true), KeyPress);
             _keyFilters = new HashMap<>();
@@ -686,7 +677,7 @@ public class ViewOwner extends PropObject {
         KeyCombo keyCombo = KeyCombo.get(aKey);
 
         // If first, do init
-        if (_keyHandlers.size() == 0) {
+        if (_keyHandlers.isEmpty()) {
             View ui = getUI();
             ui.addEventHandler(e -> checkKeyActions(e, false), KeyPress);
             _keyHandlers = new HashMap<>();
