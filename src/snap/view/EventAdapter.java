@@ -11,89 +11,27 @@ import snap.view.ViewEvent.Type;
  */
 public class EventAdapter {
     
-    // Bit set of enabled events
-    private BitSet _bitset = new BitSet();
-    
-    // A map of listeners to types
-    protected Map <Object,Set<Type>> _types = new HashMap<>();
-    
     // The event filters
     protected EventListener[] _filters = EMPTY_LISTENER_ARRAY;
     
     // The event handlers
     protected EventListener[] _handlers = EMPTY_LISTENER_ARRAY;
-    
+
+    // A map of listeners to types
+    protected Map <Object,Set<Type>> _types = new HashMap<>();
+
+    // Bit set of enabled event types indexed by event Type.ordinal()
+    private BitSet _enabledTypesBitSet = new BitSet();
+
     // Shared empty list
     private static final EventListener[] EMPTY_LISTENER_ARRAY = new EventListener[0];
 
     /**
-     * Called to register types for a listener.
+     * Constructor.
      */
-    public void enableEvents(Object aLsnr, Type ... theTypes)
+    public EventAdapter()
     {
-        // Get Types for Listener
-        Set<Type> eventTypes = _types.get(aLsnr);
-        if (eventTypes == null)
-            _types.put(aLsnr, eventTypes = new HashSet<>());
-
-        // Add new types and enable
-        Collections.addAll(eventTypes, theTypes);
-        for (Type eventType : theTypes)
-            setEnabled(eventType, true);
-    }
-
-    /**
-     * Called to unregister types for a listener.
-     */
-    public void disableEvents(Object aLsnr, Type ... theTypes)
-    {
-        // Update types for given Listener removed types
-        Set<Type> eventTypes = _types.get(aLsnr);
-        if (eventTypes == null)
-            return;
-        if (theTypes == null || theTypes.length == 0)
-            eventTypes.clear();
-        else for (Type t : theTypes)
-            eventTypes.remove(t);
-        if (eventTypes.isEmpty())
-            _types.remove(aLsnr);
-
-        // Get types to turn off (types that are currently enabled, but no longer in all types)
-        Set<Type> allTypes = new HashSet<>();
-        for (Map.Entry <Object,Set<Type>> entry : _types.entrySet())
-            allTypes.addAll(entry.getValue());
-
-        // Get types to turn off
-        Type[] enabledTypes = getEnabledEvents();
-        for (Type t : enabledTypes)
-            if (!allTypes.contains(t))
-                setEnabled(t, false);
-    }
-
-    /**
-     * Returns whether given type is enabled.
-     */
-    public boolean isEnabled(Type aType)
-    {
-        return _bitset.get(aType.ordinal());
-    }
-
-    /**
-     * Sets whether a given type is enabled.
-     */
-    public void setEnabled(Type aType, boolean aValue)
-    {
-        if (isEnabled(aType) == aValue) return;
-        _bitset.set(aType.ordinal(), aValue);
-    }
-
-    /**
-     * Returns an array of enabled events.
-     */
-    public Type[] getEnabledEvents()
-    {
-        Type[] allTypes = Type.values();
-        return ArrayUtils.filter(allTypes, type -> isEnabled(type));
+        super();
     }
 
     /**
@@ -135,12 +73,81 @@ public class EventAdapter {
     }
 
     /**
+     * Called to register types for a listener.
+     */
+    public void enableEvents(Object aLsnr, Type ... theTypes)
+    {
+        // Get Types for Listener
+        Set<Type> eventTypes = _types.get(aLsnr);
+        if (eventTypes == null)
+            _types.put(aLsnr, eventTypes = new HashSet<>());
+
+        // Add new types and enable
+        Collections.addAll(eventTypes, theTypes);
+        for (Type eventType : theTypes)
+            setEnabled(eventType, true);
+    }
+
+    /**
+     * Called to unregister types for a listener.
+     */
+    public void disableEvents(Object aLsnr, Type ... theTypes)
+    {
+        // Update types for given Listener removed types
+        Set<Type> eventTypes = _types.get(aLsnr);
+        if (eventTypes == null)
+            return;
+
+        // Update types from given types
+        if (theTypes == null || theTypes.length == 0)
+            eventTypes.clear();
+        else for (Type t : theTypes)
+            eventTypes.remove(t);
+
+        // If empty, remove types for listener
+        if (eventTypes.isEmpty())
+            _types.remove(aLsnr);
+
+        // Reset enabled types
+        resetEnabledTypes();
+    }
+
+    /**
+     * Returns whether given type is enabled.
+     */
+    public boolean isEnabled(Type aType)
+    {
+        return _enabledTypesBitSet.get(aType.ordinal());
+    }
+
+    /**
+     * Sets whether a given type is enabled.
+     */
+    public void setEnabled(Type aType, boolean aValue)
+    {
+        if (isEnabled(aType) == aValue) return;
+        _enabledTypesBitSet.set(aType.ordinal(), aValue);
+    }
+
+    /**
+     * Resets the enabled types.
+     */
+    private void resetEnabledTypes()
+    {
+        _enabledTypesBitSet.clear();
+        for (Map.Entry <Object,Set<Type>> entry : _types.entrySet()) {
+            Set<Type> enabledTypes = entry.getValue();
+            enabledTypes.forEach(type -> setEnabled(type, true));
+        }
+    }
+
+    /**
      * Clears the adapter.
      */
     public void clear()
     {
-        _bitset.clear();
         _types.clear();
         _filters = _handlers = EMPTY_LISTENER_ARRAY;
+        _enabledTypesBitSet.clear();
     }
 }
