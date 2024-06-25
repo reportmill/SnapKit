@@ -122,40 +122,35 @@ public class EventDispatcher {
      */
     public void dispatchEvent(ViewEvent anEvent)
     {
-        // If popup window, forward to it
-        if (_popup != null) {
-            if (anEvent.isMousePress()) {
-                _popup.hide();
-                _popup = null;
-            }
-            else if (anEvent.isKeyPress() && anEvent.isEscapeKey())
-                _popup.hide();
-            if (_popup != null && !_popup.isShowing())
-                _popup = null;
-        }
+        // If popup window is set, see if it needs close
+        if (_popup != null)
+            checkIfPopupNeedsClose(anEvent);
 
-        // Dispatch Mouse events
+        // Handle Mouse events
         if (anEvent.isMouseEvent() || anEvent.isScroll())
             dispatchMouseEvent(anEvent);
 
-        // Dispatch Key events
+        // Handle Key events
         else if (anEvent.isKeyEvent())
             dispatchKeyEvent(anEvent);
 
-        // Dispatch Action events
+        // Handle Action events
         else if (anEvent.isActionEvent())
             dispatchActionEvent(anEvent);
 
-        // Dispatch DragTartget events
+        // Handle DragTartget events
         else if (anEvent.isDragEvent())
             dispatchDragTargetEvent(anEvent);
 
-        // Dispatch DragSource events
+        // Handle DragSource events
         else if (anEvent.isDragSourceEvent())
             dispatchDragSourceEvent(anEvent);
 
-            // All other events just go to the view
-        else anEvent.getView().processEventAll(anEvent);
+        // Handle other events (Window, ?): Just send to the view
+        else {
+            View view = anEvent.getView();
+            view.processEventAll(anEvent);
+        }
     }
 
     /**
@@ -402,6 +397,13 @@ public class EventDispatcher {
      */
     public void dispatchActionEvent(ViewEvent anEvent)
     {
+        // If not shared action, just send to view
+        if (anEvent.getSharedAction() == null) {
+            View eventView = anEvent.getView();
+            eventView.processEventAll(anEvent);
+            return;
+        }
+
         // If popup window, try to dispatch on main window first
         View clientView = _win.getClientView();
         WindowView clientWindow = clientView != null ? clientView.getWindow() : null;
@@ -416,6 +418,16 @@ public class EventDispatcher {
         if (focusedView == null)
             focusedView = _win.getContent(); // This is bogus
         View[] parentsArray = getParents(focusedView);
+
+        // Iterate down and see if any should filter
+        for (View view : parentsArray) {
+            if (view.getEventAdapter().isEnabled(anEvent.getType())) {
+                ViewEvent e2 = anEvent.copyForView(view);
+                view.processEventFilters(e2);
+                if (e2.isConsumed())
+                    return;
+            }
+        }
 
         // Iterate back up and see if any parents should handle
         for (int i = parentsArray.length - 1; i >= 0; i--) {
@@ -533,6 +545,24 @@ public class EventDispatcher {
     public boolean isMouseDown(View aView)
     {
         return _mousePressView == aView && ViewUtils.isMouseDown();
+    }
+
+    /**
+     * Called to check if popup needs close.
+     */
+    private void checkIfPopupNeedsClose(ViewEvent anEvent)
+    {
+        // Any MousePress in main window should hide popup
+        if (anEvent.isMousePress())
+            _popup.hide();
+
+        // Any KeyPress in main window should hide popup
+        else if (anEvent.isKeyPress() && anEvent.isEscapeKey())
+            _popup.hide();
+
+        // If popup isn't showing, clear it
+        if (_popup != null && !_popup.isShowing())
+            _popup = null;
     }
 
     /**

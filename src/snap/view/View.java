@@ -2623,44 +2623,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
-     * Fires the action event.
-     * This should mostly be called in response to user input events (mouse, key) when a complete change has been made
-     * to the primary value of a control view.
-     */
-    protected void fireActionEvent(ViewEvent anEvent)
-    {
-        fireActionEventForEventAndAction(anEvent, null);
-    }
-
-    /**
-     * Fires an action event for given source event and optional shared action.
-     * This should mostly be called in response to user input events (mouse, key) when a complete change has been made
-     * to the primary value of a control view.
-     */
-    protected void fireActionEventForEventAndAction(ViewEvent anEvent, SharedAction sharedAction)
-    {
-        ViewEvent event = ViewEvent.createEvent(this, sharedAction, Action, null);
-        if (anEvent != null)
-            event.setParentEvent(anEvent);
-
-        // If shared action is set, do proper dispatch
-        if (sharedAction != null) {
-            event.setSharedAction(sharedAction);
-            WindowView window = getWindow();
-            EventDispatcher eventDispatcher = window != null ? window.getDispatcher() : null;
-            if (eventDispatcher != null)
-                eventDispatcher.dispatchEvent(event);
-            return;
-        }
-
-        // Dispatch to View
-        processEventAll(event);
-    }
-
-    /**
      * Top level process event method (calls filters and handlers).
      */
-    public void processEventAll(ViewEvent anEvent)
+    protected void processEventAll(ViewEvent anEvent)
     {
         // Forward to Filters - just return if consumed
         processEventFilters(anEvent);
@@ -2678,7 +2643,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         // Get event filters and event type
         EventAdapter eventAdapter = getEventAdapter();
-        EventListener[] filters = eventAdapter._filters;
+        EventListener[] filters = eventAdapter._filters; if (filters.length == 0) return;
         ViewEvent.Type eventType = anEvent.getType();
 
         // Iterate over filters: If event type supported, send to filter
@@ -2697,25 +2662,23 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected void processEventHandlers(ViewEvent anEvent)
     {
-        // If event not consumed, send to view
+        // Process event
         processEvent(anEvent);
 
         // If Action event, automatically forward to owner
-        if (anEvent.isActionEvent() && _owner != null)
+        if (anEvent.isActionEvent() && _owner != null && !anEvent.isConsumed())
             _owner.dispatchEventToOwner(anEvent);
 
-        // If handlers are set, forward event on
+        // Get event handlers and event type
         EventAdapter eventAdapter = getEventAdapter();
-        EventListener[] handlers = eventAdapter._handlers;
-        if (handlers.length > 0) {
-            ViewEvent.Type eventType = anEvent.getType();
+        EventListener[] handlers = eventAdapter._handlers; if (handlers.length == 0) return;
+        ViewEvent.Type eventType = anEvent.getType();
 
-            // Iterate over handlers: If event type supported, send to handler
-            for (EventListener lsnr : handlers) {
-                Set<ViewEvent.Type> types = eventAdapter._types.get(lsnr);
-                if (types.contains(eventType))
-                    lsnr.listenEvent(anEvent);
-            }
+        // Iterate over handlers: If event type supported, send to handler
+        for (EventListener lsnr : handlers) {
+            Set<ViewEvent.Type> types = eventAdapter._types.get(lsnr);
+            if (types.contains(eventType))
+                lsnr.listenEvent(anEvent);
         }
     }
 
@@ -2723,6 +2686,29 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      * Process ViewEvent.
      */
     protected void processEvent(ViewEvent anEvent)  { }
+
+    /**
+     * Fires an action event for given source event (can be null).
+     * This should mostly be called in response to user input events (mouse, key) when a complete change has been made
+     * to the primary value of a control view.
+     */
+    protected void fireActionEvent(ViewEvent sourceEvent)
+    {
+        WindowView window = getWindow(); if (window == null) return;
+        ViewEvent actionEvent = createActionEvent(sourceEvent);
+        window.dispatchEventToWindow(actionEvent);
+    }
+
+    /**
+     * Creates an Action event for given source event.
+     */
+    protected ViewEvent createActionEvent(ViewEvent sourceEvent)
+    {
+        ViewEvent actionEvent = ViewEvent.createEvent(this, null, Action, null);
+        if (sourceEvent != null)
+            actionEvent.setParentEvent(sourceEvent);
+        return actionEvent;
+    }
 
     /**
      * Called when ViewTheme changes.

@@ -289,11 +289,23 @@ public class ButtonBase extends ParentView {
      * Override to consume event.
      */
     @Override
-    protected void fireActionEventForEventAndAction(ViewEvent anEvent, SharedAction sharedAction)
+    protected void fireActionEvent(ViewEvent anEvent)
     {
-        super.fireActionEventForEventAndAction(anEvent, sharedAction != null ? sharedAction : _sharedAction);
+        super.fireActionEvent(anEvent);
         if (anEvent != null)
             anEvent.consume();
+    }
+
+    /**
+     * Override to set SourceAction if set.
+     */
+    @Override
+    protected ViewEvent createActionEvent(ViewEvent sourceEvent)
+    {
+        ViewEvent actionEvent = super.createActionEvent(sourceEvent);
+        if (_sharedAction != null)
+            actionEvent.setSharedAction(_sharedAction);
+        return actionEvent;
     }
 
     /**

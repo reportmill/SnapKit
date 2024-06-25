@@ -91,10 +91,10 @@ public class MenuItem extends ButtonBase implements Cloneable {
      */
     public String getShortcutText()
     {
-        KeyCombo kcombo = getShortcutCombo();
-        String key = Character.toString((char)kcombo.getKeyCode());
+        KeyCombo keyCombo = getShortcutCombo();
+        String key = Character.toString((char) keyCombo.getKeyCode());
         String str = (SnapUtils.isMac ? Character.toString((char)8984) : "^") + key;
-        if (kcombo.isShiftDown())
+        if (keyCombo.isShiftDown())
             str = (char) 8679 + str;
         return str;
     }
@@ -104,8 +104,9 @@ public class MenuItem extends ButtonBase implements Cloneable {
      */
     public boolean isSeparator()
     {
-        String txt = getText(); View gfc = getGraphic();
-        return (txt==null || txt.length()==0) && gfc==null;
+        String text = getText();
+        View graphic = getGraphic();
+        return (text == null || text.isEmpty()) && graphic == null;
     }
 
     /**
@@ -178,6 +179,19 @@ public class MenuItem extends ButtonBase implements Cloneable {
     }
 
     /**
+     * Override to notify parent menu (to hide all).
+     */
+    @Override
+    protected void fireActionEvent(ViewEvent anEvent)
+    {
+        super.fireActionEvent(anEvent);
+
+        // Notify ParentMenu that action fired
+        if (_parentMenu != null)
+            _parentMenu.itemFiredActionEvent();
+    }
+
+    /**
      * Override because TeaVM hates reflection.
      */
     public Object getPropValue(String aPropName)
@@ -203,10 +217,13 @@ public class MenuItem extends ButtonBase implements Cloneable {
     public MenuItem clone()
     {
         MenuItem clone;
-        if (this instanceof Menu) { Menu menu = (Menu) this;
+        if (this instanceof Menu) {
+            Menu menu = (Menu) this;
             clone = new Menu();
-            for (int i=0, iMax=menu.getItemCount(); i<iMax; i++) { MenuItem item = menu.getItem(i);
-                MenuItem iclone = item.clone(); ((Menu)clone).addItem(iclone);
+            for (int i = 0, iMax = menu.getItemCount(); i < iMax; i++) {
+                MenuItem item = menu.getItem(i);
+                MenuItem iclone = item.clone();
+                ((Menu) clone).addItem(iclone);
             }
         }
         else if (this instanceof CheckBoxMenuItem)
@@ -229,7 +246,7 @@ public class MenuItem extends ButtonBase implements Cloneable {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive Accelerator
-        if (getShortcut() != null && getShortcut().length() > 0)
+        if (getShortcut() != null && !getShortcut().isEmpty())
             e.add("key", getShortcut());
         return e;
     }

@@ -22,9 +22,6 @@ public class Menu extends MenuItem {
     // The PopupWindow
     private PopupWindow _popupWindow;
 
-    // A listener to close popup
-    private EventListener _itemFiredActionListener = this::itemFiredActionEvent;
-
     /**
      * Constructor.
      */
@@ -131,10 +128,8 @@ public class Menu extends MenuItem {
         itemColView.setPadding(4, 1, 4, 1);
 
         // Add MenuItems to ItemColView
-        for (MenuItem menuItem : _items) {
+        for (MenuItem menuItem : _items)
             itemColView.addChild(menuItem);
-            menuItem.addEventHandler(_itemFiredActionListener, Action);
-        }
 
         // Set PopupWindow.Content to ItemColView and return
         _popupWindow.setContent(itemColView);
@@ -173,11 +168,6 @@ public class Menu extends MenuItem {
         // Hide PopupWindow
         _popupWindow.hide();
 
-        // Remove MenuItem itemFiredActionListener
-        ColView itemColView = (ColView) _popupWindow.getContent();
-        for (View item : itemColView.getChildren())
-            item.removeEventHandler(_itemFiredActionListener, Action);
-
         // Clear PopupWindow
         _popupWindow = null;
     }
@@ -213,7 +203,7 @@ public class Menu extends MenuItem {
     /**
      * Called when child MenuItem fires action.
      */
-    protected void itemFiredActionEvent(ViewEvent anEvent)
+    protected void itemFiredActionEvent()
     {
         hideAll();
     }
