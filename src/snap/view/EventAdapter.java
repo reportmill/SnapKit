@@ -12,61 +12,62 @@ import snap.view.ViewEvent.Type;
 public class EventAdapter {
     
     // Bit set of enabled events
-    private BitSet  _bitset = new BitSet();
+    private BitSet _bitset = new BitSet();
     
     // A map of listeners to types
-    protected Map <Object,Set<Type>>  _types = new HashMap<>();
+    protected Map <Object,Set<Type>> _types = new HashMap<>();
     
     // The event filters
-    protected EventListener  _filters[] = EMPTY_LISTENER_ARRAY;
+    protected EventListener[] _filters = EMPTY_LISTENER_ARRAY;
     
     // The event handlers
-    protected EventListener  _handlers[] = EMPTY_LISTENER_ARRAY;
+    protected EventListener[] _handlers = EMPTY_LISTENER_ARRAY;
     
     // Shared empty list
-    private static final EventListener EMPTY_LISTENER_ARRAY[] = new EventListener[0];
+    private static final EventListener[] EMPTY_LISTENER_ARRAY = new EventListener[0];
 
     /**
-     * Called to regsiter types for a listener.
+     * Called to register types for a listener.
      */
     public void enableEvents(Object aLsnr, Type ... theTypes)
     {
         // Get Types for Listener
-        Set <Type> types = _types.get(aLsnr);
-        if (types==null)
-            _types.put(aLsnr, types=new HashSet<>());
+        Set<Type> eventTypes = _types.get(aLsnr);
+        if (eventTypes == null)
+            _types.put(aLsnr, eventTypes = new HashSet<>());
 
         // Add new types and enable
-        Collections.addAll(types, theTypes);
-        for (Type typ : theTypes)
-            setEnabled(typ, true);
+        Collections.addAll(eventTypes, theTypes);
+        for (Type eventType : theTypes)
+            setEnabled(eventType, true);
     }
 
     /**
-     * Called to unregsiter types for a listener.
+     * Called to unregister types for a listener.
      */
     public void disableEvents(Object aLsnr, Type ... theTypes)
     {
         // Update types for given Listener removed types
-        Set <Type> types = _types.get(aLsnr);
-        if (types==null) return;
-        if (theTypes==null || theTypes.length==0)
-            types.clear();
+        Set<Type> eventTypes = _types.get(aLsnr);
+        if (eventTypes == null)
+            return;
+        if (theTypes == null || theTypes.length == 0)
+            eventTypes.clear();
         else for (Type t : theTypes)
-            types.remove(t);
-        if (types.size()==0)
+            eventTypes.remove(t);
+        if (eventTypes.isEmpty())
             _types.remove(aLsnr);
 
         // Get types to turn off (types that are currently enabled, but no longer in all types)
         Set<Type> allTypes = new HashSet<>();
-        Set<Type> offTypes = new HashSet<>();
         for (Map.Entry <Object,Set<Type>> entry : _types.entrySet())
             allTypes.addAll(entry.getValue());
-        for (Type t : getEnabledEvents())
+
+        // Get types to turn off
+        Type[] enabledTypes = getEnabledEvents();
+        for (Type t : enabledTypes)
             if (!allTypes.contains(t))
-                offTypes.add(t);
-        for (Type t : offTypes)
-            setEnabled(t, false);
+                setEnabled(t, false);
     }
 
     /**
@@ -82,7 +83,7 @@ public class EventAdapter {
      */
     public void setEnabled(Type aType, boolean aValue)
     {
-        if (isEnabled(aType)==aValue) return;
+        if (isEnabled(aType) == aValue) return;
         _bitset.set(aType.ordinal(), aValue);
     }
 
@@ -91,11 +92,8 @@ public class EventAdapter {
      */
     public Type[] getEnabledEvents()
     {
-        List<Type> types = new ArrayList<>();
-        for (Type type : Type.values())
-            if (isEnabled(type))
-                types.add(type);
-        return types.toArray(new Type[0]);
+        Type[] allTypes = Type.values();
+        return ArrayUtils.filter(allTypes, type -> isEnabled(type));
     }
 
     /**
@@ -113,7 +111,7 @@ public class EventAdapter {
     public void removeFilter(EventListener aLsnr, ViewEvent.Type ... theTypes)
     {
         disableEvents(aLsnr, theTypes);
-        if (_types.get(aLsnr)==null)
+        if (_types.get(aLsnr) == null)
             _filters = ArrayUtils.remove(_filters, aLsnr);
     }
 
@@ -132,7 +130,7 @@ public class EventAdapter {
     public void removeHandler(EventListener aLsnr, ViewEvent.Type ... theTypes)
     {
         disableEvents(aLsnr, theTypes);
-        if (_types.get(aLsnr)==null)
+        if (_types.get(aLsnr) == null)
             _handlers = ArrayUtils.remove(_handlers, aLsnr);
     }
 
