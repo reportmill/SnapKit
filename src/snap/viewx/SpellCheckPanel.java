@@ -50,7 +50,7 @@ public abstract class SpellCheckPanel extends ViewOwner {
         ListView<?> suggestionListView = getView("SuggestionList", ListView.class);
         ListArea<?> suggestionListArea = suggestionListView.getListArea();
         suggestionListArea.setName("SuggestionListArea");
-        enableEvents(suggestionListArea, MouseRelease);
+        suggestionListArea.addEventHandler(this::handleSuggestionListAreaMouseRelease, MouseRelease);
     }
 
     /**
@@ -86,9 +86,11 @@ public abstract class SpellCheckPanel extends ViewOwner {
         // Handle CorrectButton
         else if (anEvent.equals("CorrectButton"))
             doCorrection();
+    }
 
-        // Handle SuggestionList
-        else if (anEvent.equals("SuggestionListArea") && anEvent.getClickCount() > 1)
+    private void handleSuggestionListAreaMouseRelease(ViewEvent anEvent)
+    {
+        if (anEvent.getClickCount() > 1)
             doCorrection();
     }
 

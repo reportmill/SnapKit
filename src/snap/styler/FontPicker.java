@@ -51,23 +51,24 @@ public class FontPicker extends ViewOwner {
      */
     protected void initUI()
     {
-        String fams[] = Font.getFamilyNames();
+        String[] familyNames = Font.getFamilyNames();
         Color c1 = Color.WHITE, c2 = new Color("#F8F8F8"), c3 = c1;
         Border border = Border.createLineBorder(Color.LIGHTGRAY,1);
-        for (String fam : fams) {
-            Font font = Font.getFont(fam, 18);
-            FontSampleView fview = new FontSampleView(font, c3, border);
+        for (String familyName : familyNames) {
+            Font font = Font.getFont(familyName, 18);
+            FontSampleView fontSampleView = new FontSampleView(font, c3, border);
             c3 = c3==c1? c2 : c1;
-            enableEvents(fview, MousePress);
-            _vbox.addChild(fview);
-            if (fam.equals(_font.getFamily())) setSelected(fview);
+            fontSampleView.addEventHandler(this::handleFontSampleViewMousePress, MousePress);
+            _vbox.addChild(fontSampleView);
+            if (familyName.equals(_font.getFamily()))
+                setSelected(fontSampleView);
         }
     }
 
     /**
      * Respond UI.
      */
-    protected void respondUI(ViewEvent anEvent)
+    protected void handleFontSampleViewMousePress(ViewEvent anEvent)
     {
         FontSampleView fview = anEvent.getView(FontSampleView.class);
         _font = fview._font;
