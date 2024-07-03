@@ -326,4 +326,28 @@ public class ListUtils {
     {
         return aList.stream().map(aFunc).collect(Collectors.joining(aDelim));
     }
+
+    /**
+     * Returns the min value of a given list using given comparator function.
+     */
+    public static <T> T getMin(List<T> aList, Comparator<T> aComparator)
+    {
+        switch (aList.size()) {
+            case 0: return null;
+            case 1: return aList.get(0);
+            default: return aList.stream().min(aComparator).get();
+        }
+    }
+
+    /**
+     * Returns the max value of a given list using given comparator function.
+     */
+    public static <T> T getMax(List<T> aList, Comparator<T> aComparator)
+    {
+        switch (aList.size()) {
+            case 0: return null;
+            case 1: return aList.get(0);
+            default: return aList.stream().max(aComparator).get();
+        }
+    }
 }

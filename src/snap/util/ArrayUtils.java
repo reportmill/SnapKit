@@ -489,4 +489,28 @@ public class ArrayUtils {
         if (anArray.length == 0) return "";
         return Stream.of(anArray).map(aFunc).collect(Collectors.joining(aDelim));
     }
+
+    /**
+     * Returns the min value of a given array using given comparator function.
+     */
+    public static <T> T getMin(T[] anArray, Comparator<T> aComparator)
+    {
+        switch (anArray.length) {
+            case 0: return null;
+            case 1: return anArray[0];
+            default: return Stream.of(anArray).min(aComparator).get();
+        }
+    }
+
+    /**
+     * Returns the max value of a given array using given comparator function.
+     */
+    public static <T> T getMax(T[] anArray, Comparator<T> aComparator)
+    {
+        switch (anArray.length) {
+            case 0: return null;
+            case 1: return anArray[0];
+            default: return Stream.of(anArray).max(aComparator).get();
+        }
+    }
 }
