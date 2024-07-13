@@ -121,8 +121,10 @@ public class ViewUpdater {
      */
     protected synchronized void updateViews()
     {
+        _updateRun = null;
+
         // Send RunBefore calls
-        while (_runBefores.size() > 0) {
+        while (!_runBefores.isEmpty()) {
             Runnable[] runs = _runBefores.toArray(new Runnable[0]);
             _runBefores.clear();
             for (Runnable run : runs)
@@ -150,7 +152,9 @@ public class ViewUpdater {
         }
 
         // Send reset later calls
-        while (_resetLaters.size() > 0) {
+        while (!_resetLaters.isEmpty()) {
+
+            // Get resetLater owners
             ViewOwner[] owners = _resetLaters.toArray(new ViewOwner[0]);
             _resetLaters.clear();
             for (ViewOwner owner : owners)
@@ -162,10 +166,8 @@ public class ViewUpdater {
 
         // Get composite repaint rect from all repaint views
         Rect rect = getRepaintRect();
-        if (rect == null) {
-            _updateRun = null;
+        if (rect == null)
             return;
-        }
 
         // Do repaint (in exception handler so we can reset things on failure)
         try {
@@ -179,7 +181,6 @@ public class ViewUpdater {
             for (View v : _repaintViews)
                 v._repaintRect = null;
             _repaintViews.clear();
-            _updateRun = null;
             _painting = false;
 
             // If ClearFlash, register for proper repaint to clear highlight
@@ -342,7 +343,7 @@ public class ViewUpdater {
     {
         if (!_viewAnims.remove(anAnim))
             return;
-        if (_viewAnims.size() == 0)
+        if (_viewAnims.isEmpty())
             _timer.stop();
     }
 
