@@ -1022,9 +1022,9 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     protected void setShowing(boolean aValue)
     {
         if (aValue == isShowing()) return;
-        super.setShowing(aValue);
         if (aValue && _needsScrollSelToVisible)
             scrollSelToVisible();
+        super.setShowing(aValue);
     }
 
     /**

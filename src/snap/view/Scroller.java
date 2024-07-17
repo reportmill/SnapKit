@@ -360,27 +360,34 @@ public class Scroller extends ParentView implements ViewHost {
         double shapeW = shapeBnds.width;
         double shapeH = shapeBnds.height;
 
-        // Calculate new ScrollX: If shape rect is outside vrect, shift vrect to it; if bigger, center it
-        double scrollX2 = scrollX;
+        // Calculate new ScrollX: If shape rect is visible bounds, shift scroll to it; if bigger, center it
+        double newScrollX = scrollX;
         if (shapeX < 0)
-            scrollX2 = scrollX + shapeX;
+            newScrollX = scrollX + shapeX;
         else if (shapeX + shapeW > scrollW)
-            scrollX2 = scrollX + (shapeX + shapeW - scrollW);
+            newScrollX = scrollX + (shapeX + shapeW - scrollW);
         if (shapeW > scrollW)
-            scrollX2 += Math.round((shapeW - scrollW) / 2);
+            newScrollX += Math.round((shapeW - scrollW) / 2);
 
-        // Calculate new ScrollY: If shape rect is outside vrect, shift vrect to it; if bigger, center it
-        double scrollY2 = scrollY;
+        // Calculate new ScrollY: If shape rect is outside visible bounds, shift scroll to it; if bigger, center it
+        double newScrollY = scrollY;
         if (shapeY < 0)
-            scrollY2 = scrollY + shapeY;
+            newScrollY = scrollY + shapeY;
         else if (shapeY + shapeH > scrollH)
-            scrollY2 = scrollY + (shapeY + shapeH - scrollH);
+            newScrollY = scrollY + (shapeY + shapeH - scrollH);
         if (shapeH > scrollH)
-            scrollY2 += Math.round((shapeH - scrollH) / 2);
+            newScrollY += Math.round((shapeH - scrollH) / 2);
 
-        // Set new value (with anim)
+        // If not showing, just apply new scroll X/Y and return
+        if (!isShowing()) {
+            setScrollX(newScrollX);
+            setScrollY(newScrollY);
+            return;
+        }
+
+        // Otherwise scroll with anim
         ViewAnim anim = getAnimCleared(250);
-        anim.setValue(ScrollX_Prop, scrollX2).setValue(ScrollY_Prop, scrollY2);
+        anim.setValue(ScrollX_Prop, newScrollX).setValue(ScrollY_Prop, newScrollY);
         anim.play();
     }
 
@@ -566,7 +573,7 @@ public class Scroller extends ParentView implements ViewHost {
             case ScrollX_Prop: setScrollX(Convert.doubleValue(aValue)); break;
             case ScrollY_Prop: setScrollY(Convert.doubleValue(aValue)); break;
             case ScrollWidth_Prop: setScrollWidth(Convert.doubleValue(aValue)); break;
-            case ScrollHeight_Prop: setScrollY(Convert.doubleValue(aValue)); break;
+            case ScrollHeight_Prop: setScrollHeight(Convert.doubleValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);
