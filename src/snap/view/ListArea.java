@@ -67,6 +67,9 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
 
     // A helper object to handle list selection
     private ListAreaSelector _selector = new ListAreaSelector(this);
+
+    // Whether list needs to scroll selection to visible after next layout or show
+    private boolean _needsScrollSelToVisible;
     
     // Shared CellPadding default
     public static final Insets  CELL_PAD_DEFAULT = new Insets(2);
@@ -261,8 +264,9 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
      */
     protected void pickListPropChange(PropChange aPC)
     {
-        // Handle Sel_Prop: Get array of changed indexes and update
         String propName = aPC.getPropName();
+
+        // Handle Sel_Prop: Get array of changed indexes and update
         if (propName == PickList.Sel_Prop) {
             ListSel sel1 = (ListSel) aPC.getOldValue();
             ListSel sel2 = (ListSel) aPC.getNewValue();
@@ -272,6 +276,9 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
 
             // Repackage and forward
             firePropChange(Sel_Prop, aPC.getOldValue(), aPC.getNewValue());
+
+            // Scroll selection to visible
+            scrollSelToVisible();
         }
 
         // Handle Items_Prop
@@ -281,10 +288,6 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
             repaint();
             _sampleWidth = _sampleHeight = -1;
         }
-
-        // Scroll selection to visible
-        if (isShowing())
-            scrollSelToVisible();
     }
 
     /**
@@ -544,11 +547,14 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
      */
     protected void scrollSelToVisible()
     {
-        // If needs layout, come back later
-        if (isNeedsLayout() || ViewUtils.isMetaDown()) {
-            getEnv().runLaterOnce("scrollSelToVisible",() -> scrollSelToVisible());
+        // If needs layout, register for later
+        if (isNeedsLayout()) {
+            _needsScrollSelToVisible = true;
             return;
         }
+
+        // Reset NeedsScrollSelToVisible
+        _needsScrollSelToVisible = false;
 
         // Get selection rect. If empty, outset by 1
         int selIndex = getSelIndex();
@@ -558,17 +564,16 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         else scrollBounds.width = 30;
 
         // If visible rect not set or empty or fully contains selection rect, just return
-        Rect vrect = getClipAllBounds();
-        if (vrect == null || vrect.isEmpty())
+        Rect visibleRect = getClipAllBounds();
+        if (visibleRect == null || visibleRect.isEmpty())
             return;
-        if (vrect.contains(scrollBounds))
+        if (visibleRect.contains(scrollBounds))
             return;
 
         // If totally out of view, add buffer. Then scroll rect to visible
-        if (!scrollBounds.intersectsShape(vrect))
+        if (!scrollBounds.intersectsShape(visibleRect))
             scrollBounds.inset(0,-4 * getRowHeight());
         scrollToVisible(scrollBounds);
-        repaint();
     }
 
     /**
@@ -662,6 +667,10 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         // Do real layout
         ColViewProxy<?> viewProxy = getViewProxy();
         viewProxy.layoutView();
+
+        // If NeedsScrollSelToVisible, send later
+        if (_needsScrollSelToVisible)
+            runLater(this::scrollSelToVisible);
     }
 
     /**
@@ -1004,6 +1013,18 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     public String getValuePropName()
     {
         return getBinding(SelIndex_Prop) != null ? SelIndex_Prop : SelItem_Prop;
+    }
+
+    /**
+     * Override to maybe scroll sel to visible.
+     */
+    @Override
+    protected void setShowing(boolean aValue)
+    {
+        if (aValue == isShowing()) return;
+        super.setShowing(aValue);
+        if (aValue && _needsScrollSelToVisible)
+            scrollSelToVisible();
     }
 
     /**
