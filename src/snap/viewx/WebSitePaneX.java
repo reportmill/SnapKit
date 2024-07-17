@@ -79,7 +79,8 @@ public class WebSitePaneX extends WebSitePane {
         _fileBrowser.setSelItem(selFileOrDir);
 
         // Update InputText
-        String fileName = selFile != null ? selFile.getName() : null;
+        WebFile targFile = getTargFile(); if (targFile == null) targFile = selFile;
+        String fileName = targFile != null ? targFile.getName() : null;
         _inputText.setText(fileName);
         _inputText.selectAll();
 
