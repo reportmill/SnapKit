@@ -19,9 +19,6 @@ public class Scroller extends ParentView implements ViewHost {
     // Whether to fit content to scroller width/height
     private boolean  _fitWidth, _fitHeight;
 
-    // Whether to grow content to scroller width/height if smaller than scroller (overrides content setting if true)
-    private boolean  _growContWidth = true, _growContHeight = true;
-    
     // The scroll amounts
     private double  _scrollX, _scrollY;
     
@@ -94,34 +91,6 @@ public class Scroller extends ParentView implements ViewHost {
     {
         if (aValue == isFillHeight()) return;
         firePropChange("FitHeight", _fitHeight, _fitHeight = aValue);
-    }
-
-    /**
-     * Returns whether to grow content to scroller width if smaller than scroller (overrides content setting if true).
-     */
-    public boolean isGrowContentWidth()  { return _growContWidth; }
-
-    /**
-     * Sets whether to grow content to scroller width if smaller than scroller (overrides content setting if true).
-     */
-    public void setGrowContentWidth(boolean aValue)
-    {
-        if (aValue == isGrowContentWidth()) return;
-        firePropChange("GrowContentWidth", _growContWidth, _growContWidth = aValue);
-    }
-
-    /**
-     * Returns whether to grow content to scroller height if smaller than scroller (overrides content setting if true).
-     */
-    public boolean isGrowContentHeight()  { return _growContHeight; }
-
-    /**
-     * Sets whether to grow content to scroller height if smaller than scroller (overrides content setting if true).
-     */
-    public void setGrowContentHeight(boolean aValue)
-    {
-        if (aValue == isGrowContentHeight()) return;
-        firePropChange("GrowContentHeight", _growContHeight, _growContHeight = aValue);
     }
 
     /**
@@ -255,26 +224,6 @@ public class Scroller extends ParentView implements ViewHost {
     }
 
     /**
-     * Returns the ratio of Scroller.Width to Content.Width.
-     */
-    public double getWidthRatio()
-    {
-        double viewW = getWidth();
-        double scrollW = getScrollWidth();
-        return scrollW > 0 ? viewW / scrollW : 1;
-    }
-
-    /**
-     * Returns the ratio of Scroller.Height to Content.Height.
-     */
-    public double getHeightRatio()
-    {
-        double viewH = getHeight();
-        double scrollH = getScrollHeight();
-        return scrollH > 0 ? viewH / scrollH : 1;
-    }
-
-    /**
      * Returns preferred size of content view in Scroller.
      */
     protected Size getContentPrefSize()
@@ -286,58 +235,27 @@ public class Scroller extends ParentView implements ViewHost {
         Insets ins = getInsetsAll();
         double areaW = getWidth() - ins.getWidth();
         double areaH = getHeight() - ins.getHeight();
+        boolean isFillWidth = isFillWidth();
+        boolean isFillHeight = isFillHeight();
+        boolean isHorizontal = isFillWidth || _content.isHorizontal();
 
-        // Handle FixedWidth special
-        boolean isFixedWidth = isFillWidth();
-        boolean isFixedHeight = isFillHeight();
-        if (isFixedWidth && isFixedHeight)
-            return new Size(areaW, areaH);
-
-        // Get Grow width/height values
-        boolean isGrowW = isGrowContentWidth() || _content.isGrowWidth();
-        boolean isGrowH = isGrowContentHeight() || _content.isGrowHeight();
-
-        // Handle FixedWidth
-        if (isFixedWidth) {
-            double prefW = areaW;
-            double prefH = _content.getBestHeight(prefW);
-            if (prefH < areaH && isGrowH)
-                prefH = areaH;
-            return new Size(prefW, prefH);
-        }
-
-        // Handle FixedHeight
-        if (isFixedHeight) {
-            double prefH = areaH;
-            double prefW = _content.getBestWidth(prefH);
-            if (prefW < areaW && isGrowW)
-                prefW = areaW;
-            return new Size(prefW, prefH);
-        }
-
-        // Handle Horizontal
-        if (_content.isHorizontal()) {
-
-            // Get PrefWidth (expand to width if needed)
-            double prefW = _content.getBestWidth(-1);
-            if (prefW < areaW && isGrowW)
+        // Handle Horizontal: Get PrefWidth first (expand to scroller size if needed)
+        if (isHorizontal) {
+            double prefW = isFillWidth ? areaW : _content.getBestWidth(-1);
+            if (prefW < areaW)
                prefW = areaW;
-
-            // Get PrefHeight (expand to height if needed)
-            double prefH = _content.getBestHeight(prefW);
-            if (prefH < areaH && isGrowH)
+            double prefH = isFillHeight ? areaH : _content.getBestHeight(prefW);
+            if (prefH < areaH)
                 prefH = areaH;
-
-            // Return size
             return new Size(prefW, prefH);
         }
 
-        // Handle Vertical
-        double prefH = _content.getBestHeight(-1);
-        if (prefH < areaH && isGrowH)
+        // Handle Vertical: Get PrefHeight first (expand to scroller size if needed)
+        double prefH = isFillHeight ? areaH : _content.getBestHeight(-1);
+        if (prefH < areaH)
             prefH = areaH;
         double prefW = _content.getBestWidth(prefH);
-        if (prefW < areaW && isGrowW)
+        if (prefW < areaW)
             prefW = areaW;
         return new Size(prefW, prefH);
     }
