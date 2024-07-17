@@ -46,6 +46,9 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     // The image to be used for branch
     private Image  _branchImage;
 
+    // Whether list needs to scroll selection to visible after next layout or show
+    private boolean _needsScrollSelToVisible;
+
     // Constants for properties
     public static final String PrefColCount_Prop = "PrefColCount";
     public static final String PrefColWidth_Prop = "PrefColWidth";
@@ -314,6 +317,9 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
 
         // Reset ColView.PrefWidth
         resetColViewWidth();
+
+        // Scroll selection to visible
+        scrollSelToVisible();
     }
 
     /**
@@ -349,14 +355,6 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
      */
     public void setSelItem(T anItem)
     {
-        setSelItem(anItem, true);
-    }
-
-    /**
-     * Sets the selected item.
-     */
-    public void setSelItem(T anItem, boolean scrollToVisible)
-    {
         // If null item, reset to first column
         if (anItem == null) {
             getCol(0).setSelIndex(-1);
@@ -372,8 +370,6 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         if (lastCol.getItemsList().contains(anItem)) {
             lastCol.setSelItem(anItem);
             setSelColIndex(lastCol.getIndex());
-            if (scrollToVisible)
-                scrollSelToVisible();
             return;
         }
 
@@ -381,21 +377,17 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         BrowserCol<T> newSelCol = getColWithSelItem(anItem);
         if (newSelCol != null) {
             setSelColIndex(newSelCol.getIndex());
-            if (scrollToVisible)
-                scrollSelToVisible();
             return;
         }
 
-        // Otherwise, select parent
+        // Otherwise, select item parent
         T itemParent = getParent(anItem);
-        setSelItem(itemParent, false);
+        setSelItem(itemParent);
 
         // Select item and column
         lastCol = getColLast();
         lastCol.setSelItem(anItem);
         setSelColIndex(lastCol.getIndex());
-        if (scrollToVisible)
-            scrollSelToVisible();
     }
 
     /**
@@ -405,9 +397,12 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     {
         // If ColView NeedsLayout, come back later
         if (_colView.isNeedsLayout() || ViewUtils.isMouseDown()) {
-            getEnv().runLater(() -> scrollSelToVisible());
+            _needsScrollSelToVisible = true;
             return;
         }
+
+        // Reset NeedsScrollSelToVisible
+        _needsScrollSelToVisible = false;
 
         // Scroll ColLast to visible
         Rect lastColBounds = getColLast().getBounds();
@@ -509,6 +504,10 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         double areaW = getWidth() - ins.getWidth();
         double areaH = getHeight() - ins.getHeight();
         _scrollView.setBounds(areaX, areaY, areaW, areaH);
+
+        // Handle NeedsScrollSelToVisible
+        if (_needsScrollSelToVisible)
+            scrollSelToVisible();
     }
 
     /**

@@ -58,7 +58,6 @@ public class BrowserCol <T> extends ListView <T> {
     protected void listAreaMouseReleased()
     {
         _browser.setSelColIndex(_index);
-        _browser.scrollSelToVisible();
     }
 
     /**
