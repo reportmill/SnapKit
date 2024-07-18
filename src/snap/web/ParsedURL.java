@@ -102,9 +102,9 @@ public class ParsedURL {
         // Set SiteURL string
         _siteUrl = _scheme + "://" + str;
 
-        // Pick off port
+        // Pick off port (number after any colon after possible windows device letter)
         int portStart = str.lastIndexOf(':');
-        if (portStart > 0) {
+        if (portStart > 2) {
             String portStr = str.substring(portStart + 1);
             _port = Integer.parseInt(portStr);
             str = str.substring(0, portStart);
