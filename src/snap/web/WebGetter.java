@@ -4,7 +4,7 @@
 package snap.web;
 import snap.gfx.GFXEnv;
 import snap.util.FilePathUtils;
-
+import snap.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -36,7 +36,7 @@ public class WebGetter {
         if (anObj instanceof File) {
             File file = (File) anObj;
             try { return file.getCanonicalFile().toURI().toURL(); }
-            catch (IOException e) { }
+            catch (IOException ignore) { }
         }
 
         // Handle URL: Get string, decode and strip "jar:" prefix if found (we don't use that)
@@ -62,13 +62,14 @@ public class WebGetter {
         if (urlString.startsWith("Jar:/reportmill"))
             return getJavaUrlForClass(WebURL.class, urlString.substring(4));
 
-        // If string is Windows/Unix file path, make it a file URL
+        // If string is Windows file path, make it a file URL
         if (urlString.indexOf('\\') >= 0) {
-            String urlStringLowerCase = urlString.toLowerCase();
             urlString = urlString.replace('\\', '/');
-            if (!urlString.startsWith("/") || !urlStringLowerCase.startsWith("file:"))
+            if (!urlString.startsWith("/") && !StringUtils.startsWithIC(urlString, "file:"))
                 urlString = '/' + urlString;
         }
+
+        // If url string is path, add 'file://' scheme prefix
         if (urlString.startsWith("/"))
             urlString = "file://" + urlString;
 
@@ -79,11 +80,11 @@ public class WebGetter {
 
         // Try to return URL
         try { return new URL(urlString); }
-        catch (MalformedURLException e) { }
+        catch (MalformedURLException ignore) { }
 
         // Try to return URL with bogus stream handler
         try { return new URL(null, urlString, new BogusURLStreamHandler()); }
-        catch (IOException e) { }
+        catch (IOException ignore) { }
 
         // Complain
         throw new IllegalArgumentException("WebGetter.getJavaUrlForString: No URL found for: " + urlString);
@@ -163,7 +164,8 @@ public class WebGetter {
 
         // Handle FileSite: If no site path, use FileSite, otherwise use DirSite
         if (scheme.equals("file")) {
-            if (sitePath.length() == 0 || sitePath.equals("/"))
+            if (sitePath.isEmpty() || sitePath.equals("/") ||
+                sitePath.length() == 3 && sitePath.charAt(2) == ':') // Windows device letter path
                 return new FileSite();
             return new DirSite();
         }

@@ -3,6 +3,7 @@
  */
 package snap.web;
 import snap.util.FilePathUtils;
+import snap.util.SnapUtils;
 
 /**
  * A class to parse a URL string and provide the parts.
@@ -15,7 +16,7 @@ public class ParsedURL {
     private String  _str;
     
     // The scheme string (lowercase): http, file, etc.
-    private String  _scheme;
+    private String  _scheme = "Unknown";
 
     // The full site string: http://abc.com
     private String  _siteUrl;
@@ -87,7 +88,16 @@ public class ParsedURL {
             _path = str.substring(pathIndex);
             str = str.substring(0, pathIndex);
         }
-        //else _path = "/";
+
+        // If Windows device letter is present, move from path to string
+        if (_path != null && _path.length() >= 2 && _path.charAt(2) == ':' && Character.isLetter(_path.charAt(1))) {
+            str += _path.substring(0, 3).toUpperCase();
+            _path = _path.substring(3);
+        }
+
+        // IF Windows and no device letter, add default /C:
+        else if (SnapUtils.isWindows)
+            str = "/C:";
 
         // Set SiteURL string
         _siteUrl = _scheme + "://" + str;
@@ -108,7 +118,7 @@ public class ParsedURL {
         }
 
         // Anything left is host
-        if (str.length() > 0)
+        if (!str.isEmpty())
             _siteId = str;
 
         // Handle JRT special
