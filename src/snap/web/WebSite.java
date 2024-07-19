@@ -200,7 +200,7 @@ public abstract class WebSite {
         file._lastModTime = fileHeader.getLastModTime();
         if (file._lastModTime == 0) {
             file._lastModTime = System.currentTimeMillis();
-            System.out.println("WebSite.createFileForFileHeader: Zero LastModTime provided for file: " + filePath);
+            //System.out.println("WebSite.createFileForFileHeader: Zero LastModTime provided for file: " + filePath);
         }
         file._size = fileHeader.getSize();
         file.setMimeType(fileHeader.getMimeType());
