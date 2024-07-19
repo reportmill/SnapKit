@@ -235,6 +235,8 @@ public class FileSite extends WebSite {
     protected File getJavaFileForUrl(WebURL aURL)
     {
         String filePath = aURL.getPath();
+        if (filePath.isEmpty())
+            filePath = "/";
         return getJavaFileForLocalPath(filePath);
     }
 

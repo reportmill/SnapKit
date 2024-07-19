@@ -16,7 +16,7 @@ public class ParsedURL {
     private String  _str;
     
     // The scheme string (lowercase): http, file, etc.
-    private String  _scheme = "Unknown";
+    private String  _scheme;
 
     // The full site string: http://abc.com
     private String  _siteUrl;
@@ -65,6 +65,8 @@ public class ParsedURL {
     {
         // Set String
         _str = aStr;
+        _scheme = "Unknown";
+        _path = "";
 
         // Parse scheme
         String str = parseScheme(aStr);
@@ -75,8 +77,8 @@ public class ParsedURL {
         // If nested path char '!', get Site/Path and return
         int nestedPathStart = str.lastIndexOf('!');
         if (nestedPathStart > 0) {
-            _siteId = str.substring(0, nestedPathStart);
             _path = str.substring(nestedPathStart + 1);
+            _siteId = str.substring(0, nestedPathStart);
             _siteUrl = _scheme + ':' + _siteId;
             return;
         }

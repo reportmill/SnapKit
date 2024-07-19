@@ -77,7 +77,7 @@ public class WebRequest {
         if (_file != null)
             return _file.getPath();
         String urlPath = _url.getPath();
-        if (urlPath == null)
+        if (urlPath.isEmpty())
             urlPath = "/";
         return urlPath;
     }

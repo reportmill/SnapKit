@@ -77,7 +77,7 @@ public abstract class WebSite {
     /**
      * Returns the name for this data source.
      */
-    public String getName()  { return _url.getPath() != null ? _url.getFilename() : getHostName(); }
+    public String getName()  { return !_url.getPath().isEmpty() ? _url.getFilename() : getHostName(); }
 
     /**
      * Returns the host name.
@@ -444,7 +444,7 @@ public abstract class WebSite {
         String filePath = FilePathUtils.getNormalizedPath(aFilePath);
         WebURL siteURL = getURL();
         String siteUrlString = siteURL.getString();
-        if (siteURL.getPath() != null)
+        if (!siteURL.getPath().isEmpty())
             siteUrlString += '!';
 
         // Get full URL string and return URL for it
@@ -521,7 +521,7 @@ public abstract class WebSite {
 
         // Add URL.Path
         String path = url.getPath();
-        if (path != null && path.length() > 1)
+        if (path.length() > 1)
             sandboxName += path.substring(1);
 
         // If filename string ends with /, trim

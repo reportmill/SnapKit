@@ -208,15 +208,10 @@ public class WebURL {
     public WebFile getFile()
     {
         WebSite site = getSite();
+        if (site == null)
+            return null;
         String filePath = getPath();
-        if (site != null) {
-            if (filePath != null)
-                return site.getFileForPath(filePath);
-            return site.getRootDir();
-        }
-
-        // Return not found
-        return null;
+        return site.getFileForPath(filePath);
     }
 
     /**
@@ -224,10 +219,10 @@ public class WebURL {
      */
     public WebFile createFile(boolean isDir)
     {
-        String path = getPath();
         WebSite site = getSite();
-        if (path != null)
-            return site.createFileForPath(path, isDir);
+        String filePath = getPath();
+        if (!filePath.isEmpty())
+            return site.createFileForPath(filePath, isDir);
 
         // Fallback to root dir?
         return site.getRootDir();
@@ -443,7 +438,7 @@ public class WebURL {
     public WebURL getParent()
     {
         String urlPath = getPath();
-        if (urlPath.equals("/"))
+        if (urlPath.isEmpty() || urlPath.equals("/"))
             return null;
 
         WebSite site = getSite();
@@ -456,9 +451,9 @@ public class WebURL {
      */
     public WebURL getChild(String aName)
     {
-        String path = getPath();
-        String childPath = FilePathUtils.getChildPath(path, aName);
         WebSite site = getSite();
+        String filePath = getPath();
+        String childPath = FilePathUtils.getChildPath(filePath, aName);
         return site.getUrlForPath(childPath);
     }
 

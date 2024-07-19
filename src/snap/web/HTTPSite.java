@@ -61,7 +61,7 @@ public class HTTPSite extends WebSite {
         // If directory, configure directory info and return
         if (isdir) {
             String path = url.getPath();
-            if (path == null)
+            if (path.isEmpty())
                 path = "/";
             FileHeader[] fileHeaders = getFileHeaders(path, httpResp.getBytes());
             aResp.setFileHeaders(fileHeaders);
@@ -79,11 +79,11 @@ public class HTTPSite extends WebSite {
         contentType = contentType.toLowerCase();
 
         String filePath = aURL.getPath();
-        if (filePath == null)
+        if (filePath.isEmpty())
             filePath = "/";
 
         String fileExt = FilePathUtils.getExtension(filePath);
-        boolean isdir = fileExt.length() == 0 && contentType.startsWith("text") && aURL.getQuery() == null;
+        boolean isdir = fileExt.isEmpty() && contentType.startsWith("text") && aURL.getQuery() == null;
         return isdir;
     }
 
@@ -107,7 +107,7 @@ public class HTTPSite extends WebSite {
             String indexFileString = StringUtils.getISOLatinString(indexFile.getBytes());
             String[] fileEntries = indexFileString.split("\n");
             for (String fileEntry : fileEntries) {
-                if (fileEntry.length() == 0)
+                if (fileEntry.isEmpty())
                     continue;
                 String[] fileInfo = fileEntry.split("\t");
                 String filePath = FilePathUtils.getChildPath(aPath, fileInfo[0]);

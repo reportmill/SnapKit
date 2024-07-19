@@ -145,7 +145,7 @@ public class WebGetter {
     {
         // Get scheme, path and type
         String scheme = aSiteURL.getScheme();
-        String sitePath = aSiteURL.getPath(); if (sitePath == null) sitePath = "";
+        String sitePath = aSiteURL.getPath();
         String fileType = FilePathUtils.getExtension(sitePath).toLowerCase();
 
         // Try platform env
@@ -159,8 +159,8 @@ public class WebGetter {
 
         // Handle DirSite
         WebURL parentSiteURL = aSiteURL.getSiteURL();
-        String parentSitePath = parentSiteURL != null ? parentSiteURL.getPath() : null;
-        if (parentSitePath != null && !parentSitePath.isEmpty())
+        String parentSitePath = parentSiteURL != null ? parentSiteURL.getPath() : "";
+        if (!parentSitePath.isEmpty())
             return new DirSite();
 
         // Handle FileSite: If no site path, use FileSite, otherwise use DirSite

@@ -696,7 +696,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public String toString()
     {
-        return "WebFile: " + getUrlAddress() + (isDir() ? "/" : "");
+        return "WebFile: " + getUrlAddress() + (isDir() && !isRoot() ? "/" : "");
     }
 
     /**
