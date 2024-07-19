@@ -262,8 +262,11 @@ public class FileSite extends WebSite {
 
         // If WindowsDriveLetterPath is set, append to path
         if (_windowsDriveLetterPath != null) {
-            if (StringUtils.startsWithIC(filePath, _windowsDriveLetterPath))
+            if (StringUtils.startsWithIC(filePath, _windowsDriveLetterPath)) {
                 filePath = filePath.substring(_windowsDriveLetterPath.length());
+                if (filePath.isEmpty())
+                    filePath = "/";
+            }
         }
 
         // Return
