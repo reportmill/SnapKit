@@ -89,15 +89,19 @@ public class ParsedURL {
             str = str.substring(0, pathIndex);
         }
 
-        // If Windows device letter is present, move from path to string
-        if (_path != null && _path.length() >= 2 && _path.charAt(2) == ':' && Character.isLetter(_path.charAt(1))) {
-            str += _path.substring(0, 3).toUpperCase();
-            _path = _path.substring(3);
-        }
+        // Handle Windows device letter: Move out of path to SiteUrl
+        if (_scheme.equals("file")) {
 
-        // IF Windows and no device letter, add default /C:
-        else if (SnapUtils.isWindows)
-            str = "/C:";
+            // If Windows device letter is present, move from path to string
+            if (_path != null && _path.length() >= 2 && _path.charAt(2) == ':' && Character.isLetter(_path.charAt(1))) {
+                str += _path.substring(0, 3).toUpperCase();
+                _path = _path.substring(3);
+            }
+
+            // IF Windows and no device letter, add default /C:
+            else if (SnapUtils.isWindows)
+                str = "/C:";
+        }
 
         // Set SiteURL string
         _siteUrl = _scheme + "://" + str;

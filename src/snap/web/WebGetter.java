@@ -143,8 +143,7 @@ public class WebGetter {
      */
     protected static WebSite createSiteForURL(WebURL aSiteURL)
     {
-        // Get parentSiteURL, scheme, path and type
-        WebURL parentSiteURL = aSiteURL.getSiteURL();
+        // Get scheme, path and type
         String scheme = aSiteURL.getScheme();
         String sitePath = aSiteURL.getPath(); if (sitePath == null) sitePath = "";
         String fileType = FilePathUtils.getExtension(sitePath).toLowerCase();
@@ -159,13 +158,14 @@ public class WebGetter {
             return new ZipFileSite();
 
         // Handle DirSite
-        if (parentSiteURL != null && parentSiteURL.getPath() != null)
+        WebURL parentSiteURL = aSiteURL.getSiteURL();
+        String parentSitePath = parentSiteURL != null ? parentSiteURL.getPath() : null;
+        if (parentSitePath != null && !parentSitePath.isEmpty())
             return new DirSite();
 
         // Handle FileSite: If no site path, use FileSite, otherwise use DirSite
         if (scheme.equals("file")) {
-            if (sitePath.isEmpty() || sitePath.equals("/") ||
-                sitePath.length() == 3 && sitePath.charAt(2) == ':') // Windows device letter path
+            if (sitePath.isEmpty())
                 return new FileSite();
             return new DirSite();
         }
