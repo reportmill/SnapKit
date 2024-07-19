@@ -11,6 +11,9 @@ import snap.util.*;
  */
 public class FileSite extends WebSite {
 
+    // The drive letter path prefix for Windows
+    private String _windowsDriveLetterPath;
+
     // A cache for LastModTimes for local files in CheerpJ
     private static Prefs _lastModTimesPrefsNode;
 
@@ -24,6 +27,19 @@ public class FileSite extends WebSite {
         // If CheerpJ, get LastModTimes prefs node
         if (SnapUtils.isWebVM)
             _lastModTimesPrefsNode = Prefs.getPrefsForName("LastModTimes");
+    }
+
+    /**
+     * Override to set drive letter path on Windows.
+     */
+    @Override
+    public void setURL(WebURL aURL)
+    {
+        super.setURL(aURL);
+
+        // If Windows, get drive letter path
+        if (SnapUtils.isWindows)
+            _windowsDriveLetterPath = aURL.getWindowsDriveLetterPath();
     }
 
     /**
@@ -43,7 +59,7 @@ public class FileSite extends WebSite {
         }
 
         // If case doesn't match, return not found - case-insensitive file systems could be supported, but it could get tricky
-        String filePathReal = getPathForJavaFile(javaFile);
+        String filePathReal = getLocalPathForJavaFile(javaFile);
         if (!filePath.equals(filePathReal)) {
             aResp.setCode(WebResponse.NOT_FOUND);
             return;
@@ -227,8 +243,12 @@ public class FileSite extends WebSite {
      */
     protected File getJavaFileForLocalPath(String filePath)
     {
-        String javaFilePath = getJavaFilePathForPath(filePath);
-        return new File(javaFilePath);
+        // If WindowsDriveLetterPath is set, append to path
+        if (_windowsDriveLetterPath != null)
+            filePath = _windowsDriveLetterPath + filePath;
+
+        // Return file
+        return new File(filePath);
     }
 
     /**
@@ -237,25 +257,15 @@ public class FileSite extends WebSite {
     protected String getLocalPathForJavaFile(File javaFile)
     {
         String filePath = getPathForJavaFile(javaFile);
-        String sitePath = getPath();
-        if (sitePath == null || sitePath.isEmpty() || sitePath.equals("/"))
-            return filePath;
 
-        // Trim prefix
-        int sitePathLength = sitePath.length();
-        if (sitePath.endsWith("/")) sitePathLength--;
-        return filePath.substring(sitePathLength);
-    }
+        // If WindowsDriveLetterPath is set, append to path
+        if (_windowsDriveLetterPath != null) {
+            if (StringUtils.startsWithIC(filePath, _windowsDriveLetterPath))
+                filePath = filePath.substring(_windowsDriveLetterPath.length());
+        }
 
-    /**
-     * Returns the java file path for given site file path.
-     */
-    protected String getJavaFilePathForPath(String filePath)
-    {
-        String sitePath = getPath();
-        if (sitePath == null)
-            return filePath;
-        return sitePath + filePath;
+        // Return
+        return filePath;
     }
 
     /**

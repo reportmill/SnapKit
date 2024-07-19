@@ -42,6 +42,9 @@ public class ParsedURL {
     // The hashtag string: #something
     private String  _hashtag;
 
+    // The Windows drive letter path
+    private String _windowsDriveLetterPath;
+
     /**
      * Constructor for given string.
      */
@@ -94,13 +97,14 @@ public class ParsedURL {
 
             // If Windows device letter is present, move from path to string
             if (_path != null && _path.length() >= 2 && _path.charAt(2) == ':' && Character.isLetter(_path.charAt(1))) {
-                str += _path.substring(0, 3).toUpperCase();
+                _windowsDriveLetterPath = _path.substring(0, 3).toUpperCase();
+                str += _windowsDriveLetterPath;
                 _path = _path.substring(3);
             }
 
             // IF Windows and no device letter, add default /C:
             else if (SnapUtils.isWindows)
-                str = "/C:";
+                str = _windowsDriveLetterPath = "/C:";
         }
 
         // Set SiteURL string
@@ -288,6 +292,11 @@ public class ParsedURL {
             urlStr = urlStr.substring(0, refStart);
         return urlStr;
     }
+
+    /**
+     * Returns the windows drive letter path.
+     */
+    public String getWindowsDriveLetterPath()  { return _windowsDriveLetterPath; }
 
     /**
      * Converts URL to JRT (Java runtime module?) form by moving module name from Path to Site.

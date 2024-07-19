@@ -463,6 +463,11 @@ public class WebURL {
     }
 
     /**
+     * Returns the windows drive letter.
+     */
+    public String getWindowsDriveLetterPath()  { return _parsedUrl.getWindowsDriveLetterPath(); }
+
+    /**
      * Standard equals implementation.
      */
     public boolean equals(Object anObj)
