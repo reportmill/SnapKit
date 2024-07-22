@@ -81,8 +81,8 @@ public class TextAreaKeys {
 
             // Handle common emacs key bindings
             switch (keyCode) {
-                case KeyCode.F: _textArea.selectForward(false); break; // Handle control-f key forward
-                case KeyCode.B: _textArea.selectBackward(false); break; // Handle control-b key backward
+                case KeyCode.F: _textArea.selectForward(); break; // Handle control-f key forward
+                case KeyCode.B: _textArea.selectBackward(); break; // Handle control-b key backward
                 case KeyCode.P: _textArea.selectUp(); break; // Handle control-p key up
                 case KeyCode.N: _textArea.selectDown(); break; // Handle control-n key down
                 case KeyCode.A: _textArea.selectLineStart(); break; // Handle control-a line start
@@ -115,13 +115,13 @@ public class TextAreaKeys {
 
                 // Handle Left arrow
                 case KeyCode.LEFT:
-                    _textArea.selectBackward(shiftDown);
+                    _textArea.selectBackward();
                     anEvent.consume();
                     break;
 
                 // Handle Right arrow
                 case KeyCode.RIGHT:
-                    _textArea.selectForward(shiftDown);
+                    _textArea.selectForward();
                     anEvent.consume();
                     break;
 
@@ -179,7 +179,7 @@ public class TextAreaKeys {
     {
         // Get event info
         String keyChars = anEvent.getKeyString();
-        char keyChar = keyChars.length() > 0 ? keyChars.charAt(0) : 0;
+        char keyChar = !keyChars.isEmpty() ? keyChars.charAt(0) : 0;
         boolean charDefined = keyChar != KeyCode.CHAR_UNDEFINED && !Character.isISOControl(keyChar);
         boolean commandDown = anEvent.isShortcutDown();
         boolean controlDown = anEvent.isControlDown();

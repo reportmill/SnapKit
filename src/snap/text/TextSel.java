@@ -3,6 +3,7 @@
  */
 package snap.text;
 import snap.geom.Shape;
+import snap.view.ViewUtils;
 
 /**
  * A class to represent a selection of text.
@@ -125,7 +126,7 @@ public class TextSel {
     {
         // If selection empty but not at end, get next char (or after newline, if at newline)
         int charIndex = getEnd();
-        if (isEmpty() && charIndex < _textBlock.length())
+        if ((isEmpty() || ViewUtils.isShiftDown()) && charIndex < _textBlock.length())
             charIndex = _textBlock.isLineEnd(charIndex) ? _textBlock.indexAfterNewline(charIndex) : (charIndex + 1);
         return charIndex;
     }
@@ -137,7 +138,7 @@ public class TextSel {
     {
         // If selection empty but not at start, get previous char (or before newline if after newline)
         int charIndex = getStart();
-        if (isEmpty() && charIndex > 0)
+        if ((isEmpty() || ViewUtils.isShiftDown()) && charIndex > 0)
             charIndex = _textBlock.isAfterLineEnd(charIndex) ? _textBlock.lastIndexOfNewline(charIndex) : (charIndex - 1);
         return charIndex;
     }

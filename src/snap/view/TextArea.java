@@ -203,7 +203,7 @@ public class TextArea extends View {
     {
         // If string already set, just return
         String str = aString != null ? aString : "";
-        if (str.length() == length() && (str.length() == 0 || str.equals(getText()))) return;
+        if (str.length() == length() && (str.isEmpty() || str.equals(getText()))) return;
 
         // Set string and notify textDidChange
         _textBlock.setString(aString);
@@ -421,6 +421,19 @@ public class TextArea extends View {
             setCaretAnim();
             getEnv().runLater(() -> scrollSelToVisible());
         }
+    }
+
+    /**
+     * Sets the selection with shift key modification, if shift key is down.
+     */
+    private void setSelWithShiftKeyCheck(int charIndex)
+    {
+        if (ViewUtils.isShiftDown()) {
+            int selStart = Math.min(charIndex, getSelStart());
+            int selEnd = Math.max(charIndex, getSelEnd());
+            setSel(selStart, selEnd);
+        }
+        else setSel(charIndex);
     }
 
     /**
@@ -873,43 +886,19 @@ public class TextArea extends View {
     /**
      * Moves the selection index forward a character (or if a range is selected, moves to end of range).
      */
-    public void selectForward(boolean isShiftDown)
+    public void selectForward()
     {
-        // If shift is down, extend selection forward
-        if (isShiftDown) {
-            if (getSelAnchor() == getSelStart() && !isSelEmpty())
-                setSel(getSelStart() + 1, getSelEnd());
-            else {
-                setSel(getSelStart(), getSelEnd() + 1);
-            }
-        }
-
-        // Set new selection
-        else {
-            int charIndex = _sel.getCharRight();
-            setSel(charIndex);
-        }
+        int charIndex = _sel.getCharRight();
+        setSelWithShiftKeyCheck(charIndex);
     }
 
     /**
      * Moves the selection index backward a character (or if a range is selected, moves to beginning of range).
      */
-    public void selectBackward(boolean isShiftDown)
+    public void selectBackward()
     {
-        // If shift is down, extend selection back
-        if (isShiftDown) {
-            if (getSelAnchor() == getSelEnd() && !isSelEmpty())
-                setSel(getSelStart(), getSelEnd() - 1);
-            else {
-                setSel(getSelEnd(), getSelStart() - 1);
-            }
-        }
-
-        // Set new selection
-        else {
-            int charIndex = _sel.getCharLeft();
-            setSel(charIndex);
-        }
+        int charIndex = _sel.getCharLeft();
+        setSelWithShiftKeyCheck(charIndex);
     }
 
     /**
@@ -918,7 +907,7 @@ public class TextArea extends View {
     public void selectUp()
     {
         int charIndex = _sel.getCharUp();
-        setSel(charIndex);
+        setSelWithShiftKeyCheck(charIndex);
     }
 
     /**
@@ -927,7 +916,7 @@ public class TextArea extends View {
     public void selectDown()
     {
         int charIndex = _sel.getCharDown();
-        setSel(charIndex);
+        setSelWithShiftKeyCheck(charIndex);
     }
 
     /**
@@ -936,7 +925,7 @@ public class TextArea extends View {
     public void selectLineStart()
     {
         int charIndex = _sel.getLineStart();
-        setSel(charIndex);
+        setSelWithShiftKeyCheck(charIndex);
     }
 
     /**
@@ -945,7 +934,7 @@ public class TextArea extends View {
     public void selectLineEnd()
     {
         int charIndex = _sel.getLineEnd();
-        setSel(charIndex);
+        setSelWithShiftKeyCheck(charIndex);
     }
 
     /**
@@ -1450,7 +1439,7 @@ public class TextArea extends View {
         // If Clipboard has String, paste it
         if (clipboard.hasString()) {
             String str = clipboard.getString();
-            if (str != null && str.length() > 0)
+            if (str != null && !str.isEmpty())
                 return  str;
         }
 
@@ -1788,7 +1777,10 @@ public class TextArea extends View {
         }
 
         // Otherwise, archive text string
-        else if (getText() != null && getText().length() > 0) xml.add("text", getText());
+        else {
+            String text = getText();
+            if (text != null && !text.isEmpty()) xml.add("text", text);
+        }
 
         // Archive FireActionOnEnterKey, FireActionOnFocusLost
         if (isFireActionOnEnterKey()) xml.add(FireActionOnEnterKey_Prop, true);
@@ -1830,7 +1822,7 @@ public class TextArea extends View {
         // Otherwise unarchive text. Text can be "text" or "value" attribute, or as content (CDATA or otherwise)
         else {
             String str = anElement.getAttributeValue("text", anElement.getAttributeValue("value", anElement.getValue()));
-            if (str != null && str.length() > 0)
+            if (str != null && !str.isEmpty())
                 setText(str);
         }
 
