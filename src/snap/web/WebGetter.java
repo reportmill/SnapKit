@@ -11,7 +11,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +20,7 @@ import java.util.Map;
 public class WebGetter {
 
     // A map of existing WebSites
-    static Map<WebURL,WebSite>  _sites = Collections.synchronizedMap(new HashMap<>());
+    static Map<WebURL,WebSite>  _sites = new HashMap<>();
 
     /**
      * Returns a java.net.URL for given source.
@@ -122,6 +121,15 @@ public class WebGetter {
         WebSite site = _sites.get(aSiteURL);
         if (site != null)
             return site;
+
+        // If File URL and nested (contains '!' path separator), flatten URL and use that to avoid unnecessary dir references
+        if (aSiteURL.getScheme().equals("file") && aSiteURL.getPath().contains("!")) {
+            String flatSiteAddress = aSiteURL.getString().replace("!", "");
+            WebURL flatSiteURL = WebURL.getURL(flatSiteAddress); assert (flatSiteURL != null);
+            WebSite flatSite = flatSiteURL.getAsSite();
+            setSite(aSiteURL, flatSite);
+            return flatSite;
+        }
 
         // Otherwise, create site, set URL and return
         site = createSiteForURL(aSiteURL);
