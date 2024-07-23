@@ -484,6 +484,16 @@ public class ViewOwner extends PropObject {
     }
 
     /**
+     * Adds an event handler (for given types) to view for given name or view.
+     */
+    public void addViewEventHandler(Object anObj, EventListener aListener, ViewEvent.Type ... theTypes)
+    {
+        View view = getView(anObj);
+        if (view != null)
+            view.addEventHandler(aListener, theTypes);
+    }
+
+    /**
      * Returns an image with given name or path from this class.
      */
     public Image getImage(String aPath)
