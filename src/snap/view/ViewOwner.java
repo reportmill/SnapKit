@@ -49,9 +49,6 @@ public class ViewOwner extends PropObject {
     // Whether this ViewOwner should suppress the next automatic reset that normally happens after respondUI
     private boolean  _cancelReset;
 
-    // The EventListener to listen to view events
-    private EventListener  _viewEventListener;
-
     // Constants for properties
     public static final String Showing_Prop = "Showing";
     
@@ -604,20 +601,6 @@ public class ViewOwner extends PropObject {
     public void dispatchEventToOwner(ViewEvent anEvent)
     {
         invokeRespondUI(anEvent);
-    }
-
-    /**
-     * Enables events on given object.
-     */
-    public void enableEvents(Object anObj, ViewEvent.Type ... theTypes)
-    {
-        // Get View and view EventListener
-        View view = getView(anObj);
-        if (_viewEventListener == null)
-            _viewEventListener = e -> dispatchEventToOwner(e);
-
-        // Add EventHandler
-        view.addEventHandler(_viewEventListener, theTypes);
     }
 
     /**
