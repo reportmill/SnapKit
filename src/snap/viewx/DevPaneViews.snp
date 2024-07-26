@@ -10,24 +10,38 @@
     </RowView>
     <BrowserView Name="BrowserView" PrefWidth="420" GrowHeight="true" PrefColCount="3" PrefColWidth="120" />
   </ColView>
-  <ColView Padding="5" GrowHeight="true">
+  <ColView Padding="5" PrefWidth="200" GrowHeight="true" FillWidth="true">
     <RowView PrefHeight="26" Padding="2,4,3,4" GrowWidth="true" Spacing="4">
       <Label text="View Properties">
         <font name="Arial" size="13" />
       </Label>
     </RowView>
-    <TableView Name="PropTableView" PrefWidth="200" GrowHeight="true" >
+    <TableView Name="PropTableView" GrowHeight="true" >
       <TableCol PrefWidth="80" Header="Property" />
       <TableCol GrowWidth="true" Header="Value" />
     </TableView>
+  </ColView>
+  <ColView Spacing="5" PrefWidth="200" FillWidth="true">
+    <RowView Margin="35,5,5,5">
+      <Label Text="Prop Name: "/>
+      <TextField Name="PropNameText" GrowWidth="true" />
+    </RowView>
+    <RowView Margin="5">
+      <Label Text="Prop Value: "/>
+      <TextField Name="PropValueText" GrowWidth="true" />
+    </RowView>
+    <Button Name="RelayoutViewButton" PrefWidth="90" Margin="25,40,8,40" Padding="2,6,2,6" Text="Relayout View" />
+    <Button Name="RepaintViewButton" PrefWidth="90" Margin="8,40,8,40" Padding="2,6,2,6" Text="Repaint View" />
+    <Button Name="ShowSourceButton" PrefWidth="90" Margin="8,40,8,40" Padding="2,6,2,6" Text="Open Source" />
+    <Button Name="ShowJavaDocButton" PrefWidth="90" Margin="8,40,8,40" Padding="2,6,2,6" Text="Open JavaDoc" />
   </ColView>
   <ColView Padding="5" GrowWidth="true" FillWidth="true">
     <RowView Padding="2,4,3,4" Spacing="8">
       <Label text="View XML">
         <font name="Arial" size="13" />
       </Label>
-      <Button Name="ShowSourceButton" PrefWidth="90" Padding="2,6,2,6" LeanX="RIGHT" text="Open Source" />
-      <Button Name="ShowJavaDocButton" PrefWidth="90" Padding="2,6,2,6" text="Open JavaDoc" />
+      <Label text="Set Prop String: " Margin="0,0,0,40" />
+      <TextField Name="SetPropStringText" PrefWidth="60" GrowWidth="true" />
     </RowView>
     <TextView Name="TextView" GrowHeight="true" />
   </ColView>

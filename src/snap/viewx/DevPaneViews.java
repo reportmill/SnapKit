@@ -5,7 +5,9 @@ import snap.geom.RoundRect;
 import snap.geom.Shape;
 import snap.gfx.GFXEnv;
 import snap.gfx.Painter;
+import snap.util.ArrayUtils;
 import snap.util.Convert;
+import snap.util.StringUtils;
 import snap.view.*;
 
 import java.util.Collections;
@@ -50,11 +52,10 @@ public class DevPaneViews extends ViewOwner {
             View.Width_Prop, View.Height_Prop,
             MaxX_Prop, MaxY_Prop,
             View.PrefWidth_Prop, View.PrefHeight_Prop,
-            View.Align_Prop, View.Padding_Prop, View.Spacing_Prop,
+            View.Align_Prop, View.Margin_Prop, View.Padding_Prop, View.Spacing_Prop,
             View.GrowWidth_Prop, View.GrowHeight_Prop,
             View.LeanX_Prop, View.LeanY_Prop,
-            View.Font_Prop,
-            View.Margin_Prop
+            View.Font_Prop, View.Fill_Prop, View.Border_Prop
     };
 
     /**
@@ -229,6 +230,9 @@ public class DevPaneViews extends ViewOwner {
         addKeyActionHandler("EscapeAction", "ESCAPE");
     }
 
+    /**
+     * Reset UI.
+     */
     @Override
     protected void resetUI()
     {
@@ -238,48 +242,122 @@ public class DevPaneViews extends ViewOwner {
         // Update PropTable pairs
         _propTable.setItems(getPropValuePairs());
 
+        // Update PropNameText, PropValueText
+        PropValuePair selPair = _propTable.getSelItem();
+        setViewValue("PropNameText", selPair != null ? selPair.getPropName() : "");
+        if (!getView("PropValueText").isFocused()) // Lame - but Fill/Border break when changed
+            setViewValue("PropValueText", selPair != null ? selPair.getValueString() : "");
+
+        // Handle RelayoutViewButton, RepaintViewButton
+        setViewEnabled("RelayoutViewButton", getSelView() != null);
+        setViewEnabled("RepaintViewButton", getSelView() != null);
+
         // Update XML
-        if (_updateXML) {
-            View view = getSelView();
-            String xml = view!=null && !isTargeting() ? new ViewArchiver().writeToXML(view).getString() : "";
-            int header = xml.indexOf('\n');
-            if (header>0) xml = xml.substring(header+1);
-            _textView.setText(xml);
-            double size = xml.length() > 800 ? 11 : xml.length() > 400 ? 12 : xml.length() > 200 ? 13 : 14;
-            if (_textView.getFont().getSize()!=size)
-                _textView.setFont(_textView.getFont().copyForSize(size));
-            _updateXML = false;
-        }
+        if (_updateXML)
+            resetXmlTextView();
     }
 
+    /**
+     * Respond UI.
+     */
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle BrowserView
-        if (anEvent.equals(_browserView)) {
-            _devPane.getUI().repaint();
-            setTargeting(false);
-            _updateXML = true;
-            _propPairs = null;
+        switch (anEvent.getName()) {
+
+            // Handle BrowserView
+            case "BrowserView":
+                _devPane.getUI().repaint();
+                setTargeting(false);
+                _updateXML = true;
+                _propPairs = null;
+                break;
+
+            // Handle TargetingButton
+            case "TargetingButton": setTargeting(true); break;
+
+            // Handle PropNameText, PropValueText
+            case "PropNameText": handlePropNameTextAction(anEvent); break;
+            case "PropValueText": handlePropValueTextAction(anEvent); break;
+
+            // Handle RelayoutViewButton, RepaintViewButton
+            case "RelayoutViewButton": getSelView().relayout(); break;
+            case "RepaintViewButton": getSelView().repaint(); break;
+
+            // Handle ShowSourceButton, ShowJavaDocButton
+            case "ShowSourceButton": showSource(); break;
+            case "ShowJavaDocButton": showJavaDoc(); break;
+
+            // Handle SetPropStringText
+            case "SetPropStringText": handleSetPropStringTextAction(anEvent); break;
+
+            // Handle EscapeAction
+            case "EscapeAction":
+                if (isTargeting()) {
+                    setTargeting(false);
+                    anEvent.consume();
+                }
+                break;
         }
+    }
 
-        // Handle TargetingButton
-        if (anEvent.equals("TargetingButton"))
-            setTargeting(true);
+    /**
+     * Resets the XML TextView.
+     */
+    private void resetXmlTextView()
+    {
+        // Get XML for selected view
+        View selView = getSelView();
+        String viewXML = selView != null && !isTargeting() ? new ViewArchiver().writeToXML(selView).getString() : "";
 
-        // Handle EscapeAction
-        if (anEvent.equals("EscapeAction") && isTargeting()) {
-            setTargeting(false);
-            anEvent.consume();
-        }
+        // Strip header line
+        int xmlHeader = viewXML.indexOf('\n');
+        if (xmlHeader > 0)
+            viewXML = viewXML.substring(xmlHeader+1);
 
-        // Handle ShowSourceButton
-        if (anEvent.equals("ShowSourceButton"))
-            showSource();
+        // Set xml in TextView
+        _textView.setText(viewXML);
 
-        // Handle ShowJavaDocButton
-        if (anEvent.equals("ShowJavaDocButton"))
-            showJavaDoc();
+        // Reset font to fit
+        double fontSize = viewXML.length() > 800 ? 11 : viewXML.length() > 400 ? 12 : viewXML.length() > 200 ? 13 : 14;
+        if (_textView.getFont().getSize() != fontSize)
+            _textView.setFont(_textView.getFont().copyForSize(fontSize));
+        _updateXML = false;
+    }
+
+    /**
+     * Called when PropNameText gets Action event.
+     */
+    private void handlePropNameTextAction(ViewEvent anEvent)
+    {
+        String prefix = anEvent.getStringValue();
+        PropValuePair selPair = ArrayUtils.findMatch(_propPairs, propPair -> StringUtils.startsWithIC(propPair.getPropName(), prefix));
+        if (selPair != null)
+            _propTable.setSelItem(selPair);
+    }
+
+    /**
+     * Called when PropValueText gets Action event.
+     */
+    private void handlePropValueTextAction(ViewEvent anEvent)
+    {
+        View selView = getSelView(); if (selView==null) return;
+        PropValuePair selPair = _propTable.getSelItem(); if (selPair == null) return;
+        String propName = selPair.getPropName();
+        String propValue = anEvent.getStringValue();
+        selView.setPropValue(propName, propValue);
+        _devPane._splitView.repaint();
+    }
+
+    /**
+     * Called when SetPropStringText gets Action event.
+     */
+    private void handleSetPropStringTextAction(ViewEvent anEvent)
+    {
+        View selView = getSelView(); if (selView==null) return;
+        String propsStr = anEvent.getStringValue();
+        selView.setPropsString(propsStr);
+        _devPane._splitView.repaint();
     }
 
     /**
@@ -287,7 +365,7 @@ public class DevPaneViews extends ViewOwner {
      */
     private void showSource()
     {
-        String urlStr = getSourceURL();
+        String urlStr = getSourceUrlForSelView();
         if (urlStr==null) { ViewUtils.beep(); return; }
         GFXEnv.getEnv().openURL(urlStr);
     }
@@ -297,48 +375,49 @@ public class DevPaneViews extends ViewOwner {
      */
     private void showJavaDoc()
     {
-        String urlStr = getSourceURL();
-        if (urlStr==null) { ViewUtils.beep(); return; }
+        String urlStr = getSourceUrlForSelView();
+        if (urlStr == null) { ViewUtils.beep(); return; }
         GFXEnv.getEnv().openURL(urlStr);
     }
 
     /**
      * Returns the Source url for currently selected type.
      */
-    public String getSourceURL()
+    private String getSourceUrlForSelView()
     {
         // Get class name for selected view
         View selView = getSelView();
-        Class cls = selView != null ? selView.getClass() : null; if (cls == null) return null;
-        if (cls.isArray()) cls = cls.getComponentType();
+        Class<?> selViewClass = selView != null ? selView.getClass() : null; if (selViewClass == null) return null;
+        if (selViewClass.isArray())
+            selViewClass = selViewClass.getComponentType();
 
         // Iterate up through class parents until URL found or null
-        while (cls != null) {
-            String url = getSourceURL(cls); if (url != null) return url;
-            Class scls = cls.getSuperclass();
-            cls = scls != null && scls != Object.class ? scls : null;
+        while (selViewClass != null) {
+            String url = getSourceUrlForViewClass(selViewClass); if (url != null) return url;
+            Class<?> viewSuperclass = selViewClass.getSuperclass();
+            selViewClass = viewSuperclass != null && viewSuperclass != Object.class ? viewSuperclass : null;
         }
         return null;
     }
 
     /**
-     * Returns the JavaDoc url for currently selected type.
+     * Returns the JavaDoc url for given view class.
      */
-    public String getSourceURL(Class aClass)
+    private String getSourceUrlForViewClass(Class<?> viewClass)
     {
         // Get class name for selected JNode (if inner class, strip that out)
-        String cname = aClass.getName();
-        if (cname.contains("$")) {
-            int ind = cname.indexOf("$");
-            cname = cname.substring(0, ind);
+        String className = viewClass.getName();
+        if (className.contains("$")) {
+            int ind = className.indexOf("$");
+            className = className.substring(0, ind);
         }
 
         // Handle snap/snapcharts classes
         String url = null;
-        if (cname.startsWith("snap."))
-            url = "https://github.com/reportmill/SnapKit/blob/master/src/" + cname.replace('.', '/') + ".java";
-        else if (cname.startsWith("snapcharts."))
-            url = "https://github.com/reportmill/SnapCharts/blob/master/src/" + cname.replace('.', '/') + ".java";
+        if (className.startsWith("snap."))
+            url = "https://github.com/reportmill/SnapKit/blob/master/src/" + className.replace('.', '/') + ".java";
+        else if (className.startsWith("snapcharts."))
+            url = "https://github.com/reportmill/SnapCharts/blob/master/src/" + className.replace('.', '/') + ".java";
 
         // Return url
         return url;

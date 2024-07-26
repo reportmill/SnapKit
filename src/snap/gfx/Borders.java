@@ -36,14 +36,14 @@ public class Borders {
         /** Creates lineBorder. */
         public LineBorder(Color aColor, double aWidth)
         {
-            _color = aColor;
+            _color = aColor != null ? aColor : Color.BLACK;
             _stroke = Stroke.getStroke(aWidth);
         }
 
         /** Creates lineBorder. */
         public LineBorder(Color aColor, Stroke aStroke)
         {
-            _color = aColor;
+            _color = aColor != null ? aColor : Color.BLACK;
             _stroke = aStroke;
         }
 
@@ -102,9 +102,9 @@ public class Borders {
          */
         public LineBorder copyForColor(Color aColor)
         {
-            LineBorder c = clone();
-            c._color = aColor;
-            return c;
+            LineBorder clone = clone();
+            clone._color = aColor != null ? aColor : Color.BLACK;
+            return clone;
         }
 
         /**
@@ -120,7 +120,7 @@ public class Borders {
          */
         public LineBorder copyForStroke(Stroke aStroke)
         {
-            LineBorder c = clone(); c._stroke = aStroke; return c;
+            LineBorder clone = clone(); clone._stroke = aStroke; return clone;
         }
 
         /**
@@ -137,8 +137,8 @@ public class Borders {
         public boolean equals(Object anObj)
         {
             // Check identity, superclass and get other
-            if(anObj == this) return true;
-            if(!super.equals(anObj)) return false;
+            if (anObj == this) return true;
+            if (!super.equals(anObj)) return false;
             LineBorder other = (LineBorder) anObj;
             return other._stroke.equals(_stroke);
         }
@@ -147,9 +147,9 @@ public class Borders {
         public XMLElement toXML(XMLArchiver anArchiver)
         {
             XMLElement e = super.toXML(anArchiver);
-            if(!_color.equals(Color.BLACK))
+            if (!_color.equals(Color.BLACK))
                 e.add("Color", '#' + _color.toHexString());
-            if(getWidth() != 1)
+            if (getWidth() != 1)
                 e.add("Width", getWidth());
             return e;
         }
@@ -157,11 +157,11 @@ public class Borders {
         /** XML Unarchival. */
         public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)
         {
-            if(anElement.hasAttribute("Color"))
+            if (anElement.hasAttribute("Color"))
                 _color = new Color(anElement.getAttributeValue("Color"));
-            if(anElement.hasAttribute("line-color"))
+            if (anElement.hasAttribute("line-color"))
                 _color = new Color(anElement.getAttributeValue("line-color"));
-            if(anElement.hasAttribute("Width"))
+            if (anElement.hasAttribute("Width"))
                 _stroke = _stroke.copyForWidth(anElement.getAttributeFloatValue("Width"));
             return this;
         }
@@ -210,7 +210,7 @@ public class Borders {
             aPntr.drawRect(boundsX + 1.5,boundsY + 1.5,boundsW - 3,boundsH - 3);
 
             // Paint Lowered
-            if(_type == LOWERED) {
+            if (_type == LOWERED) {
                 aPntr.setColor(BORDER_GRAY);
                 aPntr.drawLine(boundsX + .5,boundsY + .5,boundsX + boundsW - 1,boundsY + .5);
                 aPntr.drawLine(boundsX + .5,boundsY + .5,boundsX + .5,boundsY + boundsH - 1);
@@ -234,7 +234,7 @@ public class Borders {
         public XMLElement toXML(XMLArchiver anArchiver)
         {
             XMLElement e = super.toXML(anArchiver);
-            if(_type == RAISED)
+            if (_type == RAISED)
                 e.add("Type", "RAISED");
             return e;
         }
@@ -243,11 +243,11 @@ public class Borders {
         public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)
         {
             String type = anElement.getAttributeValue("bevel-type", "lowered");
-            if(anElement.hasAttribute("Type"))
+            if (anElement.hasAttribute("Type"))
                 type = anElement.getAttributeValue("Type");
-            if(anElement.hasAttribute("bevel-type"))
+            if (anElement.hasAttribute("bevel-type"))
                 type = anElement.getAttributeValue("bevel-type");
-            if(type.equals("RAISED") || type.equals("raised"))
+            if (type.equals("RAISED") || type.equals("raised"))
                 _type = RAISED;
             return this;
         }
@@ -359,7 +359,7 @@ public class Borders {
         private Shape getBoxPath(Shape aShape)
         {
             // If showing all borders, just return bounds
-            Rect rect = aShape.getBounds(); if(isShowAll()) return rect;
+            Rect rect = aShape.getBounds(); if (isShowAll()) return rect;
             boolean showTop = isShowTop();
             boolean showRight = isShowRight();
             boolean showBottom = isShowBottom();
@@ -369,10 +369,10 @@ public class Borders {
 
             // Otherwise, build path based on sides showing and return
             Path2D path = new Path2D();
-            if(showTop) { path.moveTo(0,0); path.lineTo(rectW, 0); }
-            if(showRight) { if(!showTop) path.moveTo(rectW, 0); path.lineTo(rectW, rectH); }
-            if(showBottom) { if(!showRight) path.moveTo(rectW, rectH); path.lineTo(0, rectH); }
-            if(showLeft) { if(!showBottom) path.moveTo(0, rectH); path.lineTo(0,0); }
+            if (showTop) { path.moveTo(0,0); path.lineTo(rectW, 0); }
+            if (showRight) { if (!showTop) path.moveTo(rectW, 0); path.lineTo(rectW, rectH); }
+            if (showBottom) { if (!showRight) path.moveTo(rectW, rectH); path.lineTo(0, rectH); }
+            if (showLeft) { if (!showBottom) path.moveTo(0, rectH); path.lineTo(0,0); }
             return path;
         }
 
@@ -397,15 +397,15 @@ public class Borders {
         public boolean equals(Object anObj)
         {
             // Check identity, super, class and get other
-            if(anObj == this) return true;
-            if(!super.equals(anObj)) return false;
+            if (anObj == this) return true;
+            if (!super.equals(anObj)) return false;
             EdgeBorder other = anObj instanceof EdgeBorder ? (EdgeBorder) anObj : null; if (other == null) return false;
 
             // Check ShowLeft, ShowRight, ShowTop, ShowBottom
-            if(other._showLeft != _showLeft) return false;
-            if(other._showRight != _showRight) return false;
-            if(other._showTop != _showTop) return false;
-            if(other._showBottom != _showBottom) return false;
+            if (other._showLeft != _showLeft) return false;
+            if (other._showRight != _showRight) return false;
+            if (other._showTop != _showTop) return false;
+            if (other._showBottom != _showBottom) return false;
             return true; // Return true since all checks passed
         }
 
@@ -419,13 +419,13 @@ public class Borders {
             e.add("type", "border");
 
             // Archive ShowLeft, ShowRight, ShowTop, ShowBottom
-            if(!isShowLeft())
+            if (!isShowLeft())
                 e.add("show-left", false);
-            if(!isShowRight())
+            if (!isShowRight())
                 e.add("show-right", false);
-            if(!isShowTop())
+            if (!isShowTop())
                 e.add("show-top", false);
-            if(!isShowBottom())
+            if (!isShowBottom())
                 e.add("show-bottom", false);
             return e;
         }
@@ -439,13 +439,13 @@ public class Borders {
             super.fromXML(anArchiver, anElement);
 
             // Unarchive ShowLeft, ShowRight, ShowTop, ShowBottom
-            if(anElement.hasAttribute("show-left"))
+            if (anElement.hasAttribute("show-left"))
                 _showLeft = anElement.getAttributeBoolValue("show-left");
-            if(anElement.hasAttribute("show-right"))
+            if (anElement.hasAttribute("show-right"))
                 _showRight = anElement.getAttributeBoolValue("show-right");
-            if(anElement.hasAttribute("show-top"))
+            if (anElement.hasAttribute("show-top"))
                 _showTop = anElement.getAttributeBoolValue("show-top");
-            if(anElement.hasAttribute("show-bottom"))
+            if (anElement.hasAttribute("show-bottom"))
                 _showBottom = anElement.getAttributeBoolValue("show-bottom");
             return this;
         }
