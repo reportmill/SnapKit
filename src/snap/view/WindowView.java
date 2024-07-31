@@ -503,9 +503,9 @@ public class WindowView extends ParentView {
         Rect screenBounds = GFXEnv.getEnv().getScreenBoundsInset();
         if (screenBounds.contains(getX(), getY())) {
             if (getMaxX() > screenBounds.getMaxX())
-                setX(screenBounds.getMaxX() - getWidth());
+                setX(screenBounds.getMaxX() - getWidth() - 5);
             if (getMaxY() > screenBounds.getMaxY())
-                setY(screenBounds.getMaxY() - getHeight());
+                setY(screenBounds.getMaxY() - getHeight() - 5);
         }
 
         // Forward to helper

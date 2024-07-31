@@ -28,6 +28,9 @@ public class MenuButton extends ButtonBase {
     // The menu
     private Menu _menu;
 
+    // Constants for properties
+    public static final String ShowArrow_Prop = "ShowArrow";
+
     /**
      * Constructor.
      */
@@ -92,7 +95,7 @@ public class MenuButton extends ButtonBase {
         else setGraphicAfter(null);
 
         // Set value and firePropChange
-        firePropChange("ShowArrow", _showArrow, _showArrow = aValue);
+        firePropChange(ShowArrow_Prop, _showArrow, _showArrow = aValue);
     }
 
     /**
@@ -230,7 +233,7 @@ public class MenuButton extends ButtonBase {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive ShowArrow, PopupPoint, PopupSize
-        if (!isShowArrow()) e.add("ShowArrow", false);
+        if (!isShowArrow()) e.add(ShowArrow_Prop, false);
         if (getPopupPoint() != null) {
             e.add("PopupX", getPopupPoint().x);
             e.add("PopupY", getPopupPoint().y);
@@ -253,7 +256,7 @@ public class MenuButton extends ButtonBase {
         super.fromXMLView(anArchiver, anElement);
 
         // Unarchive ShowArrow
-        setShowArrow(anElement.getAttributeBooleanValue("ShowArrow", true));
+        setShowArrow(anElement.getAttributeBooleanValue(ShowArrow_Prop, true));
 
         // Unarchive PopupPoint
         if (anElement.hasAttribute("PopupX") || anElement.hasAttribute("PopupY")) {
