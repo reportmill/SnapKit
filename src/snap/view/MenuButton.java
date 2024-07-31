@@ -203,8 +203,17 @@ public class MenuButton extends ButtonBase {
     }
 
     /**
+     * Returns the item for given name.
+     */
+    public MenuItem getItemForName(String aName)
+    {
+        return ListUtils.findMatch(_items, menuItem -> Objects.equals(menuItem.getName(), aName));
+    }
+
+    /**
      * Override to send to items.
      */
+    @Override
     public void setOwner(ViewOwner anOwner)
     {
         super.setOwner(anOwner);

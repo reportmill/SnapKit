@@ -4,6 +4,8 @@
 package snap.gfx;
 import java.lang.reflect.Method;
 import java.net.URL;
+
+import snap.geom.Rect;
 import snap.util.*;
 import snap.web.*;
 
@@ -121,6 +123,11 @@ public abstract class GFXEnv {
      * Returns the screen scale. Usually 1, but could be 2 for HiDPI/Retina displays.
      */
     public abstract double getScreenScale();
+
+    /**
+     * Returns the screen bounds inset to usable area.
+     */
+    public Rect getScreenBoundsInset()  { return snap.view.ViewEnv.getEnv().getScreenBoundsInset(); }
 
     /**
      * Plays a beep.

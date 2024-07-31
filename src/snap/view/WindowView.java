@@ -169,7 +169,7 @@ public class WindowView extends ParentView {
                 setBounds(_unmaxBounds);
             else {
                 Size prefSize = getPrefSize();
-                Rect screenRect = ViewEnv.getEnv().getScreenBoundsInset();
+                Rect screenRect = GFXEnv.getEnv().getScreenBoundsInset();
                 Rect centeredBounds = screenRect.getRectCenteredInside(prefSize.width, prefSize.height);
                 setBounds(centeredBounds);
             }
@@ -187,7 +187,7 @@ public class WindowView extends ParentView {
         if (_maxBounds != null) return _maxBounds;
 
         // Get screen bounds
-        Rect maxBounds = ViewEnv.getEnv().getScreenBoundsInset();
+        Rect maxBounds = GFXEnv.getEnv().getScreenBoundsInset();
 
         // Set and return
         return _maxBounds = maxBounds;
@@ -499,6 +499,15 @@ public class WindowView extends ParentView {
         // Make sure this happens in event thread
         if (!ViewUtils.isEventThread()) { ViewUtils.runLater(this::show); return; }
 
+        // If outside bounds, scoot in
+        Rect screenBounds = GFXEnv.getEnv().getScreenBoundsInset();
+        if (screenBounds.contains(getX(), getY())) {
+            if (getMaxX() > screenBounds.getMaxX())
+                setX(screenBounds.getMaxX() - getWidth());
+            if (getMaxY() > screenBounds.getMaxY())
+                setY(screenBounds.getMaxY() - getHeight());
+        }
+
         // Forward to helper
         getHelper().show();
     }
@@ -549,7 +558,7 @@ public class WindowView extends ParentView {
 
         // If no view, just use screen
         if (aView == null) {
-            Rect screenBounds = getEnv().getScreenBoundsInset();
+            Rect screenBounds = GFXEnv.getEnv().getScreenBoundsInset();
             return getRectLocation(screenBounds, aPos, aDX, aDY);
         }
 
