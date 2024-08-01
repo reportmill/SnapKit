@@ -78,10 +78,23 @@ public abstract class PainterImpl extends Painter {
     }
 
     /** Draw string at location with char spacing. */
-    public void drawString(String aStr, double aX, double aY, double cs)
+    public void drawString(String aStr, double aX, double aY, double charSpacing)
     {
         Rect rect = getFont().getStringBounds(aStr);
+        if (charSpacing > 0 && aStr.length() > 1)
+            rect.width += charSpacing * (aStr.length() - 1);
         rect.offset(aX,aY);
+        updateMarkedBounds(rect, false);
+    }
+
+    /** Stroke string at location with char spacing. */
+    public void strokeString(String aStr, double aX, double aY, double charSpacing)
+    {
+        Rect rect = getFont().getStringBounds(aStr);
+        if (charSpacing > 0 && aStr.length() > 1)
+            rect.width += charSpacing * (aStr.length() - 1);
+        rect.offset(aX, aY);
+        rect.inset(-getStroke().getWidth() / 2);
         updateMarkedBounds(rect, false);
     }
 

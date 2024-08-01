@@ -3,7 +3,6 @@
  */
 package snap.text;
 import snap.geom.Rect;
-import snap.geom.Shape;
 import snap.gfx.*;
 import snap.view.ViewUtils;
 
@@ -264,8 +263,7 @@ public class StyledString implements Cloneable {
         // Set font and text fill
         Font font = getFont();
         aPntr.setFont(font);
-        Paint textFill = getTextFill();
-        aPntr.setPaint(textFill);
+        aPntr.setPaint(getTextFill());
 
         // Get String X/Y and paint
         String text = getString();
@@ -284,10 +282,9 @@ public class StyledString implements Cloneable {
         // Handle TextBorder: Get outline and stroke
         Border border = _textStyle.getBorder();
         if (border != null) {
-            Shape shape = font.getOutline(text, aX, aY, charSpacing);
             aPntr.setPaint(border.getColor());
-            aPntr.setStroke(Stroke.Stroke1.copyForWidth(border.getWidth()));
-            aPntr.draw(shape);
+            aPntr.setStroke(border.getStroke());
+            aPntr.strokeString(text, aX, aY, charSpacing);
         }
     }
 

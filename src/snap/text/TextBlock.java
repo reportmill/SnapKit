@@ -1270,22 +1270,22 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         // Iterate over line tokens
         for (TextToken token : lineTokens) {
 
+            // Set token font and color
+            aPntr.setFont(token.getFont());
+            aPntr.setPaint(token.getTextColor());
+
             // Do normal paint token
             String tokenStr = token.getString();
             double tokenX = token.getTextX();
-            aPntr.setFont(token.getFont());
-            aPntr.setPaint(token.getTextColor()); //aPntr.setPaint(SnapColor.RED);
-            aPntr.drawString(tokenStr, tokenX, lineY, token.getTextStyle().getCharSpacing());
+            double charSpacing = token.getTextStyle().getCharSpacing();
+            aPntr.drawString(tokenStr, tokenX, lineY, charSpacing);
 
             // Handle TextBorder: Get outline and stroke
             Border border = token.getTextStyle().getBorder();
             if (border != null) {
-                Font tokenFont = token.getFont();
-                double charSpacing = token.getTextStyle().getCharSpacing();
-                Shape shape = tokenFont.getOutline(tokenStr, tokenX, lineY, charSpacing);
                 aPntr.setPaint(border.getColor());
-                aPntr.setStroke(Stroke.Stroke1.copyForWidth(border.getWidth()));
-                aPntr.draw(shape);
+                aPntr.setStroke(border.getStroke());
+                aPntr.strokeString(tokenStr, tokenX, lineY, charSpacing);
             }
         }
     }

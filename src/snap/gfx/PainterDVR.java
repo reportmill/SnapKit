@@ -123,10 +123,17 @@ public class PainterDVR extends PainterImpl {
     }
 
     /** Draw string at location with char spacing. */
-    public void drawString(String aStr, double aX, double aY, double aCSpace)
+    public void drawString(String aStr, double aX, double aY, double charSpacing)
     {
-        super.drawString(aStr, aX, aY, aCSpace);
-        add(new DrawString(aStr, aX, aY, aCSpace));
+        super.drawString(aStr, aX, aY, charSpacing);
+        add(new DrawString(aStr, aX, aY, charSpacing));
+    }
+
+    /** Stroke string at location with char spacing. */
+    public void strokeString(String aStr, double aX, double aY, double charSpacing)
+    {
+        super.strokeString(aStr, aX, aY, charSpacing);
+        add(new StrokeString(aStr, aX, aY, charSpacing));
     }
 
     /**
@@ -405,6 +412,39 @@ public class PainterDVR extends PainterImpl {
         public boolean equals(Object anObj)
         {
             DrawString o = (DrawString)anObj;
+            return _str.equals(o._str) && _x==o._x && _y==o._y && _cs==o._cs;
+        }
+
+        /** Standard toString implementation. */
+        public String toString()  { return StringUtils.toString(this, "String").toString(); }
+    }
+
+    /**
+     * An instruction to strokeString(str,x,y,cs).
+     */
+    public static class StrokeString extends Instruction {
+
+        // Ivars
+        String _str;
+        double _x, _y, _cs;
+
+        /** Constructor. */
+        public StrokeString(String aStr, double x, double y, double cs)
+        {
+            _str = aStr;
+            _x = x; _y = y; _cs = cs;
+        }
+
+        /** Returns the string. */
+        public String getString()  { return _str; }
+
+        /** Plays the op in given painter. */
+        public void exec(Painter aPntr)  { aPntr.strokeString(_str, _x, _y, _cs); }
+
+        /** Standard equals implementation. */
+        public boolean equals(Object anObj)
+        {
+            StrokeString o = (StrokeString) anObj;
             return _str.equals(o._str) && _x==o._x && _y==o._y && _cs==o._cs;
         }
 

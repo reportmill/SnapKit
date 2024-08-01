@@ -79,11 +79,11 @@ public class PainterProxy extends Painter {
         _pntr.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
     }
 
-    /** Draw string at location. */
-    public void drawString(String str, double x, double y)  { _pntr.drawString(str, x, y, 0); }
-
     /** Draw string at location with char spacing. */
     public void drawString(String str, double x, double y, double cs)  { _pntr.drawString(str, x, y, cs); }
+
+    /** Stroke string at location with char spacing. */
+    public void strokeString(String str, double x, double y, double cs)  { _pntr.strokeString(str, x, y, cs); }
 
     /** Transform by transform. */
     public Transform getTransform()  { return _pntr.getTransform(); }

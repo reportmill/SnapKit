@@ -234,19 +234,38 @@ public abstract class Painter {
     /**
      * Draw string at location with char spacing.
      */
-    public void drawString(String aStr, double aX, double aY, double aCSpace)
+    public void drawString(String aStr, double aX, double aY, double charSpacing)
     {
         // Simple case of no extra char space
-        if (aCSpace==0) {
+        if (charSpacing == 0) {
             drawString(aStr, aX, aY);
             return;
         }
 
         // Iterate over chars and draw each
-        double x = aX;
-        for (int i=0, iMax=aStr.length(); i<iMax; i++) { char c = aStr.charAt(i);
-            drawString(String.valueOf(c), x, aY);
-            x += getFont().charAdvance(c) + aCSpace;
+        Font font = getFont();
+        double charX = aX;
+        for (int i = 0, iMax = aStr.length(); i < iMax; i++) {
+            char c = aStr.charAt(i);
+            drawString(String.valueOf(c), charX, aY);
+            charX += font.charAdvance(c) + charSpacing;
+        }
+    }
+
+    /**
+     * Stroke string at location with char spacing.
+     */
+    public void strokeString(String aStr, double aX, double aY, double charSpacing)
+    {
+        Font font = getFont();
+
+        // Iterate over chars and draw each
+        double charX = aX;
+        for (int i = 0, iMax = aStr.length(); i < iMax; i++) {
+            char c = aStr.charAt(i);
+            Shape shape = font.getOutline(String.valueOf(c), charX, aY, charSpacing);
+            draw(shape);
+            charX += font.charAdvance(c) + charSpacing;
         }
     }
 
