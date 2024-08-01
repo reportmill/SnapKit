@@ -69,4 +69,15 @@ public class TextLink {
     {
         return "TextLink: " + _string;
     }
+
+    /**
+     * Creates a text link for given object.
+     */
+    public static TextLink of(Object anObj)
+    {
+        if (anObj instanceof TextLink || anObj == null)
+            return (TextLink) anObj;
+
+        return new TextLink(anObj.toString());
+    }
 }

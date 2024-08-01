@@ -202,14 +202,18 @@ public class StyledString implements Cloneable {
         // Get exact bounds around string glyphs for font
         Font font = getFont();
         String text = getString();
-        Rect bnds = text != null && !text.isEmpty() ? font.getGlyphBounds(text) : Rect.ZeroRect;
+        Rect textBounds = text != null && !text.isEmpty() ? font.getGlyphBounds(text) : Rect.ZeroRect;
 
-        // Get StringWidth from GlyphBounds
-        _textWidth = Math.ceil(bnds.width);
+        // Get text width from text bounds
+        _textWidth = Math.ceil(textBounds.width);
 
-        // Get Ascent, Descent, LineHeight from GlyphBounds
-        _ascent = Math.ceil(-bnds.y);
-        _descent = Math.ceil(bnds.height + bnds.y);
+        // Get Ascent, Descent from text bounds
+        _ascent = Math.ceil(-textBounds.y);
+        _descent = Math.ceil(textBounds.height + textBounds.y);
+        if (_textStyle.isUnderlined())
+            _descent = Math.max(_descent, Math.ceil(Math.abs(font.getUnderlineOffset()) + font.getUnderlineThickness()));
+
+        // Get text height from text bounds
         _textHeight = _ascent + _descent;
     }
 
@@ -267,6 +271,15 @@ public class StyledString implements Cloneable {
         String text = getString();
         double charSpacing = _textStyle.getCharSpacing();
         aPntr.drawString(text, aX, aY, charSpacing);
+
+        // Handle Underline
+        if (_textStyle.isUnderlined()) {
+            double underlineThickness = font.getUnderlineThickness();
+            aPntr.setStrokeWidth(underlineThickness);
+            double lineMaxX = aX + font.getStringAdvance(text);
+            double lineY = aY + Math.ceil(Math.abs(font.getUnderlineOffset()));
+            aPntr.drawLine(aX, lineY, lineMaxX, lineY);
+        }
 
         // Handle TextBorder: Get outline and stroke
         Border border = _textStyle.getBorder();
