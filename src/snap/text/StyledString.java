@@ -3,10 +3,8 @@
  */
 package snap.text;
 import snap.geom.Rect;
-import snap.gfx.Color;
-import snap.gfx.Font;
-import snap.gfx.Paint;
-import snap.gfx.Painter;
+import snap.geom.Shape;
+import snap.gfx.*;
 import snap.view.ViewUtils;
 
 /**
@@ -18,7 +16,7 @@ public class StyledString implements Cloneable {
     private String  _string;
 
     // The TextStyle
-    private TextStyle  _style = TextStyle.DEFAULT;
+    private TextStyle _textStyle = TextStyle.DEFAULT;
 
     // Whether to size to font instead of glyphs
     protected boolean  _fontSizing;
@@ -63,14 +61,14 @@ public class StyledString implements Cloneable {
     /**
      * Returns the TextStyle.
      */
-    public TextStyle getStyle()  { return _style; }
+    public TextStyle getTextStyle()  { return _textStyle; }
 
     /**
      * Sets the TextStyle.
      */
-    public void setStyle(TextStyle aStyle)
+    public void setTextStyle(TextStyle aStyle)
     {
-        _style = aStyle;
+        _textStyle = aStyle;
         _ascent = -1;
     }
 
@@ -79,7 +77,7 @@ public class StyledString implements Cloneable {
      */
     public Font getFont()
     {
-        return _style.getFont();
+        return _textStyle.getFont();
     }
 
     /**
@@ -87,8 +85,8 @@ public class StyledString implements Cloneable {
      */
     public void setFont(Font aFont)
     {
-        TextStyle textStyle = _style.copyFor(aFont);
-        setStyle(textStyle);
+        TextStyle textStyle = _textStyle.copyFor(aFont);
+        setTextStyle(textStyle);
     }
 
     /**
@@ -96,7 +94,7 @@ public class StyledString implements Cloneable {
      */
     public Paint getTextFill()
     {
-        Color color = _style.getColor();
+        Color color = _textStyle.getColor();
         Color defColor = (Color) ViewUtils.getTextFill();
         if (defColor != Color.BLACK && color == Color.BLACK)
             color = defColor;
@@ -108,28 +106,28 @@ public class StyledString implements Cloneable {
      */
     public void setTextFill(Paint aPaint)
     {
-        TextStyle textStyle = _style.copyFor(aPaint);
-        setStyle(textStyle);
+        TextStyle textStyle = _textStyle.copyFor(aPaint);
+        setTextStyle(textStyle);
     }
 
     /**
      * Returns whether this run is underlined.
      */
-    public boolean isUnderlined()  { return _style.isUnderlined(); }
+    public boolean isUnderlined()  { return _textStyle.isUnderlined(); }
 
     /**
      * Sets whether this run is underlined.
      */
     public void setUnderlined(boolean aValue)
     {
-        TextStyle textStyle = _style.copyFor(TextStyle.UNDERLINE_KEY, aValue ? 1 : 0);
-        setStyle(textStyle);
+        TextStyle textStyle = _textStyle.copyFor(TextStyle.UNDERLINE_KEY, aValue ? 1 : 0);
+        setTextStyle(textStyle);
     }
 
     /**
      * Returns the run's scripting.
      */
-    public int getScripting()  { return _style.getScripting(); }
+    public int getScripting()  { return _textStyle.getScripting(); }
 
     /**
      * Returns whether to size to font (looser) instead of glyphs (tighter).
@@ -204,7 +202,7 @@ public class StyledString implements Cloneable {
         // Get exact bounds around string glyphs for font
         Font font = getFont();
         String text = getString();
-        Rect bnds = text != null && text.length() > 0 ? font.getGlyphBounds(text) : Rect.ZeroRect;
+        Rect bnds = text != null && !text.isEmpty() ? font.getGlyphBounds(text) : Rect.ZeroRect;
 
         // Get StringWidth from GlyphBounds
         _textWidth = Math.ceil(bnds.width);
@@ -221,9 +219,14 @@ public class StyledString implements Cloneable {
     private void loadMetricsForFontSizing()
     {
         // Get StringWidth for string + font (aka Advance)
-        String text = getString();
+        String text = getString(); if (text == null) text = "";
         Font font = getFont();
-        _textWidth = text != null ? Math.ceil(font.getStringAdvance(text)) : 0;
+        _textWidth = Math.ceil(font.getStringAdvance(text));
+
+        // Add char spacing
+        double charSpacing = _textStyle.getCharSpacing();
+        if (charSpacing != 0 && text.length() > 1)
+            _textWidth += charSpacing * (text.length() - 1);
 
         // Get Font Ascent, Descent, StringHeight (aka LineHeight)
         _ascent = Math.ceil(font.getAscent());
@@ -256,13 +259,23 @@ public class StyledString implements Cloneable {
     {
         // Set font and text fill
         Font font = getFont();
-        Paint textFill = getTextFill();
         aPntr.setFont(font);
+        Paint textFill = getTextFill();
         aPntr.setPaint(textFill);
 
         // Get String X/Y and paint
         String text = getString();
-        aPntr.drawString(text, aX, aY);
+        double charSpacing = _textStyle.getCharSpacing();
+        aPntr.drawString(text, aX, aY, charSpacing);
+
+        // Handle TextBorder: Get outline and stroke
+        Border border = _textStyle.getBorder();
+        if (border != null) {
+            Shape shape = font.getOutline(text, aX, aY, charSpacing);
+            aPntr.setPaint(border.getColor());
+            aPntr.setStroke(Stroke.Stroke1.copyForWidth(border.getWidth()));
+            aPntr.draw(shape);
+        }
     }
 
     /**

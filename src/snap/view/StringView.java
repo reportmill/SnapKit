@@ -83,19 +83,19 @@ public class StringView extends View implements Cloneable {
     /**
      * Returns the TextStyle.
      */
-    public TextStyle getStyle()  { return _styledString.getStyle(); }
+    public TextStyle getTextStyle()  { return _styledString.getTextStyle(); }
 
     /**
      * Sets the TextStyle.
      */
-    public void setStyle(TextStyle aStyle)
+    public void setTextStyle(TextStyle aStyle)
     {
         // if already set, just return
-        TextStyle old = getStyle();
+        TextStyle old = getTextStyle();
         if (Objects.equals(aStyle, old)) return;
 
         // Set new value, fire prop change, relayout and return
-        _styledString.setStyle(aStyle);
+        _styledString.setTextStyle(aStyle);
         firePropChange(TextStyle_Prop, old, aStyle);
         relayoutParent();
         repaint();
@@ -115,8 +115,8 @@ public class StringView extends View implements Cloneable {
     public void setTextFill(Paint aPaint)
     {
         if (Objects.equals(aPaint, getTextFill())) return;
-        TextStyle textStyle = getStyle().copyFor(TextStyle.COLOR_KEY, aPaint);
-        setStyle(textStyle);
+        TextStyle textStyle = getTextStyle().copyFor(TextStyle.COLOR_KEY, aPaint);
+        setTextStyle(textStyle);
     }
 
     /**
@@ -524,7 +524,7 @@ public class StringView extends View implements Cloneable {
     {
         XMLElement e = super.toXML(anArchiver);
         String text = getText();
-        if (text != null && text.length() > 0)
+        if (text != null && !text.isEmpty())
             e.add("text", text);
         return e;
     }

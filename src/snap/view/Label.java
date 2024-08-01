@@ -4,8 +4,8 @@
 package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
+import snap.text.TextStyle;
 import snap.util.*;
-
 import java.util.Objects;
 
 /**
@@ -94,7 +94,7 @@ public class Label extends ParentView {
         // Set value and fire prop change
         StringView sview = getStringView();
         sview.setText(aValue);
-        sview.setVisible(aValue != null && aValue.length() > 0);
+        sview.setVisible(aValue != null && !aValue.isEmpty());
         firePropChange(Text_Prop, oldVal, aValue);
     }
 
@@ -150,6 +150,19 @@ public class Label extends ParentView {
     public void setTextFill(Paint aPaint)
     {
         getStringView().setTextFill(aPaint);
+    }
+
+    /**
+     * Returns the text style.
+     */
+    public TextStyle getTextStyle()  { return getStringView().getTextStyle(); }
+
+    /**
+     * Sets the text style.
+     */
+    public void setTextStyle(TextStyle textStyle)
+    {
+        getStringView().setTextStyle(textStyle);
     }
 
     /**
@@ -409,7 +422,7 @@ public class Label extends ParentView {
 
         // Archive Text and ImageName
         String text = getText();
-        if (text != null && text.length() > 0)
+        if (text != null && !text.isEmpty())
             e.add("text", text);
         String iname = getImageName();
         if (iname != null)
