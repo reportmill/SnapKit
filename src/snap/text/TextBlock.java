@@ -74,8 +74,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public TextBlock()
     {
-        super();
-        addDefaultLine();
+        this(false);
     }
 
     /**
@@ -84,18 +83,16 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     public TextBlock(boolean isRich)
     {
         super();
-        addDefaultLine();
-        setRichText(isRich);
-    }
-
-    /**
-     * Adds a default line.
-     */
-    protected void addDefaultLine()
-    {
+        _rich = isRich;
+        _defaultTextStyle = isRich ? TextStyle.DEFAULT : null;
         TextLine defaultLine = createLine();
         addLine(defaultLine, 0);
     }
+
+    /**
+     * Creates a new TextLine for use in this text.
+     */
+    protected TextLine createLine()  { return new TextLine(this); }
 
     /**
      * Whether this text supports multiple styles (font, color, etc.).
@@ -110,22 +107,12 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         // If already set, just return
         if (aValue == isRichText()) return;
 
-        // Get clone
-        //TextBlock clone = length() > 0 ? clone() : null;
-
         // Set value
         _rich = aValue;
 
         // Set DefaultStyle, because RichText never inherits from parent
-        if (aValue)
+        if (aValue && _defaultTextStyle == null)
             _defaultTextStyle = TextStyle.DEFAULT;
-
-        // Remove lines and add default
-        _lines.clear();
-        addDefaultLine();
-
-        // Add clone back
-        //if (clone != null) addTextBlock(clone, 0);
     }
 
     /**
@@ -789,14 +776,6 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         TextLine line = _lines.remove(anIndex);
         line._textBlock = null;
         updateLines(anIndex - 1);
-    }
-
-    /**
-     * Creates a new TextLine for use in this text.
-     */
-    protected TextLine createLine()
-    {
-        return new TextLine(this);
     }
 
     /**

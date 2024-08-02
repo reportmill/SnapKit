@@ -26,8 +26,16 @@ public class TextView extends ParentView {
      */
     public TextView()
     {
+        this(false);
+    }
+
+    /**
+     * Constructor with option for RichText.
+     */
+    public TextView(boolean isRichText)
+    {
         // Create/configure TextArea
-        _textArea = createTextArea();
+        _textArea = new TextArea(isRichText);
         _textArea.addPropChangeListener(pc -> textAreaDidPropChange(pc));
 
         // Create/add ScrollView
@@ -43,11 +51,6 @@ public class TextView extends ParentView {
      * Returns the TextArea.
      */
     public TextArea getTextArea()  { return _textArea; }
-
-    /**
-     * Creates the TextArea.
-     */
-    protected TextArea createTextArea()  { return new TextArea(true); }
 
     /**
      * Returns the ScrollView.
@@ -152,26 +155,6 @@ public class TextView extends ParentView {
      * Selects all the characters in the text editor.
      */
     public void selectAll()  { _textArea.selectAll(); }
-
-    /**
-     * Returns the font of the current selection or cursor.
-     */
-    public Font getFont()  { return _textArea.getFont(); }
-
-    /**
-     * Sets the font of the current selection or cursor.
-     */
-    public void setFont(Font aFont)  { _textArea.setFont(aFont); }
-
-    /**
-     * Returns the color of the current selection or cursor.
-     */
-    public Paint getTextFill()  { return _textArea.getTextFill(); }
-
-    /**
-     * Sets the color of the current selection or cursor.
-     */
-    public void setTextFill(Paint aColor)  { _textArea.setTextFill(aColor); }
 
     /**
      * Returns the width needed to display all characters.

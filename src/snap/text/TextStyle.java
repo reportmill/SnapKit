@@ -47,8 +47,8 @@ public class TextStyle extends PropObject implements Cloneable {
     public static final String Border_Prop = "Border";
     public static final String Scripting_Prop = "Scripting";
     public static final String CharSpacing_Prop = "CharSpacing";
-    public static final String Link_Prop = "Link";
     public static final String Format_Prop = "Format";
+    public static final String Link_Prop = "Link";
 
     // Constants for style attribute keys
     public static final String COLOR_KEY = Color_Prop;
@@ -262,13 +262,14 @@ public class TextStyle extends PropObject implements Cloneable {
         // Do normal version
         super.initProps(aPropSet);
 
-        // Font, Color, Underline, Border, Scripting, CharSpacing, Link
+        // Font, Color, Underline, Border, Scripting, CharSpacing, Format, Link
         aPropSet.addPropNamed(Font_Prop, Font.class, null);
         aPropSet.addPropNamed(Color_Prop, Color.class, null);
         aPropSet.addPropNamed(Underline_Prop, int.class, 0);
         aPropSet.addPropNamed(Border_Prop, Border.class, 0);
         aPropSet.addPropNamed(Scripting_Prop, double.class, 0d);
         aPropSet.addPropNamed(CharSpacing_Prop, double.class, 0d);
+        aPropSet.addPropNamed(Format_Prop, TextFormat.class, null);
         aPropSet.addPropNamed(Link_Prop, TextLink.class, null);
     }
 
@@ -281,13 +282,14 @@ public class TextStyle extends PropObject implements Cloneable {
         // Handle properties
         switch (aPropName) {
 
-            // Font, Color, Underline, Border, Scripting, CharSpacing, Link
+            // Font, Color, Underline, Border, Scripting, CharSpacing, Format, Link
             case Font_Prop: return getFont();
             case Color_Prop: return getColor();
             case Underline_Prop: return getUnderlineStyle();
             case Border_Prop: return getBorder();
             case Scripting_Prop: return getScripting();
             case CharSpacing_Prop: return getCharSpacing();
+            case Format_Prop: return getFormat();
             case Link_Prop: return getLink();
 
             // Do normal version
@@ -304,16 +306,16 @@ public class TextStyle extends PropObject implements Cloneable {
         // Handle properties
         switch (aPropName) {
 
-            // Font, Color, Underline, Border, Scripting, CharSpacing, Link
+            // Font, Color, Underline, Border, Scripting, CharSpacing, Format, Link
             case Font_Prop: _font = Font.of(aValue); break;
             case Color_Prop: _color = Color.get(aValue); break;
             case Underline_Prop: _underline = Convert.intValue(aValue); break;
             case Border_Prop: _border = Border.of(aValue); break;
             case Scripting_Prop: _scripting = Convert.intValue(aValue); break;
             case CharSpacing_Prop: _charSpacing = Convert.doubleValue(aValue); break;
-            case Link_Prop: _link = TextLink.of(aValue); break;
-            case Format_Prop:
-                _format = (TextFormat) aValue;
+            case Format_Prop: _format = (TextFormat) aValue; break;
+            case Link_Prop:
+                _link = TextLink.of(aValue);
                 _color = DEFAULT_LINK_STYLE.getColor();
                 _underline = DEFAULT_LINK_STYLE.getUnderlineStyle();
                 break;

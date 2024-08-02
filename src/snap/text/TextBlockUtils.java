@@ -317,7 +317,7 @@ public class TextBlockUtils {
             // If format changed for segment, write format
             else if (e.getName().equals("format")) {
                 Object fmt = anArchiver.fromXML(e, null);
-                style = style.copyFor(TextStyle.Font_Prop, fmt);
+                style = style.copyFor(TextStyle.Format_Prop, fmt);
             }
 
             // Unarchive pgraph element
