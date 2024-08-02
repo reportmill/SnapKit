@@ -172,12 +172,46 @@ public class TextLine implements CharSequenceX, Cloneable {
      */
     public void removeChars(int aStart, int anEnd)
     {
-        // Remove length from run
-        TextRun run = getRun(0);
-        run.addLength(aStart - anEnd);
+        // If empty range, just return
+        if (anEnd == aStart) return;
 
-        // Remove chars
-        _sb.delete(aStart, anEnd);
+        // Handle plain text: Just remove length from run and chars from string and update text
+        if (!_textBlock.isRichText()) {
+            TextRun run = getRun(0);
+            run.addLength(aStart - anEnd);
+            _sb.delete(aStart, anEnd);
+            updateText();
+            return;
+        }
+
+        // Handle RichText: Iterate over effected runs and remove chars
+        int end = anEnd;
+        while (aStart < end) {
+
+            // Get run at end
+            TextRun run = getRunForCharIndex(end);
+            int runStart = run.getStartCharIndex();
+            int start = Math.max(aStart, runStart);
+
+            // If range matches run range, just remove it
+            if (start == runStart && end == run.getEndCharIndex() && getRunCount() > 1) {
+                int runIndex = run.getIndex();
+                removeRun(runIndex);
+                _sb.delete(start, end);
+                updateRuns(runIndex - 1);
+            }
+
+            // Otherwise delete chars from run
+            else {
+                run.addLength(start - end);
+                _sb.delete(start, end);
+                updateRuns(run.getIndex());
+            }
+
+            // Reset end to runStart
+            end = runStart;
+        }
+
         updateText();
     }
 

@@ -8,7 +8,6 @@ import snap.geom.Shape;
 import snap.gfx.Border;
 import snap.gfx.Font;
 import snap.gfx.Painter;
-import snap.gfx.Stroke;
 import snap.props.PropChange;
 import snap.props.PropObject;
 import snap.props.UndoSet;
@@ -651,7 +650,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
             // Get run for range
             TextRun textRun = getRunForCharRange(aStart, anEnd);
-            RichTextLine textLine = (RichTextLine) textRun.getLine();
+            TextLine textLine = textRun.getLine();
             int lineStart = textLine.getStartCharIndex();
             int runEndInText = textRun.getEndCharIndex() + lineStart;
             int newStyleEndInText = Math.min(runEndInText, anEnd);
@@ -797,8 +796,6 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     protected TextLine createLine()
     {
-        if (isRichText())
-            return new RichTextLine(this);
         return new TextLine(this);
     }
 
