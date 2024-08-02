@@ -54,12 +54,26 @@ public class TextBox extends TextBlock {
      */
     public TextBox()
     {
-        super();
+        this(false);
+    }
 
-        // Set default text block
-        TextBlock textBlock = new TextBlock(true);
+    /**
+     * Constructor with option for rich text.
+     */
+    public TextBox(boolean isRichText)
+    {
+        super(isRichText);
+        TextBlock textBlock = new TextBlock(isRichText);
         setSourceText(textBlock);
-        setRichText(true);
+    }
+
+    /**
+     * Constructor for source text block.
+     */
+    public TextBox(TextBlock sourceText)
+    {
+        super(sourceText.isRichText());
+        setSourceText(sourceText);
     }
 
     /**

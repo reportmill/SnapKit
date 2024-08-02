@@ -31,7 +31,7 @@ public class TextEditor extends TextArea {
      */
     public void setCharSpacing(double aValue)
     {
-        setSelStyleValue(TextStyle.CHAR_SPACING_KEY, aValue);
+        setSelStyleValue(TextStyle.CharSpacing_Prop, aValue);
     }
 
     /**

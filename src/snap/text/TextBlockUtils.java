@@ -293,7 +293,7 @@ public class TextBlockUtils {
             // Unarchive string
             if (e.getName().equals("string")) {
                 String str = e.getValue();
-                if (str == null || str.length() == 0) continue;
+                if (str == null || str.isEmpty()) continue;
                 int len = textBlock.length();
                 textBlock.addCharsWithStyle(str, style);
                 if (lineStyle != null) {
@@ -317,7 +317,7 @@ public class TextBlockUtils {
             // If format changed for segment, write format
             else if (e.getName().equals("format")) {
                 Object fmt = anArchiver.fromXML(e, null);
-                style = style.copyFor(TextStyle.FORMAT_KEY, fmt);
+                style = style.copyFor(TextStyle.Font_Prop, fmt);
             }
 
             // Unarchive pgraph element
@@ -327,14 +327,14 @@ public class TextBlockUtils {
                 // Unarchive underline element
             else if (e.getName().equals("underline")) {
                 if (e.getAttributeIntValue("style") < 0)
-                    style = style.copyFor(TextStyle.UNDERLINE_KEY, null);
-                else style = style.copyFor(TextStyle.UNDERLINE_KEY, 1);
+                    style = style.copyFor(TextStyle.Underline_Prop, null);
+                else style = style.copyFor(TextStyle.Underline_Prop, 1);
             }
 
             // Unarchive outline element
             else if (e.getName().equals("outline")) {
                 if (e.getAttributeBoolValue("off"))
-                    style = style.copyFor(TextStyle.BORDER_KEY, null);
+                    style = style.copyFor(TextStyle.Border_Prop, null);
                 else {
                     double swidth = e.getAttributeFloatValue("stroke", 1);
                     String cstr = e.getAttributeValue("color");
@@ -357,13 +357,13 @@ public class TextBlockUtils {
             // Unarchive scripting
             else if (e.getName().equals("scripting")) {
                 int scripting = e.getAttributeIntValue("val");
-                style = style.copyFor(TextStyle.SCRIPTING_KEY, scripting);
+                style = style.copyFor(TextStyle.Scripting_Prop, scripting);
             }
 
             // Unarchive char spacing
             else if (e.getName().equals("char-spacing")) {
                 double cspace = e.getAttributeFloatValue("value");
-                style = style.copyFor(TextStyle.CHAR_SPACING_KEY, cspace);
+                style = style.copyFor(TextStyle.CharSpacing_Prop, cspace);
             }
         }
 

@@ -31,12 +31,9 @@ public class DevPaneConsoleTextArea extends TextArea {
      */
     public DevPaneConsoleTextArea()
     {
+        super(true);
         setFill(Color.WHITE);
         setEditable(true);
-
-        // Set RichText by default
-        TextDoc richText = new TextDoc(true);
-        setSourceText(richText);
     }
 
     /**

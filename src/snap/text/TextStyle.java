@@ -51,13 +51,8 @@ public class TextStyle extends PropObject implements Cloneable {
     public static final String Format_Prop = "Format";
 
     // Constants for style attribute keys
-    public static final String FONT_KEY = Font_Prop;
     public static final String COLOR_KEY = Color_Prop;
     public static final String UNDERLINE_KEY = Underline_Prop;
-    public static final String BORDER_KEY = Border_Prop;
-    public static final String SCRIPTING_KEY = Scripting_Prop;
-    public static final String CHAR_SPACING_KEY = CharSpacing_Prop;
-    public static final String FORMAT_KEY = Format_Prop;
 
     // Constants for default text styles
     public static final TextStyle DEFAULT = new TextStyle();

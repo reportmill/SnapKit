@@ -99,21 +99,42 @@ public class TextArea extends View {
     private static final Insets DEFAULT_TEXT_AREA_PADDING = new Insets(2);
 
     /**
-     * Creates a new TextArea.
+     * Constructor.
      */
     public TextArea()
     {
+        this(false);
+    }
+
+    /**
+     * Constructor with option for RichText.
+     */
+    public TextArea(boolean isRichText)
+    {
         super();
         _padding = DEFAULT_TEXT_AREA_PADDING;
+        setFocusPainted(false);
         enableEvents(Action);
 
-        // Configure
-        setFocusPainted(false);
-
         // Create/set default TextBlock
-        _textBlock = new TextBox();
+        _textBlock = new TextBox(isRichText);
         _textBlock.getSourceText().addPropChangeListener(_sourceTextPropLsnr);
         _textBlock.activateUndo();
+    }
+
+    /**
+     * Constructor for source text block.
+     */
+    public TextArea(TextBlock sourceText)
+    {
+        super();
+        _padding = DEFAULT_TEXT_AREA_PADDING;
+        setFocusPainted(false);
+        enableEvents(Action);
+
+        // Set default TextBlock
+        _textBlock = sourceText;
+        _textBlock.getSourceText().addPropChangeListener(_sourceTextPropLsnr);
     }
 
     /**
@@ -178,9 +199,8 @@ public class TextArea extends View {
         // Get appropriate text block for source text
         TextBlock textBlock = aTextBlock;
         if (isWrapLines() && !(aTextBlock instanceof TextBox)) {
-            TextBox textBox = new TextBox();
+            TextBox textBox = new TextBox(aTextBlock);
             textBox.setWrapLines(true);
-            textBox.setSourceText(aTextBlock);
             textBlock = textBox;
         }
 
@@ -268,8 +288,7 @@ public class TextArea extends View {
 
         // Otherwise, wrap text in text box and set new text box
         else if (aValue) {
-            TextBox textBox = new TextBox();
-            textBox.setSourceText(_textBlock);
+            TextBox textBox = new TextBox(_textBlock);
             textBox.setWrapLines(true);
             setTextBlock(textBox);
         }
@@ -514,7 +533,7 @@ public class TextArea extends View {
         // Handle RichText: just update SelStyle.Font and return
         if (isRichText()) {
             if (aFont != null)
-                setSelStyleValue(TextStyle.FONT_KEY, aFont);
+                setSelStyleValue(TextStyle.Font_Prop, aFont);
             return;
         }
 
@@ -564,7 +583,7 @@ public class TextArea extends View {
      */
     public void setTextColor(Paint aColor)
     {
-        setSelStyleValue(TextStyle.COLOR_KEY, aColor instanceof Color ? aColor : null);
+        setSelStyleValue(TextStyle.Color_Prop, aColor instanceof Color ? aColor : null);
     }
 
     /**
@@ -581,7 +600,7 @@ public class TextArea extends View {
      */
     public void setTextFill(Paint aColor)
     {
-        setSelStyleValue(TextStyle.COLOR_KEY, aColor instanceof Color ? aColor : null);
+        setSelStyleValue(TextStyle.Color_Prop, aColor instanceof Color ? aColor : null);
     }
 
     /**
@@ -598,7 +617,7 @@ public class TextArea extends View {
      */
     public void setTextBorder(Border aBorder)
     {
-        setSelStyleValue(TextStyle.BORDER_KEY, aBorder);
+        setSelStyleValue(TextStyle.Border_Prop, aBorder);
     }
 
     /**
@@ -626,7 +645,7 @@ public class TextArea extends View {
             return;
 
         // If there is a format, add it to current attributes and set for selected text
-        setSelStyleValue(TextStyle.FORMAT_KEY, aFormat);
+        setSelStyleValue(TextStyle.Font_Prop, aFormat);
     }
 
     /**
@@ -643,7 +662,7 @@ public class TextArea extends View {
      */
     public void setUnderlined(boolean aValue)
     {
-        setSelStyleValue(TextStyle.UNDERLINE_KEY, aValue ? 1 : 0);
+        setSelStyleValue(TextStyle.Underline_Prop, aValue ? 1 : 0);
     }
 
     /**
@@ -653,7 +672,7 @@ public class TextArea extends View {
     {
         TextStyle selStyle = getSelStyle();
         int state = selStyle.getScripting();
-        setSelStyleValue(TextStyle.SCRIPTING_KEY, state == 0 ? 1 : 0);
+        setSelStyleValue(TextStyle.Scripting_Prop, state == 0 ? 1 : 0);
     }
 
     /**
@@ -663,7 +682,7 @@ public class TextArea extends View {
     {
         TextStyle selStyle = getSelStyle();
         int state = selStyle.getScripting();
-        setSelStyleValue(TextStyle.SCRIPTING_KEY, state == 0 ? -1 : 0);
+        setSelStyleValue(TextStyle.Scripting_Prop, state == 0 ? -1 : 0);
     }
 
     /**
@@ -1616,7 +1635,7 @@ public class TextArea extends View {
 
         // If PlainText, update to parent (should probably watch parent Font_Prop change as well)
         if (!isRichText() && !isFontSet() && !getFont().equals(getSelStyle().getFont()))
-            setSelStyleValue(TextStyle.FONT_KEY, getFont());
+            setSelStyleValue(TextStyle.Font_Prop, getFont());
     }
 
     /**

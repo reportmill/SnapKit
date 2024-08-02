@@ -47,7 +47,7 @@ public class TextPane extends ViewOwner {
      */
     protected TextArea createTextArea()
     {
-        return new TextArea();
+        return new TextArea(true);
     }
 
     /**

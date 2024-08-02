@@ -4,7 +4,6 @@
 package snap.view;
 import snap.gfx.*;
 import snap.props.PropChange;
-import snap.props.Undoer;
 import snap.text.*;
 import snap.util.*;
 
@@ -48,7 +47,7 @@ public class TextView extends ParentView {
     /**
      * Creates the TextArea.
      */
-    protected TextArea createTextArea()  { return new TextArea(); }
+    protected TextArea createTextArea()  { return new TextArea(true); }
 
     /**
      * Returns the ScrollView.

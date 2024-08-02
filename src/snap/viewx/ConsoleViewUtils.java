@@ -93,7 +93,7 @@ class ConsoleViewUtils {
     private static View createContentViewForTextBlock(TextBlock textBlock)
     {
         // Create and configure TextArea
-        TextArea textArea = new TextArea();
+        TextArea textArea = new TextArea(textBlock);
         textArea.setBorderRadius(4);
         textArea.setFill(DEFAULT_TEXTAREA_FILL);
         textArea.setEditable(true);
@@ -102,9 +102,6 @@ class ConsoleViewUtils {
         textArea.setGrowWidth(true);
         textArea.setMinSize(30, 20);
         textArea.setPadding(5, 5, 5, 5);
-
-        // Set TextBlock
-        textArea.setSourceText(textBlock);
 
         // If large text, wrap in ScrollView
         if (textArea.getPrefHeight() > 300) {
