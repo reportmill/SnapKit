@@ -1469,7 +1469,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     public TextBlock copyForRange(int aStart, int aEnd)
     {
         // Create new RichText and iterate over lines in range to add copies for subrange
-        TextBlock textCopy = new RichText();
+        TextBlock textCopy = new TextBlock(isRichText());
         textCopy._lines.remove(0);
 
         // Get start/end line indexes

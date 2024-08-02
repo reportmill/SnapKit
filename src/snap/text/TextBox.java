@@ -57,18 +57,9 @@ public class TextBox extends TextBlock {
         super();
 
         // Set default text block
-        TextBlock textBlock = new RichText();
+        TextBlock textBlock = new TextBlock(true);
         setSourceText(textBlock);
         setRichText(true);
-    }
-
-    /**
-     * Creates a new TextBox initialized with the given String and no attributes.
-     */
-    public TextBox(CharSequence theChars)
-    {
-        this();
-        addChars(theChars);
     }
 
     /**

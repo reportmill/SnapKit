@@ -1428,7 +1428,7 @@ public class TextArea extends View {
         if (clipboard.hasData(SNAP_RICHTEXT_TYPE)) {
             byte[] bytes = clipboard.getDataBytes(SNAP_RICHTEXT_TYPE);
             if (bytes != null && bytes.length > 0) {  // Shouldn't need this - Happens when pasting content from prior instance
-                RichText richText = new RichText();
+                TextBlock richText = new TextBlock(true);
                 XMLArchiver archiver = new XMLArchiver();
                 archiver.setRootObject(richText);
                 archiver.readFromXMLBytes(bytes);
