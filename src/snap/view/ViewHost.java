@@ -48,16 +48,6 @@ public interface ViewHost {
     default View[] getGuests()  { return getGuests(this); }
 
     /**
-     * ViewHost helper method.
-     */
-    default int indexOfGuest(View aView)  { return indexOfGuest(this, aView); }
-
-    /**
-     * Removes all children from this view (in reverse order).
-     */
-    default void removeGuests()  { removeGuests(this); }
-
-    /**
      * Returns the guests array.
      */
     public static View[] getGuests(ViewHost aHost)
@@ -70,25 +60,6 @@ public interface ViewHost {
     }
 
     /**
-     * Sets children to given list.
-     */
-    public static void setGuests(ViewHost aHost, View ... theChildren)
-    {
-        removeGuests(aHost);
-        for (View c : theChildren)
-            aHost.addGuest(c);
-    }
-
-    /**
-     * Removes all children from this view (in reverse order).
-     */
-    public static void removeGuests(ViewHost aHost)
-    {
-        for (int i=aHost.getGuestCount()-1; i>=0; i--)
-            aHost.removeGuest(i);
-    }
-
-    /**
      * Returns whether given view parent is a ViewHost and view is one of its guests.
      */
     public static ViewHost getHost(View aView)
@@ -97,20 +68,6 @@ public interface ViewHost {
         ViewHost host = par instanceof ViewHost ? (ViewHost) par : null;
         return host;
     }
-
-    /**
-     * Returns whether given view parent is a ViewHost and view is one of its guests.
-     */
-    public static boolean isGuest(View aView)
-    {
-        ViewHost host = getHost(aView);
-        return host!=null && isGuest(host, aView);
-    }
-
-    /**
-     * Returns whether given view is a guest view of this ViewHost.
-     */
-    public static boolean isGuest(ViewHost aHost, View aView)  { return indexOfGuest(aHost, aView)>=0; }
 
     /**
      * ViewHost helper method.
