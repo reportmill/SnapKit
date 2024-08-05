@@ -579,43 +579,11 @@ public class TextArea extends View {
     /**
      * Sets the color of the current selection or cursor.
      */
-    public void setTextColor(Paint aColor)
+    public void setTextColor(Color aColor)
     {
-        setSelStyleValue(TextStyle.Color_Prop, aColor instanceof Color ? aColor : null);
-    }
-
-    /**
-     * Returns the color of the current selection or cursor.
-     */
-    public Paint getTextFill()
-    {
-        TextStyle selStyle = getSelStyle();
-        return selStyle.getColor();
-    }
-
-    /**
-     * Sets the color of the current selection or cursor.
-     */
-    public void setTextFill(Paint aColor)
-    {
-        setSelStyleValue(TextStyle.Color_Prop, aColor instanceof Color ? aColor : null);
-    }
-
-    /**
-     * Returns whether current selection is outlined.
-     */
-    public Border getTextBorder()
-    {
-        TextStyle selStyle = getSelStyle();
-        return selStyle.getBorder();
-    }
-
-    /**
-     * Sets whether current selection is outlined.
-     */
-    public void setTextBorder(Border aBorder)
-    {
-        setSelStyleValue(TextStyle.Border_Prop, aBorder);
+        if (isRichText())
+            setSelStyleValue(TextStyle.Color_Prop, aColor != null ? aColor : Color.BLACK);
+        else _textBlock.setDefaultTextColor(aColor);
     }
 
     /**

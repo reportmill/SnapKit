@@ -6,6 +6,7 @@ import snap.geom.HPos;
 import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.gfx.Border;
+import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Painter;
 import snap.props.PropChange;
@@ -226,6 +227,22 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     {
         if (aFont.equals(getDefaultFont())) return;
         TextStyle newTextStyle = _defaultTextStyle.copyFor(aFont);
+        setDefaultTextStyle(newTextStyle);
+    }
+
+    /**
+     * Returns the default text color.
+     */
+    public Color getDefaultTextColor()  { return _defaultTextStyle.getColor(); }
+
+    /**
+     * Sets the default text color.
+     */
+    public void setDefaultTextColor(Color aColor)
+    {
+        if (aColor == null) aColor = Color.BLACK;
+        if (aColor.equals(getDefaultTextColor())) return;
+        TextStyle newTextStyle = _defaultTextStyle.copyFor(aColor);
         setDefaultTextStyle(newTextStyle);
     }
 
