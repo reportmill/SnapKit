@@ -54,7 +54,7 @@ public class CodeDoc extends TextDoc {
         // Get iteration vars
         List<TextToken> tokens = new ArrayList<>();
         TextRun textRun = aTextLine.getRun(0);
-        TextStyle textStyle = textRun.getStyle();
+        TextStyle textStyle = textRun.getTextStyle();
 
         // Get first token in line
         Exception exception = null;

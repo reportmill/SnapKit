@@ -416,7 +416,7 @@ public class TextToken implements ParseToken, Cloneable {
     {
         TextToken[] tokens = aTextLine.getTokens();
         TextRun textRun = aTextLine.getRun(0);
-        TextStyle textStyle = textRun.getStyle();
+        TextStyle textStyle = textRun.getTextStyle();
         double charSpacing = textStyle.getCharSpacing();
         int charIndex = 0;
         double tokenX = 0;

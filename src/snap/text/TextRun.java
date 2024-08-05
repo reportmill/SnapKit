@@ -23,7 +23,7 @@ public class TextRun implements CharSequenceX, Cloneable {
     protected int  _length;
 
     // The attributes of the Run
-    protected TextStyle  _style = TextStyle.DEFAULT;
+    protected TextStyle _textStyle = TextStyle.DEFAULT;
 
     // The index of this run in line
     protected int  _index;
@@ -59,16 +59,16 @@ public class TextRun implements CharSequenceX, Cloneable {
     public int getEndCharIndex()  { return _startCharIndex + length(); }
 
     /**
-     * Returns the run style.
+     * Returns the run text style.
      */
-    public TextStyle getStyle()  { return _style; }
+    public TextStyle getTextStyle()  { return _textStyle; }
 
     /**
-     * Sets the run style.
+     * Sets the run text style.
      */
-    protected void setStyle(TextStyle aStyle)
+    protected void setTextStyle(TextStyle textStyle)
     {
-        _style = aStyle;
+        _textStyle = textStyle;
         _width = -1;
         _textLine.updateRuns(_index);
     }
@@ -133,7 +133,7 @@ public class TextRun implements CharSequenceX, Cloneable {
         // Iterate over chars and accumulate width
         double width = 0;
         for (int i = 0; i < endCharIndex; i++)
-            width += _style.getCharAdvance(charAt(i));
+            width += _textStyle.getCharAdvance(charAt(i));
 
         // Add char spacing
         if (endCharIndex > 1 && getCharSpacing() > 0)
@@ -157,7 +157,7 @@ public class TextRun implements CharSequenceX, Cloneable {
 
         // Remove width of trailing whitespace chars
         while (endCharIndex > 0 && Character.isWhitespace(charAt(endCharIndex - 1))) {
-            trailingWidth += _style.getCharAdvance(charAt(--endCharIndex));
+            trailingWidth += _textStyle.getCharAdvance(charAt(--endCharIndex));
             if (endCharIndex > 0)
                 trailingWidth += getCharSpacing();
         }
@@ -186,7 +186,7 @@ public class TextRun implements CharSequenceX, Cloneable {
         while (len - 1 > 0 && Character.isWhitespace(charAt(len - 1)))
             len--;
         for (int i = anIndex; i < len; i++)
-            width += _style.getCharAdvance(charAt(i));
+            width += _textStyle.getCharAdvance(charAt(i));
         if (len - anIndex > 1)
             width += (len - anIndex - 1) * getCharSpacing();
 
@@ -207,37 +207,37 @@ public class TextRun implements CharSequenceX, Cloneable {
     /**
      * Returns the font for this run.
      */
-    public Font getFont()  { return _style.getFont(); }
+    public Font getFont()  { return _textStyle.getFont(); }
 
     /**
      * Returns the color for this run.
      */
-    public Color getColor()  { return _style.getColor(); }
+    public Color getColor()  { return _textStyle.getColor(); }
 
     /**
      * Returns the format for this run.
      */
-    public TextFormat getFormat()  { return _style.getFormat(); }
+    public TextFormat getFormat()  { return _textStyle.getFormat(); }
 
     /**
      * Returns the border for this run.
      */
-    public Border getBorder()  { return _style.getBorder(); }
+    public Border getBorder()  { return _textStyle.getBorder(); }
 
     /**
      * Returns whether this run is underlined.
      */
-    public boolean isUnderlined()  { return _style.isUnderlined(); }
+    public boolean isUnderlined()  { return _textStyle.isUnderlined(); }
 
     /**
      * Returns the scripting for this run (1=SuperScripting, -1=Subscripting, 0=none).
      */
-    public int getScripting()  { return _style.getScripting(); }
+    public int getScripting()  { return _textStyle.getScripting(); }
 
     /**
      * Returns the char spacing.
      */
-    public double getCharSpacing()  { return _style.getCharSpacing(); }
+    public double getCharSpacing()  { return _textStyle.getCharSpacing(); }
 
     /**
      * Returns the max distance above the baseline for this run font.
@@ -286,7 +286,7 @@ public class TextRun implements CharSequenceX, Cloneable {
         // Check Start, Length, Style
         if (other.getStartCharIndex() != getStartCharIndex()) return false;
         if (other.length() != length()) return false;
-        if (!other._style.equals(_style)) return false;
+        if (!other._textStyle.equals(_textStyle)) return false;
 
         // Return equal
         return true;

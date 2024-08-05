@@ -136,19 +136,19 @@ public class TextLine implements CharSequenceX, Cloneable {
     {
         // Get run at index (just return if style is null or equal)
         TextRun run = getRunForCharIndex(charIndex);
-        if (aStyle == null || aStyle.equals(run.getStyle()))
+        if (aStyle == null || aStyle.equals(run.getTextStyle()))
             return run;
 
         // If empty, just set style and return
         if (run.length() == 0) {
-            run.setStyle(aStyle);
+            run.setTextStyle(aStyle);
             return run;
         }
 
         // If charIndex at run end and next run has same style, return it instead
         if (charIndex == run.getEndCharIndex()) {
             TextRun nextRun = run.getNext();
-            if (nextRun != null && aStyle.equals(nextRun.getStyle()))
+            if (nextRun != null && aStyle.equals(nextRun.getTextStyle()))
                 return nextRun;
         }
 
@@ -162,7 +162,7 @@ public class TextLine implements CharSequenceX, Cloneable {
 
         // Create new run for new chars, add and return
         TextRun newRun = createRun();
-        newRun.setStyle(aStyle);
+        newRun.setTextStyle(aStyle);
         addRun(newRun, newRunIndex);
         return newRun;
     }
@@ -305,23 +305,23 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Sets the style for the line (propagates to runs).
      */
-    protected void setStyle(TextStyle aStyle)
+    protected void setTextStyle(TextStyle textStyle)
     {
         for (TextRun run : getRuns())
-            run.setStyle(aStyle);
+            run.setTextStyle(textStyle);
         updateLineStyle();
     }
 
     /**
      * Sets the style for the given range.
      */
-    protected void setStyle(TextStyle aStyle, int startCharIndex, int endCharIndex)
+    protected void setTextStyle(TextStyle textStyle, int startCharIndex, int endCharIndex)
     {
         // Forward to textBlock - though I think it should be the other way around
         int lineStartCharIndex = getStartCharIndex();
         int startCharIndexInText = lineStartCharIndex + startCharIndex;
         int endCharIndexInText = lineStartCharIndex + endCharIndex;
-        _textBlock.setStyle(aStyle, startCharIndexInText, endCharIndexInText);
+        _textBlock.setTextStyle(textStyle, startCharIndexInText, endCharIndexInText);
     }
 
     /**
@@ -471,7 +471,7 @@ public class TextLine implements CharSequenceX, Cloneable {
         int tabIndex = lineStyle.getTabIndexForX(aX);
         if (tabIndex < 0) {
             TextRun textRun = getRunForCharIndex(charIndex);
-            TextStyle textStyle = textRun.getStyle();
+            TextStyle textStyle = textRun.getTextStyle();
             return aX + textStyle.getCharAdvance(' ') * 4;
         }
 
@@ -483,7 +483,7 @@ public class TextLine implements CharSequenceX, Cloneable {
 
         // Get width of characters after tab (until next tab, newline or decimal)
         TextRun textRun = getRunForCharIndex(charIndex);
-        TextStyle textStyle = textRun.getStyle();
+        TextStyle textStyle = textRun.getTextStyle();
         int lineLength = length();
         double charsW = 0;
         for (int i = charIndex + 1; i < lineLength; i++) {
@@ -611,7 +611,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     {
         // Get token for char index and token style
         TextToken textToken = getLastTokenForCharIndex(anIndex);
-        TextStyle textStyle = textToken != null ? textToken.getTextStyle() : getRun(0).getStyle();
+        TextStyle textStyle = textToken != null ? textToken.getTextStyle() : getRun(0).getTextStyle();
         double charSpacing = textStyle.getCharSpacing();
 
         // Init charX to token start X
@@ -666,7 +666,7 @@ public class TextLine implements CharSequenceX, Cloneable {
         // Get token for x coord
         TextToken token = getTokenForX(anX);
         int charIndex = token != null ? token.getStartCharIndexInLine() : 0;
-        TextStyle textStyle = token != null ? token.getTextStyle() : getRun(0).getStyle();
+        TextStyle textStyle = token != null ? token.getTextStyle() : getRun(0).getTextStyle();
         double charSpacing = textStyle.getCharSpacing();
 
         // Get char start X and line length

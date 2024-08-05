@@ -103,7 +103,7 @@ public class TextBlockUtils {
 
             // If run underlined, add to list
             for (TextRun run : line.getRuns())
-                if (run.getStyle().isUnderlined())
+                if (run.getTextStyle().isUnderlined())
                     underlineRuns.add(run);
         }
 
@@ -164,7 +164,7 @@ public class TextBlockUtils {
 
             // If chars found, create/add token
             if (tokenStart < tokenEnd) {
-                TextToken token = new TextToken(aTextLine, tokenStart, tokenEnd, textRun.getStyle());
+                TextToken token = new TextToken(aTextLine, tokenStart, tokenEnd, textRun.getTextStyle());
                 tokens.add(token);
                 tokenStart = tokenEnd;
             }
@@ -369,7 +369,7 @@ public class TextBlockUtils {
 
         // If no string was read, apply attributes anyway
         if (textBlock.length() == 0)
-            textBlock.getLine(0).getRun(0).setStyle(style);
+            textBlock.getLine(0).getRun(0).setTextStyle(style);
     }
 
     /**
@@ -434,7 +434,7 @@ public class TextBlockUtils {
         public void doChange(Object oldVal, Object newVal)
         {
             TextBlock textBlock = (TextBlock) getSource();
-            textBlock.setStyle((TextStyle) newVal, _start, _end);
+            textBlock.setTextStyle((TextStyle) newVal, _start, _end);
         }
     }
 

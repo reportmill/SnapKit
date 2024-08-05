@@ -722,9 +722,9 @@ public class TextArea extends View {
     /**
      * Returns the style at given char index.
      */
-    public TextStyle getStyleForCharIndex(int anIndex)
+    public TextStyle getTextStyleForCharIndex(int charIndex)
     {
-        return _textBlock.getStyleForCharIndex(anIndex);
+        return _textBlock.getTextStyleForCharIndex(charIndex);
     }
 
     /**
@@ -738,7 +738,7 @@ public class TextArea extends View {
         // Get style for sel range
         int selStart = getSelStart();
         int selEnd = getSelEnd();
-        TextStyle selStyle = _textBlock.getStyleForCharRange(selStart, selEnd);
+        TextStyle selStyle = _textBlock.getTextStyleForCharRange(selStart, selEnd);
 
         // Set/return
         return _selStyle = selStyle;
@@ -784,9 +784,9 @@ public class TextArea extends View {
      */
     public void addChars(CharSequence theChars, Object... theAttrs)
     {
-        int len = length();
-        TextStyle style = getStyleForCharIndex(len).copyFor(theAttrs);
-        replaceChars(theChars, style, len, len, true);
+        int endCharIndex = length();
+        TextStyle textStyle = _textBlock.getTextStyleForCharIndex(endCharIndex).copyFor(theAttrs);
+        replaceChars(theChars, textStyle, endCharIndex, endCharIndex, true);
     }
 
     /**
@@ -857,7 +857,7 @@ public class TextArea extends View {
         if (style == null) {
             if (aStart == getSelStart())
                 style = getSelStyle();
-            else style = _textBlock.getStyleForCharRange(aStart, anEnd);
+            else style = _textBlock.getTextStyleForCharRange(aStart, anEnd);
         }
 
         // Forward to TextBlock replaceChars()
@@ -1055,7 +1055,7 @@ public class TextArea extends View {
 
         // Get TextStyle at XY and return link
         int charIndex = getCharIndexForXY(aX, aY);
-        TextStyle textStyle = getStyleForCharIndex(charIndex);
+        TextStyle textStyle = _textBlock.getTextStyleForCharIndex(charIndex);
         return textStyle.getLink();
     }
 

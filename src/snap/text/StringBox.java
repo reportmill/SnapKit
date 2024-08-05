@@ -12,7 +12,7 @@ public class StringBox extends RoundRect {
     private String  _string;
 
     // The TextStyle for characters in this run
-    protected TextStyle  _style = TextStyle.DEFAULT;
+    private TextStyle _textStyle = TextStyle.DEFAULT;
 
     // The border
     private Border  _border;
@@ -78,14 +78,14 @@ public class StringBox extends RoundRect {
     /**
      * Returns the TextStyle.
      */
-    public TextStyle getStyle()  { return _style; }
+    public TextStyle getTextStyle()  { return _textStyle; }
 
     /**
      * Sets the TextStyle.
      */
-    public void setStyle(TextStyle aStyle)
+    public void setTextStyle(TextStyle textStyle)
     {
-        _style = aStyle;
+        _textStyle = textStyle;
         _needsResize = true;
         _ascent = -1;
     }
@@ -93,20 +93,20 @@ public class StringBox extends RoundRect {
     /**
      * Returns the font.
      */
-    public Font getFont()  { return _style.getFont(); }
+    public Font getFont()  { return _textStyle.getFont(); }
 
     /**
      * Sets the font.
      */
     public void setFont(Font aFont)
     {
-        setStyle(_style.copyFor(aFont));
+        setTextStyle(_textStyle.copyFor(aFont));
     }
 
     /**
      * Returns the color for string text.
      */
-    public Color getTextColor()  { return _style.getColor(); }
+    public Color getTextColor()  { return _textStyle.getColor(); }
 
     /**
      * Sets the color for string text.
@@ -114,28 +114,28 @@ public class StringBox extends RoundRect {
     public void setTextColor(Color aColor)
     {
         if (Objects.equals(aColor, getTextColor())) return;
-        TextStyle textStyle = _style.copyFor(aColor);
-        setStyle(textStyle);
+        TextStyle textStyle = _textStyle.copyFor(aColor);
+        setTextStyle(textStyle);
     }
 
     /**
      * Returns whether this run is underlined.
      */
-    public boolean isUnderlined()  { return _style.isUnderlined(); }
+    public boolean isUnderlined()  { return _textStyle.isUnderlined(); }
 
     /**
      * Sets whether this run is underlined.
      */
     public void setUnderlined(boolean aValue)
     {
-        TextStyle textStyle = _style.copyFor(TextStyle.UNDERLINE_KEY, aValue ? 1 : 0);
-        setStyle(textStyle);
+        TextStyle textStyle = _textStyle.copyFor(TextStyle.UNDERLINE_KEY, aValue ? 1 : 0);
+        setTextStyle(textStyle);
     }
 
     /**
      * Returns the run's scripting.
      */
-    public int getScripting()  { return _style.getScripting(); }
+    public int getScripting()  { return _textStyle.getScripting(); }
 
     /**
      * Returns the border.
@@ -432,7 +432,7 @@ public class StringBox extends RoundRect {
         double strY = getStringY();
         Font font = getFont();
         Color color = getTextColor();
-        double cspace = getStyle().getCharSpacing();
+        double cspace = getTextStyle().getCharSpacing();
 
         // Set style and draw string
         aPntr.setFont(font);
@@ -517,7 +517,7 @@ public class StringBox extends RoundRect {
     public String toString()
     {
         String cname = getClass().getSimpleName();
-        return cname + " { String='" + _string + '\'' + ", Style=" + _style + ", Rect=[" + super.getSvgString() + ']' +
+        return cname + " { String='" + _string + '\'' + ", Style=" + _textStyle + ", Rect=[" + super.getSvgString() + ']' +
             ", Padding=" + _padding + ", Border=" + _border +
             ", Ascent=" + getAscent() + ", Descent=" + getDescent() + ", LineHeight=" + _strHeight +
             ", Advance=" + _strWidth + " }";
@@ -529,8 +529,8 @@ public class StringBox extends RoundRect {
     public static StringBox getForStringAndAttributes(String aStr, Object ... theAttrs)
     {
         StringBox sbox = new StringBox(aStr);
-        TextStyle textStyle = sbox.getStyle().copyFor(theAttrs);
-        sbox.setStyle(textStyle);
+        TextStyle textStyle = sbox.getTextStyle().copyFor(theAttrs);
+        sbox.setTextStyle(textStyle);
         return sbox;
     }
 }

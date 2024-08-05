@@ -145,9 +145,9 @@ public class TextBox extends TextBlock {
      * Override to forward to source text block.
      */
     @Override
-    public void setStyle(TextStyle aStyle, int aStart, int anEnd)
+    public void setTextStyle(TextStyle textStyle, int aStart, int anEnd)
     {
-        _sourceText.setStyle(aStyle, aStart, anEnd);
+        _sourceText.setTextStyle(textStyle, aStart, anEnd);
     }
 
     /**
@@ -586,7 +586,7 @@ public class TextBox extends TextBlock {
             _updateTextLineStyle = textLine.getLineStyle();
 
             // Add run chars
-            super_addCharsWithStyle(nextRun.getString(), nextRun.getStyle(), charIndex - textStartCharIndex);
+            super_addCharsWithStyle(nextRun.getString(), nextRun.getTextStyle(), charIndex - textStartCharIndex);
             _updateTextLineStyle = null;
             charIndex += nextRun.length();
         }

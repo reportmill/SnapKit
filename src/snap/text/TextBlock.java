@@ -201,7 +201,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             TextStyle textStyle = getDefaultStyle();
             List<TextLine> lines = getLines();
             for (TextLine line : lines)
-                line.setStyle(textStyle);
+                line.setTextStyle(textStyle);
         }
 
         // Fire prop change
@@ -262,7 +262,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             TextStyle textStyle = getDefaultStyle();
             List<TextLine> lines = getLines();
             for (TextLine line : lines)
-                line.setStyle(textStyle);
+                line.setTextStyle(textStyle);
         }
 
         // Fire prop change
@@ -399,7 +399,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             textLine.removeChars(runStartCharIndex, textLine.length());
 
             // Add run chars to next line
-            TextStyle textStyle = lastRun.getStyle();
+            TextStyle textStyle = lastRun.getTextStyle();
             int nextLineStartCharIndex = nextLine.getStartCharIndex();
             boolean charsHaveNewline = CharSequenceUtils.indexAfterNewline(moveChars, 0) > 0;
             addCharsToLine(moveChars, textStyle, nextLineStartCharIndex, nextLine, charsHaveNewline);
@@ -487,7 +487,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         // Get TextStyle for add chars range (if not provided)
         TextStyle style = theStyle;
         if (style == null)
-            style = getStyleForCharRange(aStart, anEnd);
+            style = getTextStyleForCharRange(aStart, anEnd);
 
         // Remove given range and add chars
         if (anEnd > aStart)
@@ -524,7 +524,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         // Iterate over NextLine runs and add chars for each
         TextRun[] textRuns = nextLine.getRuns();
         for (TextRun textRun : textRuns)
-            textLine.addCharsWithStyle(textRun.getString(), textRun.getStyle(), textLine.length());
+            textLine.addCharsWithStyle(textRun.getString(), textRun.getTextStyle(), textLine.length());
 
         // Remove NextLine
         removeLine(nextLine.getLineIndex());
@@ -540,20 +540,20 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             TextRun[] lineRuns = line.getRuns();
             for (TextRun run : lineRuns) {
                 int index = anIndex + line.getStartCharIndex() + run.getStartCharIndex();
-                addCharsWithStyle(run.getString(), run.getStyle(), index);
+                addCharsWithStyle(run.getString(), run.getTextStyle(), index);
                 setLineStyle(line.getLineStyle(), index, index + run.length());
             }
         }
     }
 
     /**
-     * Sets a given style to a given range.
+     * Sets the given text style for given range.
      */
-    public void setStyle(TextStyle aStyle, int aStart, int anEnd)
+    public void setTextStyle(TextStyle textStyle, int aStart, int anEnd)
     {
         // Handle Rich
         if (isRichText())
-            setStyleRich(aStyle, aStart, anEnd);
+            setStyleRich(textStyle, aStart, anEnd);
 
         // Handle Plain
         else System.out.println("TextBlock.setStyle: Has no effect on plain text");
@@ -576,8 +576,8 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
             // Set style
             TextRun textRun = runIter.getNextRun();
-            TextStyle oldStyle = textRun.getStyle();
-            textRun.setStyle(aStyle);
+            TextStyle oldStyle = textRun.getTextStyle();
+            textRun.setTextStyle(aStyle);
 
             // Fire prop change
             if (isPropChangeEnabled()) {
@@ -621,9 +621,9 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
         // Handle Plain
         else {
-            TextStyle styleForRange = getStyleForCharRange(aStart, anEnd);
+            TextStyle styleForRange = getTextStyleForCharRange(aStart, anEnd);
             TextStyle newStyle = styleForRange.copyFor(aKey, aValue);
-            setStyle(newStyle, aStart, anEnd);
+            setTextStyle(newStyle, aStart, anEnd);
         }
     }
 
@@ -643,11 +643,11 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             int newStyleEndInText = Math.min(runEndInText, anEnd);
 
             // Get current run style, get new style for given key/value
-            TextStyle style = textRun.getStyle();
+            TextStyle style = textRun.getTextStyle();
             TextStyle newStyle = style.copyFor(aKey, aValue);
 
             // Set new style for run range
-            setStyle(newStyle, aStart, newStyleEndInText);
+            setTextStyle(newStyle, aStart, newStyleEndInText);
 
             // Reset start to run end
             aStart = runEndInText;
@@ -807,7 +807,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
         // Remove chars and reset style
         removeChars(0, length());
-        setStyle(getDefaultStyle(), 0, 0);
+        setTextStyle(getDefaultStyle(), 0, 0);
         setLineStyle(getDefaultLineStyle(), 0, 0);
 
         // Reset undo
@@ -915,19 +915,19 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     /**
      * Returns the TextStyle for the run at the given character index.
      */
-    public TextStyle getStyleForCharIndex(int charIndex)
+    public TextStyle getTextStyleForCharIndex(int charIndex)
     {
         TextRun textRun = getRunForCharIndex(charIndex);
-        return textRun.getStyle();
+        return textRun.getTextStyle();
     }
 
     /**
      * Returns the TextStyle for the run for given char range.
      */
-    public TextStyle getStyleForCharRange(int startIndex, int endIndex)
+    public TextStyle getTextStyleForCharRange(int startIndex, int endIndex)
     {
         TextRun textRun = getRunForCharRange(startIndex, endIndex);
-        return textRun.getStyle();
+        return textRun.getTextStyle();
     }
 
     /**
@@ -991,7 +991,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
                     return true;
         }
 
-        TextStyle textStyle = getStyleForCharIndex(0);
+        TextStyle textStyle = getTextStyleForCharIndex(0);
         return textStyle.isUnderlined();
     }
 
@@ -1047,9 +1047,9 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         // Iterate over lines
         for (TextLine line : getLines()) {
             for (TextRun run : line.getRuns()) {
-                TextStyle runStyle = run.getStyle();
+                TextStyle runStyle = run.getTextStyle();
                 TextStyle runStyleScaled = runStyle.copyFor(run.getFont().copyForScale(aScale));
-                run.setStyle(runStyleScaled);
+                run.setTextStyle(runStyleScaled);
             }
         }
     }
