@@ -125,7 +125,7 @@ public class TextPane extends ViewOwner {
         TextArea textArea = getTextArea();
 
         // Reset FontSizeText
-        setViewValue("FontSizeText", textArea.getFont().getSize());
+        setViewValue("FontSizeText", textArea.getTextFont().getSize());
 
         // Update UndoButton, RedoButton
         Undoer undoer = textArea.getUndoer();

@@ -317,12 +317,12 @@ public class TextArea extends View {
     /**
      * Returns the default style for text.
      */
-    public TextStyle getDefaultStyle()  { return _textBlock.getDefaultStyle(); }
+    public TextStyle getDefaultStyle()  { return _textBlock.getDefaultTextStyle(); }
 
     /**
      * Sets the default style.
      */
-    public void setDefaultStyle(TextStyle aStyle)  { _textBlock.setDefaultStyle(aStyle); }
+    public void setDefaultStyle(TextStyle aStyle)  { _textBlock.setDefaultTextStyle(aStyle); }
 
     /**
      * Returns the default line style for text.

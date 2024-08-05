@@ -89,9 +89,7 @@ public class DevPaneConsole extends ViewOwner {
 
             // Change Console Font
             TextBlock textBlock = getTextBlock();
-            TextStyle textStyle = textBlock.getDefaultStyle();
-            TextStyle textStyle2 = textStyle.copyFor(new Font("Arial", 12));
-            textBlock.setDefaultStyle(textStyle2);
+            textBlock.setDefaultFont(Font.Arial12);
 
             // Change line spacing
             TextLineStyle lineStyle = textBlock.getDefaultLineStyle();

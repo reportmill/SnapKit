@@ -1,6 +1,5 @@
 package snap.viewx;
 import snap.gfx.Font;
-import snap.text.TextStyle;
 import snap.view.ScrollView;
 import snap.view.View;
 import snap.view.ViewOwner;
@@ -12,7 +11,6 @@ import java.util.Arrays;
 
 /**
  * A class to display and process System IN/OUT/ERR.
- *
  * This can be useful to quickly add UI for Java command line programs.
  */
 public class ScanPane extends ViewOwner {
@@ -73,8 +71,7 @@ public class ScanPane extends ViewOwner {
         public ScanView()
         {
             setPadding(4,4,4,4);
-            setFont(new Font("Arial", 16));
-            getTextBlock().setDefaultStyle(new TextStyle(new Font("Arial", 16)));
+            setFont(Font.Arial16);
         }
 
         /** Override to send to process. */

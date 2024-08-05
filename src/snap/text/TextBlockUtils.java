@@ -194,7 +194,7 @@ public class TextBlockUtils {
         XMLElement xml = new XMLElement("xstring");
 
         // Declare loop variables for text attributes: TextTyle, LineStyle, Font, Color, Format, Outline, Underline, Scripting, CS
-        TextStyle textStyle = textBlock.getDefaultStyle();
+        TextStyle textStyle = textBlock.getDefaultTextStyle();
         TextLineStyle lineStyle = textBlock.getDefaultLineStyle();
         Font font = textStyle.getFont();
         Color color = textStyle.getColor();
@@ -283,7 +283,7 @@ public class TextBlockUtils {
     public static void fromXML(TextBlock textBlock, XMLArchiver anArchiver, XMLElement anElement)
     {
         // Get map for run attributes
-        TextStyle style = textBlock.getDefaultStyle();
+        TextStyle style = textBlock.getDefaultTextStyle();
         TextLineStyle lineStyle = null;
 
         // Iterate over child elements to snag common attributes

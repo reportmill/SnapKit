@@ -172,12 +172,12 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     /**
      * Returns the default text style for text.
      */
-    public TextStyle getDefaultStyle()  { return _defaultTextStyle; }
+    public TextStyle getDefaultTextStyle()  { return _defaultTextStyle; }
 
     /**
      * Sets the default text style.
      */
-    public void setDefaultStyle(TextStyle aStyle)
+    public void setDefaultTextStyle(TextStyle aStyle)
     {
         // If already set, just return
         if (Objects.equals(aStyle, _defaultTextStyle)) return;
@@ -188,7 +188,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
         // Update existing lines
         if (!isRichText() || length() == 0) {
-            TextStyle textStyle = getDefaultStyle();
+            TextStyle textStyle = getDefaultTextStyle();
             List<TextLine> lines = getLines();
             for (TextLine line : lines)
                 line.setTextStyle(textStyle);
@@ -226,7 +226,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     {
         if (aFont.equals(getDefaultFont())) return;
         TextStyle newTextStyle = _defaultTextStyle.copyFor(aFont);
-        setDefaultStyle(newTextStyle);
+        setDefaultTextStyle(newTextStyle);
     }
 
     /**
@@ -767,7 +767,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
         // Remove chars and reset style
         removeChars(0, length());
-        setTextStyle(getDefaultStyle(), 0, 0);
+        setTextStyle(getDefaultTextStyle(), 0, 0);
         setLineStyle(getDefaultLineStyle(), 0, 0);
 
         // Reset undo

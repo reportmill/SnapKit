@@ -183,9 +183,9 @@ public class TextBox extends TextBlock {
      * Override to forward to source text block.
      */
     @Override
-    public void setDefaultStyle(TextStyle aStyle)
+    public void setDefaultTextStyle(TextStyle aStyle)
     {
-        _sourceText.setDefaultStyle(aStyle);
+        _sourceText.setDefaultTextStyle(aStyle);
     }
 
     /**
@@ -517,7 +517,7 @@ public class TextBox extends TextBlock {
         // Handle DefaultTextStyle
         else if (propName == TextBlock.DefaultTextStyle_Prop) {
             TextStyle newStyle = (TextStyle) aPC.getNewValue();
-            super.setDefaultStyle(newStyle);
+            super.setDefaultTextStyle(newStyle);
         }
     }
 
