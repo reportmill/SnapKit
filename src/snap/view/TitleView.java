@@ -11,17 +11,17 @@ import snap.util.*;
  */
 public class TitleView extends ParentView implements ViewHost {
 
-    // The view that paints title view decorations
-    private TitleArea  _area;
-    
     // The title label
     private Label  _label;
 
     // The content
     private View  _content;
-    
+
+    // The view that paints title view decorations
+    private TitleArea _titleArea;
+
     // The Style
-    private TitleStyle  _tstyle;
+    private TitleStyle _titleStyle;
     
     // Whether Title view is collapsible
     private boolean  _collapsible;
@@ -30,7 +30,7 @@ public class TitleView extends ParentView implements ViewHost {
     private boolean  _expanded = true;
     
     // Images for collapsed/expanded
-    private View  _clpView;
+    private View _arrowView;
     
     // Constants for TitleView styles
     public enum TitleStyle { Plain, EtchBorder, Button }
@@ -44,7 +44,7 @@ public class TitleView extends ParentView implements ViewHost {
     private static Insets DEFAULT_TITLE_VIEW_PADDING = new Insets(2);
 
     /**
-     * Creates a new TitleView.
+     * Constructor.
      */
     public TitleView()
     {
@@ -56,7 +56,7 @@ public class TitleView extends ParentView implements ViewHost {
     }
 
     /**
-     * Creates a new TitleView for given title.
+     * Constructor for given title.
      */
     public TitleView(String aTitle)
     {
@@ -65,7 +65,7 @@ public class TitleView extends ParentView implements ViewHost {
     }
 
     /**
-     * Creates a new TitleView for given title.
+     * Constructor for given title and content view.
      */
     public TitleView(String aTitle, View aView)
     {
@@ -110,18 +110,18 @@ public class TitleView extends ParentView implements ViewHost {
     /**
      * Returns the title style.
      */
-    public TitleStyle getTitleStyle()  { return _tstyle; }
+    public TitleStyle getTitleStyle()  { return _titleStyle; }
 
     /**
      * Sets the title style.
      */
-    public void setTitleStyle(TitleStyle aTS)
+    public void setTitleStyle(TitleStyle titleStyle)
     {
         // If already set, just return
-        if (aTS == _tstyle) return;
+        if (titleStyle == _titleStyle) return;
 
         // Set value and fire prop change
-        firePropChange(TitleStyle_Prop, _tstyle, _tstyle = aTS);
+        firePropChange(TitleStyle_Prop, _titleStyle, _titleStyle = titleStyle);
 
         // Relayout, repaint
         relayout();
@@ -129,40 +129,36 @@ public class TitleView extends ParentView implements ViewHost {
         repaint();
 
         // If Area needs to change, change it
-        TitleArea area = createArea();
-        setArea(area);
+        TitleArea titleArea = createTitleArea();
+        setTitleArea(titleArea);
     }
-
-    /**
-     * Returns the TitleArea.
-     */
-    protected TitleArea getArea()  { return _area; }
 
     /**
      * Sets the TitleArea.
      */
-    protected void setArea(TitleArea aTA)
+    private void setTitleArea(TitleArea titleArea)
     {
         // Remove old
         String text = null;
-        if (_area!=null) {
+        if (_titleArea != null) {
             text = getText();
-            removeChild(_area);
+            removeChild(_titleArea);
         }
 
         // Set/add new
-        _area = aTA;
-        _area.setTitleView(this);
-        _area.setPadding(getPadding());
-        addChild(_area, 0);
-        _label = _area._label;
-        if (text!=null) _label.setText(text);
+        _titleArea = titleArea;
+        _titleArea.setTitleView(this);
+        _titleArea.setPadding(getPadding());
+        addChild(_titleArea, 0);
+        _label = _titleArea._label;
+        if (text != null)
+            _label.setText(text);
     }
 
     /**
      * Creates the Area.
      */
-    protected TitleArea createArea()
+    private TitleArea createTitleArea()
     {
         switch (getTitleStyle()) {
             case EtchBorder: return new TitleAreaEtched();
@@ -182,8 +178,8 @@ public class TitleView extends ParentView implements ViewHost {
     public void setCollapsible(boolean aValue)
     {
         // Do normal setter
-        if(aValue==_collapsible) return;
-        firePropChange(Collapsible_Prop, _collapsible, _collapsible=aValue);
+        if (aValue == _collapsible) return;
+        firePropChange(Collapsible_Prop, _collapsible, _collapsible = aValue);
         setActionable(aValue);
 
         // If collapsible: Enable action event and listen for label click
@@ -211,10 +207,10 @@ public class TitleView extends ParentView implements ViewHost {
     public void setExpanded(boolean aValue)
     {
         // If value already set, just return
-        if(aValue==_expanded) return;
+        if (aValue == _expanded) return;
 
         // Set value and fire prop change
-        firePropChange(Expanded_Prop, _expanded, _expanded=aValue);
+        firePropChange(Expanded_Prop, _expanded, _expanded = aValue);
         relayout();
 
         // Update graphic
@@ -230,7 +226,7 @@ public class TitleView extends ParentView implements ViewHost {
     public void setExpandedAnimated(boolean aValue)
     {
         // If already set, just return
-        if(aValue == _expanded) return;
+        if (aValue == _expanded) return;
 
         // Cache current size and set new Expanded value
         double viewW = getWidth();
@@ -248,7 +244,7 @@ public class TitleView extends ParentView implements ViewHost {
 
         // Clip content to bounds?
         View content = getContent();
-        if(content != null)
+        if (content != null)
             content.setClipToBounds(true);
 
         // Configure anim to new size
@@ -259,7 +255,7 @@ public class TitleView extends ParentView implements ViewHost {
         View graphic = _label.getGraphic();
         if (graphic == null)
             return;
-        graphic.setRotate(aValue? 0 : 90);
+        graphic.setRotate(aValue ? 0 : 90);
 
         // Configure anim for graphic
         anim = graphic.getAnim(0).clear();
@@ -332,12 +328,12 @@ public class TitleView extends ParentView implements ViewHost {
     /**
      * Override to return preferred width of content.
      */
-    protected double getPrefWidthImpl(double aH)  { return _area.getPrefWidth(aH); }
+    protected double getPrefWidthImpl(double aH)  { return _titleArea.getPrefWidth(aH); }
 
     /**
      * Override to return preferred height of content.
      */
-    protected double getPrefHeightImpl(double aW)  { return _area.getPrefHeight(aW); }
+    protected double getPrefHeightImpl(double aW)  { return _titleArea.getPrefHeight(aW); }
 
     /**
      * Override to layout content.
@@ -345,10 +341,10 @@ public class TitleView extends ParentView implements ViewHost {
     protected void layoutImpl()
     {
         // Layout TitleArea to full bounds
-        _area.setBounds(0, 0, getWidth(), getHeight());
+        _titleArea.setBounds(0, 0, getWidth(), getHeight());
 
         // Layout content
-        Rect contentBounds = _area.getContentBounds();
+        Rect contentBounds = _titleArea.getContentBounds();
         if (isContentShowing())
             _content.setBounds(contentBounds.x, contentBounds.y, contentBounds.width, contentBounds.height);
         else if (_content != null) {
@@ -363,17 +359,17 @@ public class TitleView extends ParentView implements ViewHost {
     public View getCollapseGraphic()
     {
         // If already set, just return
-        if (_clpView != null) return _clpView;
+        if (_arrowView != null) return _arrowView;
 
         // Create
-        Polygon poly = new Polygon(2.5, .5, 2.5, 8.5, 8.5, 4.5);
-        ShapeView shapeView = new ShapeView(poly);
+        Polygon arrowShape = new Polygon(2.5, .5, 2.5, 8.5, 8.5, 4.5);
+        ShapeView shapeView = new ShapeView(arrowShape);
         shapeView.setPrefSize(9,9);
         shapeView.setFill(Color.GRAY);
         shapeView.setBorder(Color.GRAY, 1);
 
         // Set, return
-        return _clpView = shapeView;
+        return _arrowView = shapeView;
     }
 
     /**
@@ -382,7 +378,7 @@ public class TitleView extends ParentView implements ViewHost {
     public void setPadding(Insets theIns)
     {
         super.setPadding(theIns);
-        _area.setPadding(theIns);
+        _titleArea.setPadding(theIns);
     }
 
     /**
@@ -419,8 +415,8 @@ public class TitleView extends ParentView implements ViewHost {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive Text, TitleStyle
-        String text = getText(); if (text!=null && text.length()>0) e.add(Text_Prop, text);
-        if (getTitleStyle()!=TitleStyle.EtchBorder) e.add(TitleStyle_Prop, getTitleStyle());
+        String text = getText(); if (text != null && !text.isEmpty()) e.add(Text_Prop, text);
+        if (getTitleStyle() != TitleStyle.EtchBorder) e.add(TitleStyle_Prop, getTitleStyle());
 
         // Archive Expandable, Expanded
         if (isCollapsible()) e.add(Collapsible_Prop, true);
@@ -453,13 +449,13 @@ public class TitleView extends ParentView implements ViewHost {
     /**
      * A View to draw content of TitleView.
      */
-    public static class TitleArea extends ParentView {
+    private static class TitleArea extends ParentView {
 
         // The TitleView
-        TitleView     _titleView;
+        private TitleView _titleView;
 
         // The label
-        Label         _label;
+        protected Label _label;
 
         /** Sets the TitleView. */
         public void setTitleView(TitleView aTV)  { _titleView = aTV; }
@@ -526,7 +522,7 @@ public class TitleView extends ParentView implements ViewHost {
         protected void fireActionEvent(ViewEvent anEvent)
         {
             //super.fireActionEvent(anEvent);
-            if(_titleView.isCollapsible())
+            if (_titleView.isCollapsible())
                 _titleView.toggleExpandedAnimated(anEvent);
         }
     }
@@ -598,7 +594,7 @@ public class TitleView extends ParentView implements ViewHost {
     private static class TitleAreaButton extends TitleArea {
 
         // The Button
-        Button      _button;
+        Button _button;
 
         /** Create TitleAreaButton. */
         public TitleAreaButton()
@@ -623,7 +619,7 @@ public class TitleView extends ParentView implements ViewHost {
             // Get Button.PrefWidth and Content.PrefWidth
             double buttonW = _button.getPrefWidth();
             double contentW = 0;
-            if(isContentShowing()) {
+            if (isContentShowing()) {
                 View content = getContent();
                 Insets ins = getInsetsAll();
                 contentW = content.getPrefWidth() + ins.getWidth();
@@ -639,7 +635,7 @@ public class TitleView extends ParentView implements ViewHost {
             // Get Button.PrefWidth and Content.PrefWidth
             double buttonH = _button.getPrefHeight();
             double contentH = 0;
-            if(isContentShowing()) {
+            if (isContentShowing()) {
                 View content = getContent();
                 Insets ins = getInsetsAll();
                 contentH = content.getPrefHeight() + ins.getHeight();
