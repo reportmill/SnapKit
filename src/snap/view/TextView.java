@@ -43,8 +43,8 @@ public class TextView extends ParentView {
         addChild(_scrollView);
 
         // Other configuration
-        setEditable(true);
         _textArea.setFill(Color.WHITE);
+        _textArea.setEditable(true);
     }
 
     /**
@@ -73,16 +73,6 @@ public class TextView extends ParentView {
     public void setText(String aString)  { _textArea.setText(aString); }
 
     /**
-     * Returns whether Text shape is editable.
-     */
-    public boolean isEditable()  { return _textArea.isEditable(); }
-
-    /**
-     * Sets whether Text shape is editable.
-     */
-    public void setEditable(boolean aValue)  { _textArea.setEditable(aValue); }
-
-    /**
      * Sets whether to wrap lines that overrun bounds.
      */
     public void setWrapLines(boolean aValue)
@@ -90,16 +80,6 @@ public class TextView extends ParentView {
         _textArea.setWrapLines(aValue);
         _scrollView.setFillWidth(aValue);
     }
-
-    /**
-     * Returns the default style for text.
-     */
-    public TextStyle getDefaultStyle()  { return _textArea.getDefaultStyle(); }
-
-    /**
-     * Sets the default style.
-     */
-    public void setDefaultStyle(TextStyle aStyle)  { _textArea.setDefaultStyle(aStyle); }
 
     /**
      * Sets whether text area sends action on focus lost (if text changed).

@@ -32,13 +32,10 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     protected int  _length;
 
     // The default text style for this text
-    protected TextStyle  _defaultTextStyle;
+    protected TextStyle _defaultTextStyle = TextStyle.DEFAULT;
 
     // The default line style for this text
     protected TextLineStyle  _defaultLineStyle = TextLineStyle.DEFAULT;
-
-    // The current text style for TextDoc parent/container (probably TextArea).
-    protected TextStyle  _parentTextStyle = TextStyle.DEFAULT;
 
     // Whether text is modified
     private boolean _textModified;
@@ -66,7 +63,6 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     public static final String Style_Prop = "Style";
     public static final String LineStyle_Prop = "LineStyle";
     public static final String DefaultTextStyle_Prop = "DefaultTextStyle";
-    public static final String ParentTextStyle_Prop = "ParentTextStyle";
     public static final String TextModified_Prop = "TextModified";
 
     /**
@@ -84,7 +80,6 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     {
         super();
         _rich = isRich;
-        _defaultTextStyle = isRich ? TextStyle.DEFAULT : null;
         TextLine defaultLine = createLine();
         addLine(defaultLine, 0);
     }
@@ -175,14 +170,9 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Returns whether the default text style is explicitly set (vs. coming from parent).
-     */
-    public boolean isDefaultTextStyleSet()  { return _defaultTextStyle != null; }
-
-    /**
      * Returns the default text style for text.
      */
-    public TextStyle getDefaultStyle()  { return _defaultTextStyle != null ? _defaultTextStyle : _parentTextStyle; }
+    public TextStyle getDefaultStyle()  { return _defaultTextStyle; }
 
     /**
      * Sets the default text style.
@@ -227,46 +217,16 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     /**
      * Returns the default font.
      */
-    public Font getDefaultFont()  { return getDefaultStyle().getFont(); }
+    public Font getDefaultFont()  { return _defaultTextStyle.getFont(); }
 
     /**
      * Sets the default font.
      */
     public void setDefaultFont(Font aFont)
     {
-        TextStyle oldTextStyle = getDefaultStyle();
-        TextStyle newTextStyle = oldTextStyle.copyFor(aFont);
+        if (aFont.equals(getDefaultFont())) return;
+        TextStyle newTextStyle = _defaultTextStyle.copyFor(aFont);
         setDefaultStyle(newTextStyle);
-    }
-
-    /**
-     * Returns the current style for TextDoc parent/container (probably a TextArea).
-     */
-    public TextStyle getParentTextStyle()  { return _parentTextStyle; }
-
-    /**
-     * Sets the current style for TextDoc parent/container (probably a TextArea).
-     */
-    public void setParentTextStyle(TextStyle aStyle)
-    {
-        // If already set, just return
-        if (aStyle == null) aStyle = TextStyle.DEFAULT;
-        if (Objects.equals(aStyle, _defaultTextStyle)) return;
-
-        // Set
-        TextStyle oldStyle = _parentTextStyle;
-        _parentTextStyle = aStyle;
-
-        // If DefaultTextStyle not set, update existing lines
-        if (!isRichText() && !isDefaultTextStyleSet()) {
-            TextStyle textStyle = getDefaultStyle();
-            List<TextLine> lines = getLines();
-            for (TextLine line : lines)
-                line.setTextStyle(textStyle);
-        }
-
-        // Fire prop change
-        firePropChange(ParentTextStyle_Prop, oldStyle, aStyle);
     }
 
     /**
@@ -1165,11 +1125,6 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      * Returns the y for alignment.
      */
     public double getAlignedY()  { return getY(); }
-
-    /**
-     * Returns the max x value that doesn't hit right border for given y/height.
-     */
-    protected double getMaxHitX(double aY, double aH)  { return getMaxX(); }
 
     /**
      * Returns a path for two char indexes - it will be a simple box with extensions for first/last lines.

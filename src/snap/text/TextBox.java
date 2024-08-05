@@ -73,6 +73,8 @@ public class TextBox extends TextBlock {
     public TextBox(TextBlock sourceText)
     {
         super(sourceText.isRichText());
+        _defaultTextStyle = sourceText._defaultTextStyle;
+        _defaultLineStyle = sourceText._defaultLineStyle;
         setSourceText(sourceText);
     }
 
@@ -184,15 +186,6 @@ public class TextBox extends TextBlock {
     public void setDefaultStyle(TextStyle aStyle)
     {
         _sourceText.setDefaultStyle(aStyle);
-    }
-
-    /**
-     * Override to forward to source text block.
-     */
-    @Override
-    public void setParentTextStyle(TextStyle aStyle)
-    {
-        _sourceText.setParentTextStyle(aStyle);
     }
 
     /**
@@ -525,12 +518,6 @@ public class TextBox extends TextBlock {
         else if (propName == TextBlock.DefaultTextStyle_Prop) {
             TextStyle newStyle = (TextStyle) aPC.getNewValue();
             super.setDefaultStyle(newStyle);
-        }
-
-        // Handle ParentTextStyle
-        else if (propName == TextBlock.ParentTextStyle_Prop) {
-            TextStyle newStyle = (TextStyle) aPC.getNewValue();
-            super.setParentTextStyle(newStyle);
         }
     }
 

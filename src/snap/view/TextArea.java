@@ -27,6 +27,9 @@ public class TextArea extends View {
     // Whether text should wrap lines that overrun bounds
     private boolean  _wrapLines;
 
+    // Whether to synchronize text area font with text block
+    private boolean _syncTextFont = true;
+
     // The char index of carat
     private int  _selIndex;
 
@@ -79,7 +82,7 @@ public class TextArea extends View {
     public static final String  SNAP_RICHTEXT_TYPE = "reportmill/xstring";
 
     // The PropChangeListener to catch SourceText PropChanges.
-    private PropChangeListener _sourceTextPropLsnr = pc -> sourceTextDidPropChange(pc);
+    private PropChangeListener _sourceTextPropLsnr = this::handleSourceTextPropChange;
 
     // A PropChangeListener to enable/disable caret when window loses focus
     private PropChangeListener  _windowFocusedChangedLsnr;
@@ -150,15 +153,9 @@ public class TextArea extends View {
         // If already set, just return
         if (aTextBlock == _textBlock) return;
 
-        // Update new TextBlock.ParentTextStyle
-        if (aTextBlock != null) {
-            View parent = getParent();
-            if (isFontSet() || parent != null) {
-                Font font = isFontSet() ? getFont() : parent.getFont();
-                TextStyle parentTextStyle = aTextBlock.getParentTextStyle().copyFor(font);
-                aTextBlock.setParentTextStyle(parentTextStyle);
-            }
-        }
+        // If SyncTextFont, forward to TextBlock
+        if (isSyncTextFont() && !isRichText())
+            aTextBlock.setDefaultFont(getFont());
 
         // Remove PropChangeListener
         if (_textBlock != null)
@@ -292,6 +289,19 @@ public class TextArea extends View {
             textBox.setWrapLines(true);
             setTextBlock(textBox);
         }
+    }
+
+    /**
+     * Returns whether to synchronize text area font with text block.
+     */
+    public boolean isSyncTextFont()  { return _syncTextFont; }
+
+    /**
+     * Sets whether to synchronize text area font with text block.
+     */
+    public void setSyncTextFont(boolean aValue)
+    {
+        _syncTextFont = aValue;
     }
 
     /**
@@ -505,50 +515,17 @@ public class TextArea extends View {
     }
 
     /**
-     * Returns the font of the current selection or cursor.
-     */
-    public Font getFont()
-    {
-        // Handle RichText: Return SelStyle.Font
-        if (isRichText()) {
-            TextStyle selStyle = getSelStyle();
-            return selStyle.getFont();
-        }
-
-        // Handle plain text with DefaultStyleSet: Return DefaultStyle.Font
-        if (_textBlock.isDefaultTextStyleSet()) {
-            TextStyle textStyle = _textBlock.getDefaultStyle();
-            return textStyle.getFont();
-        }
-
-        // Do normal version
-        return super.getFont();
-    }
-
-    /**
      * Sets the font of the current selection or cursor.
      */
+    @Override
     public void setFont(Font aFont)
     {
-        // Handle RichText: just update SelStyle.Font and return
-        if (isRichText()) {
-            if (aFont != null)
-                setSelStyleValue(TextStyle.Font_Prop, aFont);
-            return;
-        }
-
-        // Update TextBlock.DefaultTextStyle, ParentTextStyle
-        _textBlock.setPropChangeEnabled(false);
-        TextStyle defaultTextStyle = aFont != null ? _textBlock.getDefaultStyle().copyFor(aFont) : null;
-        _textBlock.setDefaultStyle(defaultTextStyle);
-
-        // Do normal version
+        if (Objects.equals(aFont, getFont())) return;
         super.setFont(aFont);
 
-        // Update TextBlock.ParentTextStyle
-        TextStyle parentTextStyle = defaultTextStyle != null ? defaultTextStyle : _textBlock.getParentTextStyle().copyFor(aFont);
-        _textBlock.setParentTextStyle(parentTextStyle);
-        _textBlock.setPropChangeEnabled(true);
+        // If SyncTextFont, forward to TextBlock
+        if (isSyncTextFont())
+            setTextFont(getFont());
     }
 
     /**
@@ -563,10 +540,31 @@ public class TextArea extends View {
         // Do normal version
         super.parentFontChanged();
 
-        // Update TextBlock.ParentTextStyle
-        Font font = getFont();
-        TextStyle parentTextStyle = _textBlock.getParentTextStyle().copyFor(font);
-        _textBlock.setParentTextStyle(parentTextStyle);
+        // If SyncTextFont, forward to TextBlock
+        if (isSyncTextFont())
+            setTextFont(getFont());
+    }
+
+    /**
+     * Returns the font of the text block.
+     */
+    public Font getTextFont()
+    {
+        if (isRichText()) {
+            TextStyle selStyle = getSelStyle();
+            return selStyle.getFont();
+        }
+        return _textBlock.getDefaultFont();
+    }
+
+    /**
+     * Sets the font of the text block.
+     */
+    public void setTextFont(Font aFont)
+    {
+        if (isRichText())
+            setSelStyleValue(TextStyle.Font_Prop, aFont);
+        else _textBlock.setDefaultFont(aFont);
     }
 
     /**
@@ -1537,10 +1535,17 @@ public class TextArea extends View {
     /**
      * Called when SourceText changes (chars added, updated or deleted).
      */
-    protected void sourceTextDidPropChange(PropChange aPC)
+    protected void handleSourceTextPropChange(PropChange aPC)
     {
         // Forward on to listeners
         firePropChange(aPC);
+
+        // Handle DefaultTextStyle and SyncTextFont
+        String propName = aPC.getPropName();
+        if (propName == TextBlock.DefaultTextStyle_Prop && isSyncTextFont()) {
+            Font font = _textBlock.getDefaultFont();
+            setFont(font);
+        }
 
         // Notify text did change
         textDidChange();

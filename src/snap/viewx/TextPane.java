@@ -166,24 +166,24 @@ public class TextPane extends ViewOwner {
         if (anEvent.equals("FontSizeText")) {
             float size = anEvent.getFloatValue();
             if (size < 1) return;
-            Font font = textArea.getFont();
+            Font font = textArea.getTextFont();
             Font font2 = new Font(font.getName(), size);
-            textArea.setFont(font2);
+            textArea.setTextFont(font2);
             requestFocus(textArea);
         }
 
         // Handle IncreaseFontButton
         if (anEvent.equals("IncreaseFontButton")) {
-            Font font = textArea.getFont();
+            Font font = textArea.getTextFont();
             Font font2 = new Font(font.getName(), font.getSize() + 1);
-            textArea.setFont(font2);
+            textArea.setTextFont(font2);
         }
 
         // Handle DecreaseFontButton
         if (anEvent.equals("DecreaseFontButton")) {
-            Font font = textArea.getFont();
+            Font font = textArea.getTextFont();
             Font font2 = new Font(font.getName(), font.getSize() - 1);
-            textArea.setFont(font2);
+            textArea.setTextFont(font2);
         }
 
         // Handle FindButton

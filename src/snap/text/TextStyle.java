@@ -56,7 +56,6 @@ public class TextStyle extends PropObject implements Cloneable {
 
     // Constants for default text styles
     public static final TextStyle DEFAULT = new TextStyle();
-    public static final TextStyle MONOSPACE_DEFAULT = new TextStyle(Font.getFont("Consolas", 12));
 
     // Constant for Link attributes
     public static final TextStyle DEFAULT_LINK_STYLE = DEFAULT.copyForPropsString("Color:BLUE; Underline:1;");
@@ -187,10 +186,8 @@ public class TextStyle extends PropObject implements Cloneable {
      */
     public TextStyle clone()
     {
-        TextStyle clone = null;
-        try { clone = (TextStyle) super.clone(); }
+        try { return (TextStyle) super.clone(); }
         catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
-        return clone;
     }
 
     /**
