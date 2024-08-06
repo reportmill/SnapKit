@@ -27,6 +27,9 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
     // The system native version of this font
     private Object  _native;
 
+    // A good code font
+    private static Font _codeFont;
+
     // Whether font not found error has already been printed
     private static boolean  _fontNotFoundErrorPrinted = false;
 
@@ -428,6 +431,35 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
      * Returns the user's default font.
      */
     public static Font getDefaultFont()  { return Arial12; }
+
+    /**
+     * Returns a good code font (at 12 pt).
+     */
+    public static Font getCodeFont()
+    {
+        if (_codeFont != null) return _codeFont;
+
+        // Get font names and size
+        String[] names = { "Monaco", "Consolas", "Lucida Console", "Courier" };
+
+        // Look for font
+        for (String name : names) {
+            _codeFont = new Font(name, 12);
+            if (_codeFont.getFamily().startsWith(name))
+                break;
+        }
+
+        // Return
+        return _codeFont;
+    }
+
+    /**
+     * Returns a good code font at given point size.
+     */
+    public static Font getCodeFontForSize(double pointSize)
+    {
+        return getCodeFont().copyForSize(pointSize);
+    }
 
     /**
      * Returns a list of all system font names.
