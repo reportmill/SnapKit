@@ -1,19 +1,28 @@
 
+# Remoe old version
 rm -rf /tmp/javadoc
 
-cd /Temp/SnapKit/src
+# Change to SnapKit src dir
+SNAPKIT_HOME="/Users/jeff/SnapDev/SnapKit"
+cd $SNAPKIT_HOME/src
 
+# Run Javadoc
 javadoc -d /tmp/javadoc -windowtitle 'SnapKit API' \
 -header 'SnapKit API' \
 -footer 'SnapKit API' \
 -overview /Temp/SnapKit/scripts/overview.html \
+snap/geom/*.java \
 snap/gfx/*.java \
+snap/gfx3d/*.java \
 snap/parse/*.java \
+snap/props/*.java \
+snap/text/*.java \
 snap/util/*.java \
 snap/view/*.java \
 snap/viewx/*.java \
 snap/web/*.java
 
+# Create javadoc.zip
 echo "Zipping javadoc.zip"
 cd /tmp
 zip -rq javadoc.zip javadoc
