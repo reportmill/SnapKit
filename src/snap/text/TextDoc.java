@@ -22,14 +22,6 @@ public class TextDoc extends TextBlock {
     }
 
     /**
-     * Constructor for rich text.
-     */
-    public TextDoc(boolean isRich)
-    {
-        super(isRich);
-    }
-
-    /**
      * Returns the source URL.
      */
     public WebURL getSourceURL()  { return _sourceURL; }
@@ -67,7 +59,7 @@ public class TextDoc extends TextBlock {
     /**
      * Write TextDoc text to source file.
      */
-    public void writeToSourceFile() throws Exception
+    public void writeToSourceFile()
     {
         // Get SourceFile
         WebURL sourceURL = getSourceURL();
@@ -81,21 +73,5 @@ public class TextDoc extends TextBlock {
 
         // Save file
         sourceFile.save();
-    }
-
-    /**
-     * Returns a new TextDoc from given source.
-     */
-    public static TextDoc newFromSource(Object aSource)
-    {
-        // Get/Set URL from Source
-        WebURL url = WebURL.getURL(aSource);
-
-        // Create TextDoc and open from URL
-        TextDoc textDoc = new TextDoc();
-        textDoc.readFromSourceURL(url);
-
-        // Return
-        return textDoc;
     }
 }

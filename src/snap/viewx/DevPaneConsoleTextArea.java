@@ -4,7 +4,6 @@
 package snap.viewx;
 import java.util.*;
 import snap.gfx.Color;
-import snap.text.TextDoc;
 import snap.text.TextStyle;
 import snap.util.*;
 import snap.view.*;
