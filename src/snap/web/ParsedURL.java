@@ -98,7 +98,7 @@ public class ParsedURL {
         if (_scheme.equals("file")) {
 
             // If Windows device letter is present, move from path to string
-            if (_path != null && _path.length() >= 2 && _path.charAt(2) == ':' && Character.isLetter(_path.charAt(1))) {
+            if (_path != null && _path.length() > 2 && _path.charAt(2) == ':' && Character.isLetter(_path.charAt(1))) {
                 _windowsDriveLetterPath = _path.substring(0, 3).toUpperCase();
                 str += _windowsDriveLetterPath;
                 _path = _path.substring(3);
