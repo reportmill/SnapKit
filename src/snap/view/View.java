@@ -71,10 +71,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     private double  _prefWidth, _prefHeight;
 
     // The view fill
-    private Paint  _fill;
+    protected Paint _fill;
 
     // The view border
-    private Border  _border;
+    protected Border _border;
 
     // The radius for border rounded corners
     protected double  _borderRadius;
@@ -2079,16 +2079,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
-     * Returns the default border.
-     */
-    public Border getDefaultBorder()  { return null; }
-
-    /**
-     * Returns the default fill paint.
-     */
-    public Paint getDefaultFill()  { return null; }
-
-    /**
      * Returns the default font.
      */
     public Font getDefaultFont()
@@ -3157,16 +3147,14 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             e.add(Vertical_Prop, isVertical());
 
         // Archive Border, BorderRadius
-        Border border = getBorder();
-        if (border != null && !Objects.equals(border, getDefaultBorder()))
-            e.add(anArchiver.toXML(border, this));
+        if (!isPropDefault(Border_Prop))
+            e.add(anArchiver.toXML(getBorder(), this));
         if (!isPropDefault(BorderRadius_Prop))
             e.add(BorderRadius_Prop, getBorderRadius());
 
         // Archive Fill
-        Paint fill = getFill();
-        if (fill != null && !Objects.equals(fill, getDefaultFill()))
-            e.add(anArchiver.toXML(fill, this));
+        if (!isPropDefault(Fill_Prop))
+            e.add(anArchiver.toXML(getFill(), this));
 
         // Archive Effect
         Effect effect = getEffect();

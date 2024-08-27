@@ -10,6 +10,7 @@ import snap.geom.Rect;
 import snap.gfx.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -89,14 +90,16 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     public static final String RowHeight_Prop = "RowHeight";
     public static final String Sel_Prop = PickList.Sel_Prop;
 
+    // Constants for property overrides
+    private static final Color DEFAULT_LIST_AREA_FILL = Color.WHITE;
+
     /**
-     * Creates a new ListArea.
+     * Constructor.
      */
     public ListArea()
     {
-        // Basic
         super();
-        setFill(Color.WHITE);
+        _fill = DEFAULT_LIST_AREA_FILL;
 
         // Events
         setActionable(true);
@@ -872,7 +875,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
 
             // Configure (make sure text is not empty)
             configureCell(cell);
-            if (cell.getText() == null || cell.getText().length() == 0)
+            if (cell.getText() == null || cell.getText().isEmpty())
                 cell.setText("X");
 
             // Get Sample Width/Height
@@ -958,11 +961,6 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Override to return white.
-     */
-    public Paint getDefaultFill()  { return Color.WHITE; }
-
-    /**
      * Override to return text for currently selected item.
      */
     public String getText()
@@ -1008,14 +1006,6 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Returns a mapped property name.
-     */
-    public String getValuePropName()
-    {
-        return getBinding(SelIndex_Prop) != null ? SelIndex_Prop : SelItem_Prop;
-    }
-
-    /**
      * Override to maybe scroll sel to visible.
      */
     @Override
@@ -1033,6 +1023,27 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     protected boolean equalsItems(List<T> theItems)
     {
         return ListUtils.equalsId(theItems, _items) || Objects.equals(theItems, _items);
+    }
+
+    /**
+     * Returns a mapped property name.
+     */
+    public String getValuePropName()
+    {
+        return getBinding(SelIndex_Prop) != null ? SelIndex_Prop : SelItem_Prop;
+    }
+
+    /**
+     * Override to customize for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Reset defaults
+        aPropSet.getPropForName(Fill_Prop).setDefaultValue(DEFAULT_LIST_AREA_FILL);
     }
 
     /**

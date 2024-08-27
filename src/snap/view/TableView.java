@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import snap.geom.*;
 import snap.gfx.*;
 import snap.props.PropChange;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -80,8 +81,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public TableView()
     {
-        // Set border, enable Action event for selection change
-        setBorder(getDefaultBorder());
+        super();
+        _border = ScrollView.DEFAULT_SCROLL_VIEW_BORDER;
         setFocusable(true);
         setFocusWhenPressed(true);
         setActionable(true);
@@ -971,9 +972,17 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public String getValuePropName()  { return SelItem_Prop; }
 
     /**
-     * Returns the default border.
+     * Override to customize for this class.
      */
-    public Border getDefaultBorder()  { return ScrollView.DEFAULT_SCROLL_VIEW_BORDER; }
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Reset defaults
+        aPropSet.getPropForName(Border_Prop).setDefaultValue(ScrollView.DEFAULT_SCROLL_VIEW_BORDER);
+    }
 
     /**
      * XML archival.

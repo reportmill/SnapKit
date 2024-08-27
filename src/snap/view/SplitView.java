@@ -6,6 +6,7 @@ import java.util.*;
 import snap.gfx.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -36,21 +37,21 @@ public class SplitView extends ParentView implements ViewHost {
     public static final String DividerSpan_Prop = "DividerSpan";
     
     // Constants for internal use
-    public static final Border SPLIT_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
-    public static final int DEFAULT_DIVIDER_SPAN = Divider.DEFAULT_SPAN;
+    private static final Border DEFAULT_SPLIT_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
+    private static final int DEFAULT_DIVIDER_SPAN = Divider.DEFAULT_SPAN;
 
     // Constant for props that all SplitView dividers share with prototype returned by getDivider()
     private static String[] SHARED_DIVIDER_PROPS = { Fill_Prop, Border_Prop, Paintable_Prop, Divider.Span_Prop, Divider.ClickSpan_Prop };
 
 
     /**
-     * Creates a new SplitView.
+     * Constructor.
      */
     public SplitView()
     {
         super();
+        _border = DEFAULT_SPLIT_VIEW_BORDER;
         _divSpan = DEFAULT_DIVIDER_SPAN;
-        setBorder(SPLIT_VIEW_BORDER);
         setClipToBounds(true);
         addEventFilter(e -> processDividerMouseEvent(e), MouseMove, MousePress, MouseDrag, MouseRelease);
     }
@@ -411,11 +412,6 @@ public class SplitView extends ParentView implements ViewHost {
     }
 
     /**
-     * Returns the default border.
-     */
-    public Border getDefaultBorder()  { return SPLIT_VIEW_BORDER; }
-
-    /**
      * Override to forward to dividers.
      */
     public void setVertical(boolean aValue)
@@ -538,6 +534,19 @@ public class SplitView extends ParentView implements ViewHost {
     }
 
     /**
+     * Override to customize for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Reset defaults
+        aPropSet.getPropForName(Border_Prop).setDefaultValue(DEFAULT_SPLIT_VIEW_BORDER);
+    }
+
+    /**
      * XML Archival of basic view.
      */
     protected XMLElement toXMLView(XMLArchiver anArchiver)
@@ -546,7 +555,7 @@ public class SplitView extends ParentView implements ViewHost {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive DividerSpan
-        if (getDividerSpan() != DEFAULT_DIVIDER_SPAN)
+        if (!isPropDefault(DividerSpan_Prop))
             e.add(DividerSpan_Prop, getDividerSpan());
 
         // Return

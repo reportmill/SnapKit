@@ -66,6 +66,7 @@ public class TextField extends ParentView {
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
 
     // Constants for property defaults
+    private static Color DEFAULT_TEXT_FIELD_FILL = Color.WHITE;
     private static Border DEFAULT_TEXT_FIELD_BORDER = Border.createLineBorder(Color.LIGHTGRAY, 1).copyForInsets(Insets.EMPTY);
     private static double DEFAULT_TEXT_FIELD_BORDER_RADIUS = 3;
     private static final Insets DEFAULT_TEXT_FIELD_PADDING = new Insets(2, 2, 2, 5);
@@ -79,12 +80,13 @@ public class TextField extends ParentView {
     public TextField()
     {
         super();
+
+        // Override default properties
         _align = Pos.CENTER_LEFT;
         _padding = DEFAULT_TEXT_FIELD_PADDING;
-
-        setFill(Color.WHITE);
-        setBorder(DEFAULT_TEXT_FIELD_BORDER);
-        setBorderRadius(DEFAULT_TEXT_FIELD_BORDER_RADIUS);
+        _fill = DEFAULT_TEXT_FIELD_FILL;
+        _border = DEFAULT_TEXT_FIELD_BORDER;
+        _borderRadius = DEFAULT_TEXT_FIELD_BORDER_RADIUS;
         setFocusable(true);
         setFocusWhenPressed(true);
         setActionable(true);
@@ -170,18 +172,6 @@ public class TextField extends ParentView {
      * Returns the label in the background.
      */
     public Label getLabel()  { return _label; }
-
-    /**
-     * Returns the default border.
-     */
-    @Override
-    public Border getDefaultBorder()  { return DEFAULT_TEXT_FIELD_BORDER; }
-
-    /**
-     * Override to return white.
-     */
-    @Override
-    public Paint getDefaultFill()  { return Color.WHITE; }
 
     /**
      * Returns the text width.
@@ -955,7 +945,7 @@ public class TextField extends ParentView {
     {
         // Get event info
         String keyChars = anEvent.getKeyString();
-        char keyChar = keyChars.length() > 0 ? keyChars.charAt(0) : 0;
+        char keyChar = !keyChars.isEmpty() ? keyChars.charAt(0) : 0;
         boolean charDefined = keyChar != KeyCode.CHAR_UNDEFINED && !Character.isISOControl(keyChar);
         boolean commandDown = anEvent.isShortcutDown(), controlDown = anEvent.isControlDown();
         boolean emacsDown = SnapUtils.isWindows ? anEvent.isAltDown() : controlDown;
@@ -1152,6 +1142,8 @@ public class TextField extends ParentView {
         super.initProps(aPropSet);
 
         // Reset defaults
+        aPropSet.getPropForName(Fill_Prop).setDefaultValue(DEFAULT_TEXT_FIELD_FILL);
+        aPropSet.getPropForName(Border_Prop).setDefaultValue(DEFAULT_TEXT_FIELD_BORDER);
         aPropSet.getPropForName(BorderRadius_Prop).setDefaultValue(DEFAULT_TEXT_FIELD_BORDER_RADIUS);
     }
 
@@ -1176,8 +1168,8 @@ public class TextField extends ParentView {
 
         // Archive ColCount, Text, PromptText
         if (!isPrefWidthSet() && getColCount() != 12) e.add(ColCount_Prop, getColCount());
-        if (getText() != null && getText().length() > 0) e.add("text", getText());
-        if (getPromptText() != null && getPromptText().length() > 0) e.add(PromptText_Prop, getPromptText());
+        if (getText() != null && !getText().isEmpty()) e.add("text", getText());
+        if (getPromptText() != null && !getPromptText().isEmpty()) e.add(PromptText_Prop, getPromptText());
         return e;
     }
 
@@ -1195,7 +1187,7 @@ public class TextField extends ParentView {
         String str = anElement.getAttributeValue("text");
         if (str == null)
             str = anElement.getAttributeValue("value", anElement.getValue());
-        if (str != null && str.length() > 0)
+        if (str != null && !str.isEmpty())
             setText(str);
         if (anElement.hasAttribute(PromptText_Prop))
             setPromptText(anElement.getAttributeValue(PromptText_Prop));

@@ -63,14 +63,18 @@ public class ThumbWheel extends View {
     public static final byte ABSOLUTE_BOUNDED = 0;
     public static final byte ABSOLUTE_WRAPPED = 1;
 
+    // Constants for property overrides
+    private static final Color DEFAULT_THUMB_WHEEL_FILL = Color.LIGHTGRAY;
+
     /**
      * Creates a new thumbwheel.
      */
     public ThumbWheel()
     {
+        super();
+        _fill = DEFAULT_THUMB_WHEEL_FILL;
         setActionable(true);
         enableEvents(MousePress, MouseDrag, MouseRelease);
-        setFill(Color.LIGHTGRAY);
     }
 
     /**
@@ -256,7 +260,7 @@ public class ThumbWheel extends View {
         if (getWidth()<10 || getHeight()<10) return;
 
         // Get thumbwheel color
-        Color color = (Color)getFill(); if (color==null) color = Color.LIGHTGRAY;
+        Color color = (Color) getFill(); if (color == null) color = DEFAULT_THUMB_WHEEL_FILL;
 
         // Draw linear background
         if (isLinear()) {
@@ -442,13 +446,13 @@ public class ThumbWheel extends View {
     private Image getBackImage()
     {
         // Get the thumbwheel color
-        Color color = (Color)getFill(); if (color==null) color = Color.LIGHTGRAY;
+        Color color = (Color) getFill(); if (color == null) color = DEFAULT_THUMB_WHEEL_FILL;
 
         // Get name for image and try to find new image (return if already created/cached)
-        int imageW = (int)Math.round(getWidth());
-        int imageH = (int)Math.round(getHeight());
+        int imageW = (int) Math.round(getWidth());
+        int imageH = (int) Math.round(getHeight());
         String imageName = (isVertical() ? "V" : "H") + imageW + "x" + imageH + "_" + color.getRGB();
-        Image image = _images.get(imageName); if (image!=null) return image;
+        Image image = _images.get(imageName); if (image != null) return image;
 
         // Get new image and put in cache, then draw button background
         image = Image.getImageForSize(imageW, imageH, false);
@@ -518,11 +522,6 @@ public class ThumbWheel extends View {
         // Draw strip into image
         aPntr.drawImage(strip, aX, aY, aW, aH);
     }
-
-    /**
-     * Override to return white.
-     */
-    public Paint getDefaultFill()  { return Color.LIGHTGRAY; }
 
     /**
      * Override to reset image.

@@ -4,10 +4,7 @@
 package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
-import snap.props.PropChange;
-import snap.props.PropChangeListener;
-import snap.props.UndoSet;
-import snap.props.Undoer;
+import snap.props.*;
 import snap.text.*;
 import snap.util.*;
 import java.util.List;
@@ -1529,14 +1526,6 @@ public class TextArea extends View {
     }
 
     /**
-     * Override to return white.
-     */
-    public Paint getDefaultFill()
-    {
-        return isEditable() ? Color.WHITE : null;
-    }
-
-    /**
      * Returns the width needed to display all characters.
      */
     protected double getPrefWidthImpl(double aH)
@@ -1704,11 +1693,6 @@ public class TextArea extends View {
     }
 
     /**
-     * Returns a mapped property name.
-     */
-    public String getValuePropName()  { return "Text"; }
-
-    /**
      * Returns the path for the current selection.
      */
     public Shape getSelPath()
@@ -1727,6 +1711,24 @@ public class TextArea extends View {
     public static void setHyphenating(boolean aValue)
     {
         Prefs.getDefaultPrefs().setValue("Hyphenating", _hyphenating = aValue);
+    }
+
+    /**
+     * Returns a mapped property name.
+     */
+    public String getValuePropName()  { return "Text"; }
+
+    /**
+     * Override to customize for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Reset defaults
+        aPropSet.getPropForName(Padding_Prop).setDefaultValue(DEFAULT_TEXT_AREA_PADDING);
     }
 
     /**

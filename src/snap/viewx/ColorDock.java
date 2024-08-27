@@ -7,6 +7,7 @@ import snap.geom.Insets;
 import snap.geom.Point;
 import snap.geom.Rect;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.Prefs;
 import snap.util.StringUtils;
 import snap.view.*;
@@ -38,18 +39,20 @@ public class ColorDock extends View {
     private static int  SWATCH_SIZE = 13;
     
     // The border for color dock
-    private static final Border  COLOR_DOCK_BORDER = Border.createLoweredBevelBorder();
+    private static final Border DEFAULT_COLOR_DOCK_BORDER = Border.createLoweredBevelBorder();
     
     /**
      * Creates a new color dock.
      */
     public ColorDock()
     {
+        super();
+        _border = DEFAULT_COLOR_DOCK_BORDER;
+
         // Configure this view
         setActionable(true);
         enableEvents(MousePress, MouseRelease);
         enableEvents(ViewEvent.Type.DragGesture, ViewEvent.Type.DragSourceEnd); enableEvents(DragEvents);
-        setBorder(COLOR_DOCK_BORDER);
 
         // Create ColorWell
         _colorWell = new ColorWell();
@@ -489,9 +492,17 @@ public class ColorDock extends View {
     }
 
     /**
-     * Override to return dock border.
+     * Override to customize for this class.
      */
-    public Border getDefaultBorder()  { return COLOR_DOCK_BORDER; }
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Reset defaults
+        aPropSet.getPropForName(Border_Prop).setDefaultValue(DEFAULT_COLOR_DOCK_BORDER);
+    }
 
     /**
      * A class to represent a color swatch.

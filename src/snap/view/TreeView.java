@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import snap.geom.Polygon;
 import snap.gfx.*;
 import snap.props.PropChange;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -53,19 +54,19 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     
     // Constants
     private static final Paint DIVIDER_FILL = new Color("#EEEEEE");
-    //private static final Paint DIVIDER_FILLH = new Color("#E0E0E0");
+    private static final Border DEFAULT_TREE_VIEW_BORDER = ScrollView.DEFAULT_SCROLL_VIEW_BORDER;
 
     /**
-     * Creates a new TreeView.
+     * Constructor.
      */
     public TreeView()
     {
         super();
+        _border = DEFAULT_TREE_VIEW_BORDER;
         setActionable(true);
         setFocusable(true);
         setFocusWhenPressed(true);
         setFocusPainted(false);
-        setBorder(ScrollView.DEFAULT_SCROLL_VIEW_BORDER);
 
         // Create/configure Columns SplitView
         _splitView = new SplitView();
@@ -646,16 +647,24 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Returns the default border.
-     */
-    public Border getDefaultBorder()  { return ScrollView.DEFAULT_SCROLL_VIEW_BORDER; }
-
-    /**
      * Returns whether given items are equal to set items.
      */
     protected boolean equalsItems(List<T> theItems)
     {
         return ListUtils.equalsId(theItems, getItemsList()) || theItems.equals(getItemsList());
+    }
+
+    /**
+     * Override to customize for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Reset defaults
+        aPropSet.getPropForName(Border_Prop).setDefaultValue(DEFAULT_TREE_VIEW_BORDER);
     }
 
     /**

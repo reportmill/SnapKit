@@ -5,22 +5,25 @@ package snap.view;
 import snap.geom.Insets;
 import snap.geom.Rect;
 import snap.gfx.*;
+import snap.props.PropSet;
 
 /**
  * A View subclass to represent a DocView page.
  */
 public class PageView extends ChildView {
     
-    // Constant
-    static final Border PAGE_VIEW_BORDER = Border.createLineBorder(Color.BLACK, 1);
+    // Constants for property overrides
+    private static final Color DEFAULT_PAGE_VIEW_FILL = Color.WHITE;
+    private static final Border DEFAULT_PAGE_VIEW_BORDER = Border.createLineBorder(Color.BLACK, 1);
 
     /**
-     * Creates a new PageView.
+     * Constructor.
      */
     public PageView()
     {
-        setFill(Color.WHITE);
-        setBorder(PAGE_VIEW_BORDER);
+        super();
+        _fill = DEFAULT_PAGE_VIEW_FILL;
+        _border = DEFAULT_PAGE_VIEW_BORDER;
         setEffect(new ShadowEffect().copySimple());
     }
 
@@ -46,17 +49,7 @@ public class PageView extends ChildView {
     }
 
     /**
-     * Override to return white.
-     */
-    public Paint getDefaultFill()  { return Color.WHITE; }
-
-    /**
-     * Returns the default border.
-     */
-    public Border getDefaultBorder()  { return PAGE_VIEW_BORDER; }
-
-    /**
-     * Override to page page margin.
+     * Override to paint page margin.
      */
     protected void paintBack(Painter aPntr)
     {
@@ -66,5 +59,19 @@ public class PageView extends ChildView {
         aPntr.setColor(Color.LIGHTGRAY);
         aPntr.setStroke(Stroke.Stroke1);
         aPntr.draw(marg);
+    }
+
+    /**
+     * Override to customize for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Reset defaults
+        aPropSet.getPropForName(Fill_Prop).setDefaultValue(DEFAULT_PAGE_VIEW_FILL);
+        aPropSet.getPropForName(Border_Prop).setDefaultValue(DEFAULT_PAGE_VIEW_BORDER);
     }
 }
