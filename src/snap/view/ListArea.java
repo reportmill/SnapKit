@@ -1030,7 +1030,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
      */
     public String getValuePropName()
     {
-        return getBinding(SelIndex_Prop) != null ? SelIndex_Prop : SelItem_Prop;
+        return getBindingForName(SelIndex_Prop) != null ? SelIndex_Prop : SelItem_Prop;
     }
 
     /**

@@ -4,6 +4,7 @@
 package snap.view;
 import snap.geom.Insets;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -12,8 +13,8 @@ import snap.util.*;
 public class MenuBar extends ParentView {
 
     // Constants for properties
-    public static Font MENU_BAR_FONT = new Font("Arial", 13);
-    public static Insets DEFAULT_MENU_BAR_PADDING = new Insets(2, 10, 2, 10);
+    private static Insets DEFAULT_MENU_BAR_PADDING = new Insets(2, 10, 2, 10);
+    protected static Font DEFAULT_MENU_BAR_FONT = new Font("Arial", 13);
 
     /**
      * Constructor.
@@ -22,7 +23,7 @@ public class MenuBar extends ParentView {
     {
         super();
         _padding = DEFAULT_MENU_BAR_PADDING;
-        setFont(MENU_BAR_FONT);
+        _font = DEFAULT_MENU_BAR_FONT;
     }
 
     /**
@@ -137,9 +138,17 @@ public class MenuBar extends ParentView {
     protected void layoutImpl()  { RowView.layout(this, true); }
 
     /**
-     * Returns the default font.
+     * Override to customize for this class.
      */
-    public Font getDefaultFont()  { return MENU_BAR_FONT; }
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Reset defaults
+        aPropSet.getPropForName(Font_Prop).setDefaultValue(DEFAULT_MENU_BAR_FONT);
+    }
 
     /**
      * XML archival of children.

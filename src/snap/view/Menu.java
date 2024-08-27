@@ -6,6 +6,7 @@ import java.util.*;
 import snap.geom.Polygon;
 import snap.geom.Pos;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -22,13 +23,16 @@ public class Menu extends MenuItem {
     // The PopupWindow
     private PopupWindow _popupWindow;
 
+    // Constants for properties
+    protected static Font DEFAULT_MENU_FONT = MenuBar.DEFAULT_MENU_BAR_FONT;
+
     /**
      * Constructor.
      */
     public Menu()
     {
         super();
-        setFont(MenuBar.MENU_BAR_FONT);
+        _font = DEFAULT_MENU_FONT;
     }
 
     /**
@@ -119,7 +123,7 @@ public class Menu extends MenuItem {
 
         // Create PopupWindow, configure with items and return
         _popupWindow = new PopupWindow();
-        _popupWindow.setFont(getDefaultFont());
+        _popupWindow.setFont(getFont());
 
         // Create ItemColView to hold MenuItems
         ColView itemColView = new ColView();
@@ -291,11 +295,16 @@ public class Menu extends MenuItem {
     }
 
     /**
-     * Returns the default font.
+     * Override to customize for this class.
      */
-    public Font getDefaultFont()
+    @Override
+    protected void initProps(PropSet aPropSet)
     {
-        return MenuBar.MENU_BAR_FONT;
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Reset defaults
+        aPropSet.getPropForName(Font_Prop).setDefaultValue(DEFAULT_MENU_FONT);
     }
 
     /**

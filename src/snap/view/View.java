@@ -1536,25 +1536,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public List <Binding> getBindings()  { return _bindings; }
 
     /**
-     * Returns the number of bindings.
-     */
-    public int getBindingCount()  { return _bindings.size(); }
-
-    /**
-     * Returns the individual binding at given index.
-     */
-    public Binding getBinding(int anIndex)
-    {
-        return _bindings.get(anIndex);
-    }
-
-    /**
      * Adds the individual binding to the shape's bindings list.
      */
     public void addBinding(Binding aBinding)
     {
+        // Remove current binding for property (if it exists)
+        Binding oldBinding = getBindingForName(aBinding.getPropName());
+        if (oldBinding != null)
+            removeBinding(oldBinding);
+
+        // Add new binding
         if (_bindings == Collections.EMPTY_LIST) _bindings = new ArrayList<>();
-        removeBinding(aBinding.getPropName());     // Remove current binding for property (if it exists)
         _bindings.add(aBinding);
         aBinding.setView(this);
     }
@@ -1562,15 +1554,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Removes the binding at the given index from view bindings list.
      */
-    public Binding removeBinding(int anIndex)
-    {
-        return _bindings.remove(anIndex);
-    }
+    public void removeBinding(Binding aBinding)  { _bindings.remove(aBinding); }
 
     /**
      * Returns the individual binding with the given property name.
      */
-    public Binding getBinding(String aPropName)
+    public Binding getBindingForName(String aPropName)
     {
         // Iterate over bindings and if we find one for given property name, return it
         for (Binding b : _bindings)
@@ -1580,25 +1569,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // If property name is mapped, try again
         String mappedName = aPropName.equals("Value") ? getValuePropName() : aPropName;
         if (!aPropName.equals(mappedName))
-            return getBinding(mappedName);
+            return getBindingForName(mappedName);
 
         // Return null since binding with property name not found
         return null;
-    }
-
-    /**
-     * Removes the binding with given property name.
-     */
-    public boolean removeBinding(String aPropName)
-    {
-        for (int i = 0, iMax = getBindingCount(); i < iMax; i++) {
-            Binding binding = getBinding(i);
-            if (binding.getPropName().equals(aPropName)) {
-                removeBinding(i);
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -3079,14 +3053,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     @Override
     public Object getPropDefault(String aPropName)
     {
-        switch (aPropName) {
+        // Handle Font special since default font changes depending on parent
+        if (aPropName.equals(Font_Prop))
+            return getDefaultFont();
 
-            // Font
-            case Font_Prop: getDefaultFont();
-
-            // Do normal version
-            default: return super.getPropDefault(aPropName);
-        }
+        // Do normal version
+        return super.getPropDefault(aPropName);
     }
 
     /**
@@ -3108,7 +3080,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         XMLElement e = new XMLElement(className);
 
         // Archive name
-        if (getName() != null && getName().length() > 0)
+        if (getName() != null && !getName().isEmpty())
             e.add(Name_Prop, getName());
 
         // Archive X, Y, Width, Height
@@ -3157,12 +3129,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             e.add(anArchiver.toXML(getFill(), this));
 
         // Archive Effect
-        Effect effect = getEffect();
-        if (effect != null)
-            e.add(anArchiver.toXML(effect, this));
+        if (!isPropDefault(Effect_Prop))
+            e.add(anArchiver.toXML(getEffect(), this));
 
         // Archive font
-        if (!Objects.equals(getFont(), getDefaultFont()))
+        if (!isPropDefault(Font_Prop))
             e.add(getFont().toXML(anArchiver));
 
         // Archive Disabled, Visible, Opacity
@@ -3209,7 +3180,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Archive RealClassName
         className = getRealClassName();
-        if (className != null && className.length() > 0)
+        if (className != null && !className.isEmpty())
             e.add("Class", className);
 
         // Return the element
@@ -3378,12 +3349,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Append Name
         StringBuffer sb = new StringBuffer();
         String name = getName();
-        if (name != null && name.length() > 0)
+        if (name != null && !name.isEmpty())
             StringUtils.appendProp(sb, "Name", name);
 
         // Append Text
         String text = getText();
-        if (text != null && text.length() > 0) {
+        if (text != null && !text.isEmpty()) {
             if (text.length() > 40)
                 text = text.substring(0, 40) + "...";
             StringUtils.appendProp(sb, "Text", text);
