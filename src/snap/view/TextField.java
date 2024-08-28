@@ -19,10 +19,10 @@ public class TextField extends ParentView {
     private StringBuffer  _sb = new StringBuffer();
     
     // The column count to be used for preferred width (if set)
-    private int  _colCount = 12;
+    private int  _colCount;
     
     // The paint for the text
-    private Paint  _textFill = Color.BLACK;
+    private Paint  _textFill;
     
     // A label in the background for promt text and/or in text controls
     private Label  _label;
@@ -49,7 +49,7 @@ public class TextField extends ParentView {
     private boolean  _hideCaret;
 
     // Whether to send action on focus lost (if content changed)
-    private boolean  _fireActionOnFocusLost = true;
+    private boolean  _fireActionOnFocusLost;
 
     // The value of text on focus gained
     protected String  _focusGainedText;
@@ -66,10 +66,15 @@ public class TextField extends ParentView {
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
 
     // Constants for property defaults
+    private static final int DEFAULT_COL_COUNT = 12;
+    private static final Color DEFAULT_TEXT_FILL = Color.BLACK;
+    private static final boolean DEFAULT_FIRE_ACTION_ON_FOCUS_LOST = true;
+
+    // Constants for property overrides defaults
+    private static final Insets DEFAULT_TEXT_FIELD_PADDING = new Insets(2, 2, 2, 5);
     private static Color DEFAULT_TEXT_FIELD_FILL = Color.WHITE;
     private static Border DEFAULT_TEXT_FIELD_BORDER = Border.createLineBorder(Color.LIGHTGRAY, 1).copyForInsets(Insets.EMPTY);
     private static double DEFAULT_TEXT_FIELD_BORDER_RADIUS = 3;
-    private static final Insets DEFAULT_TEXT_FIELD_PADDING = new Insets(2, 2, 2, 5);
 
     // The color of the border when focused
     static Color SELECTION_COLOR = new Color(181, 214, 254, 255);
@@ -80,6 +85,9 @@ public class TextField extends ParentView {
     public TextField()
     {
         super();
+        _colCount = DEFAULT_COL_COUNT;
+        _textFill = DEFAULT_TEXT_FILL;
+        _fireActionOnFocusLost = DEFAULT_FIRE_ACTION_ON_FOCUS_LOST;
 
         // Override default properties
         _align = Pos.CENTER_LEFT;
@@ -1141,10 +1149,60 @@ public class TextField extends ParentView {
         // Do normal version
         super.initProps(aPropSet);
 
-        // Reset defaults
+        // Add props: ColCount, Edited, PromptText, Sel, TextFill, FireActionOnFocusLost
+        aPropSet.addPropNamed(ColCount_Prop, int.class, DEFAULT_COL_COUNT);
+        aPropSet.addPropNamed(Edited_Prop, boolean.class).setSkipArchival(true);
+        aPropSet.addPropNamed(PromptText_Prop, String.class);
+        aPropSet.addPropNamed(Sel_Prop, String.class).setSkipArchival(true);
+        aPropSet.addPropNamed(TextFill_Prop, Paint.class, DEFAULT_TEXT_FILL);
+        aPropSet.addPropNamed(FireActionOnFocusLost_Prop, boolean.class, true);
+
+        // Override defaults: Padding, Fill, Border, BorderRadius
+        aPropSet.getPropForName(Padding_Prop).setDefaultValue(DEFAULT_TEXT_FIELD_PADDING);
         aPropSet.getPropForName(Fill_Prop).setDefaultValue(DEFAULT_TEXT_FIELD_FILL);
         aPropSet.getPropForName(Border_Prop).setDefaultValue(DEFAULT_TEXT_FIELD_BORDER);
         aPropSet.getPropForName(BorderRadius_Prop).setDefaultValue(DEFAULT_TEXT_FIELD_BORDER_RADIUS);
+    }
+
+    /**
+     * Returns the value for given prop name.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        // Handle properties
+        switch (aPropName) {
+
+            // ColCount, PromptText, TextFill, FireActionOnFocusLost
+            case ColCount_Prop: return getColCount();
+            case Edited_Prop: return isEdited();
+            case PromptText_Prop: return getPromptText();
+            case TextFill_Prop: return getTextFill();
+            case FireActionOnFocusLost_Prop: return isFireActionOnFocusLost();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Sets the value for given prop name.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        // Handle properties
+        switch (aPropName) {
+
+            // ColCount, PromptText, TextFill, FireActionOnFocusLost
+            case ColCount_Prop: setColCount(Convert.intValue(aValue)); break;
+            case PromptText_Prop: setPromptText(Convert.stringValue(aValue)); break;
+            case TextFill_Prop: setTextFill(Paint.of(aValue)); break;
+            case FireActionOnFocusLost_Prop: setFireActionOnFocusLost(Convert.boolValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**

@@ -5,6 +5,7 @@ package snap.view;
 import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.*;
+import snap.props.PropSet;
 
 /**
  * A ToggleButton subclass for RadioButton.
@@ -21,7 +22,7 @@ public class RadioButton extends ToggleButton {
     private static final boolean DEFAULT_RADIO_BUTTON_SHOW_AREA = false;
 
     /**
-     * Creates RadioButton.
+     * Constructor.
      */
     public RadioButton()
     {
@@ -38,7 +39,7 @@ public class RadioButton extends ToggleButton {
     }
 
     /**
-     * Creates RadioButton with given text.
+     * Constructor for given label text.
      */
     public RadioButton(String aStr)
     {
@@ -66,7 +67,7 @@ public class RadioButton extends ToggleButton {
     public void setPosition(Pos aPos)
     {
         // If already set, just return
-        if (aPos==getPosition()) return;
+        if (aPos == getPosition()) return;
 
         // Set new position and make sure label is loaded
         super.setPosition(aPos);
@@ -74,7 +75,7 @@ public class RadioButton extends ToggleButton {
 
         // If CENTER_RIGHT, put Radio after label, otherwise put first
         removeChild(_radio);
-        if (aPos==Pos.CENTER_RIGHT)
+        if (aPos == Pos.CENTER_RIGHT)
             addChild(_radio);
         else addChild(_radio, 0);
     }
@@ -101,5 +102,21 @@ public class RadioButton extends ToggleButton {
     protected void layoutImpl()
     {
         RowView.layout(this, false);
+    }
+
+    /**
+     * Initialize Props. Override to provide custom defaults.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Override Align, Padding, Spacing, ShowArea
+        aPropSet.getPropForName(Align_Prop).setDefaultValue(DEFAULT_RADIO_BUTTON_ALIGN);
+        aPropSet.getPropForName(Padding_Prop).setDefaultValue(DEFAULT_RADIO_BUTTON_PADDING);
+        aPropSet.getPropForName(Spacing_Prop).setDefaultValue(DEFAULT_RADIO_BUTTON_SPACING);
+        aPropSet.getPropForName(ShowArea_Prop).setDefaultValue(DEFAULT_RADIO_BUTTON_SHOW_AREA);
     }
 }

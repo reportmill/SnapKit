@@ -5,6 +5,7 @@ package snap.view;
 import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.*;
+import snap.props.PropSet;
 
 /**
  * A View subclass for CheckBox.
@@ -15,13 +16,13 @@ public class CheckBox extends ToggleButton {
     private Label  _check;
     
     // Constants for overridden defaults
-    private static final boolean DEFAULT_CHECK_BOX_SHOW_AREA = false;
     private static final Pos DEFAULT_CHECK_BOX_ALIGN = Pos.CENTER_LEFT;
     private static final Insets DEFAULT_CHECK_BOX_PADDING = new Insets(2);
     private static final int DEFAULT_CHECK_BOX_SPACING = 5;
+    private static final boolean DEFAULT_CHECK_BOX_SHOW_AREA = false;
 
     /**
-     * Creates CheckBox.
+     * Constructor.
      */
     public CheckBox()
     {
@@ -38,7 +39,7 @@ public class CheckBox extends ToggleButton {
     }
 
     /**
-     * Creates CheckBox with given text.
+     * Constructor for given label text.
      */
     public CheckBox(String aStr)  { this(); setText(aStr); }
 
@@ -70,7 +71,7 @@ public class CheckBox extends ToggleButton {
 
         // If CENTER_RIGHT, put Check after label, otherwise put Check first
         removeChild(_check);
-        if (aPos==Pos.CENTER_RIGHT)
+        if (aPos == Pos.CENTER_RIGHT)
             addChild(_check);
         else addChild(_check, 0);
     }
@@ -97,5 +98,21 @@ public class CheckBox extends ToggleButton {
     protected void layoutImpl()
     {
         RowView.layout(this, false);
+    }
+
+    /**
+     * Initialize Props. Override to provide custom defaults.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Override Align, Padding, Spacing, ShowArea
+        aPropSet.getPropForName(Align_Prop).setDefaultValue(DEFAULT_CHECK_BOX_ALIGN);
+        aPropSet.getPropForName(Padding_Prop).setDefaultValue(DEFAULT_CHECK_BOX_PADDING);
+        aPropSet.getPropForName(Spacing_Prop).setDefaultValue(DEFAULT_CHECK_BOX_SPACING);
+        aPropSet.getPropForName(ShowArea_Prop).setDefaultValue(DEFAULT_CHECK_BOX_SHOW_AREA);
     }
 }

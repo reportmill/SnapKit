@@ -4,6 +4,7 @@
 package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.text.TextStyle;
 import snap.util.*;
 import java.util.Objects;
@@ -41,6 +42,7 @@ public class Label extends ParentView {
     public static final String GraphicAfter_Prop = "GraphicAfter";
 
     // Constants for property defaults
+    private static final Pos DEFAULT_LABEL_ALIGN = Pos.CENTER_LEFT;
     private static final double DEFAULT_LABEL_SPACING = 4;
 
     /**
@@ -49,7 +51,7 @@ public class Label extends ParentView {
     public Label()
     {
         super();
-        _align = Pos.CENTER_LEFT;
+        _align = DEFAULT_LABEL_ALIGN;
         _spacing = DEFAULT_LABEL_SPACING;
     }
 
@@ -420,6 +422,65 @@ public class Label extends ParentView {
         super.setAlign(aPos);
         if (isStringViewSet())
             getStringView().setAlignX(getAlignX());
+    }
+
+    /**
+     * Initialize Props. Override to provide custom defaults.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Editable, Editing, Graphic, GraphicAfter
+        aPropSet.addPropNamed(Editable_Prop, boolean.class);
+        aPropSet.addPropNamed(Editing_Prop, boolean.class).setSkipArchival(true);
+        aPropSet.addPropNamed(Graphic_Prop, View.class);
+        aPropSet.addPropNamed(GraphicAfter_Prop, View.class);
+
+        // Override defaults
+        aPropSet.getPropForName(Align_Prop).setDefaultValue(DEFAULT_LABEL_ALIGN);
+        aPropSet.getPropForName(Spacing_Prop).setDefaultValue(DEFAULT_LABEL_SPACING);
+    }
+
+    /**
+     * Returns the value for given prop name.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        // Handle properties
+        switch (aPropName) {
+
+            // Editable, Editing, Graphic, GraphicAfter
+            case Editable_Prop: return isEditable();
+            case Editing_Prop: return isEditing();
+            case Graphic_Prop: return getGraphic();
+            case GraphicAfter_Prop: return getGraphicAfter();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Sets the value for given prop name.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        // Handle properties
+        switch (aPropName) {
+
+            // Editable, Graphic, GraphicAfter
+            case Editable_Prop: setEditable(Convert.boolValue(aValue)); break;
+            case Graphic_Prop: setGraphic((View) aValue); break;
+            case GraphicAfter_Prop: setGraphicAfter(((View) aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**

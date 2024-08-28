@@ -48,24 +48,25 @@ public class ButtonBase extends ParentView {
     public static final String Position_Prop = "Position";
     public static final String Targeted_Prop = "Targeted";
 
-    // Constants for property defaults
-    private static final boolean DEFAULT_SHOW_AREA = true;
-    private static final double DEFAULT_BUTTON_BORDER_RADIUS = 4;
-
     // Button states
     public static final int BUTTON_NORMAL = 0;
     public static final int BUTTON_OVER = 1;
     public static final int BUTTON_PRESSED = 2;
 
+    // Constants for property defaults
+    private static final Pos DEFAULT_BUTTON_ALIGN = Pos.CENTER;
+    private static final boolean DEFAULT_SHOW_AREA = true;
+    private static final double DEFAULT_BUTTON_BORDER_RADIUS = 4;
+
     /**
-     * Creates a new ButtonBaseNode.
+     * Constructor.
      */
     public ButtonBase()
     {
         super();
 
         // Set default properties
-        _align = Pos.CENTER;
+        _align = DEFAULT_BUTTON_ALIGN;
         _borderRadius = DEFAULT_BUTTON_BORDER_RADIUS;
         _showArea = DEFAULT_SHOW_AREA;
 
@@ -447,10 +448,11 @@ public class ButtonBase extends ParentView {
     {
         super.initProps(aPropSet);
 
-        // Update defaults
+        // Override defaults
+        aPropSet.getPropForName(Align_Prop).setDefaultValue(DEFAULT_BUTTON_ALIGN);
         aPropSet.getPropForName(BorderRadius_Prop).setDefaultValue(DEFAULT_BUTTON_BORDER_RADIUS);
 
-        // ShowArea
+        // ShowArea, Position
         aPropSet.addPropNamed(ShowArea_Prop, boolean.class);
         aPropSet.addPropNamed(Position_Prop, Pos.class);
     }

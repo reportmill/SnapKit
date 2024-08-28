@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.props.PropSet;
 import snap.util.*;
 
 import java.util.Objects;
@@ -19,7 +20,7 @@ public class ToggleButton extends ButtonBase {
     
     // Constants for properties
     public static final String Selected_Prop = "Selected";
-    public static final String Group_Prop = "Group";
+    public static final String GroupName_Prop = "GroupName";
     
     /**
      * Constructor.
@@ -27,7 +28,7 @@ public class ToggleButton extends ButtonBase {
     public ToggleButton()  { }
 
     /**
-     * Constructor with given text.
+     * Constructor for given label text.
      */
     public ToggleButton(String aStr)
     {
@@ -69,7 +70,7 @@ public class ToggleButton extends ButtonBase {
     public void setGroupName(String aName)
     {
         if (Objects.equals(aName, _groupName)) return;
-        firePropChange(Group_Prop, _groupName, _groupName = aName);
+        firePropChange(GroupName_Prop, _groupName, _groupName = aName);
     }
 
     /**
@@ -84,25 +85,6 @@ public class ToggleButton extends ButtonBase {
 
         // Do normal version
         super.fireActionEvent(anEvent);
-    }
-
-    /**
-     * Override because TeaVM hates reflection.
-     */
-    public Object getPropValue(String aPropName)
-    {
-        if (aPropName.equals("Value") || aPropName == Selected_Prop) return isSelected();
-        return super.getPropValue(aPropName);
-    }
-
-    /**
-     * Override because TeaVM hates reflection.
-     */
-    public void setPropValue(String aPropName, Object aValue)
-    {
-        if (aPropName.equals("Value") || aPropName == Selected_Prop)
-            setSelected(Convert.boolValue(aValue));
-        else super.setPropValue(aPropName, aValue);
     }
 
     /**
@@ -127,6 +109,56 @@ public class ToggleButton extends ButtonBase {
     }
 
     /**
+     * Initialize Props. Override to provide custom defaults.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Selected, Group
+        aPropSet.addPropNamed(Selected_Prop, boolean.class);
+        aPropSet.addPropNamed(GroupName_Prop, String.class);
+    }
+
+    /**
+     * Returns the value for given prop name.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        // Handle properties
+        switch (aPropName) {
+
+            // Selected, Group
+            case Selected_Prop: case "Value": return isSelected();
+            case GroupName_Prop: return getGroupName();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Sets the value for given prop name.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        // Handle properties
+        switch (aPropName) {
+
+            // Selected, Group
+            case Selected_Prop: case "Value": setSelected(Convert.boolValue(aValue)); break;
+            case GroupName_Prop: setGroupName(Convert.stringValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
+    }
+
+    /**
      * XML archival.
      */
     protected XMLElement toXMLView(XMLArchiver anArchiver)
@@ -135,12 +167,12 @@ public class ToggleButton extends ButtonBase {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive Selected
-        if (isSelected())
+        if (!isPropDefault(Selected_Prop))
             e.add(Selected_Prop, true);
 
-        // Archive ToggleGroup
-        if (getGroupName() != null)
-            e.add(Group_Prop, getGroupName());
+        // Archive Group
+        if (!isPropDefault(GroupName_Prop))
+            e.add("Group", getGroupName());
         return e;
     }
 
@@ -155,8 +187,8 @@ public class ToggleButton extends ButtonBase {
         // Unarchive Selected
         setSelected(anElement.getAttributeBoolValue(Selected_Prop));
 
-        // Unarchive ToggleGroup
-        if (anElement.hasAttribute(Group_Prop) || anElement.hasAttribute("ToggleGroup"))
-            setGroupName(anElement.getAttributeValue(Group_Prop, anElement.getAttributeValue("ToggleGroup")));
+        // Unarchive Group
+        if (anElement.hasAttribute("Group") || anElement.hasAttribute("ToggleGroup"))
+            setGroupName(anElement.getAttributeValue("Group", anElement.getAttributeValue("ToggleGroup")));
     }
 }
