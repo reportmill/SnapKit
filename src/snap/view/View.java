@@ -641,11 +641,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Color getFillColor()
     {
         Paint fill = getFill();
-        if (fill == null || fill instanceof Color)
-            return (Color) fill;
-        if (fill instanceof GradientPaint)
-            return ((GradientPaint) fill).getStopColor(0);
-        return null;
+        return fill != null ? fill.getColor() : null;
     }
 
     /**

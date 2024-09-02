@@ -1,5 +1,9 @@
 package snap.view;
+import snap.geom.Insets;
+import snap.geom.Pos;
 import snap.gfx.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A class to provide view area classes to define UI look.
@@ -48,6 +52,9 @@ public class ViewTheme {
     // The ButtonPainter
     private ButtonPainter  _buttonPainter;
 
+    // Map of class to style
+    private Map<Class<?>, ViewStyle> _viewStyles = new HashMap<>();
+
     // The current theme
     private static ViewTheme  _theme = getClassic();
 
@@ -58,6 +65,12 @@ public class ViewTheme {
     {
         super();
         _buttonPainter = createButtonPainter();
+
+        // Create and initialize ViewStyles
+        _viewStyles = new HashMap<>();
+        ViewStyle viewStyle = new ViewStyle();
+        _viewStyles.put(View.class, viewStyle);
+        initViewStyles();
     }
 
     /**
@@ -134,6 +147,56 @@ public class ViewTheme {
      * Creates the button painter.
      */
     protected ButtonPainter createButtonPainter()  { return new ButtonPainter.Flat(this); }
+
+    /**
+     * Initialize ViewStyles.
+     */
+    protected void initViewStyles()
+    {
+        // Label
+        ViewStyle labelStyle = getViewStyleForClass(Label.class);
+        labelStyle._align = Pos.CENTER_LEFT;
+        labelStyle._spacing = 4;
+
+        // Button
+        ViewStyle buttonStyle = getViewStyleForClass(ButtonBase.class);
+        buttonStyle._align = Pos.CENTER;
+        buttonStyle._borderRadius = 4;
+
+        // RadioButton
+        ViewStyle radioButtonStyle = getViewStyleForClass(RadioButton.class);
+        radioButtonStyle._align = Pos.CENTER_LEFT;
+        radioButtonStyle._padding = new Insets(2);
+        radioButtonStyle._spacing = 5;
+
+        // CheckBox
+        ViewStyle checkBoxStyle = getViewStyleForClass(CheckBox.class);
+        checkBoxStyle._align = Pos.CENTER_LEFT;
+        checkBoxStyle._padding = new Insets(2);
+        checkBoxStyle._spacing = 5;
+
+        // TextField
+        ViewStyle textFieldStyle = getViewStyleForClass(TextField.class);
+        textFieldStyle._align = Pos.CENTER_LEFT;
+        textFieldStyle._padding = new Insets(2, 2, 2, 5);
+        textFieldStyle._fill = getContentColor();
+        textFieldStyle._border = Border.createLineBorder(Color.LIGHTGRAY, 1);
+        textFieldStyle._borderRadius = 3;
+    }
+
+    /**
+     * Returns the ViewStyle for given class.
+     */
+    public ViewStyle getViewStyleForClass(Class<? extends View> viewClass)
+    {
+        // Get style for class, just return if found
+        ViewStyle viewStyle = _viewStyles.get(viewClass);
+        if (viewStyle != null)
+            return viewStyle;
+
+        // Creates style for class, adds to given map and returns it
+        return ViewStyle.getViewStyleForClassMapAndClass(_viewStyles, viewClass);
+    }
 
     /**
      * Returns the current theme.
