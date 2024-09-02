@@ -102,20 +102,20 @@ public class StringView extends View implements Cloneable {
     }
 
     /**
-     * Returns the text fill.
+     * Returns the text color.
      */
-    public Paint getTextFill()
+    public Color getTextColor()
     {
-        return _styledString.getTextFill();
+        return _styledString.getTextColor();
     }
 
     /**
-     * Sets the text fill.
+     * Sets the text color.
      */
-    public void setTextFill(Paint aPaint)
+    public void setTextColor(Color aColor)
     {
-        if (Objects.equals(aPaint, getTextFill())) return;
-        TextStyle textStyle = getTextStyle().copyFor(TextStyle.COLOR_KEY, aPaint);
+        if (Objects.equals(aColor, getTextColor())) return;
+        TextStyle textStyle = getTextStyle().copyFor(TextStyle.COLOR_KEY, aColor);
         setTextStyle(textStyle);
     }
 

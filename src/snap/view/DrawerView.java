@@ -153,7 +153,7 @@ public class DrawerView extends ParentView {
         // Create/configure
         Label label = new Label();
         label.setFont(Font.Arial12.getBold());
-        label.setTextFill(Color.DARKGRAY);
+        label.setTextColor(Color.DARKGRAY);
         label.setManaged(false);
         label.setLean(Pos.CENTER);
         label.setRotate(-90);
@@ -177,7 +177,7 @@ public class DrawerView extends ParentView {
         Label drawerLabel = new Label();
         drawerLabel.setPadding(6, 0, 0, 0);
         drawerLabel.setFont(Font.Arial12.getBold());
-        drawerLabel.setTextFill(Color.GRAY);
+        drawerLabel.setTextColor(Color.GRAY);
         drawerLabel.setManaged(false);
         drawerLabel.setLean(Pos.TOP_CENTER);
 

@@ -43,7 +43,7 @@ public class CollapseView extends ParentView implements ViewHost {
     // Constants
     public static Font LABEL_FONT = Font.Arial14;//.getBold();
     public static Color LABEL_FILL = new Color("#F4F4F8"); //"#e0e6f0"
-    public static Color LABEL_TEXT_FILL = Color.DARKGRAY;
+    public static Color LABEL_TEXT_COLOR = Color.DARKGRAY;
     public static Border LABEL_BORDER = Border.createLineBorder(LABEL_FILL.darker(), 1).copyForInsets(Insets.EMPTY);
 
     /**
@@ -103,7 +103,7 @@ public class CollapseView extends ParentView implements ViewHost {
         Label label = new Label();
         label.setFont(LABEL_FONT);
         label.setFill(LABEL_FILL);
-        label.setTextFill(LABEL_TEXT_FILL);
+        label.setTextColor(LABEL_TEXT_COLOR);
         label.setBorder(LABEL_BORDER);
         label.getStringView().setGrowWidth(true);
         label.setAlign(Pos.CENTER);

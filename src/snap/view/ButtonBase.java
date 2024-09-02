@@ -140,14 +140,14 @@ public class ButtonBase extends ParentView {
     public void setGraphicAfter(View aGraphic)  { getLabel().setGraphicAfter(aGraphic); }
 
     /**
-     * Returns the text fill.
+     * Returns the text color.
      */
-    public Paint getTextFill()  { return getLabel().getTextFill(); }
+    public Color getTextColor()  { return getLabel().getTextColor(); }
 
     /**
-     * Sets the text fill.
+     * Sets the text color.
      */
-    public void setTextFill(Paint aFill)  { getLabel().setTextFill(aFill); }
+    public void setTextColor(Color aColor)  { getLabel().setTextColor(aColor); }
 
     /**
      * Returns the image name, if loaded from local resource.

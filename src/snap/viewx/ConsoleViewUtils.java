@@ -21,7 +21,7 @@ class ConsoleViewUtils {
     // Constants
     public static final Font DEFAULT_FONT = Font.Arial14;
     private static final Color DEFAULT_TEXTAREA_FILL = new Color(.95);
-    private static final Color DEFAULT_TEXTAREA_TEXTFILL = Color.GRAY2;
+    private static final Color DEFAULT_TEXTAREA_TEXTCOLOR = Color.GRAY2;
 
     /**
      * Override to support custom content views for response values.
@@ -78,7 +78,7 @@ class ConsoleViewUtils {
         // Create TextBlock and configure Style
         TextBlock textBlock = new TextBlock();
         textBlock.setDefaultFont(DEFAULT_FONT);
-        textBlock.setDefaultTextStyle(textBlock.getDefaultTextStyle().copyFor(DEFAULT_TEXTAREA_TEXTFILL));
+        textBlock.setDefaultTextStyle(textBlock.getDefaultTextStyle().copyFor(DEFAULT_TEXTAREA_TEXTCOLOR));
 
         // Set string
         textBlock.setString(aString);

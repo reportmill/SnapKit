@@ -132,9 +132,9 @@ public class MenuItem extends ButtonBase implements Cloneable {
         if (aValue == isTargeted()) return;
         super.setTargeted(aValue);
 
-        // Update Fill/TextFill to show Targetted
+        // Update Fill/TextColor to show Targetted
         setFill(aValue ? ViewUtils.getTargetFill() : null);
-        getLabel().setTextFill(aValue ? ViewUtils.getTargetTextFill() : Color.BLACK);
+        getLabel().setTextColor(aValue ? ViewUtils.getTextTargetedColor() : Color.BLACK);
 
         // If targeting this menu item, hide any previous peer menu popups
         if (aValue) {

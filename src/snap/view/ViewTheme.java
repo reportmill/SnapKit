@@ -98,7 +98,7 @@ public class ViewTheme {
     /**
      * Returns the text color when in targeted item.
      */
-    public Paint getTextTargetedColor()  { return TEXT_TARG_COLOR; }
+    public Color getTextTargetedColor()  { return TEXT_TARG_COLOR; }
 
     /**
      * Returns the button color.

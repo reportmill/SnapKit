@@ -89,23 +89,23 @@ public class StyledString implements Cloneable {
     }
 
     /**
-     * Returns the text fill.
+     * Returns the text color.
      */
-    public Paint getTextFill()
+    public Color getTextColor()
     {
         Color color = _textStyle.getColor();
-        Color defColor = (Color) ViewUtils.getTextFill();
+        Color defColor = ViewUtils.getTextColor();
         if (defColor != Color.BLACK && color == Color.BLACK)
             color = defColor;
         return color;
     }
 
     /**
-     * Sets the text fill.
+     * Sets the text color.
      */
-    public void setTextFill(Paint aPaint)
+    public void setTextColor(Color aColor)
     {
-        TextStyle textStyle = _textStyle.copyFor(aPaint);
+        TextStyle textStyle = _textStyle.copyFor(aColor);
         setTextStyle(textStyle);
     }
 
@@ -260,10 +260,10 @@ public class StyledString implements Cloneable {
      */
     public void paintString(Painter aPntr, double aX, double aY)
     {
-        // Set font and text fill
+        // Set font and text color
         Font font = getFont();
         aPntr.setFont(font);
-        aPntr.setPaint(getTextFill());
+        aPntr.setPaint(getTextColor());
 
         // Get String X/Y and paint
         String text = getString();

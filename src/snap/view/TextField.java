@@ -21,8 +21,8 @@ public class TextField extends ParentView {
     // The column count to be used for preferred width (if set)
     private int  _colCount;
     
-    // The paint for the text
-    private Paint  _textFill;
+    // The color for the text
+    private Color _textColor;
     
     // A label in the background for promt text and/or in text controls
     private Label  _label;
@@ -62,12 +62,12 @@ public class TextField extends ParentView {
     public static final String Edited_Prop = "Edited";
     public static final String PromptText_Prop = "PromptText";
     public static final String Sel_Prop = "Selection";
-    public static final String TextFill_Prop = "TextFill";
+    public static final String TextColor_Prop = "TextColor";
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
 
     // Constants for property defaults
     private static final int DEFAULT_COL_COUNT = 12;
-    private static final Color DEFAULT_TEXT_FILL = Color.BLACK;
+    private static final Color DEFAULT_TEXT_COLOR = Color.BLACK;
     private static final boolean DEFAULT_FIRE_ACTION_ON_FOCUS_LOST = true;
 
     // Constants for property overrides defaults
@@ -86,7 +86,7 @@ public class TextField extends ParentView {
     {
         super();
         _colCount = DEFAULT_COL_COUNT;
-        _textFill = DEFAULT_TEXT_FILL;
+        _textColor = DEFAULT_TEXT_COLOR;
         _fireActionOnFocusLost = DEFAULT_FIRE_ACTION_ON_FOCUS_LOST;
 
         // Override default properties
@@ -110,17 +110,17 @@ public class TextField extends ParentView {
     }
 
     /**
-     * Returns the text fill.
+     * Returns the text color.
      */
-    public Paint getTextFill()  { return _textFill; }
+    public Color getTextColor()  { return _textColor; }
 
     /**
-     * Sets the text fill.
+     * Sets the text color.
      */
-    public void setTextFill(Paint aPaint)
+    public void setTextColor(Color aPaint)
     {
-        if (Objects.equals(aPaint, _textFill)) return;
-        firePropChange(TextFill_Prop, _textFill, _textFill = aPaint);
+        if (Objects.equals(aPaint, _textColor)) return;
+        firePropChange(TextColor_Prop, _textColor, _textColor = aPaint);
         repaint();
     }
 
@@ -158,7 +158,7 @@ public class TextField extends ParentView {
     {
         if (Objects.equals(aStr, _promptText)) return;
         _label.setText(aStr);
-        _label.setTextFill(Color.LIGHTGRAY);
+        _label.setTextColor(Color.LIGHTGRAY);
         firePropChange(PromptText_Prop, _promptText, _promptText = aStr);
     }
 
@@ -717,8 +717,8 @@ public class TextField extends ParentView {
         // Get/set font/paint
         Font font = getFont();
         aPntr.setFont(font);
-        Paint textFill = isEnabled() ? getTextFill() : Color.GRAY;
-        aPntr.setPaint(textFill);
+        Color textColor = isEnabled() ? getTextColor() : Color.GRAY;
+        aPntr.setPaint(textColor);
 
         // Paint text
         String str = getText();
@@ -1149,12 +1149,12 @@ public class TextField extends ParentView {
         // Do normal version
         super.initProps(aPropSet);
 
-        // Add props: ColCount, Edited, PromptText, Sel, TextFill, FireActionOnFocusLost
+        // Add props: ColCount, Edited, PromptText, Sel, TextColor, FireActionOnFocusLost
         aPropSet.addPropNamed(ColCount_Prop, int.class, DEFAULT_COL_COUNT);
         aPropSet.addPropNamed(Edited_Prop, boolean.class).setSkipArchival(true);
         aPropSet.addPropNamed(PromptText_Prop, String.class);
         aPropSet.addPropNamed(Sel_Prop, String.class).setSkipArchival(true);
-        aPropSet.addPropNamed(TextFill_Prop, Paint.class, DEFAULT_TEXT_FILL);
+        aPropSet.addPropNamed(TextColor_Prop, Color.class, DEFAULT_TEXT_COLOR);
         aPropSet.addPropNamed(FireActionOnFocusLost_Prop, boolean.class, true);
 
         // Override defaults: Padding, Fill, Border, BorderRadius
@@ -1173,11 +1173,11 @@ public class TextField extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // ColCount, PromptText, TextFill, FireActionOnFocusLost
+            // ColCount, PromptText, TextColor, FireActionOnFocusLost
             case ColCount_Prop: return getColCount();
             case Edited_Prop: return isEdited();
             case PromptText_Prop: return getPromptText();
-            case TextFill_Prop: return getTextFill();
+            case TextColor_Prop: return getTextColor();
             case FireActionOnFocusLost_Prop: return isFireActionOnFocusLost();
 
             // Do normal version
@@ -1194,10 +1194,10 @@ public class TextField extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // ColCount, PromptText, TextFill, FireActionOnFocusLost
+            // ColCount, PromptText, TextColor, FireActionOnFocusLost
             case ColCount_Prop: setColCount(Convert.intValue(aValue)); break;
             case PromptText_Prop: setPromptText(Convert.stringValue(aValue)); break;
-            case TextFill_Prop: setTextFill(Paint.of(aValue)); break;
+            case TextColor_Prop: setTextColor(Color.get(aValue)); break;
             case FireActionOnFocusLost_Prop: setFireActionOnFocusLost(Convert.boolValue(aValue)); break;
 
             // Do normal version

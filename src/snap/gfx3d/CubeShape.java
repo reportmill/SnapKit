@@ -253,7 +253,7 @@ public class CubeShape extends ParentShape {
         StringView stringView = new StringView(aSide.name());
         stringView.setFont(Font.Arial14.copyForSize(28).getBold());
         if (aSide == Side3D.BOTTOM) stringView.setFont(Font.Arial14.copyForSize(24));
-        stringView.setTextFill(Color.DARKGRAY);
+        stringView.setTextColor(Color.DARKGRAY);
         stringView.setAlign(Pos.CENTER);
         stringView.setFill(aSide == Side3D.TOP ? Color.WHITE : aSide == Side3D.BOTTOM ? BOTTOM_COLOR : SIDE_PAINT);
         stringView.setBorder(SIDE_BORDER_COLOR, 3);

@@ -139,20 +139,23 @@ public class Label extends ParentView {
     }
 
     /**
-     * Returns the text fill.
+     * Returns the text color.
      */
-    public Paint getTextFill()
+    public Color getTextColor()
     {
-        return _stringView != null ? _stringView.getTextFill() : null;
+        return _stringView != null ? _stringView.getTextColor() : null;
     }
 
     /**
-     * Sets the text fill.
+     * Sets the text color.
      */
-    public void setTextFill(Paint aPaint)
+    public void setTextColor(Color aColor)
     {
-        getStringView().setTextFill(aPaint);
+        getStringView().setTextColor(aColor);
     }
+
+    @Deprecated
+    public void setTextFill(Paint aPaint) { setTextColor(aPaint.getColor()); }
 
     /**
      * Returns the text style.

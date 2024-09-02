@@ -232,6 +232,6 @@ public class WebSitePaneX extends WebSitePane {
             return;
 
         aCell.setEnabled(false);
-        aCell.setTextFill(Color.LIGHTGRAY);
+        aCell.setTextColor(Color.LIGHTGRAY);
     }
 }

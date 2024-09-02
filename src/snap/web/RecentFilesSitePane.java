@@ -148,7 +148,7 @@ public class RecentFilesSitePane extends WebSitePane {
         WebURL directoryURL = recentFile.getURL().getParent();
         String directoryUrlString = RecentFiles.getNormalizedUrlString(directoryURL.getString());
         aCell.setText(directoryUrlString);
-        aCell.setTextFill(Color.DARKGRAY);
+        aCell.setTextColor(Color.DARKGRAY);
 
         // Add button to clear item from recent files
         CloseBox closeBox = new CloseBox();

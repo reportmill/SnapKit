@@ -81,19 +81,19 @@ public class ViewUtils {
     public static Paint getTargetFill()  { return ViewTheme.get().getTargetedFill(); }
 
     /**
-     * Returns the text fill.
+     * Returns the text color.
      */
-    public static Paint getTextFill()  { return ViewTheme.get().getTextColor(); }
+    public static Color getTextColor()  { return ViewTheme.get().getTextColor(); }
 
     /**
-     * Returns the selection color.
+     * Returns the text selected color.
      */
-    public static Paint getSelectTextFill()  { return ViewTheme.get().getTextSelectedColor(); }
+    public static Color getTextSelectedColor()  { return ViewTheme.get().getTextSelectedColor(); }
 
     /**
-     * Returns the selection color.
+     * Returns the text targeted color.
      */
-    public static Paint getTargetTextFill()  { return ViewTheme.get().getTextTargetedColor(); }
+    public static Color getTextTargetedColor()  { return ViewTheme.get().getTextTargetedColor(); }
 
     /**
      * Returns the bounds of a given view list.
@@ -101,7 +101,7 @@ public class ViewUtils {
     public static Rect getBoundsOfViews(View aPar, List <? extends View> aList)
     {
         // If list is null or empty, return this shape's bounds inside
-        if (aList == null || aList.size() == 0)
+        if (aList == null || aList.isEmpty())
             return aPar.getBoundsLocal();
 
         // Declare and initialize a rect to frame of first shape in list

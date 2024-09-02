@@ -85,15 +85,15 @@ public class FontPicker extends ViewOwner {
     {
         if (_sel!=null) {
             _sel.setFill(_sel._color);
-            _sel._label.setTextFill(Color.BLACK);
-            _sel._sampleLC.setTextFill(Color.BLACK);
-            _sel._sampleUC.setTextFill(Color.BLACK);
+            _sel._label.setTextColor(Color.BLACK);
+            _sel._sampleLC.setTextColor(Color.BLACK);
+            _sel._sampleUC.setTextColor(Color.BLACK);
         }
         _sel = aFSV;
         _sel.setFill(ViewUtils.getSelectFill());
-        _sel._label.setTextFill(ViewUtils.getSelectTextFill());
-        _sel._sampleLC.setTextFill(ViewUtils.getSelectTextFill());
-        _sel._sampleUC.setTextFill(ViewUtils.getSelectTextFill());
+        _sel._label.setTextColor(ViewUtils.getTextSelectedColor());
+        _sel._sampleLC.setTextColor(ViewUtils.getTextSelectedColor());
+        _sel._sampleUC.setTextColor(ViewUtils.getTextSelectedColor());
     }
 
     /**

@@ -78,9 +78,9 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     // Shared constants for colors
     private static Paint ALT_GRAY = Color.get("#F8F8F8");
     private static Paint SEL_FILL = ViewUtils.getSelectFill();
-    private static Paint SEL_TEXT_FILL = ViewUtils.getSelectTextFill();
     private static Paint TARG_FILL = ViewUtils.getTargetFill();
-    private static Paint TARG_TEXT_FILL = ViewUtils.getTargetTextFill();
+    private static Color SEL_TEXT_COLOR = ViewUtils.getTextSelectedColor();
+    private static Color TARG_TEXT_COLOR = ViewUtils.getTextTargetedColor();
     
     // Constants for properties
     public static final String CellPadding_Prop = "CellPadding";
@@ -752,32 +752,32 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Called to configure a cell fill and text fill.
+     * Called to configure a cell fill and text color.
      */
     protected void configureCellFills(ListCell <T> aCell)
     {
         // Handle Cell.Selected
         if (aCell.isSelected()) {
             aCell.setFill(SEL_FILL);
-            aCell.setTextFill(SEL_TEXT_FILL);
+            aCell.setTextColor(SEL_TEXT_COLOR);
         }
 
         // Handle ListArea.Targeting given cell
         else if (isTargeting() && aCell.getRow() == getTargetedIndex())  {
             aCell.setFill(TARG_FILL);
-            aCell.setTextFill(TARG_TEXT_FILL);
+            aCell.setTextColor(TARG_TEXT_COLOR);
         }
 
         // Handle alternate rows
         else if (aCell.getRow() % 2 == 0) {
             aCell.setFill(_altPaint);
-            aCell.setTextFill(Color.BLACK);
+            aCell.setTextColor(Color.BLACK);
         }
 
         // Handle normal case
         else {
             aCell.setFill(null);
-            aCell.setTextFill(Color.BLACK);
+            aCell.setTextColor(Color.BLACK);
         }
     }
 
