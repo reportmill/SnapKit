@@ -68,32 +68,32 @@ public class ViewUtils {
     /**
      * Returns the background fill.
      */
-    public static Paint getBackDarkFill()  { return ViewTheme.get().getBackDarkFill(); }
+    public static Paint getBackDarkFill()  { return ViewTheme.get().getGutterFill(); }
+
+    /**
+     * Returns the selection color.
+     */
+    public static Paint getSelectFill()  { return ViewTheme.get().getSelectedFill(); }
+
+    /**
+     * Returns the selection color.
+     */
+    public static Paint getTargetFill()  { return ViewTheme.get().getTargetedFill(); }
 
     /**
      * Returns the text fill.
      */
-    public static Paint getTextFill()  { return ViewTheme.get().getTextFill(); }
+    public static Paint getTextFill()  { return ViewTheme.get().getTextColor(); }
 
     /**
      * Returns the selection color.
      */
-    public static Paint getSelectFill()  { return ViewTheme.get().getSelectFill(); }
+    public static Paint getSelectTextFill()  { return ViewTheme.get().getTextSelectedColor(); }
 
     /**
      * Returns the selection color.
      */
-    public static Paint getSelectTextFill()  { return ViewTheme.get().getSelectTextFill(); }
-
-    /**
-     * Returns the selection color.
-     */
-    public static Paint getTargetFill()  { return ViewTheme.get().getTargetFill(); }
-
-    /**
-     * Returns the selection color.
-     */
-    public static Paint getTargetTextFill()  { return ViewTheme.get().getTargetTextFill(); }
+    public static Paint getTargetTextFill()  { return ViewTheme.get().getTextTargetedColor(); }
 
     /**
      * Returns the bounds of a given view list.

@@ -6,20 +6,43 @@ import snap.gfx.*;
  */
 public class ViewTheme {
 
-    // Color constants
+    // Background fill
     protected Color BACK_FILL = new Color("#E9E8EA");
-    protected Color BACK_DARK_FILL = new Color("#C0"); // Color.LIGHTGRAY
-    protected Color SEL_FILL = new Color("#C0"); // Color.LIGHTGRAY
-    protected Color TARG_FILL = new Color("#D0");
-    protected Color TEXT_FILL = Color.BLACK;
-    protected Color SEL_TEXT_FILL = Color.BLACK;
-    protected Color TARG_TEXT_FILL = Color.WHITE;
 
-    // Button colors
+    // Far background fill, like gutters of scroll bar or tabview buttons
+    protected Color GUTTER_FILL = new Color("#C0"); // Color.LIGHTGRAY
+
+    // Color for content like text fields, text areas, list areas
+    protected Color CONTENT_COLOR = Color.WHITE;
+
+    // Selection fill, like list items
+    protected Color SEL_FILL = new Color("#C0"); // Color.LIGHTGRAY
+
+    // Targeted fill, like mouse over list items
+    protected Color TARG_FILL = new Color("#D0");
+
+    // Text color
+    protected Color TEXT_COLOR = Color.BLACK;
+
+    // Text color for text in selected list item
+    protected Color TEXT_SEL_COLOR = Color.BLACK;
+
+    // Text color for text in targeted list item
+    protected Color TEXT_TARG_COLOR = Color.WHITE;
+
+    // Main button color
     protected Color BUTTON_COLOR = Color.WHITE;
+
+    // Button color when mouse over
     protected Color BUTTON_OVER_COLOR = new Color("#F8F8F8");
+
+    // Button color when pressed
     protected Color BUTTON_PRESSED_COLOR = new Color("#DFDFDF");
+
+    // Button border color
     protected Color BUTTON_BORDER_COLOR = new Color("#BFBFBF");
+
+    // Button border pressed color
     protected Color BUTTON_BORDER_PRESSED_COLOR = new Color("#87AFDA");
 
     // The ButtonPainter
@@ -43,34 +66,39 @@ public class ViewTheme {
     public Paint getBackFill()  { return BACK_FILL; }
 
     /**
-     * Returns the background fill.
+     * Returns the fill for gutter areas like scrollbar background or tabview button bar background.
      */
-    public Paint getBackDarkFill()  { return BACK_DARK_FILL; }
+    public Paint getGutterFill()  { return GUTTER_FILL; }
 
     /**
-     * Returns the text fill.
+     * Returns the Color for content like text fields, text areas, list areas.
      */
-    public Paint getTextFill()  { return TEXT_FILL; }
-
-    /**
-     * Returns the selection color.
-     */
-    public Paint getSelectFill()  { return SEL_FILL; }
+    public Color getContentColor()  { return CONTENT_COLOR; }
 
     /**
      * Returns the selection color.
      */
-    public Paint getSelectTextFill()  { return SEL_TEXT_FILL; }
+    public Paint getSelectedFill()  { return SEL_FILL; }
 
     /**
-     * Returns the selection color.
+     * Returns the targeted color.
      */
-    public Paint getTargetFill()  { return TARG_FILL; }
+    public Paint getTargetedFill()  { return TARG_FILL; }
 
     /**
-     * Returns the selection color.
+     * Returns the text color.
      */
-    public Paint getTargetTextFill()  { return TARG_TEXT_FILL; }
+    public Color getTextColor()  { return TEXT_COLOR; }
+
+    /**
+     * Returns the text color when in selected item.
+     */
+    public Color getTextSelectedColor()  { return TEXT_SEL_COLOR; }
+
+    /**
+     * Returns the text color when in targeted item.
+     */
+    public Paint getTextTargetedColor()  { return TEXT_TARG_COLOR; }
 
     /**
      * Returns the button color.

@@ -51,11 +51,11 @@ public class ViewThemes {
         // Reset Color constants
         {
             BACK_FILL = new Color("#FA");
-            BACK_DARK_FILL = new Color("#F0");
+            GUTTER_FILL = new Color("#F0");
             SEL_FILL = new Color("#DA");
             TARG_FILL = new Color("#E6");
-            SEL_TEXT_FILL = Color.BLACK;
-            TARG_TEXT_FILL = Color.WHITE;
+            TEXT_SEL_COLOR = Color.BLACK;
+            TEXT_TARG_COLOR = Color.WHITE;
         }
     }
 
@@ -69,11 +69,11 @@ public class ViewThemes {
             // Reset Color constants
             Color BASE = new Color(165, 179, 216).brighter();
             BACK_FILL = BASE.blend(Color.WHITE, .8);
-            BACK_DARK_FILL = BASE.blend(Color.WHITE, .6);
+            GUTTER_FILL = BASE.blend(Color.WHITE, .6);
             SEL_FILL = BASE.blend(Color.WHITE, .6);
             TARG_FILL = BASE.blend(Color.WHITE, .7);
-            SEL_TEXT_FILL = Color.BLACK;
-            TARG_TEXT_FILL = Color.WHITE;
+            TEXT_SEL_COLOR = Color.BLACK;
+            TEXT_TARG_COLOR = Color.WHITE;
 
             // Reset Button colors
             Color blue = Color.BLUE;
@@ -95,12 +95,13 @@ public class ViewThemes {
         {
             // Reset Color constants
             BACK_FILL = new Color("#3C3F41");
-            BACK_DARK_FILL = BACK_FILL.darker().darker();
+            GUTTER_FILL = BACK_FILL.darker().darker();
+            CONTENT_COLOR = Color.BLACK;
             SEL_FILL = new Color("#C0"); // Color.LIGHTGRAY;
             TARG_FILL = new Color("#90");
-            TEXT_FILL = Color.WHITE;
-            SEL_TEXT_FILL = Color.BLACK;
-            TARG_TEXT_FILL = Color.WHITE;
+            TEXT_COLOR = Color.WHITE;
+            TEXT_SEL_COLOR = Color.BLACK;
+            TEXT_TARG_COLOR = Color.WHITE;
 
             // Reset Button colors
             BUTTON_COLOR = new Color("#45494A");
@@ -119,11 +120,11 @@ public class ViewThemes {
         {
             // Reset Color constants
             BACK_FILL = Color.WHITE;
-            BACK_DARK_FILL = Color.WHITE;
+            GUTTER_FILL = Color.WHITE;
             SEL_FILL = new Color("#F0");
             TARG_FILL = new Color("#F8");
-            SEL_TEXT_FILL = Color.BLACK;
-            TARG_TEXT_FILL = Color.BLACK;
+            TEXT_SEL_COLOR = Color.BLACK;
+            TEXT_TARG_COLOR = Color.BLACK;
 
             // Reset Button colors
             BUTTON_COLOR = Color.WHITE;
