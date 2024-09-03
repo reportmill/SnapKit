@@ -19,6 +19,9 @@ public class ViewTheme {
     // Color for content like text fields, text areas, list areas
     protected Color CONTENT_COLOR = Color.WHITE;
 
+    // Color for content like text fields, text areas, list areas
+    protected Color CONTENT_ALT_COLOR = Color.get("#F8");
+
     // Selection fill, like list items
     protected Color SEL_FILL = new Color("#C0"); // Color.LIGHTGRAY
 
@@ -94,9 +97,14 @@ public class ViewTheme {
     public Paint getGutterFill()  { return GUTTER_FILL; }
 
     /**
-     * Returns the Color for content like text fields, text areas, list areas.
+     * Returns the color for content like text fields, text areas, list areas.
      */
     public Color getContentColor()  { return CONTENT_COLOR; }
+
+    /**
+     * Returns the color for alternate content, like list area alternate rows.
+     */
+    public Color getContentAltColor()  { return CONTENT_ALT_COLOR; }
 
     /**
      * Returns the selection color.

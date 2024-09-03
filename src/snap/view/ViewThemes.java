@@ -100,6 +100,7 @@ public class ViewThemes {
             BACK_FILL = new Color("#2B2B2B");
             GUTTER_FILL = BACK_FILL.darker().darker();
             CONTENT_COLOR = BACK_FILL;
+            CONTENT_ALT_COLOR = BACK_FILL.brighter();
             SEL_FILL = new Color("#C0"); // Color.LIGHTGRAY;
             TARG_FILL = new Color("#90");
             TEXT_COLOR = Color.WHITE;

@@ -35,7 +35,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     // A simple alternate way to set ListArea item text using Key
     private String  _itemKey;
     
-    // The paint for alternating cells
+    // The background color for alternating rows
     private Color _altRowColor;
     
     // Whether list distinguishes item under the mouse
@@ -74,9 +74,6 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     // Shared CellPadding default
     public static final Insets  CELL_PAD_DEFAULT = new Insets(2);
     
-    // Constants for colors
-    private static Color ALT_ROW_COLOR = Color.get("#F8F8F8");
-
     // Constants for properties
     public static final String CellPadding_Prop = "CellPadding";
     public static final String Editable_Prop = "Editable";
@@ -91,7 +88,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     public ListArea()
     {
         super();
-        _altRowColor = ALT_ROW_COLOR;
+        _altRowColor = ViewTheme.get().getContentAltColor();
 
         // Events
         setActionable(true);
@@ -379,14 +376,14 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Returns the paint for alternating cells.
+     * Returns the background color for alternating rows.
      */
-    public Paint getAltPaint()  { return _altRowColor; }
+    public Color getAltRowColor()  { return _altRowColor; }
 
     /**
-     * Sets the paint for alternating cells.
+     * Sets the background color for alternating rows.
      */
-    public void setAltPaint(Paint aPaint)  { _altRowColor = aPaint; }
+    public void setAltRowColor(Color aColor)  { _altRowColor = aColor; }
 
     /**
      * Returns whether list shows visual cue for item under the mouse.
@@ -761,15 +758,15 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         }
 
         // Handle alternate rows
-        else if (aCell.getRow() % 2 == 0) {
+        else if (_altRowColor != null && aCell.getRow() % 2 == 0) {
             aCell.setFill(_altRowColor);
-            aCell.setTextColor(Color.BLACK);
+            aCell.setTextColor(ViewUtils.getTextColor());
         }
 
         // Handle normal case
         else {
             aCell.setFill(null);
-            aCell.setTextColor(Color.BLACK);
+            aCell.setTextColor(ViewUtils.getTextColor());
         }
     }
 
@@ -955,6 +952,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     /**
      * Override to return text for currently selected item.
      */
+    @Override
     public String getText()
     {
         T item = getSelItem();
@@ -964,6 +962,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     /**
      * Override to set the given text in this ListArea by matching it to existing item text.
      */
+    @Override
     public void setText(String aString)
     {
         T item = getItemForText(aString);
@@ -1023,6 +1022,18 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     public String getValuePropName()
     {
         return getBindingForName(SelIndex_Prop) != null ? SelIndex_Prop : SelItem_Prop;
+    }
+
+    /**
+     * Override to reset AltRowColor
+     */
+    @Override
+    protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
+    {
+        super.themeChanged(oldTheme, newTheme);
+        if (Objects.equals(_altRowColor, oldTheme.getContentAltColor()))
+            _altRowColor = newTheme.getContentAltColor();
+        removeChildren();
     }
 
     /**

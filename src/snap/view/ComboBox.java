@@ -146,8 +146,8 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     protected ListView <T> createListView()
     {
         PopupList<T> popupList = new PopupList<>();
-        popupList.setAltPaint(null);
-        popupList.setTargeting(true);
+        popupList.getListArea().setAltRowColor(null);
+        popupList.getListArea().setTargeting(true);
         popupList.setItemTextFunction(getItemTextFunction());
         return popupList;
     }

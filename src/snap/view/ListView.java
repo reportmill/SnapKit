@@ -5,7 +5,6 @@ package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import snap.gfx.*;
 import snap.props.PropChange;
 import snap.util.*;
 
@@ -192,26 +191,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      * Sets the ItemKey (a simple alternate way to set ListArea item text using KeyChain).
      */
     public void setItemKey(String aKey)  { _listArea.setItemKey(aKey); }
-
-    /**
-     * Returns the paint for alternating cells.
-     */
-    public Paint getAltPaint()  { return _listArea.getAltPaint(); }
-
-    /**
-     * Sets the paint for alternating cells.
-     */
-    public void setAltPaint(Paint aPaint)  { _listArea.setAltPaint(aPaint); }
-
-    /**
-     * Returns whether list shows visual cue for item under the mouse.
-     */
-    public boolean isTargeting()  { return _listArea.isTargeting(); }
-
-    /**
-     * Sets whether list shows visual cue for item under the mouse.
-     */
-    public void setTargeting(boolean aValue)  { _listArea.setTargeting(aValue); }
 
     /**
      * Called to update item in list that has changed.

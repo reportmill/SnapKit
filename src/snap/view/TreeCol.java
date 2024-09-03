@@ -27,7 +27,7 @@ public class TreeCol <T> extends ListArea <T> {
     public TreeCol()
     {
         setGrowWidth(true);
-        setAltPaint(null);
+        setAltRowColor(null);
     }
 
     /**
