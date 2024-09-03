@@ -69,19 +69,19 @@ public class ViewThemes {
         protected void initColors()
         {
             // Reset Color constants
-            BACK_FILL = new Color("#2B2B2B");
+            BACK_FILL = new Color("#2B");
             GUTTER_FILL = BACK_FILL.darker().darker();
             CONTENT_COLOR = BACK_FILL;
             CONTENT_ALT_COLOR = BACK_FILL.brighter();
-            SEL_FILL = new Color("#C0"); // Color.LIGHTGRAY;
-            TARG_FILL = new Color("#90");
+            SEL_FILL = new Color("#90");
+            TARG_FILL = new Color("#80");
             TEXT_COLOR = Color.WHITE;
             TEXT_SEL_COLOR = Color.BLACK;
             TEXT_TARG_COLOR = Color.WHITE;
 
             // Reset Button colors
             BUTTON_COLOR = new Color("#45494A");
-            BUTTON_BORDER_COLOR = new Color("#BFBFBF");
+            BUTTON_BORDER_COLOR = new Color("#BF");
             BUTTON_OVER_COLOR = BUTTON_COLOR.brighter();
             BUTTON_PRESSED_COLOR = BUTTON_OVER_COLOR.brighter();
         }
@@ -99,6 +99,8 @@ public class ViewThemes {
             Color BASE = new Color(165, 179, 216).brighter();
             BACK_FILL = BASE.blend(Color.WHITE, .8);
             GUTTER_FILL = BASE.blend(Color.WHITE, .6);
+            CONTENT_COLOR = CONTENT_COLOR.blend(Color.BLUE, .025);
+            CONTENT_ALT_COLOR = CONTENT_ALT_COLOR.blend(Color.BLUE, .075);
             SEL_FILL = BASE.blend(Color.WHITE, .6);
             TARG_FILL = BASE.blend(Color.WHITE, .7);
             TEXT_SEL_COLOR = Color.BLACK;
