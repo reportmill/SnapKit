@@ -1158,7 +1158,6 @@ public class TextField extends ParentView {
         aPropSet.addPropNamed(ColCount_Prop, int.class, DEFAULT_COL_COUNT);
         aPropSet.addPropNamed(Edited_Prop, boolean.class).setSkipArchival(true);
         aPropSet.addPropNamed(PromptText_Prop, String.class);
-        aPropSet.addPropNamed(Sel_Prop, String.class).setSkipArchival(true);
         aPropSet.addPropNamed(TextColor_Prop, Color.class, DEFAULT_TEXT_COLOR);
         aPropSet.addPropNamed(FireActionOnFocusLost_Prop, boolean.class, true);
 

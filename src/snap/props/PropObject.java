@@ -59,8 +59,7 @@ public abstract class PropObject implements PropChange.DoChange {
                     return extraProp;
         }
 
-        // Complain since it's unexpected to ask for a non-existent prop
-        System.err.println("PropObject.getPropForName: Prop not found for: " + getClass() + ": " + aPropName);
+        // Return not found
         return null;
     }
 

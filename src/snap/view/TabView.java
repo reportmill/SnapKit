@@ -362,9 +362,9 @@ public class TabView extends ParentView implements Selectable<Tab> {
      * Called when Theme changes.
      */
     @Override
-    protected void themeChanged()
+    protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
     {
-        super.themeChanged();
+        super.themeChanged(oldTheme, newTheme);
         Paint tabBarFill = ViewTheme.get().getClass().getSimpleName().equals("ViewTheme") ? CLASSIC_TAB_BAR_FILL : ViewUtils.getBackDarkFill();
         _tabBar.setFill(tabBarFill);
         _contentBox.setFill(ViewUtils.getBackFill());

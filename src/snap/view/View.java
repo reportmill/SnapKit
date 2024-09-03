@@ -2684,7 +2684,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Called when ViewTheme changes.
      */
-    protected void themeChanged()  { }
+    protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
+    {
+        newTheme.setThemeStyleDefaultsForViewAndOldTheme(this, oldTheme);
+    }
 
     /**
      * Returns the anim for the given time.
@@ -3064,8 +3067,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (aPropName.equals(Font_Prop))
             return getDefaultFont();
 
-        // Do normal version
-        return super.getPropDefault(aPropName);
+        // Forward to current style
+        ViewStyle viewStyle = ViewTheme.get().getViewStyleForClass(getClass());
+        return viewStyle.getPropDefaultForView(this, aPropName);
     }
 
     /**

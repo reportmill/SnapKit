@@ -223,18 +223,40 @@ public class ViewTheme {
     public static ViewTheme getClassic()  { return ViewThemes.getClassic(); }
 
     /**
-     * Sets the theme by name.
+     * Sets the style property values for given view if they were previously set to default of given old theme.
+     */
+    public void setThemeStyleDefaultsForViewAndOldTheme(View aView, ViewTheme oldTheme)
+    {
+        ViewStyle newViewStyle = getViewStyleForClass(aView.getClass());
+        ViewStyle oldViewStyle = oldTheme.getViewStyleForClass(aView.getClass());
+        newViewStyle.setStyleDefaultsForViewAndOldStyle(aView, oldViewStyle);
+    }
+
+    /**
+     * Sets the theme to theme for given name.
      */
     public static void setThemeForName(String aName)
     {
+        ViewTheme theme = ViewThemes.getThemeForName(aName);
+        if (theme != null)
+            setTheme(theme);
+        else System.err.println("ViewTheme.setThemeForName: Not theme for name: " + aName);
+    }
+
+    /**
+     * Sets the theme.
+     */
+    public static void setTheme(ViewTheme newTheme)
+    {
         // Set new theme
-        _theme = ViewThemes.getThemeForName(aName);
+        ViewTheme oldTheme = _theme;
+        _theme = newTheme;
 
         // Update windows
         WindowView[] openWindows = WindowView.getOpenWindows();
         for (WindowView openWindow : openWindows) {
             RootView rootView = openWindow.getRootView();
-            rootView.themeChanged();
+            rootView.themeChanged(oldTheme, newTheme);
             rootView.setFill(_theme.getBackFill());
             rootView.repaint();
         }

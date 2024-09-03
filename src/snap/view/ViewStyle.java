@@ -5,6 +5,8 @@ import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Paint;
+import snap.props.Prop;
+import snap.util.Convert;
 import java.util.*;
 
 /**
@@ -87,6 +89,99 @@ public class ViewStyle implements Cloneable {
      * Returns the text color.
      */
     public Color getTextColor()  { return _textColor; }
+
+    /**
+     * Returns value for given property name.
+     */
+    public Object getPropValue(String propName)
+    {
+        switch (propName) {
+            case View.Align_Prop: return _align;
+            case View.Margin_Prop: return _margin;
+            case View.Padding_Prop: return _padding;
+            case View.Spacing_Prop: return _spacing;
+            case View.Fill_Prop: return _fill;
+            case View.Border_Prop: return _border;
+            case View.BorderRadius_Prop: return _borderRadius;
+            case View.Font_Prop: return _font;
+            case TextField.TextColor_Prop: return _textColor;
+            default: System.out.println("ViewStyle.getPropValue: Unknown property name: " + propName); return null;
+        }
+    }
+
+    /**
+     * Sets value for given property name.
+     */
+    public void setPropValue(String propName, Object aValue)
+    {
+        switch (propName) {
+            case View.Align_Prop: _align = Pos.of(aValue); break;
+            case View.Margin_Prop: _margin = Insets.of(aValue); break;
+            case View.Padding_Prop: _padding = Insets.of(aValue); break;
+            case View.Spacing_Prop: _spacing = Convert.doubleValue(aValue); break;
+            case View.Fill_Prop: _fill = Paint.of(aValue); break;
+            case View.Border_Prop: _border = Border.of(aValue); break;
+            case View.BorderRadius_Prop: _borderRadius = Convert.doubleValue(aValue); break;
+            case View.Font_Prop: _font = Font.of(aValue); break;
+            default: System.out.println("ViewStyle.setPropValue: Unknown property name: " + propName);
+        }
+    }
+
+    /**
+     * Returns the default prop value for view.
+     */
+    public Object getPropDefaultForView(View aView, String propName)
+    {
+        switch (propName) {
+            case View.Align_Prop: return _align;
+            case View.Margin_Prop: return _margin;
+            case View.Padding_Prop: return _padding;
+            case View.Spacing_Prop: return _spacing;
+            case View.Fill_Prop: return _fill;
+            case View.Border_Prop: return _border;
+            case View.BorderRadius_Prop: return _borderRadius;
+            case View.Font_Prop: return _font;
+            case TextField.TextColor_Prop: return _textColor;
+        }
+
+        // Get prop and return DefaultValue
+        Prop prop = aView.getPropForName(propName);
+        if (prop != null)
+            return prop.getDefaultValue();
+
+        // Complain and return null
+        System.err.println("ViewStyle.getPropDefaultForView: No default found for: " + propName);
+        return null;
+    }
+
+    /**
+     * Sets the style property values for given view if they were previously set to default of given old style.
+     */
+    protected void setStyleDefaultsForViewAndOldStyle(View aView, ViewStyle oldViewStyle)
+    {
+        // Handle general style props
+        String[] styleProps = { View.Align_Prop, View.Margin_Prop, View.Padding_Prop, View.Spacing_Prop,
+                View.Fill_Prop, View.Border_Prop, View.BorderRadius_Prop };
+        for (String propName : styleProps)
+            setPropDefaultForView(aView, propName, oldViewStyle);
+
+        // Handle TextColor
+        if (aView.getPropForName(TextField.TextColor_Prop) != null)
+            setPropDefaultForView(aView, TextField.TextColor_Prop, oldViewStyle);
+    }
+
+    /**
+     * Sets the view prop value to this style default if current value matches old style default.
+     */
+    private void setPropDefaultForView(View aView, String propName, ViewStyle oldViewStyle)
+    {
+        Object viewPropValue = aView.getPropValue(propName);
+        Object oldDefaultPropValue = oldViewStyle.getPropDefaultForView(aView, propName);
+        if (Objects.equals(viewPropValue, oldDefaultPropValue)) {
+            Object newDefaultPropValue = getPropDefaultForView(aView, propName);
+            aView.setPropValue(propName, newDefaultPropValue);
+        }
+    }
 
     /**
      * Standard clone implementation.
