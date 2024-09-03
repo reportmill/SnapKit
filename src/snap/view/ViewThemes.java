@@ -48,7 +48,8 @@ public class ViewThemes {
      */
     private static class LightTheme extends ViewTheme {
 
-        // Reset Color constants
+        @Override
+        protected void initColors()
         {
             BACK_FILL = new Color("#FA");
             GUTTER_FILL = new Color("#F0");
@@ -64,7 +65,8 @@ public class ViewThemes {
      */
     private static class StandardBlueTheme extends ViewTheme {
 
-        // Reset Color constants
+        @Override
+        protected void initColors()
         {
             // Reset Color constants
             Color BASE = new Color(165, 179, 216).brighter();
@@ -91,12 +93,13 @@ public class ViewThemes {
      */
     private static class DarkTheme extends ViewTheme {
 
-        // Reset Color constants
+        @Override
+        protected void initColors()
         {
             // Reset Color constants
-            BACK_FILL = new Color("#3C3F41");
+            BACK_FILL = new Color("#2B2B2B");
             GUTTER_FILL = BACK_FILL.darker().darker();
-            CONTENT_COLOR = Color.BLACK;
+            CONTENT_COLOR = BACK_FILL;
             SEL_FILL = new Color("#C0"); // Color.LIGHTGRAY;
             TARG_FILL = new Color("#90");
             TEXT_COLOR = Color.WHITE;
@@ -116,7 +119,8 @@ public class ViewThemes {
      */
     private static class BlackAndWhiteTheme extends ViewTheme {
 
-        // Reset Color constants
+        @Override
+        protected void initColors()
         {
             // Reset Color constants
             BACK_FILL = Color.WHITE;

@@ -64,14 +64,24 @@ public class ViewTheme {
     public ViewTheme()
     {
         super();
-        _buttonPainter = createButtonPainter();
+
+        // Initialize colors
+        initColors();
 
         // Create and initialize ViewStyles
         _viewStyles = new HashMap<>();
-        ViewStyle viewStyle = new ViewStyle();
+        ViewStyle viewStyle = new ViewStyle(this);
         _viewStyles.put(View.class, viewStyle);
         initViewStyles();
+
+        // Create ButtonPainter
+        _buttonPainter = createButtonPainter();
     }
+
+    /**
+     * Initialize colors.
+     */
+    protected void initColors()  { }
 
     /**
      * Returns the background fill.
@@ -180,8 +190,12 @@ public class ViewTheme {
         textFieldStyle._align = Pos.CENTER_LEFT;
         textFieldStyle._padding = new Insets(2, 2, 2, 5);
         textFieldStyle._fill = getContentColor();
-        textFieldStyle._border = Border.createLineBorder(Color.LIGHTGRAY, 1);
+        textFieldStyle._border = Border.createLineBorder(Color.LIGHTGRAY, 1).copyForInsets(Insets.EMPTY);
         textFieldStyle._borderRadius = 3;
+
+        // ListArea
+        ViewStyle listAreaStyle = getViewStyleForClass(ListArea.class);
+        listAreaStyle._fill = getContentColor();
     }
 
     /**

@@ -2,6 +2,7 @@ package snap.view;
 import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.Border;
+import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Paint;
 import java.util.*;
@@ -23,11 +24,12 @@ public class ViewStyle implements Cloneable {
     protected Border _border;
     protected double _borderRadius;
     protected Font _font;
+    protected Color _textColor;
 
     /**
      * Constructor.
      */
-    public ViewStyle()
+    public ViewStyle(ViewTheme viewTheme)
     {
         _viewClass = View.class;
         _align = Pos.TOP_LEFT;
@@ -37,7 +39,8 @@ public class ViewStyle implements Cloneable {
         _fill = null;
         _border = null;
         _borderRadius = 0;
-        _font = Font.Arial11;
+        _font = null;
+        _textColor = viewTheme.getTextColor();
     }
 
     /**
@@ -79,6 +82,11 @@ public class ViewStyle implements Cloneable {
      * Returns the font.
      */
     public Font getFont()  { return _font; }
+
+    /**
+     * Returns the text color.
+     */
+    public Color getTextColor()  { return _textColor; }
 
     /**
      * Standard clone implementation.

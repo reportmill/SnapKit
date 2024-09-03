@@ -86,15 +86,9 @@ public class TextField extends ParentView {
     {
         super();
         _colCount = DEFAULT_COL_COUNT;
-        _textColor = DEFAULT_TEXT_COLOR;
         _fireActionOnFocusLost = DEFAULT_FIRE_ACTION_ON_FOCUS_LOST;
 
         // Override default properties
-        _align = Pos.CENTER_LEFT;
-        _padding = DEFAULT_TEXT_FIELD_PADDING;
-        _fill = DEFAULT_TEXT_FIELD_FILL;
-        _border = DEFAULT_TEXT_FIELD_BORDER;
-        _borderRadius = DEFAULT_TEXT_FIELD_BORDER_RADIUS;
         setFocusable(true);
         setFocusWhenPressed(true);
         setActionable(true);
@@ -107,6 +101,17 @@ public class TextField extends ParentView {
         _label.setPadding(0, 0, 0, 0);
         _label.setPickable(false);
         addChild(_label);
+    }
+
+    /**
+     * Override to support TextColor.
+     */
+    @Override
+    protected void initStyleProps()
+    {
+        super.initStyleProps();
+        ViewStyle viewStyle = ViewTheme.get().getViewStyleForClass(getClass());
+        _textColor = viewStyle.getTextColor();
     }
 
     /**

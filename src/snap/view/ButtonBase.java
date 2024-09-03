@@ -9,7 +9,6 @@ import snap.geom.Shape;
 import snap.gfx.*;
 import snap.props.PropSet;
 import snap.util.*;
-
 import java.util.Objects;
 
 /**
@@ -64,10 +63,6 @@ public class ButtonBase extends ParentView {
     public ButtonBase()
     {
         super();
-
-        // Set default properties
-        _align = DEFAULT_BUTTON_ALIGN;
-        _borderRadius = DEFAULT_BUTTON_BORDER_RADIUS;
         _showArea = DEFAULT_SHOW_AREA;
 
         // Config
@@ -75,7 +70,6 @@ public class ButtonBase extends ParentView {
         setActionable(true);
         enableEvents(MouseEvents);
         enableEvents(KeyPress);
-        themeChanged();
     }
 
     /**

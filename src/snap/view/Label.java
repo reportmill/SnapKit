@@ -51,8 +51,6 @@ public class Label extends ParentView {
     public Label()
     {
         super();
-        _align = DEFAULT_LABEL_ALIGN;
-        _spacing = DEFAULT_LABEL_SPACING;
     }
 
     /**

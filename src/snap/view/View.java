@@ -209,10 +209,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
     // Constants for property defaults
     private static final boolean DEFAULT_VERTICAL = false;
-    public static final Pos DEFAULT_ALIGN = Pos.TOP_LEFT;
-    public static final Insets DEFAULT_MARGIN = Insets.EMPTY;
-    public static final Insets DEFAULT_PADDING = Insets.EMPTY;
-    public static final double DEFAULT_SPACING = 0;
 
     // Convenience for common events
     public static final ViewEvent.Type Action = ViewEvent.Type.Action;
@@ -239,10 +235,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Set property defaults
         _scaleX = _scaleY = 1;
-        _align = DEFAULT_ALIGN;
-        _margin = DEFAULT_MARGIN;
-        _padding = DEFAULT_PADDING;
-        _spacing = DEFAULT_SPACING;
         _vertical = DEFAULT_VERTICAL;
         _minWidth = _minHeight = -1;
         _maxWidth = _maxHeight = -1;
@@ -254,6 +246,25 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         _paintable = true;
         _managed = true;
         _opacity = 1;
+
+        // Initialize style props
+        initStyleProps();
+    }
+
+    /**
+     * Initializes style props.
+     */
+    protected void initStyleProps()
+    {
+        ViewStyle viewStyle = ViewTheme.get().getViewStyleForClass(getClass());
+        _align = viewStyle.getAlign();
+        _margin = viewStyle.getMargin();
+        _padding = viewStyle.getPadding();
+        _spacing = viewStyle.getSpacing();
+        _fill = viewStyle.getFill();
+        _border = viewStyle.getBorder();
+        _borderRadius = viewStyle.getBorderRadius();
+        _font = viewStyle.getFont();
     }
 
     /**

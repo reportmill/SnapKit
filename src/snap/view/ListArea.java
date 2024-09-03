@@ -99,7 +99,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     public ListArea()
     {
         super();
-        _fill = DEFAULT_LIST_AREA_FILL;
+        //_fill = DEFAULT_LIST_AREA_FILL;
 
         // Events
         setActionable(true);
