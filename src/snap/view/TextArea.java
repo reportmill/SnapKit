@@ -95,9 +95,6 @@ public class TextArea extends View {
     public static final String SourceText_Prop = "SourceText";
     public static final String Selection_Prop = "Selection";
 
-    // Constants for property defaults
-    private static final Insets DEFAULT_TEXT_AREA_PADDING = new Insets(2);
-
     /**
      * Constructor.
      */
@@ -112,7 +109,6 @@ public class TextArea extends View {
     public TextArea(boolean isRichText)
     {
         super();
-        _padding = DEFAULT_TEXT_AREA_PADDING;
         setFocusPainted(false);
         enableEvents(Action);
 
@@ -128,7 +124,6 @@ public class TextArea extends View {
     public TextArea(TextBlock sourceText)
     {
         super();
-        _padding = DEFAULT_TEXT_AREA_PADDING;
         setFocusPainted(false);
         enableEvents(Action);
 
@@ -1717,19 +1712,6 @@ public class TextArea extends View {
      * Returns a mapped property name.
      */
     public String getValuePropName()  { return "Text"; }
-
-    /**
-     * Override to customize for this class.
-     */
-    @Override
-    protected void initProps(PropSet aPropSet)
-    {
-        // Do normal version
-        super.initProps(aPropSet);
-
-        // Reset defaults
-        aPropSet.getPropForName(Padding_Prop).setDefaultValue(DEFAULT_TEXT_AREA_PADDING);
-    }
 
     /**
      * Standard toString implementation.

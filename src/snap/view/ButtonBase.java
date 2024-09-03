@@ -53,9 +53,7 @@ public class ButtonBase extends ParentView {
     public static final int BUTTON_PRESSED = 2;
 
     // Constants for property defaults
-    private static final Pos DEFAULT_BUTTON_ALIGN = Pos.CENTER;
     private static final boolean DEFAULT_SHOW_AREA = true;
-    private static final double DEFAULT_BUTTON_BORDER_RADIUS = 4;
 
     /**
      * Constructor.
@@ -442,10 +440,6 @@ public class ButtonBase extends ParentView {
     {
         super.initProps(aPropSet);
 
-        // Override defaults
-        aPropSet.getPropForName(Align_Prop).setDefaultValue(DEFAULT_BUTTON_ALIGN);
-        aPropSet.getPropForName(BorderRadius_Prop).setDefaultValue(DEFAULT_BUTTON_BORDER_RADIUS);
-
         // ShowArea, Position
         aPropSet.addPropNamed(ShowArea_Prop, boolean.class);
         aPropSet.addPropNamed(Position_Prop, Pos.class);
@@ -495,7 +489,7 @@ public class ButtonBase extends ParentView {
 
         // Archive Text
         String text = getText();
-        if (text != null && text.length() > 0)
+        if (text != null && !text.isEmpty())
             e.add(Text_Prop, text);
 
         // Archive ImageName

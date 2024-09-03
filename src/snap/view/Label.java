@@ -41,10 +41,6 @@ public class Label extends ParentView {
     public static final String Graphic_Prop = "Graphic";
     public static final String GraphicAfter_Prop = "GraphicAfter";
 
-    // Constants for property defaults
-    private static final Pos DEFAULT_LABEL_ALIGN = Pos.CENTER_LEFT;
-    private static final double DEFAULT_LABEL_SPACING = 4;
-
     /**
      * Creates a label node.
      */
@@ -434,15 +430,10 @@ public class Label extends ParentView {
         // Do normal version
         super.initProps(aPropSet);
 
-        // Editable, Editing, Graphic, GraphicAfter
+        // Editable, Graphic, GraphicAfter
         aPropSet.addPropNamed(Editable_Prop, boolean.class);
-        aPropSet.addPropNamed(Editing_Prop, boolean.class).setSkipArchival(true);
         aPropSet.addPropNamed(Graphic_Prop, View.class);
         aPropSet.addPropNamed(GraphicAfter_Prop, View.class);
-
-        // Override defaults
-        aPropSet.getPropForName(Align_Prop).setDefaultValue(DEFAULT_LABEL_ALIGN);
-        aPropSet.getPropForName(Spacing_Prop).setDefaultValue(DEFAULT_LABEL_SPACING);
     }
 
     /**
@@ -454,9 +445,8 @@ public class Label extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // Editable, Editing, Graphic, GraphicAfter
+            // Editable, Graphic, GraphicAfter
             case Editable_Prop: return isEditable();
-            case Editing_Prop: return isEditing();
             case Graphic_Prop: return getGraphic();
             case GraphicAfter_Prop: return getGraphicAfter();
 

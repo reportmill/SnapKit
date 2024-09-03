@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.*;
 import snap.props.PropSet;
@@ -16,9 +15,6 @@ public class RadioButton extends ToggleButton {
     private Label  _radio;
 
     // Constants for overridden defaults
-    private static final Pos DEFAULT_RADIO_BUTTON_ALIGN = Pos.CENTER_LEFT;
-    private static final Insets DEFAULT_RADIO_BUTTON_PADDING = new Insets(2);
-    private static final int DEFAULT_RADIO_BUTTON_SPACING = 5;
     private static final boolean DEFAULT_RADIO_BUTTON_SHOW_AREA = false;
 
     /**
@@ -27,9 +23,6 @@ public class RadioButton extends ToggleButton {
     public RadioButton()
     {
         super();
-        _align = DEFAULT_RADIO_BUTTON_ALIGN;
-        _padding = DEFAULT_RADIO_BUTTON_PADDING;
-        _spacing = DEFAULT_RADIO_BUTTON_SPACING;
         _showArea = DEFAULT_RADIO_BUTTON_SHOW_AREA;
 
         // Create/add radio
@@ -113,10 +106,7 @@ public class RadioButton extends ToggleButton {
         // Do normal version
         super.initProps(aPropSet);
 
-        // Override Align, Padding, Spacing, ShowArea
-        aPropSet.getPropForName(Align_Prop).setDefaultValue(DEFAULT_RADIO_BUTTON_ALIGN);
-        aPropSet.getPropForName(Padding_Prop).setDefaultValue(DEFAULT_RADIO_BUTTON_PADDING);
-        aPropSet.getPropForName(Spacing_Prop).setDefaultValue(DEFAULT_RADIO_BUTTON_SPACING);
+        // Override ShowArea
         aPropSet.getPropForName(ShowArea_Prop).setDefaultValue(DEFAULT_RADIO_BUTTON_SHOW_AREA);
     }
 }

@@ -193,6 +193,10 @@ public class ViewTheme {
         textFieldStyle._border = Border.createLineBorder(Color.LIGHTGRAY, 1).copyForInsets(Insets.EMPTY);
         textFieldStyle._borderRadius = 3;
 
+        // TextArea
+        ViewStyle textAreaStyle = getViewStyleForClass(TextArea.class);
+        textAreaStyle._padding = new Insets(2);
+
         // ListArea
         ViewStyle listAreaStyle = getViewStyleForClass(ListArea.class);
         listAreaStyle._fill = getContentColor();

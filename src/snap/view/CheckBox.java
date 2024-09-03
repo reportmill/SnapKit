@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.*;
 import snap.props.PropSet;
@@ -16,9 +15,6 @@ public class CheckBox extends ToggleButton {
     private Label  _check;
     
     // Constants for overridden defaults
-    private static final Pos DEFAULT_CHECK_BOX_ALIGN = Pos.CENTER_LEFT;
-    private static final Insets DEFAULT_CHECK_BOX_PADDING = new Insets(2);
-    private static final int DEFAULT_CHECK_BOX_SPACING = 5;
     private static final boolean DEFAULT_CHECK_BOX_SHOW_AREA = false;
 
     /**
@@ -27,9 +23,6 @@ public class CheckBox extends ToggleButton {
     public CheckBox()
     {
         super();
-        _align = DEFAULT_CHECK_BOX_ALIGN;
-        _padding = DEFAULT_CHECK_BOX_PADDING;
-        _spacing = DEFAULT_CHECK_BOX_SPACING;
         _showArea = DEFAULT_CHECK_BOX_SHOW_AREA;
 
         // Create/add check
@@ -109,10 +102,7 @@ public class CheckBox extends ToggleButton {
         // Do normal version
         super.initProps(aPropSet);
 
-        // Override Align, Padding, Spacing, ShowArea
-        aPropSet.getPropForName(Align_Prop).setDefaultValue(DEFAULT_CHECK_BOX_ALIGN);
-        aPropSet.getPropForName(Padding_Prop).setDefaultValue(DEFAULT_CHECK_BOX_PADDING);
-        aPropSet.getPropForName(Spacing_Prop).setDefaultValue(DEFAULT_CHECK_BOX_SPACING);
+        // Override ShowArea
         aPropSet.getPropForName(ShowArea_Prop).setDefaultValue(DEFAULT_CHECK_BOX_SHOW_AREA);
     }
 }

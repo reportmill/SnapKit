@@ -10,7 +10,6 @@ import snap.geom.Rect;
 import snap.gfx.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
-import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -37,7 +36,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     private String  _itemKey;
     
     // The paint for alternating cells
-    private Paint  _altPaint = ALT_GRAY;
+    private Color _altRowColor;
     
     // Whether list distinguishes item under the mouse
     private boolean  _targeting;
@@ -75,13 +74,9 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     // Shared CellPadding default
     public static final Insets  CELL_PAD_DEFAULT = new Insets(2);
     
-    // Shared constants for colors
-    private static Paint ALT_GRAY = Color.get("#F8F8F8");
-    private static Paint SEL_FILL = ViewUtils.getSelectFill();
-    private static Paint TARG_FILL = ViewUtils.getTargetFill();
-    private static Color SEL_TEXT_COLOR = ViewUtils.getTextSelectedColor();
-    private static Color TARG_TEXT_COLOR = ViewUtils.getTextTargetedColor();
-    
+    // Constants for colors
+    private static Color ALT_ROW_COLOR = Color.get("#F8F8F8");
+
     // Constants for properties
     public static final String CellPadding_Prop = "CellPadding";
     public static final String Editable_Prop = "Editable";
@@ -90,16 +85,13 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     public static final String RowHeight_Prop = "RowHeight";
     public static final String Sel_Prop = PickList.Sel_Prop;
 
-    // Constants for property overrides
-    private static final Color DEFAULT_LIST_AREA_FILL = Color.WHITE;
-
     /**
      * Constructor.
      */
     public ListArea()
     {
         super();
-        //_fill = DEFAULT_LIST_AREA_FILL;
+        _altRowColor = ALT_ROW_COLOR;
 
         // Events
         setActionable(true);
@@ -389,12 +381,12 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the paint for alternating cells.
      */
-    public Paint getAltPaint()  { return _altPaint; }
+    public Paint getAltPaint()  { return _altRowColor; }
 
     /**
      * Sets the paint for alternating cells.
      */
-    public void setAltPaint(Paint aPaint)  { _altPaint = aPaint; }
+    public void setAltPaint(Paint aPaint)  { _altRowColor = aPaint; }
 
     /**
      * Returns whether list shows visual cue for item under the mouse.
@@ -758,19 +750,19 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     {
         // Handle Cell.Selected
         if (aCell.isSelected()) {
-            aCell.setFill(SEL_FILL);
-            aCell.setTextColor(SEL_TEXT_COLOR);
+            aCell.setFill(ViewUtils.getSelectFill());
+            aCell.setTextColor(ViewUtils.getTextTargetedColor());
         }
 
         // Handle ListArea.Targeting given cell
         else if (isTargeting() && aCell.getRow() == getTargetedIndex())  {
-            aCell.setFill(TARG_FILL);
-            aCell.setTextColor(TARG_TEXT_COLOR);
+            aCell.setFill(ViewUtils.getTargetFill());
+            aCell.setTextColor(ViewUtils.getTextTargetedColor());
         }
 
         // Handle alternate rows
         else if (aCell.getRow() % 2 == 0) {
-            aCell.setFill(_altPaint);
+            aCell.setFill(_altRowColor);
             aCell.setTextColor(Color.BLACK);
         }
 
@@ -1031,19 +1023,6 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     public String getValuePropName()
     {
         return getBindingForName(SelIndex_Prop) != null ? SelIndex_Prop : SelItem_Prop;
-    }
-
-    /**
-     * Override to customize for this class.
-     */
-    @Override
-    protected void initProps(PropSet aPropSet)
-    {
-        // Do normal version
-        super.initProps(aPropSet);
-
-        // Reset defaults
-        aPropSet.getPropForName(Fill_Prop).setDefaultValue(DEFAULT_LIST_AREA_FILL);
     }
 
     /**
