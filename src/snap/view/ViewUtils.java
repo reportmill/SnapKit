@@ -66,11 +66,6 @@ public class ViewUtils {
     public static Paint getBackFill()  { return ViewTheme.get().getBackFill(); }
 
     /**
-     * Returns the background fill.
-     */
-    public static Paint getBackDarkFill()  { return ViewTheme.get().getGutterFill(); }
-
-    /**
      * Returns the selection color.
      */
     public static Paint getSelectFill()  { return ViewTheme.get().getSelectedFill(); }

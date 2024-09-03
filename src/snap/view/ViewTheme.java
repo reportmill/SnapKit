@@ -14,7 +14,7 @@ public class ViewTheme {
     protected Color BACK_FILL = new Color("#E9E8EA");
 
     // Far background fill, like gutters of scroll bar or tabview buttons
-    protected Color GUTTER_FILL = new Color("#C0"); // Color.LIGHTGRAY
+    protected Color GUTTER_FILL = new Color("#E0"); // Color.LIGHTGRAY
 
     // Color for content like text fields, text areas, list areas
     protected Color CONTENT_COLOR = Color.WHITE;
@@ -59,7 +59,7 @@ public class ViewTheme {
     private Map<Class<?>, ViewStyle> _viewStyles = new HashMap<>();
 
     // The current theme
-    private static ViewTheme  _theme = getClassic();
+    private static ViewTheme  _theme = getLight();
 
     /**
      * Constructor.
@@ -228,6 +228,11 @@ public class ViewTheme {
      * Returns the current theme.
      */
     public static ViewTheme get()  { return _theme; }
+
+    /**
+     * Returns the light theme.
+     */
+    public static ViewTheme getLight()  { return ViewThemes.getLight(); }
 
     /**
      * Returns the classic theme.

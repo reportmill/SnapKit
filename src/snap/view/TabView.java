@@ -38,12 +38,6 @@ public class TabView extends ParentView implements Selectable<Tab> {
     public static final String Classic_Prop = "Classic";
     public static final String AnimateTabChange_Prop = "AnimateTabChange";
 
-    // The default TabBar fill
-    private static Color c1 = new Color("#d6d6d6");
-    private static Color c2 = new Color("#dddddd");
-    private static GradientPaint.Stop[] SHELF_FILL_STOPS = GradientPaint.getStops(0, c1,.2, c2,1,c2);
-    private static Paint CLASSIC_TAB_BAR_FILL = new GradientPaint(.5,0,.5,1, SHELF_FILL_STOPS);
-
     // Constants
     private static final Insets CLASSIC_TAB_BAR_INSETS = new Insets(5, 5, 0, 5);
     private static final double CLASSIC_TAB_BAR_SPACING = 2;
@@ -62,7 +56,7 @@ public class TabView extends ParentView implements Selectable<Tab> {
 
         // Create ToolBar
         _tabBar = new TabBar();
-        _tabBar.setFill(CLASSIC_TAB_BAR_FILL);
+        _tabBar.setFill(ViewTheme.get().getGutterFill());
         _tabBar.setPadding(CLASSIC_TAB_BAR_INSETS);
         _tabBar.getTabsBox().setSpacing(CLASSIC_TAB_BAR_SPACING);
         _tabBar.addPropChangeListener(pc -> tabBarDidPropChange(pc));
@@ -149,14 +143,12 @@ public class TabView extends ParentView implements Selectable<Tab> {
 
         // Handle configure classic
         if (aValue) {
-            _tabBar.setFill(CLASSIC_TAB_BAR_FILL);
             _tabBar.setPadding(CLASSIC_TAB_BAR_INSETS);
             _tabBar.getTabsBox().setSpacing(CLASSIC_TAB_BAR_SPACING);
         }
 
         // Handle configure non-classic
         else {
-            _tabBar.setFill(null);
             _tabBar.setPadding(TabBar.DEFAULT_PADDING);
             _tabBar.getTabsBox().setSpacing(TabBar.DEFAULT_SPACING);
         }
@@ -365,9 +357,16 @@ public class TabView extends ParentView implements Selectable<Tab> {
     protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
     {
         super.themeChanged(oldTheme, newTheme);
-        Paint tabBarFill = ViewTheme.get().getClass().getSimpleName().equals("ViewTheme") ? CLASSIC_TAB_BAR_FILL : ViewUtils.getBackDarkFill();
-        _tabBar.setFill(tabBarFill);
+        _tabBar.setFill(ViewTheme.get().getGutterFill());
         _contentBox.setFill(ViewUtils.getBackFill());
+
+        if (ViewTheme.get() == ViewTheme.getClassic() && isClassic()) {
+            Color c1 = new Color("#d6d6d6");
+            Color c2 = new Color("#dddddd");
+            GradientPaint.Stop[] SHELF_FILL_STOPS = GradientPaint.getStops(0, c1,.2, c2,1,c2);
+            Paint CLASSIC_TAB_BAR_FILL = new GradientPaint(.5,0,.5,1, SHELF_FILL_STOPS);
+            _tabBar.setFill(CLASSIC_TAB_BAR_FILL);
+        }
     }
 
     /**

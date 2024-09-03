@@ -12,13 +12,13 @@ public class DevPaneGraphics extends ViewOwner {
     private DevPane  _devPane;
 
     // The Themes
-    private static final String STANDARD_THEME = "Standard";
-    private static final String STANDARD_BLUE_THEME = "StandardBlue";
     private static final String LIGHT_THEME = "Light";
     private static final String DARK_THEME = "Dark";
+    private static final String LIGHT_BLUE_THEME = "LightBlue";
+    private static final String CLASSIC_THEME = "Classic";
     private static final String BLACK_AND_WHITE_THEME = "BlackAndWhite";
     private static final String[] ALL_THEMES = {
-            STANDARD_THEME, STANDARD_BLUE_THEME, LIGHT_THEME, DARK_THEME, BLACK_AND_WHITE_THEME
+            LIGHT_THEME, DARK_THEME, LIGHT_BLUE_THEME, CLASSIC_THEME, BLACK_AND_WHITE_THEME
     };
 
     /**
@@ -39,7 +39,7 @@ public class DevPaneGraphics extends ViewOwner {
         // Init ThemesListView
         ListView<String> themesListView = getView("ThemesListView", ListView.class);
         themesListView.setItems(ALL_THEMES);
-        themesListView.setSelItem(STANDARD_THEME);
+        themesListView.setSelItem(CLASSIC_THEME);
         themesListView.getListArea().setCellPadding(new Insets(4, 8, 4, 8));
 
         // Init RenderersListView
@@ -60,7 +60,7 @@ public class DevPaneGraphics extends ViewOwner {
 
         // Update ThemesListView
         String themeName = ViewTheme.get().getClass().getSimpleName().replace("Theme", "");
-        if (themeName.equals("View")) themeName = STANDARD_THEME;
+        if (themeName.equals("View")) themeName = CLASSIC_THEME;
         setViewSelItem("ThemesListView", themeName);
 
         // Update RenderersListView
