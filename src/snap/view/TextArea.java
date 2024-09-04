@@ -562,6 +562,7 @@ public class TextArea extends View {
     /**
      * Returns the color of the current selection or cursor.
      */
+    @Override
     public Color getTextColor()
     {
         TextStyle selStyle = getSelStyle();
@@ -571,6 +572,7 @@ public class TextArea extends View {
     /**
      * Sets the color of the current selection or cursor.
      */
+    @Override
     public void setTextColor(Color aColor)
     {
         if (isRichText())

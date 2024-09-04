@@ -135,6 +135,7 @@ public class Label extends ParentView {
     /**
      * Returns the text color.
      */
+    @Override
     public Color getTextColor()
     {
         return _stringView != null ? _stringView.getTextColor() : null;
@@ -143,6 +144,7 @@ public class Label extends ParentView {
     /**
      * Sets the text color.
      */
+    @Override
     public void setTextColor(Color aColor)
     {
         getStringView().setTextColor(aColor);

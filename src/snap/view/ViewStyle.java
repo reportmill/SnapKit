@@ -104,7 +104,7 @@ public class ViewStyle implements Cloneable {
             case View.Border_Prop: return _border;
             case View.BorderRadius_Prop: return _borderRadius;
             case View.Font_Prop: return _font;
-            case TextField.TextColor_Prop: return _textColor;
+            case View.TextColor_Prop: return _textColor;
             default: System.out.println("ViewStyle.getPropValue: Unknown property name: " + propName); return null;
         }
     }
@@ -141,7 +141,7 @@ public class ViewStyle implements Cloneable {
             case View.Border_Prop: return _border;
             case View.BorderRadius_Prop: return _borderRadius;
             case View.Font_Prop: return _font;
-            case TextField.TextColor_Prop: return _textColor;
+            case View.TextColor_Prop: return _textColor;
         }
 
         // Get prop and return DefaultValue
@@ -166,8 +166,8 @@ public class ViewStyle implements Cloneable {
             setPropDefaultForView(aView, propName, oldViewStyle);
 
         // Handle TextColor
-        if (aView.getPropForName(TextField.TextColor_Prop) != null)
-            setPropDefaultForView(aView, TextField.TextColor_Prop, oldViewStyle);
+        if (aView.getPropForName(View.TextColor_Prop) != null)
+            setPropDefaultForView(aView, View.TextColor_Prop, oldViewStyle);
     }
 
     /**

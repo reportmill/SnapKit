@@ -62,19 +62,11 @@ public class TextField extends ParentView {
     public static final String Edited_Prop = "Edited";
     public static final String PromptText_Prop = "PromptText";
     public static final String Sel_Prop = "Selection";
-    public static final String TextColor_Prop = "TextColor";
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
 
     // Constants for property defaults
     private static final int DEFAULT_COL_COUNT = 12;
-    private static final Color DEFAULT_TEXT_COLOR = Color.BLACK;
     private static final boolean DEFAULT_FIRE_ACTION_ON_FOCUS_LOST = true;
-
-    // Constants for property overrides defaults
-    private static final Insets DEFAULT_TEXT_FIELD_PADDING = new Insets(2, 2, 2, 5);
-    private static Color DEFAULT_TEXT_FIELD_FILL = Color.WHITE;
-    private static Border DEFAULT_TEXT_FIELD_BORDER = Border.createLineBorder(Color.LIGHTGRAY, 1).copyForInsets(Insets.EMPTY);
-    private static double DEFAULT_TEXT_FIELD_BORDER_RADIUS = 3;
 
     // The color of the border when focused
     static Color SELECTION_COLOR = new Color(181, 214, 254, 255);
@@ -117,11 +109,13 @@ public class TextField extends ParentView {
     /**
      * Returns the text color.
      */
+    @Override
     public Color getTextColor()  { return _textColor; }
 
     /**
      * Sets the text color.
      */
+    @Override
     public void setTextColor(Color aPaint)
     {
         if (Objects.equals(aPaint, _textColor)) return;
@@ -1154,18 +1148,11 @@ public class TextField extends ParentView {
         // Do normal version
         super.initProps(aPropSet);
 
-        // Add props: ColCount, Edited, PromptText, Sel, TextColor, FireActionOnFocusLost
+        // Add props: ColCount, Edited, PromptText, Sel, FireActionOnFocusLost
         aPropSet.addPropNamed(ColCount_Prop, int.class, DEFAULT_COL_COUNT);
         aPropSet.addPropNamed(Edited_Prop, boolean.class).setSkipArchival(true);
         aPropSet.addPropNamed(PromptText_Prop, String.class);
-        aPropSet.addPropNamed(TextColor_Prop, Color.class, DEFAULT_TEXT_COLOR);
         aPropSet.addPropNamed(FireActionOnFocusLost_Prop, boolean.class, true);
-
-        // Override defaults: Padding, Fill, Border, BorderRadius
-        aPropSet.getPropForName(Padding_Prop).setDefaultValue(DEFAULT_TEXT_FIELD_PADDING);
-        aPropSet.getPropForName(Fill_Prop).setDefaultValue(DEFAULT_TEXT_FIELD_FILL);
-        aPropSet.getPropForName(Border_Prop).setDefaultValue(DEFAULT_TEXT_FIELD_BORDER);
-        aPropSet.getPropForName(BorderRadius_Prop).setDefaultValue(DEFAULT_TEXT_FIELD_BORDER_RADIUS);
     }
 
     /**
@@ -1177,11 +1164,10 @@ public class TextField extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // ColCount, PromptText, TextColor, FireActionOnFocusLost
+            // ColCount, PromptText, FireActionOnFocusLost
             case ColCount_Prop: return getColCount();
             case Edited_Prop: return isEdited();
             case PromptText_Prop: return getPromptText();
-            case TextColor_Prop: return getTextColor();
             case FireActionOnFocusLost_Prop: return isFireActionOnFocusLost();
 
             // Do normal version
@@ -1198,10 +1184,9 @@ public class TextField extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // ColCount, PromptText, TextColor, FireActionOnFocusLost
+            // ColCount, PromptText, FireActionOnFocusLost
             case ColCount_Prop: setColCount(Convert.intValue(aValue)); break;
             case PromptText_Prop: setPromptText(Convert.stringValue(aValue)); break;
-            case TextColor_Prop: setTextColor(Color.get(aValue)); break;
             case FireActionOnFocusLost_Prop: setFireActionOnFocusLost(Convert.boolValue(aValue)); break;
 
             // Do normal version

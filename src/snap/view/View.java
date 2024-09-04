@@ -189,23 +189,26 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public static final String Focused_Prop = "Focused";
     public static final String Focusable_Prop = "Focusable";
     public static final String FocusWhenPressed_Prop = "FocusWhenPressed";
-    public static final String Border_Prop = "Border";
-    public static final String BorderRadius_Prop = "BorderRadius";
     public static final String Clip_Prop = "Clip";
     public static final String Cursor_Prop = "Cursor";
     public static final String Effect_Prop = "Effect";
-    public static final String Fill_Prop = "Fill";
-    public static final String Font_Prop = "Font";
-    public static final String Align_Prop = "Align";
     public static final String Opacity_Prop = "Opacity";
-    public static final String Margin_Prop = "Margin";
-    public static final String Padding_Prop = "Padding";
-    public static final String Spacing_Prop = "Spacing";
     public static final String Managed_Prop = "Managed";
     public static final String Parent_Prop = "Parent";
     public static final String Showing_Prop = "Showing";
     public static final String Text_Prop = "Text";
     public static final String ToolTip_Prop = "ToolTip";
+
+    // Constants for special style properties
+    public static final String Align_Prop = "Align";
+    public static final String Margin_Prop = "Margin";
+    public static final String Padding_Prop = "Padding";
+    public static final String Spacing_Prop = "Spacing";
+    public static final String Fill_Prop = "Fill";
+    public static final String Border_Prop = "Border";
+    public static final String BorderRadius_Prop = "BorderRadius";
+    public static final String Font_Prop = "Font";
+    public static final String TextColor_Prop = "TextColor";
 
     // Constants for property defaults
     private static final boolean DEFAULT_VERTICAL = false;
@@ -2531,6 +2534,16 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setText(String aString)  { }
 
     /**
+     * Returns the text color.
+     */
+    public Color getTextColor()  { return ViewUtils.getTextColor(); }
+
+    /**
+     * Sets the text color.
+     */
+    public void setTextColor(Color aColor)  { }
+
+    /**
      * Returns the event adapter for view.
      */
     public EventAdapter getEventAdapter()
@@ -2823,19 +2836,24 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         aPropSet.addPropNamed(TransX_Prop, double.class, 0d);
         aPropSet.addPropNamed(TransY_Prop, double.class, 0d);
 
-        // Align, Margin, Padding, Spacing, Vertical, Managed
+        // Style: Align, Margin, Padding, Spacing, Fill, Border, BorderRadius, Font, TextColor
         aPropSet.addPropNamed(Align_Prop, Pos.class);
         aPropSet.addPropNamed(Margin_Prop, Insets.class);
         aPropSet.addPropNamed(Padding_Prop, Insets.class);
         aPropSet.addPropNamed(Spacing_Prop, double.class);
-        aPropSet.addPropNamed(Vertical_Prop, boolean.class);
-        aPropSet.addPropNamed(Managed_Prop, boolean.class);
+        aPropSet.addPropNamed(Border_Prop, Border.class);
+        aPropSet.addPropNamed(BorderRadius_Prop, double.class);
+        aPropSet.addPropNamed(Fill_Prop, Paint.class);
+        aPropSet.addPropNamed(Font_Prop, Font.class, null);
+        aPropSet.addPropNamed(TextColor_Prop, Color.class);
 
-        // LeanX, LeanY, GrowWidth, GrowHeight
+        // LeanX, LeanY, GrowWidth, GrowHeight, Vertical, Managed
         aPropSet.addPropNamed(LeanX_Prop, HPos.class, null);
         aPropSet.addPropNamed(LeanY_Prop, VPos.class, null);
         aPropSet.addPropNamed(GrowWidth_Prop, boolean.class, false);
         aPropSet.addPropNamed(GrowHeight_Prop, boolean.class, false);
+        aPropSet.addPropNamed(Vertical_Prop, boolean.class);
+        aPropSet.addPropNamed(Managed_Prop, boolean.class);
 
         // MinWidth, MinHeight, MaxWidth, MaxHeight, PrefWidth, PrefHeight
         aPropSet.addPropNamed(MinWidth_Prop, double.class, 0d);
@@ -2845,15 +2863,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         aPropSet.addPropNamed(PrefWidth_Prop, double.class, 0d);
         aPropSet.addPropNamed(PrefHeight_Prop, double.class, 0d);
 
-        // Border, BorderRadius, Fill, Effect, Opacity
-        aPropSet.addPropNamed(Border_Prop, Border.class, null);
-        aPropSet.addPropNamed(BorderRadius_Prop, double.class, 0d);
-        aPropSet.addPropNamed(Fill_Prop, Paint.class, null);
+        // Effect, Opacity
         aPropSet.addPropNamed(Effect_Prop, Effect.class, null);
         aPropSet.addPropNamed(Opacity_Prop, double.class, 1d);
 
-        // Font, Text, ToolTip, Cursor, Clip
-        aPropSet.addPropNamed(Font_Prop, Font.class, null);
+        // Text, ToolTip, Cursor, Clip
         aPropSet.addPropNamed(Text_Prop, String.class, null).setSkipArchival(true);
         aPropSet.addPropNamed(ToolTip_Prop, String.class, null);
         aPropSet.addPropNamed(Cursor_Prop, Cursor.class, null).setSkipArchival(true);
@@ -2873,6 +2887,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Parent, Showing
         aPropSet.addPropNamed(Parent_Prop, ParentView.class, null).setSkipArchival(true);
         aPropSet.addPropNamed(Showing_Prop, boolean.class, false).setSkipArchival(true);
+
+        // Set style defaults from ViewTheme
+        ViewStyle viewStyle = ViewTheme.get().getViewStyleForClass(getClass());
+        aPropSet.getPropForName(Align_Prop).setDefaultValue(viewStyle.getAlign());
+        aPropSet.getPropForName(Margin_Prop).setDefaultValue(viewStyle.getMargin());
+        aPropSet.getPropForName(Padding_Prop).setDefaultValue(viewStyle.getPadding());
+        aPropSet.getPropForName(Spacing_Prop).setDefaultValue(viewStyle.getSpacing());
+        aPropSet.getPropForName(Fill_Prop).setDefaultValue(viewStyle.getFill());
+        aPropSet.getPropForName(Border_Prop).setDefaultValue(viewStyle.getBorder());
+        aPropSet.getPropForName(BorderRadius_Prop).setDefaultValue(viewStyle.getBorderRadius());
+        aPropSet.getPropForName(TextColor_Prop).setDefaultValue(viewStyle.getTextColor());
     }
 
     /**
@@ -2903,19 +2928,24 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case TransX_Prop: return getTransX();
             case TransY_Prop: return getTransY();
 
-            // Align, Margin, Padding, Spacing, Vertical
+            // Style: Align, Margin, Padding, Spacing, Fill, Border, BorderRadius, Font, TextColor
             case Align_Prop: return getAlign();
             case Margin_Prop: return getMargin();
             case Padding_Prop: return getPadding();
             case Spacing_Prop: return getSpacing();
-            case Vertical_Prop: return isVertical();
-            case Managed_Prop: return isManaged();
+            case Fill_Prop: return getFill();
+            case Border_Prop: return getBorder();
+            case BorderRadius_Prop: return getBorderRadius();
+            case Font_Prop: return getFont();
+            case TextColor_Prop: return getTextColor();
 
-            // LeanX, LeanY, GrowWidth, GrowHeight
+            // LeanX, LeanY, GrowWidth, GrowHeight, Vertical, Managed
             case LeanX_Prop: return getLeanX();
             case LeanY_Prop: return getLeanY();
             case GrowWidth_Prop: return isGrowWidth();
             case GrowHeight_Prop: return isGrowHeight();
+            case Vertical_Prop: return isVertical();
+            case Managed_Prop: return isManaged();
 
             // MinWidth, MinHeight, MaxWidth, MaxHeight, PrefWidth, PrefHeight
             case View.MinWidth_Prop: return getMinWidth();
@@ -2925,15 +2955,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case View.PrefWidth_Prop: return getPrefWidth();
             case View.PrefHeight_Prop: return getPrefHeight();
 
-            // Border, BorderRadius, Fill, Effect, Opacity
-            case Border_Prop: return getBorder();
-            case BorderRadius_Prop: return getBorderRadius();
-            case Fill_Prop: return getFill();
+            // Effect, Opacity
             case Effect_Prop: return getEffect();
             case Opacity_Prop: return getOpacity();
 
-            // Font, Text, ToolTip, Cursor, Clip
-            case Font_Prop: return getFont();
+            // Text, ToolTip, Cursor, Clip
             case Text_Prop: return getText();
             case ToolTip_Prop: return getToolTip();
             case Cursor_Prop: return getCursor();
@@ -2994,19 +3020,24 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case TransX_Prop: setTransX(Convert.doubleValue(aValue)); break;
             case TransY_Prop: setTransY(Convert.doubleValue(aValue)); break;
 
-            // Align, Margin, Padding, Spacing, Vertical
+            // Style: Align, Margin, Padding, Spacing, Fill, Border, BorderRadius, Font, TextColor
             case Align_Prop: setAlign(Pos.of(aValue)); break;
             case Margin_Prop: setMargin(Insets.of(aValue)); break;
             case Padding_Prop: setPadding(Insets.of(aValue)); break;
             case Spacing_Prop: setSpacing(Convert.doubleValue(aValue)); break;
-            case Vertical_Prop: setVertical(Convert.boolValue(aValue)); break;
-            case Managed_Prop: setManaged(Convert.boolValue(aValue)); break;
+            case Border_Prop: setBorder(Border.of(aValue)); break;
+            case BorderRadius_Prop: setBorderRadius(Convert.doubleValue(aValue)); break;
+            case Fill_Prop: setFill(Paint.of(aValue)); break;
+            case Font_Prop: setFont(Font.of(aValue)); break;
+            case TextColor_Prop: setTextColor(Color.get(aValue)); break;
 
-            // Alignment: LeanX, LeanY, GrowWidth, GrowHeight
+            // Alignment: LeanX, LeanY, GrowWidth, GrowHeight, Vertical, Managed
             case LeanX_Prop: setLeanX(HPos.of(aValue)); break;
             case LeanY_Prop: setLeanY(VPos.of(aValue)); break;
             case GrowWidth_Prop: setGrowWidth(Convert.boolValue(aValue)); break;
             case GrowHeight_Prop: setGrowHeight(Convert.boolValue(aValue)); break;
+            case Vertical_Prop: setVertical(Convert.boolValue(aValue)); break;
+            case Managed_Prop: setManaged(Convert.boolValue(aValue)); break;
 
             // MinWidth, MinHeight, MaxWidth, MaxHeight, PrefWidth, PrefHeight
             case MinWidth_Prop: setMinWidth(Convert.doubleValue(aValue)); break;
@@ -3016,15 +3047,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case PrefWidth_Prop: setPrefWidth(Convert.doubleValue(aValue)); break;
             case PrefHeight_Prop: setPrefHeight(Convert.doubleValue(aValue)); break;
 
-            // Border, BorderRadius, Fill, Effect, Opacity
-            case Border_Prop: setBorder(Border.of(aValue)); break;
-            case BorderRadius_Prop: setBorderRadius(Convert.doubleValue(aValue)); break;
-            case Fill_Prop: setFill(Paint.of(aValue)); break;
+            // Effect, Opacity
             case Effect_Prop: setEffect(Effect.of(aValue)); break;
             case Opacity_Prop: setOpacity(Convert.doubleValue(aValue)); break;
 
             // Font, Text, ToolTip, Cursor, Clip
-            case Font_Prop: setFont(Font.of(aValue)); break;
             case Text_Prop: setText(Convert.stringValue(aValue)); break;
             case ToolTip_Prop: setToolTip(Convert.stringValue(aValue)); break;
             case Cursor_Prop: setCursor((Cursor) aValue); break;

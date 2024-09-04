@@ -748,7 +748,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         // Handle Cell.Selected
         if (aCell.isSelected()) {
             aCell.setFill(ViewUtils.getSelectFill());
-            aCell.setTextColor(ViewUtils.getTextTargetedColor());
+            aCell.setTextColor(ViewUtils.getTextSelectedColor());
         }
 
         // Handle ListArea.Targeting given cell

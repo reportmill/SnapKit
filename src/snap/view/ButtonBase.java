@@ -134,11 +134,13 @@ public class ButtonBase extends ParentView {
     /**
      * Returns the text color.
      */
+    @Override
     public Color getTextColor()  { return getLabel().getTextColor(); }
 
     /**
      * Sets the text color.
      */
+    @Override
     public void setTextColor(Color aColor)  { getLabel().setTextColor(aColor); }
 
     /**

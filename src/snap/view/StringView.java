@@ -104,6 +104,7 @@ public class StringView extends View implements Cloneable {
     /**
      * Returns the text color.
      */
+    @Override
     public Color getTextColor()
     {
         return _styledString.getTextColor();
@@ -112,6 +113,7 @@ public class StringView extends View implements Cloneable {
     /**
      * Sets the text color.
      */
+    @Override
     public void setTextColor(Color aColor)
     {
         if (Objects.equals(aColor, getTextColor())) return;
