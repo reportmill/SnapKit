@@ -1585,19 +1585,6 @@ public class TextArea extends View {
     }
 
     /**
-     * Override to update font.
-     */
-    protected void setParent(ParentView aPar)
-    {
-        // Do normal version
-        super.setParent(aPar);
-
-        // If PlainText, update to parent (should probably watch parent Font_Prop change as well)
-        if (!isRichText() && !isFontSet() && !getFont().equals(getSelStyle().getFont()))
-            setSelStyleValue(TextStyle.Font_Prop, getFont());
-    }
-
-    /**
      * Override to check caret animation and scrollSelToVisible when showing.
      */
     @Override
