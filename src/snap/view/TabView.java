@@ -56,7 +56,6 @@ public class TabView extends ParentView implements Selectable<Tab> {
 
         // Create ToolBar
         _tabBar = new TabBar();
-        _tabBar.setFill(ViewTheme.get().getGutterFill());
         _tabBar.setPadding(CLASSIC_TAB_BAR_INSETS);
         _tabBar.getTabsBox().setSpacing(CLASSIC_TAB_BAR_SPACING);
         _tabBar.addPropChangeListener(pc -> tabBarDidPropChange(pc));
@@ -357,9 +356,9 @@ public class TabView extends ParentView implements Selectable<Tab> {
     protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
     {
         super.themeChanged(oldTheme, newTheme);
-        _tabBar.setFill(ViewTheme.get().getGutterFill());
         _contentBox.setFill(ViewUtils.getBackFill());
 
+        _tabBar.setFill(null);
         if (ViewTheme.get() == ViewTheme.getClassic() && isClassic()) {
             Color c1 = new Color("#d6d6d6");
             Color c2 = new Color("#dddddd");

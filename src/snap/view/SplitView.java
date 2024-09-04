@@ -3,10 +3,8 @@
  */
 package snap.view;
 import java.util.*;
-import snap.gfx.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
-import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -36,10 +34,6 @@ public class SplitView extends ParentView implements ViewHost {
     // Constants for properties
     public static final String DividerSpan_Prop = "DividerSpan";
     
-    // Constants for internal use
-    private static final Border DEFAULT_SPLIT_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
-    private static final int DEFAULT_DIVIDER_SPAN = Divider.DEFAULT_SPAN;
-
     // Constant for props that all SplitView dividers share with prototype returned by getDivider()
     private static String[] SHARED_DIVIDER_PROPS = { Fill_Prop, Border_Prop, Paintable_Prop, Divider.Span_Prop, Divider.ClickSpan_Prop };
 
@@ -50,8 +44,7 @@ public class SplitView extends ParentView implements ViewHost {
     public SplitView()
     {
         super();
-        _border = DEFAULT_SPLIT_VIEW_BORDER;
-        _divSpan = DEFAULT_DIVIDER_SPAN;
+        _divSpan = Divider.DEFAULT_SPAN;
         setClipToBounds(true);
         addEventFilter(e -> processDividerMouseEvent(e), MouseMove, MousePress, MouseDrag, MouseRelease);
     }
@@ -531,19 +524,6 @@ public class SplitView extends ParentView implements ViewHost {
         if (isVertical())
             return aView.isMinHeightSet() && aView.isMaxHeightSet() && aView.getMinHeight() == aView.getMaxHeight();
         return aView.isMinWidthSet() && aView.isMaxWidthSet() && aView.getMinWidth() == aView.getMaxWidth();
-    }
-
-    /**
-     * Override to customize for this class.
-     */
-    @Override
-    protected void initProps(PropSet aPropSet)
-    {
-        // Do normal version
-        super.initProps(aPropSet);
-
-        // Reset defaults
-        aPropSet.getPropForName(Border_Prop).setDefaultValue(DEFAULT_SPLIT_VIEW_BORDER);
     }
 
     /**

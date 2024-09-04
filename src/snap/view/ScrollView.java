@@ -4,9 +4,7 @@
 package snap.view;
 import snap.geom.Insets;
 import snap.geom.Size;
-import snap.gfx.*;
 import snap.props.PropChange;
-import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -27,7 +25,6 @@ public class ScrollView extends ParentView implements ViewHost {
     private int  _barSize = 16;
     
     // Constants
-    public static final Border DEFAULT_SCROLL_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
     public static final String ShowHBar_Prop = "ShowHBar";
     public static final String ShowVBar_Prop = "ShowVBar";
     public static final String HBarShowing_Prop = "HBarShowing";
@@ -40,7 +37,6 @@ public class ScrollView extends ParentView implements ViewHost {
     public ScrollView()
     {
         super();
-        _border = DEFAULT_SCROLL_VIEW_BORDER;
 
         // Create Scroller and add listeners for scroll changes
         _scroller = new Scroller();
@@ -438,19 +434,6 @@ public class ScrollView extends ParentView implements ViewHost {
                 _scroller.setScrollRatioX(val);
             else _scroller.setScrollRatioY(val);
         }
-    }
-
-    /**
-     * Override to customize for this class.
-     */
-    @Override
-    protected void initProps(PropSet aPropSet)
-    {
-        // Do normal version
-        super.initProps(aPropSet);
-
-        // Reset defaults
-        aPropSet.getPropForName(Border_Prop).setDefaultValue(DEFAULT_SCROLL_VIEW_BORDER);
     }
 
     /**

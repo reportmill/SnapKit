@@ -52,6 +52,9 @@ public class ViewTheme {
     // Button border pressed color
     protected Color BUTTON_BORDER_PRESSED_COLOR = new Color("#87AFDA");
 
+    // Border for distinct content areas like Scrollview, Splitview, TableView, TreeView
+    protected Border CONTENT_BORDER = Border.createLineBorder(Color.get("#C0"),1);
+
     // The ButtonPainter
     private ButtonPainter  _buttonPainter;
 
@@ -157,6 +160,11 @@ public class ViewTheme {
     public Color getButtonBorderPressedColor()  { return BUTTON_BORDER_PRESSED_COLOR; }
 
     /**
+     * Returns the border for distinct content areas like Scrollview, Splitview, TableView, TreeView.
+     */
+    public Border getContentBorder()  { return CONTENT_BORDER; }
+
+    /**
      * Returns the button painter.
      */
     public ButtonPainter getButtonPainter()  { return _buttonPainter; }
@@ -173,41 +181,46 @@ public class ViewTheme {
     {
         // Label
         ViewStyle labelStyle = getViewStyleForClass(Label.class);
-        labelStyle._align = Pos.CENTER_LEFT;
-        labelStyle._spacing = 4;
+        labelStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
+        labelStyle.setPropValue(View.Spacing_Prop, 4);
 
         // Button
         ViewStyle buttonStyle = getViewStyleForClass(ButtonBase.class);
-        buttonStyle._align = Pos.CENTER;
-        buttonStyle._borderRadius = 4;
+        buttonStyle.setPropValue(View.Align_Prop, Pos.CENTER);
+        buttonStyle.setPropValue(View.BorderRadius_Prop, 4);
 
         // RadioButton
         ViewStyle radioButtonStyle = getViewStyleForClass(RadioButton.class);
-        radioButtonStyle._align = Pos.CENTER_LEFT;
-        radioButtonStyle._padding = new Insets(2);
-        radioButtonStyle._spacing = 5;
+        radioButtonStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
+        radioButtonStyle.setPropValue(View.Padding_Prop, new Insets(2));
+        radioButtonStyle.setPropValue(View.Spacing_Prop, 5);
 
         // CheckBox
         ViewStyle checkBoxStyle = getViewStyleForClass(CheckBox.class);
-        checkBoxStyle._align = Pos.CENTER_LEFT;
-        checkBoxStyle._padding = new Insets(2);
-        checkBoxStyle._spacing = 5;
+        checkBoxStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
+        checkBoxStyle.setPropValue(View.Padding_Prop, new Insets(2));
+        checkBoxStyle.setPropValue(View.Spacing_Prop, 5);
 
         // TextField
         ViewStyle textFieldStyle = getViewStyleForClass(TextField.class);
-        textFieldStyle._align = Pos.CENTER_LEFT;
-        textFieldStyle._padding = new Insets(2, 2, 2, 5);
-        textFieldStyle._fill = getContentColor();
-        textFieldStyle._border = Border.createLineBorder(Color.LIGHTGRAY, 1).copyForInsets(Insets.EMPTY);
-        textFieldStyle._borderRadius = 3;
+        textFieldStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
+        textFieldStyle.setPropValue(View.Padding_Prop, new Insets(2, 2, 2, 5));
+        textFieldStyle.setPropValue(View.Fill_Prop, getContentColor());
+        textFieldStyle.setPropValue(View.Border_Prop, getContentBorder().copyForInsets(Insets.EMPTY));
+        textFieldStyle.setPropValue(View.BorderRadius_Prop, 3);
 
         // TextArea
-        ViewStyle textAreaStyle = getViewStyleForClass(TextArea.class);
-        textAreaStyle._padding = new Insets(2);
+        setViewStylePropValue(TextArea.class, View.Padding_Prop, new Insets(2));
 
         // ListArea
-        ViewStyle listAreaStyle = getViewStyleForClass(ListArea.class);
-        listAreaStyle._fill = getContentColor();
+        setViewStylePropValue(ListArea.class, View.Fill_Prop, getContentColor());
+
+        // ScrollView, SplitView, ListView, TableView, TreeView
+        setViewStylePropValue(ScrollView.class, View.Border_Prop, getContentBorder());
+        setViewStylePropValue(SplitView.class, View.Border_Prop, getContentBorder());
+        setViewStylePropValue(ListView.class, View.Border_Prop, getContentBorder());
+        setViewStylePropValue(TableView.class, View.Border_Prop, getContentBorder());
+        setViewStylePropValue(TreeView.class, View.Border_Prop, getContentBorder());
     }
 
     /**
@@ -222,6 +235,15 @@ public class ViewTheme {
 
         // Creates style for class, adds to given map and returns it
         return ViewStyle.getViewStyleForClassMapAndClass(_viewStyles, viewClass);
+    }
+
+    /**
+     * Sets a View property value for given class, property name and value.
+     */
+    public void setViewStylePropValue(Class<? extends View> viewClass, String propName, Object aValue)
+    {
+        ViewStyle viewStyle = getViewStyleForClass(viewClass);
+        viewStyle.setPropValue(propName, aValue);
     }
 
     /**
@@ -242,7 +264,7 @@ public class ViewTheme {
     /**
      * Sets the style property values for given view if they were previously set to default of given old theme.
      */
-    public void setThemeStyleDefaultsForViewAndOldTheme(View aView, ViewTheme oldTheme)
+    protected void setThemeStyleDefaultsForViewAndOldTheme(View aView, ViewTheme oldTheme)
     {
         ViewStyle newViewStyle = getViewStyleForClass(aView.getClass());
         ViewStyle oldViewStyle = oldTheme.getViewStyleForClass(aView.getClass());

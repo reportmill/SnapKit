@@ -35,7 +35,7 @@ public class Color implements Paint, XMLArchiver.Archivable {
     public static Color DARKGRAY = new Color(.333f);
     public static Color GRAY = new Color(.5f);
     public static Color GREEN = new Color(0f, 1f, 0f);
-    public static Color LIGHTGRAY = new Color("#C0C0C0");
+    public static Color LIGHTGRAY = new Color("#C0"); // Web is #D3
     public static Color MAGENTA = new Color(0f, 1f, 0f, 0f, 1f);
     public static Color ORANGE = new Color(1f, 200/255f, 0f);
     public static Color PINK = new Color(1f, 175/255f, 175/255f);

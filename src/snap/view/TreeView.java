@@ -4,11 +4,9 @@
 package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
-
 import snap.geom.Polygon;
 import snap.gfx.*;
 import snap.props.PropChange;
-import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -54,7 +52,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     
     // Constants
     private static final Paint DIVIDER_FILL = new Color("#EEEEEE");
-    private static final Border DEFAULT_TREE_VIEW_BORDER = ScrollView.DEFAULT_SCROLL_VIEW_BORDER;
 
     /**
      * Constructor.
@@ -62,7 +59,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     public TreeView()
     {
         super();
-        _border = DEFAULT_TREE_VIEW_BORDER;
         setActionable(true);
         setFocusable(true);
         setFocusWhenPressed(true);
@@ -83,15 +79,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
         _scrollView = new ScrollView(_splitView);
         _scrollView.setBorder(null);
         addChild(_scrollView);
-
-        // Set main scroller to sync HeaderScroller
-        //Scroller scroller = _scroll.getScroller();
-        //scroller.addPropChangeListener(pce -> getHeaderScroller().setScrollH(scroller.getScrollH()), Scroller.ScrollH_Prop);
-
-        // Whenever one split needs layout, propogate to other
-        //SplitView hsplit = getHeaderSplitView();
-        //_split.addPropChangeListener(pc -> hsplit.relayout(), NeedsLayout_Prop);
-        //hsplit.addPropChangeListener(pc -> _split.relayout(), NeedsLayout_Prop);
 
         // Register PickList to notify when selection changes
         _items.addPropChangeListener(pc -> pickListSelChange(pc));
@@ -172,7 +159,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      */
     public TreeCol<T>[] getCols()
     {
-        List<View> treeCols = _splitView.getItems();
+        List<TreeCol<?>> treeCols = (List<TreeCol<?>>) (List<?>) _splitView.getItems();
         return treeCols.toArray(new TreeCol[0]);
     }
 
@@ -234,8 +221,8 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
         setSelItem(selItem);
 
         // Prune removed items from expanded set
-        Object[] expanded = _expanded.toArray();
-        for (Object item : expanded)
+        T[] expanded = (T[]) _expanded.toArray();
+        for (T item : expanded)
             if (!_items.contains(item))
                 _expanded.remove(item);
     }
@@ -652,19 +639,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     protected boolean equalsItems(List<T> theItems)
     {
         return ListUtils.equalsId(theItems, getItemsList()) || theItems.equals(getItemsList());
-    }
-
-    /**
-     * Override to customize for this class.
-     */
-    @Override
-    protected void initProps(PropSet aPropSet)
-    {
-        // Do normal version
-        super.initProps(aPropSet);
-
-        // Reset defaults
-        aPropSet.getPropForName(Border_Prop).setDefaultValue(DEFAULT_TREE_VIEW_BORDER);
     }
 
     /**
