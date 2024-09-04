@@ -717,7 +717,7 @@ public class TextArea extends View {
 
         // If selection is multiple chars, apply attribute to text and reset SelStyle
         else {
-            _textBlock.setStyleValue(aKey, aValue, getSelStart(), getSelEnd());
+            _textBlock.setTextStyleValue(aKey, aValue, getSelStart(), getSelEnd());
             _selStyle = null;
             repaint();
         }

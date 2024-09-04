@@ -156,9 +156,9 @@ public class TextBox extends TextBlock {
      * Override to forward to source text block.
      */
     @Override
-    public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
+    public void setTextStyleValue(String aKey, Object aValue, int aStart, int anEnd)
     {
-        _sourceText.setStyleValue(aKey, aValue, aStart, anEnd);
+        _sourceText.setTextStyleValue(aKey, aValue, aStart, anEnd);
     }
 
     /**

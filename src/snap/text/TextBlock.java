@@ -528,21 +528,9 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void setTextStyle(TextStyle textStyle, int aStart, int anEnd)
     {
-        // Handle Rich
-        if (isRichText())
-            setStyleRich(textStyle, aStart, anEnd);
+        // If plaint text, just return (can't apply style to range for plain text)
+        if (!isRichText()) return;
 
-        // Handle Plain
-        else System.out.println("TextBlock.setStyle: Has no effect on plain text");
-
-        _prefW = -1;
-    }
-
-    /**
-     * Sets a given style to a given range.
-     */
-    private void setStyleRich(TextStyle aStyle, int aStart, int anEnd)
-    {
         // Get run iter and split end runs
         TextRunIter runIter = getRunIterForCharRange(aStart, anEnd);
         runIter.splitEndRuns();
@@ -554,61 +542,31 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             // Set style
             TextRun textRun = runIter.getNextRun();
             TextStyle oldStyle = textRun.getTextStyle();
-            textRun.setTextStyle(aStyle);
+            textRun.setTextStyle(textStyle);
 
             // Fire prop change
             if (isPropChangeEnabled()) {
                 int lineStartCharIndex = textRun.getLine().getStartCharIndex();
                 int runStart = textRun.getStartCharIndex() + lineStartCharIndex;
                 int runEnd = textRun.getEndCharIndex() + lineStartCharIndex;
-                PropChange pc = new TextBlockUtils.StyleChange(this, oldStyle, aStyle, runStart, runEnd);
+                PropChange pc = new TextBlockUtils.StyleChange(this, oldStyle, textStyle, runStart, runEnd);
                 firePropChange(pc);
             }
         }
 
         // Update lines
         startLine.updateText();
+        _prefW = -1;
     }
 
     /**
-     * Sets a given style value to given value for a given range.
+     * Sets a text style value for given key, value and range.
      */
-    public void setStyleValue(Object aValue)
+    public void setTextStyleValue(String aKey, Object aValue, int aStart, int anEnd)
     {
-        setStyleValue(aValue, 0, length());
-    }
+        // If plaint text, just return (can't apply style to range for plain text)
+        if (!isRichText()) return;
 
-    /**
-     * Sets a given style value to given value for a given range.
-     */
-    public void setStyleValue(Object aValue, int aStart, int aEnd)
-    {
-        String key = TextStyle.getStyleKey(aValue);
-        setStyleValue(key, aValue, aStart, aEnd);
-    }
-
-    /**
-     * Sets a given attribute to a given value for a given range.
-     */
-    public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
-    {
-        // Handle Rich
-        if (isRichText())
-            setStyleValueRich(aKey, aValue, aStart, anEnd);
-
-        // Handle Plain
-        else {
-            TextStyle styleForRange = getTextStyleForCharRange(aStart, anEnd);
-            TextStyle newStyle = styleForRange.copyFor(aKey, aValue);
-            setTextStyle(newStyle, aStart, anEnd);
-        }
-    }
-
-    /**
-     * Sets a given attribute to a given value for a given range.
-     */
-    private void setStyleValueRich(String aKey, Object aValue, int aStart, int anEnd)
-    {
         // Iterate over lines in range and set attribute
         while (aStart < anEnd) {
 
@@ -977,7 +935,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void setUnderlined(boolean aFlag)
     {
-        setStyleValue(TextStyle.UNDERLINE_KEY, aFlag ? 1 : null, 0, length());
+        setTextStyleValue(TextStyle.UNDERLINE_KEY, aFlag ? 1 : null, 0, length());
     }
 
     /**
