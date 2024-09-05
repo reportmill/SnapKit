@@ -67,10 +67,7 @@ public class PropNode {
     /**
      * Returns a node value (String, PropNode, PropNode[]) for given prop name.
      */
-    public Object getPropValue(String aPropName)
-    {
-        return _propValues.get(aPropName);
-    }
+    public Object getPropValue(String propName)  { return _propValues.get(propName); }
 
     /**
      * Sets a node value (String, PropNode, PropNode[]) for given prop name.
@@ -78,11 +75,6 @@ public class PropNode {
     public void setPropValue(String aPropName, Object nodeValue)
     {
         _propValues.put(aPropName, nodeValue);
-    }
-
-    public void setPropValue(Prop aProp, Object nodeValue)
-    {
-        throw new RuntimeException("PropNode.setPropValue(prop) Not implemented");
     }
 
     /**
@@ -128,10 +120,7 @@ public class PropNode {
     /**
      * Whether node is empty.
      */
-    public boolean isEmpty()
-    {
-        return _propValues.size() == 0;
-    }
+    public boolean isEmpty()  { return _propValues.isEmpty(); }
 
     /**
      * Standard toString implementation.

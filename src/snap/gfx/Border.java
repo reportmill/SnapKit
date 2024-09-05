@@ -6,12 +6,13 @@ import snap.geom.Insets;
 import snap.geom.Shape;
 import snap.props.PropObject;
 import snap.props.PropSet;
+import snap.props.StringCodec;
 import snap.util.*;
 
 /**
  * A class to represent a painted stroke.
  */
-public abstract class Border extends PropObject implements Cloneable, XMLArchiver.Archivable {
+public abstract class Border extends PropObject implements Cloneable, StringCodec.Codeable, XMLArchiver.Archivable {
     
     // Cached version of insets
     private Insets  _insets;
@@ -154,6 +155,26 @@ public abstract class Border extends PropObject implements Cloneable, XMLArchive
 
         // Return equal
         return true;
+    }
+
+    /**
+     * Returns Border as string.
+     */
+    @Override
+    public String codeString()
+    {
+        String fillStr = '#' + getColor().toHexString();
+        String strokeStr = FormatUtils.formatNum(getWidth());
+        return fillStr + ' ' + strokeStr;
+    }
+
+    /**
+     * Returns Border for string.
+     */
+    @Override
+    public Border decodeString(String aString)
+    {
+        return Border.of(aString);
     }
 
     /**

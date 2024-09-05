@@ -2841,9 +2841,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         aPropSet.addPropNamed(Margin_Prop, Insets.class);
         aPropSet.addPropNamed(Padding_Prop, Insets.class);
         aPropSet.addPropNamed(Spacing_Prop, double.class);
+        aPropSet.addPropNamed(Fill_Prop, Paint.class);
         aPropSet.addPropNamed(Border_Prop, Border.class);
         aPropSet.addPropNamed(BorderRadius_Prop, double.class);
-        aPropSet.addPropNamed(Fill_Prop, Paint.class);
         aPropSet.addPropNamed(Font_Prop, Font.class, null);
         aPropSet.addPropNamed(TextColor_Prop, Color.class);
 
@@ -2868,7 +2868,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         aPropSet.addPropNamed(Opacity_Prop, double.class, 1d);
 
         // Text, ToolTip, Cursor, Clip
-        aPropSet.addPropNamed(Text_Prop, String.class, null).setSkipArchival(true);
+        aPropSet.addPropNamed(Text_Prop, String.class, null); //.setSkipArchival(true);
         aPropSet.addPropNamed(ToolTip_Prop, String.class, null);
         //aPropSet.addPropNamed(Cursor_Prop, Cursor.class, null).setSkipArchival(true);
         //aPropSet.addPropNamed(Clip_Prop, Shape.class, null).setSkipArchival(true);

@@ -237,6 +237,10 @@ public class Prop {
         if (aClass.isPrimitive())
             return false;
 
+        // Handle Codeable
+        if (StringCodec.Codeable.class.isAssignableFrom(aClass))
+            return false;
+
         // Handle PropObject class/subclass
         if (PropObject.class.isAssignableFrom(aClass))
             return true;

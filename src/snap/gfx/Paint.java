@@ -3,12 +3,13 @@
  */
 package snap.gfx;
 import snap.geom.Rect;
+import snap.props.StringCodec;
 import snap.util.XMLArchiver;
 
 /**
  * A class to represent a fill for a Shape or text (Color, GradientPaint, ImagePaint).
  */
-public interface Paint extends XMLArchiver.Archivable {
+public interface Paint extends XMLArchiver.Archivable, StringCodec.Codeable {
 
     /**
      * Returns whether paint is defined in terms independent of primitive to be filled.
@@ -41,9 +42,16 @@ public interface Paint extends XMLArchiver.Archivable {
     public Paint copyForColor(Color aColor);
 
     /**
-     * Returns the snap version of this fill.
+     * Returns Paint as string.
      */
-    default Paint snap()  { return this; }
+    @Override
+    default String codeString()  { return '#' + getColor().toHexString(); }
+
+    /**
+     * Returns Paint for string.
+     */
+    @Override
+    default Paint decodeString(String aString)  { return of(aString); }
 
     /**
      * Returns a color from given object.

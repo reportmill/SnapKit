@@ -6,6 +6,7 @@ import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.props.PropObject;
 import snap.props.PropSet;
+import snap.props.StringCodec;
 import snap.util.*;
 import java.util.Arrays;
 
@@ -13,7 +14,7 @@ import java.util.Arrays;
  * This class represents a font for use in rich text. Currently this is necessary because Java fonts are missing
  * so much basic typographic information.
  */
-public class Font extends PropObject implements XMLArchiver.Archivable {
+public class Font extends PropObject implements XMLArchiver.Archivable, StringCodec.Codeable {
     
     // This font's base font file
     private FontFile  _fontFile;
@@ -379,6 +380,24 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
             // Do normal version
             default: return super.getPropValue(aPropName);
         }
+    }
+
+    /**
+     * Returns Font as string.
+     */
+    @Override
+    public String codeString()
+    {
+        return getName() + ' ' + FormatUtils.formatNum(_size);
+    }
+
+    /**
+     * Returns Font for string.
+     */
+    @Override
+    public StringCodec.Codeable decodeString(String aString)
+    {
+        return of(aString);
     }
 
     /**

@@ -3,7 +3,7 @@
  */
 package snap.props;
 import snap.geom.Insets;
-import snap.gfx.Color;
+import snap.gfx.*;
 import snap.util.Convert;
 import snap.util.EnumUtils;
 import java.lang.reflect.Array;
@@ -147,10 +147,6 @@ public class StringCodec {
         if (anObj instanceof Codeable)
             return ((Codeable) anObj).codeString();
 
-        // Handle Color
-        if (anObj instanceof Color)
-            return ((Color) anObj).toHexString();
-
         // Handle Insets
         if (anObj instanceof Insets)
             return ((Insets) anObj).getString();
@@ -212,6 +208,14 @@ public class StringCodec {
         if (aClass == double[].class)
             return (T) getDoubleArrayForString(aString);
 
+        // Handle Font, Border, Paint
+        if (aClass == Font.class)
+            return (T) Font.Arial12.decodeString(aString);
+        if (aClass == Border.class)
+            return (T) Border.blackBorder().decodeString(aString);
+        if (aClass == Paint.class)
+            return (T) Color.BLACK.decodeString(aString);
+
         // Handle Codeable
         if (Codeable.class.isAssignableFrom(aClass)) {
             Codeable codeable;
@@ -231,7 +235,7 @@ public class StringCodec {
 
         // Handle Array
         if (aClass.isArray()) {
-            Class compClass = aClass.getComponentType();
+            Class<?> compClass = aClass.getComponentType();
             String string = aString.substring(1, aString.length() - 1);
             String[] strings = string.split("\\s*,\\s*");
             Object[] array = (Object[]) Array.newInstance(compClass, strings.length);
@@ -254,7 +258,7 @@ public class StringCodec {
         String str = aStr;
         if (str.startsWith("[") && str.endsWith("]"))
             str = str.substring(1, str.length() - 1).trim();
-        if (str.length() == 0)
+        if (str.isEmpty())
             return new String[0];
 
         // Split string into strings
@@ -317,12 +321,12 @@ public class StringCodec {
 
         // Iterate over strings and add valid numbers
         for (String valStr : valStrs) {
-            if (valStr.length() > 0) {
+            if (!valStr.isEmpty()) {
                 try {
                     double val = Double.parseDouble(valStr);
                     vals[count++] = val;
                 }
-                catch (Exception e)  { }
+                catch (Exception ignore)  { }
             }
         }
 
