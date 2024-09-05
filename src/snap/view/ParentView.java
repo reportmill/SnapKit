@@ -443,13 +443,7 @@ public class ParentView extends View {
     /**
      * Paints above children.
      */
-    protected void paintAbove(Painter aPntr)
-    {
-        // Check for odd case of Border with PaintAbove set
-        Border border = getBorder();
-        if (border != null && border.isPaintAbove())
-            border.paint(aPntr, getBoundsShape());
-    }
+    protected void paintAbove(Painter aPntr)  { }
 
     /**
      * Returns whether any children need repaint.

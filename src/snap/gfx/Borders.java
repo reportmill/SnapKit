@@ -56,9 +56,6 @@ public class Borders {
         /** Returns the stroke. */
         public Stroke getStroke()  { return _stroke; }
 
-        /** Creates the insets. */
-        protected Insets createInsets()  { return new Insets(getWidth()); }
-
         /** Paint border. */
         public void paint(Painter aPntr, Shape aShape)
         {

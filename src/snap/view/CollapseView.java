@@ -1,11 +1,9 @@
 package snap.view;
-import snap.geom.Insets;
 import snap.geom.Polygon;
 import snap.geom.Pos;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,10 +39,10 @@ public class CollapseView extends ParentView implements ViewHost {
     private static Map<String, CollapseGroup> _groups = new HashMap<>();
 
     // Constants
-    public static Font LABEL_FONT = Font.Arial14;//.getBold();
-    public static Color LABEL_FILL = new Color("#F4F4F8"); //"#e0e6f0"
+    public static Font LABEL_FONT = Font.Arial14;
+    public static Color LABEL_FILL = new Color("#F4F4F8");
     public static Color LABEL_TEXT_COLOR = Color.DARKGRAY;
-    public static Border LABEL_BORDER = Border.createLineBorder(LABEL_FILL.darker(), 1).copyForInsets(Insets.EMPTY);
+    public static Border LABEL_BORDER = Border.createLineBorder(LABEL_FILL.darker(), 1);
 
     /**
      * Constructor.
@@ -107,7 +105,7 @@ public class CollapseView extends ParentView implements ViewHost {
         label.setBorder(LABEL_BORDER);
         label.getStringView().setGrowWidth(true);
         label.setAlign(Pos.CENTER);
-        label.setPadding(4, 4, 4, 10);
+        label.setPadding(3, 3, 3, 9);
         label.setMargin(0, 8, 0, 8);
         label.setBorderRadius(5);
 

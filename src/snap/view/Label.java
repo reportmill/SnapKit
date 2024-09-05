@@ -342,22 +342,21 @@ public class Label extends ParentView {
         editor.setBorderRadius(2);
         editor.setFill(new Color(1,.95));
         editor.setBorder(new Color(1,.3,.3,.5), 1);
-        editor.setBorder(editor.getBorder().copyForInsets(Insets.EMPTY));
-        editor.setPadding(2,2,2,2);
+        editor.setPadding(1,1,1,1);
         editor.setAlignX(getAlignX());
         editor.setFont(getFont());
-        editor.addEventHandler(e -> editorFiredAction(), Action);
+        editor.addEventHandler(this::handleEditorActionEvent, Action);
         editor.addPropChangeListener(pc -> editorFocusChanged(editor), Focused_Prop);
         return _editor = editor;
     }
 
     /**
-     * Called when editor fires action.
+     * Called when editor text field fires action event.
      */
-    protected void editorFiredAction()
+    protected void handleEditorActionEvent(ViewEvent anEvent)
     {
         setEditing(false);
-        fireActionEvent(null);
+        fireActionEvent(anEvent);
     }
 
     /**

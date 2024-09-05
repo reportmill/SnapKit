@@ -204,9 +204,9 @@ public class ViewTheme {
         // TextField
         ViewStyle textFieldStyle = getViewStyleForClass(TextField.class);
         textFieldStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
-        textFieldStyle.setPropValue(View.Padding_Prop, new Insets(2, 2, 2, 5));
+        textFieldStyle.setPropValue(View.Padding_Prop, new Insets(1, 1, 1, 4));
         textFieldStyle.setPropValue(View.Fill_Prop, getContentColor());
-        textFieldStyle.setPropValue(View.Border_Prop, getContentBorder().copyForInsets(Insets.EMPTY));
+        textFieldStyle.setPropValue(View.Border_Prop, getContentBorder());
         textFieldStyle.setPropValue(View.BorderRadius_Prop, 3);
 
         // TextArea

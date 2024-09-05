@@ -16,14 +16,9 @@ public abstract class Border extends PropObject implements Cloneable, XMLArchive
     // Cached version of insets
     private Insets  _insets;
     
-    // Whether to paint above view
-    private boolean  _paintAbove;
-
     // Constants for properties
     public static final String Stroke_Prop = "Stroke";
     public static final String Color_Prop = "Color";
-    public static final String Insets_Prop = "Insets";
-    public static final String PaintAbove_Prop = "PaintAbove";
 
     /**
      * Returns the insets.
@@ -37,7 +32,7 @@ public abstract class Border extends PropObject implements Cloneable, XMLArchive
     /**
      * Creates the insets.
      */
-    protected Insets createInsets()  { return Insets.EMPTY; }
+    protected Insets createInsets()  { return getWidth() > 0 ? new Insets(getWidth()) : Insets.EMPTY; }
 
     /**
      * Returns the basic color of the border.
@@ -58,11 +53,6 @@ public abstract class Border extends PropObject implements Cloneable, XMLArchive
      * Returns the name for border.
      */
     public String getName()  { return getClass().getSimpleName(); }
-
-    /**
-     * Returns whether the border paints above view.
-     */
-    public boolean isPaintAbove()  { return _paintAbove; }
 
     /**
      * Paint border.
@@ -89,26 +79,6 @@ public abstract class Border extends PropObject implements Cloneable, XMLArchive
     }
 
     /**
-     * Copies border for given insets.
-     */
-    public Border copyForInsets(Insets theIns)
-    {
-        Border copy = clone();
-        copy.setPropValue(Insets_Prop, theIns);
-        return copy;
-    }
-
-    /**
-     * Returns a border with given insets.
-     */
-    public Border copyFor(String aPropName, Object aValue)
-    {
-        Border copy = clone();
-        copy.setPropValue(aPropName, aValue);
-        return copy;
-    }
-
-    /**
      * Override to support props for this class.
      */
     @Override
@@ -117,11 +87,9 @@ public abstract class Border extends PropObject implements Cloneable, XMLArchive
         // Do normal version
         super.initProps(aPropSet);
 
-        // Stroke, Color, Insets, PaintAbove
+        // Stroke, Color
         aPropSet.addPropNamed(Stroke_Prop, Stroke.class, null);
         aPropSet.addPropNamed(Color_Prop, Color.class, null);
-        aPropSet.addPropNamed(Insets_Prop, Insets.class, null);
-        aPropSet.addPropNamed(PaintAbove_Prop, Insets.class, null);
     }
 
     /**
@@ -131,11 +99,9 @@ public abstract class Border extends PropObject implements Cloneable, XMLArchive
     {
         switch (aPropName) {
 
-            // Stroke, Color, Insets, PaintAbove
+            // Stroke, Color
             case Stroke_Prop: return getStroke();
             case Color_Prop: return getColor();
-            case Insets_Prop: return getInsets();
-            case PaintAbove_Prop: return isPaintAbove();
 
             // Do normal version
             default: throw new RuntimeException("Border.getPropValue: Unknown key: " + aPropName);
@@ -149,11 +115,9 @@ public abstract class Border extends PropObject implements Cloneable, XMLArchive
     {
         switch (aPropName) {
 
-            // Stroke, Color, Insets, PaintAbove
+            // Stroke, Color
             case Stroke_Prop: break;
             case Color_Prop: break;
-            case Insets_Prop: _insets = (Insets) aValue; break;
-            case PaintAbove_Prop: _paintAbove = Convert.boolValue(aValue); break;
 
             // Do normal version
             default: throw new RuntimeException("Border.setPropValue: Unknown key: " + aPropName);
@@ -163,10 +127,10 @@ public abstract class Border extends PropObject implements Cloneable, XMLArchive
     /**
      * Standard clone implementation - only used internally (by copyFor methods).
      */
+    @Override
     protected Border clone()
     {
-        try
-        {
+        try {
             Border copy = (Border) super.clone();
             copy._insets = null;
             return copy;
@@ -187,7 +151,6 @@ public abstract class Border extends PropObject implements Cloneable, XMLArchive
         // Check Color, Width
         if (!other.getColor().equals(getColor())) return false;
         if (other.getWidth() != getWidth()) return false;
-        if (other.isPaintAbove() != isPaintAbove()) return false;
 
         // Return equal
         return true;
