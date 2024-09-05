@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.geom.Pos;
 import snap.props.PropSet;
 import snap.util.*;
 
@@ -26,7 +25,6 @@ public class ColView extends ChildView {
     public ColView()
     {
         super();
-        _align = Pos.TOP_LEFT;
         _vertical = DEFAULT_COL_VIEW_VERTICAL;
     }
 

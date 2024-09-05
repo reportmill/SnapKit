@@ -221,6 +221,10 @@ public class ViewTheme {
         setViewStylePropValue(ListView.class, View.Border_Prop, getContentBorder());
         setViewStylePropValue(TableView.class, View.Border_Prop, getContentBorder());
         setViewStylePropValue(TreeView.class, View.Border_Prop, getContentBorder());
+
+        // RowView, ColView
+        setViewStylePropValue(RowView.class, View.Align_Prop, Pos.CENTER_LEFT);
+        setViewStylePropValue(ColView.class, View.Align_Prop, Pos.TOP_LEFT);
     }
 
     /**

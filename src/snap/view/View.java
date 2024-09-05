@@ -2831,8 +2831,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Rotate, ScaleX, ScaleY, TransX, TransY
         aPropSet.addPropNamed(Rotate_Prop, double.class, 0d);
-        aPropSet.addPropNamed(ScaleX_Prop, double.class, 0d);
-        aPropSet.addPropNamed(ScaleY_Prop, double.class, 0d);
+        aPropSet.addPropNamed(ScaleX_Prop, double.class, 1d);
+        aPropSet.addPropNamed(ScaleY_Prop, double.class, 1d);
         aPropSet.addPropNamed(TransX_Prop, double.class, 0d);
         aPropSet.addPropNamed(TransY_Prop, double.class, 0d);
 
@@ -2870,8 +2870,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Text, ToolTip, Cursor, Clip
         aPropSet.addPropNamed(Text_Prop, String.class, null).setSkipArchival(true);
         aPropSet.addPropNamed(ToolTip_Prop, String.class, null);
-        aPropSet.addPropNamed(Cursor_Prop, Cursor.class, null).setSkipArchival(true);
-        aPropSet.addPropNamed(Clip_Prop, Shape.class, null).setSkipArchival(true);
+        //aPropSet.addPropNamed(Cursor_Prop, Cursor.class, null).setSkipArchival(true);
+        //aPropSet.addPropNamed(Clip_Prop, Shape.class, null).setSkipArchival(true);
 
         // Disabled, Visible, Pickable, Paintable
         aPropSet.addPropNamed(Disabled_Prop, boolean.class, false);
@@ -2879,14 +2879,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         aPropSet.addPropNamed(Pickable_Prop, boolean.class, true);
         aPropSet.addPropNamed(Paintable_Prop, boolean.class, true);
 
-        // Focusable, FocusWhenPressed, Focused
-        aPropSet.addPropNamed(Focusable_Prop, boolean.class, false);
-        aPropSet.addPropNamed(FocusWhenPressed_Prop, boolean.class, true);
-        aPropSet.addPropNamed(Focused_Prop, boolean.class, true);
-
-        // Parent, Showing
-        aPropSet.addPropNamed(Parent_Prop, ParentView.class, null).setSkipArchival(true);
-        aPropSet.addPropNamed(Showing_Prop, boolean.class, false).setSkipArchival(true);
+        // Focusable, FocusWhenPressed, Focused, Parent, Showing
+        //aPropSet.addPropNamed(Focusable_Prop, boolean.class, false);
+        //aPropSet.addPropNamed(FocusWhenPressed_Prop, boolean.class, true);
+        //aPropSet.addPropNamed(Focused_Prop, boolean.class, true);
+        //aPropSet.addPropNamed(Parent_Prop, ParentView.class, null).setSkipArchival(true);
+        //aPropSet.addPropNamed(Showing_Prop, boolean.class, false).setSkipArchival(true);
 
         // Set style defaults from ViewTheme
         ViewStyle viewStyle = ViewTheme.get().getViewStyleForClass(getClass());
@@ -3081,6 +3079,23 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             default:
                 System.out.println("View.setPropValue: Unknown prop name: " + propName);
                 KeyChain.setValueSafe(this, propName, aValue);
+        }
+    }
+
+    /**
+     * Override property defaults for View.
+     */
+    @Override
+    public boolean isPropDefault(String propName)
+    {
+        switch (propName) {
+            case MinWidth_Prop: return !isMinWidthSet();
+            case MinHeight_Prop: return !isMinHeightSet();
+            case MaxWidth_Prop: return !isMaxWidthSet();
+            case MaxHeight_Prop: return !isMaxHeightSet();
+            case PrefWidth_Prop: return !isPrefWidthSet();
+            case PrefHeight_Prop: return !isPrefHeightSet();
+            default: return super.isPropDefault(propName);
         }
     }
 

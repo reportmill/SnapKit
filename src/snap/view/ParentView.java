@@ -719,8 +719,8 @@ public class ParentView extends View {
         super.initProps(aPropSet);
 
         // Child, NeedsLayout
-        aPropSet.addPropNamed(Child_Prop, View[].class, EMPTY_OBJECT);
-        aPropSet.addPropNamed(NeedsLayout_Prop, boolean.class, false).setSkipArchival(true);
+        if (this instanceof ViewHost)
+            aPropSet.addPropNamed(Child_Prop, View[].class, EMPTY_OBJECT);
     }
 
     /**

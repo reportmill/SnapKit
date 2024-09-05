@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.geom.Pos;
 import snap.props.PropSet;
 import snap.util.*;
 
@@ -23,7 +22,6 @@ public class RowView extends ChildView {
     public RowView()
     {
         super();
-        _align = Pos.CENTER_LEFT;
     }
 
     /**
