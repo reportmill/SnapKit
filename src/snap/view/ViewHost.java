@@ -9,22 +9,22 @@ public interface ViewHost {
     /**
      * ViewHost method: Returns the number of guest views.
      */
-    public int getGuestCount();
+    int getGuestCount();
 
     /**
      * ViewHost method: Returns the guest view at given index.
      */
-    public View getGuest(int anIndex);
+    View getGuest(int anIndex);
 
     /**
      * ViewHost method: Adds the given view to this host's guest (children) list at given index.
      */
-    public void addGuest(View aChild, int anIndex);
+    void addGuest(View aChild, int anIndex);
 
     /**
      * ViewHost method: Remove's guest at given index from this host's guest (children) list.
      */
-    public View removeGuest(int anIndex);
+    View removeGuest(int anIndex);
 
     /**
      * Adds the given view to the end of this view's guest list.
@@ -45,24 +45,30 @@ public interface ViewHost {
     /**
      * Returns the array of guests.
      */
-    default View[] getGuests()  { return getGuests(this); }
+    default View[] getGuests()
+    {
+        int guestCount = getGuestCount();
+        View[] guests = new View[guestCount];
+        for (int i = 0; i < guestCount; i++)
+            guests[i] = getGuest(i);
+        return guests;
+    }
 
     /**
-     * Returns the guests array.
+     * Sets the array of guests.
      */
-    public static View[] getGuests(ViewHost aHost)
+    default void setGuests(View[] theViews)
     {
-        int gc = aHost.getGuestCount();
-        View[] guests = new View[gc];
-        for (int i=0; i<gc; i++)
-            guests[i] = aHost.getGuest(i);
-        return guests;
+        while (getGuestCount() > 0)
+            removeGuest(0);
+        for (View view : theViews)
+            addGuest(view);
     }
 
     /**
      * Returns whether given view parent is a ViewHost and view is one of its guests.
      */
-    public static ViewHost getHost(View aView)
+    static ViewHost getHost(View aView)
     {
         ParentView par = aView != null ? aView.getParent() : null;
         ViewHost host = par instanceof ViewHost ? (ViewHost) par : null;
@@ -72,7 +78,7 @@ public interface ViewHost {
     /**
      * ViewHost helper method.
      */
-    public static int indexOfGuest(ViewHost aHost, View aView)
+    static int indexOfGuest(ViewHost aHost, View aView)
     {
         if (aHost == null) return -1;
         for (int i=0,iMax=aHost.getGuestCount(); i<iMax; i++) {
@@ -86,7 +92,7 @@ public interface ViewHost {
     /**
      * ViewHost helper method.
      */
-    public static int indexInHost(View aView)
+    static int indexInHost(View aView)
     {
         ViewHost host = getHost(aView);
         return indexOfGuest(host, aView);
@@ -95,7 +101,7 @@ public interface ViewHost {
     /**
      * XML archival of ViewHost.Guests.
      */
-    public static void toXMLGuests(ViewHost aHost, XMLArchiver anArchiver, XMLElement anElement)
+    static void toXMLGuests(ViewHost aHost, XMLArchiver anArchiver, XMLElement anElement)
     {
         // Archive guests
         for (int i=0, iMax=aHost.getGuestCount(); i<iMax; i++) {
@@ -107,7 +113,7 @@ public interface ViewHost {
     /**
      * XML unarchival of ViewHost.Guests.
      */
-    public static void fromXMLGuests(ViewHost aHost, XMLArchiver anArchiver, XMLElement anElement)
+    static void fromXMLGuests(ViewHost aHost, XMLArchiver anArchiver, XMLElement anElement)
     {
         // Iterate over child elements and unarchive as child views
         for (int i=0, iMax=anElement.size(); i<iMax; i++) {

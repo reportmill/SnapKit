@@ -1713,6 +1713,59 @@ public class TextArea extends View {
     }
 
     /**
+     * Override to support properties for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        super.initProps(aPropSet);
+
+        // Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
+        aPropSet.addPropNamed(Editable_Prop, boolean.class);
+        aPropSet.addPropNamed(WrapLines_Prop, boolean.class);
+        aPropSet.addPropNamed(FireActionOnEnterKey_Prop, boolean.class);
+        aPropSet.addPropNamed(FireActionOnFocusLost_Prop, boolean.class);
+    }
+
+    /**
+     * Override to support properties for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
+            case Editable_Prop: return isEditable();
+            case WrapLines_Prop: return isWrapLines();
+            case FireActionOnEnterKey_Prop: return isFireActionOnEnterKey();
+            case FireActionOnFocusLost_Prop: return isFireActionOnFocusLost();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support properties for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
+            case Editable_Prop: setEditable(Convert.boolValue(aValue)); break;
+            case WrapLines_Prop: setWrapLines(Convert.boolValue(aValue)); break;
+            case FireActionOnEnterKey_Prop: setFireActionOnEnterKey(Convert.boolValue(aValue)); break;
+            case FireActionOnFocusLost_Prop: setFireActionOnFocusLost(Convert.boolValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue); break;
+        }
+    }
+
+    /**
      * XML archival.
      */
     public XMLElement toXML(XMLArchiver anArchiver)

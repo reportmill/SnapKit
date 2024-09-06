@@ -435,7 +435,7 @@ public class ButtonBase extends ParentView {
     }
 
     /**
-     * Override to add properties for this class.
+     * Override to support properties for this class.
      */
     @Override
     protected void initProps(PropSet aPropSet)
@@ -448,7 +448,7 @@ public class ButtonBase extends ParentView {
     }
 
     /**
-     * Override for ButtonBase properties.
+     * Override to support properties for this class.
      */
     @Override
     public Object getPropValue(String aPropName)
@@ -465,7 +465,7 @@ public class ButtonBase extends ParentView {
     }
 
     /**
-     * Override for ButtonBase properties.
+     * Override to support properties for this class.
      */
     @Override
     public void setPropValue(String aPropName, Object aValue)

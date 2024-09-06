@@ -39,7 +39,7 @@ public class ParentView extends View {
     private DeepChangeListener _childDCL;
 
     // Constants for properties
-    public static final String Child_Prop = "Child";
+    public static final String Children_Prop = "Children";
     public static final String NeedsLayout_Prop = "NeedsLayout";
 
     /**
@@ -107,7 +107,7 @@ public class ParentView extends View {
         }
 
         // Fire property change
-        firePropChange(Child_Prop, null, aChild, anIndex);
+        firePropChange(Children_Prop, null, aChild, anIndex);
     }
 
     /**
@@ -131,7 +131,7 @@ public class ParentView extends View {
         repaint();
 
         // Fire property change and return
-        firePropChange(Child_Prop, child, null, anIndex);
+        firePropChange(Children_Prop, child, null, anIndex);
         return child;
     }
 
@@ -625,8 +625,8 @@ public class ParentView extends View {
     @Override
     public void processPropChange(PropChange aPC, Object oldVal, Object newVal)
     {
-        String pname = aPC.getPropName();
-        if (pname == Child_Prop) {
+        String propName = aPC.getPropName();
+        if (propName == Children_Prop) {
             int index = aPC.getIndex();
             if (newVal != null)
                 addChild((View) newVal, index);
@@ -712,9 +712,9 @@ public class ParentView extends View {
         // Do normal version
         super.initProps(aPropSet);
 
-        // Child, NeedsLayout
+        // Children, NeedsLayout
         if (this instanceof ViewHost)
-            aPropSet.addPropNamed(Child_Prop, View[].class, EMPTY_OBJECT);
+            aPropSet.addPropNamed(Children_Prop, View[].class, EMPTY_OBJECT);
     }
 
     /**
@@ -725,8 +725,8 @@ public class ParentView extends View {
     {
         switch (aPropName) {
 
-            // Child
-            case Child_Prop: return getChildren();
+            // Children
+            case Children_Prop: return ((ViewHost) this).getGuests();
 
             // Do normal version
             default: return super.getPropValue(aPropName);
@@ -741,8 +741,8 @@ public class ParentView extends View {
     {
         switch (aPropName) {
 
-            // Child
-            case Child_Prop: setChildren((View[]) aValue); break;
+            // Children
+            case Children_Prop: ((ViewHost) this).setGuests((View[]) aValue); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);
