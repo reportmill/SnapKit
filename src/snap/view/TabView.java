@@ -13,7 +13,7 @@ import snap.util.*;
 /**
  * A View subclass to show multiple children under user selectable tabs.
  */
-public class TabView extends ParentView implements Selectable<Tab> {
+public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
 
     // The side that tabs should be on
     private Side  _tabSide;
@@ -43,7 +43,7 @@ public class TabView extends ParentView implements Selectable<Tab> {
     private static final double CLASSIC_TAB_BAR_SPACING = 2;
 
     /**
-     * Creates a new TabView.
+     * Constructor.
      */
     public TabView()
     {
@@ -388,6 +388,40 @@ public class TabView extends ParentView implements Selectable<Tab> {
                 _tabBar.setOwnerChildren(anOwner);
             else child.setOwner(anOwner);
         }
+    }
+
+    /**
+     * ViewHost method: Returns the number of guest views.
+     */
+    public int getGuestCount()  { return getTabCount(); }
+
+    /**
+     * ViewHost method: Returns the guest view at given index.
+     */
+    public View getGuest(int anIndex)
+    {
+        return getTab(anIndex).getContent();
+    }
+
+    /**
+     * ViewHost method: Adds the given view to this host's guest (children) list at given index.
+     */
+    public void addGuest(View aChild, int anIndex)
+    {
+        Tab newTab = new Tab();
+        newTab.setTitle("");
+        newTab.setContent(aChild);
+        addTab(newTab, anIndex);
+    }
+
+    /**
+     * ViewHost method: Remove's guest at given index from this host's guest (children) list.
+     */
+    public View removeGuest(int anIndex)
+    {
+        Tab tab = getTab(anIndex);
+        removeTab(anIndex);
+        return tab.getContent();
     }
 
     /**

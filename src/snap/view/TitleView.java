@@ -4,6 +4,7 @@
 package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -40,16 +41,12 @@ public class TitleView extends ParentView implements ViewHost {
     public static final String Expanded_Prop = "Expanded";
     public static final String TitleStyle_Prop = "TitleStyle";
 
-    // Constants for property defaults
-    private static Insets DEFAULT_TITLE_VIEW_PADDING = new Insets(2);
-
     /**
      * Constructor.
      */
     public TitleView()
     {
         super();
-        _padding = DEFAULT_TITLE_VIEW_PADDING;
 
         // Create/add TitleArea
         setTitleStyle(TitleStyle.EtchBorder);
@@ -382,29 +379,59 @@ public class TitleView extends ParentView implements ViewHost {
     }
 
     /**
-     * Override to handle additional properties.
-     */
-    public Object getPropValue(String aPropName)
-    {
-        if (aPropName.equals("Value") || aPropName == Expanded_Prop)
-            return isExpanded();
-        return super.getPropValue(aPropName);
-    }
-
-    /**
-     * Override to handle additional properties.
-     */
-    public void setPropValue(String aPropName, Object aValue)
-    {
-        if (aPropName.equals("Value") || aPropName == Expanded_Prop)
-            setExpanded(Convert.boolValue(aValue));
-        else super.setPropValue(aPropName, aValue);
-    }
-
-    /**
-     * Returns a mapped property name name.
+     * Returns a mapped property name.
      */
     protected String getValuePropName()  { return Expanded_Prop; }
+
+    /**
+     * Override to support properties for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        super.initProps(aPropSet);
+
+        // Collapsible, Expanded, TitleStyle
+        aPropSet.addPropNamed(Collapsible_Prop, boolean.class);
+        aPropSet.addPropNamed(Expanded_Prop, boolean.class, true);
+        aPropSet.addPropNamed(TitleStyle_Prop, TitleStyle.class, TitleStyle.EtchBorder);
+    }
+
+    /**
+     * Override to support properties for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Collapsible, Expanded, TitleStyle
+            case Collapsible_Prop: return isCollapsible();
+            case Expanded_Prop: case "Value": return isExpanded();
+            case TitleStyle_Prop: return getTitleStyle();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support properties for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // Collapsible, Expanded, TitleStyle
+            case Collapsible_Prop: setCollapsible(Convert.boolValue(aValue)); break;
+            case Expanded_Prop: case "Value": setExpanded(Convert.boolValue(aValue)); break;
+            case TitleStyle_Prop: setTitleStyle(titleStyleOf(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue); break;
+        }
+    }
 
     /**
      * XML archival.
@@ -444,6 +471,15 @@ public class TitleView extends ParentView implements ViewHost {
         // Unrchive Expandable, Expanded
         if (anElement.hasAttribute(Collapsible_Prop)) setCollapsible(anElement.getAttributeBoolValue(Collapsible_Prop));
         if (anElement.hasAttribute(Expanded_Prop)) setExpanded(anElement.getAttributeBoolValue(Expanded_Prop));
+    }
+
+    /**
+     * Returns a TitleStyle for given object.
+     */
+    private static TitleStyle titleStyleOf(Object aValue)
+    {
+        if (aValue == null || aValue instanceof TitleStyle) return (TitleStyle) aValue;
+        return EnumUtils.valueOfIC(TitleStyle.class, aValue.toString());
     }
 
     /**

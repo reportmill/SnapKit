@@ -212,6 +212,9 @@ public class ViewTheme {
         // TextArea
         setViewStylePropValue(TextArea.class, View.Padding_Prop, new Insets(2));
 
+        // TextArea
+        setViewStylePropValue(TitleView.class, View.Padding_Prop, new Insets(2));
+
         // ListArea
         setViewStylePropValue(ListArea.class, View.Fill_Prop, getContentColor());
 

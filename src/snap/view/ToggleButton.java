@@ -88,7 +88,7 @@ public class ToggleButton extends ButtonBase {
     }
 
     /**
-     * Returns a mapped property name name.
+     * Returns a mapped property name.
      */
     protected String getValuePropName()  { return Selected_Prop; }
 
