@@ -5,6 +5,7 @@ package snap.view;
 import java.util.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -524,6 +525,51 @@ public class SplitView extends ParentView implements ViewHost {
         if (isVertical())
             return aView.isMinHeightSet() && aView.isMaxHeightSet() && aView.getMinHeight() == aView.getMaxHeight();
         return aView.isMinWidthSet() && aView.isMaxWidthSet() && aView.getMinWidth() == aView.getMaxWidth();
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // DividerSpan
+        aPropSet.addPropNamed(DividerSpan_Prop, double.class, Divider.DEFAULT_SPAN);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // DividerSpan
+            case DividerSpan_Prop: return getDividerSpan();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // DividerSpan
+            case DividerSpan_Prop: setDividerSpan(Convert.doubleValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**

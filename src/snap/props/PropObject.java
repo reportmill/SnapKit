@@ -332,6 +332,16 @@ public abstract class PropObject implements PropChange.DoChange {
     }
 
     /**
+     * A hook to provide opportunity to modify archived PropNode.
+     */
+    protected void processArchivedNode(PropNode propNode)  { }
+
+    /**
+     * A hook to provide opportunity to modify un archived object.
+     */
+    protected void processUnarchivedNode(PropNode propNode)  { }
+
+    /**
      * Standard clone implementation.
      */
     @Override

@@ -8,6 +8,7 @@ import snap.geom.Pos;
 import snap.geom.Side;
 import snap.gfx.*;
 import snap.props.PropChange;
+import snap.props.PropNode;
 import snap.util.*;
 
 /**
@@ -422,6 +423,33 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
         Tab tab = getTab(anIndex);
         removeTab(anIndex);
         return tab.getContent();
+    }
+
+    /**
+     * A hook to provide opportunity to modify archived PropNode.
+     */
+    @Override
+    protected void processArchivedNode(PropNode propNode)
+    {
+        PropNode[] childNodes = (PropNode[]) propNode.getPropValue(Children_Prop);
+        for (int i = 0; i < childNodes.length; i++) {
+            PropNode childNode = childNodes[i];
+            childNode.setPropValue("Title", getTab(i).getTitle());
+        }
+    }
+
+    /**
+     * A hook to provide opportunity to modify un archived object.
+     */
+    protected void processUnarchivedNode(PropNode propNode)
+    {
+        PropNode childrenNode = (PropNode) propNode.getPropValue(Children_Prop);
+        PropNode[] childNodes = childrenNode.getPropValuesAsArray();
+        for (int i = 0; i < childNodes.length; i++) {
+            PropNode childNode = childNodes[i];
+            String title = childNode.getPropValueAsString("Title");
+            getTab(i).setTitle(title);
+        }
     }
 
     /**

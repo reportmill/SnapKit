@@ -3,7 +3,6 @@
  */
 package snap.view;
 import snap.geom.Insets;
-import snap.geom.Pos;
 
 /**
  * A ChildView subclass to show overlapping children.
@@ -16,7 +15,6 @@ public class StackView extends ChildView {
     public StackView()
     {
         super();
-        _align = Pos.CENTER;
     }
 
     /**

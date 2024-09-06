@@ -118,6 +118,9 @@ public class PropArchiver {
             if (nodeValue != null)
                 aPropNode.setPropValue(prop.getName(), nodeValue);
         }
+
+        // Call hook to provide opportunity for PropObject to modify PropNode
+        aPropObj.processArchivedNode(aPropNode);
     }
 
     /**
@@ -265,6 +268,9 @@ public class PropArchiver {
             if (!prop.isPreexisting())
                 propObject.setPropValue(prop.getName(), nativeValue);
         }
+
+        // Call hook to provide opportunity to modify unarchived PropObject for PropNode
+        propObject.processUnarchivedNode(propNode);
 
         // Return
         return propObject;
