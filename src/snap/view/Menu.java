@@ -12,7 +12,7 @@ import snap.util.*;
 /**
  * A MenuItem subclass to show child menu items.
  */
-public class Menu extends MenuItem {
+public class Menu extends MenuItem implements ViewHost {
 
     // List of MenuItems
     private List<MenuItem> _items = new ArrayList<>();
@@ -292,6 +292,32 @@ public class Menu extends MenuItem {
         super.setOwner(anOwner);
         for (View child : _items)
             child.setOwner(anOwner);
+    }
+
+    /**
+     * ViewHost method: Returns the number of guest views.
+     */
+    public int getGuestCount()  { return getItemCount(); }
+
+    /**
+     * ViewHost method: Returns the guest view at given index.
+     */
+    public View getGuest(int anIndex)  { return getItem(anIndex); }
+
+    /**
+     * ViewHost method: Adds the given view to this host's guest (children) list at given index.
+     */
+    public void addGuest(View aChild, int anIndex)
+    {
+        addItem((MenuItem) aChild);
+    }
+
+    /**
+     * ViewHost method: Remove's guest at given index from this host's guest (children) list.
+     */
+    public View removeGuest(int anIndex)
+    {
+        return null; //removeItem(anIndex);
     }
 
     /**

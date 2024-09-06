@@ -229,6 +229,11 @@ public class ViewTheme {
         setViewStylePropValue(RowView.class, View.Align_Prop, Pos.CENTER_LEFT);
         setViewStylePropValue(ColView.class, View.Align_Prop, Pos.TOP_LEFT);
         setViewStylePropValue(StackView.class, View.Align_Prop, Pos.CENTER);
+
+        // MenuBar, MenuItem
+        setViewStylePropValue(MenuBar.class, View.Padding_Prop, new Insets(2, 10, 2, 10));
+        setViewStylePropValue(MenuItem.class, View.Align_Prop, Pos.CENTER_LEFT);
+        setViewStylePropValue(MenuItem.class, View.Padding_Prop, new Insets(4, 8, 4, 6));
     }
 
     /**

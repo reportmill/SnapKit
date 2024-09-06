@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.geom.Insets;
 import snap.gfx.*;
 import snap.props.PropSet;
 import snap.util.*;
@@ -10,10 +9,9 @@ import snap.util.*;
 /**
  * A View to display menus in a menu bar.
  */
-public class MenuBar extends ParentView {
+public class MenuBar extends ParentView implements ViewHost {
 
     // Constants for properties
-    private static Insets DEFAULT_MENU_BAR_PADDING = new Insets(2, 10, 2, 10);
     protected static Font DEFAULT_MENU_BAR_FONT = new Font("Arial", 13);
 
     /**
@@ -22,7 +20,6 @@ public class MenuBar extends ParentView {
     public MenuBar()
     {
         super();
-        _padding = DEFAULT_MENU_BAR_PADDING;
         _font = DEFAULT_MENU_BAR_FONT;
     }
 
@@ -136,6 +133,32 @@ public class MenuBar extends ParentView {
      * Layout children.
      */
     protected void layoutImpl()  { RowView.layout(this, true); }
+
+    /**
+     * ViewHost method: Returns the number of guest views.
+     */
+    public int getGuestCount()  { return getMenus().length; }
+
+    /**
+     * ViewHost method: Returns the guest view at given index.
+     */
+    public View getGuest(int anIndex)  { return getMenus()[anIndex]; }
+
+    /**
+     * ViewHost method: Adds the given view to this host's guest (children) list at given index.
+     */
+    public void addGuest(View aChild, int anIndex)
+    {
+        addMenu((Menu) aChild);
+    }
+
+    /**
+     * ViewHost method: Remove's guest at given index from this host's guest (children) list.
+     */
+    public View removeGuest(int anIndex)
+    {
+        return removeMenu(anIndex);
+    }
 
     /**
      * Override to customize for this class.

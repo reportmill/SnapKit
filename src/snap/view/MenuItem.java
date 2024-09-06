@@ -3,9 +3,8 @@
  */
 package snap.view;
 import snap.geom.HPos;
-import snap.geom.Insets;
-import snap.geom.Pos;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -14,16 +13,16 @@ import snap.util.*;
 public class MenuItem extends ButtonBase implements Cloneable {
 
     // The accelerator string
-    private String  _key;
+    private String _shortcut;
     
     // The accelerator key combo
-    private KeyCombo  _kcombo;
+    private KeyCombo _keyCombo;
     
     // Whether item is selected
-    private boolean  _selected;
+    private boolean _selected;
     
     // The parent Menu (if there is one)
-    protected Menu  _parentMenu;
+    protected Menu _parentMenu;
     
     // Constants for properties
     public static final String Selected_Prop = "Selected";
@@ -31,7 +30,6 @@ public class MenuItem extends ButtonBase implements Cloneable {
 
     // Custom property defaults
     private static boolean DEFAULT_MENU_ITEM_SHOW_AREA = false;
-    private static Insets  DEFAULT_MENU_ITEM_PADDING = new Insets(4, 8, 4, 6);
 
     /**
      * Constructor.
@@ -39,8 +37,6 @@ public class MenuItem extends ButtonBase implements Cloneable {
     public MenuItem()
     {
         super();
-        _align = Pos.CENTER_LEFT;
-        _padding = DEFAULT_MENU_ITEM_PADDING;
         _showArea = DEFAULT_MENU_ITEM_SHOW_AREA;
     }
 
@@ -61,14 +57,14 @@ public class MenuItem extends ButtonBase implements Cloneable {
     /**
      * Returns the key string.
      */
-    public String getShortcut()  { return _key; }
+    public String getShortcut()  { return _shortcut; }
 
     /**
      * Sets the key string.
      */
     public void setShortcut(String aValue)
     {
-        firePropChange(Shortcut_Prop, _key, _key = aValue);
+        firePropChange(Shortcut_Prop, _shortcut, _shortcut = aValue);
 
         // Set graphic
         if (aValue == null) { setGraphicAfter(null); return; }
@@ -83,7 +79,7 @@ public class MenuItem extends ButtonBase implements Cloneable {
      */
     public KeyCombo getShortcutCombo()
     {
-        return _kcombo != null || _key == null ? _kcombo : (_kcombo = KeyCombo.get(_key));
+        return _keyCombo != null || _shortcut == null ? _keyCombo : (_keyCombo = KeyCombo.get(_shortcut));
     }
 
     /**
@@ -192,26 +188,6 @@ public class MenuItem extends ButtonBase implements Cloneable {
     }
 
     /**
-     * Override because TeaVM hates reflection.
-     */
-    public Object getPropValue(String aPropName)
-    {
-        if (aPropName.equals("Value") || aPropName.equals(Selected_Prop))
-            return isSelected();
-        return super.getPropValue(aPropName);
-    }
-
-    /**
-     * Override because TeaVM hates reflection.
-     */
-    public void setPropValue(String aPropName, Object aValue)
-    {
-        if (aPropName.equals("Value") || aPropName.equals(Selected_Prop))
-            setSelected(Convert.boolValue(aValue));
-        else super.setPropValue(aPropName, aValue);
-    }
-
-    /**
      * Copies a menu item.
      */
     public MenuItem clone()
@@ -238,6 +214,53 @@ public class MenuItem extends ButtonBase implements Cloneable {
     }
 
     /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Shortcut
+        aPropSet.addPropNamed(Shortcut_Prop, String.class, EMPTY_OBJECT);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Selected, Shortcut
+            case Selected_Prop: case "Value": return isSelected();
+            case Shortcut_Prop: return getShortcut();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // Selected, Shortcut
+            case Selected_Prop: case "Value": setSelected(Convert.boolValue(aValue));
+            case Shortcut_Prop: setShortcut(Convert.stringValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
+    }
+
+    /**
      * XML archival.
      */
     public XMLElement toXMLView(XMLArchiver anArchiver)
@@ -247,7 +270,7 @@ public class MenuItem extends ButtonBase implements Cloneable {
 
         // Archive Accelerator
         if (getShortcut() != null && !getShortcut().isEmpty())
-            e.add("key", getShortcut());
+            e.add("Key", getShortcut());
         return e;
     }
 
@@ -260,6 +283,6 @@ public class MenuItem extends ButtonBase implements Cloneable {
         super.fromXMLView(anArchiver, anElement);
 
         // Unarchive Accelerator
-        String key = anElement.getAttributeValue("key"); if (key != null) setShortcut(key);
+        String key = anElement.getAttributeValue("Key"); if (key != null) setShortcut(key);
     }
 }
