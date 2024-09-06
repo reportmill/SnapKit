@@ -4,10 +4,10 @@
 package snap.view;
 import java.util.*;
 import java.util.function.*;
-
 import snap.geom.Polygon;
 import snap.geom.Pos;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -18,7 +18,7 @@ import snap.util.*;
 public class ComboBox <T> extends ParentView implements Selectable<T> {
 
     // The TextField (if showing)
-    private TextField  _text;
+    private TextField _textField;
     
     // The Button to show popup (and maybe text)
     private Button  _button;
@@ -40,7 +40,12 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
 
     // The arrow image
     private static Image  _arrowImg;
-    
+
+    // Constants for properties
+    public static final String ShowTextField_Prop = "ShowTextField";
+    public static final String ShowButton_Prop = "ShowButton";
+    public static final String FilterList_Prop = "FilterList";
+
     /**
      * Constructor.
      */
@@ -90,15 +95,16 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
      */
     public TextField getTextField()
     {
-        if (_text != null) return _text;
-        _text = new TextField();
-        _text.setGrowWidth(true);
-        _text.setColCount(0);
-        _text.addEventHandler(e -> textFieldFiredAction(), Action);
-        _text.addEventFilter(e -> textFieldKeyPressed(e), KeyPress);
-        _text.addEventFilter(e -> ViewUtils.runLater(() -> textFieldKeyTyped(e)), KeyType);
-        _text.addPropChangeListener(pce -> textFieldFocusChanged(), View.Focused_Prop);
-        return _text;
+        if (_textField != null) return _textField;
+
+        _textField = new TextField();
+        _textField.setGrowWidth(true);
+        _textField.setColCount(0);
+        _textField.addEventHandler(this::handleTextFieldActionEvent, Action);
+        _textField.addEventFilter(this::handleTextFieldKeyPressEvent, KeyPress);
+        _textField.addEventFilter(e -> ViewUtils.runLater(() -> handleTextFieldKeyTypeEvent(e)), KeyType);
+        _textField.addPropChangeListener(pc -> handleTextFieldFocusChanged(), View.Focused_Prop);
+        return _textField;
     }
 
     /**
@@ -155,7 +161,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Returns whether to show TextField.
      */
-    public boolean isShowTextField()  { return _text!=null && _text.getParent()!=null; }
+    public boolean isShowTextField()  { return _textField !=null && _textField.getParent()!=null; }
 
     /**
      * Sets whether to show TextField.
@@ -244,7 +250,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
      */
     public PopupList <T> getPopupList()
     {
-        return getListView() instanceof PopupList? (PopupList) _list : null;
+        return getListView() instanceof PopupList? (PopupList<T>) _list : null;
     }
 
     /**
@@ -352,8 +358,8 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         // Set in TextField or Button
         String str = item != null ? getListView().getText(item) : aString;
         if (isShowTextField())
-            _text.setText(aString);
-        else _button.setText(aString);
+            _textField.setText(str);
+        else _button.setText(str);
     }
 
     /**
@@ -371,11 +377,11 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Called when TextField focus changed.
      */
-    protected void textFieldFocusChanged()
+    protected void handleTextFieldFocusChanged()
     {
         // On focus gained: SelectAll, get copy of current items,
-        if (_text.isFocused()) {
-            _text.selectAll();
+        if (_textField.isFocused()) {
+            _textField.selectAll();
             _items = new ArrayList<>(getListView().getItemsList());
             if (isPopup() && getItemCount()>0)
                 showPopup();
@@ -388,7 +394,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Called before TextField has KeyPress.
      */
-    protected void textFieldKeyPressed(ViewEvent anEvent)
+    protected void handleTextFieldKeyPressEvent(ViewEvent anEvent)
     {
         // Handle UpArrow/DownArrow: send to list
         if (anEvent.isUpArrow())  {
@@ -404,10 +410,10 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         else if (anEvent.isEscapeKey()) {
 
             // If value has changed, reset to focus gained values
-            if (_text.isEdited()) {
+            if (_textField.isEdited()) {
                 _list.setItemsList(_items);
-                _list.setText(_text._focusGainedText);
-                _text.selectAll();
+                _list.setText(_textField._focusGainedText);
+                _textField.selectAll();
                 if (getItemCount() == 0 && isPopup() && isPopupShowing())
                     getPopupList().hide();
             }
@@ -426,22 +432,22 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Called after TextField has KeyType.
      */
-    protected void textFieldKeyTyped(ViewEvent anEvent)
+    protected void handleTextFieldKeyTypeEvent(ViewEvent anEvent)
     {
         // Get prefix text and current selection
-        String text = _text.getText();
-        int selStart = _text.getSelStart();
+        String text = _textField.getText();
+        int selStart = _textField.getSelStart();
 
         // Not sure if/why we needed this
-        if (!_text.isSelEmpty()) { System.err.println("ComboBox.textFieldKeyTyped: not SelEmpty?"); return; }
+        if (!_textField.isSelEmpty()) { System.err.println("ComboBox.textFieldKeyTyped: not SelEmpty?"); return; }
         //text = text.substring(0, selStart);
 
         // Get items for prefix
         List <T> items = getItemsForPrefix(selStart>0? text : "");
-        T item = items.size() > 0 ? items.get(0) : null;
+        T item = !items.isEmpty() ? items.get(0) : null;
 
         // What to do if empty text?
-        if (text.length() == 0 && items.size() > 0)
+        if (text.isEmpty() && !items.isEmpty())
             item = getSelItem();
 
         // Set ListView Items, SelItem
@@ -451,13 +457,13 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
             getPopupList().hide();
 
         // Reset text and selection (since List.setSelItem changes it)
-        _text.setText(text);
-        _text.setSel(selStart);
+        _textField.setText(text);
+        _textField.setSel(selStart);
 
         // If completion item available, set completion text
         if (item != null) {
             String ctext = getText(item);
-            _text.setCompletionText(ctext);
+            _textField.setCompletionText(ctext);
         }
 
         // Handle KeyPress with no PopupShowing
@@ -475,7 +481,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
             return _prefixFunction.apply(aStr);
 
         // If no string, return all items
-        if (aStr.length() == 0)
+        if (aStr.isEmpty())
             return _items;
 
         // Otherwise, return items that start with prefix
@@ -492,12 +498,11 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Called when TextField fires action.
      */
-    protected void textFieldFiredAction()
+    protected void handleTextFieldActionEvent(ViewEvent anEvent)
     {
         if (isPopup() && isPopupShowing())
             getPopupList().hide();
-        //getListView().setText(_text.getText());
-        fireActionEvent(null);
+        fireActionEvent(anEvent);
     }
 
     /**
@@ -516,7 +521,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     {
         T item = getSelItem();
         String str = getText(item);
-        if (isShowTextField()) { _text.setText(str); _text.selectAll(); }
+        if (isShowTextField()) { _textField.setText(str); _textField.selectAll(); }
         else _button.setText(str);
     }
 
@@ -527,7 +532,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     {
         super.setAlign(aPos);
         if (isShowTextField())
-            _text.setAlign(aPos);
+            _textField.setAlign(aPos);
         else _button.setAlign(aPos);
     }
 
@@ -537,8 +542,8 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     public void setDisabled(boolean aValue)
     {
         super.setDisabled(aValue);
-        if (_text != null)
-            _text.setDisabled(aValue);
+        if (_textField != null)
+            _textField.setDisabled(aValue);
         _button.setDisabled(aValue);
     }
 
@@ -581,6 +586,56 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     }
 
     /**
+     * Override to support properties for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        super.initProps(aPropSet);
+
+        // ShowTextField, ShowButton, FilterList
+        aPropSet.addPropNamed(ShowTextField_Prop, boolean.class);
+        aPropSet.addPropNamed(ShowButton_Prop, boolean.class, true);
+        aPropSet.addPropNamed(FilterList_Prop, boolean.class);
+    }
+
+    /**
+     * Override to support properties for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // ShowTextField, ShowButton, FilterList
+            case ShowTextField_Prop: return isShowTextField();
+            case ShowButton_Prop: return isShowButton();
+            case FilterList_Prop: return isFilterList();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support properties for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // ShowTextField, ShowButton, FilterList
+            case ShowTextField_Prop: setShowTextField(Convert.boolValue(aValue)); break;
+            case ShowButton_Prop: setShowButton(Convert.boolValue(aValue)); break;
+            case FilterList_Prop: setFilterList(Convert.boolValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue); break;
+        }
+    }
+
+    /**
      * XML archival.
      */
     public XMLElement toXMLView(XMLArchiver anArchiver)
@@ -589,9 +644,9 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive ShowTextField, ShowButton, FilterList
-        if (isShowTextField()) e.add("ShowTextField", true);
-        if (isShowButton()!=isPopup()) e.add("ShowButton", isShowButton());
-        if (isFilterList()) e.add("FilterList", true);
+        if (isShowTextField()) e.add(ShowTextField_Prop, true);
+        if (isShowButton()!=isPopup()) e.add(ShowButton_Prop, isShowButton());
+        if (isFilterList()) e.add(FilterList_Prop, true);
 
         // Return element
         return e;
@@ -606,12 +661,12 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         super.fromXMLView(anArchiver, anElement);
 
         // Unarchive ShowTextField, ShowButton, FilterList
-        if (anElement.hasAttribute("ShowTextField"))
-            setShowTextField(anElement.getAttributeBooleanValue("ShowTextField"));
-        if (anElement.hasAttribute("ShowButton"))
-            setShowButton(anElement.getAttributeBooleanValue("ShowButton"));
-        if (anElement.hasAttribute("FilterList"))
-            setFilterList(anElement.getAttributeBooleanValue("FilterList"));
+        if (anElement.hasAttribute(ShowTextField_Prop))
+            setShowTextField(anElement.getAttributeBooleanValue(ShowTextField_Prop));
+        if (anElement.hasAttribute(ShowButton_Prop))
+            setShowButton(anElement.getAttributeBooleanValue(ShowButton_Prop));
+        if (anElement.hasAttribute(FilterList_Prop))
+            setFilterList(anElement.getAttributeBooleanValue(FilterList_Prop));
     }
 
     /**

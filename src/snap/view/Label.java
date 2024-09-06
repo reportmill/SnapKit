@@ -36,10 +36,11 @@ public class Label extends ParentView {
     private TextField  _editor;
     
     // Constants for properties
-    public static final String Editable_Prop = "Editable";
-    public static final String Editing_Prop = "Editing";
+    public static final String ImageName_Prop = "ImageName";
     public static final String Graphic_Prop = "Graphic";
     public static final String GraphicAfter_Prop = "GraphicAfter";
+    public static final String Editable_Prop = "Editable";
+    public static final String Editing_Prop = "Editing";
 
     /**
      * Creates a label node.
@@ -263,7 +264,9 @@ public class Label extends ParentView {
      */
     public void setImageName(String aName)
     {
-        _imageName = aName;
+        if (Objects.equals(aName, _imageName)) return;
+        firePropChange(ImageName_Prop, _imageName, _imageName = aName);
+        repaint();
     }
 
     /**
@@ -431,10 +434,11 @@ public class Label extends ParentView {
         // Do normal version
         super.initProps(aPropSet);
 
-        // Editable, Graphic, GraphicAfter
+        // ImageName, Graphic, GraphicAfter, Editable
+        aPropSet.addPropNamed(ImageName_Prop, String.class, EMPTY_OBJECT);
+        //aPropSet.addPropNamed(Graphic_Prop, View.class);
+        //aPropSet.addPropNamed(GraphicAfter_Prop, View.class);
         aPropSet.addPropNamed(Editable_Prop, boolean.class);
-        aPropSet.addPropNamed(Graphic_Prop, View.class);
-        aPropSet.addPropNamed(GraphicAfter_Prop, View.class);
     }
 
     /**
@@ -446,10 +450,11 @@ public class Label extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // Editable, Graphic, GraphicAfter
-            case Editable_Prop: return isEditable();
+            // ImageName, Graphic, GraphicAfter, Editable
+            case ImageName_Prop: return getImageName();
             case Graphic_Prop: return getGraphic();
             case GraphicAfter_Prop: return getGraphicAfter();
+            case Editable_Prop: return isEditable();
 
             // Do normal version
             default: return super.getPropValue(aPropName);
@@ -465,10 +470,11 @@ public class Label extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // Editable, Graphic, GraphicAfter
-            case Editable_Prop: setEditable(Convert.boolValue(aValue)); break;
+            // ImageName, Graphic, GraphicAfter, Editable
+            case ImageName_Prop: setImageName(Convert.stringValue(aValue)); break;
             case Graphic_Prop: setGraphic((View) aValue); break;
             case GraphicAfter_Prop: setGraphicAfter(((View) aValue)); break;
+            case Editable_Prop: setEditable(Convert.boolValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);

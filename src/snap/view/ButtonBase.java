@@ -7,6 +7,7 @@ import snap.geom.Pos;
 import snap.geom.RoundRect;
 import snap.geom.Shape;
 import snap.gfx.*;
+import snap.props.PropObject;
 import snap.props.PropSet;
 import snap.util.*;
 import java.util.Objects;
@@ -19,14 +20,14 @@ public class ButtonBase extends ParentView {
     // The button label
     private Label  _label;
     
-    // The image name, if loaded from local resource
-    private String  _imageName;
-    
     // Whether button displays the standard background area
     protected boolean _showArea;
     
     // The position of the button when in a group (determines corner rendering)
-    private Pos  _pos;
+    private Pos _position;
+
+    // The image name, if loaded from local resource
+    private String  _imageName;
 
     // The shared action
     private SharedAction _sharedAction;
@@ -41,10 +42,10 @@ public class ButtonBase extends ParentView {
     private boolean  _tracked;
     
     // Constants for properties
-    public static final String ImageName_Prop = "ImageName";
-    public static final String Pressed_Prop = "Pressed";
     public static final String ShowArea_Prop = "ShowArea";
     public static final String Position_Prop = "Position";
+    public static final String ImageName_Prop = "ImageName";
+    public static final String Pressed_Prop = "Pressed";
     public static final String Targeted_Prop = "Targeted";
 
     // Button states
@@ -175,15 +176,15 @@ public class ButtonBase extends ParentView {
     /**
      * Returns the position of the button when in a group (determines corner rendering).
      */
-    public Pos getPosition()  { return _pos; }
+    public Pos getPosition()  { return _position; }
 
     /**
      * Sets the position of the button when in a group (determines corner rendering).
      */
     public void setPosition(Pos aPos)
     {
-        if (aPos == _pos) return;
-        firePropChange(Position_Prop, _pos, _pos = aPos);
+        if (aPos == _position) return;
+        firePropChange(Position_Prop, _position, _position = aPos);
         repaint();
     }
 
@@ -442,9 +443,10 @@ public class ButtonBase extends ParentView {
     {
         super.initProps(aPropSet);
 
-        // ShowArea, Position
-        aPropSet.addPropNamed(ShowArea_Prop, boolean.class);
+        // ShowArea, Position, ImageName
+        aPropSet.addPropNamed(ShowArea_Prop, boolean.class, DEFAULT_SHOW_AREA);
         aPropSet.addPropNamed(Position_Prop, Pos.class);
+        aPropSet.addPropNamed(ImageName_Prop, String.class, PropObject.EMPTY_OBJECT);
     }
 
     /**
@@ -455,9 +457,10 @@ public class ButtonBase extends ParentView {
     {
         switch (aPropName) {
 
-            // ShowArea, Position
+            // ShowArea, Position, ImageName
             case ShowArea_Prop: return isShowArea();
             case Position_Prop: return getPosition();
+            case ImageName_Prop: return getImageName();
 
             // Do normal version
             default: return super.getPropValue(aPropName);
@@ -472,9 +475,10 @@ public class ButtonBase extends ParentView {
     {
         switch (aPropName) {
 
-            // ShowArea, Position
+            // ShowArea, Position, ImageName
             case ShowArea_Prop: setShowArea(Convert.boolValue(aValue)); break;
-            case Position_Prop: setPosition((Pos) aValue); break;
+            case Position_Prop: setPosition(Pos.of(aValue)); break;
+            case ImageName_Prop: setImageName(Convert.stringValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue); break;
