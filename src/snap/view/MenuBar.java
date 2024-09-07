@@ -80,7 +80,7 @@ public class MenuBar extends ParentView implements ViewHost {
         // Handle Menu
         if (aMenuItem instanceof Menu) {
             Menu menu = (Menu) aMenuItem;
-            for (MenuItem item : menu.getItems()) {
+            for (MenuItem item : menu.getMenuItems()) {
                 MenuItem match = getMatchingMenuItem(item, anEvent);
                 if(match != null)
                     return match;

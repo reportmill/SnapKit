@@ -6,6 +6,7 @@ import java.util.*;
 import snap.geom.HPos;
 import snap.geom.Point;
 import snap.geom.Size;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -22,13 +23,14 @@ public class MenuButton extends ButtonBase {
     // The popup size
     private Size  _popSize;
 
-    // The items
-    private List<MenuItem>  _items = new ArrayList<>();
+    // The menu items
+    private ObjectArray<MenuItem> _menuItems = new ObjectArray<>(MenuItem.class);
 
     // The menu
     private Menu _menu;
 
     // Constants for properties
+    public static final String MenuItems_Prop = "MenuItems";
     public static final String ShowArrow_Prop = "ShowArrow";
 
     /**
@@ -41,27 +43,31 @@ public class MenuButton extends ButtonBase {
     }
 
     /**
-     * Returns the items.
+     * Returns the menu items.
      */
-    public List<MenuItem> getItems()  { return _items; }
+    public MenuItem[] getMenuItems()  { return _menuItems.getArray(); }
 
     /**
-     * Sets the items.
+     * Sets the menu items.
      */
-    public void setItems(List<MenuItem> theItems)
+    public void setMenuItems(MenuItem[] theItems)
     {
-        _items.clear();
+        MenuItem[] oldItems = _menuItems.getArray();
+        _menuItems.clear();
         if (theItems != null)
             for (MenuItem mi : theItems)
-                addItem(mi);
+                addMenuItem(mi);
+
+        // Fire prop change
+        firePropChange(MenuItems_Prop, oldItems, theItems);
     }
 
     /**
-     * Adds a new item.
+     * Adds a menu item.
      */
-    public void addItem(MenuItem anItem)
+    public void addMenuItem(MenuItem anItem)
     {
-        _items.add(anItem);
+        _menuItems.add(anItem);
     }
 
     /**
@@ -134,9 +140,8 @@ public class MenuButton extends ButtonBase {
 
         // Create menu with items
         Menu menu = new Menu();
-        List<MenuItem> menuItems = getItems();
-        for (MenuItem item : menuItems)
-            menu.addItem(item);
+        MenuItem[] menuItems = getMenuItems();
+        menu.setMenuItems(menuItems);
 
         // Return
         return _menu = menu;
@@ -210,7 +215,7 @@ public class MenuButton extends ButtonBase {
      */
     public MenuItem getItemForName(String aName)
     {
-        return ListUtils.findMatch(_items, menuItem -> Objects.equals(menuItem.getName(), aName));
+        return ArrayUtils.findMatch(getMenuItems(), menuItem -> Objects.equals(menuItem.getName(), aName));
     }
 
     /**
@@ -220,8 +225,56 @@ public class MenuButton extends ButtonBase {
     public void setOwner(ViewOwner anOwner)
     {
         super.setOwner(anOwner);
-        for (View child : _items)
+        for (View child : getMenuItems())
             child.setOwner(anOwner);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // MenuItems, ShowArrow
+        aPropSet.addPropNamed(MenuItems_Prop, MenuItem[].class, EMPTY_OBJECT);
+        aPropSet.addPropNamed(ShowArrow_Prop, boolean.class, true);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // MenuItems, ShowArrow
+            case MenuItems_Prop: return getMenuItems();
+            case ShowArrow_Prop: return isShowArrow();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // MenuItems, ShowArrow
+            case MenuItems_Prop: setMenuItems((MenuItem[]) aValue); break;
+            case ShowArrow_Prop: setShowArrow(Convert.boolValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**
@@ -279,7 +332,7 @@ public class MenuButton extends ButtonBase {
     protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     {
         // Archive children
-        for (View child : getItems())
+        for (View child : getMenuItems())
             anElement.add(anArchiver.toXML(child, this));
     }
 
@@ -296,7 +349,7 @@ public class MenuButton extends ButtonBase {
             Class<?> childClass = anArchiver.getClass(childXML.getName());
             if (childClass != null && MenuItem.class.isAssignableFrom(childClass)) {
                 MenuItem mitem = (MenuItem) anArchiver.fromXML(childXML, this);
-                addItem(mitem);
+                addMenuItem(mitem);
             }
         }
     }

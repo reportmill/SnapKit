@@ -12,10 +12,10 @@ import snap.util.*;
 /**
  * A MenuItem subclass to show child menu items.
  */
-public class Menu extends MenuItem implements ViewHost {
+public class Menu extends MenuItem {
 
-    // List of MenuItems
-    private List<MenuItem> _items = new ArrayList<>();
+    // MenuItems
+    private ObjectArray<MenuItem> _items = new ObjectArray<>(MenuItem.class);
 
     // The Arrow graphic
     private static Polygon _arrow = new Polygon(0, 0, 9, 5, 0, 10);
@@ -24,6 +24,9 @@ public class Menu extends MenuItem implements ViewHost {
     private PopupWindow _popupWindow;
 
     // Constants for properties
+    public static final String MenuItems_Prop = "MenuItems";
+
+    // Constants for property defaults
     protected static Font DEFAULT_MENU_FONT = MenuBar.DEFAULT_MENU_BAR_FONT;
 
     /**
@@ -70,24 +73,18 @@ public class Menu extends MenuItem implements ViewHost {
     }
 
     /**
-     * Returns the child items.
+     * Returns the child menu items.
      */
-    public List<MenuItem> getItems()  { return _items; }
+    public MenuItem[] getMenuItems()  { return _items.getArray(); }
 
     /**
-     * Returns the number of items.
+     * Sets the child menu items.
      */
-    public int getItemCount()
+    public void setMenuItems(MenuItem[] theItems)
     {
-        return _items.size();
-    }
-
-    /**
-     * Override to return child as MenuItem.
-     */
-    public MenuItem getItem(int anIndex)
-    {
-        return _items.get(anIndex);
+        _items.clear();
+        for (MenuItem item : theItems)
+            addItem(item);
     }
 
     /**
@@ -132,7 +129,7 @@ public class Menu extends MenuItem implements ViewHost {
         itemColView.setPadding(4, 1, 4, 1);
 
         // Add MenuItems to ItemColView
-        for (MenuItem menuItem : _items)
+        for (MenuItem menuItem : getMenuItems())
             itemColView.addChild(menuItem);
 
         // Set PopupWindow.Content to ItemColView and return
@@ -253,17 +250,6 @@ public class Menu extends MenuItem implements ViewHost {
     }
 
     /**
-     * Returns the menu showing (or null).
-     */
-    public Menu getMenuShowing()
-    {
-        for (MenuItem menuItem : getItems())
-            if (menuItem instanceof Menu && ((Menu) menuItem).isPopupShowing())
-                return (Menu) menuItem;
-        return null;
-    }
-
-    /**
      * Override to include child menu items.
      */
     @Override
@@ -275,7 +261,7 @@ public class Menu extends MenuItem implements ViewHost {
             return child;
 
         // Search MenuItems for name, return if found
-        child = ListUtils.findMatch(_items, item -> Objects.equals(aName, item.getName()));
+        child = ArrayUtils.findMatch(getMenuItems(), item -> Objects.equals(aName, item.getName()));
         if (child != null)
             return child;
 
@@ -290,34 +276,8 @@ public class Menu extends MenuItem implements ViewHost {
     public void setOwner(ViewOwner anOwner)
     {
         super.setOwner(anOwner);
-        for (View child : _items)
+        for (View child : getMenuItems())
             child.setOwner(anOwner);
-    }
-
-    /**
-     * ViewHost method: Returns the number of guest views.
-     */
-    public int getGuestCount()  { return getItemCount(); }
-
-    /**
-     * ViewHost method: Returns the guest view at given index.
-     */
-    public View getGuest(int anIndex)  { return getItem(anIndex); }
-
-    /**
-     * ViewHost method: Adds the given view to this host's guest (children) list at given index.
-     */
-    public void addGuest(View aChild, int anIndex)
-    {
-        addItem((MenuItem) aChild);
-    }
-
-    /**
-     * ViewHost method: Remove's guest at given index from this host's guest (children) list.
-     */
-    public View removeGuest(int anIndex)
-    {
-        return null; //removeItem(anIndex);
     }
 
     /**
@@ -329,8 +289,39 @@ public class Menu extends MenuItem implements ViewHost {
         // Do normal version
         super.initProps(aPropSet);
 
+        // MenuItems
+        aPropSet.addPropNamed(MenuItems_Prop, MenuItem[].class, EMPTY_OBJECT);
+
         // Reset defaults
         aPropSet.getPropForName(Font_Prop).setDefaultValue(DEFAULT_MENU_FONT);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        // MenuItems
+        if (aPropName.equals(MenuItems_Prop))
+            return getMenuItems();
+
+        // Do normal version
+        return super.getPropValue(aPropName);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        // MenuItems
+        if (aPropName.equals(MenuItems_Prop))
+            setMenuItems((MenuItem[]) aValue);
+
+        // Do normal version
+        else super.setPropValue(aPropName, aValue);
     }
 
     /**
@@ -338,11 +329,8 @@ public class Menu extends MenuItem implements ViewHost {
      */
     protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     {
-        // Archive children
-        for (int i = 0, iMax = getItemCount(); i < iMax; i++) {
-            MenuItem child = getItem(i);
+        for (MenuItem child : getMenuItems())
             anElement.add(anArchiver.toXML(child, this));
-        }
     }
 
     /**

@@ -14,7 +14,7 @@ public class ObjectArray<T> implements Cloneable {
     protected T[]  _array;
 
     // The array length
-    protected int  _length;
+    protected int _size;
 
     // The class
     private Class<T>  _compClass;
@@ -37,13 +37,13 @@ public class ObjectArray<T> implements Cloneable {
         super();
         _array = anArray;
         _compClass = (Class<T>) anArray.getClass().getComponentType();
-        _length = anArray.length;
+        _size = anArray.length;
     }
 
     /**
      * Returns the length.
      */
-    public final int length()  { return _length; }
+    public final int size()  { return _size; }
 
     /**
      * Sets the length.
@@ -51,11 +51,11 @@ public class ObjectArray<T> implements Cloneable {
     public void setLength(int aValue)
     {
         // Expand components array if needed
-        if (aValue >= _length)
+        if (aValue >= _size)
             _array = Arrays.copyOf(_array, aValue);
 
         // Set length
-        _length = aValue;
+        _size = aValue;
     }
 
     /**
@@ -76,7 +76,7 @@ public class ObjectArray<T> implements Cloneable {
      */
     public void add(T aValue)
     {
-        add(aValue, _length);
+        add(aValue, _size);
     }
 
     /**
@@ -85,16 +85,16 @@ public class ObjectArray<T> implements Cloneable {
     public void add(T aValue, int anIndex)
     {
         // Expand components array if needed
-        if (_length == _array.length)
+        if (_size == _array.length)
             _array = Arrays.copyOf(_array, Math.max(_array.length * 2, 20));
 
         // If index is inside current length, shift existing elements over
-        if (anIndex < _length)
-            System.arraycopy(_array, anIndex, _array, anIndex + 1, _length - anIndex);
+        if (anIndex < _size)
+            System.arraycopy(_array, anIndex, _array, anIndex + 1, _size - anIndex);
 
         // Set value and increment length
         _array[anIndex] = aValue;
-        _length++;
+        _size++;
     }
 
     /**
@@ -103,24 +103,29 @@ public class ObjectArray<T> implements Cloneable {
     public void removeIndex(int anIndex)
     {
         // Shift remaining elements in
-        System.arraycopy(_array, anIndex + 1, _array, anIndex, _length - anIndex - 1);
-        _length--;
+        System.arraycopy(_array, anIndex + 1, _array, anIndex, _size - anIndex - 1);
+        _size--;
     }
+
+    /**
+     * Clears the list.
+     */
+    public void clear()  { setLength(0); }
 
     /**
      * Returns the simple array (trimmed to length).
      */
     public T[] getArray()
     {
-        if (_length != _array.length)
-            _array = Arrays.copyOf(_array, _length);
+        if (_size != _array.length)
+            _array = Arrays.copyOf(_array, _size);
         return _array;
     }
 
     /**
      * Returns the last item.
      */
-    public T getLast()  { return _length > 0 ? _array[_length - 1] : null; }
+    public T getLast()  { return _size > 0 ? _array[_size - 1] : null; }
 
     /**
      * Returns the component class.
@@ -167,7 +172,7 @@ public class ObjectArray<T> implements Cloneable {
         sb.append("ComponentClass=").append(className).append(", ");
 
         // Add Length
-        sb.append("Length=").append(length());
+        sb.append("Length=").append(size());
 
         // Return
         return sb.toString();

@@ -194,13 +194,10 @@ public class MenuItem extends ButtonBase implements Cloneable {
     {
         MenuItem clone;
         if (this instanceof Menu) {
-            Menu menu = (Menu) this;
             clone = new Menu();
-            for (int i = 0, iMax = menu.getItemCount(); i < iMax; i++) {
-                MenuItem item = menu.getItem(i);
-                MenuItem iclone = item.clone();
-                ((Menu) clone).addItem(iclone);
-            }
+            MenuItem[] menuItems = ((Menu) this).getMenuItems();
+            MenuItem[] menuItemsCopy = ArrayUtils.map(menuItems, item -> item.clone(), MenuItem.class);
+            ((Menu) clone).setMenuItems(menuItemsCopy);
         }
         else if (this instanceof CheckBoxMenuItem)
             clone = new CheckBoxMenuItem();
