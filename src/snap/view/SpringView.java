@@ -8,6 +8,8 @@ import snap.geom.HPos;
 import snap.geom.VPos;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
+import snap.props.PropNode;
+import snap.props.PropObject;
 import snap.util.*;
 
 /**
@@ -147,6 +149,24 @@ public class SpringView extends ChildView {
         String propName = aPCE.getPropName();
         if (propName == X_Prop || propName == Y_Prop || propName == Width_Prop || propName == Height_Prop)
             resetSpringInfo((View)aPCE.getSource());
+    }
+
+    /**
+     * A hook to provide opportunity to modify archived PropNode.
+     */
+    @Override
+    protected void processArchivedNode(PropNode propNode)
+    {
+        PropNode[] childNodes = (PropNode[]) propNode.getPropValue(Children_Prop);
+        if (childNodes == null) return;
+        for (int i = 0; i < childNodes.length; i++) {
+            PropNode childNode = childNodes[i];
+            View childView = getChild(i);
+            if (childView.getX() != 0) childNode.setPropValue("X", childView.getX());
+            if (childView.getY() != 0) childNode.setPropValue("Y", childView.getY());
+            if (childView.getWidth() != 0) childNode.setPropValue("Width", childView.getWidth());
+            if (childView.getHeight() != 0) childNode.setPropValue("Height", childView.getHeight());
+        }
     }
 
     /**

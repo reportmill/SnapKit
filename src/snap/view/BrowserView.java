@@ -9,6 +9,7 @@ import snap.geom.Insets;
 import snap.geom.Polygon;
 import snap.geom.Rect;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -598,6 +599,54 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
 
         // Set, return
         return _branchImage = branchImage;
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // PrefColCount, PrefColWidth
+        aPropSet.addPropNamed(PrefColCount_Prop, int.class, DEFAULT_PREF_COL_COUNT);
+        aPropSet.addPropNamed(PrefColWidth_Prop, int.class, DEFAULT_PREF_COL_WIDTH);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // PrefColCount, PrefColWidth
+            case PrefColCount_Prop: return getPrefColCount();
+            case PrefColWidth_Prop: return getPrefColWidth();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // PrefColCount, PrefColWidth
+            case PrefColCount_Prop: setPrefColCount(Convert.intValue(aValue)); break;
+            case PrefColWidth_Prop: setPrefColWidth(Convert.intValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**
