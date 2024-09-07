@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import snap.props.PropChange;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -40,8 +41,8 @@ public class ListView <T> extends ParentView implements Selectable<T> {
 
         // Create/configure ListArea
         _listArea = createListArea();
-        _listArea.addEventHandler(e -> listAreaDidFireActionEvent(e), Action);
-        _listArea.addPropChangeListener(pce -> listAreaPropChange(pce));
+        _listArea.addEventHandler(this::handleListAreaActionEvent, Action);
+        _listArea.addPropChangeListener(this::handleListAreaSelChanged, Sel_Prop);
 
         // Enable Focus
         setFocusable(true);
@@ -289,13 +290,13 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      */
     public String getValuePropName()
     {
-        return getBindingForName(SelIndex_Prop)!=null ? SelIndex_Prop : SelItem_Prop;
+        return getBindingForName(SelIndex_Prop) != null ? SelIndex_Prop : SelItem_Prop;
     }
 
     /**
      * Catches ListArea Action event to resend from this ListView (and suppress original).
      */
-    void listAreaDidFireActionEvent(ViewEvent anEvent)
+    private void handleListAreaActionEvent(ViewEvent anEvent)
     {
         fireActionEvent(anEvent);
         anEvent.consume();
@@ -304,11 +305,9 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Catches property changes from ListArea and redispatches for this ListView.
      */
-    void listAreaPropChange(PropChange aPC)
+    private void handleListAreaSelChanged(PropChange aPC)
     {
-        String pname = aPC.getPropName();
-        if (pname==ListArea.Sel_Prop)
-            firePropChange(Sel_Prop, aPC.getOldValue(), aPC.getNewValue());
+        firePropChange(Sel_Prop, aPC.getOldValue(), aPC.getNewValue());
     }
 
     /**
@@ -320,6 +319,47 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         super.setBorderRadius(aValue);
         _scrollView.setBorderRadius(aValue);
         _listArea.setBorderRadius(aValue);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // ItemKey
+        aPropSet.addPropNamed(ItemKey_Prop, String.class, EMPTY_OBJECT);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        // ItemKey
+        if (aPropName.equals(ItemKey_Prop))
+            return getItemKey();
+
+        // Do normal version
+        return super.getPropValue(aPropName);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        // ItemKey
+        if (aPropName.equals(ItemKey_Prop))
+            setItemKey(Convert.stringValue(aValue));
+
+        // Do normal version
+        else super.setPropValue(aPropName, aValue);
     }
 
     /**

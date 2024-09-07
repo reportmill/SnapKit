@@ -10,6 +10,7 @@ import snap.geom.Rect;
 import snap.gfx.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -75,12 +76,12 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     public static final Insets  CELL_PAD_DEFAULT = new Insets(2);
     
     // Constants for properties
+    public static final String RowHeight_Prop = "RowHeight";
     public static final String CellPadding_Prop = "CellPadding";
     public static final String Editable_Prop = "Editable";
-    public static final String EditingCell_Prop = "EditingCell";
     public static final String ItemKey_Prop = "ItemKey";
-    public static final String RowHeight_Prop = "RowHeight";
     public static final String Sel_Prop = PickList.Sel_Prop;
+    public static final String EditingCell_Prop = "EditingCell";
 
     /**
      * Constructor.
@@ -1034,6 +1035,65 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         if (Objects.equals(_altRowColor, oldTheme.getContentAltColor()))
             _altRowColor = newTheme.getContentAltColor();
         removeChildren();
+    }
+
+    /**
+     * Override to support RowHeight property.
+     */
+    @Override
+    public boolean isPropDefault(String propName)
+    {
+        if (propName == RowHeight_Prop)
+            return !isRowHeightSet();
+        return super.isPropDefault(propName);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // RowHeight, ItemKey
+        aPropSet.addPropNamed(RowHeight_Prop, double.class);
+        aPropSet.addPropNamed(ItemKey_Prop, String.class, EMPTY_OBJECT);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // RowHeight, ItemKey
+            case RowHeight_Prop: return getRowHeight();
+            case ItemKey_Prop: return getItemKey();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // RowHeight, ItemKey
+            case RowHeight_Prop: setRowHeight(Convert.doubleValue(aValue)); break;
+            case ItemKey_Prop: setItemKey(Convert.stringValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**
