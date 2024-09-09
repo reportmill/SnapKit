@@ -1058,7 +1058,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         super.initProps(aPropSet);
 
         // RowHeight, ItemKey
-        aPropSet.addPropNamed(RowHeight_Prop, double.class);
+        aPropSet.addPropNamed(RowHeight_Prop, double.class, 0d);
         aPropSet.addPropNamed(ItemKey_Prop, String.class, EMPTY_OBJECT);
     }
 

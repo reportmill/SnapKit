@@ -165,6 +165,8 @@ public abstract class Border extends PropObject implements Cloneable, StringCode
     {
         if (this instanceof Borders.BevelBorder)
             return "bevel";
+        if (this instanceof Borders.EtchBorder)
+            return "etch";
         String fillStr = '#' + getColor().toHexString();
         String strokeStr = FormatUtils.formatNum(getWidth());
         return fillStr + ' ' + strokeStr;
@@ -178,6 +180,8 @@ public abstract class Border extends PropObject implements Cloneable, StringCode
     {
         if (aString.equals("bevel"))
             return createLoweredBevelBorder();
+        if (aString.equals("etch"))
+            return new Borders.EtchBorder();
         return Border.of(aString);
     }
 

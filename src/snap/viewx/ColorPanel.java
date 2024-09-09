@@ -166,6 +166,11 @@ public class ColorPanel extends ViewOwner {
      */
     protected void initUI()
     {
+        // Configure HistoryMenuButton
+        MenuButton historyMenuButton = getView("HistoryMenuButton", MenuButton.class);
+        historyMenuButton.setPopupXY(-40, 10);
+        historyMenuButton.setPopupSize(56, 120);
+
         // Configure ImagePickerLabel
         getView("ImagePickerLabel", ImagePicker.class).setImage(getImage(0));
 

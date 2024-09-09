@@ -118,6 +118,14 @@ public class MenuButton extends ButtonBase {
     }
 
     /**
+     * Sets the popup point.
+     */
+    public void setPopupXY(double popupX, double popupY)
+    {
+        setPopupPoint(new Point(popupX, popupY));
+    }
+
+    /**
      * Returns the popup size.
      */
     public Size getPopupSize()  { return _popSize; }
@@ -128,6 +136,14 @@ public class MenuButton extends ButtonBase {
     public void setPopupSize(Size aValue)
     {
         firePropChange("PopupSize", _popSize, _popSize = aValue);
+    }
+
+    /**
+     * Sets the popup size.
+     */
+    public void setPopupSize(double aW, double aH)
+    {
+        setPopupSize(new Size(aW, aH));
     }
 
     /**

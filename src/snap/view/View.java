@@ -142,8 +142,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // The view best width and height
     private double  _bestWidth = -1, _bestHeight = -1, _bestWidthParam, _bestHeightParam;
 
-    // The real class name, if shape component is really a custom subclass
-    private String  _realClassName;
+    // The class name to use at runtime (for archival/unarchival use)
+    private String _runtimeClassName;
 
     // The event adapter
     private EventAdapter _eventAdapter;
@@ -198,6 +198,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public static final String Showing_Prop = "Showing";
     public static final String Text_Prop = "Text";
     public static final String ToolTip_Prop = "ToolTip";
+    public static final String RuntimeClassName_Prop = "RuntimeClassName";
 
     // Constants for special style properties
     public static final String Align_Prop = "Align";
@@ -2191,15 +2192,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the substitution class name.
      */
-    public String getRealClassName()  { return _realClassName; }
+    public String getRuntimeClassName()  { return _runtimeClassName; }
 
     /**
      * Sets the substitution class string.
      */
-    public void setRealClassName(String aName)
+    public void setRuntimeClassName(String aName)
     {
-        if (Objects.equals(aName, getRealClassName()) || getClass().getName().equals(aName)) return;
-        firePropChange("RealClassString", _realClassName, _realClassName = aName);
+        if (Objects.equals(aName, getRuntimeClassName()) || getClass().getName().equals(aName)) return;
+        firePropChange("RealClassString", _runtimeClassName, _runtimeClassName = aName);
     }
 
     /**
@@ -2214,7 +2215,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             Border.createLineBorder(Color.GRAY, 2).paint(aPntr, getBoundsLocal());
 
         // Get ClassName
-        String className = getRealClassName();
+        String className = getRuntimeClassName();
         if (className == null) className = "Custom View";
         else className = className.substring(className.lastIndexOf('.') + 1);
 
@@ -2867,11 +2868,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         aPropSet.addPropNamed(Effect_Prop, Effect.class, null);
         aPropSet.addPropNamed(Opacity_Prop, double.class, 1d);
 
-        // Text, ToolTip, Cursor, Clip
-        aPropSet.addPropNamed(Text_Prop, String.class, null); //.setSkipArchival(true);
-        aPropSet.addPropNamed(ToolTip_Prop, String.class, null);
-        //aPropSet.addPropNamed(Cursor_Prop, Cursor.class, null).setSkipArchival(true);
-        //aPropSet.addPropNamed(Clip_Prop, Shape.class, null).setSkipArchival(true);
+        // Text, ToolTip, RuntimeClassName
+        aPropSet.addPropNamed(Text_Prop, String.class, EMPTY_OBJECT);
+        aPropSet.addPropNamed(ToolTip_Prop, String.class, EMPTY_OBJECT);
+        aPropSet.addPropNamed(RuntimeClassName_Prop, String.class, EMPTY_OBJECT);
 
         // Disabled, Visible, Pickable, Paintable
         aPropSet.addPropNamed(Disabled_Prop, boolean.class, false);
@@ -2957,9 +2957,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case Effect_Prop: return getEffect();
             case Opacity_Prop: return getOpacity();
 
-            // Text, ToolTip, Cursor, Clip
+            // Text, ToolTip, RuntimeClassName, Cursor, Clip
             case Text_Prop: return getText();
             case ToolTip_Prop: return getToolTip();
+            case RuntimeClassName_Prop: return getRuntimeClassName();
             case Cursor_Prop: return getCursor();
             case Clip_Prop: return getClip();
 
@@ -3049,9 +3050,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case Effect_Prop: setEffect(Effect.of(aValue)); break;
             case Opacity_Prop: setOpacity(Convert.doubleValue(aValue)); break;
 
-            // Font, Text, ToolTip, Cursor, Clip
+            // Font, Text, ToolTip, RuntimeClassName, Cursor, Clip
             case Text_Prop: setText(Convert.stringValue(aValue)); break;
             case ToolTip_Prop: setToolTip(Convert.stringValue(aValue)); break;
+            case RuntimeClassName_Prop: setRuntimeClassName(Convert.stringValue(aValue)); break;
             case Cursor_Prop: setCursor((Cursor) aValue); break;
             case Clip_Prop: setClip((Shape) aValue); break;
 
@@ -3232,7 +3234,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             e.add(ToolTip_Prop, getToolTip());
 
         // Archive RealClassName
-        className = getRealClassName();
+        className = getRuntimeClassName();
         if (className != null && !className.isEmpty())
             e.add("Class", className);
 
@@ -3247,7 +3249,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         // Unarchive class property for subclass substitution, if available
         if (anElement.hasAttribute("Class"))
-            setRealClassName(anElement.getAttributeValue("Class"));
+            setRuntimeClassName(anElement.getAttributeValue("Class"));
 
         // Unarchive Name
         if (anElement.hasAttribute(Name_Prop))
@@ -3387,7 +3389,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Unarchive class property for subclass substitution, if available
         if (anElement.hasAttribute("Class"))
-            setRealClassName(anElement.getAttributeValue("Class"));
+            setRuntimeClassName(anElement.getAttributeValue("Class"));
 
         // Return this shape
         return this;

@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import snap.geom.*;
 import snap.gfx.*;
 import snap.props.PropChange;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -63,11 +64,13 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     private TableViewSelector  _selector = new TableViewSelector(this);
 
     // Constants for properties
+    public static final String ShowHeader_Prop = "ShowHeader";
+    public static final String TableCols_Prop = "TableCols";
+    public static final String GridColor_Prop = "GridColor";
     public static final String CellPadding_Prop = "CellPadding";
     public static final String Editable_Prop = "Editable";
-    public static final String EditingCell_Prop = "EditingCell";
     public static final String RowHeight_Prop = "RowHeight";
-    public static final String ShowHeader_Prop = "ShowHeader";
+    public static final String EditingCell_Prop = "EditingCell";
 
     // Internal constants
     public static final int DIVIDER_SPAN = 2;
@@ -388,6 +391,15 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
+     * Sets the columns.
+     */
+    protected void setTableCols(TableCol<T>[] tableCols)
+    {
+        for (TableCol<T> tableCol : tableCols)
+            addCol(tableCol);
+    }
+
+    /**
      * Adds a TableCol.
      */
     public void addCol(TableCol<T> aCol)
@@ -575,7 +587,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public void setGridColor(Color aValue)
     {
-        firePropChange("GridColor", _gridColor, _gridColor = aValue);
+        firePropChange(GridColor_Prop, _gridColor, _gridColor = aValue);
     }
 
     /**
@@ -965,6 +977,71 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      * Returns a mapped property name.
      */
     public String getValuePropName()  { return SelItem_Prop; }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // ShowHeader, GridColor, TableCols, RowHeight
+        aPropSet.addPropNamed(ShowHeader_Prop, boolean.class, false);
+        aPropSet.addPropNamed(GridColor_Prop, Color.class, null);
+        aPropSet.addPropNamed(TableCols_Prop, TableCol[].class, null);
+        aPropSet.addPropNamed(RowHeight_Prop, double.class, 0);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // ShowHeader, GridColor, TableCols, RowHeight
+            case ShowHeader_Prop: return isShowHeader();
+            case GridColor_Prop: return getGridColor();
+            case TableCols_Prop: return getCols();
+            case RowHeight_Prop: return getRowHeight();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // ShowHeader, GridColor, TableCols, RowHeight
+            case ShowHeader_Prop: setShowHeader(Convert.boolValue(aValue)); break;
+            case GridColor_Prop: setGridColor(Color.get(aValue)); break;
+            case TableCols_Prop: setTableCols((TableCol<T>[]) aValue); break;
+            case RowHeight_Prop: setRowHeight(Convert.doubleValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public boolean isPropDefault(String propName)
+    {
+        if (propName == RowHeight_Prop)
+            return !isRowHeightSet();
+        return super.isPropDefault(propName);
+    }
 
     /**
      * XML archival.

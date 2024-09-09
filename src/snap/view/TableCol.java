@@ -4,6 +4,8 @@
 package snap.view;
 import java.util.List;
 import java.util.function.Consumer;
+
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -12,7 +14,7 @@ import snap.util.*;
 public class TableCol <T> extends ListArea <T> {
     
     // The Table
-    protected TableView  _table;
+    protected TableView<T> _table;
 
     // The header value
     private Label  _header = new Label();
@@ -22,7 +24,8 @@ public class TableCol <T> extends ListArea <T> {
 
     // Constants for properties
     public static final String HeaderText_Prop = "HeaderText";
-    
+    public static final String Resizable_Prop = "Resizable";
+
     /**
      * Creates a new TableCol.
      */
@@ -39,7 +42,7 @@ public class TableCol <T> extends ListArea <T> {
     /**
      * Returns the table.
      */
-    public TableView getTable()  { return _table; }
+    public TableView<T> getTable()  { return _table; }
 
     /**
      * Returns the header label.
@@ -107,7 +110,7 @@ public class TableCol <T> extends ListArea <T> {
         double prefW = super.getPrefWidthImpl(aH);
 
         // Add Header.PrefWidth
-        TableView table = getTable();
+        TableView<T> table = getTable();
         if (table != null && table.isShowHeader()) {
             double headerPrefW = getHeader().getPrefWidth(aH);
             prefW = Math.max(headerPrefW, prefW);
@@ -124,7 +127,7 @@ public class TableCol <T> extends ListArea <T> {
     protected void cellEditingChanged(ListCell<T> aCell)
     {
         super.cellEditingChanged(aCell);
-        TableView table = getTable(); if (table == null) return;
+        TableView<T> table = getTable(); if (table == null) return;
         table.cellEditingChanged(aCell);
     }
 
@@ -137,6 +140,54 @@ public class TableCol <T> extends ListArea <T> {
      * Override to forward to table.
      */
     protected View getFocusPrev(View aChild)  { return getTable().getFocusPrev(); }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // HeaderText, Resizable
+        aPropSet.addPropNamed(HeaderText_Prop, String.class, EMPTY_OBJECT);
+        aPropSet.addPropNamed(Resizable_Prop, boolean.class, false);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // HeaderText, Resizable
+            case HeaderText_Prop: return getHeaderText();
+            case Resizable_Prop: return isResizable();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // HeaderText, Resizable
+            case HeaderText_Prop: setHeaderText(Convert.stringValue(aValue)); break;
+            case Resizable_Prop: setResizable(Convert.boolValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
+    }
 
     /**
      * XML archival - table columns.
