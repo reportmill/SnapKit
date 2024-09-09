@@ -432,6 +432,9 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     protected void processArchivedNode(PropNode propNode)
     {
         PropNode[] childNodes = (PropNode[]) propNode.getPropValue(Children_Prop);
+        if (childNodes == null)
+            return;
+
         for (int i = 0; i < childNodes.length; i++) {
             PropNode childNode = childNodes[i];
             childNode.setPropValue("Title", getTab(i).getTitle());
