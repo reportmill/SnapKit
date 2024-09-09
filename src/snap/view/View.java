@@ -2200,7 +2200,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setRuntimeClassName(String aName)
     {
         if (Objects.equals(aName, getRuntimeClassName()) || getClass().getName().equals(aName)) return;
-        firePropChange("RealClassString", _runtimeClassName, _runtimeClassName = aName);
+        firePropChange(RuntimeClassName_Prop, _runtimeClassName, _runtimeClassName = aName);
     }
 
     /**
