@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.geom.Pos;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -30,7 +30,6 @@ public class BoxView extends ParentView implements ViewHost {
     public BoxView()
     {
         super();
-        _align = Pos.CENTER;
     }
 
     /**
@@ -231,6 +230,54 @@ public class BoxView extends ParentView implements ViewHost {
         if (aView == null)
             setContent(null);
         setPrefSize(-1, -1);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // FillWidth, FillHeight
+        aPropSet.addPropNamed(FillWidth_Prop, boolean.class, false);
+        aPropSet.addPropNamed(FillHeight_Prop, boolean.class, false);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // FillWidth, FillHeight
+            case FillWidth_Prop: return isFillWidth();
+            case FillHeight_Prop: return isFillHeight();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // FillWidth, FillHeight
+            case FillWidth_Prop: setFillWidth(Convert.boolValue(aValue)); break;
+            case FillHeight_Prop: setFillHeight(Convert.boolValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**

@@ -225,7 +225,8 @@ public class ViewTheme {
         setViewStylePropValue(TableView.class, View.Border_Prop, getContentBorder());
         setViewStylePropValue(TreeView.class, View.Border_Prop, getContentBorder());
 
-        // RowView, ColView, StackView
+        // BoxView, RowView, ColView, StackView
+        setViewStylePropValue(BoxView.class, View.Align_Prop, Pos.CENTER);
         setViewStylePropValue(RowView.class, View.Align_Prop, Pos.CENTER_LEFT);
         setViewStylePropValue(ColView.class, View.Align_Prop, Pos.TOP_LEFT);
         setViewStylePropValue(StackView.class, View.Align_Prop, Pos.CENTER);

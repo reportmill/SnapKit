@@ -5,6 +5,7 @@ package snap.viewx;
 import snap.geom.Path2D;
 import snap.geom.Rect;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
 import snap.view.*;
 
@@ -260,26 +261,6 @@ public class ColorWell extends View {
     public String getValuePropName()  { return Color_Prop; }
 
     /**
-     * Override because TeaVM hates reflection.
-     */
-    public Object getPropValue(String aPropName)
-    {
-        if (aPropName.equals("Value") || aPropName.equals(Color_Prop))
-            return getColor();
-        return super.getPropValue(aPropName);
-    }
-
-    /**
-     * Override because TeaVM hates reflection.
-     */
-    public void setPropValue(String aPropName, Object aValue)
-    {
-        if (aPropName.equals("Value") || aPropName.equals(Color_Prop))
-            setColor((Color) aValue);
-        else super.setPropValue(aPropName, aValue);
-    }
-
-    /**
      * Called by ColorPanel when user selects color in color panel.
      */
     protected void colorPanelChangedColor(ColorPanel aCP, ViewEvent anEvent)
@@ -287,6 +268,53 @@ public class ColorWell extends View {
         Color color = aCP.getColor();
         setColor(color);
         fireActionEvent(anEvent);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Selectable
+        aPropSet.addPropNamed(Selectable_Prop, boolean.class, true);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Selectable, Color
+            case Selectable_Prop: return isSelectable();
+            case Color_Prop: case "Value": return getColor();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // Selectable, Color
+            case Selectable_Prop: setSelectable(Convert.boolValue(aValue)); break;
+            case Color_Prop: case "Value": setColor(Color.get(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**

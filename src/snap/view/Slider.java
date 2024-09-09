@@ -4,6 +4,7 @@
 package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -95,26 +96,6 @@ public class Slider extends View {
         if (aValue == _max) return;
         firePropChange(Max_Prop, _max, _max = aValue);
         repaint();
-    }
-
-    /**
-     * Returns the value for given key.
-     */
-    public Object getPropValue(String aPropName)
-    {
-        if (aPropName.equals("Value"))
-            return getValue();
-        return super.getPropValue(aPropName);
-    }
-
-    /**
-     * Sets the value for given key.
-     */
-    public void setPropValue(String aPropName, Object aValue)
-    {
-        if (aPropName.equals("Value"))
-            setValue(Convert.doubleValue(aValue));
-        else super.setPropValue(aPropName, aValue);
     }
 
     /**
@@ -248,6 +229,57 @@ public class Slider extends View {
             // Set value, fire Action event
             setValue(value);
             fireActionEvent(anEvent);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Min, Max, Value
+        aPropSet.addPropNamed(Min_Prop, double.class, 0);
+        aPropSet.addPropNamed(Max_Prop, double.class, 1);
+        aPropSet.addPropNamed(Value_Prop, double.class, 0);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Min, Max, Value
+            case Min_Prop: return getMin();
+            case Max_Prop: return getMax();
+            case Value_Prop: return getValue();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // Min, Max, Value
+            case Min_Prop: setMin(Convert.doubleValue(aValue)); break;
+            case Max_Prop: setMax(Convert.doubleValue(aValue)); break;
+            case Value_Prop: setValue(Convert.doubleValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
         }
     }
 
