@@ -5,6 +5,7 @@ package snap.view;
 import snap.geom.Insets;
 import snap.geom.Size;
 import snap.props.PropChange;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -27,10 +28,10 @@ public class ScrollView extends ParentView implements ViewHost {
     // Constants
     public static final String ShowHBar_Prop = "ShowHBar";
     public static final String ShowVBar_Prop = "ShowVBar";
+    public static final String BarSize_Prop = "BarSize";
     public static final String HBarShowing_Prop = "HBarShowing";
     public static final String VBarShowing_Prop = "VBarShowing";
-    public static final String BarSize_Prop = "BarSize";
-    
+
     /**
      * Constructor.
      */
@@ -433,6 +434,57 @@ public class ScrollView extends ParentView implements ViewHost {
             if (scrollBar == _hbar)
                 _scroller.setScrollRatioX(val);
             else _scroller.setScrollRatioY(val);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // ShowHBar, ShowVBar, BarSize
+        //aPropSet.addPropNamed(ShowHBar_Prop, boolean.class, true);
+        //aPropSet.addPropNamed(ShowVBar_Prop, boolean.class, true);
+        aPropSet.addPropNamed(BarSize_Prop, int.class, 16);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // ShowHBar, ShowVBar, BarSize
+            case ShowHBar_Prop: return getShowHBar();
+            case ShowVBar_Prop: return getShowVBar();
+            case BarSize_Prop: return getBarSize();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // ShowHBar, ShowVBar, BarSize
+            case ShowHBar_Prop: setShowHBar(Convert.booleanValue(aValue)); break;
+            case ShowVBar_Prop: setShowVBar(Convert.booleanValue(aValue)); break;
+            case BarSize_Prop: setBarSize(Convert.intValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
         }
     }
 
