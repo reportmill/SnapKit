@@ -3328,9 +3328,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             Paint fill = (Paint) anArchiver.fromXML(fxml, this);
             setFill(fill);
         }
-        XMLElement bxml = anElement.getElement("border");
-        if (bxml != null) // Only KeysPanel is left
-            setBorder(null);
 
         // Unarchive font
         XMLElement fontXML = anElement.getElement(Font_Prop);

@@ -1722,9 +1722,9 @@ public class TextArea extends View {
 
         // Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
         aPropSet.addPropNamed(Editable_Prop, boolean.class);
-        aPropSet.addPropNamed(WrapLines_Prop, boolean.class);
-        aPropSet.addPropNamed(FireActionOnEnterKey_Prop, boolean.class);
-        aPropSet.addPropNamed(FireActionOnFocusLost_Prop, boolean.class);
+        aPropSet.addPropNamed(WrapLines_Prop, boolean.class, false);
+        aPropSet.addPropNamed(FireActionOnEnterKey_Prop, boolean.class, false);
+        aPropSet.addPropNamed(FireActionOnFocusLost_Prop, boolean.class, false);
     }
 
     /**

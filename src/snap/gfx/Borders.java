@@ -239,11 +239,7 @@ public class Borders {
         /** XML Unarchival. */
         public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)
         {
-            String type = anElement.getAttributeValue("bevel-type", "lowered");
-            if (anElement.hasAttribute("Type"))
-                type = anElement.getAttributeValue("Type");
-            if (anElement.hasAttribute("bevel-type"))
-                type = anElement.getAttributeValue("bevel-type");
+            String type = anElement.getAttributeValue("Type", "lowered");
             if (type.equals("RAISED") || type.equals("raised"))
                 _type = RAISED;
             return this;
