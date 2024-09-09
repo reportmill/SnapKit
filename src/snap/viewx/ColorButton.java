@@ -4,6 +4,7 @@
 package snap.viewx;
 import snap.geom.Path2D;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
 import snap.view.*;
 import java.util.Objects;
@@ -38,6 +39,7 @@ public class ColorButton extends View {
     private static Image   _arrowImg;
 
     // Constants for properties
+    public static final String Title_Prop = "Title";
     public static final String Color_Prop = "Color";
 
     /**
@@ -301,23 +303,54 @@ public class ColorButton extends View {
     public String getValuePropName()  { return Color_Prop; }
 
     /**
-     * Override because TeaVM hates reflection.
+     * Override to support props for this class.
      */
-    public Object getPropValue(String aPropName)
+    @Override
+    protected void initProps(PropSet aPropSet)
     {
-        if (aPropName.equals("Value") || aPropName.equals(Color_Prop))
-            return getColor();
-        return super.getPropValue(aPropName);
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Title
+        aPropSet.addPropNamed(Title_Prop, String.class, EMPTY_OBJECT);
+
+        // Override defaults
+        aPropSet.getPropForName(PrefWidth_Prop).setDefaultValue(32d);
+        aPropSet.getPropForName(PrefHeight_Prop).setDefaultValue(22d);
     }
 
     /**
-     * Override because TeaVM hates reflection.
+     * Override to support props for this class.
      */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Title, Color
+            case Title_Prop: return getTitle();
+            case Color_Prop: case "Value": getColor();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
     public void setPropValue(String aPropName, Object aValue)
     {
-        if (aPropName.equals("Value") || aPropName.equals(Color_Prop))
-            setColor((Color) aValue);
-        else super.setPropValue(aPropName, aValue);
+        switch (aPropName) {
+
+            // Title, Color
+            case Title_Prop: setTitle(Convert.stringValue(aValue)); break;
+            case Color_Prop: case "Value": setColor(Color.get(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**
@@ -326,7 +359,7 @@ public class ColorButton extends View {
     public XMLElement toXML(XMLArchiver anArchiver)
     {
         XMLElement e = super.toXML(anArchiver);
-        if (getTitle() != null && getTitle().length() > 0)
+        if (getTitle() != null && !getTitle().isEmpty())
             e.add("Title", getTitle());
         return e;
     }

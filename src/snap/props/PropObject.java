@@ -218,7 +218,7 @@ public abstract class PropObject implements PropChange.DoChange {
                     return true;
             }
             if (propValue instanceof List) {
-                if (((List<?>) propValue).size() == 0)
+                if (((List<?>) propValue).isEmpty())
                     return true;
             }
         }
@@ -377,7 +377,7 @@ public abstract class PropObject implements PropChange.DoChange {
             // Skip relations and arrays
             if (prop.isRelation()) continue;
             if (prop.isArray()) continue;
-            if (isPropDefault(prop.getName())) continue;;
+            if (isPropDefault(prop.getName())) continue;
 
             // If not default value, add to string
             String propName = prop.getName();

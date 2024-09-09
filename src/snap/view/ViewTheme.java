@@ -2,6 +2,8 @@ package snap.view;
 import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.*;
+import snap.viewx.ColorButton;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -235,6 +237,9 @@ public class ViewTheme {
         setViewStylePropValue(MenuBar.class, View.Padding_Prop, new Insets(2, 10, 2, 10));
         setViewStylePropValue(MenuItem.class, View.Align_Prop, Pos.CENTER_LEFT);
         setViewStylePropValue(MenuItem.class, View.Padding_Prop, new Insets(4, 8, 4, 6));
+
+        // ThumbWheel
+        setViewStylePropValue(ThumbWheel.class, View.Fill_Prop, getBackFill());
     }
 
     /**

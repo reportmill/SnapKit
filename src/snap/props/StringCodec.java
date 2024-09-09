@@ -193,6 +193,8 @@ public class StringCodec {
         // Handle boolean, int, float, double
         if (aClass == boolean.class || aClass == Boolean.class)
             return (T) Convert.booleanValue(aString);
+        if (aClass == byte.class || aClass == Byte.class)
+            return (T) (Byte) (byte) Convert.intValue(aString);
         if (aClass == int.class || aClass == Integer.class)
             return (T) Convert.getInteger(aString);
         if (aClass == float.class || aClass == Float.class)

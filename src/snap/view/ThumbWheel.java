@@ -7,6 +7,7 @@ import snap.geom.Path2D;
 import snap.geom.Point;
 import snap.geom.Shape;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -17,40 +18,40 @@ import snap.util.*;
 public class ThumbWheel extends View {
 
     // Value
-    double           _value = 0;
+    private double _value = 0;
     
     // Amount to round value to
-    float            _round = 0;
+    private double _round = 0;
     
     // Visible min/max
-    float            _visibleMin = 0;
-    float            _visibleMax = 100;
+    private double _visibleMin = 0;
+    private double _visibleMax = 100;
     
     // Absolute min/max
-    float            _absoluteMin = -Float.MAX_VALUE;
-    float            _absoluteMax = Float.MAX_VALUE;
+    private double _absoluteMin = -Float.MAX_VALUE;
+    private double _absoluteMax = Float.MAX_VALUE;
     
     // Absolute mode
-    byte             _absoluteMode = ABSOLUTE_BOUNDED;
+    private byte _absoluteMode = ABSOLUTE_BOUNDED;
     
     // The type of thumbwheel (radial or linear)
-    byte             _type = TYPE_RADIAL;
+    private byte _type = TYPE_RADIAL;
 
     // Value to snap back to if snaps-back
     // How often to draw a dash (in points or degs)
-    int              _dashInterval = 10;
+    private int _dashInterval = 10;
     
     // Set this to NO if you want relative vals
-    boolean          _showMainDash = true;
+    private boolean _showMainDash = true;
 
     // Mouse location at last press
-    Point _pressedMousePoint;
+    private Point _pressedMousePoint;
     
     // Value at last press
-    double           _pressedValue;
+    private double _pressedValue;
 
     // Background of Thumbwheel in radial mode
-    Image            _image;
+    private Image _image;
     
     // Shared map of images
     private static Map<String,Image> _images = new HashMap<>();
@@ -63,8 +64,14 @@ public class ThumbWheel extends View {
     public static final byte ABSOLUTE_BOUNDED = 0;
     public static final byte ABSOLUTE_WRAPPED = 1;
 
-    // Constants for property overrides
-    private static final Color DEFAULT_THUMB_WHEEL_FILL = Color.LIGHTGRAY;
+    // Constants for properties
+    public static final String Min_Prop = "Min";
+    public static final String Max_Prop = "Max";
+    public static final String AbsMin_Prop = "AbsMin";
+    public static final String AbsMax_Prop = "AbsMax";
+    public static final String Round_Prop = "Round";
+    public static final String Type_Prop = "Type";
+    public static final String Value_Prop = "Value";
 
     /**
      * Creates a new thumbwheel.
@@ -72,7 +79,6 @@ public class ThumbWheel extends View {
     public ThumbWheel()
     {
         super();
-        _fill = DEFAULT_THUMB_WHEEL_FILL;
         setActionable(true);
         enableEvents(MousePress, MouseDrag, MouseRelease);
     }
@@ -97,7 +103,7 @@ public class ThumbWheel extends View {
      */
     public double getValue()
     {
-        return _round==0 ? _value : MathUtils.round(_value, _round);
+        return _round == 0 ? _value : MathUtils.round(_value, _round);
     }
 
     /**
@@ -106,9 +112,11 @@ public class ThumbWheel extends View {
     public void setValue(double aValue)
     {
         // Clamp or Wrap aValue wrt the absoluteMode
-        if (aValue<getAbsoluteMin() || aValue>getAbsoluteMax()) {
-            if (isBounded()) aValue = MathUtils.clamp(aValue, _absoluteMin, _absoluteMax);
-            else if (isWrapped()) aValue = MathUtils.clamp_wrap(aValue, _absoluteMin, _absoluteMax);
+        if (aValue < getAbsoluteMin() || aValue > getAbsoluteMax()) {
+            if (isBounded())
+                aValue = MathUtils.clamp(aValue, _absoluteMin, _absoluteMax);
+            else if (isWrapped())
+                aValue = MathUtils.clamp_wrap(aValue, _absoluteMin, _absoluteMax);
         }
 
         // Set value, fire action and repaint
@@ -118,34 +126,54 @@ public class ThumbWheel extends View {
     }
 
     /** Returns the value that thumbwheel values are rounded to. */
-    public float getRound() { return _round; }
+    public double getRound() { return _round; }
 
     /** Sets the value that thumbwheel values are rounded to. */
-    public void setRound(float aValue) { _round = aValue; }
+    public void setRound(double aValue)
+    {
+        if (aValue == _round) return;
+        firePropChange(Round_Prop, _round, _round = aValue);
+    }
 
     /** Returns the smallest value in the visible range (ie, on the left side) of the thumbhweel. */
-    public float getVisibleMin() { return _visibleMin; }
+    public double getVisibleMin() { return _visibleMin; }
 
     /** Sets the smallest value in the visible range (ie, on the left side) of the thumbhweel. */
-    public void setVisibleMin(float aValue) { _visibleMin = aValue; }
+    public void setVisibleMin(double aValue)
+    {
+        if (aValue == _visibleMin) return;
+        firePropChange(Min_Prop, _visibleMin, _visibleMin = aValue);
+    }
 
     /** Returns the largest value in the visible range (ie, on the right side) of the thumbhweel. */
-    public float getVisibleMax() { return _visibleMax; }
+    public double getVisibleMax() { return _visibleMax; }
 
     /** Sets the largest value in the visible range (ie, on the right side) of the thumbhweel. */
-    public void setVisibleMax(float aValue) { _visibleMax = aValue; }
+    public void setVisibleMax(double aValue)
+    {
+        if (aValue == _visibleMax) return;
+        firePropChange(Max_Prop, _visibleMax, _visibleMax = aValue);
+    }
 
     /** Returns the smallest value permitted by the thumbwheel (even when outside visible range). */
-    public float getAbsoluteMin() { return _absoluteMin; }
+    public double getAbsoluteMin() { return _absoluteMin; }
 
     /** Sets the smallest value permitted by the thumbwheel (even when outside visible range). */
-    public void setAbsoluteMin(float aValue) { _absoluteMin = aValue; }
+    public void setAbsoluteMin(double aValue)
+    {
+        if (aValue == _absoluteMin) return;
+        firePropChange(AbsMin_Prop, _absoluteMin, _absoluteMin = aValue);
+    }
 
     /** Returns the largest value permitted by the thumbwheel (even when outside visible range). */
-    public float getAbsoluteMax() { return _absoluteMax; }
+    public double getAbsoluteMax() { return _absoluteMax; }
 
     /** Sets the largest value permitted by the thumbwheel (even when outside visible range). */
-    public void setAbsoluteMax(float aValue) { _absoluteMax = aValue; }
+    public void setAbsoluteMax(double aValue)
+    {
+        if (aValue == _absoluteMax) return;
+        firePropChange(AbsMax_Prop, _absoluteMax, _absoluteMax = aValue);
+    }
 
     /** Returns the thumbhweel absolute mode (ABSOLUTE_BOUNDED or ABSOLUTE_WRAPPED). */
     public byte getAbsoluteMode() { return _absoluteMode; }
@@ -249,7 +277,7 @@ public class ThumbWheel extends View {
     /**
      * Returns the extent of the thumbwheel's visible range.
      */
-    public float getVisibleRange() { return getVisibleMax() - getVisibleMin(); }
+    public double getVisibleRange() { return getVisibleMax() - getVisibleMin(); }
 
     /**
      * Override to paint thumbwheel.
@@ -260,7 +288,7 @@ public class ThumbWheel extends View {
         if (getWidth()<10 || getHeight()<10) return;
 
         // Get thumbwheel color
-        Color color = (Color) getFill(); if (color == null) color = DEFAULT_THUMB_WHEEL_FILL;
+        Color color = getFillColor();
 
         // Draw linear background
         if (isLinear()) {
@@ -446,7 +474,7 @@ public class ThumbWheel extends View {
     private Image getBackImage()
     {
         // Get the thumbwheel color
-        Color color = (Color) getFill(); if (color == null) color = DEFAULT_THUMB_WHEEL_FILL;
+        Color color = getFillColor();
 
         // Get name for image and try to find new image (return if already created/cached)
         int imageW = (int) Math.round(getWidth());
@@ -547,21 +575,65 @@ public class ThumbWheel extends View {
     private boolean isEven(float aValue)  { return Math.round(aValue)%2==0; }
 
     /**
-     * Returns the value for given key.
+     * Override to support props for this class.
      */
-    public Object getPropValue(String aPropName)
+    @Override
+    protected void initProps(PropSet aPropSet)
     {
-        if (aPropName.equals("Value")) return getValue();
-        return super.getPropValue(aPropName);
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Type, Min, Max, AbsMin, AbsMax, Round
+        aPropSet.addPropNamed(Type_Prop, byte.class, TYPE_RADIAL);
+        aPropSet.addPropNamed(Min_Prop, double.class, 0d);
+        aPropSet.addPropNamed(Max_Prop, double.class, 100d);
+        aPropSet.addPropNamed(AbsMin_Prop, double.class, (double) -Float.MAX_VALUE);
+        aPropSet.addPropNamed(AbsMax_Prop, double.class, (double) Float.MAX_VALUE);
+        aPropSet.addPropNamed(Round_Prop, double.class, 1);
     }
 
     /**
-     * Sets the value for given key.
+     * Override to support props for this class.
      */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Type, Min, Max, AbsMin, AbsMax, Round, Value
+            case Type_Prop: return getType();
+            case Min_Prop: return getVisibleMin();
+            case Max_Prop: return getVisibleMax();
+            case AbsMin_Prop: return getAbsoluteMin();
+            case AbsMax_Prop: return getAbsoluteMax();
+            case Round_Prop: return getRound();
+            case Value_Prop: return getValue();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
     public void setPropValue(String aPropName, Object aValue)
     {
-        if (aPropName.equals("Value")) setValue(Convert.doubleValue(aValue));
-        else super.setPropValue(aPropName, aValue);
+        switch (aPropName) {
+
+            // Type, Min, Max, AbsMin, AbsMax, Round, Value
+            case Type_Prop: setType((byte) Convert.intValue(aValue)); break;
+            case Min_Prop: setVisibleMin(Convert.doubleValue(aValue)); break;
+            case Max_Prop: setVisibleMax(Convert.doubleValue(aValue)); break;
+            case AbsMin_Prop: setAbsoluteMin(Convert.doubleValue(aValue)); break;
+            case AbsMax_Prop: setAbsoluteMax(Convert.doubleValue(aValue)); break;
+            case Round_Prop: setRound(Convert.doubleValue(aValue)); break;
+            case Value_Prop: setValue(Convert.doubleValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**
@@ -573,12 +645,12 @@ public class ThumbWheel extends View {
         XMLElement e = super.toXML(anArchiver);
 
         // Archive Type, VisibleMin, VisibleMax, AbsoluteMin, AbsoluteMax and Round
-        if (getType()!=TYPE_RADIAL) e.add("type", "linear");
-        if (getVisibleMin()!=0) e.add("min", getVisibleMin());
-        if (getVisibleMax()!=100) e.add("max", getVisibleMax());
-        if (getAbsoluteMin()!=-Float.MAX_VALUE) e.add("absmin", getAbsoluteMin());
-        if (getAbsoluteMax()!=Float.MAX_VALUE) e.add("absmax", getAbsoluteMax());
-        if (getRound()!=0) e.add("round", getRound());
+        if (getType() != TYPE_RADIAL) e.add("Type", "linear");
+        if (getVisibleMin() != 0) e.add("Min", getVisibleMin());
+        if (getVisibleMax() != 100) e.add("Max", getVisibleMax());
+        if (getAbsoluteMin()!=-Float.MAX_VALUE) e.add("AbsMin", getAbsoluteMin());
+        if (getAbsoluteMax()!=Float.MAX_VALUE) e.add("AbsMax", getAbsoluteMax());
+        if (getRound()!=0) e.add("Round", getRound());
 
         // Return element
         return e;
@@ -593,15 +665,15 @@ public class ThumbWheel extends View {
         super.fromXML(anArchiver, anElement);
 
         // Unarchive Type
-        if (anElement.getAttributeValue("type", "radial").equals("linear"))
+        if (anElement.getAttributeValue("Type", "radial").equals("linear"))
             setType(TYPE_LINEAR);
 
         // Unarchive VisibleMin, VisibleMax, AbsoluteMin, AbsoluteMax and Round
-        setVisibleMin(anElement.getAttributeFloatValue("min", getVisibleMin()));
-        setVisibleMax(anElement.getAttributeFloatValue("max", getVisibleMax()));
-        setAbsoluteMin(anElement.getAttributeFloatValue("absmin", getAbsoluteMin()));
-        setAbsoluteMax(anElement.getAttributeFloatValue("absmax", getAbsoluteMax()));
-        setRound(anElement.getAttributeFloatValue("round"));
+        setVisibleMin(anElement.getAttributeDoubleValue("Min", getVisibleMin()));
+        setVisibleMax(anElement.getAttributeDoubleValue("Max", getVisibleMax()));
+        setAbsoluteMin(anElement.getAttributeDoubleValue("AbsMin", getAbsoluteMin()));
+        setAbsoluteMax(anElement.getAttributeDoubleValue("AbsMax", getAbsoluteMax()));
+        setRound(anElement.getAttributeDoubleValue("Round"));
         if (getHeight()>getWidth()) setVertical(true);
         return this;
     }
