@@ -2,8 +2,6 @@ package snap.view;
 import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.*;
-import snap.viewx.ColorButton;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -186,7 +184,7 @@ public class ViewTheme {
         labelStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
         labelStyle.setPropValue(View.Spacing_Prop, 4);
 
-        // Button
+        // ButtonBase
         ViewStyle buttonStyle = getViewStyleForClass(ButtonBase.class);
         buttonStyle.setPropValue(View.Align_Prop, Pos.CENTER);
         buttonStyle.setPropValue(View.BorderRadius_Prop, 4);
@@ -211,10 +209,13 @@ public class ViewTheme {
         textFieldStyle.setPropValue(View.Border_Prop, getContentBorder());
         textFieldStyle.setPropValue(View.BorderRadius_Prop, 3);
 
+        // ComboBox
+        setViewStylePropValue(ComboBox.class, View.Align_Prop, Pos.CENTER_LEFT);
+
         // TextArea
         setViewStylePropValue(TextArea.class, View.Padding_Prop, new Insets(2));
 
-        // TextArea
+        // TitleView
         setViewStylePropValue(TitleView.class, View.Padding_Prop, new Insets(2));
 
         // ListArea

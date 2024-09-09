@@ -114,6 +114,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     {
         if (_button != null) return _button;
         _button = new Button();
+        _button.setAlign(getAlign());
         _button.addEventHandler(e -> showPopup(), MousePress);
         addChild(_button);
         return _button;
