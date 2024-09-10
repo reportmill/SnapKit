@@ -240,7 +240,6 @@ public class ReflectEffect extends Effect {
     public XMLElement toXML(XMLArchiver anArchiver)
     {
         XMLElement e = super.toXML(anArchiver);
-        e.add("type", "reflection");
         if (getReflectHeight() != DEFAULT_REFLECT_HEIGHT)
             e.add(ReflectHeight_Prop, getReflectHeight());
         if (getFadeHeight() != DEFAULT_FADE_HEIGHT)

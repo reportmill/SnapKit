@@ -252,7 +252,7 @@ public class ShadowEffect extends Effect {
     public XMLElement toXML(XMLArchiver anArchiver)
     {
         // Archive basic effect attributes and set type
-        XMLElement e = super.toXML(anArchiver); e.add("type", "shadow");
+        XMLElement e = super.toXML(anArchiver);
 
         // Archive Radius, DX & DY
         e.add("radius", _radius);

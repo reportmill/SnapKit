@@ -160,36 +160,13 @@ public class ViewArchiver extends XMLArchiver {
         cmap.put("ReflectEffect", ReflectEffect.class);
         cmap.put("EmbossEffect", EmbossEffect.class);
 
-        // Add aliases and return cmap
-        addAliases(cmap);
-        return cmap;
-    }
-
-    /**
-     * Adds aliases.
-     */
-    protected void addAliases(Map<String,Class> cmap)
-    {
-        // Shape classes
-        cmap.put("document", DocView.class); // RMDocument.class
-        cmap.put("image-shape", ImageView.class); //RMImageShape.class
-        cmap.put("page", PageView.class); // RMPage.class
-        cmap.put("polygon", PathView.class); //RMPolygonShape.class
-        cmap.put("rect", RectView.class); //RMRectShape.class
-        cmap.put("spring-shape", SpringView.class); //RMSpringShape.class
-        cmap.put("text", TextView.class); //RMTextShape.class
-        cmap.put("TextViewBase", TextView.class);
-
-        // Graphics
+        // Some case issues
         cmap.put("color", Color.class);
         cmap.put("font", Font.class);
         cmap.put("fill", Color.class); //RMFill.class
-        cmap.put("gradient-fill", GradientPaint.class); //RMGradientFill.class
-        cmap.put("image-fill", ImagePaint.class); //RMImageFill.class
-        cmap.put("blur-effect", BlurEffect.class);
-        cmap.put("shadow-effect", ShadowEffect.class);
-        cmap.put("reflection-effect", ReflectEffect.class);
-        cmap.put("emboss-effect", EmbossEffect.class);
+
+        // Return
+        return cmap;
     }
 
     /**

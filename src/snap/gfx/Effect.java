@@ -49,7 +49,7 @@ public class Effect extends PropObject implements XMLArchiver.Archivable {
      */
     public XMLElement toXML(XMLArchiver anArchiver)
     {
-        String name = getClass().getSimpleName(); // "effect"
+        String name = getClass().getSimpleName();
         XMLElement e = new XMLElement(name);
         return e;
     }

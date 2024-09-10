@@ -189,7 +189,7 @@ public class EmbossEffect extends Effect {
     public XMLElement toXML(XMLArchiver anArchiver)
     {
         // Archive basic attributes and set type
-        XMLElement e = super.toXML(anArchiver); e.add("type", "emboss");
+        XMLElement e = super.toXML(anArchiver);
 
         // Archive Radius, Altitude, Azimuth
         if (getRadius() != DEFAULT_RADIUS) e.add("radius", getRadius());

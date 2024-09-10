@@ -138,7 +138,6 @@ public class BlurEffect extends Effect {
     public XMLElement toXML(XMLArchiver anArchiver)
     {
         XMLElement e = super.toXML(anArchiver);
-        e.add("type", "blur");
         e.add("radius", _radius);
         return e;
     }

@@ -336,8 +336,8 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
         XMLElement e = new XMLElement(name);
 
         // Archive Type
-        if (isLinear()) e.add("type", "gradient");
-        else e.add("type", "radial");
+        if (isRadial())
+            e.add("type", "radial");
 
         // Archive Points/Roll
         if (isRadial()) {
@@ -380,7 +380,7 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
     public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
         // Unarchive type
-        String type = anElement.getAttributeValue("type", "gradient");
+        String type = anElement.getAttributeValue("type", "linear");
         if (type.equals("radial")) _type = Type.RADIAL;
 
         // Unarchive points

@@ -182,9 +182,7 @@ public class ImagePaint implements Paint, XMLArchiver.Archivable {
     public XMLElement toXML(XMLArchiver anArchiver)
     {
         // Archive basic fill attributes and set type
-        String name = getClass().getSimpleName(); //"fill"
-        XMLElement e = new XMLElement(name);
-        e.add("type", "image");
+        XMLElement e = new XMLElement(getClass().getSimpleName());
 
         // Archive ImageData
         if (_image.getBytes() != null) {
