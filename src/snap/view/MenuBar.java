@@ -9,7 +9,10 @@ import snap.util.*;
 /**
  * A View to display menus in a menu bar.
  */
-public class MenuBar extends ParentView implements ViewHost {
+public class MenuBar extends ParentView {
+
+    // Constants for properties
+    public static final String Menus_Prop = "Menus";
 
     // Constants for properties
     protected static Font DEFAULT_MENU_BAR_FONT = new Font("Arial", 13);
@@ -30,6 +33,17 @@ public class MenuBar extends ParentView implements ViewHost {
     {
         View[] children = getChildren();
         return ArrayUtils.filterByClass(children, Menu.class);
+    }
+
+    /**
+     * Sets the child menus.
+     */
+    public void setMenus(Menu[] theMenus)
+    {
+        while (getChildCount() > 0)
+            removeChild(0);
+        for (Menu menu : theMenus)
+            addMenu(menu);
     }
 
     /**
@@ -135,32 +149,6 @@ public class MenuBar extends ParentView implements ViewHost {
     protected void layoutImpl()  { RowView.layout(this, true); }
 
     /**
-     * ViewHost method: Returns the number of guest views.
-     */
-    public int getGuestCount()  { return getMenus().length; }
-
-    /**
-     * ViewHost method: Returns the guest view at given index.
-     */
-    public View getGuest(int anIndex)  { return getMenus()[anIndex]; }
-
-    /**
-     * ViewHost method: Adds the given view to this host's guest (children) list at given index.
-     */
-    public void addGuest(View aChild, int anIndex)
-    {
-        addMenu((Menu) aChild);
-    }
-
-    /**
-     * ViewHost method: Remove's guest at given index from this host's guest (children) list.
-     */
-    public View removeGuest(int anIndex)
-    {
-        return removeMenu(anIndex);
-    }
-
-    /**
      * Override to customize for this class.
      */
     @Override
@@ -169,8 +157,39 @@ public class MenuBar extends ParentView implements ViewHost {
         // Do normal version
         super.initProps(aPropSet);
 
+        // Menus
+        aPropSet.addPropNamed(Menus_Prop, Menu[].class, EMPTY_OBJECT);
+
         // Reset defaults
         aPropSet.getPropForName(Font_Prop).setDefaultValue(DEFAULT_MENU_BAR_FONT);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        // Menus
+        if (aPropName.equals(Menus_Prop))
+            return getMenus();
+
+        // Do normal version
+        return super.getPropValue(aPropName);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        // Menus
+        if (aPropName.equals(Menus_Prop))
+            setMenus((Menu[]) aValue);
+
+            // Do normal version
+        else super.setPropValue(aPropName, aValue);
     }
 
     /**
