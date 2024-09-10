@@ -254,12 +254,11 @@ public class ShadowEffect extends Effect {
         // Archive basic effect attributes and set type
         XMLElement e = super.toXML(anArchiver);
 
-        // Archive Radius, DX & DY
-        e.add("radius", _radius);
-        e.add("dx", _dx);
-        e.add("dy", _dy);
-        if (!getColor().equals(Color.BLACK))
-            e.add("color", "#" + getColor().toHexString());
+        // Archive Radius, DX, DY, Color
+        if (!isPropDefault(Radius_Prop)) e.add(Radius_Prop, _radius);
+        if (!isPropDefault(DX_Prop)) e.add(DX_Prop, _dx);
+        if (!isPropDefault(DY_Prop)) e.add(DY_Prop, _dy);
+        if (!isPropDefault(Color_Prop)) e.add(Color_Prop, '#' + _color.toHexString());
 
         // Return element
         return e;
@@ -273,13 +272,11 @@ public class ShadowEffect extends Effect {
         // Unarchive basic effect attributes
         super.fromXML(anArchiver, anElement);
 
-        // Unarchive Radius, DX & DY
-        _radius = anElement.getAttributeIntValue("radius");
-        _dx = anElement.getAttributeIntValue("dx");
-        _dy = anElement.getAttributeIntValue("dy");
-        String color = anElement.getAttributeValue("color");
-        if (color != null)
-            _color = new Color(color);
+        // Unarchive Radius, DX, DY, Color
+        if (anElement.hasAttribute(Radius_Prop)) _radius = anElement.getAttributeIntValue(Radius_Prop);
+        if (anElement.hasAttribute(DX_Prop)) _dx = anElement.getAttributeIntValue(DX_Prop);
+        if (anElement.hasAttribute(DY_Prop)) _dy = anElement.getAttributeIntValue(DY_Prop);
+        if (anElement.hasAttribute(Color_Prop)) _color = Color.get(anElement.getAttributeValue(Color_Prop));
 
         // Return this effect
         return this;

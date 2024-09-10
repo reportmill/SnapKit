@@ -447,8 +447,8 @@ public class ScrollView extends ParentView implements ViewHost {
         super.initProps(aPropSet);
 
         // ShowHBar, ShowVBar, BarSize
-        //aPropSet.addPropNamed(ShowHBar_Prop, boolean.class, true);
-        //aPropSet.addPropNamed(ShowVBar_Prop, boolean.class, true);
+        aPropSet.addPropNamed(ShowHBar_Prop, Boolean.class, null);
+        aPropSet.addPropNamed(ShowVBar_Prop, Boolean.class, null);
         aPropSet.addPropNamed(BarSize_Prop, int.class, 16);
     }
 
@@ -497,9 +497,9 @@ public class ScrollView extends ParentView implements ViewHost {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive ShowHBar, ShowVBar, BarSize
-        if (getShowHBar() != null) e.add(ShowHBar_Prop, getShowHBar());
-        if (getShowVBar() != null) e.add(ShowVBar_Prop, getShowVBar());
-        if (getBarSize() != 16) e.add(BarSize_Prop, getBarSize());
+        if (!isPropDefault(ShowHBar_Prop)) e.add(ShowHBar_Prop, getShowHBar());
+        if (!isPropDefault(ShowVBar_Prop)) e.add(ShowVBar_Prop, getShowVBar());
+        if (!isPropDefault(BarSize_Prop)) e.add(BarSize_Prop, getBarSize());
         return e;
     }
 

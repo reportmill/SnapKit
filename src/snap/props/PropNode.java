@@ -139,7 +139,8 @@ public class PropNode {
     {
         // Add ClassName
         StringBuffer sb = new StringBuffer();
-        StringUtils.appendProp(sb, "Class", _className != null ? _className : "Unknown");
+        String className = _className != null ? _className : getPropValueAsString(PropArchiver.CLASS_KEY);
+        StringUtils.appendProp(sb, "Class", className != null ? className : "Unknown");
 
         // Add XmlName
         if (_xmlName != null)

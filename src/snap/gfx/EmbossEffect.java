@@ -192,9 +192,9 @@ public class EmbossEffect extends Effect {
         XMLElement e = super.toXML(anArchiver);
 
         // Archive Radius, Altitude, Azimuth
-        if (getRadius() != DEFAULT_RADIUS) e.add("radius", getRadius());
-        if (getAzimuth() != DEFAULT_AZIMUTH) e.add("azimuth", getAzimuth());
-        if (getAltitude() != DEFAULT_ALTITUDE) e.add("altitude", getAltitude());
+        if (!isPropDefault(Radius_Prop)) e.add(Radius_Prop, getRadius());
+        if (!isPropDefault(Azimuth_Prop)) e.add(Azimuth_Prop, getAzimuth());
+        if (!isPropDefault(Altitude_Prop)) e.add(Altitude_Prop, getAltitude());
 
         // Return element
         return e;
@@ -209,9 +209,9 @@ public class EmbossEffect extends Effect {
         super.fromXML(anArchiver, anElement);
 
         // Uanrchive Radius, Altitude, Azimuth
-        _radius = anElement.getAttributeIntValue("radius", 10);
-        _azimuth = anElement.getAttributeFloatValue("azimuth", 120);
-        _altitude = anElement.getAttributeFloatValue("altitude", 60);
+        if (anElement.hasAttribute(Radius_Prop)) _radius = anElement.getAttributeIntValue(Radius_Prop);
+        if (anElement.hasAttribute(Azimuth_Prop)) _azimuth = anElement.getAttributeFloatValue(Azimuth_Prop);
+        if (anElement.hasAttribute(Altitude_Prop)) _altitude = anElement.getAttributeFloatValue(Altitude_Prop);
 
         // Return
         return this;

@@ -6,6 +6,7 @@ import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.geom.Rect;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
 
 import java.util.Objects;
@@ -51,7 +52,6 @@ public class ImageView extends View {
     public ImageView()
     {
         super();
-        _align = Pos.CENTER;
     }
 
     /**
@@ -372,6 +372,25 @@ public class ImageView extends View {
     }
 
     /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // ImageName
+        aPropSet.addPropNamed(ImageName_Prop, String.class, EMPTY_OBJECT);
+
+        // FillWidth, FillHeight, KeepAspect, AllowBleed
+        aPropSet.addPropNamed(FillWidth_Prop, boolean.class, false);
+        aPropSet.addPropNamed(FillHeight_Prop, boolean.class, false);
+        aPropSet.addPropNamed(KeepAspect_Prop, boolean.class, false);
+        aPropSet.addPropNamed(AllowBleed_Prop, boolean.class, false);
+    }
+
+    /**
      * Returns the value for given key.
      */
     public Object getPropValue(String aPropName)
@@ -444,9 +463,9 @@ public class ImageView extends View {
         }
 
         // Archive FillWidth, FillHeight, KeepAspect
-        if (isFillWidth()) e.add(FillWidth_Prop, true);
-        if (isFillHeight()) e.add(FillHeight_Prop, true);
-        if (isKeepAspect()) e.add(KeepAspect_Prop, true);
+        if (!isPropDefault(FillWidth_Prop)) e.add(FillWidth_Prop, true);
+        if (!isPropDefault(FillHeight_Prop)) e.add(FillHeight_Prop, true);
+        if (!isPropDefault(KeepAspect_Prop)) e.add(KeepAspect_Prop, true);
 
         // Return
         return e;

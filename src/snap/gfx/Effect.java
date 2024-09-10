@@ -9,7 +9,7 @@ import snap.util.*;
 /**
  * A class to represent a visual effect that can be applied to drawing done in a Painter (like blur, shadow, etc.).
  */
-public class Effect extends PropObject implements XMLArchiver.Archivable {
+public abstract class Effect extends PropObject implements XMLArchiver.Archivable {
 
     /**
      * Constructor.
@@ -39,10 +39,7 @@ public class Effect extends PropObject implements XMLArchiver.Archivable {
     /**
      * Apply the effect from given DVR to painter.
      */
-    public void applyEffect(PainterDVR aPDVR, Painter aPntr, Rect aRect)
-    {
-        System.err.println(getClass().getSimpleName() + ".apply: Not implemented");
-    }
+    public abstract void applyEffect(PainterDVR aPDVR, Painter aPntr, Rect aRect);
 
     /**
      * XML archival.
@@ -57,10 +54,7 @@ public class Effect extends PropObject implements XMLArchiver.Archivable {
     /**
      * XML unarchival.
      */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        return this;
-    }
+    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)  { return this; }
 
     /**
      * Parses an effect from given object.

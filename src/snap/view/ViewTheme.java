@@ -209,8 +209,9 @@ public class ViewTheme {
         textFieldStyle.setPropValue(View.Border_Prop, getContentBorder());
         textFieldStyle.setPropValue(View.BorderRadius_Prop, 3);
 
-        // ComboBox
+        // ComboBox, ImageView
         setViewStylePropValue(ComboBox.class, View.Align_Prop, Pos.CENTER_LEFT);
+        setViewStylePropValue(ImageView.class, View.Align_Prop, Pos.CENTER);
 
         // TextArea
         setViewStylePropValue(TextArea.class, View.Padding_Prop, new Insets(2));

@@ -106,14 +106,12 @@ public class BlurEffect extends Effect {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        // Radius
+        if (aPropName.equals(Radius_Prop))
+            return getRadius();
 
-            // Radius
-            case Radius_Prop: return getRadius();
-
-            // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+        // Do normal version
+        return super.getPropValue(aPropName);
     }
 
     /**
@@ -122,14 +120,12 @@ public class BlurEffect extends Effect {
     @Override
     public void setPropValue(String aPropName, Object aValue)
     {
-        switch (aPropName) {
+        // Radius
+        if (aPropName.equals(Radius_Prop))
+            _radius = Convert.doubleValue(aValue);
 
-            // Radius
-            case Radius_Prop: _radius = Convert.doubleValue(aValue); break;
-
-            // Do normal version
-            default: super.setPropValue(aPropName, aValue);
-        }
+        // Do normal version
+        else super.setPropValue(aPropName, aValue);
     }
 
     /**
@@ -138,7 +134,7 @@ public class BlurEffect extends Effect {
     public XMLElement toXML(XMLArchiver anArchiver)
     {
         XMLElement e = super.toXML(anArchiver);
-        e.add("radius", _radius);
+        if (!isPropDefault(Radius_Prop)) e.add(Radius_Prop, _radius);
         return e;
     }
 
@@ -148,7 +144,7 @@ public class BlurEffect extends Effect {
     public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
         super.fromXML(anArchiver, anElement);
-        _radius = anElement.getAttributeIntValue("radius");
+        if (anElement.hasAttribute(Radius_Prop)) _radius = anElement.getAttributeIntValue(Radius_Prop);
         return this;
     }
 }

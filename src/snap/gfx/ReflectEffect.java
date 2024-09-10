@@ -240,12 +240,9 @@ public class ReflectEffect extends Effect {
     public XMLElement toXML(XMLArchiver anArchiver)
     {
         XMLElement e = super.toXML(anArchiver);
-        if (getReflectHeight() != DEFAULT_REFLECT_HEIGHT)
-            e.add(ReflectHeight_Prop, getReflectHeight());
-        if (getFadeHeight() != DEFAULT_FADE_HEIGHT)
-            e.add(FadeHeight_Prop, getFadeHeight());
-        if (getGap() != DEFAULT_GAP)
-            e.add(Gap_Prop, getGap());
+        if (!isPropDefault(ReflectHeight_Prop)) e.add(ReflectHeight_Prop, getReflectHeight());
+        if (!isPropDefault(FadeHeight_Prop)) e.add(FadeHeight_Prop, getFadeHeight());
+        if (!isPropDefault(Gap_Prop)) e.add(Gap_Prop, getGap());
         return e;
     }
 
@@ -258,12 +255,9 @@ public class ReflectEffect extends Effect {
         super.fromXML(anArchiver, anElement);
 
         // Unarchive ReflectHeight, FadeHeight, Gap
-        if (anElement.hasAttribute(ReflectHeight_Prop))
-            setReflectHeight(anElement.getAttributeFloatValue(ReflectHeight_Prop));
-        if (anElement.hasAttribute(FadeHeight_Prop))
-            setFadeHeight(anElement.getAttributeFloatValue(FadeHeight_Prop));
-        if (anElement.hasAttribute(Gap_Prop))
-            setGap(anElement.getAttributeFloatValue(Gap_Prop));
+        if (anElement.hasAttribute(ReflectHeight_Prop)) setReflectHeight(anElement.getAttributeFloatValue(ReflectHeight_Prop));
+        if (anElement.hasAttribute(FadeHeight_Prop)) setFadeHeight(anElement.getAttributeFloatValue(FadeHeight_Prop));
+        if (anElement.hasAttribute(Gap_Prop)) setGap(anElement.getAttributeFloatValue(Gap_Prop));
         return this;
     }
 }
