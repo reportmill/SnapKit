@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
-
 import java.text.*;
 import java.util.Locale;
 
@@ -16,7 +15,7 @@ public class XMLAttribute implements Cloneable {
     private String _name;
 
     // The full name of the attribute (if namespaced)
-    private String _fname;
+    private String _fullName;
 
     // The value string of the attribute
     private String _value;
@@ -54,14 +53,6 @@ public class XMLAttribute implements Cloneable {
     }
 
     /**
-     * Creates an attribute initialized with the given name and Boolean value.
-     */
-    public XMLAttribute(String aName, Boolean aValue)
-    {
-        this(aName, aValue.booleanValue());
-    }
-
-    /**
      * Creates an attribute initialized with the given name and int value.
      */
     public XMLAttribute(String aName, int aValue)
@@ -82,33 +73,24 @@ public class XMLAttribute implements Cloneable {
     /**
      * Returns the name for this attribute.
      */
-    public String getName()
-    {
-        return _name;
-    }
+    public String getName()  { return _name; }
 
     /**
      * Sets the name for this attribute.
      */
-    public void setName(String aName)
-    {
-        _name = aName;
-    }
+    public void setName(String aName)  { _name = aName; }
 
     /**
      * Returns the full name for this attribute.
      */
-    public String getFullName()
-    {
-        return _fname != null ? _fname : _name;
-    }
+    public String getFullName()  { return _fullName != null ? _fullName : _name; }
 
     /**
      * Sets the full name for this attribute.
      */
     public void setFullName(String aName)
     {
-        _fname = aName;
+        _fullName = aName;
         int ind = aName.indexOf(':');
         if (ind > 0) aName = aName.substring(ind + 1);
         setName(aName);
@@ -128,61 +110,40 @@ public class XMLAttribute implements Cloneable {
     /**
      * Returns the value for this attribute.
      */
-    public String getValue()
-    {
-        return _value;
-    }
+    public String getValue()  { return _value; }
 
     /**
      * Sets the value for this attribute.
      */
-    public void setValue(String aValue)
-    {
-        _value = aValue;
-    }
+    public void setValue(String aValue)  { _value = aValue; }
 
     /**
      * Returns the value for this attribute as an int.
      */
-    public int getIntValue()
-    {
-        return Convert.intValue(_value);
-    }
+    public int getIntValue()  { return Convert.intValue(_value); }
 
     /**
      * Returns the value for this attribute as a float.
      */
-    public float getFloatValue()
-    {
-        return Convert.floatValue(_value);
-    }
+    public float getFloatValue()  { return Convert.floatValue(_value); }
 
     /**
      * Returns the value for this attribute as a float.
      */
-    public double getDoubleValue()
-    {
-        return Convert.doubleValue(_value);
-    }
+    public double getDoubleValue()  { return Convert.doubleValue(_value); }
 
     /**
      * Returns value for the attribute as a Number (can be any of Integer, Double, etc).
      */
-    public Number getNumberValue()
-    {
-        return Convert.numberValue(_value);
-    }
+    public Number getNumberValue()  { return Convert.numberValue(_value); }
 
     /**
      * Returns a clone of this attribute.
      */
     public XMLAttribute clone()
     {
-        try {
-            return (XMLAttribute) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+        try { return (XMLAttribute) super.clone(); }
+        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
     }
 
     /**

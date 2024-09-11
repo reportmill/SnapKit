@@ -130,7 +130,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
      */
     public boolean isEmpty()
     {
-        if (_endVals.size() > 0)
+        if (!_endVals.isEmpty())
             return false;
         for (ViewAnim child : _anims)
             if (!child.isEmpty())
@@ -757,21 +757,6 @@ public class ViewAnim implements XMLArchiver.Archivable {
     private List<PropChange> _autoRegisterChanges;
 
     /**
-     * Returns the key frame times.
-     */
-    public Integer[] getKeyFrameTimes()
-    {
-        Set<Integer> timesSet = new HashSet<>();
-        timesSet.add(getStart());
-        timesSet.add(getEnd());
-        for (ViewAnim anim : _anims)
-            Collections.addAll(timesSet, anim.getKeyFrameTimes());
-        Integer[] times = timesSet.toArray(new Integer[0]);
-        Arrays.sort(times);
-        return times;
-    }
-
-    /**
      * Configures this anim from given JSON/CSS style string, e.g.: "time: 300; scale: 2; time: 600; scale: 1; time: 1200; rotate: 360"
      */
     public ViewAnim setAnimString(String animString)
@@ -871,7 +856,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
     {
         StringBuffer sb = StringUtils.toString(this, "Start", "End");
         String keys = ListUtils.joinStrings(getKeys(), ",");
-        if (keys.length() > 0)
+        if (!keys.isEmpty())
             StringUtils.toStringAdd(sb, "Keys", keys);
         if (_loopCount == Short.MAX_VALUE)
             StringUtils.toStringAdd(sb, "Loops", "true");
@@ -929,12 +914,6 @@ public class ViewAnim implements XMLArchiver.Archivable {
      */
     public ViewAnim fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
-        // Legacy
-        if (!anElement.getName().equals("Anim")) {
-            fromXMLLegacy(anElement);
-            return this;
-        }
-
         // Unarchive LoopCount
         if (anElement.hasAttribute("LoopCount"))
             setLoopCount(anElement.getAttributeIntValue("LoopCount"));
@@ -946,12 +925,15 @@ public class ViewAnim implements XMLArchiver.Archivable {
 
             // Get time and make sure we have right anim
             int time = keyVal.getAttributeIntValue("Time");
-            anim = anim.getAnim(time);
+            if (time != anim.getEnd())
+                anim = anim.getAnim(time);
 
             // Get key and value
             String key = keyVal.getAttributeValue("Key");
             String valStr = keyVal.getAttributeValue("Value");
-            Object val = null;
+            if (key == null || valStr == null)
+                continue;
+            Object val;
             if (valStr.startsWith("#")) val = new Color(valStr);
             else if (valStr.equalsIgnoreCase("true")) val = Boolean.TRUE;
             else if (valStr.equalsIgnoreCase("false")) val = Boolean.FALSE;
@@ -961,27 +943,6 @@ public class ViewAnim implements XMLArchiver.Archivable {
 
         // Return this anim
         return this;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLLegacy(XMLElement anElement)
-    {
-        ViewAnim anim = this;
-        for (int i = anElement.indexOf("KeyFrame"); i >= 0; i = anElement.indexOf("KeyFrame", i + 1)) {
-            XMLElement kframe = anElement.get(i);
-            int time = kframe.getAttributeIntValue("time");
-            anim = anim.getAnim(time);
-            for (int j = kframe.indexOf("KeyValue"); j >= 0; j = kframe.indexOf("KeyValue", j + 1)) {
-                XMLElement kval = kframe.get(j);
-                String key = kval.getAttributeValue("key");
-                double val = kval.getAttributeFloatValue("value");
-                anim.setValue(key, val);
-            }
-            if (kframe.getAttributeBoolValue("Loops", false)) setLoops();
-            if (kframe.hasAttribute("LoopCount")) setLoopCount(kframe.getAttributeIntValue("LoopCount"));
-        }
     }
 
     /**
