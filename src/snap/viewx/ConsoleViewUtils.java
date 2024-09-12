@@ -78,7 +78,7 @@ class ConsoleViewUtils {
         // Create TextBlock and configure Style
         TextBlock textBlock = new TextBlock();
         textBlock.setDefaultFont(DEFAULT_FONT);
-        textBlock.setDefaultTextStyle(textBlock.getDefaultTextStyle().copyFor(DEFAULT_TEXTAREA_TEXTCOLOR));
+        textBlock.setDefaultTextStyle(textBlock.getDefaultTextStyle().copyForStyleValue(DEFAULT_TEXTAREA_TEXTCOLOR));
 
         // Set string
         textBlock.setString(aString);

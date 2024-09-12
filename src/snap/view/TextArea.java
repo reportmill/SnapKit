@@ -749,34 +749,35 @@ public class TextArea extends View {
     }
 
     /**
-     * Adds the given string to end of text.
+     * Adds the given chars to end of text.
      */
-    public void addChars(CharSequence theChars, Object... theAttrs)
+    public void addChars(CharSequence theChars)  { addCharsWithStyle(theChars, null, length()); }
+
+    /**
+     * Adds the given chars at given char index.
+     */
+    public void addChars(CharSequence theChars, int charIndex)  { addCharsWithStyle(theChars, null, charIndex); }
+
+    /**
+     * Adds the given chars with given style to text end.
+     */
+    public void addCharsWithStyle(CharSequence theChars, TextStyle textStyle)
     {
-        int endCharIndex = length();
-        TextStyle textStyle = _textBlock.getTextStyleForCharIndex(endCharIndex).copyFor(theAttrs);
-        replaceChars(theChars, textStyle, endCharIndex, endCharIndex, true);
+        addCharsWithStyle(theChars, textStyle, length());
     }
 
     /**
-     * Adds the given string with given style to text at given index.
+     * Adds the given chars with given style to text at given index.
      */
-    public void addChars(CharSequence theChars, TextStyle aStyle)
+    public void addCharsWithStyle(CharSequence theChars, TextStyle textStyle, int charIndex)
     {
-        int length = length();
-        replaceChars(theChars, aStyle, length, length, true);
+        if (theChars == null) return;
+        _textBlock.addCharsWithStyle(theChars, textStyle, charIndex);
+        setSel(charIndex + theChars.length());
     }
 
     /**
-     * Adds the given string with given style to text at given index.
-     */
-    public void addChars(CharSequence theChars, TextStyle aStyle, int anIndex)
-    {
-        replaceChars(theChars, aStyle, anIndex, anIndex, true);
-    }
-
-    /**
-     * Adds chars to text with given style string.
+     * Adds the given chars to text with given style string.
      */
     public void addCharsWithStyleString(CharSequence theChars, String styleString)
     {
@@ -786,21 +787,12 @@ public class TextArea extends View {
     }
 
     /**
-     * Deletes the current selection.
-     */
-    public void delete()
-    {
-        int selStart = getSelStart();
-        int selEnd = getSelEnd();
-        delete(selStart, selEnd, true);
-    }
-
-    /**
      * Deletes the given range of chars.
      */
-    public void delete(int aStart, int anEnd, boolean doUpdateSel)
+    public void removeChars(int aStart, int anEnd)
     {
-        replaceChars(null, null, aStart, anEnd, doUpdateSel);
+        _textBlock.removeChars(aStart, anEnd);
+        setSel(aStart, aStart);
     }
 
     /**
@@ -810,7 +802,7 @@ public class TextArea extends View {
     {
         int startCharIndex = getSelStart();
         int endCharIndex = getSelEnd();
-        replaceChars(theChars, null, startCharIndex, endCharIndex, true);
+        replaceCharsWithStyle(theChars, null, startCharIndex, endCharIndex);
     }
 
     /**
@@ -818,13 +810,13 @@ public class TextArea extends View {
      */
     public void replaceChars(CharSequence theChars, int startCharIndex, int endCharIndex)
     {
-        replaceChars(theChars, null, startCharIndex, endCharIndex, true);
+        replaceCharsWithStyle(theChars, null, startCharIndex, endCharIndex);
     }
 
     /**
      * Replaces the current selection with the given string.
      */
-    public void replaceChars(CharSequence theChars, TextStyle aStyle, int aStart, int anEnd, boolean doUpdateSel)
+    public void replaceCharsWithStyle(CharSequence theChars, TextStyle textStyle, int aStart, int anEnd)
     {
         // Get string length (if no string length and no char range, just return)
         int strLen = theChars != null ? theChars.length() : 0;
@@ -832,28 +824,25 @@ public class TextArea extends View {
             return;
 
         // Get style (might need SelStyle if replacing empty selection)
-        TextStyle style = aStyle;
-        if (style == null) {
+        if (textStyle == null) {
             if (aStart == getSelStart())
-                style = getSelStyle();
-            else style = _textBlock.getTextStyleForCharRange(aStart, anEnd);
+                textStyle = getSelStyle();
+            else textStyle = _textBlock.getTextStyleForCharRange(aStart, anEnd);
         }
 
-        // Forward to TextBlock replaceChars()
-        _textBlock.replaceChars(theChars, style, aStart, anEnd);
+        // Forward to TextBlock replaceChars() and update selection to end of new string
+        _textBlock.replaceCharsWithStyle(theChars, textStyle, aStart, anEnd);
+        setSel(aStart + strLen);
+    }
 
-        // Update selection to be at end of new string
-        if (doUpdateSel)
-            setSel(aStart + strLen);
-
-        // Otherwise, if replace was before current selection, adjust current selection
-        else if (aStart < getSelEnd()) {
-            int delta = strLen - (anEnd - aStart);
-            int start = getSelStart();
-            if (aStart < start)
-                start += delta;
-            setSel(start, getSelEnd() + delta);
-        }
+    /**
+     * Deletes the current selection.
+     */
+    public void delete()
+    {
+        int selStart = getSelStart();
+        int selEnd = getSelEnd();
+        removeChars(selStart, selEnd);
     }
 
     /**
@@ -950,7 +939,7 @@ public class TextArea extends View {
         if (_textBlock.isAfterLineEnd(deleteEnd))
             deleteStart = _textBlock.lastIndexOfNewline(deleteEnd);
 
-        delete(deleteStart, deleteEnd, true);
+        removeChars(deleteStart, deleteEnd);
     }
 
     /**
@@ -968,7 +957,7 @@ public class TextArea extends View {
         if (_textBlock.isLineEnd(deleteEnd - 1))
             deleteEnd = _textBlock.indexAfterNewline(deleteEnd - 1);
 
-        delete(deleteStart, deleteEnd, true);
+        removeChars(deleteStart, deleteEnd);
     }
 
     /**
@@ -982,12 +971,12 @@ public class TextArea extends View {
 
         // Otherwise, if at line end, delete line end
         else if (_textBlock.isLineEnd(getSelEnd()))
-            delete(getSelStart(), _textBlock.indexAfterNewline(getSelStart()), true);
+            removeChars(getSelStart(), _textBlock.indexAfterNewline(getSelStart()));
 
         // Otherwise delete up to next newline or line end
         else {
             int index = _textBlock.indexOfNewline(getSelStart());
-            delete(getSelStart(), index >= 0 ? index : length(), true);
+            removeChars(getSelStart(), index >= 0 ? index : length());
         }
     }
 

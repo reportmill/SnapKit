@@ -134,9 +134,20 @@ public class DevPaneConsoleTextArea extends TextArea {
     /**
      * Override to update input location.
      */
-    public void replaceChars(CharSequence theChars, TextStyle aStyle, int aStart, int anEnd, boolean doUpdateSel)
+    @Override
+    public void addCharsWithStyle(CharSequence theChars, TextStyle textStyle, int charIndex)
     {
-        super.replaceChars(theChars, aStyle, aStart, anEnd, doUpdateSel);
+        super.addCharsWithStyle(theChars, textStyle, charIndex);
+        _inputLoc = length();
+    }
+
+    /**
+     * Override to update input location.
+     */
+    @Override
+    public void replaceCharsWithStyle(CharSequence theChars, TextStyle textStyle, int aStart, int anEnd)
+    {
+        super.replaceCharsWithStyle(theChars, textStyle, aStart, anEnd);
         _inputLoc = length();
     }
 
@@ -231,7 +242,7 @@ public class DevPaneConsoleTextArea extends TextArea {
     {
         _cmdHistoryIndex = MathUtils.clamp(_cmdHistoryIndex-1, 0, _cmdHistory.size());
         String command = _cmdHistoryIndex<_cmdHistory.size() ? _cmdHistory.get(_cmdHistoryIndex) : "";
-        replaceChars(command, null, getInputLocation(), length(), true);
+        replaceCharsWithStyle(command, null, getInputLocation(), length());
     }
 
     /**
@@ -241,6 +252,6 @@ public class DevPaneConsoleTextArea extends TextArea {
     {
         _cmdHistoryIndex = MathUtils.clamp(_cmdHistoryIndex+1, 0, _cmdHistory.size());
         String command = _cmdHistoryIndex<_cmdHistory.size() ? _cmdHistory.get(_cmdHistoryIndex) : "";
-        replaceChars(command, null, getInputLocation(), length(), true);
+        replaceCharsWithStyle(command, null, getInputLocation(), length());
     }
 }

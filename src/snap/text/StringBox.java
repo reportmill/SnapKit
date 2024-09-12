@@ -100,7 +100,7 @@ public class StringBox extends RoundRect {
      */
     public void setFont(Font aFont)
     {
-        setTextStyle(_textStyle.copyFor(aFont));
+        setTextStyle(_textStyle.copyForStyleValue(aFont));
     }
 
     /**
@@ -114,7 +114,7 @@ public class StringBox extends RoundRect {
     public void setTextColor(Color aColor)
     {
         if (Objects.equals(aColor, getTextColor())) return;
-        TextStyle textStyle = _textStyle.copyFor(aColor);
+        TextStyle textStyle = _textStyle.copyForStyleValue(aColor);
         setTextStyle(textStyle);
     }
 
@@ -529,7 +529,7 @@ public class StringBox extends RoundRect {
     public static StringBox getForStringAndAttributes(String aStr, Object ... theAttrs)
     {
         StringBox sbox = new StringBox(aStr);
-        TextStyle textStyle = sbox.getTextStyle().copyFor(theAttrs);
+        TextStyle textStyle = sbox.getTextStyle().copyForStyleValues(theAttrs);
         sbox.setTextStyle(textStyle);
         return sbox;
     }

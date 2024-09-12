@@ -167,8 +167,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void setString(String aString)
     {
-        // Used to worry about TextArea undo by bracketing with setPropChangeEnabled(false/true);
-        replaceChars(aString, null, 0, length());
+        replaceChars(aString, 0, length());
     }
 
     /**
@@ -248,7 +247,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     public void setDefaultFont(Font aFont)
     {
         if (aFont.equals(getDefaultFont())) return;
-        TextStyle newTextStyle = _defaultTextStyle.copyFor(aFont);
+        TextStyle newTextStyle = _defaultTextStyle.copyForStyleValue(aFont);
         setDefaultTextStyle(newTextStyle);
     }
 
@@ -264,7 +263,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     {
         if (aColor == null) aColor = Color.BLACK;
         if (aColor.equals(getDefaultTextColor())) return;
-        TextStyle newTextStyle = _defaultTextStyle.copyFor(aColor);
+        TextStyle newTextStyle = _defaultTextStyle.copyForStyleValue(aColor);
         setDefaultTextStyle(newTextStyle);
     }
 
@@ -475,13 +474,13 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void replaceChars(CharSequence theChars, int aStart, int anEnd)
     {
-        replaceChars(theChars, null, aStart, anEnd);
+        replaceCharsWithStyle(theChars, null, aStart, anEnd);
     }
 
     /**
      * Replaces chars in given range, with given String, using the given attributes.
      */
-    public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
+    public void replaceCharsWithStyle(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
     {
         // Get TextStyle for add chars range (if not provided)
         TextStyle style = theStyle;
@@ -1005,7 +1004,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         for (TextLine line : getLines()) {
             for (TextRun run : line.getRuns()) {
                 TextStyle runStyle = run.getTextStyle();
-                TextStyle runStyleScaled = runStyle.copyFor(run.getFont().copyForScale(aScale));
+                TextStyle runStyleScaled = runStyle.copyForStyleValue(run.getFont().copyForScale(aScale));
                 run.setTextStyle(runStyleScaled);
             }
         }

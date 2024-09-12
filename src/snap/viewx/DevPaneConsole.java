@@ -60,8 +60,8 @@ public class DevPaneConsole extends ViewOwner {
     protected void initUI()
     {
         if (_stdOut != null) {
-            _consoleTextArea.addChars(_stdOut._sb.toString(), _stdOut._textStyle);
-            _consoleTextArea.addChars(_stdErr._sb.toString(), _stdErr._textStyle);
+            _consoleTextArea.addCharsWithStyle(_stdOut._sb.toString(), _stdOut._textStyle);
+            _consoleTextArea.addCharsWithStyle(_stdErr._sb.toString(), _stdErr._textStyle);
         }
     }
 
@@ -135,7 +135,7 @@ public class DevPaneConsole extends ViewOwner {
         {
             super(printStream);
             if (printStream == System.err)
-                _textStyle = TextStyle.DEFAULT.copyFor(Color.RED);
+                _textStyle = TextStyle.DEFAULT.copyForStyleValue(Color.RED);
         }
 
         /**
@@ -171,7 +171,7 @@ public class DevPaneConsole extends ViewOwner {
         {
             // Write buff to console
             if (_consoleTextArea != null)
-                _consoleTextArea.addChars(aString, _textStyle);
+                _consoleTextArea.addCharsWithStyle(aString, _textStyle);
             else _sb.append(aString);
         }
     }

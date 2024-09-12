@@ -191,18 +191,18 @@ public class TextStyle extends PropObject implements Cloneable {
     }
 
     /**
-     * Clone with new value.
+     * Returns a copy for given style value.
      */
-    public TextStyle copyFor(Object anObj)
+    public TextStyle copyForStyleValue(Object anObj)
     {
         String key = getStyleKey(anObj);
         return key != null ? copyFor(key, anObj) : this;
     }
 
     /**
-     * Clone with new values.
+     * Returns a copy for given style values.
      */
-    public TextStyle copyFor(Object ... theObjs)
+    public TextStyle copyForStyleValues(Object ... theObjs)
     {
         // If no attributes, just return
         if (theObjs == null || theObjs.length == 0) return this;
@@ -230,13 +230,13 @@ public class TextStyle extends PropObject implements Cloneable {
     }
 
     /**
-     * Clone with map.
+     * Returns a copy for given style map.
      */
-    public TextStyle copyFor(Map<? super Object, ? super Object> aMap)
+    public TextStyle copyForStyleMap(Map<String, ? super Object> aMap)
     {
         TextStyle clone = clone();
-        for (Map.Entry<Object,Object> entry : aMap.entrySet())
-            clone.setPropValue((String) entry.getKey(), entry.getValue());
+        for (Map.Entry<String,Object> entry : aMap.entrySet())
+            clone.setPropValue(entry.getKey(), entry.getValue());
         return clone;
     }
 
@@ -334,15 +334,5 @@ public class TextStyle extends PropObject implements Cloneable {
         if (anAttr instanceof Border) return Border_Prop;
         System.out.println("TextStyle.getStyleKey: Unknown key for " + (anAttr != null ? anAttr.getClass() : null));
         return null;
-    }
-
-    /**
-     * Creates a TextStyle for given prop string.
-     */
-    public static TextStyle createForPropsString(String propsString)
-    {
-        TextStyle textStyle = new TextStyle();
-        textStyle.setPropsString(propsString);
-        return textStyle;
     }
 }

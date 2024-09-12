@@ -305,13 +305,13 @@ public class TextBlockUtils {
             // Unarchive font element
             else if (e.getName().equals("font")) {
                 Font font = anArchiver.fromXML(e, Font.class, null);
-                style = style.copyFor(font);
+                style = style.copyForStyleValue(font);
             }
 
             // Unarchive color element
             else if (e.getName().equals("color")) {
                 Color color = anArchiver.fromXML(e, Color.class, null);
-                style = style.copyFor(color);
+                style = style.copyForStyleValue(color);
             }
 
             // If format changed for segment, write format
@@ -340,8 +340,8 @@ public class TextBlockUtils {
                     String cstr = e.getAttributeValue("color");
                     Color color = Color.get(cstr);
                     Border border = Border.createLineBorder(style.getColor(), swidth);
-                    style = style.copyFor(border);
-                    style = style.copyFor(color);
+                    style = style.copyForStyleValue(border);
+                    style = style.copyForStyleValue(color);
                 }
             }
 
@@ -351,7 +351,7 @@ public class TextBlockUtils {
                 String cstr = e.getAttributeValue("color");
                 Color color = Color.get(cstr);
                 Border border = Border.createLineBorder(color, stroke);
-                style = style.copyFor(border);
+                style = style.copyForStyleValue(border);
             }
 
             // Unarchive scripting

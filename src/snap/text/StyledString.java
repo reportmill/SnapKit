@@ -84,7 +84,7 @@ public class StyledString implements Cloneable {
      */
     public void setFont(Font aFont)
     {
-        TextStyle textStyle = _textStyle.copyFor(aFont);
+        TextStyle textStyle = _textStyle.copyForStyleValue(aFont);
         setTextStyle(textStyle);
     }
 
@@ -105,7 +105,7 @@ public class StyledString implements Cloneable {
      */
     public void setTextColor(Color aColor)
     {
-        TextStyle textStyle = _textStyle.copyFor(aColor);
+        TextStyle textStyle = _textStyle.copyForStyleValue(aColor);
         setTextStyle(textStyle);
     }
 

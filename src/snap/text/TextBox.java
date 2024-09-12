@@ -138,9 +138,9 @@ public class TextBox extends TextBlock {
      * Override to forward to source text block.
      */
     @Override
-    public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
+    public void replaceCharsWithStyle(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
     {
-        _sourceText.replaceChars(theChars, theStyle, aStart, anEnd);
+        _sourceText.replaceCharsWithStyle(theChars, theStyle, aStart, anEnd);
     }
 
     /**
@@ -219,7 +219,7 @@ public class TextBox extends TextBlock {
         // If FontScale is set, replace style with scaled style
         double fontScale = getFontScale();
         if (fontScale != 1)
-            theStyle = theStyle.copyFor(theStyle.getFont().copyForScale(fontScale));
+            theStyle = theStyle.copyForStyleValue(theStyle.getFont().copyForScale(fontScale));
 
         // Do normal version
         super.addCharsWithStyle(theChars, theStyle, anIndex);
