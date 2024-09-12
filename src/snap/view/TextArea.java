@@ -45,9 +45,6 @@ public class TextArea extends View {
     // The current TextStyle for the cursor or selection
     private TextStyle  _selStyle;
 
-    // The Selection color
-    private Color  _selColor = new Color(181, 214, 254, 255);
-
     // The mouse down point
     private double  _downX, _downY;
 
@@ -69,15 +66,6 @@ public class TextArea extends View {
     // A helper class for key processing
     private TextAreaKeys  _keys = createTextAreaKeys();
 
-    // Whether as-you-type spell checking is enabled
-    public static boolean  isSpellChecking = Prefs.getDefaultPrefs().getBoolean("SpellChecking", false);
-
-    // Whether hyphenating is activated
-    static boolean  _hyphenating = Prefs.getDefaultPrefs().getBoolean("Hyphenating", false);
-
-    // The MIME type for SnapKit RichText
-    public static final String  SNAP_RICHTEXT_TYPE = "reportmill/xstring";
-
     // The PropChangeListener to catch SourceText PropChanges.
     private PropChangeListener _sourceTextPropLsnr = this::handleSourceTextPropChange;
 
@@ -86,6 +74,18 @@ public class TextArea extends View {
 
     // A pointer to window this TextArea is showing in so we can remove WindowFocusChangedLsnr
     private WindowView  _showingWindow;
+
+    // Whether as-you-type spell checking is enabled
+    public static boolean isSpellChecking = Prefs.getDefaultPrefs().getBoolean("SpellChecking", false);
+
+    // Whether hyphenating is activated
+    private static boolean _hyphenating = Prefs.getDefaultPrefs().getBoolean("Hyphenating", false);
+
+    // The MIME type for SnapKit RichText
+    public static final String SNAP_RICHTEXT_TYPE = "reportmill/xstring";
+
+    // The Selection color
+    private static Color TEXT_SEL_COLOR = new Color(181, 214, 254, 255);
 
     // Constants for properties
     public static final String Editable_Prop = "Editable";
@@ -315,10 +315,6 @@ public class TextArea extends View {
      * Sets the default text style for text.
      */
     public void setDefaultTextStyle(TextStyle textStyle)  { _textBlock.setDefaultTextStyle(textStyle); }
-
-    @Deprecated
-    public TextStyle getDefaultStyle()  { return getDefaultTextStyle(); }
-    public void setDefaultStyle(TextStyle aStyle)  { setDefaultTextStyle(aStyle); }
 
     /**
      * Sets default text style for given style string.
@@ -721,7 +717,7 @@ public class TextArea extends View {
         // If selection is zero length, just modify input style
         if (isSelEmpty() && isRichText()) {
             TextStyle selStyle = getSelStyle();
-            _selStyle = selStyle.copyFor(aKey, aValue);
+            _selStyle = selStyle.copyForStyleKeyValue(aKey, aValue);
         }
 
         // If selection is multiple chars, apply attribute to text and reset SelStyle
@@ -983,10 +979,7 @@ public class TextArea extends View {
     /**
      * Clears the text.
      */
-    public void clear()
-    {
-        _textBlock.clear();
-    }
+    public void clear()  { _textBlock.clear(); }
 
     /**
      * Returns the number of lines.
@@ -1028,11 +1021,6 @@ public class TextArea extends View {
     }
 
     /**
-     * Returns the selection color.
-     */
-    public Color getSelColor()  { return _selColor; }
-
-    /**
      * Paint text.
      */
     protected void paintFront(Painter aPntr)
@@ -1067,7 +1055,7 @@ public class TextArea extends View {
 
         // Otherwise
         else {
-            aPntr.setPaint(getSelColor());
+            aPntr.setPaint(TEXT_SEL_COLOR);
             aPntr.fill(selPath);
         }
     }
@@ -1858,4 +1846,8 @@ public class TextArea extends View {
         if (anElement.hasAttribute(FireActionOnFocusLost_Prop))
             setFireActionOnFocusLost(anElement.getAttributeBoolValue(FireActionOnFocusLost_Prop, true));
     }
+
+    @Deprecated
+    public TextStyle getDefaultStyle()  { return getDefaultTextStyle(); }
+    public void setDefaultStyle(TextStyle aStyle)  { setDefaultTextStyle(aStyle); }
 }

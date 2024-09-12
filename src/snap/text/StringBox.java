@@ -128,7 +128,7 @@ public class StringBox extends RoundRect {
      */
     public void setUnderlined(boolean aValue)
     {
-        TextStyle textStyle = _textStyle.copyFor(TextStyle.UNDERLINE_KEY, aValue ? 1 : 0);
+        TextStyle textStyle = _textStyle.copyForStyleKeyValue(TextStyle.UNDERLINE_KEY, aValue ? 1 : 0);
         setTextStyle(textStyle);
     }
 

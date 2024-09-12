@@ -117,7 +117,7 @@ public class StringView extends View implements Cloneable {
     public void setTextColor(Color aColor)
     {
         if (Objects.equals(aColor, getTextColor())) return;
-        TextStyle textStyle = getTextStyle().copyFor(TextStyle.COLOR_KEY, aColor);
+        TextStyle textStyle = getTextStyle().copyForStyleKeyValue(TextStyle.COLOR_KEY, aColor);
         setTextStyle(textStyle);
     }
 

@@ -600,7 +600,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
             // Get current run style, get new style for given key/value
             TextStyle style = textRun.getTextStyle();
-            TextStyle newStyle = style.copyFor(aKey, aValue);
+            TextStyle newStyle = style.copyForStyleKeyValue(aKey, aValue);
 
             // Set new style for run range
             setTextStyle(newStyle, aStart, newStyleEndInText);

@@ -196,7 +196,7 @@ public class TextStyle extends PropObject implements Cloneable {
     public TextStyle copyForStyleValue(Object anObj)
     {
         String key = getStyleKey(anObj);
-        return key != null ? copyFor(key, anObj) : this;
+        return key != null ? copyForStyleKeyValue(key, anObj) : this;
     }
 
     /**
@@ -220,9 +220,9 @@ public class TextStyle extends PropObject implements Cloneable {
     }
 
     /**
-     * Clone with key/value.
+     * Returns a copy for given style key and value.
      */
-    public TextStyle copyFor(String aKey, Object aValue)
+    public TextStyle copyForStyleKeyValue(String aKey, Object aValue)
     {
         TextStyle clone = clone();
         clone.setPropValue(aKey, aValue);
@@ -335,4 +335,7 @@ public class TextStyle extends PropObject implements Cloneable {
         System.out.println("TextStyle.getStyleKey: Unknown key for " + (anAttr != null ? anAttr.getClass() : null));
         return null;
     }
+
+    @Deprecated
+    public TextStyle copyFor(String aKey, Object aValue)  { return copyForStyleKeyValue(aKey, aValue); }
 }
