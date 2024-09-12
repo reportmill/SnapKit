@@ -1717,7 +1717,7 @@ public class TextArea extends View {
         super.initProps(aPropSet);
 
         // Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
-        aPropSet.addPropNamed(Editable_Prop, boolean.class);
+        aPropSet.addPropNamed(Editable_Prop, boolean.class, false);
         aPropSet.addPropNamed(WrapLines_Prop, boolean.class, false);
         aPropSet.addPropNamed(FireActionOnEnterKey_Prop, boolean.class, false);
         aPropSet.addPropNamed(FireActionOnFocusLost_Prop, boolean.class, false);
@@ -1778,8 +1778,8 @@ public class TextArea extends View {
     {
         // Archive Rich, Editable, WrapLines
         if (isRichText()) xml.add("Rich", true);
-        if (!isEditable()) xml.add("Editable", false);
-        if (isWrapLines()) xml.add(WrapLines_Prop, true);
+        if (!isPropDefault(Editable_Prop)) xml.add(Editable_Prop, isEditable());
+        if (!isPropDefault(WrapLines_Prop)) xml.add(WrapLines_Prop, isWrapLines());
 
         // If RichText, archive rich text
         if (isRichText()) {
@@ -1819,12 +1819,10 @@ public class TextArea extends View {
         // Unarchive Rich, Editable, WrapLines
         if (anElement.hasAttribute("Rich"))
             _textBlock.setRichText(anElement.getAttributeBoolValue("Rich"));
-        if (anElement.hasAttribute("Editable"))
-            setEditable(anElement.getAttributeBoolValue("Editable"));
+        if (anElement.hasAttribute(Editable_Prop))
+            setEditable(anElement.getAttributeBoolValue(Editable_Prop));
         if (anElement.hasAttribute(WrapLines_Prop))
             setWrapLines(anElement.getAttributeBoolValue(WrapLines_Prop));
-        if (anElement.hasAttribute("WrapText"))
-            setWrapLines(anElement.getAttributeBoolValue("WrapText"));
 
         // If RichText, unarchive rich text
         XMLElement richTextXML = anElement.get("RichText");

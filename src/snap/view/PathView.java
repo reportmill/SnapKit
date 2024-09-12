@@ -3,6 +3,7 @@
  */
 package snap.view;
 import snap.geom.*;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -13,12 +14,31 @@ public class PathView extends View {
     // The path shape
     private Path2D _path;
 
+    // Constants for properties
+    public static final String SvgString_Prop = "SvgString";
+
     /**
      * Constructor.
      */
     public PathView()
     {
         super();
+    }
+
+    /**
+     * Returns the SvgString.
+     */
+    public String getSvgString()  { return _path != null ? _path.getSvgString().replace('\n', ' ') : ""; }
+
+    /**
+     * Sets the SvgString.
+     */
+    public void setSvgString(String svgString)
+    {
+        Path2D path = new Path2D();
+        if (svgString != null)
+            path.appendSvgString(svgString);
+        setPath(path);
     }
 
     /**
@@ -62,6 +82,47 @@ public class PathView extends View {
     }
 
     /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // SvgString
+        aPropSet.addPropNamed(SvgString_Prop, String.class, EMPTY_OBJECT);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        // SvgString
+        if (aPropName.equals(SvgString_Prop))
+            return getSvgString();
+
+        // Do normal version
+        return super.getPropValue(aPropName);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        // SvgString
+        if (aPropName.equals(SvgString_Prop))
+            setSvgString(Convert.stringValue(aValue));
+
+        // Do normal version
+        else super.setPropValue(aPropName, aValue);
+    }
+
+    /**
      * Calculates the preferred width.
      */
     protected double getPrefWidthImpl(double aH)
@@ -91,12 +152,9 @@ public class PathView extends View {
         // Do normal version
         XMLElement e = super.toXML(anArchiver);
 
-        // Archive path - was: e.add(_path.toXML(anArchiver));
-        Shape path = getPath();
-        if (path != null) {
-            String svgString = path.getSvgString().replace('\n', ' ');
-            e.add("SvgString", svgString);
-        }
+        // Archive path
+        if (!isPropDefault(SvgString_Prop))
+            e.add(SvgString_Prop, getSvgString());
 
         // Return
         return e;
@@ -110,12 +168,9 @@ public class PathView extends View {
         // Do normal version
         super.fromXML(anArchiver, anElement);
 
-        // Unarchive path - was: pathXML = anElement.get("path"); _path = anArchiver.fromXML(pathXML, Path.class, this);
-        String svgString = anElement.getAttributeValue("SvgString");
-        if (svgString != null) {
-            _path = new Path2D();
-            _path.appendSvgString(svgString);
-        }
+        // Unarchive path
+        if (anElement.hasAttribute(SvgString_Prop))
+            setSvgString(anElement.getAttributeValue(SvgString_Prop));
 
         // Return
         return this;

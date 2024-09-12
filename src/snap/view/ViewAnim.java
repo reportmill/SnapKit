@@ -891,7 +891,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * XML archival.
      */
-    protected static void toXMLAnim(ViewAnim theAnim, XMLElement aXML)
+    private static void toXMLAnim(ViewAnim theAnim, XMLElement aXML)
     {
         // Iterate over values
         for (String key : theAnim.getKeys()) {
@@ -901,6 +901,13 @@ public class ViewAnim implements XMLArchiver.Archivable {
             Object val = theAnim.getEndVal(key);
             if (val instanceof Color) val = '#' + ((Color) val).toHexString();
             kvxml.add("Value", val);
+            aXML.add(kvxml);
+        }
+
+        // If no keys, just add KeyValue with time
+        if (theAnim.getKeys().isEmpty()) {
+            XMLElement kvxml = new XMLElement("KeyValue");
+            kvxml.add("Time", theAnim.getEnd());
             aXML.add(kvxml);
         }
 
