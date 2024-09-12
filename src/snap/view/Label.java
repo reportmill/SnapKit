@@ -168,12 +168,12 @@ public class Label extends ParentView {
     }
 
     /**
-     * Sets the text style to style updated for props string.
+     * Sets the text style to style updated for style string.
      */
-    public void setTextStylePropsString(String propsString)
+    public void setTextStyleString(String styleString)
     {
         TextStyle textStyle = getTextStyle();
-        TextStyle textStyle2 = textStyle.copyForPropsString(propsString);
+        TextStyle textStyle2 = textStyle.copyForStyleString(styleString);
         setTextStyle(textStyle2);
     }
 

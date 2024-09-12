@@ -307,14 +307,23 @@ public class TextArea extends View {
     public boolean isRichText()  { return _textBlock.isRichText(); }
 
     /**
-     * Returns the default style for text.
+     * Returns the default text style for text.
      */
-    public TextStyle getDefaultStyle()  { return _textBlock.getDefaultTextStyle(); }
+    public TextStyle getDefaultTextStyle()  { return _textBlock.getDefaultTextStyle(); }
 
     /**
-     * Sets the default style.
+     * Sets the default text style for text.
      */
-    public void setDefaultStyle(TextStyle aStyle)  { _textBlock.setDefaultTextStyle(aStyle); }
+    public void setDefaultTextStyle(TextStyle textStyle)  { _textBlock.setDefaultTextStyle(textStyle); }
+
+    @Deprecated
+    public TextStyle getDefaultStyle()  { return getDefaultTextStyle(); }
+    public void setDefaultStyle(TextStyle aStyle)  { setDefaultTextStyle(aStyle); }
+
+    /**
+     * Sets default text style for given style string.
+     */
+    public void setDefaultTextStyleString(String styleString)  { _textBlock.setDefaultTextStyleString(styleString); }
 
     /**
      * Returns the default line style for text.
@@ -764,6 +773,16 @@ public class TextArea extends View {
     public void addChars(CharSequence theChars, TextStyle aStyle, int anIndex)
     {
         replaceChars(theChars, aStyle, anIndex, anIndex, true);
+    }
+
+    /**
+     * Adds chars to text with given style string.
+     */
+    public void addCharsWithStyleString(CharSequence theChars, String styleString)
+    {
+        TextStyle textStyle = getDefaultTextStyle();
+        TextStyle textStyle2 = textStyle.copyForStyleString(styleString);
+        _textBlock.addCharsWithStyle(theChars, textStyle2);
     }
 
     /**

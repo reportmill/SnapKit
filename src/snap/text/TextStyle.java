@@ -58,7 +58,7 @@ public class TextStyle extends PropObject implements Cloneable {
     public static final TextStyle DEFAULT = new TextStyle();
 
     // Constant for Link attributes
-    public static final TextStyle DEFAULT_LINK_STYLE = DEFAULT.copyForPropsString("Color:BLUE; Underline:1;");
+    public static final TextStyle DEFAULT_LINK_STYLE = DEFAULT.copyForStyleString("Color:BLUE; Underline:1;");
 
     /**
      * Creates a new TextStyle.
@@ -243,10 +243,10 @@ public class TextStyle extends PropObject implements Cloneable {
     /**
      * Returns a copy of this style for given props string.
      */
-    public TextStyle copyForPropsString(String propsString)
+    public TextStyle copyForStyleString(String styleString)
     {
         TextStyle clone = clone();
-        clone.setPropsString(propsString);
+        clone.setPropsString(styleString);
         return clone;
     }
 

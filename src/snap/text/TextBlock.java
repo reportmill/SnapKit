@@ -64,6 +64,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     public static final String Style_Prop = "Style";
     public static final String LineStyle_Prop = "LineStyle";
     public static final String DefaultTextStyle_Prop = "DefaultTextStyle";
+    public static final String DefaultLineStyle_Prop = "DefaultLineStyle";
     public static final String TextModified_Prop = "TextModified";
 
     /**
@@ -178,26 +179,34 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     /**
      * Sets the default text style.
      */
-    public void setDefaultTextStyle(TextStyle aStyle)
+    public void setDefaultTextStyle(TextStyle textStyle)
     {
         // If already set, just return
-        if (Objects.equals(aStyle, _defaultTextStyle)) return;
+        if (Objects.equals(textStyle, _defaultTextStyle)) return;
 
         // Set
         TextStyle oldStyle = _defaultTextStyle;
-        _defaultTextStyle = aStyle;
+        _defaultTextStyle = textStyle;
 
         // Update existing lines
         if (!isRichText() || length() == 0) {
-            TextStyle textStyle = getDefaultTextStyle();
-            List<TextLine> lines = getLines();
-            for (TextLine line : lines)
+            for (TextLine line : getLines())
                 line.setTextStyle(textStyle);
         }
 
         // Fire prop change
         if (isPropChangeEnabled())
-            firePropChange(DefaultTextStyle_Prop, oldStyle, aStyle);
+            firePropChange(DefaultTextStyle_Prop, oldStyle, textStyle);
+    }
+
+    /**
+     * Sets default text style for given style string.
+     */
+    public void setDefaultTextStyleString(String styleString)
+    {
+        TextStyle textStyle = getDefaultTextStyle();
+        TextStyle textStyle2 = textStyle.copyForStyleString(styleString);
+        setDefaultTextStyle(textStyle2);
     }
 
     /**
@@ -208,11 +217,24 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     /**
      * Sets the default line style.
      */
-    public void setDefaultLineStyle(TextLineStyle aLineStyle)
+    public void setDefaultLineStyle(TextLineStyle lineStyle)
     {
-        _defaultLineStyle = aLineStyle;
-        for (TextLine line : getLines())
-            line.setLineStyle(aLineStyle);
+        // If already set, just return
+        if (Objects.equals(lineStyle, _defaultLineStyle)) return;
+
+        // Set
+        TextLineStyle oldStyle = _defaultLineStyle;
+        _defaultLineStyle = lineStyle;
+
+        // Upgrade existing lines
+        if (!isRichText() || length() == 0) {
+            for (TextLine line : getLines())
+                line.setLineStyle(lineStyle);
+        }
+
+        // Fire prop change
+        if (isPropChangeEnabled())
+            firePropChange(DefaultLineStyle_Prop, oldStyle, lineStyle);
     }
 
     /**

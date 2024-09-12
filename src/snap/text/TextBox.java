@@ -44,7 +44,7 @@ public class TextBox extends TextBlock {
     private Shape _boundsPath;
 
     // A Listener to catch TextBlock PropChanges
-    private PropChangeListener _textBlockLsnr = pc -> textBlockDidPropChange(pc);
+    private PropChangeListener _textBlockLsnr = this::handleTextBlockPropChange;
 
     // A temp var to hold TextLineStyle when updating runs from source text
     private TextLineStyle _updateTextLineStyle;
@@ -183,9 +183,18 @@ public class TextBox extends TextBlock {
      * Override to forward to source text block.
      */
     @Override
-    public void setDefaultTextStyle(TextStyle aStyle)
+    public void setDefaultTextStyle(TextStyle textStyle)
     {
-        _sourceText.setDefaultTextStyle(aStyle);
+        _sourceText.setDefaultTextStyle(textStyle);
+    }
+
+    /**
+     * Override to forward to source text block.
+     */
+    @Override
+    public void setDefaultLineStyle(TextLineStyle lineStyle)
+    {
+        _sourceText.setDefaultLineStyle(lineStyle);
     }
 
     /**
@@ -474,9 +483,9 @@ public class TextBox extends TextBlock {
     }
 
     /**
-     * Updates lines for TextBlock changes.
+     * Called when TextBlock does property change.
      */
-    protected void textBlockDidPropChange(PropChange aPC)
+    protected void handleTextBlockPropChange(PropChange aPC)
     {
         // Get PropName
         String propName = aPC.getPropName();
@@ -518,6 +527,12 @@ public class TextBox extends TextBlock {
         else if (propName == TextBlock.DefaultTextStyle_Prop) {
             TextStyle newStyle = (TextStyle) aPC.getNewValue();
             super.setDefaultTextStyle(newStyle);
+        }
+
+        // Handle DefaultLineStyle
+        else if (propName == TextBlock.DefaultLineStyle_Prop) {
+            TextLineStyle newStyle = (TextLineStyle) aPC.getNewValue();
+            super.setDefaultLineStyle(newStyle);
         }
     }
 

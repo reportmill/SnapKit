@@ -240,7 +240,6 @@ with large source files and providing syntax coloring and symbol highlighting.
 - TextLine: Manages a paragraph of text (with multiple runs)
 - TextBlock: Manages a block of text lines in a text document
 - TextBox: Manages a text block in a box or path (providing text wrapping)
-- RichText: Manages large text content with attributes
 - TextStyle: Manages a group of text display attributes
 - TextLineStyle: Manages a group of text paragraph attributes (indent, spacing)
 - TextToken: Manages a group of characters in a line that represent a word or code part
@@ -270,7 +269,7 @@ an easy way to serialize Java objects and provides automatic support for read/wr
 undo/redo and more. Specifically the props support provides the following:
 
 - Read/write an object graph to XML and JSON
-- "Sparce Serialization" (only write attributes that have changed from default)
+- "Sparse Serialization" (only write attributes that have changed from default)
 - Clipboard copy/paste an object or object graph
 - Undo/Redo support
 - Automatic support for clone(), equals(), hashCode() and toString()
