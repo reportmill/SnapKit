@@ -206,6 +206,12 @@ public abstract class PropObject implements PropChange.DoChange {
         if (Objects.deepEquals(propValue, propDefault))
             return true;
 
+        // If EMPTY_OBJECT and null or empty String, return true
+        if (propDefault == EMPTY_OBJECT) {
+            if (propValue == null || propValue instanceof String && ((String) propValue).isEmpty())
+                return true;
+        }
+
         // If propValue or propDefault null, return false
         if (propValue == null || propDefault == null)
             return false;

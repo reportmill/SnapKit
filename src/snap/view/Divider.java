@@ -27,7 +27,7 @@ public class Divider extends View {
     private static final Paint DIVIDER_FILL_HOR = new GradientPaint(c1, c2, 90);
     private static final Paint DIVIDER_FILL_VER = new GradientPaint(c1, c2, 0);
     public static final Border DIVIDER_BORDER = Border.createLineBorder(Color.LIGHTGRAY, 1);
-    public static final int DEFAULT_SPAN = 8;
+    public static final double DEFAULT_SPAN = 8;
 
     /**
      * Creates a new Divider.
