@@ -84,10 +84,10 @@ public class ViewArchiver extends XMLArchiver {
      * Creates the class map.
      */
     @Override
-    protected Map<String, Class> createClassMap()
+    protected Map<String, Class<?>> createClassMap()
     {
         // Create class map and add classes
-        Map<String,Class> cmap = new HashMap<>();
+        Map<String,Class<?>> cmap = new HashMap<>();
 
         // View classes
         cmap.put("BorderView", BorderView.class);

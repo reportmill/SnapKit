@@ -40,16 +40,16 @@ public class XMLArchiver {
     private Map<XMLElement, Object> _readElements = new HashMap<>();
 
     // list of objects that are archived by reference
-    private List _references = new ArrayList<>();
+    private List<Object> _references = new ArrayList<>();
 
     // Archiver manages archival of shared BLOBs external to normal element hierarchy
     private List<Resource> _resources = new ArrayList<>();
 
     // The map of classes for unarchival
-    private Map<String,Class> _classMap;
+    private Map<String,Class<?>> _classMap;
 
     // The stack of parents
-    private Deque _parentStack = new ArrayDeque();
+    private Deque<Object> _parentStack = new ArrayDeque<>();
 
     /**
      * Returns the WebURL of the currently loading archive.
@@ -80,10 +80,7 @@ public class XMLArchiver {
     /**
      * Returns the owner class.
      */
-    public Class getOwnerClass()
-    {
-        return _owner != null ? _owner.getClass() : null;
-    }
+    public Class<?> getOwnerClass()  { return _owner != null ? _owner.getClass() : null; }
 
     /**
      * Returns the object that the archiver should read "into".
@@ -132,7 +129,7 @@ public class XMLArchiver {
     /**
      * Returns the class map.
      */
-    public Map<String, Class> getClassMap()
+    public Map<String, Class<?>> getClassMap()
     {
         if (_classMap != null) return _classMap;
         return _classMap = createClassMap();
@@ -141,7 +138,7 @@ public class XMLArchiver {
     /**
      * Creates the class map.
      */
-    protected Map<String, Class> createClassMap()
+    protected Map<String, Class<?>> createClassMap()
     {
         throw new RuntimeException("No class map");
     }
@@ -660,7 +657,7 @@ public class XMLArchiver {
     public static class Resource {
 
         // The resource bytes
-        byte _bytes[];
+        byte[] _bytes;
 
         // The resource name
         String _name;
@@ -678,14 +675,14 @@ public class XMLArchiver {
         }
 
         // Creates new resource for given bytes and name
-        public Resource(byte bytes[], String aName)
+        public Resource(byte[] bytes, String aName)
         {
             _bytes = bytes;
             _name = aName;
         }
 
         // Standard equals implementation
-        public boolean equals(byte bytes[])
+        public boolean equals(byte[] bytes)
         {
             if (bytes.length != _bytes.length) return false;
             for (int i = 0, iMax = bytes.length; i < iMax; i++)
