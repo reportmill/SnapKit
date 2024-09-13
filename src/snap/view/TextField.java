@@ -1213,9 +1213,8 @@ public class TextField extends ParentView {
         // Do normal version
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive ColCount, Text, PromptText
+        // Archive ColCount, PromptText
         if (!isPrefWidthSet() && getColCount() != 12) e.add(ColCount_Prop, getColCount());
-        if (getText() != null && !getText().isEmpty()) e.add("text", getText());
         if (getPromptText() != null && !getPromptText().isEmpty()) e.add(PromptText_Prop, getPromptText());
         return e;
     }
@@ -1228,14 +1227,9 @@ public class TextField extends ParentView {
         // Do normal version
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive ColCount, Text, PromptText
+        // Unarchive ColCount, PromptText
         if (anElement.hasAttribute(ColCount_Prop))
             setColCount(anElement.getAttributeIntValue(ColCount_Prop));
-        String str = anElement.getAttributeValue("text");
-        if (str == null)
-            str = anElement.getAttributeValue("value", anElement.getValue());
-        if (str != null && !str.isEmpty())
-            setText(str);
         if (anElement.hasAttribute(PromptText_Prop))
             setPromptText(anElement.getAttributeValue(PromptText_Prop));
     }

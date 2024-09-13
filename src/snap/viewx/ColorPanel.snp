@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<VBox Name="ColorPanel" PrefWidth="275" PrefHeight="260" Padding="8,4,4,4" Spacing="4" FillWidth="true">
-  <HBox Align="CENTER" Spacing="2">
+<ColView Name="ColorPanel" PrefWidth="275" PrefHeight="260" Padding="8,4,4,4" Spacing="4" FillWidth="true">
+  <RowView Align="CENTER" Spacing="2">
     <ToggleButton Name="ImagePickerButton" PrefWidth="40" PrefHeight="27" image="spectrum-icon.png" Selected="true" ToggleGroup="bg1" />
     <ToggleButton Name="RGBPickerButton" PrefWidth="40" PrefHeight="27" image="rgb-icon.png" ToggleGroup="bg1" />
     <ToggleButton Name="GrayPickerButton" PrefWidth="40" PrefHeight="27" image="grayscale-icon.png" ToggleGroup="bg1" />
@@ -8,53 +8,53 @@
     <Label PrefWidth="20" PrefHeight="8" />
     <ColorWell Name="DisplayColorWell" PrefWidth="40" PrefHeight="27" Selectable="false" />
     <MenuButton Name="HistoryMenuButton" PrefWidth="16" PrefHeight="11" ToolTip="Recent Colors" ShowArea="false" />
-  </HBox>
+  </RowView>
   <SwitchView Name="PickerPanel" PrefHeight="198">
-    <VBox Name="ImagePicker" Spacing="4" FillWidth="true">
+    <ColView Name="ImagePicker" Spacing="4" FillWidth="true">
       <ScrollView GrowHeight="true">
         <View Name="ImagePickerLabel" Class="snap.viewx.ColorPanel$ImagePicker" />
       </ScrollView>
       <ComboBox Name="ImageComboBox" PrefHeight="23" />
-    </VBox>
-    <VBox Name="RGBPicker" Padding="16,12,12,12" Spacing="15" FillWidth="true">
-      <HBox Spacing="4">
+    </ColView>
+    <ColView Name="RGBPicker" Padding="16,12,12,12" Spacing="15" FillWidth="true">
+      <RowView Spacing="4">
         <Label PrefWidth="12" text="R:" />
         <Slider Name="RedSlider" GrowWidth="true" Class="snap.viewx.ColorPanel$GradSlider" Max="255" />
         <TextField Name="RedText" PrefWidth="45" Align="CENTER" />
-      </HBox>
-      <HBox Spacing="4">
+      </RowView>
+      <RowView Spacing="4">
         <Label PrefWidth="12" text="G:" />
         <Slider Name="GreenSlider" GrowWidth="true" Class="snap.viewx.ColorPanel$GradSlider" Max="255" />
         <TextField Name="GreenText" PrefWidth="45" Align="CENTER" />
-      </HBox>
-      <HBox Spacing="4">
+      </RowView>
+      <RowView Spacing="4">
         <Label PrefWidth="12" text="B:" />
         <Slider Name="BlueSlider" GrowWidth="true" Class="snap.viewx.ColorPanel$GradSlider" Max="255" />
         <TextField Name="BlueText" PrefWidth="45" Align="CENTER" />
-      </HBox>
-      <HBox Spacing="4">
+      </RowView>
+      <RowView Spacing="4">
         <Label PrefWidth="12" text="A:" />
         <Slider Name="AlphaSlider" GrowWidth="true" Class="snap.viewx.ColorPanel$GradSlider" Max="255" />
         <TextField Name="AlphaText" PrefWidth="45" Align="CENTER" />
-      </HBox>
-      <HBox Align="CENTER" GrowHeight="true" Spacing="4">
+      </RowView>
+      <RowView Align="CENTER" GrowHeight="true" Spacing="4">
         <Label text="Hex:" />
         <TextField Name="HexText" PrefWidth="74" Align="CENTER" />
-      </HBox>
-    </VBox>
-    <VBox Name="GrayPicker" Padding="16,12,12,12" Spacing="15" FillWidth="true">
-      <HBox Spacing="4">
+      </RowView>
+    </ColView>
+    <ColView Name="GrayPicker" Padding="16,12,12,12" Spacing="15" FillWidth="true">
+      <RowView Spacing="4">
         <Label PrefWidth="12" text="G:" />
         <Slider Name="GraySlider" GrowWidth="true" Class="snap.viewx.ColorPanel$GradSlider" Max="255" />
         <TextField Name="GrayText" PrefWidth="45" Align="CENTER" />
-      </HBox>
-      <HBox Spacing="4">
+      </RowView>
+      <RowView Spacing="4">
         <Label PrefWidth="12" text="A:" />
         <Slider Name="GrayAlphaSlider" GrowWidth="true" Class="snap.viewx.ColorPanel$GradSlider" Max="255" />
         <TextField Name="GrayAlphaText" PrefWidth="45" Align="CENTER" />
-      </HBox>
-    </VBox>
+      </RowView>
+    </ColView>
     <SpringView Name="SwatchPicker" PrefWidth="0" PrefHeight="0" />
   </SwitchView>
   <ColorDock Name="ColorDock" PrefHeight="30" GrowHeight="true" />
-</VBox>
+</ColView>

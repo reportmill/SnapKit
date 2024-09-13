@@ -489,10 +489,7 @@ public class Label extends ParentView {
         // Archive basic view attributes
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive Text and ImageName
-        String text = getText();
-        if (text != null && !text.isEmpty())
-            e.add("text", text);
+        // Archive ImageName
         String iname = getImageName();
         if (iname != null)
             e.add("image", iname);
@@ -509,8 +506,7 @@ public class Label extends ParentView {
         // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive Text and ImageName
-        setText(anElement.getAttributeValue("text", anElement.getAttributeValue("value")));
+        // Unarchive ImageName
         String iname = anElement.getAttributeValue("image");
         if (iname != null) {
             setImageName(iname);

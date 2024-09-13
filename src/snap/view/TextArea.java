@@ -88,6 +88,7 @@ public class TextArea extends View {
     private static Color TEXT_SEL_COLOR = new Color(181, 214, 254, 255);
 
     // Constants for properties
+    public static final String RichText_Prop = "RichText";
     public static final String Editable_Prop = "Editable";
     public static final String WrapLines_Prop = "WrapLines";
     public static final String FireActionOnEnterKey_Prop = "FireActionOnEnterKey";
@@ -1716,7 +1717,8 @@ public class TextArea extends View {
     {
         super.initProps(aPropSet);
 
-        // Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
+        // RichText, Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
+        aPropSet.addPropNamed(RichText_Prop, boolean.class, false);
         aPropSet.addPropNamed(Editable_Prop, boolean.class, false);
         aPropSet.addPropNamed(WrapLines_Prop, boolean.class, false);
         aPropSet.addPropNamed(FireActionOnEnterKey_Prop, boolean.class, false);
@@ -1731,7 +1733,8 @@ public class TextArea extends View {
     {
         switch (aPropName) {
 
-            // Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
+            // RichText, Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
+            case RichText_Prop: return isRichText();
             case Editable_Prop: return isEditable();
             case WrapLines_Prop: return isWrapLines();
             case FireActionOnEnterKey_Prop: return isFireActionOnEnterKey();
@@ -1750,7 +1753,8 @@ public class TextArea extends View {
     {
         switch (aPropName) {
 
-            // Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
+            // RichText, Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
+            case RichText_Prop: _textBlock.setRichText(Convert.boolValue(aValue)); break;
             case Editable_Prop: setEditable(Convert.boolValue(aValue)); break;
             case WrapLines_Prop: setWrapLines(Convert.boolValue(aValue)); break;
             case FireActionOnEnterKey_Prop: setFireActionOnEnterKey(Convert.boolValue(aValue)); break;
@@ -1781,21 +1785,6 @@ public class TextArea extends View {
         if (!isPropDefault(Editable_Prop)) xml.add(Editable_Prop, isEditable());
         if (!isPropDefault(WrapLines_Prop)) xml.add(WrapLines_Prop, isWrapLines());
 
-        // If RichText, archive rich text
-        if (isRichText()) {
-            xml.removeElement("font");
-            XMLElement richTextXML = anArchiver.toXML(_textBlock);
-            richTextXML.setName("RichText");
-            if (richTextXML.size() > 0)
-                xml.add(richTextXML);
-        }
-
-        // Otherwise, archive text string
-        else {
-            String text = getText();
-            if (text != null && !text.isEmpty()) xml.add("text", text);
-        }
-
         // Archive FireActionOnEnterKey, FireActionOnFocusLost
         if (isFireActionOnEnterKey()) xml.add(FireActionOnEnterKey_Prop, true);
         if (isFireActionOnFocusLost()) xml.add(FireActionOnFocusLost_Prop, true);
@@ -1823,20 +1812,6 @@ public class TextArea extends View {
             setEditable(anElement.getAttributeBoolValue(Editable_Prop));
         if (anElement.hasAttribute(WrapLines_Prop))
             setWrapLines(anElement.getAttributeBoolValue(WrapLines_Prop));
-
-        // If RichText, unarchive rich text
-        XMLElement richTextXML = anElement.get("RichText");
-        if (richTextXML != null) {
-            _textBlock.setRichText(true);
-            _textBlock.fromXML(anArchiver, richTextXML);
-        }
-
-        // Otherwise unarchive text. Text can be "text" or "value" attribute, or as content (CDATA or otherwise)
-        else {
-            String str = anElement.getAttributeValue("text", anElement.getAttributeValue("value", anElement.getValue()));
-            if (str != null && !str.isEmpty())
-                setText(str);
-        }
 
         // Unarchive FireActionOnEnterKey, FireActionOnFocusLost
         if (anElement.hasAttribute(FireActionOnEnterKey_Prop))

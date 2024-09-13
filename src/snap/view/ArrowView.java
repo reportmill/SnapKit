@@ -1,9 +1,7 @@
 package snap.view;
-
 import snap.geom.Polygon;
 import snap.geom.Pos;
 import snap.gfx.*;
-import snap.util.*;
 
 /**
  * A view to show up to four arrows.
@@ -324,42 +322,5 @@ public class ArrowView extends ParentView {
     protected void layoutImpl()
     {
         RowView.layout(this, false);
-    }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive ShowUp, ShowDown, ShowLeft, ShowRight
-        if (!isShowUp()) e.add(ShowUp_Prop, isShowUp());
-        if (!isShowDown()) e.add(ShowDown_Prop, isShowDown());
-        if (isShowLeft()) e.add(ShowLeft_Prop, isShowLeft());
-        if (isShowRight()) e.add(ShowRight_Prop, isShowRight());
-
-        // Return element
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive ShowUp, ShowDown, ShowLeft, ShowRight
-        if (anElement.hasAttribute(ShowUp_Prop))
-            setShowUp(anElement.getAttributeBoolValue(ShowUp_Prop));
-        if (anElement.hasAttribute(ShowDown_Prop))
-            setShowDown(anElement.getAttributeBoolValue(ShowDown_Prop));
-        if (anElement.hasAttribute(ShowLeft_Prop))
-            setShowLeft(anElement.getAttributeBoolValue(ShowLeft_Prop));
-        if (anElement.hasAttribute(ShowRight_Prop))
-            setShowRight(anElement.getAttributeBoolValue(ShowRight_Prop));
     }
 }

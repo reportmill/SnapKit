@@ -9,7 +9,6 @@ import snap.geom.Transform;
 import snap.gfx.*;
 import snap.text.StyledString;
 import snap.text.TextStyle;
-import snap.util.*;
 import java.util.Objects;
 
 /**
@@ -517,28 +516,5 @@ public class StringView extends View implements Cloneable {
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
         copy._styledString = _styledString.clone();
         return copy;
-    }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        XMLElement e = super.toXML(anArchiver);
-        String text = getText();
-        if (text != null && !text.isEmpty())
-            e.add("text", text);
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public View fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        super.fromXML(anArchiver, anElement);
-        if (anElement.hasAttribute("text"))
-            setText(anElement.getAttributeValue("text", anElement.getAttributeValue("value")));
-        return this;
     }
 }

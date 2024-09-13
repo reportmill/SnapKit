@@ -493,11 +493,6 @@ public class ButtonBase extends ParentView {
         // Archive basic view attributes
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive Text
-        String text = getText();
-        if (text != null && !text.isEmpty())
-            e.add(Text_Prop, text);
-
         // Archive ImageName
         String imageName = getImageName();
         if (imageName != null)
@@ -520,10 +515,6 @@ public class ButtonBase extends ParentView {
     {
         // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive Text
-        if (anElement.hasAttribute(Text_Prop))
-            setText(anElement.getAttributeValue(Text_Prop));
 
         // Unarchive ImageName
         String imageName = anElement.getAttributeValue("Image");

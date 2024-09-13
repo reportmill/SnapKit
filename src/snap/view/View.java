@@ -2728,17 +2728,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Convenience to quickly set anim props.
      */
-    public ViewAnim setAnimString(String animString)
+    public void setAnimString(String animString)
     {
-        return getAnim(0).setAnimString(animString);
-    }
-
-    /**
-     * Convenience to quickly set anim props.
-     */
-    public ViewAnim setAnimProps(Object ... propItems)
-    {
-        return getAnim(0).setProps(propItems);
+        getAnim(0).setAnimString(animString);
     }
 
     /**
@@ -3121,17 +3113,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public XMLElement toXML(XMLArchiver anArchiver)
     {
-        // Get class name for element
-        String className;
-        for (Class<?> cls = getClass(); ; cls = cls.getSuperclass()) {
-            if (cls == ParentView.class) continue;
-            if (cls.getName().startsWith("snap.view")) {
-                className = cls.getSimpleName();
-                break;
-            }
-        }
-
         // Get new element with class name
+        String className = getClass().getSimpleName();
         XMLElement e = new XMLElement(className);
 
         // Archive name
@@ -3227,10 +3210,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (getToolTip() != null)
             e.add(ToolTip_Prop, getToolTip());
 
+        // Archive Text
+        String text = getText();
+        if (text != null && !text.isEmpty())
+            e.add(Text_Prop, text);
+
         // Archive RealClassName
-        className = getRuntimeClassName();
-        if (className != null && !className.isEmpty())
-            e.add("Class", className);
+        String runtimeClassName = getRuntimeClassName();
+        if (runtimeClassName != null && !runtimeClassName.isEmpty())
+            e.add("Class", runtimeClassName);
 
         // Return the element
         return e;
@@ -3371,6 +3359,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             setToolTip(anElement.getAttributeValue("ttip"));
         if (anElement.hasAttribute(ToolTip_Prop))
             setToolTip(anElement.getAttributeValue(ToolTip_Prop));
+
+        // Unarchive Text
+        if (anElement.hasAttribute(Text_Prop))
+            setText(anElement.getAttributeValue(Text_Prop));
 
         // Unarchive class property for subclass substitution, if available
         if (anElement.hasAttribute("Class"))

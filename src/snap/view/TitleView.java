@@ -441,8 +441,7 @@ public class TitleView extends ParentView implements ViewHost {
         // Do normal archival
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive Text, TitleStyle
-        String text = getText(); if (text != null && !text.isEmpty()) e.add(Text_Prop, text);
+        // Archive TitleStyle
         if (getTitleStyle() != TitleStyle.EtchBorder) e.add(TitleStyle_Prop, getTitleStyle());
 
         // Archive Expandable, Expanded
@@ -458,10 +457,6 @@ public class TitleView extends ParentView implements ViewHost {
     {
         // Do normal version
         super.fromXMLView(anArchiver,anElement);
-
-        // Unarchive Title (legacy)
-        if (anElement.hasAttribute(Text_Prop)) setText(anElement.getAttributeValue(Text_Prop));
-        if (anElement.hasAttribute("Title")) setText(anElement.getAttributeValue("Title"));
 
         // Unrchive TitleStyle
         String tstr = anElement.getAttributeValue(TitleStyle_Prop);

@@ -75,12 +75,9 @@ public class ViewArchiver extends XMLArchiver {
     private static Class<?> getClassForName(String aClassName)
     {
         ClassLoader classLoader = ViewArchiver.class.getClassLoader();
-        try {
-            return Class.forName(aClassName, false, classLoader);
-        }
+        try { return Class.forName(aClassName, false, classLoader); }
         catch (ClassNotFoundException e) { return null; }
         catch (NoClassDefFoundError t) { System.err.println("ViewArchiver.getClassForName: " + t); return null; }
-        catch (Throwable t) { System.err.println("ViewArchiver.getClassForName: " + t); return null; }
     }
 
     /**
@@ -93,14 +90,10 @@ public class ViewArchiver extends XMLArchiver {
         Map<String,Class> cmap = new HashMap<>();
 
         // View classes
-        cmap.put("ArcView", ArcView.class);
-        cmap.put("ArrowView", ArrowView.class);
         cmap.put("BorderView", BorderView.class);
-        cmap.put("Box", BoxView.class);
         cmap.put("BoxView", BoxView.class);
         cmap.put("BrowserView", BrowserView.class);
         cmap.put("Button", Button.class);
-        cmap.put("CollapseView", CollapseView.class);
         cmap.put("ColorButton", snap.viewx.ColorButton.class);
         cmap.put("ColorDock", snap.viewx.ColorDock.class);
         cmap.put("ColorWell", snap.viewx.ColorWell.class);
@@ -108,8 +101,6 @@ public class ViewArchiver extends XMLArchiver {
         cmap.put("CheckBox", CheckBox.class);
         cmap.put("CheckBoxMenuItem", CheckBoxMenuItem.class);
         cmap.put("ComboBox", ComboBox.class);
-        cmap.put("DocView", DocView.class);
-        cmap.put("HBox", RowView.class);
         cmap.put("ImageView", ImageView.class);
         cmap.put("Label", Label.class);
         cmap.put("ListView", ListView.class);
@@ -117,7 +108,6 @@ public class ViewArchiver extends XMLArchiver {
         cmap.put("MenuBar", MenuBar.class);
         cmap.put("MenuButton", MenuButton.class);
         cmap.put("MenuItem", MenuItem.class);
-        cmap.put("PageView", PageView.class);
         cmap.put("PathView", PathView.class);
         cmap.put("ProgressBar", ProgressBar.class);
         cmap.put("RadioButton", RadioButton.class);
@@ -131,7 +121,6 @@ public class ViewArchiver extends XMLArchiver {
         cmap.put("SplitView", SplitView.class);
         cmap.put("SpringView", SpringView.class);
         cmap.put("StackView", StackView.class);
-        cmap.put("StringView", StringView.class);
         cmap.put("SwitchView", SwitchView.class);
         cmap.put("TableView", TableView.class);
         cmap.put("TableCol", TableCol.class);
@@ -143,7 +132,6 @@ public class ViewArchiver extends XMLArchiver {
         cmap.put("ToggleButton", ToggleButton.class);
         cmap.put("TreeView", TreeView.class);
         cmap.put("TitleView", TitleView.class);
-        cmap.put("VBox", ColView.class);
         cmap.put("View", View.class);
 
         // Graphics
@@ -190,18 +178,12 @@ public class ViewArchiver extends XMLArchiver {
     /**
      * Returns whether to use real classes.
      */
-    public static boolean isUseRealClass()
-    {
-        return _useRealClass;
-    }
+    public static boolean isUseRealClass()  { return _useRealClass; }
 
     /**
      * Sets whether to use real classes.
      */
-    public static void setUseRealClass(boolean aFlag)
-    {
-        _useRealClass = aFlag;
-    }
+    public static void setUseRealClass(boolean aFlag)  { _useRealClass = aFlag; }
 
     /**
      * Returns an image for given name/path.

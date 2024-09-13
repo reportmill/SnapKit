@@ -63,6 +63,12 @@ public class ViewAnim {
     // A convenience for ViewUpdater
     protected int _startTime;
 
+    // AutoRegisterChanges PropChangeListener
+    private PropChangeListener _autoRegisterChangesListener;
+
+    // List of changes encountered by AutoRegisterChanges PropChangeListener
+    private List<PropChange> _autoRegisterChanges;
+
     /**
      * Constructor.
      */
@@ -95,15 +101,6 @@ public class ViewAnim {
      * Returns the root ViewAnim.
      */
     public ViewAnim getRoot()  { return _parent != null ? _parent.getRoot() : this; }
-
-    /**
-     * Returns the root ViewAnim.
-     */
-    public ViewAnim getRoot(int aTime)
-    {
-        ViewAnim rootAnim = getRoot();
-        return rootAnim.getAnim(aTime);
-    }
 
     /**
      * Returns the parent ViewAnim.
@@ -708,52 +705,6 @@ public class ViewAnim {
     }
 
     /**
-     * Watches given View for changes and registers animation.
-     */
-    public void startAutoRegisterChanges(String... theProps)
-    {
-        _autoRegisterChangesListener = pc -> autoRegisterPropChange(pc);
-        _autoRegisterChanges = new ArrayList<>();
-        View view = getView();
-        view.addPropChangeListener(_autoRegisterChangesListener, theProps);
-    }
-
-    /**
-     * Stops watching and register changes.
-     */
-    public void stopAutoRegisterChanges()
-    {
-        // Remove/clear AutoRegisterChangeListener
-        View view = getView();
-        view.removePropChangeListener(_autoRegisterChangesListener);
-        _autoRegisterChangesListener = null;
-
-        // Reset old values for changes and clear changes
-        for (PropChange propChange : _autoRegisterChanges) {
-            String propName = propChange.getPropName();
-            Object oldValue = propChange.getOldValue();
-            view.setPropValue(propName, oldValue);
-        }
-        _autoRegisterChanges = null;
-    }
-
-    /**
-     * Register anim for changes.
-     */
-    public void autoRegisterPropChange(PropChange aPC)
-    {
-        String propName = aPC.getPropName();
-        setValue(propName, aPC.getOldValue(), aPC.getNewValue());
-        _autoRegisterChanges.add(aPC);
-    }
-
-    // AutoRegisterChanges PropChangeListener
-    private PropChangeListener _autoRegisterChangesListener;
-
-    // List of changes encountered by AutoRegisterChanges PropChangeListener
-    private List<PropChange> _autoRegisterChanges;
-
-    /**
      * Returns the anim string.
      */
     public String getAnimString()
@@ -769,7 +720,7 @@ public class ViewAnim {
     /**
      * Configures this anim from given JSON/CSS style string, e.g.: "time: 300; scale: 2; time: 600; scale: 1; time: 1200; rotate: 360"
      */
-    public ViewAnim setAnimString(String animString)
+    public void setAnimString(String animString)
     {
         // Remap aliases
         animString = animString.replace("T:", "Time:").replace("R:", "Rotate:");
@@ -829,38 +780,46 @@ public class ViewAnim {
             // If "name:value" parts not found, complain
             else System.err.println("PropObject.setPropsString: Invalid prop string: " + propString);
         }
-
-        // Return
-        return anim;
     }
 
     /**
-     * Sets props from items which can be times, keys, values.
+     * Watches given View for changes and registers animation.
      */
-    public ViewAnim setProps(Object ... propItems)
+    public void startAutoRegisterChanges(String... theProps)
     {
-        for (int i = 0; i < propItems.length; i++) {
-            Object propItem = propItems[i];
+        _autoRegisterChangesListener = pc -> autoRegisterPropChange(pc);
+        _autoRegisterChanges = new ArrayList<>();
+        View view = getView();
+        view.addPropChangeListener(_autoRegisterChangesListener, theProps);
+    }
 
-            // Handle Number: get anim for time and forward
-            if (propItem instanceof Number) {
-                int time = ((Number) propItem).intValue();
-                ViewAnim timeAnim = getAnim(time);
-                Object[] remainder = Arrays.copyOfRange(propItems, i + 1, propItems.length);
-                timeAnim.setProps(remainder);
-                return this;
-            }
+    /**
+     * Stops watching and register changes.
+     */
+    public void stopAutoRegisterChanges()
+    {
+        // Remove/clear AutoRegisterChangeListener
+        View view = getView();
+        view.removePropChangeListener(_autoRegisterChangesListener);
+        _autoRegisterChangesListener = null;
 
-            // Handle String: get next item as value and set
-            if (propItem instanceof String) {
-                String propName = (String) propItem;
-                Object propVal2 = propItems[++i];
-                setValue(propName, propVal2);
-            }
+        // Reset old values for changes and clear changes
+        for (PropChange propChange : _autoRegisterChanges) {
+            String propName = propChange.getPropName();
+            Object oldValue = propChange.getOldValue();
+            view.setPropValue(propName, oldValue);
         }
+        _autoRegisterChanges = null;
+    }
 
-        // Return
-        return this;
+    /**
+     * Register anim for changes.
+     */
+    public void autoRegisterPropChange(PropChange aPC)
+    {
+        String propName = aPC.getPropName();
+        setValue(propName, aPC.getOldValue(), aPC.getNewValue());
+        _autoRegisterChanges.add(aPC);
     }
 
     /**
