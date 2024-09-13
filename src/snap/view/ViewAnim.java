@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * A class to animate View attributes.
  */
-public class ViewAnim implements XMLArchiver.Archivable {
+public class ViewAnim {
 
     // The View
     private View _view;
@@ -565,14 +565,6 @@ public class ViewAnim implements XMLArchiver.Archivable {
     }
 
     /**
-     * Sets the loop count.
-     */
-    public ViewAnim setLoops()
-    {
-        return setLoopCount(Short.MAX_VALUE);
-    }
-
-    /**
      * Returns the LoopCount.
      */
     public int getLoopCount()  { return _loopCount; }
@@ -585,6 +577,11 @@ public class ViewAnim implements XMLArchiver.Archivable {
         _loopCount = aValue;
         return this;
     }
+
+    /**
+     * Sets the loop count.
+     */
+    public ViewAnim setLoops()  { return setLoopCount(Short.MAX_VALUE); }
 
     /**
      * Returns the runnable to be called on each frame.
@@ -757,10 +754,28 @@ public class ViewAnim implements XMLArchiver.Archivable {
     private List<PropChange> _autoRegisterChanges;
 
     /**
+     * Returns the anim string.
+     */
+    public String getAnimString()
+    {
+        StringBuilder sb = new StringBuilder();
+        writeAnimToStringBuilder(this, sb);
+        if (sb.length() > 0 && sb.charAt(sb.length() - 1) == ' ') sb.setLength(sb.length() - 1);
+        return sb.toString().replace("Time:", "T:").replace("Rotate:", "R:")
+                .replace("TransX:", "TX:").replace("TransY:", "TY:")
+                .replace("ScaleX:", "SX:").replace("ScaleY:", "SY:");
+    }
+
+    /**
      * Configures this anim from given JSON/CSS style string, e.g.: "time: 300; scale: 2; time: 600; scale: 1; time: 1200; rotate: 360"
      */
     public ViewAnim setAnimString(String animString)
     {
+        // Remap aliases
+        animString = animString.replace("T:", "Time:").replace("R:", "Rotate:");
+        animString = animString.replace("TX:", "TransX:").replace("TY:", "TransY:");
+        animString = animString.replace("SX:", "ScaleX:").replace("SY:", "ScaleY:");
+
         // Get individual prop/value strings (separated by semi-colons)
         String[] propStrings = animString.split(";");
         ViewAnim anim = this;
@@ -867,89 +882,33 @@ public class ViewAnim implements XMLArchiver.Archivable {
         if (isRoot() && _view.getName() != null)
             sb.append(' ').append(_view.getName());
         for (ViewAnim va : _anims)
-            sb.append("\n    " + va.toString().replace("\n", "\n    "));
+            sb.append("\n    ").append(va.toString().replace("\n", "\n    "));
         return sb.toString();
     }
 
     /**
-     * XML archival.
+     * Writes given anim to given string builder.
      */
-    public XMLElement toXML(XMLArchiver anArchiver)
+    private static void writeAnimToStringBuilder(ViewAnim theAnim, StringBuilder aSB)
     {
-        // Create element
-        XMLElement e = new XMLElement("Anim");
+        if (theAnim.getEnd() > 0) {
 
-        // Unarchive Loops, LoopCount
-        if (getLoopCount() > 0)
-            e.add("LoopCount", getLoopCount());
+            // Write time
+            aSB.append("Time:").append(theAnim.getEnd()).append("; ");
 
-        // Archive KeyValues
-        toXMLAnim(this, e);
-        return e;
-    }
-
-    /**
-     * XML archival.
-     */
-    private static void toXMLAnim(ViewAnim theAnim, XMLElement aXML)
-    {
-        // Iterate over values
-        for (String key : theAnim.getKeys()) {
-            XMLElement kvxml = new XMLElement("KeyValue");
-            kvxml.add("Time", theAnim.getEnd());
-            kvxml.add("Key", key);
-            Object val = theAnim.getEndVal(key);
-            if (val instanceof Color) val = '#' + ((Color) val).toHexString();
-            kvxml.add("Value", val);
-            aXML.add(kvxml);
-        }
-
-        // If no keys, just add KeyValue with time
-        if (theAnim.getKeys().isEmpty()) {
-            XMLElement kvxml = new XMLElement("KeyValue");
-            kvxml.add("Time", theAnim.getEnd());
-            aXML.add(kvxml);
+            // Iterate over keys and write key/value
+            for (String key : theAnim.getKeys()) {
+                aSB.append(key).append(":");
+                Object val = theAnim.getEndVal(key);
+                if (val instanceof Color) val = '#' + ((Color) val).toHexString();
+                else val = FormatUtils.formatNum((Number) val);
+                aSB.append(val).append("; ");
+            }
         }
 
         // Iterate over children
         for (ViewAnim child : theAnim.getAnims())
-            toXMLAnim(child, aXML);
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public ViewAnim fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive LoopCount
-        if (anElement.hasAttribute("LoopCount"))
-            setLoopCount(anElement.getAttributeIntValue("LoopCount"));
-
-        // Unarchive KeyValue records
-        ViewAnim anim = this;
-        for (int i = anElement.indexOf("KeyValue"); i >= 0; i = anElement.indexOf("KeyValue", i + 1)) {
-            XMLElement keyVal = anElement.get(i);
-
-            // Get time and make sure we have right anim
-            int time = keyVal.getAttributeIntValue("Time");
-            if (time != anim.getEnd())
-                anim = anim.getAnim(time);
-
-            // Get key and value
-            String key = keyVal.getAttributeValue("Key");
-            String valStr = keyVal.getAttributeValue("Value");
-            if (key == null || valStr == null)
-                continue;
-            Object val;
-            if (valStr.startsWith("#")) val = new Color(valStr);
-            else if (valStr.equalsIgnoreCase("true")) val = Boolean.TRUE;
-            else if (valStr.equalsIgnoreCase("false")) val = Boolean.FALSE;
-            else val = Convert.doubleValue(valStr);
-            anim.setValue(key, val);
-        }
-
-        // Return this anim
-        return this;
+            writeAnimToStringBuilder(child, aSB);
     }
 
     /**

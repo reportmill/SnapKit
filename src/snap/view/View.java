@@ -3219,12 +3219,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (getLeanY() != null)
             e.add(LeanY_Prop, getLeanY());
 
-        // Archive animation
-        if (getAnim(-1) != null && !getAnim(0).isEmpty()) {
-            ViewAnim anim = getAnim(0);
-            e.add(anim.toXML(anArchiver));
-        }
-
         // Archive bindings
         for (Binding b : getBindings())
             e.add(b.toXML(anArchiver));
@@ -3365,12 +3359,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             setLeanX(HPos.get(anElement.getAttributeValue(LeanX_Prop)));
         if (anElement.hasAttribute(LeanY_Prop))
             setLeanY(VPos.get(anElement.getAttributeValue(LeanY_Prop)));
-
-        // Unarchive animation
-        XMLElement animXML = anElement.getElement("Anim");
-        if (animXML == null) animXML = anElement.getElement("KeyFrame") != null ? anElement : null;
-        if (animXML != null)
-            getAnim(0).fromXML(anArchiver, animXML);
 
         // Unarchive bindings
         for (int i = anElement.indexOf("binding"); i >= 0; i = anElement.indexOf("binding", i + 1)) {
