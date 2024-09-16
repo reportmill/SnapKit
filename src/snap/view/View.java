@@ -133,9 +133,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // The clip (if set)
     private Shape  _clip;
 
-    // Bindings for this view
-    private List <Binding>  _bindings = Collections.EMPTY_LIST;
-
     // Client properties
     private Map<String,Object>  _props = Collections.EMPTY_MAP;
 
@@ -1539,51 +1536,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (aValue == _vertical) return;
         firePropChange(Vertical_Prop, _vertical, _vertical = aValue);
         relayoutParent();
-    }
-
-    /**
-     * Returns the list of bindings.
-     */
-    public List <Binding> getBindings()  { return _bindings; }
-
-    /**
-     * Adds the individual binding to the shape's bindings list.
-     */
-    public void addBinding(Binding aBinding)
-    {
-        // Remove current binding for property (if it exists)
-        Binding oldBinding = getBindingForName(aBinding.getPropName());
-        if (oldBinding != null)
-            removeBinding(oldBinding);
-
-        // Add new binding
-        if (_bindings == Collections.EMPTY_LIST) _bindings = new ArrayList<>();
-        _bindings.add(aBinding);
-        aBinding.setView(this);
-    }
-
-    /**
-     * Removes the binding at the given index from view bindings list.
-     */
-    public void removeBinding(Binding aBinding)  { _bindings.remove(aBinding); }
-
-    /**
-     * Returns the individual binding with the given property name.
-     */
-    public Binding getBindingForName(String aPropName)
-    {
-        // Iterate over bindings and if we find one for given property name, return it
-        for (Binding b : _bindings)
-            if (b.getPropName().equals(aPropName))
-                return b;
-
-        // If property name is mapped, try again
-        String mappedName = aPropName.equals("Value") ? getValuePropName() : aPropName;
-        if (!aPropName.equals(mappedName))
-            return getBindingForName(mappedName);
-
-        // Return null since binding with property name not found
-        return null;
     }
 
     /**
@@ -3124,10 +3076,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Archive X, Y, Width, Height
         View par = getParent();
         if (this instanceof SpringView || par instanceof SpringView || par instanceof PageView) {
-            if (getX() != 0) e.add("x", getX());
-            if (getY() != 0) e.add("y", getY());
-            if (getWidth() != 0) e.add("width", getWidth());
-            if (getHeight() != 0) e.add("height", getHeight());
+            if (getX() != 0) e.add(X_Prop, getX());
+            if (getY() != 0) e.add(Y_Prop, getY());
+            if (getWidth() != 0) e.add(Width_Prop, getWidth());
+            if (getHeight() != 0) e.add(Height_Prop, getHeight());
         }
 
         // Archive MinWidth, MinHeight, PrefWidth, PrefHeight
@@ -3202,10 +3154,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (getLeanY() != null)
             e.add(LeanY_Prop, getLeanY());
 
-        // Archive bindings
-        for (Binding b : getBindings())
-            e.add(b.toXML(anArchiver));
-
         // Archive ToolTip
         if (getToolTip() != null)
             e.add(ToolTip_Prop, getToolTip());
@@ -3229,23 +3177,19 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
-        // Unarchive class property for subclass substitution, if available
-        if (anElement.hasAttribute("Class"))
-            setRuntimeClassName(anElement.getAttributeValue("Class"));
-
         // Unarchive Name
         if (anElement.hasAttribute(Name_Prop))
             setName(anElement.getAttributeValue(Name_Prop));
 
         // Unarchive X, Y, Width, Height
-        if (anElement.hasAttribute("x") || anElement.hasAttribute("y") ||
-                anElement.hasAttribute("width") || anElement.hasAttribute("height")) {
-            double x = anElement.getAttributeFloatValue("x");
-            double y = anElement.getAttributeFloatValue("y");
-            double w = anElement.getAttributeFloatValue("width");
-            double h = anElement.getAttributeFloatValue("height");
-            setBounds(x, y, w, h);
-        }
+        if (anElement.hasAttribute(X_Prop))
+            setX(anElement.getAttributeFloatValue(X_Prop));
+        if (anElement.hasAttribute(Y_Prop))
+            setY(anElement.getAttributeFloatValue(Y_Prop));
+        if (anElement.hasAttribute(Width_Prop))
+            setWidth(anElement.getAttributeFloatValue(Width_Prop));
+        if (anElement.hasAttribute(Height_Prop))
+            setHeight(anElement.getAttributeFloatValue(Height_Prop));
 
         // Unarchive MinWidth, MinHeight, PrefWidth, PrefHeight
         if (anElement.hasAttribute(MinWidth_Prop))
@@ -3273,13 +3217,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (anElement.hasAttribute(Vertical_Prop))
             setVertical(anElement.getAttributeBoolValue(Vertical_Prop));
 
-        // Unarchive Border
+        // Unarchive Border, BorderRadius
         int borderIndex = anArchiver.indexOf(anElement, Border.class);
         if (borderIndex >= 0) {
             Border border = (Border) anArchiver.fromXML(anElement.get(borderIndex), this);
             setBorder(border);
         }
-
         if (anElement.hasAttribute(BorderRadius_Prop))
             setBorderRadius(anElement.getAttributeFloatValue(BorderRadius_Prop));
 
@@ -3298,17 +3241,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         }
 
         // Unarchive Fill, Border (Legacy)
-        XMLElement sxml = anElement.getElement("stroke");
-        if (sxml != null) {
-            String cstr = sxml.getAttributeValue("color");
-            Color sc = cstr != null ? new Color(cstr) : Color.BLACK;
-            double sw = sxml.getAttributeFloatValue("width", 1);
-            setBorder(sc, sw);
-        }
         XMLElement fxml = anElement.getElement("fill");
         if (fxml != null) {
             Paint fill = (Paint) anArchiver.fromXML(fxml, this);
-            setFill(fill);
+            if (!Objects.equals(fill, _fill))
+                setFill(fill);
         }
 
         // Unarchive font
@@ -3348,21 +3285,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (anElement.hasAttribute(LeanY_Prop))
             setLeanY(VPos.get(anElement.getAttributeValue(LeanY_Prop)));
 
-        // Unarchive bindings
-        for (int i = anElement.indexOf("binding"); i >= 0; i = anElement.indexOf("binding", i + 1)) {
-            XMLElement bx = anElement.get(i);
-            addBinding(new Binding().fromXML(anArchiver, bx));
-        }
-
         // Unarchive ToolTip
-        if (anElement.hasAttribute("ttip"))
-            setToolTip(anElement.getAttributeValue("ttip"));
         if (anElement.hasAttribute(ToolTip_Prop))
             setToolTip(anElement.getAttributeValue(ToolTip_Prop));
 
         // Unarchive Text
         if (anElement.hasAttribute(Text_Prop))
             setText(anElement.getAttributeValue(Text_Prop));
+
+        // Unarchive class property for subclass substitution, if available
+        if (anElement.hasAttribute("Class"))
+            setRuntimeClassName(anElement.getAttributeValue("Class"));
 
         // Unarchive class property for subclass substitution, if available
         if (anElement.hasAttribute("Class"))

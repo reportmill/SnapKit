@@ -286,14 +286,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Returns a mapped property name.
-     */
-    public String getValuePropName()
-    {
-        return getBindingForName(SelIndex_Prop) != null ? SelIndex_Prop : SelItem_Prop;
-    }
-
-    /**
      * Catches ListArea Action event to resend from this ListView (and suppress original).
      */
     private void handleListAreaActionEvent(ViewEvent anEvent)
@@ -320,6 +312,11 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         _scrollView.setBorderRadius(aValue);
         _listArea.setBorderRadius(aValue);
     }
+
+    /**
+     * Returns a mapped property name.
+     */
+    public String getValuePropName()  { return SelItem_Prop; }
 
     /**
      * Override to support props for this class.

@@ -1018,14 +1018,6 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Returns a mapped property name.
-     */
-    public String getValuePropName()
-    {
-        return getBindingForName(SelIndex_Prop) != null ? SelIndex_Prop : SelItem_Prop;
-    }
-
-    /**
      * Override to reset AltRowColor
      */
     @Override
@@ -1036,6 +1028,11 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
             _altRowColor = newTheme.getContentAltColor();
         removeChildren();
     }
+
+    /**
+     * Returns a mapped property name.
+     */
+    public String getValuePropName()  { return SelItem_Prop; }
 
     /**
      * Override to support RowHeight property.

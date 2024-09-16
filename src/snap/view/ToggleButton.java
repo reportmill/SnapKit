@@ -166,13 +166,12 @@ public class ToggleButton extends ButtonBase {
         // Archive basic view attributes
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive Selected
+        // Archive Selected, GroupName
         if (!isPropDefault(Selected_Prop))
             e.add(Selected_Prop, true);
-
-        // Archive Group
         if (!isPropDefault(GroupName_Prop))
-            e.add("Group", getGroupName());
+            e.add(GroupName_Prop, getGroupName());
+
         return e;
     }
 
@@ -184,11 +183,12 @@ public class ToggleButton extends ButtonBase {
         // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive Selected
-        setSelected(anElement.getAttributeBoolValue(Selected_Prop));
-
-        // Unarchive Group
-        if (anElement.hasAttribute("Group") || anElement.hasAttribute("ToggleGroup"))
+        // Unarchive Selected, GroupName
+        if (anElement.hasAttribute(Selected_Prop))
+            setSelected(anElement.getAttributeBoolValue(Selected_Prop));
+        if (anElement.hasAttribute(GroupName_Prop))
+            setGroupName(anElement.getAttributeValue(GroupName_Prop));
+        else if (anElement.hasAttribute("Group") || anElement.hasAttribute("ToggleGroup"))
             setGroupName(anElement.getAttributeValue("Group", anElement.getAttributeValue("ToggleGroup")));
     }
 }

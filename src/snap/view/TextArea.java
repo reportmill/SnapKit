@@ -308,6 +308,11 @@ public class TextArea extends View {
     public boolean isRichText()  { return _textBlock.isRichText(); }
 
     /**
+     * Sets whether text supports multiple styles.
+     */
+    public void setRichText(boolean aValue)  { _textBlock.setRichText(aValue); }
+
+    /**
      * Returns the default text style for text.
      */
     public TextStyle getDefaultTextStyle()  { return _textBlock.getDefaultTextStyle(); }
@@ -1718,7 +1723,7 @@ public class TextArea extends View {
         super.initProps(aPropSet);
 
         // RichText, Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
-        aPropSet.addPropNamed(RichText_Prop, boolean.class, false);
+        //aPropSet.addPropNamed(RichText_Prop, boolean.class, false);
         aPropSet.addPropNamed(Editable_Prop, boolean.class, false);
         aPropSet.addPropNamed(WrapLines_Prop, boolean.class, false);
         aPropSet.addPropNamed(FireActionOnEnterKey_Prop, boolean.class, false);
@@ -1754,7 +1759,7 @@ public class TextArea extends View {
         switch (aPropName) {
 
             // RichText, Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
-            case RichText_Prop: _textBlock.setRichText(Convert.boolValue(aValue)); break;
+            case RichText_Prop: setRichText(Convert.boolValue(aValue)); break;
             case Editable_Prop: setEditable(Convert.boolValue(aValue)); break;
             case WrapLines_Prop: setWrapLines(Convert.boolValue(aValue)); break;
             case FireActionOnEnterKey_Prop: setFireActionOnEnterKey(Convert.boolValue(aValue)); break;
@@ -1771,23 +1776,16 @@ public class TextArea extends View {
     public XMLElement toXML(XMLArchiver anArchiver)
     {
         XMLElement xml = super.toXML(anArchiver);
-        toXMLTextArea(anArchiver, xml);
-        return xml;
-    }
 
-    /**
-     * XML archival.
-     */
-    protected void toXMLTextArea(XMLArchiver anArchiver, XMLElement xml)
-    {
-        // Archive Rich, Editable, WrapLines
-        if (isRichText()) xml.add("Rich", true);
+        // Archive Editable, WrapLines
         if (!isPropDefault(Editable_Prop)) xml.add(Editable_Prop, isEditable());
         if (!isPropDefault(WrapLines_Prop)) xml.add(WrapLines_Prop, isWrapLines());
 
         // Archive FireActionOnEnterKey, FireActionOnFocusLost
         if (isFireActionOnEnterKey()) xml.add(FireActionOnEnterKey_Prop, true);
         if (isFireActionOnFocusLost()) xml.add(FireActionOnFocusLost_Prop, true);
+
+        return xml;
     }
 
     /**
@@ -1796,18 +1794,8 @@ public class TextArea extends View {
     public TextArea fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
         super.fromXML(anArchiver, anElement);
-        fromXMLTextArea(anArchiver, anElement);
-        return this;
-    }
 
-    /**
-     * XML unarchival.
-     */
-    protected void fromXMLTextArea(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive Rich, Editable, WrapLines
-        if (anElement.hasAttribute("Rich"))
-            _textBlock.setRichText(anElement.getAttributeBoolValue("Rich"));
+        // Unarchive Editable, WrapLines
         if (anElement.hasAttribute(Editable_Prop))
             setEditable(anElement.getAttributeBoolValue(Editable_Prop));
         if (anElement.hasAttribute(WrapLines_Prop))
@@ -1815,9 +1803,11 @@ public class TextArea extends View {
 
         // Unarchive FireActionOnEnterKey, FireActionOnFocusLost
         if (anElement.hasAttribute(FireActionOnEnterKey_Prop))
-            setFireActionOnEnterKey(anElement.getAttributeBoolValue(FireActionOnEnterKey_Prop, true));
+            setFireActionOnEnterKey(anElement.getAttributeBoolValue(FireActionOnEnterKey_Prop));
         if (anElement.hasAttribute(FireActionOnFocusLost_Prop))
-            setFireActionOnFocusLost(anElement.getAttributeBoolValue(FireActionOnFocusLost_Prop, true));
+            setFireActionOnFocusLost(anElement.getAttributeBoolValue(FireActionOnFocusLost_Prop));
+
+        return this;
     }
 
     @Deprecated
