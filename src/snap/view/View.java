@@ -3082,16 +3082,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             if (getHeight() != 0) e.add(Height_Prop, getHeight());
         }
 
-        // Archive MinWidth, MinHeight, PrefWidth, PrefHeight
-        if (isMinWidthSet())
-            e.add(MinWidth_Prop, getMinWidth());
-        if (isMinHeightSet())
-            e.add(MinHeight_Prop, getMinHeight());
-        if (isPrefWidthSet())
-            e.add(PrefWidth_Prop, getPrefWidth());
-        if (isPrefHeightSet())
-            e.add(PrefHeight_Prop, getPrefHeight());
-
         // Archive TransX, TransY, Rotate, ScaleX, ScaleY
         if (getTransX() != 0)
             e.add(TransX_Prop, getTransX());
@@ -3104,9 +3094,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (getScaleY() != 1)
             e.add(ScaleY_Prop, getScaleY());
 
-        // Archive Vertical
-        if (!isPropDefault(Vertical_Prop))
-            e.add(Vertical_Prop, isVertical());
+        // Archive Align, Margin, Padding, Spacing
+        if (!isPropDefault(Align_Prop))
+            e.add(Align_Prop, getAlign());
+        if (!isPropDefault(Margin_Prop))
+            e.add(Margin_Prop, getMargin().getString());
+        if (!isPropDefault(Padding_Prop))
+            e.add(Padding_Prop, getPadding().getString());
+        if (!isPropDefault(Spacing_Prop))
+            e.add(Spacing_Prop, getSpacing());
 
         // Archive Border, BorderRadius
         if (!isPropDefault(Border_Prop))
@@ -3126,23 +3122,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (!isPropDefault(Font_Prop))
             e.add(getFont().toXML(anArchiver));
 
-        // Archive Disabled, Visible, Opacity
-        if (isDisabled())
-            e.add(Disabled_Prop, true);
-        if (!isVisible())
-            e.add(Visible_Prop, false);
-        if (getOpacity() < 1)
-            e.add(Opacity_Prop, getOpacity());
-
-        // Archive Align, Margin, Padding, Spacing
-        if (!isPropDefault(Align_Prop))
-            e.add(Align_Prop, getAlign());
-        if (!isPropDefault(Margin_Prop))
-            e.add(Margin_Prop, getMargin().getString());
-        if (!isPropDefault(Padding_Prop))
-            e.add(Padding_Prop, getPadding().getString());
-        if (!isPropDefault(Spacing_Prop))
-            e.add(Spacing_Prop, getSpacing());
+        // Archive MinWidth, MinHeight, PrefWidth, PrefHeight
+        if (isMinWidthSet())
+            e.add(MinWidth_Prop, getMinWidth());
+        if (isMinHeightSet())
+            e.add(MinHeight_Prop, getMinHeight());
+        if (isPrefWidthSet())
+            e.add(PrefWidth_Prop, getPrefWidth());
+        if (isPrefHeightSet())
+            e.add(PrefHeight_Prop, getPrefHeight());
 
         // Archive GrowWidth, GrowHeight, LeanX, LeanY
         if (isGrowWidth())
@@ -3153,6 +3141,16 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             e.add(LeanX_Prop, getLeanX());
         if (getLeanY() != null)
             e.add(LeanY_Prop, getLeanY());
+
+        // Archive Vertical, Disabled, Visible, Opacity
+        if (!isPropDefault(Vertical_Prop))
+            e.add(Vertical_Prop, isVertical());
+        if (isDisabled())
+            e.add(Disabled_Prop, true);
+        if (!isVisible())
+            e.add(Visible_Prop, false);
+        if (getOpacity() < 1)
+            e.add(Opacity_Prop, getOpacity());
 
         // Archive ToolTip
         if (getToolTip() != null)
@@ -3191,16 +3189,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (anElement.hasAttribute(Height_Prop))
             setHeight(anElement.getAttributeFloatValue(Height_Prop));
 
-        // Unarchive MinWidth, MinHeight, PrefWidth, PrefHeight
-        if (anElement.hasAttribute(MinWidth_Prop))
-            setMinWidth(anElement.getAttributeFloatValue(MinWidth_Prop));
-        if (anElement.hasAttribute(MinHeight_Prop))
-            setMinHeight(anElement.getAttributeFloatValue(MinHeight_Prop));
-        if (anElement.hasAttribute(PrefWidth_Prop))
-            setPrefWidth(anElement.getAttributeFloatValue(PrefWidth_Prop));
-        if (anElement.hasAttribute(PrefHeight_Prop))
-            setPrefHeight(anElement.getAttributeFloatValue(PrefHeight_Prop));
-
         // Unarchive TransX, TransY, Rotate, ScaleX, ScaleY
         if (anElement.hasAttribute(TransX_Prop))
             setTransX(anElement.getAttributeFloatValue(TransX_Prop));
@@ -3213,9 +3201,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (anElement.hasAttribute(ScaleY_Prop))
             setScaleY(anElement.getAttributeFloatValue(ScaleY_Prop));
 
-        // Unarchive Vertical
-        if (anElement.hasAttribute(Vertical_Prop))
-            setVertical(anElement.getAttributeBoolValue(Vertical_Prop));
+        // Unarchive Align, Margin, Padding, Spacing
+        if (anElement.hasAttribute(Align_Prop))
+            setAlign(Pos.get(anElement.getAttributeValue(Align_Prop)));
+        if (anElement.hasAttribute(Margin_Prop))
+            setMargin(Insets.get(anElement.getAttributeValue(Margin_Prop)));
+        if (anElement.hasAttribute(Padding_Prop))
+            setPadding(Insets.get(anElement.getAttributeValue(Padding_Prop)));
+        if (anElement.hasAttribute(Spacing_Prop))
+            setSpacing(anElement.getAttributeDoubleValue(Spacing_Prop));
 
         // Unarchive Border, BorderRadius
         int borderIndex = anArchiver.indexOf(anElement, Border.class);
@@ -3227,9 +3221,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             setBorderRadius(anElement.getAttributeFloatValue(BorderRadius_Prop));
 
         // Unarchive Fill
-        int fillIndex = anArchiver.indexOf(anElement, Paint.class);
-        if (fillIndex >= 0) {
-            Paint fill = (Paint) anArchiver.fromXML(anElement.get(fillIndex), this);
+        XMLElement fillXML = anElement.getElement("color");
+        if (fillXML == null)
+            fillXML = anElement.getElement("fill");
+        if (fillXML != null) {
+            Paint fill = (Paint) anArchiver.fromXML(fillXML, this);
             setFill(fill);
         }
 
@@ -3240,20 +3236,14 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             setEffect(eff);
         }
 
-        // Unarchive Fill, Border (Legacy)
-        XMLElement fxml = anElement.getElement("fill");
-        if (fxml != null) {
-            Paint fill = (Paint) anArchiver.fromXML(fxml, this);
-            if (!Objects.equals(fill, _fill))
-                setFill(fill);
-        }
-
         // Unarchive font
         XMLElement fontXML = anElement.getElement(Font_Prop);
         if (fontXML != null)
             setFont((Font) anArchiver.fromXML(fontXML, this));
 
-        // Unarchive Disabled, Visible, Opacity
+        // Unarchive Vertical, Disabled, Visible, Opacity
+        if (anElement.hasAttribute(Vertical_Prop))
+            setVertical(anElement.getAttributeBoolValue(Vertical_Prop));
         if (anElement.hasAttribute(Disabled_Prop))
             setDisabled(anElement.getAttributeBoolValue(Disabled_Prop));
         if (anElement.hasAttribute(Visible_Prop))
@@ -3261,19 +3251,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (anElement.hasAttribute(Opacity_Prop))
             setOpacity(anElement.getAttributeFloatValue(Opacity_Prop));
 
-        // Unarchive Align, Margin, Padding, Spacing
-        if (anElement.hasAttribute(Align_Prop))
-            setAlign(Pos.get(anElement.getAttributeValue(Align_Prop)));
-        if (anElement.hasAttribute(Margin_Prop)) {
-            Insets ins = Insets.get(anElement.getAttributeValue(Margin_Prop));
-            setMargin(ins);
-        }
-        if (anElement.hasAttribute(Padding_Prop)) {
-            Insets ins = Insets.get(anElement.getAttributeValue(Padding_Prop));
-            setPadding(ins);
-        }
-        if (anElement.hasAttribute(Spacing_Prop))
-            setSpacing(anElement.getAttributeDoubleValue(Spacing_Prop));
+        // Unarchive MinWidth, MinHeight, PrefWidth, PrefHeight
+        if (anElement.hasAttribute(MinWidth_Prop))
+            setMinWidth(anElement.getAttributeFloatValue(MinWidth_Prop));
+        if (anElement.hasAttribute(MinHeight_Prop))
+            setMinHeight(anElement.getAttributeFloatValue(MinHeight_Prop));
+        if (anElement.hasAttribute(PrefWidth_Prop))
+            setPrefWidth(anElement.getAttributeFloatValue(PrefWidth_Prop));
+        if (anElement.hasAttribute(PrefHeight_Prop))
+            setPrefHeight(anElement.getAttributeFloatValue(PrefHeight_Prop));
 
         // Unarchive GrowWidth, GrowHeight, LeanX, LeanY
         if (anElement.hasAttribute(GrowWidth_Prop))
@@ -3292,10 +3278,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Unarchive Text
         if (anElement.hasAttribute(Text_Prop))
             setText(anElement.getAttributeValue(Text_Prop));
-
-        // Unarchive class property for subclass substitution, if available
-        if (anElement.hasAttribute("Class"))
-            setRuntimeClassName(anElement.getAttributeValue("Class"));
 
         // Unarchive class property for subclass substitution, if available
         if (anElement.hasAttribute("Class"))

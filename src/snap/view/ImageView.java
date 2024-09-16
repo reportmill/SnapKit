@@ -8,7 +8,6 @@ import snap.geom.Rect;
 import snap.gfx.*;
 import snap.props.PropSet;
 import snap.util.*;
-
 import java.util.Objects;
 
 /**
@@ -448,19 +447,10 @@ public class ImageView extends View {
         // Archive basic shape attributes
         XMLElement e = super.toXML(anArchiver);
 
-        // Get image and image name
-        Image image = getImage();
-        String imageName = getImageName();
-
         // If image name available, just archive it
+        String imageName = getImageName();
         if (imageName != null)
             e.add(ImageName_Prop, imageName);
-
-        // Otherwise if image available, archive image bytes as archiver resource
-        else if (image != null) {
-            String resourceName = anArchiver.addResource(image.getBytes(), "" + System.identityHashCode(this));
-            e.add("resource", resourceName);
-        }
 
         // Archive FillWidth, FillHeight, KeepAspect
         if (!isPropDefault(FillWidth_Prop)) e.add(FillWidth_Prop, true);
@@ -488,12 +478,6 @@ public class ImageView extends View {
             if (image != null)
                 setImage(image);
         }
-
-        // Unarchive image resource: get resource bytes, page and set ImageData
-        String resourceName = anElement.getAttributeValue("resource");
-        byte[] bytes = resourceName != null ? anArchiver.getResource(resourceName) : null; // Get resource bytes
-        if (resourceName != null)
-            setImage(Image.getImageForSource(bytes));
 
         // Unarchive FillWidth, FillHeight, KeepAspect
         if (anElement.hasAttribute(FillWidth_Prop)) setFillWidth(anElement.getAttributeBooleanValue(FillWidth_Prop));

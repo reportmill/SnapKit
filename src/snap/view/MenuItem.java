@@ -221,6 +221,9 @@ public class MenuItem extends ButtonBase implements Cloneable {
 
         // Shortcut
         aPropSet.addPropNamed(Shortcut_Prop, String.class, EMPTY_OBJECT);
+
+        // Reset ShowArea default
+        aPropSet.getPropForName(ShowArea_Prop).setDefaultValue(DEFAULT_MENU_ITEM_SHOW_AREA);
     }
 
     /**
@@ -265,9 +268,10 @@ public class MenuItem extends ButtonBase implements Cloneable {
         // Archive basic attributes
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive Accelerator
-        if (getShortcut() != null && !getShortcut().isEmpty())
-            e.add("Key", getShortcut());
+        // Archive Shortcut
+        if (!isPropDefault(Shortcut_Prop))
+            e.add(Shortcut_Prop, getShortcut());
+
         return e;
     }
 
@@ -279,7 +283,10 @@ public class MenuItem extends ButtonBase implements Cloneable {
         // Unarchive basic attributes
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive Accelerator
-        String key = anElement.getAttributeValue("Key"); if (key != null) setShortcut(key);
+        // Unarchive Shortcut
+        if (anElement.hasAttribute(Shortcut_Prop))
+            setShortcut(anElement.getAttributeValue(Shortcut_Prop));
+        else if (anElement.hasAttribute("Key"))
+            setShortcut(anElement.getAttributeValue("Key"));
     }
 }
