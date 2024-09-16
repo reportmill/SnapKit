@@ -3094,6 +3094,20 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (getScaleY() != 1)
             e.add(ScaleY_Prop, getScaleY());
 
+        // Archive MinWidth, MinHeight, PrefWidth, PrefHeight
+        if (isMinWidthSet())
+            e.add(MinWidth_Prop, getMinWidth());
+        if (isMinHeightSet())
+            e.add(MinHeight_Prop, getMinHeight());
+        if (isPrefWidthSet())
+            e.add(PrefWidth_Prop, getPrefWidth());
+        if (isPrefHeightSet())
+            e.add(PrefHeight_Prop, getPrefHeight());
+
+        // Archive Vertical
+        if (!isPropDefault(Vertical_Prop))
+            e.add(Vertical_Prop, isVertical());
+
         // Archive Align, Margin, Padding, Spacing
         if (!isPropDefault(Align_Prop))
             e.add(Align_Prop, getAlign());
@@ -3122,16 +3136,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (!isPropDefault(Font_Prop))
             e.add(getFont().toXML(anArchiver));
 
-        // Archive MinWidth, MinHeight, PrefWidth, PrefHeight
-        if (isMinWidthSet())
-            e.add(MinWidth_Prop, getMinWidth());
-        if (isMinHeightSet())
-            e.add(MinHeight_Prop, getMinHeight());
-        if (isPrefWidthSet())
-            e.add(PrefWidth_Prop, getPrefWidth());
-        if (isPrefHeightSet())
-            e.add(PrefHeight_Prop, getPrefHeight());
-
         // Archive GrowWidth, GrowHeight, LeanX, LeanY
         if (isGrowWidth())
             e.add(GrowWidth_Prop, true);
@@ -3142,9 +3146,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (getLeanY() != null)
             e.add(LeanY_Prop, getLeanY());
 
-        // Archive Vertical, Disabled, Visible, Opacity
-        if (!isPropDefault(Vertical_Prop))
-            e.add(Vertical_Prop, isVertical());
+        // Archive Disabled, Visible, Opacity
         if (isDisabled())
             e.add(Disabled_Prop, true);
         if (!isVisible())
@@ -3201,6 +3203,20 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (anElement.hasAttribute(ScaleY_Prop))
             setScaleY(anElement.getAttributeFloatValue(ScaleY_Prop));
 
+        // Unarchive MinWidth, MinHeight, PrefWidth, PrefHeight
+        if (anElement.hasAttribute(MinWidth_Prop))
+            setMinWidth(anElement.getAttributeFloatValue(MinWidth_Prop));
+        if (anElement.hasAttribute(MinHeight_Prop))
+            setMinHeight(anElement.getAttributeFloatValue(MinHeight_Prop));
+        if (anElement.hasAttribute(PrefWidth_Prop))
+            setPrefWidth(anElement.getAttributeFloatValue(PrefWidth_Prop));
+        if (anElement.hasAttribute(PrefHeight_Prop))
+            setPrefHeight(anElement.getAttributeFloatValue(PrefHeight_Prop));
+
+        // Unarchive Vertical
+        if (anElement.hasAttribute(Vertical_Prop))
+            setVertical(anElement.getAttributeBoolValue(Vertical_Prop));
+
         // Unarchive Align, Margin, Padding, Spacing
         if (anElement.hasAttribute(Align_Prop))
             setAlign(Pos.get(anElement.getAttributeValue(Align_Prop)));
@@ -3241,25 +3257,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (fontXML != null)
             setFont((Font) anArchiver.fromXML(fontXML, this));
 
-        // Unarchive Vertical, Disabled, Visible, Opacity
-        if (anElement.hasAttribute(Vertical_Prop))
-            setVertical(anElement.getAttributeBoolValue(Vertical_Prop));
+        // Unarchive Disabled, Visible, Opacity
         if (anElement.hasAttribute(Disabled_Prop))
             setDisabled(anElement.getAttributeBoolValue(Disabled_Prop));
         if (anElement.hasAttribute(Visible_Prop))
             setVisible(anElement.getAttributeBoolValue(Visible_Prop));
         if (anElement.hasAttribute(Opacity_Prop))
             setOpacity(anElement.getAttributeFloatValue(Opacity_Prop));
-
-        // Unarchive MinWidth, MinHeight, PrefWidth, PrefHeight
-        if (anElement.hasAttribute(MinWidth_Prop))
-            setMinWidth(anElement.getAttributeFloatValue(MinWidth_Prop));
-        if (anElement.hasAttribute(MinHeight_Prop))
-            setMinHeight(anElement.getAttributeFloatValue(MinHeight_Prop));
-        if (anElement.hasAttribute(PrefWidth_Prop))
-            setPrefWidth(anElement.getAttributeFloatValue(PrefWidth_Prop));
-        if (anElement.hasAttribute(PrefHeight_Prop))
-            setPrefHeight(anElement.getAttributeFloatValue(PrefHeight_Prop));
 
         // Unarchive GrowWidth, GrowHeight, LeanX, LeanY
         if (anElement.hasAttribute(GrowWidth_Prop))
