@@ -494,9 +494,8 @@ public class ButtonBase extends ParentView {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive ImageName
-        String imageName = getImageName();
-        if (imageName != null)
-            e.add("Image", imageName);
+        if (!isPropDefault(ImageName_Prop))
+            e.add(ImageName_Prop, getImageName());
 
         // Archive ShowArea, Position
         if (!isPropDefault(ShowArea_Prop))
@@ -517,7 +516,9 @@ public class ButtonBase extends ParentView {
         super.fromXMLView(anArchiver, anElement);
 
         // Unarchive ImageName
-        String imageName = anElement.getAttributeValue("Image");
+        String imageName = anElement.getAttributeValue(ImageName_Prop);
+        if (imageName == null)
+            imageName = anElement.getAttributeValue("Image");
         if (imageName != null) {
             setImageName(imageName);
             Image image = ViewArchiver.getImage(anArchiver, imageName);

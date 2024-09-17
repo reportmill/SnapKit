@@ -490,9 +490,8 @@ public class Label extends ParentView {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive ImageName
-        String iname = getImageName();
-        if (iname != null)
-            e.add("image", iname);
+        if (!isPropDefault(ImageName_Prop))
+            e.add(ImageName_Prop, getImageName());
 
         // Return element
         return e;
@@ -507,10 +506,12 @@ public class Label extends ParentView {
         super.fromXMLView(anArchiver, anElement);
 
         // Unarchive ImageName
-        String iname = anElement.getAttributeValue("image");
-        if (iname != null) {
-            setImageName(iname);
-            Image image = ViewArchiver.getImage(anArchiver, iname);
+        String imageName = anElement.getAttributeValue(ImageName_Prop);
+        if (imageName == null)
+            imageName = anElement.getAttributeValue("image");
+        if (imageName != null) {
+            setImageName(imageName);
+            Image image = ViewArchiver.getImage(anArchiver, imageName);
             if (image != null)
                 setImage(image);
         }

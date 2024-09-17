@@ -6,12 +6,20 @@ import snap.geom.Insets;
 import snap.gfx.*;
 
 /**
- * This class provides a RM shape/inspector for editing JSeparator.
+ * This class is used to visually separate other components and just paints a line.
  */
 public class Separator extends View {
     
     // Color
     private static Color BRIGHT_COLOR = new Color(1,1,1,.5);
+
+    /**
+     * Constructor.
+     */
+    public Separator()
+    {
+        super();
+    }
 
     /**
      * Override to wrap in Painter and forward.

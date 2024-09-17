@@ -42,7 +42,7 @@ public class Spinner <T> extends ParentView {
     private static DecimalFormat _fmt = new DecimalFormat("#.##");
 
     /**
-     * Creates a new Spinner.
+     * Constructor.
      */
     public Spinner()
     {
@@ -78,13 +78,13 @@ public class Spinner <T> extends ParentView {
     {
         if (Objects.equals(aValue,getValue())) return;
         firePropChange(Value_Prop, _value, _value = aValue);
-        _text.setText(getText());
+        _text.setText(getValueAsString());
     }
 
     /**
      * Returns the text for value.
      */
-    public String getText()
+    public String getValueAsString()
     {
         if (_value == null) return "";
         if (_value instanceof Double) return _fmt.format(_value);
@@ -204,7 +204,8 @@ public class Spinner <T> extends ParentView {
     public void textChanged()
     {
         // Get Text value based as same current type of spinner
-        Object oval = getValue(), nval = null; String str = _text.getText();
+        Object oval = getValue(), nval = null;
+        String str = _text.getText();
         if (oval instanceof Integer) nval = Convert.intValue(str);
         else if (oval instanceof Long) nval = Convert.longValue(str);
         else if (oval instanceof Byte) nval = (byte) Convert.intValue(str);
