@@ -70,12 +70,17 @@ public abstract class Effect extends PropObject implements XMLArchiver.Archivabl
         if (anObj instanceof Effect || anObj == null)
             return (Effect) anObj;
 
-        String str = anObj.toString().trim().toLowerCase();
-        switch (str) {
-            case "shadow": return new ShadowEffect();
-            case "blur": return new BlurEffect();
-            case "emboss": return new EmbossEffect();
-            case "reflect": return new ReflectEffect();
+        // Get effect name
+        String str = anObj.toString().replace('(', ' ');
+        String[] parts = str.split("\\s");
+        String effectName = parts.length > 0 ? parts[0].toLowerCase() : "";
+
+        // Parse effect
+        switch (effectName) {
+            case "shadow": return ShadowEffect.of(anObj);
+            case "blur": return BlurEffect.of(anObj);
+            case "emboss": return EmbossEffect.of(anObj);
+            case "reflect": return ReflectEffect.of(anObj);
             default: System.err.println("Effect.of: Invalid effect string: " + anObj); return null;
         }
     }

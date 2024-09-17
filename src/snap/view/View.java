@@ -3229,7 +3229,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Unarchive Border, BorderRadius
         if (anElement.hasAttribute(Border_Prop))
-            setBorder(Border.of(anElement.getAttributeBoolValue(Border_Prop)));
+            setBorder(Border.of(anElement.getAttributeValue(Border_Prop)));
         else {
             int borderIndex = anArchiver.indexOf(anElement, Border.class);
             if (borderIndex >= 0) {
@@ -3242,7 +3242,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Unarchive Fill
         if (anElement.hasAttribute(Fill_Prop))
-            setFill(Paint.of(anElement.getAttributeBoolValue(Fill_Prop)));
+            setFill(Paint.of(anElement.getAttributeValue(Fill_Prop)));
         else {
             XMLElement fillXML = anElement.getElement("color");
             if (fillXML == null)
@@ -3255,7 +3255,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Unarchive Effect
         if (anElement.hasAttribute(Effect_Prop))
-            setEffect(Effect.of(anElement.getAttributeBoolValue(Effect_Prop)));
+            setEffect(Effect.of(anElement.getAttributeValue(Effect_Prop)));
         else {
             int effectIndex = anArchiver.indexOf(anElement, Effect.class);
             if (effectIndex >= 0) {
