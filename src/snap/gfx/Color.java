@@ -297,7 +297,7 @@ public class Color implements Paint, XMLArchiver.Archivable {
     /**
      * Returns a string representation of this color.
      */
-    public String toString()  { return "Color: " + toHexString(); }
+    public String toString()  { return "Color: " + toColorString(); }
 
     /**
      * Returns a hex string representation of this color.

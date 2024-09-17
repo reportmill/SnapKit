@@ -329,7 +329,7 @@ public class ShadowEffect extends Effect {
                 FormatUtils.formatNum(getRadius()) + ' ' +
                 FormatUtils.formatNum(getDX()) + ' ' +
                 FormatUtils.formatNum(getDY()) + ' ' +
-                '#' + _color.toHexString() + ')';
+                _color.toColorString() + ')';
         return sb;
     }
 

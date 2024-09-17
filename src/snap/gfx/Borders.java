@@ -166,7 +166,7 @@ public class Borders {
         /** Standard toString implementation. */
         public String toString()
         {
-            return "LineBorder { Color=" + _color.toHexString() + ", Width=" + getWidth() + " }";
+            return "LineBorder { Color=" + _color.toColorString() + ", Width=" + getWidth() + " }";
         }
     }
 
