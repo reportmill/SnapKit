@@ -317,6 +317,27 @@ public class Color implements Paint, XMLArchiver.Archivable {
     }
 
     /**
+     * Returns a hex string representation of this color.
+     */
+    public String toColorString()
+    {
+        // Get components
+        int r = getRedInt(), g = getGreenInt(), b = getBlueInt(), a = getAlphaInt();
+
+        // If grayscale, just return 2 digit hex color
+        if (r == g && g == b && a == 255)
+            return (r < 16 ? "#0" : "#") + Integer.toHexString(r).toUpperCase();
+
+        // Add r, g, b components (and alpha, if not full) and return string
+        StringBuilder sb = new StringBuilder("#");
+        if (r<16) sb.append('0'); sb.append(Integer.toHexString(r).toUpperCase());
+        if (g<16) sb.append('0'); sb.append(Integer.toHexString(g).toUpperCase());
+        if (b<16) sb.append('0'); sb.append(Integer.toHexString(b).toUpperCase());
+        if (a<255) { if (a<16) sb.append('0'); sb.append(Integer.toHexString(a).toUpperCase()); }
+        return sb.toString();
+    }
+
+    /**
      * Returns a float array containing the color and alpha components of the Color, in the ColorSpace specified by cspace
      * parameter. If compArray is null, an array with length equal to number of components in cspace plus one is created.
      */

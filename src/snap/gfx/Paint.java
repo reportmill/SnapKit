@@ -45,7 +45,7 @@ public interface Paint extends XMLArchiver.Archivable, StringCodec.Codeable {
      * Returns Paint as string.
      */
     @Override
-    default String codeString()  { return '#' + getColor().toHexString(); }
+    default String codeString()  { return getColor().toColorString(); }
 
     /**
      * Returns Paint for string.
