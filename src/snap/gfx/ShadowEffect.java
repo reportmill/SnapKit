@@ -318,4 +318,39 @@ public class ShadowEffect extends Effect {
         // Return
         return shadowImage;
     }
+
+    /**
+     * Returns a string encoding of this effect.
+     */
+    @Override
+    public String codeString()
+    {
+        String sb = "shadow" + '(' +
+                FormatUtils.formatNum(getRadius()) + ' ' +
+                FormatUtils.formatNum(getDX()) + ' ' +
+                FormatUtils.formatNum(getDY()) + ' ' +
+                '#' + _color.toHexString() + ')';
+        return sb;
+    }
+
+    /**
+     * Returns a shadow effect for given coded string.
+     */
+    public static ShadowEffect of(Object anObj)
+    {
+        if (anObj == null || anObj instanceof ShadowEffect)
+            return (ShadowEffect) anObj;
+        String str = anObj.toString().replace("shadow", "").replace('(', ' ').replace(')', ' ').trim();
+        String[] parts = str.split("\\s");
+        if (parts.length < 4) {
+            System.err.println("ShadowEffect: invalid effect string: " + anObj);
+            return null;
+        }
+
+        double radius = Convert.doubleValue(parts[0]);
+        double dx = Convert.doubleValue(parts[1]);
+        double dy = Convert.doubleValue(parts[2]);
+        Color color = Color.get(parts[3]);
+        return new ShadowEffect(radius, color, dx, dy);
+    }
 }

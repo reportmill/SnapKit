@@ -216,4 +216,38 @@ public class EmbossEffect extends Effect {
         // Return
         return this;
     }
+
+
+    /**
+     * Returns a string encoding of this effect.
+     */
+    @Override
+    public String codeString()
+    {
+        String sb = "emboss" + '(' +
+                FormatUtils.formatNum(getRadius()) + ' ' +
+                FormatUtils.formatNum(getAltitude()) + ' ' +
+                FormatUtils.formatNum(getAzimuth()) + ' ' + ')';
+        return sb;
+    }
+
+    /**
+     * Returns a emboss effect for given coded string.
+     */
+    public static EmbossEffect of(Object anObj)
+    {
+        if (anObj == null || anObj instanceof EmbossEffect)
+            return (EmbossEffect) anObj;
+        String str = anObj.toString().replace("emboss", "").replace('(', ' ').replace(')', ' ').trim();
+        String[] parts = str.split("\\s");
+        if (parts.length < 3) {
+            System.err.println("EmbossEffect: invalid effect string: " + anObj);
+            return null;
+        }
+
+        double radius = Convert.doubleValue(parts[0]);
+        double altitude = Convert.doubleValue(parts[1]);
+        double azimuth = Convert.doubleValue(parts[2]);
+        return new EmbossEffect(altitude, azimuth, radius);
+    }
 }

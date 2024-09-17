@@ -3118,23 +3118,23 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (!isPropDefault(Spacing_Prop))
             e.add(Spacing_Prop, getSpacing());
 
+        // Archive Fill
+        if (!isPropDefault(Fill_Prop))
+            e.add(Fill_Prop, getFill().codeString());
+
         // Archive Border, BorderRadius
         if (!isPropDefault(Border_Prop))
-            e.add(anArchiver.toXML(getBorder(), this));
+            e.add(Border_Prop, getBorder().codeString());
         if (!isPropDefault(BorderRadius_Prop))
             e.add(BorderRadius_Prop, getBorderRadius());
 
-        // Archive Fill
-        if (!isPropDefault(Fill_Prop))
-            e.add(anArchiver.toXML(getFill(), this));
-
         // Archive Effect
         if (!isPropDefault(Effect_Prop))
-            e.add(anArchiver.toXML(getEffect(), this));
+            e.add(Effect_Prop, getEffect().codeString());
 
         // Archive font
         if (!isPropDefault(Font_Prop))
-            e.add(getFont().toXML(anArchiver));
+            e.add(Font_Prop, getFont().codeString());
 
         // Archive GrowWidth, GrowHeight, LeanX, LeanY
         if (isGrowWidth())
@@ -3228,31 +3228,45 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             setSpacing(anElement.getAttributeDoubleValue(Spacing_Prop));
 
         // Unarchive Border, BorderRadius
-        int borderIndex = anArchiver.indexOf(anElement, Border.class);
-        if (borderIndex >= 0) {
-            Border border = (Border) anArchiver.fromXML(anElement.get(borderIndex), this);
-            setBorder(border);
+        if (anElement.hasAttribute(Border_Prop))
+            setBorder(Border.of(anElement.getAttributeBoolValue(Border_Prop)));
+        else {
+            int borderIndex = anArchiver.indexOf(anElement, Border.class);
+            if (borderIndex >= 0) {
+                Border border = (Border) anArchiver.fromXML(anElement.get(borderIndex), this);
+                setBorder(border);
+            }
         }
         if (anElement.hasAttribute(BorderRadius_Prop))
             setBorderRadius(anElement.getAttributeFloatValue(BorderRadius_Prop));
 
         // Unarchive Fill
-        XMLElement fillXML = anElement.getElement("color");
-        if (fillXML == null)
-            fillXML = anElement.getElement("fill");
-        if (fillXML != null) {
-            Paint fill = (Paint) anArchiver.fromXML(fillXML, this);
-            setFill(fill);
+        if (anElement.hasAttribute(Fill_Prop))
+            setFill(Paint.of(anElement.getAttributeBoolValue(Fill_Prop)));
+        else {
+            XMLElement fillXML = anElement.getElement("color");
+            if (fillXML == null)
+                fillXML = anElement.getElement("fill");
+            if (fillXML != null) {
+                Paint fill = (Paint) anArchiver.fromXML(fillXML, this);
+                setFill(fill);
+            }
         }
 
         // Unarchive Effect
-        int effectIndex = anArchiver.indexOf(anElement, Effect.class);
-        if (effectIndex >= 0) {
-            Effect eff = (Effect) anArchiver.fromXML(anElement.get(effectIndex), this);
-            setEffect(eff);
+        if (anElement.hasAttribute(Effect_Prop))
+            setEffect(Effect.of(anElement.getAttributeBoolValue(Effect_Prop)));
+        else {
+            int effectIndex = anArchiver.indexOf(anElement, Effect.class);
+            if (effectIndex >= 0) {
+                Effect eff = (Effect) anArchiver.fromXML(anElement.get(effectIndex), this);
+                setEffect(eff);
+            }
         }
 
         // Unarchive font
+        if (anElement.hasAttribute(Font_Prop))
+            setFont(Font.of(anElement.getAttributeValue(Font_Prop)));
         XMLElement fontXML = anElement.getElement(Font_Prop);
         if (fontXML != null)
             setFont((Font) anArchiver.fromXML(fontXML, this));

@@ -147,4 +147,31 @@ public class BlurEffect extends Effect {
         if (anElement.hasAttribute(Radius_Prop)) _radius = anElement.getAttributeIntValue(Radius_Prop);
         return this;
     }
+
+    /**
+     * Returns a string encoding of this effect.
+     */
+    @Override
+    public String codeString()
+    {
+        return "blur" + '(' + FormatUtils.formatNum(getRadius()) + ')';
+    }
+
+    /**
+     * Returns a blur effect for given object (coded string).
+     */
+    public static BlurEffect of(Object anObj)
+    {
+        if (anObj == null || anObj instanceof BlurEffect)
+            return (BlurEffect) anObj;
+        String str = anObj.toString().replace("blur", "").replace('(', ' ').replace(')', ' ').trim();
+        String[] parts = str.split("\\s");
+        if (parts.length < 1) {
+            System.err.println("BlurEffect: invalid effect string: " + anObj);
+            return null;
+        }
+
+        double radius = Convert.doubleValue(parts[0]);
+        return new BlurEffect(radius);
+    }
 }

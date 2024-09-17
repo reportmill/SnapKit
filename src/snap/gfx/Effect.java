@@ -57,6 +57,11 @@ public abstract class Effect extends PropObject implements XMLArchiver.Archivabl
     public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)  { return this; }
 
     /**
+     * Returns a string encoding of this effect.
+     */
+    public String codeString()  { return "unknown"; }
+
+    /**
      * Parses an effect from given object.
      */
     public static Effect of(Object anObj)

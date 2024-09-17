@@ -260,4 +260,37 @@ public class ReflectEffect extends Effect {
         if (anElement.hasAttribute(Gap_Prop)) setGap(anElement.getAttributeFloatValue(Gap_Prop));
         return this;
     }
+
+    /**
+     * Returns a string encoding of this effect.
+     */
+    @Override
+    public String codeString()
+    {
+        String sb = "reflect" + '(' +
+                FormatUtils.formatNum(getReflectHeight()) + ' ' +
+                FormatUtils.formatNum(getFadeHeight()) + ' ' +
+                FormatUtils.formatNum(getGap()) + ' ' + ')';
+        return sb;
+    }
+
+    /**
+     * Returns a reflect effect for given coded string.
+     */
+    public static ReflectEffect of(Object anObj)
+    {
+        if (anObj == null || anObj instanceof ReflectEffect)
+            return (ReflectEffect) anObj;
+        String str = anObj.toString().replace("reflect", "").replace('(', ' ').replace(')', ' ').trim();
+        String[] parts = str.split("\\s");
+        if (parts.length < 3) {
+            System.err.println("ReflectEffect: invalid effect string: " + anObj);
+            return null;
+        }
+
+        double reflectHeight = Convert.doubleValue(parts[0]);
+        double fadeHeight = Convert.doubleValue(parts[1]);
+        double gap = Convert.doubleValue(parts[2]);
+        return new ReflectEffect(reflectHeight, fadeHeight, gap);
+    }
 }
