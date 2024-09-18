@@ -516,10 +516,8 @@ public class ButtonBase extends ParentView {
         super.fromXMLView(anArchiver, anElement);
 
         // Unarchive ImageName
-        String imageName = anElement.getAttributeValue(ImageName_Prop);
-        if (imageName == null)
-            imageName = anElement.getAttributeValue("Image");
-        if (imageName != null) {
+        if (anElement.hasAttribute(ImageName_Prop)) {
+            String imageName = anElement.getAttributeValue(ImageName_Prop);
             setImageName(imageName);
             Image image = ViewArchiver.getImage(anArchiver, imageName);
             if (image != null)

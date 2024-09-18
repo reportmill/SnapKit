@@ -27,13 +27,6 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     // Whether to show table header column
     private boolean  _showHeaderCol;
 
-    // Whether to show horizontal/vertical grid lines
-    private boolean  _showGridX, _showGridY;
-    
-    // Grid color
-    private Color  _gridColor;
-    
-    // Row height
     private double  _rowHeight, _rowHeightCached = -1;
 
     // The cell padding
@@ -66,7 +59,6 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     // Constants for properties
     public static final String ShowHeader_Prop = "ShowHeader";
     public static final String TableCols_Prop = "TableCols";
-    public static final String GridColor_Prop = "GridColor";
     public static final String CellPadding_Prop = "CellPadding";
     public static final String Editable_Prop = "Editable";
     public static final String RowHeight_Prop = "RowHeight";
@@ -552,45 +544,6 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Returns whether to show horizontal grid lines.
-     */
-    public boolean isShowGridX()  { return _showGridX; }
-
-    /**
-     * Sets whether to show horizontal grid lines.
-     */
-    public void setShowGridX(boolean aValue)
-    {
-        firePropChange("ShowGridX", _showGridX, _showGridX = aValue);
-    }
-
-    /**
-     * Returns whether to show vertical grid lines.
-     */
-    public boolean isShowGridY()  { return _showGridY; }
-
-    /**
-     * Sets whether to show vertical grid lines.
-     */
-    public void setShowGridY(boolean aValue)
-    {
-        firePropChange("ShowGridY", _showGridY, _showGridY = aValue);
-    }
-
-    /**
-     * Returns grid color.
-     */
-    public Color getGridColor()  { return _gridColor; }
-
-    /**
-     * Sets grid color.
-     */
-    public void setGridColor(Color aValue)
-    {
-        firePropChange(GridColor_Prop, _gridColor, _gridColor = aValue);
-    }
-
-    /**
      * Returns whether row height has been explicitly set.
      */
     public boolean isRowHeightSet()  { return _rowHeight>0; }
@@ -987,9 +940,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         // Do normal version
         super.initProps(aPropSet);
 
-        // ShowHeader, GridColor, TableCols, RowHeight
+        // ShowHeader, TableCols, RowHeight
         aPropSet.addPropNamed(ShowHeader_Prop, boolean.class, false);
-        aPropSet.addPropNamed(GridColor_Prop, Color.class, null);
         aPropSet.addPropNamed(TableCols_Prop, TableCol[].class, null);
         aPropSet.addPropNamed(RowHeight_Prop, double.class, 0);
     }
@@ -1002,9 +954,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     {
         switch (aPropName) {
 
-            // ShowHeader, GridColor, TableCols, RowHeight
+            // ShowHeader, TableCols, RowHeight
             case ShowHeader_Prop: return isShowHeader();
-            case GridColor_Prop: return getGridColor();
             case TableCols_Prop: return getCols();
             case RowHeight_Prop: return getRowHeight();
 
@@ -1021,9 +972,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     {
         switch (aPropName) {
 
-            // ShowHeader, GridColor, TableCols, RowHeight
+            // ShowHeader, TableCols, RowHeight
             case ShowHeader_Prop: setShowHeader(Convert.boolValue(aValue)); break;
-            case GridColor_Prop: setGridColor(Color.get(aValue)); break;
             case TableCols_Prop: setTableCols((TableCol<T>[]) aValue); break;
             case RowHeight_Prop: setRowHeight(Convert.doubleValue(aValue)); break;
 
@@ -1051,16 +1001,10 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         // Archive basic view attributes
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive ShowHeader
+        // Archive ShowHeader, RowHeight
         if (isShowHeader()) e.add(ShowHeader_Prop, false);
-
-        // Archive GridColor, ShowLinesX, ShowLinesY
-        if (getGridColor()!=null) e.add("GridColor", '#' + getGridColor().toHexString());
-        if (isShowGridX()) e.add("ShowGridX", true);
-        if (isShowGridY()) e.add("ShowGridY", true);
-
-        // Archive RowHeight
         if (isRowHeightSet()) e.add(RowHeight_Prop, getRowHeight());
+
         return e;
     }
 
@@ -1072,17 +1016,9 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive TableHeader
+        // Unarchive ShowHeader, RowHeight
         if (anElement.hasAttribute(ShowHeader_Prop))
             setShowHeader(anElement.getAttributeBooleanValue(ShowHeader_Prop));
-
-        // Unarchive GridColor, ShowLinesX, ShowLinesY
-        if (anElement.hasAttribute("GridColor"))
-            setGridColor(new Color(anElement.getAttributeValue("GridColor")));
-        setShowGridX(anElement.getAttributeBoolValue("ShowGridX", false));
-        setShowGridY(anElement.getAttributeBoolValue("ShowGridY", false));
-
-        // Unarchive RowHeight
         if (anElement.hasAttribute(RowHeight_Prop))
             setRowHeight(anElement.getAttributeIntValue(RowHeight_Prop));
     }

@@ -447,10 +447,9 @@ public class ImageView extends View {
         // Archive basic shape attributes
         XMLElement e = super.toXML(anArchiver);
 
-        // If image name available, just archive it
-        String imageName = getImageName();
-        if (imageName != null)
-            e.add(ImageName_Prop, imageName);
+        // Archive ImageName
+        if (!isPropDefault(ImageName_Prop))
+            e.add(ImageName_Prop, getImageName());
 
         // Archive FillWidth, FillHeight, KeepAspect
         if (!isPropDefault(FillWidth_Prop)) e.add(FillWidth_Prop, true);
@@ -470,9 +469,8 @@ public class ImageView extends View {
         super.fromXML(anArchiver, anElement);
 
         // Unarchive ImageName
-        String imageName = anElement.getAttributeValue(ImageName_Prop);
-        if (imageName == null) imageName = anElement.getAttributeValue("image");
-        if (imageName != null) {
+        if (anElement.hasAttribute(ImageName_Prop)) {
+            String imageName = anElement.getAttributeValue(ImageName_Prop);
             setImageName(imageName);
             Image image = ViewArchiver.getImage(anArchiver, imageName);
             if (image != null)
