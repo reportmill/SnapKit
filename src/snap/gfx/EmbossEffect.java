@@ -227,7 +227,7 @@ public class EmbossEffect extends Effect {
         String sb = "emboss" + '(' +
                 FormatUtils.formatNum(getRadius()) + ' ' +
                 FormatUtils.formatNum(getAltitude()) + ' ' +
-                FormatUtils.formatNum(getAzimuth()) + ' ' + ')';
+                FormatUtils.formatNum(getAzimuth()) + ')';
         return sb;
     }
 

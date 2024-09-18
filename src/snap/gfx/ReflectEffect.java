@@ -270,7 +270,7 @@ public class ReflectEffect extends Effect {
         String sb = "reflect" + '(' +
                 FormatUtils.formatNum(getReflectHeight()) + ' ' +
                 FormatUtils.formatNum(getFadeHeight()) + ' ' +
-                FormatUtils.formatNum(getGap()) + ' ' + ')';
+                FormatUtils.formatNum(getGap()) + ')';
         return sb;
     }
 
