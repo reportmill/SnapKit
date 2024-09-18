@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView Padding="5" GrowHeight="true" PrefWidth="500" PrefHeight="400" Spacing="12" FillWidth="true">
-  <RowView Align="CENTER" Spacing="8" >
-    <Font Name="Arial" Size="13" />
+<ColView PrefWidth="500" PrefHeight="400" Padding="5" Spacing="12" GrowHeight="true" FillWidth="true">
+  <RowView Align="CENTER" Spacing="8" Font="Arial 13">
     <Label Text="Directory:" />
-    <ComboBox name="DirComboBox" PrefWidth="250" PrefHeight="24" />
-    <Button name="HomeButton" PrefWidth="24" PrefHeight="24" ToolTip="Go to Home Directory" image="Home.png" />
+    <ComboBox Name="DirComboBox" PrefWidth="250" PrefHeight="24" />
+    <Button Name="HomeButton" PrefWidth="24" PrefHeight="24" ToolTip="Go to Home Directory" ImageName="Home.png" />
   </RowView>
-  <BrowserView name="FileBrowser" GrowWidth="true" GrowHeight="true" PrefColCount="2">
-    <Font Name="Arial" Size="13" />
-  </BrowserView>
-  <RowView Align="CENTER" Spacing="5" >
-    <Font Name="Arial" Size="14" />
+  <BrowserView Name="FileBrowser" Font="Arial 13" GrowWidth="true" GrowHeight="true" />
+  <RowView Align="CENTER" Spacing="5" Font="Arial 14">
     <Label Text="File:" />
-    <TextField name="InputText" ColCount="32" />
+    <TextField Name="InputText" ColCount="32" />
   </RowView>
 </ColView>

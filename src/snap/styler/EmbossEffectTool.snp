@@ -1,36 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SpringView x="1" y="1" width="275" height="175" PrefWidth="275" PrefHeight="175">
-  <Label x="92" y="2" width="91" height="22" Align="CENTER" text="Light Source" />
-  <Separator x="10" y="13" width="85" height="2" />
-  <Separator x="170" y="13" width="85" height="2" />
-  <ThumbWheel Name="AzimuthWheel" x="32" y="64" width="67" height="16" max="180" absmin="-360" absmax="360" round="1" />
-  <TextField Name="AzimuthTextField" x="32" y="42" width="67" height="19" Align="CENTER" text="120">
-    <LineBorder Color="#c0c0c0" />
-  </TextField>
-  <Label x="102" y="43" width="28" height="15" text="&#176;">
-    <font name="Arial" size="9" />
-  </Label>
-  <Label x="32" y="25" width="63" height="18" Align="CENTER" text="Angle">
-    <font name="Arial" size="9" />
-  </Label>
-  <Label x="171" y="24" width="63" height="18" Align="CENTER" text="Altitude">
-    <font name="Arial" size="9" />
-  </Label>
-  <TextField Name="AltitudeTextField" x="171" y="41" width="63" height="19" Align="CENTER" text="60 ">
-    <LineBorder Color="#c0c0c0" />
-  </TextField>
-  <ThumbWheel Name="AltitudeWheel" x="169" y="64" width="67" height="16" min="20" max="90" absmin="0" absmax="180" round="1" />
-  <Label x="237" y="41" width="28" height="15" text="&#176;">
-    <font name="Arial" size="9" />
-  </Label>
-  <Separator x="10" y="102" width="85" height="2" />
-  <Separator x="170" y="102" width="85" height="2" />
-  <Label x="92" y="91" width="91" height="22" Align="CENTER" text="Bevel" />
-  <Label x="106" y="112" width="63" height="18" PrefHeight="11" Align="CENTER" text="Size">
-    <font name="Arial" size="9" />
-  </Label>
-  <TextField Name="RadiusTextField" x="106" y="128" width="63" height="19" Align="CENTER" text="6">
-    <LineBorder Color="#c0c0c0" />
-  </TextField>
-  <ThumbWheel Name="RadiusWheel" x="106" y="149" width="63" height="16" type="linear" min="1" max="10" absmin="0" absmax="20" round="1" />
+<SpringView X="1" Y="1" Width="275" Height="175" PrefWidth="275" PrefHeight="175">
+  <Label X="92" Y="2" Width="91" Height="22" Align="CENTER" Text="Light Source" />
+  <Separator X="10" Y="13" Width="85" Height="2" />
+  <Separator X="170" Y="13" Width="85" Height="2" />
+  <ThumbWheel Name="AzimuthWheel" X="32" Y="64" Width="67" Height="16" Max="180" AbsMin="-360" AbsMax="360" Round="1" />
+  <TextField Name="AzimuthTextField" X="32" Y="42" Width="67" Height="19" Align="CENTER" Text="120" />
+  <Label X="102" Y="43" Width="28" Height="15" Font="Arial 9" Text="&#176;" />
+  <Label X="32" Y="25" Width="63" Height="18" Align="CENTER" Font="Arial 9" Text="Angle" />
+  <Label X="171" Y="24" Width="63" Height="18" Align="CENTER" Font="Arial 9" Text="Altitude" />
+  <TextField Name="AltitudeTextField" X="171" Y="41" Width="63" Height="19" Align="CENTER" Text="60 " />
+  <ThumbWheel Name="AltitudeWheel" X="169" Y="64" Width="67" Height="16" Min="20" Max="90" AbsMin="0" AbsMax="180" Round="1" />
+  <Label X="237" Y="41" Width="28" Height="15" Font="Arial 9" Text="&#176;" />
+  <Separator X="10" Y="102" Width="85" Height="2" />
+  <Separator X="170" Y="102" Width="85" Height="2" />
+  <Label X="92" Y="91" Width="91" Height="22" Align="CENTER" Text="Bevel" />
+  <Label X="106" Y="112" Width="63" Height="18" PrefHeight="11" Align="CENTER" Font="Arial 9" Text="Size" />
+  <TextField Name="RadiusTextField" X="106" Y="128" Width="63" Height="19" Align="CENTER" Text="6" />
+  <ThumbWheel Name="RadiusWheel" X="106" Y="149" Width="63" Height="16" Type="linear" Min="1" Max="10" AbsMin="0" AbsMax="20" Round="1" />
 </SpringView>

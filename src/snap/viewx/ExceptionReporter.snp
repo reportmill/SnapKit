@@ -1,29 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SpringView width="585" height="475" PrefWidth="585" PrefHeight="475">
-  <Label x="10" y="10" width="70" height="55" />
-  <Label x="90" y="10" width="430" height="20" text="Warning: An unexpected internal error has occurred!">
-    <font name="Arial Bold" size="14" />
-  </Label>
-  <Label x="90" y="30" width="430" height="15" text="If you continue to notice strange behavior, restart the application.">
-    <font name="Arial" size="12" />
-  </Label>
-  <Label x="90" y="40" width="430" height="25" text="Use this form to notify ReportMill of the problem.">
-    <font name="Arial" size="12" />
-  </Label>
-  <Label x="5" y="76" width="35" height="25" text="Name:" />
-  <TextField Name="UserText" x="42" y="75" width="248" height="25">
-    <font name="Arial" size="12" />
-  </TextField>
-  <Label x="293" y="76" width="35" height="25" text="Email:" />
-  <TextField Name="EmailText" x="330" y="75" width="220" height="25">
-    <font name="Arial" size="12" />
-  </TextField>
-  <Label x="5" y="103" width="420" height="20" text="Please describe how to reproduce this exception:" />
-  <TextView Name="ScenarioText" x="5" y="120" width="575" height="100" GrowWidth="true">
-    <font name="Arial" size="12" />
-  </TextView>
-  <Label x="5" y="227" width="575" height="20" text="Exception Content:" />
-  <TextView Name="BacktraceText" x="5" y="245" width="575" height="230" GrowWidth="true" GrowHeight="true">
-    <font name="Arial" size="12" />
-  </TextView>
+<SpringView Width="585" Height="475" PrefWidth="585" PrefHeight="475">
+  <Label X="10" Y="10" Width="70" Height="55" />
+  <Label X="90" Y="10" Width="430" Height="20" Font="Arial Bold 14" Text="Warning: An unexpected internal error has occurred!" />
+  <Label X="90" Y="30" Width="430" Height="15" Font="Arial 12" Text="If you continue to notice strange behavior, restart the application." />
+  <Label X="90" Y="40" Width="430" Height="25" Font="Arial 12" Text="Use this form to notify ReportMill of the problem." />
+  <Label X="5" Y="76" Width="35" Height="25" Text="Name:" />
+  <TextField Name="UserText" X="42" Y="75" Width="248" Height="25" Font="Arial 12" />
+  <Label X="293" Y="76" Width="35" Height="25" Text="Email:" />
+  <TextField Name="EmailText" X="330" Y="75" Width="220" Height="25" Font="Arial 12" />
+  <Label X="5" Y="103" Width="420" Height="20" Text="Please describe how to reproduce this exception:" />
+  <TextView Name="ScenarioText" X="5" Y="120" Width="575" Height="100" Font="Arial 12" GrowWidth="true" />
+  <Label X="5" Y="227" Width="575" Height="20" Text="Exception Content:" />
+  <TextView Name="BacktraceText" X="5" Y="245" Width="575" Height="230" Font="Arial 12" GrowWidth="true" GrowHeight="true" />
 </SpringView>

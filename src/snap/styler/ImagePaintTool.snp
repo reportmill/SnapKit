@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SpringView width="275" height="140" PrefWidth="275" PrefHeight="140">
-  <CheckBox Name="TiledCheckBox" x="110" y="10" width="150" height="20" text="Tiled" />
-  <Label x="43" y="30" width="50" height="18" Align="CENTER" text="Offset:" />
-  <Label x="22" y="51" width="20" height="22" Align="CENTER_RIGHT" text="X:" />
-  <Spinner Name="XSpinner" x="44" y="51" width="60" height="22" Align="CENTER" />
-  <Label x="22" y="80" width="20" height="22" Align="CENTER_RIGHT" text="Y:" />
-  <Spinner Name="YSpinner" x="44" y="80" width="60" height="22" Align="CENTER" />
-  <Label x="165" y="30" width="50" height="18" Align="CENTER" text="Scale:" />
-  <Label x="144" y="51" width="20" height="22" Align="CENTER_RIGHT" text="X:" />
-  <Spinner Name="ScaleXSpinner" x="166" y="51" width="60" height="22" Align="CENTER" Step=".1" />
-  <Label x="144" y="80" width="20" height="22" Align="CENTER_RIGHT" text="Y:" />
-  <Spinner Name="ScaleYSpinner" x="166" y="80" width="60" height="22" Align="CENTER" Step=".1" />
-  <Button Name="ChooseButton" x="90" y="115" width="93" height="22" text="Choose..." />
+<SpringView Width="275" Height="140" PrefWidth="275" PrefHeight="140">
+  <CheckBox Name="TiledCheckBox" X="110" Y="10" Width="150" Height="20" Text="Tiled" />
+  <Label X="43" Y="30" Width="50" Height="18" Align="CENTER" Text="Offset:" />
+  <Label X="22" Y="51" Width="20" Height="22" Align="CENTER_RIGHT" Text="X:" />
+  <Spinner Name="XSpinner" X="44" Y="51" Width="60" Height="22" Align="CENTER" />
+  <Label X="22" Y="80" Width="20" Height="22" Align="CENTER_RIGHT" Text="Y:" />
+  <Spinner Name="YSpinner" X="44" Y="80" Width="60" Height="22" Align="CENTER" />
+  <Label X="165" Y="30" Width="50" Height="18" Align="CENTER" Text="Scale:" />
+  <Label X="144" Y="51" Width="20" Height="22" Align="CENTER_RIGHT" Text="X:" />
+  <Spinner Name="ScaleXSpinner" X="166" Y="51" Width="60" Height="22" Align="CENTER" Step="0.1" />
+  <Label X="144" Y="80" Width="20" Height="22" Align="CENTER_RIGHT" Text="Y:" />
+  <Spinner Name="ScaleYSpinner" X="166" Y="80" Width="60" Height="22" Align="CENTER" Step="0.1" />
+  <Button Name="ChooseButton" X="90" Y="115" Width="93" Height="22" Text="Choose..." />
 </SpringView>

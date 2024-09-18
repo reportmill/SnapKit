@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView Padding="15,8,8,8" Spacing="15" FillWidth="true">
-  <RowView Spacing="40" Align="CENTER">
-    <ColView Spacing="3" Align="CENTER">
-      <Label text="Color" />
+  <RowView Align="CENTER" Spacing="40">
+    <ColView Align="CENTER" Spacing="3">
+      <Label Text="Color" />
       <ColorWell Name="StrokeColorWell" PrefWidth="60" PrefHeight="30" />
     </ColView>
-    <ColView Spacing="3" Align="CENTER">
-      <Label text="Width" />
+    <ColView Align="CENTER" Spacing="3">
+      <Label Text="Width" />
       <TextField Name="StrokeWidthText" PrefWidth="50" Align="CENTER" />
-      <ThumbWheel Name="StrokeWidthThumb" PrefWidth="110" PrefHeight="16" max="20" absmin="0" round="1" />
+      <ThumbWheel Name="StrokeWidthThumb" PrefWidth="110" PrefHeight="16" Max="20" AbsMin="0" Round="1" />
     </ColView>
   </RowView>
   <ColView Spacing="5" FillWidth="true">
     <RowView Padding="0,0,0,30">
-      <Label PrefWidth="70" text="Dash Array:" />
+      <Label PrefWidth="70" Text="Dash Array:" />
       <TextField Name="DashArrayText" PrefWidth="104" PrefHeight="22" />
     </RowView>
     <RowView Padding="0,0,0,30">
-      <Label PrefWidth="70" text="Dash Phase:" />
-      <Spinner Name="DashPhaseSpinner" PrefWidth="58" Value="0" />
+      <Label PrefWidth="70" Text="Dash Phase:" />
+      <Spinner Name="DashPhaseSpinner" PrefWidth="58" />
     </RowView>
   </ColView>
 </ColView>

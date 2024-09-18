@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RowView PrefWidth="330" PrefHeight="220" FillHeight="true">
   <ColView Margin="5" GrowWidth="true">
-    <Label Margin="0,5,5,5" PrefWidth="131" PrefHeight="20" text="Not in Dictionary:" />
-    <TextField Name="WordText" Margin="5" PrefWidth="215" PrefHeight="22" GrowWidth="true" />
-    <Label Margin="5" PrefWidth="131" PrefHeight="20" text="Suggestions:" />
-    <ListView Name="SuggestionList" Margin="5" PrefWidth="215" PrefHeight="147" GrowWidth="true" GrowHeight="true">
-      <Font Name="Arial" Size="12" />
-    </ListView>
+    <Label PrefWidth="131" PrefHeight="20" Margin="0,5,5,5" Text="Not in Dictionary:" />
+    <TextField Name="WordText" PrefWidth="215" PrefHeight="22" Margin="5" GrowWidth="true" />
+    <Label PrefWidth="131" PrefHeight="20" Margin="5" Text="Suggestions:" />
+    <ListView Name="SuggestionList" PrefWidth="215" PrefHeight="147" Margin="5" Font="Arial 12" GrowWidth="true" GrowHeight="true" />
   </ColView>
   <ColView Margin="5" Spacing="5">
-    <Button Name="FindNextButton" Margin="10" PrefWidth="90" PrefHeight="22" Text="Find Next" />
-    <Button Name="CorrectButton" Margin="10" PrefWidth="90" PrefHeight="22" Text="Correct" />
-    <Button Name="LearnButton" Margin="10" PrefWidth="90" PrefHeight="22" Text="Learn" />
-    <Button Name="CloseButton" Margin="10" PrefWidth="90" PrefHeight="22" LeanY="BOTTOM" Text="Close" />
+    <Button Name="FindNextButton" PrefWidth="90" PrefHeight="22" Margin="10" Text="Find Next" />
+    <Button Name="CorrectButton" PrefWidth="90" PrefHeight="22" Margin="10" Text="Correct" />
+    <Button Name="LearnButton" PrefWidth="90" PrefHeight="22" Margin="10" Text="Learn" />
+    <Button Name="CloseButton" PrefWidth="90" PrefHeight="22" Margin="10" LeanY="BOTTOM" Text="Close" />
   </ColView>
 </RowView>

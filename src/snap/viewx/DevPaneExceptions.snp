@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView FillWidth="true">
-  <Font Name="Arial" Size="12" />
-  <Label Padding="8,8,0,12" Text="Exception was thrown:">
-    <Font Name="Arial Bold" Size="14" />
-  </Label>
+<ColView Font="Arial 12" FillWidth="true">
+  <Label Padding="8,8,0,12" Font="Arial Bold 14" Text="Exception was thrown:" />
   <RowView GrowHeight="true" FillHeight="true">
     <ColView PrefWidth="200" Margin="8" FillWidth="true">
       <Label Margin="4" Text="History:" />
@@ -26,14 +23,13 @@
         <Label Text="Email:" />
         <TextField Name="UserEmailText" PrefWidth="200" GrowWidth="true" GrowHeight="true" />
       </RowView>
-      <RowView Margin="8,5,8,5" Padding="10" Spacing="5" GrowWidth="true">
-        <EtchBorder />
+      <RowView Margin="8,5,8,5" Padding="10" Spacing="5" Border="#00 1" GrowWidth="true">
         <Button Name="SendExceptionButton" PrefWidth="100" PrefHeight="24" LeanX="CENTER" Text="Send Exception" />
         <Label Name="SendStatusLabel" />
       </RowView>
-      <Button Name="ClearAllButton" Margin="8,20,8,20" PrefWidth="100" PrefHeight="24" Text="Clear All" />
-      <Button Name="TriggerNPEButton" Margin="8,20,8,20" PrefWidth="100" PrefHeight="24" Text="Trigger NPE" />
-      <CheckBox Name="IgnoreSuccessiveCheckBox" Margin="8,20,8,20" PrefWidth="100" PrefHeight="24" Text="Ignore successive exceptions" />
+      <Button Name="ClearAllButton" PrefWidth="100" PrefHeight="24" Margin="8,20,8,20" Text="Clear All" />
+      <Button Name="TriggerNPEButton" PrefWidth="100" PrefHeight="24" Margin="8,20,8,20" Text="Trigger NPE" />
+      <CheckBox Name="IgnoreSuccessiveCheckBox" PrefWidth="100" PrefHeight="24" Margin="8,20,8,20" Text="Ignore successive exceptions" />
     </ColView>
   </RowView>
 </ColView>

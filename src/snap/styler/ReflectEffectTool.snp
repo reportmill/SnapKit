@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SpringView x="1" y="1" width="275" height="140" PrefWidth="275" PrefHeight="140">
-  <Label x="35" y="28" width="91" height="22" Align="CENTER_RIGHT" text="Reflection Height:" />
-  <Spinner Name="ReflectionHeightSpinner" x="137" y="28" width="88" height="22" Min="0" />
-  <Label x="35" y="63" width="91" height="22" Align="CENTER_RIGHT" text="Fade Height:" />
-  <Spinner Name="FadeHeightSpinner" x="137" y="63" width="88" height="22" Min="0" Max="1" />
-  <Label x="35" y="98" width="91" height="22" Align="CENTER_RIGHT" text="Gap Height:" />
-  <Spinner Name="GapHeightSpinner" x="137" y="98" width="88" height="22" Min="0" />
+<SpringView X="1" Y="1" Width="275" Height="140" PrefWidth="275" PrefHeight="140">
+  <Label X="35" Y="28" Width="91" Height="22" Align="CENTER_RIGHT" Text="Reflection Height:" />
+  <Spinner Name="ReflectionHeightSpinner" X="137" Y="28" Width="88" Height="22" Min="0" />
+  <Label X="35" Y="63" Width="91" Height="22" Align="CENTER_RIGHT" Text="Fade Height:" />
+  <Spinner Name="FadeHeightSpinner" X="137" Y="63" Width="88" Height="22" Min="0" Max="1" />
+  <Label X="35" Y="98" Width="91" Height="22" Align="CENTER_RIGHT" Text="Gap Height:" />
+  <Spinner Name="GapHeightSpinner" X="137" Y="98" Width="88" Height="22" Min="0" />
 </SpringView>

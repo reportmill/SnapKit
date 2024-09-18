@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SplitView DividerSpan="1">
-  <Font Name="Arial" Size="13" />
+<SplitView Font="Arial 13" DividerSpan="1">
   <ColView PrefWidth="300" GrowWidth="true" FillWidth="true">
     <RowView Margin="8" GrowWidth="true">
       <Label Margin="0,4,0,4" Text="Root File:" />
-      <TextField Name="RootFileText" Margin="0,4,0,4" PrefWidth="412" />
-      <Button Name="HomeButton" Margin="0,4,0,6" PrefWidth="24" PrefHeight="24" ToolTip="Go to Home Directory" image="Home.png" />
-      <Button Name="DeleteButton" Margin="0,10,0,6" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" ToolTip="Delete selected file" image="Edit_Delete.png" ShowArea="false" />
+      <TextField Name="RootFileText" PrefWidth="412" Margin="0,4,0,4" />
+      <Button Name="HomeButton" PrefWidth="24" PrefHeight="24" Margin="0,4,0,6" ToolTip="Go to Home Directory" ImageName="Home.png" />
+      <Button Name="DeleteButton" PrefWidth="24" PrefHeight="24" Margin="0,10,0,6" LeanX="RIGHT" ToolTip="Delete selected file" ImageName="Edit_Delete.png" ShowArea="false" />
     </RowView>
-    <BrowserView Name="FileBrowser" Margin="8" GrowWidth="true" GrowHeight="true" PrefColCount="2" />
+    <BrowserView Name="FileBrowser" Margin="8" GrowWidth="true" GrowHeight="true" />
   </ColView>
-  <ColView Margin="8" PrefWidth="60" GrowWidth="true">
+  <ColView PrefWidth="60" Margin="8" GrowWidth="true">
     <Label Name="FileLabel" Margin="4" />
     <TextView Name="FileTextView" GrowWidth="true" GrowHeight="true" />
   </ColView>

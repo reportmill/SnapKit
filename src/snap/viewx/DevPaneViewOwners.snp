@@ -1,22 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RowView PrefHeight="300" Padding="5" FillHeight="true">
-  <ColView PrefWidth="300" Padding="5" GrowWidth="true" FillWidth="true">
-    <font name="Arial" size="13" />
+  <ColView PrefWidth="300" Padding="5" Font="Arial 13" GrowWidth="true" FillWidth="true">
     <RowView Padding="2,4,3,4">
-      <Label text="ViewOwner Hierarchy" />
-      <ToggleButton Name="TargetingButton" Padding="2,6,2,6" LeanX="RIGHT" text="Mouse Over Select...">
-        <font name="Arial" size="11" />
-      </ToggleButton>
+      <Label Text="ViewOwner Hierarchy" />
+      <ToggleButton Name="TargetingButton" Padding="2,6,2,6" Font="Arial 11" LeanX="RIGHT" Text="Mouse Over Select..." />
     </RowView>
     <BrowserView Name="BrowserView" GrowHeight="true" PrefColCount="3" PrefColWidth="120" />
   </ColView>
   <ColView PrefWidth="100" Padding="5" GrowWidth="true" FillWidth="true">
     <RowView Padding="2,4,3,4" Spacing="8">
-      <Label Name="XMLTextLabel" text="View XML">
-        <font name="Arial" size="13" />
-      </Label>
-      <Button Name="ShowUIButton" PrefWidth="90" Padding="2,6,2,6" LeanX="RIGHT" text="Open UI" />
-      <Button Name="ShowSourceButton" PrefWidth="90" Padding="2,6,2,6" text="Open Source" />
+      <Label Name="XMLTextLabel" Font="Arial 13" Text="View XML" />
+      <Button Name="ShowUIButton" PrefWidth="90" Padding="2,6,2,6" LeanX="RIGHT" Text="Open UI" />
+      <Button Name="ShowSourceButton" PrefWidth="90" Padding="2,6,2,6" Text="Open Source" />
     </RowView>
     <TextView Name="XMLText" GrowHeight="true" />
   </ColView>

@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView Padding="15,8,8,8" Spacing="15" FillWidth="true">
-  <RowView Spacing="40" Align="CENTER">
-    <ColView Spacing="3" Align="CENTER">
-      <Label text="Color:" />
+  <RowView Align="CENTER" Spacing="40">
+    <ColView Align="CENTER" Spacing="3">
+      <Label Text="Color:" />
       <ColorWell Name="StrokeColorWell" PrefWidth="60" PrefHeight="30" />
     </ColView>
-    <ColView Spacing="3" Align="CENTER">
-      <Label text="Width:" />
+    <ColView Align="CENTER" Spacing="3">
+      <Label Text="Width:" />
       <TextField Name="StrokeWidthText" PrefWidth="50" Align="CENTER" />
-      <ThumbWheel Name="StrokeWidthThumb" PrefWidth="110" PrefHeight="16" max="20" absmin="0" round="1" />
+      <ThumbWheel Name="StrokeWidthThumb" PrefWidth="110" PrefHeight="16" Max="20" AbsMin="0" Round="1" />
     </ColView>
   </RowView>
   <ColView>
     <RowView Padding="0,0,0,94">
-      <CheckBox Name="TopCheckBox" Padding="0,1,1,1" text="Top" />
+      <CheckBox Name="TopCheckBox" Padding="0,1,1,1" Text="Top" />
     </RowView>
     <RowView Padding="0,0,0,45">
-      <CheckBox Name="LeftCheckBox" Position="CENTER_RIGHT" text="Left" />
-      <CheckBox Padding="0,0,0,32" Name="RightCheckBox" text="Right" />
+      <CheckBox Name="LeftCheckBox" Text="Left" Position="CENTER_RIGHT" />
+      <CheckBox Name="RightCheckBox" Padding="0,0,0,32" Text="Right" />
     </RowView>
     <RowView Padding="0,0,0,94">
-      <CheckBox Name="BottomCheckBox" Padding="1" text="Bottom" />
+      <CheckBox Name="BottomCheckBox" Padding="1" Text="Bottom" />
     </RowView>
   </ColView>
 </ColView>

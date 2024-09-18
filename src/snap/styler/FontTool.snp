@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView Name="BasicFontTool" Padding="2,8,2,8" Spacing="5" FillWidth="true">
   <RowView Align="CENTER" Padding="4,4,2,4" Spacing="5">
-    <Button Name="FontSizeUpButton" PrefWidth="24" PrefHeight="24" ToolTip="Increase Font Size" image="Font_Increase.png" />
-    <Button Name="FontSizeDownButton" PrefWidth="24" PrefHeight="24" ToolTip="Decrease Font Size" image="Font_Decrease.png" />
+    <Button Name="FontSizeUpButton" PrefWidth="24" PrefHeight="24" ToolTip="Increase Font Size" ImageName="Font_Increase.png" />
+    <Button Name="FontSizeDownButton" PrefWidth="24" PrefHeight="24" ToolTip="Decrease Font Size" ImageName="Font_Decrease.png" />
     <Label Name="Separator" PrefWidth="8" PrefHeight="8" />
-    <ToggleButton Name="BoldButton" PrefWidth="24" PrefHeight="24" ToolTip="Make Bold" image="Font_Bold.png" />
-    <ToggleButton Name="ItalicButton" PrefWidth="24" PrefHeight="24" ToolTip="Make Italic" image="Font_Italic.png" />
-    <ToggleButton Name="UnderlineButton" PrefWidth="24" PrefHeight="24" ToolTip="Make Underline" image="Font_Underline.png" />
-    <ToggleButton Name="OutlineButton" PrefWidth="24" PrefHeight="24" ToolTip="Make Outline" text="O">
-      <font name="Arial Bold" size="16" />
-    </ToggleButton>
+    <ToggleButton Name="BoldButton" PrefWidth="24" PrefHeight="24" ToolTip="Make Bold" ImageName="Font_Bold.png" />
+    <ToggleButton Name="ItalicButton" PrefWidth="24" PrefHeight="24" ToolTip="Make Italic" ImageName="Font_Italic.png" />
+    <ToggleButton Name="UnderlineButton" PrefWidth="24" PrefHeight="24" ToolTip="Make Underline" ImageName="Font_Underline.png" />
+    <ToggleButton Name="OutlineButton" PrefWidth="24" PrefHeight="24" Font="Arial Bold 16" ToolTip="Make Outline" Text="O" />
     <Label Name="Separator" PrefWidth="8" PrefHeight="8" />
-    <Button Name="FontPickerButton" PrefWidth="24" PrefHeight="24" ToolTip="Show Font Picker" image="/snap/viewx/pkg.images/Find.png" />
+    <Button Name="FontPickerButton" PrefWidth="24" PrefHeight="24" ToolTip="Show Font Picker" ImageName="/snap/viewx/pkg.images/Find.png" />
   </RowView>
   <RowView Padding="4,4,4,10" Spacing="4">
     <Label Text="Font:" />
