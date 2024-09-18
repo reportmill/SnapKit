@@ -2,6 +2,8 @@ package snap.view;
 import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.*;
+import snap.viewx.ColorDock;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -240,9 +242,10 @@ public class ViewTheme {
         setViewStylePropValue(MenuItem.class, View.Align_Prop, Pos.CENTER_LEFT);
         setViewStylePropValue(MenuItem.class, View.Padding_Prop, new Insets(4, 8, 4, 6));
 
-        // ProgressBar, ThumbWheel
+        // ProgressBar, ThumbWheel, ColorDock
         setViewStylePropValue(ProgressBar.class, View.BorderRadius_Prop, 4);
         setViewStylePropValue(ThumbWheel.class, View.Fill_Prop, getBackFill());
+        setViewStylePropValue(ColorDock.class, View.Border_Prop, Border.createLoweredBevelBorder());
     }
 
     /**

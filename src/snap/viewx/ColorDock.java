@@ -38,16 +38,12 @@ public class ColorDock extends View {
     // The size of the individual swatches
     private static int  SWATCH_SIZE = 13;
     
-    // The border for color dock
-    private static final Border DEFAULT_COLOR_DOCK_BORDER = Border.createLoweredBevelBorder();
-    
     /**
      * Creates a new color dock.
      */
     public ColorDock()
     {
         super();
-        _border = DEFAULT_COLOR_DOCK_BORDER;
 
         // Configure this view
         setActionable(true);
@@ -489,19 +485,6 @@ public class ColorDock extends View {
         // Reset selected and swatch
         setSelected(false);
         setSelSwatch(null);
-    }
-
-    /**
-     * Override to customize for this class.
-     */
-    @Override
-    protected void initProps(PropSet aPropSet)
-    {
-        // Do normal version
-        super.initProps(aPropSet);
-
-        // Reset defaults
-        aPropSet.getPropForName(Border_Prop).setDefaultValue(DEFAULT_COLOR_DOCK_BORDER);
     }
 
     /**
