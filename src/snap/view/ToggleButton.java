@@ -186,9 +186,7 @@ public class ToggleButton extends ButtonBase {
         // Unarchive Selected, GroupName
         if (anElement.hasAttribute(Selected_Prop))
             setSelected(anElement.getAttributeBoolValue(Selected_Prop));
-        if (anElement.hasAttribute(GroupName_Prop))
+        if (anElement.hasAttribute(GroupName_Prop)) // Archival legacy: Group or ToggleGroup
             setGroupName(anElement.getAttributeValue(GroupName_Prop));
-        else if (anElement.hasAttribute("Group") || anElement.hasAttribute("ToggleGroup"))
-            setGroupName(anElement.getAttributeValue("Group", anElement.getAttributeValue("ToggleGroup")));
     }
 }

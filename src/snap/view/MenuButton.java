@@ -301,16 +301,8 @@ public class MenuButton extends ButtonBase {
         // Archive basic view attributes
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive ShowArrow, PopupPoint, PopupSize
+        // Archive ShowArrow
         if (!isShowArrow()) e.add(ShowArrow_Prop, false);
-        if (getPopupPoint() != null) {
-            e.add("PopupX", getPopupPoint().x);
-            e.add("PopupY", getPopupPoint().y);
-        }
-        if (getPopupSize() != null) {
-            e.add("PopupWidth", getPopupSize().width);
-            e.add("PopupHeight", getPopupSize().height);
-        }
 
         // Return element
         return e;
@@ -326,20 +318,6 @@ public class MenuButton extends ButtonBase {
 
         // Unarchive ShowArrow
         setShowArrow(anElement.getAttributeBooleanValue(ShowArrow_Prop, true));
-
-        // Unarchive PopupPoint
-        if (anElement.hasAttribute("PopupX") || anElement.hasAttribute("PopupY")) {
-            int x = anElement.getAttributeIntValue("PopupX");
-            int y = anElement.getAttributeIntValue("PopupY");
-            setPopupPoint(new Point(x, y));
-        }
-
-        // Unarchive PopupSize
-        if (anElement.hasAttribute("PopupWidth") || anElement.hasAttribute("PopupHeight")) {
-            int w = anElement.getAttributeIntValue("PopupWidth");
-            int h = anElement.getAttributeIntValue("PopupHeight");
-            setPopupSize(new Size(w, h));
-        }
     }
 
     /**

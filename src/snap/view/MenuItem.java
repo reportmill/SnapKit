@@ -284,7 +284,7 @@ public class MenuItem extends ButtonBase implements Cloneable {
         super.fromXMLView(anArchiver, anElement);
 
         // Unarchive Shortcut
-        if (anElement.hasAttribute(Shortcut_Prop))
+        if (anElement.hasAttribute(Shortcut_Prop)) // Archival legacy: Key
             setShortcut(anElement.getAttributeValue(Shortcut_Prop));
         else if (anElement.hasAttribute("Key"))
             setShortcut(anElement.getAttributeValue("Key"));

@@ -640,23 +640,4 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     {
         return ListUtils.equalsId(theItems, getItemsList()) || theItems.equals(getItemsList());
     }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-    }
 }

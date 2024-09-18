@@ -527,13 +527,9 @@ public class ButtonBase extends ParentView {
         }
 
         // Unarchive ShowArea, Position
-        if (anElement.hasAttribute(ShowArea_Prop))
+        if (anElement.hasAttribute(ShowArea_Prop)) // Archival legacy: ShowBorder
             setShowArea(anElement.getAttributeBoolValue(ShowArea_Prop));
         if (anElement.hasAttribute(Position_Prop))
             setPosition(anElement.getAttributeEnumValue(Position_Prop, Pos.class, null));
-
-        // Legacy
-        if (anElement.hasAttribute("ShowBorder"))
-            setShowArea(anElement.getAttributeBoolValue("ShowBorder"));
     }
 }

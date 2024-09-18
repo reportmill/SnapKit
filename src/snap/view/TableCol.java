@@ -197,9 +197,9 @@ public class TableCol <T> extends ListArea <T> {
         // Create xml for column
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive Header, Resizable
-        if (getHeaderText()!=null) e.add("Header", getHeaderText());
-        if (isResizable()) e.add("Resizable", false);
+        // Archive HeaderText, Resizable
+        if (!isPropDefault(HeaderText_Prop)) e.add(HeaderText_Prop, getHeaderText());
+        if (!isPropDefault(Resizable_Prop)) e.add(Resizable_Prop, false);
 
         // Return column xml
         return e;
@@ -213,8 +213,8 @@ public class TableCol <T> extends ListArea <T> {
         // Do normal version
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive Header, Resizable
-        if (anElement.hasAttribute("Header")) setHeaderText(anElement.getAttributeValue("Header"));
-        if (anElement.hasAttribute("Resizable")) setResizable(anElement.getAttributeBoolValue("Resizable"));
+        // Unarchive HeaderText, Resizable
+        if (anElement.hasAttribute(HeaderText_Prop)) setHeaderText(anElement.getAttributeValue(HeaderText_Prop));
+        if (anElement.hasAttribute(Resizable_Prop)) setResizable(anElement.getAttributeBoolValue(Resizable_Prop));
     }
 }

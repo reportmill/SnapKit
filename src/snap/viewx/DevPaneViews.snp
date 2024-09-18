@@ -12,8 +12,8 @@
       <Label Font="Arial 13" Text="View Properties" />
     </RowView>
     <TableView Name="PropTableView" GrowHeight="true">
-      <TableCol PrefWidth="80" Header="Property" />
-      <TableCol GrowWidth="true" Header="Value" />
+      <TableCol PrefWidth="80" HeaderText="Property" />
+      <TableCol GrowWidth="true" HeaderText="Value" />
     </TableView>
   </ColView>
   <ColView PrefWidth="200" Spacing="5" FillWidth="true">
