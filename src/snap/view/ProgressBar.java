@@ -48,7 +48,6 @@ public class ProgressBar extends View {
     public ProgressBar()
     {
         super();
-        _borderRadius = 4;
     }
 
     /**
