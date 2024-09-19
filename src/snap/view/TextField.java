@@ -11,7 +11,7 @@ import snap.util.*;
 import java.util.Objects;
 
 /**
- * An view subclass for editing a single line of text.
+ * A view subclass for editing a single line of text.
  */
 public class TextField extends ParentView {
 
@@ -140,10 +140,7 @@ public class TextField extends ParentView {
     /**
      * Returns the total column width.
      */
-    double getTotalColWidth()
-    {
-        return Math.ceil(_colCount * getFont().charAdvance('X'));
-    }
+    private double getTotalColWidth()  { return Math.ceil(_colCount * getFont().charAdvance('X')); }
 
     /**
      * Returns the prompt text.
@@ -357,9 +354,6 @@ public class TextField extends ParentView {
      */
     protected void textDidChange()
     {
-        // Ensure that selection is still within bounds
-        setSel(getSelStart(), getSelEnd());
-
         // If PromptText present, update Label.StringView.Visible
         if (_promptText != null)
             _label.getStringView().setPaintable(length() == 0);
@@ -425,7 +419,7 @@ public class TextField extends ParentView {
      */
     public void setText(String aString)
     {
-        replaceChars(aString, 0, length(), false);
+        replaceChars(aString, 0, length());
     }
 
     /**
@@ -447,17 +441,9 @@ public class TextField extends ParentView {
     public int getSelEnd()  { return _selEnd; }
 
     /**
-     * Sets the selection end.
-     */
-    public void setSelEnd(int aValue)
-    {
-        setSel(getSelStart(), aValue);
-    }
-
-    /**
      * Returns whether the selection is empty.
      */
-    public boolean isSelEmpty()  { return _selStart==_selEnd; }
+    public boolean isSelEmpty()  { return _selStart == _selEnd; }
 
     /**
      * Sets the character index of the text cursor.
@@ -534,13 +520,13 @@ public class TextField extends ParentView {
      */
     public void replaceChars(String aString)
     {
-        replaceChars(aString, getSelStart(), getSelEnd(), true);
+        replaceChars(aString, getSelStart(), getSelEnd());
     }
 
     /**
      * Replaces the current selection with the given string.
      */
-    public void replaceChars(String aString, int aStart, int anEnd, boolean doUpdateSel)
+    public void replaceChars(String aString, int aStart, int anEnd)
     {
         // Get string length (if no string length and no char range, just return)
         int strLen = aString != null ? aString.length() : 0;
@@ -554,13 +540,7 @@ public class TextField extends ParentView {
             _sb.insert(aStart, aString);
 
         // Update selection to be at end of new string
-        if (doUpdateSel)
-            setSel(aStart + strLen);
-
-        // Otherwise, if replace was before current selection, adjust current selection
-        //else if (aStart<=getSelEnd()) {
-        //    int delta = strLen - (anEnd - aStart), start = getSelStart(); if (aStart<=start) start += delta;
-        //    setSel(start, getSelEnd() + delta); }
+        setSel(aStart + strLen);
 
         // Notify textDidChange
         textDidChange();
@@ -571,15 +551,15 @@ public class TextField extends ParentView {
      */
     public void delete()
     {
-        delete(getSelStart(), getSelEnd(), true);
+        delete(getSelStart(), getSelEnd());
     }
 
     /**
      * Deletes the given range of chars.
      */
-    public void delete(int aStart, int anEnd, boolean doUpdateSel)
+    public void delete(int aStart, int anEnd)
     {
-        replaceChars(null, aStart, anEnd, doUpdateSel);
+        replaceChars(null, aStart, anEnd);
     }
 
     /**
@@ -633,7 +613,7 @@ public class TextField extends ParentView {
         if (!isSelEmpty() || getSelStart() == 0) delete();
 
             // Otherwise delete previous char
-        else delete(getSelStart() - 1, getSelStart(), true);
+        else delete(getSelStart() - 1, getSelStart());
     }
 
     /**
@@ -647,7 +627,7 @@ public class TextField extends ParentView {
         }
         int start = getSelStart(), end = start + 1;
         if (start >= length()) return;
-        delete(start, end, true);
+        delete(start, end);
     }
 
     /**
@@ -660,7 +640,7 @@ public class TextField extends ParentView {
             delete();
 
         // Otherwise delete up to next newline or line end
-        delete(getSelStart(), length(), true);
+        delete(getSelStart(), length());
     }
 
     /**
@@ -668,7 +648,7 @@ public class TextField extends ParentView {
      */
     public void clear()
     {
-        delete(0, length(), true);
+        delete(0, length());
     }
 
     /**
@@ -765,11 +745,11 @@ public class TextField extends ParentView {
         switch (anEvent.getType()) {
             case MousePress: mousePressed(anEvent); break;
             case MouseDrag: mouseDragged(anEvent); break;
-            case MouseRelease: mouseReleased(anEvent); break;
-            case MouseMove: mouseMoved(anEvent); break;
+            case MouseRelease: mouseReleased(); break;
+            case MouseMove: showCursor(); break;
             case KeyPress: keyPressed(anEvent); break;
             case KeyType: keyTyped(anEvent); break;
-            case KeyRelease: keyReleased(anEvent); break;
+            case KeyRelease: setCaretAnim(); break;
             case Action: processActionEvent(anEvent);
         }
 
@@ -865,18 +845,10 @@ public class TextField extends ParentView {
     /**
      * Handles mouse released.
      */
-    protected void mouseReleased(ViewEvent anEvent)
+    protected void mouseReleased()
     {
         setCaretAnim();
         _downX = 0;
-    }
-
-    /**
-     * Handle MouseMoved.
-     */
-    protected void mouseMoved(ViewEvent anEvent)
-    {
-        showCursor();
     }
 
     /**
@@ -967,14 +939,6 @@ public class TextField extends ParentView {
         // If alt-TAB or alt-ENTER
         //if (altDown && anEvent.isEnterKey() || anEvent.isTabKey()) {
         //    replaceChars(keyChars); hideCursor(); anEvent.consume(); }
-    }
-
-    /**
-     * Called when a key is released.
-     */
-    protected void keyReleased(ViewEvent anEvent)
-    {
-        setCaretAnim();
     }
 
     /**
@@ -1151,7 +1115,7 @@ public class TextField extends ParentView {
         // Add props: ColCount, Edited, PromptText, Sel, FireActionOnFocusLost
         aPropSet.addPropNamed(ColCount_Prop, int.class, DEFAULT_COL_COUNT);
         aPropSet.addPropNamed(Edited_Prop, boolean.class).setSkipArchival(true);
-        aPropSet.addPropNamed(PromptText_Prop, String.class);
+        aPropSet.addPropNamed(PromptText_Prop, String.class, EMPTY_OBJECT);
         aPropSet.addPropNamed(FireActionOnFocusLost_Prop, boolean.class, true);
     }
 
@@ -1214,8 +1178,8 @@ public class TextField extends ParentView {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive ColCount, PromptText
-        if (!isPrefWidthSet() && getColCount() != 12) e.add(ColCount_Prop, getColCount());
-        if (getPromptText() != null && !getPromptText().isEmpty()) e.add(PromptText_Prop, getPromptText());
+        if (!isPropDefault(ColCount_Prop)) e.add(ColCount_Prop, getColCount());
+        if (!isPropDefault(PromptText_Prop)) e.add(PromptText_Prop, getPromptText());
         return e;
     }
 
