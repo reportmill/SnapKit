@@ -11,8 +11,11 @@ import snap.text.TextBlock;
 import snap.text.TextDoc;
 import snap.text.TextLine;
 import snap.text.TextSel;
+import snap.util.ArrayUtils;
 import snap.util.Convert;
 import snap.view.*;
+
+import java.util.stream.Stream;
 
 /**
  * A panel for editing text files.
@@ -38,6 +41,7 @@ public class TextPane extends ViewOwner {
      */
     public TextArea getTextArea()
     {
+        if (_textArea != null) return _textArea;
         getUI();
         return _textArea;
     }
@@ -58,40 +62,41 @@ public class TextPane extends ViewOwner {
     /**
      * Create UI.
      */
+    @Override
     protected View createUI()
     {
         // Create ToolBar
         _toolBarPane = (ChildView) super.createUI();
 
-        // Disable all button focus
-        for (View node : _toolBarPane.getChildren()) if (node instanceof ButtonBase) node.setFocusable(false);
-
         // Create/config TextArea
-        TextArea text = createTextArea();
-        text.setFill(Color.WHITE);
-        text.setEditable(true);
-        text.setName("TextArea");
-        setFirstFocus(text);
+        _textArea = createTextArea();
+        _textArea.setName("TextArea");
+        _textArea.setFill(Color.WHITE);
+        _textArea.setEditable(true);
+        _textArea.setGrowWidth(true);
 
         // Wrap TextArea in ScrollPane
-        ScrollView scroll = new ScrollView(text);
-        scroll.setName("ScrollView");
+        ScrollView scrollView = new ScrollView(_textArea);
+        scrollView.setName("ScrollView");
 
         // Create SelectionText Label in BottomBox
-        Label slabel = new Label();
-        slabel.setName("SelectionText");
-        slabel.setFont(new Font("Arial", 11));
-        RowView bbox = new RowView();
-        bbox.setPadding(2, 2, 2, 5);
-        bbox.setName("BottomBox");
-        bbox.addChild(slabel);
+        Label selectionLabel = new Label();
+        selectionLabel.setName("SelectionText");
+
+        // Create BottomRowView and add SelectionText
+        RowView bottomRowView = new RowView();
+        bottomRowView.setName("BottomBox");
+        bottomRowView.setPadding(2, 2, 2, 5);
+        bottomRowView.addChild(selectionLabel);
 
         // Create BorderView and add ToolBar, text and bottom box
-        BorderView pane = new BorderView();
-        pane.setTop(_toolBarPane);
-        pane.setCenter(scroll);
-        pane.setBottom(bbox);
-        return pane;
+        BorderView borderView = new BorderView();
+        borderView.setTop(_toolBarPane);
+        borderView.setCenter(scrollView);
+        borderView.setBottom(bottomRowView);
+
+        // Return
+        return borderView;
     }
 
     /**
@@ -99,13 +104,19 @@ public class TextPane extends ViewOwner {
      */
     protected void initUI()
     {
+        // Disable all toolbar button focus
+        ButtonBase[] toolBarButtons = ArrayUtils.filterByClass(_toolBarPane.getChildren(), ButtonBase.class);
+        Stream.of(toolBarButtons).forEach(button -> button.setFocusable(false));
+
         // Get text area and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
         _textArea = getView("TextArea", TextArea.class);
-        _textArea.addPropChangeListener(pc -> textAreaDidPropChange(pc));
+        _textArea.addPropChangeListener(this::handleTextAreaPropChange);
+        setFirstFocus(_textArea);
 
         // Configure FindText
-        getView("FindText", TextField.class).setPromptText("Find");
-        getView("FindText", TextField.class).getLabel().setImage(Image.getImageForClassResource(TextPane.class, "Find.png"));
+        TextField findText = getView("FindText", TextField.class);
+        findText.setPromptText("Find");
+        findText.getLabel().setImage(Image.getImageForClassResource(TextPane.class, "Find.png"));
 
         // Register command-s for save, command-f for find, command-l for line number and escape
         addKeyActionHandler("SaveButton", "Shortcut+S");
@@ -121,14 +132,11 @@ public class TextPane extends ViewOwner {
      */
     protected void resetUI()
     {
-        // Get TextArea
-        TextArea textArea = getTextArea();
-
         // Reset FontSizeText
-        setViewValue("FontSizeText", textArea.getTextFont().getSize());
+        setViewValue("FontSizeText", _textArea.getTextFont().getSize());
 
         // Update UndoButton, RedoButton
-        Undoer undoer = textArea.getUndoer();
+        Undoer undoer = _textArea.getUndoer();
         setViewEnabled("UndoButton", undoer.hasUndos());
         setViewEnabled("RedoButton", undoer.hasRedos());
 
@@ -323,17 +331,17 @@ public class TextPane extends ViewOwner {
     /**
      * Called when TextArea does prop change.
      */
-    protected void textAreaDidPropChange(PropChange aPC)
+    protected void handleTextAreaPropChange(PropChange aPC)
     {
         Object src = aPC.getSource();
         if (src instanceof TextBlock)
-            textBlockDidPropChange(aPC);
+            handleTextBlockPropChange(aPC);
     }
 
     /**
      * Called when TextBlock does prop change.
      */
-    protected void textBlockDidPropChange(PropChange aPC)
+    protected void handleTextBlockPropChange(PropChange aPC)
     {
         resetLater();
     }

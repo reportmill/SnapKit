@@ -3,7 +3,6 @@
  */
 package snap.view;
 import snap.geom.Pos;
-import snap.util.*;
 
 /**
  * A View subclass to manage subviews along edges (top, bottom, left, right) and center.
@@ -25,10 +24,7 @@ public class BorderView extends ParentView {
     /**
      * Returns the center node.
      */
-    public View getCenter()
-    {
-        return _center;
-    }
+    public View getCenter()  { return _center; }
 
     /**
      * Sets the center node.
@@ -46,10 +42,7 @@ public class BorderView extends ParentView {
     /**
      * Returns the top node.
      */
-    public View getTop()
-    {
-        return _top;
-    }
+    public View getTop()  { return _top; }
 
     /**
      * Sets the top node.
@@ -68,10 +61,7 @@ public class BorderView extends ParentView {
     /**
      * Returns the bottom node.
      */
-    public View getBottom()
-    {
-        return _bottom;
-    }
+    public View getBottom()  { return _bottom; }
 
     /**
      * Sets the bottom node.
@@ -90,10 +80,7 @@ public class BorderView extends ParentView {
     /**
      * Returns the left node.
      */
-    public View getLeft()
-    {
-        return _left;
-    }
+    public View getLeft()  { return _left; }
 
     /**
      * Sets the left node.
@@ -112,10 +99,7 @@ public class BorderView extends ParentView {
     /**
      * Returns the right node.
      */
-    public View getRight()
-    {
-        return _right;
-    }
+    public View getRight()  { return _right; }
 
     /**
      * Sets the right node.
@@ -165,80 +149,6 @@ public class BorderView extends ParentView {
     protected BorderViewProxy getViewProxy()
     {
         return new BorderViewProxy(this, _center, _top, _right, _bottom, _left);
-    }
-
-    /**
-     * XML archival of children.
-     */
-    protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Archive Top, Left, Center, Bottom, Right
-        if (getTop() != null) {
-            XMLElement top = new XMLElement("Top");
-            anElement.add(top);
-            top.add(anArchiver.toXML(getTop(), this));
-        }
-        if (getLeft() != null) {
-            XMLElement lft = new XMLElement("Left");
-            anElement.add(lft);
-            lft.add(anArchiver.toXML(getLeft(), this));
-        }
-        if (getCenter() != null) {
-            XMLElement ctr = new XMLElement("Center");
-            anElement.add(ctr);
-            ctr.add(anArchiver.toXML(getCenter(), this));
-        }
-        if (getBottom() != null) {
-            XMLElement btm = new XMLElement("Bottom");
-            anElement.add(btm);
-            btm.add(anArchiver.toXML(getBottom(), this));
-        }
-        if (getRight() != null) {
-            XMLElement rgt = new XMLElement("Right");
-            anElement.add(rgt);
-            rgt.add(anArchiver.toXML(getRight(), this));
-        }
-    }
-
-    /**
-     * XML unarchival for shape children.
-     */
-    protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive Top
-        XMLElement top = anElement.get("Top");
-        top = top != null && top.getElementCount() > 0 ? top.getElement(0) : null;
-        Object topView = top != null ? anArchiver.fromXML(top, this) : null;
-        if (topView instanceof View)
-            setTop((View) topView);
-
-        // Unarchive Left
-        XMLElement lft = anElement.get("Left");
-        lft = lft != null && lft.getElementCount() > 0 ? lft.getElement(0) : null;
-        Object lftView = lft != null ? anArchiver.fromXML(lft, this) : null;
-        if (lftView instanceof View)
-            setLeft((View) lftView);
-
-        // Unarchive Center
-        XMLElement ctr = anElement.get("Center");
-        ctr = ctr != null && ctr.getElementCount() > 0 ? ctr.getElement(0) : null;
-        Object ctrView = ctr != null ? anArchiver.fromXML(ctr, this) : null;
-        if (ctrView instanceof View)
-            setCenter((View) ctrView);
-
-        // Unarchive Bottom
-        XMLElement btm = anElement.get("Bottom");
-        btm = btm != null && btm.getElementCount() > 0 ? btm.getElement(0) : null;
-        Object btmView = btm != null ? anArchiver.fromXML(btm, this) : null;
-        if (btmView instanceof View)
-            setBottom((View) btmView);
-
-        // Unarchive Right
-        XMLElement rgt = anElement.get("Right");
-        rgt = rgt != null && rgt.getElementCount() > 0 ? rgt.getElement(0) : null;
-        Object rgtView = rgt != null ? anArchiver.fromXML(rgt, this) : null;
-        if (rgtView instanceof View)
-            setRight((View) rgtView);
     }
 
     /**
