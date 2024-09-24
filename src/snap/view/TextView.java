@@ -99,26 +99,6 @@ public class TextView extends ParentView {
     public void setFireActionOnFocusLost(boolean aValue)  { _textArea.setFireActionOnFocusLost(aValue); }
 
     /**
-     * Returns the number of characters in the text string.
-     */
-    public int length()  { return _textArea.length(); }
-
-    /**
-     * Returns the individual character at given index.
-     */
-    public char charAt(int anIndex)  { return _textArea.charAt(anIndex); }
-
-    /**
-     * Returns whether the selection is empty.
-     */
-    public boolean isSelEmpty()  { return _textArea.isSelEmpty(); }
-
-    /**
-     * Returns the final character index of the selection (usually SelEnd).
-     */
-    public int getSelIndex()  { return _textArea.getSelIndex(); }
-
-    /**
      * Returns the character index of the start of the text selection.
      */
     public int getSelStart()  { return _textArea.getSelStart(); }

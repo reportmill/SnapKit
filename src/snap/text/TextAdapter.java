@@ -19,10 +19,10 @@ import java.util.List;
 public class TextAdapter extends PropObject {
 
     // The view
-    private View _view;
+    protected View _view;
 
     // The text being edited
-    private TextBlock _textBlock;
+    protected TextBlock _textBlock;
 
     // Whether text is editable
     private boolean  _editable;
@@ -68,9 +68,6 @@ public class TextAdapter extends PropObject {
 
     // Whether as-you-type spell checking is enabled
     public static boolean isSpellChecking = Prefs.getDefaultPrefs().getBoolean("SpellChecking", false);
-
-    // Whether hyphenating is activated
-    private static boolean _hyphenating = Prefs.getDefaultPrefs().getBoolean("Hyphenating", false);
 
     // The MIME type for SnapKit RichText
     public static final String SNAP_RICHTEXT_TYPE = "reportmill/xstring";
@@ -141,7 +138,7 @@ public class TextAdapter extends PropObject {
     /**
      * Sets the text block that holds the text.
      */
-    protected void setTextBlock(TextBlock aTextBlock)
+    public void setTextBlock(TextBlock aTextBlock)
     {
         // If already set, just return
         if (aTextBlock == _textBlock) return;
@@ -997,7 +994,7 @@ public class TextAdapter extends PropObject {
     /**
      * Handles mouse pressed.
      */
-    protected void mousePressed(ViewEvent anEvent)
+    public void mousePressed(ViewEvent anEvent)
     {
         // Stop caret animation
         setCaretAnim(false);
@@ -1033,7 +1030,7 @@ public class TextAdapter extends PropObject {
     /**
      * Handles mouse dragged.
      */
-    protected void mouseDragged(ViewEvent anEvent)
+    public void mouseDragged(ViewEvent anEvent)
     {
         // Get selected range for down point and drag point
         TextSel sel = new TextSel(_textBlock, _downX, _downY, anEvent.getX(), anEvent.getY(), _wordSel, _pgraphSel);
@@ -1054,7 +1051,7 @@ public class TextAdapter extends PropObject {
     /**
      * Handles mouse released.
      */
-    protected void mouseReleased(ViewEvent anEvent)
+    public void mouseReleased(ViewEvent anEvent)
     {
         setCaretAnim();
         _downX = _downY = 0;
@@ -1069,7 +1066,7 @@ public class TextAdapter extends PropObject {
     /**
      * Handle MouseMoved.
      */
-    protected void mouseMoved(ViewEvent anEvent)
+    public void mouseMoved(ViewEvent anEvent)
     {
         TextLink textLink = getTextLinkForXY(anEvent.getX(), anEvent.getY());
         if (textLink != null)
@@ -1080,7 +1077,7 @@ public class TextAdapter extends PropObject {
     /**
      * Called when a key is pressed.
      */
-    protected void keyPressed(ViewEvent anEvent)
+    public void keyPressed(ViewEvent anEvent)
     {
         // Get event info
         int keyCode = anEvent.getKeyCode();
@@ -1209,7 +1206,7 @@ public class TextAdapter extends PropObject {
     /**
      * Called when a key is typed.
      */
-    protected void keyTyped(ViewEvent anEvent)
+    public void keyTyped(ViewEvent anEvent)
     {
         // Get event info
         String keyChars = anEvent.getKeyString();
@@ -1229,7 +1226,7 @@ public class TextAdapter extends PropObject {
     /**
      * Called when a key is released.
      */
-    protected void keyReleased(ViewEvent anEvent)
+    public void keyReleased(ViewEvent anEvent)
     {
         setCaretAnim();
     }
@@ -1417,7 +1414,7 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the clipboard content.
      */
-    protected Object getClipboardContent(Clipboard clipboard)
+    public Object getClipboardContent(Clipboard clipboard)
     {
         // If Clipboard has RICHTEXT_TYPE, paste it
         if (clipboard.hasData(SNAP_RICHTEXT_TYPE)) {
@@ -1638,7 +1635,7 @@ public class TextAdapter extends PropObject {
     /**
      * Override to check caret animation and repaint.
      */
-    protected void handleViewFocusedChanged()
+    public void handleViewFocusedChanged()
     {
         // Update caret
         setShowCaret(false);
@@ -1651,19 +1648,6 @@ public class TextAdapter extends PropObject {
     public Shape getSelPath()
     {
         return getSel().getPath();
-    }
-
-    /**
-     * Returns whether layout tries to hyphenate wrapped words.
-     */
-    public static boolean isHyphenating()  { return _hyphenating; }
-
-    /**
-     * Sets whether layout tries to hyphenate wrapped words.
-     */
-    public static void setHyphenating(boolean aValue)
-    {
-        Prefs.getDefaultPrefs().setValue("Hyphenating", _hyphenating = aValue);
     }
 
     /**

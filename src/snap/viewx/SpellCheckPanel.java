@@ -3,7 +3,6 @@
  */
 package snap.viewx;
 import snap.text.SpellCheck;
-import snap.text.TextEditor;
 import snap.view.*;
 
 /**
@@ -145,37 +144,16 @@ public abstract class SpellCheckPanel extends ViewOwner {
      */
     protected abstract String getTextString();
 
-    /**
-     * Returns the TextEditor.
-     */
-    protected TextEditor getTextEditor()  { return null; }
+    protected int getTextLength()  { return 0; }  // getTextAdapter().length()
 
-    protected int getTextLength()
-    {
-        TextEditor textEditor = getTextEditor();
-        return textEditor.length();
-    }
-
-    protected int getSelEnd()
-    {
-        TextEditor textEditor = getTextEditor();
-        return textEditor.getSelEnd();
-    }
+    protected int getSelEnd()  { return 0; }  // getTextAdapter().getSelEnd();
 
     protected void setSel(int aStart)
     {
         setSel(aStart, aStart);
     }
 
-    protected void setSel(int aStart, int anEnd)
-    {
-        TextEditor textEditor = getTextEditor();
-        textEditor.setSel(aStart, anEnd);
-    }
+    protected void setSel(int aStart, int anEnd)  { }  // getTextAdapter().setSel(aStart, anEnd);
 
-    protected void replaceChars(String aString)
-    {
-        TextEditor textEditor = getTextEditor();
-        textEditor.replaceChars(aString);
-    }
+    protected void replaceChars(String aString)  { }  // getTextAdapter().replaceChars(aString);
 }
