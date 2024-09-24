@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.text.TextBlock;
 import snap.text.TextSel;
 
 /**
@@ -14,11 +15,20 @@ public class TextAreaUtils {
      */
     public static TextSel smartFindFormatRange(TextArea aTextArea)
     {
+        TextBlock textBlock = aTextArea.getTextBlock();
         int selStart = aTextArea.getSelStart();
         int selEnd = aTextArea.getSelEnd();
+        return smartFindFormatRange(textBlock, selStart, selEnd);
+    }
+
+    /**
+     * This method returns the range of the @-sign delinated key closest to the current selection (or null if not found).
+     */
+    public static TextSel smartFindFormatRange(TextBlock textBlock, int selStart, int selEnd)
+    {
+        String string = textBlock.getString();
         int prevAtSignIndex = -1;
         int nextAtSignIndex = -1;
-        String string = aTextArea.getText();
 
         // See if selection contains an '@'
         if (selEnd > selStart)
@@ -46,7 +56,7 @@ public class TextAreaUtils {
         if (prevAtSignIndex >= 0 && nextAtSignIndex >= 0 && prevAtSignIndex != nextAtSignIndex) {
             int start = Math.min(prevAtSignIndex, nextAtSignIndex);
             int end = Math.max(prevAtSignIndex, nextAtSignIndex);
-            return new TextSel(aTextArea.getTextBlock(), start, end + 1);
+            return new TextSel(textBlock, start, end + 1);
         }
 
         // Return null since range not found
