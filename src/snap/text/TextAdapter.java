@@ -83,27 +83,6 @@ public class TextAdapter extends PropObject {
     public static final String Selection_Prop = "Selection";
 
     /**
-     * Constructor.
-     */
-    public TextAdapter()
-    {
-        this(false);
-    }
-
-    /**
-     * Constructor with option for RichText.
-     */
-    public TextAdapter(boolean isRichText)
-    {
-        super();
-
-        // Create/set default TextBlock
-        _textBlock = new TextBox(isRichText);
-        _textBlock.getSourceText().addPropChangeListener(_sourceTextPropLsnr);
-        _textBlock.activateUndo();
-    }
-
-    /**
      * Constructor for source text block.
      */
     public TextAdapter(TextBlock sourceText)
@@ -142,10 +121,6 @@ public class TextAdapter extends PropObject {
     {
         // If already set, just return
         if (aTextBlock == _textBlock) return;
-
-        // If SyncTextFont, forward to TextBlock
-        //if (isSyncTextFont() && !isRichText())
-        //    aTextBlock.setDefaultFont(getFont());
 
         // Remove PropChangeListener
         if (_textBlock != null)
@@ -387,7 +362,7 @@ public class TextAdapter extends PropObject {
         // Repaint selection and scroll to visible (after delay)
         if (_view != null && _view.isShowing()) {
             repaintSel();
-            setCaretAnim();
+            updateCaretAnim();
             _view.runLater(() -> scrollSelToVisible());
         }
     }
@@ -513,7 +488,7 @@ public class TextAdapter extends PropObject {
         // Get format selection range and select it (if non-null)
         int selStart = getSelStart();
         int selEnd = getSelEnd();
-        TextSel sel = TextAreaUtils.smartFindFormatRange(_textBlock, selStart, selEnd);
+        TextSel sel = TextBlockUtils.smartFindFormatRange(_textBlock, selStart, selEnd);
         if (sel != null)
             setSel(sel.getStart(), sel.getEnd());
 
@@ -1053,7 +1028,7 @@ public class TextAdapter extends PropObject {
      */
     public void mouseReleased(ViewEvent anEvent)
     {
-        setCaretAnim();
+        updateCaretAnim();
         _downX = _downY = 0;
 
         if (anEvent.isMouseClick()) {
@@ -1081,14 +1056,17 @@ public class TextAdapter extends PropObject {
     {
         // Get event info
         int keyCode = anEvent.getKeyCode();
-        boolean commandDown = anEvent.isShortcutDown(), controlDown = anEvent.isControlDown();
+        boolean shortcutDown = anEvent.isShortcutDown();
+        boolean controlDown = anEvent.isControlDown();
         boolean emacsDown = SnapUtils.isWindows ? anEvent.isAltDown() : controlDown;
         boolean shiftDown = anEvent.isShiftDown();
+
+        // Reset caret
         setCaretAnim(false);
         setShowCaret(isCaretNeeded());
 
-        // Handle command keys
-        if (commandDown) {
+        // Handle shortcut keys
+        if (shortcutDown) {
 
             // If shift-down, just return
             if (shiftDown && keyCode != KeyCode.Z) return;
@@ -1100,11 +1078,10 @@ public class TextAdapter extends PropObject {
                 case KeyCode.V: paste(); anEvent.consume(); break; // Handle command-v paste
                 case KeyCode.A: selectAll(); anEvent.consume(); break; // Handle command-a select all
                 case KeyCode.Z:
-                    if(shiftDown)
+                    if (shiftDown)
                         redo();
                     else undo();
                     anEvent.consume(); break; // Handle command-z undo
-                default: return; // Any other command keys just return
             }
         }
 
@@ -1124,83 +1101,35 @@ public class TextAdapter extends PropObject {
                 case KeyCode.E: selectLineEnd(); break; // Handle control-e line end
                 case KeyCode.D: deleteForward(); break; // Handle control-d delete forward
                 case KeyCode.K: deleteToLineEnd(); break; // Handle control-k delete line to end
-                default: return; // Any other control keys, just return
             }
         }
 
         // Handle supported non-character keys
-        else switch (keyCode) {
+        else {
+            switch (keyCode) {
 
-                // Handle Tab
-                case KeyCode.TAB:
-                    replaceChars("\t");
-                    anEvent.consume();
-                    break;
+                // Handle Tab, Enter
+                case KeyCode.TAB: replaceChars("\t"); anEvent.consume(); break;
+                case KeyCode.ENTER: replaceChars("\n"); anEvent.consume(); break;
 
-                // Handle Enter
-                case KeyCode.ENTER:
-                    //if (isFireActionOnEnterKey()) { _textAdapter.selectAll(); _textAdapter.fireActionEvent(anEvent); } else {
-                    replaceChars("\n");
-                    anEvent.consume();
-                    break;
+                // Handle Left, Right, Up, Down arrows
+                case KeyCode.LEFT: selectBackward(); anEvent.consume(); break;
+                case KeyCode.RIGHT: selectForward(); anEvent.consume(); break;
+                case KeyCode.UP: selectUp(); anEvent.consume(); break;
+                case KeyCode.DOWN: selectDown(); anEvent.consume(); break;
 
-                // Handle Left arrow
-                case KeyCode.LEFT:
-                    selectBackward();
-                    anEvent.consume();
-                    break;
+                // Handle Home, End
+                case KeyCode.HOME: selectLineStart(); break;
+                case KeyCode.END: selectLineEnd(); break;
 
-                // Handle Right arrow
-                case KeyCode.RIGHT:
-                    selectForward();
-                    anEvent.consume();
-                    break;
-
-                // Handle Up arrow
-                case KeyCode.UP:
-                    selectUp();
-                    anEvent.consume();
-                    break;
-
-                // Handle down arrow
-                case KeyCode.DOWN:
-                    selectDown();
-                    anEvent.consume();
-                    break;
-
-                // Handle Home key
-                case KeyCode.HOME:
-                    selectLineStart();
-                    break;
-
-                // Handle End key
-                case KeyCode.END:
-                    selectLineEnd();
-                    break;
-
-                // Handle Backspace key
-                case KeyCode.BACK_SPACE:
-                    deleteBackward();
-                    anEvent.consume();
-                    break;
-
-                // Handle Delete key
-                case KeyCode.DELETE:
-                    deleteForward();
-                    anEvent.consume();
-                    break;
+                // Handle Backspace, Delete
+                case KeyCode.BACK_SPACE: deleteBackward(); anEvent.consume(); break;
+                case KeyCode.DELETE: deleteForward(); anEvent.consume(); break;
 
                 // Handle Space key
-                case KeyCode.SPACE:
-                    anEvent.consume();
-                    break;
-
-                // Handle any other non-character key: Just return
-                default: return;
+                case KeyCode.SPACE: anEvent.consume(); break;
             }
-
-        // Consume the event
-        //anEvent.consume();
+        }
     }
 
     /**
@@ -1228,7 +1157,7 @@ public class TextAdapter extends PropObject {
      */
     public void keyReleased(ViewEvent anEvent)
     {
-        setCaretAnim();
+        updateCaretAnim();
     }
 
     /**
@@ -1286,7 +1215,7 @@ public class TextAdapter extends PropObject {
     /**
      * Sets the caret animation to whether it's needed.
      */
-    protected void setCaretAnim()
+    protected void updateCaretAnim()
     {
         boolean show = isCaretNeeded();
         setCaretAnim(show);
@@ -1295,12 +1224,12 @@ public class TextAdapter extends PropObject {
     /**
      * Returns whether caret is flashing.
      */
-    public boolean isCaretAnim()  { return _caretRun != null; }
+    private boolean isCaretAnim()  { return _caretRun != null; }
 
     /**
      * Sets whether caret is flashing.
      */
-    public void setCaretAnim(boolean aValue)
+    private void setCaretAnim(boolean aValue)
     {
         // If already set, just return
         if (aValue == isCaretAnim()) return;
@@ -1571,7 +1500,7 @@ public class TextAdapter extends PropObject {
     /**
      * Called when View width/height changes.
      */
-    public void handleViewSizeChanged()
+    private void handleViewSizeChanged()
     {
         Rect textBounds = getTextBounds();
         _textBlock.setBounds(textBounds);
@@ -1580,11 +1509,11 @@ public class TextAdapter extends PropObject {
     /**
      * Called when View.Showing changes.
      */
-    public void handleViewShowingChanged()
+    private void handleViewShowingChanged()
     {
         // If focused, update CaretAnim
         if (_view.isFocused())
-            setCaretAnim();
+            updateCaretAnim();
 
         // If Showing, make sure selection is visible
         if (_view.isShowing() && getSelStart() != 0)
@@ -1603,7 +1532,7 @@ public class TextAdapter extends PropObject {
         if (_view.isShowing()) {
             _showingWindow = _view.getWindow();
             if (_showingWindow != null) {
-                _windowFocusedChangedLsnr = e -> setCaretAnim();
+                _windowFocusedChangedLsnr = e -> updateCaretAnim();
                 _showingWindow.addPropChangeListener(_windowFocusedChangedLsnr, View.Focused_Prop);
             }
         }
@@ -1620,7 +1549,7 @@ public class TextAdapter extends PropObject {
     /**
      * Override to forward to text box.
      */
-    public void handleViewAlignChanged()
+    private void handleViewAlignChanged()
     {
         Pos viewAlign = _view.getAlign();
 
@@ -1635,19 +1564,11 @@ public class TextAdapter extends PropObject {
     /**
      * Override to check caret animation and repaint.
      */
-    public void handleViewFocusedChanged()
+    private void handleViewFocusedChanged()
     {
         // Update caret
         setShowCaret(false);
-        setCaretAnim();
-    }
-
-    /**
-     * Returns the path for the current selection.
-     */
-    public Shape getSelPath()
-    {
-        return getSel().getPath();
+        updateCaretAnim();
     }
 
     /**

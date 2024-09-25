@@ -469,7 +469,17 @@ public class TextArea extends View {
     /**
      * Called when a key is pressed.
      */
-    protected void keyPressed(ViewEvent anEvent)  { _textAdapter.keyPressed(anEvent); }
+    protected void keyPressed(ViewEvent anEvent)
+    {
+        // Handle EnterKey + FireActionOnEnterKey
+        if (anEvent.isEnterKey() && isFireActionOnEnterKey() && !anEvent.isShortcutDown() && !anEvent.isControlDown() && !anEvent.isAltDown()) {
+            selectAll();
+            fireActionEvent(anEvent);
+        }
+
+        // Forward to text adapter
+        else _textAdapter.keyPressed(anEvent);
+    }
 
     /**
      * Called when a key is typed.
@@ -595,49 +605,6 @@ public class TextArea extends View {
     }
 
     /**
-     * Override to update getTextBlock.Rect.
-     */
-    @Override
-    public void setWidth(double aWidth)
-    {
-        if (aWidth == getWidth()) return;
-        super.setWidth(aWidth);
-        _textAdapter.handleViewSizeChanged();
-    }
-
-    /**
-     * Override to update getTextBlock.Rect.
-     */
-    @Override
-    public void setHeight(double aHeight)
-    {
-        if (aHeight == getHeight()) return;
-        super.setHeight(aHeight);
-        _textAdapter.handleViewSizeChanged();
-    }
-
-    /**
-     * Override to check caret animation and scrollSelToVisible when showing.
-     */
-    @Override
-    protected void setShowing(boolean aValue)
-    {
-        if (aValue == isShowing()) return;
-        super.setShowing(aValue);
-        _textAdapter.handleViewShowingChanged();
-    }
-
-    /**
-     * Override to forward to text box.
-     */
-    public void setAlign(Pos aPos)
-    {
-        if (aPos == getAlign()) return;
-        super.setAlign(aPos);
-        _textAdapter.handleViewAlignChanged();
-    }
-
-    /**
      * Override to check caret animation and repaint.
      */
     protected void setFocused(boolean aValue)
@@ -645,9 +612,6 @@ public class TextArea extends View {
         // Do normal version
         if (aValue == isFocused()) return;
         super.setFocused(aValue);
-
-        // Update caret
-        _textAdapter.handleViewFocusedChanged();
 
         // Repaint ?
         repaint();
@@ -658,7 +622,8 @@ public class TextArea extends View {
             // If focus gained, set FocusedGainedValue and select all (if not from mouse press)
             if (aValue) {
                 _focusGainedText = getText();
-                if (!ViewUtils.isMouseDown()) selectAll();
+                if (!ViewUtils.isMouseDown())
+                    selectAll();
             }
 
             // If focus lost and FocusGainedVal changed, fire action
