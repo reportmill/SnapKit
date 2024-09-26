@@ -6,7 +6,10 @@ import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.geom.Rect;
 import snap.gfx.*;
+import snap.props.PropChange;
 import snap.props.PropSet;
+import snap.text.TextAdapter;
+import snap.text.TextBlock;
 import snap.util.*;
 import java.util.Objects;
 
@@ -15,61 +18,43 @@ import java.util.Objects;
  */
 public class TextField extends ParentView {
 
-    // The StringBuffer to hold text
-    private StringBuffer  _sb = new StringBuffer();
+    // The TextAdapter
+    private TextAdapter _textAdapter;
     
     // The column count to be used for preferred width (if set)
-    private int  _colCount;
+    private int _colCount;
     
     // The color for the text
     private Color _textColor;
     
-    // A label in the background for promt text and/or in text controls
-    private Label  _label;
+    // A label in the background for prompt text or other background decoration
+    private Label _promptLabel;
     
     // The string to show when textfield is empty
-    private String  _promptText;
+    private String _promptText;
     
-    // The selection start/end
-    private int  _selStart, _selEnd;
-    
-    // Whether the editor is word selecting (double click) or paragraph selecting (triple click)
-    private boolean  _wordSel, _pgraphSel;
-    
-    // Whether text field is showing a completion selection
-    private boolean  _compSel;
-    
-    // The mouse down point
-    private double  _downX;
-
-    // The runnable for caret flashing
-    private Runnable _caretRun;
-    
-    // Whether to hide caret
-    private boolean  _hideCaret;
-
     // Whether to send action on focus lost (if content changed)
-    private boolean  _fireActionOnFocusLost;
+    private boolean _fireActionOnFocusLost;
 
     // The value of text on focus gained
-    protected String  _focusGainedText;
+    protected String _focusGainedText;
     
     // Whether text has been edited since last focus
-    private boolean  _edited;
+    private boolean _edited;
+
+    // Whether text field is showing an auto-completion
+    private boolean _autoCompleting;
 
     // Constants for properties
     public static final String ColCount_Prop = "ColCount";
     public static final String Edited_Prop = "Edited";
     public static final String PromptText_Prop = "PromptText";
-    public static final String Sel_Prop = "Selection";
+    public static final String Selection_Prop = TextAdapter.Selection_Prop;
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
 
     // Constants for property defaults
     private static final int DEFAULT_COL_COUNT = 12;
     private static final boolean DEFAULT_FIRE_ACTION_ON_FOCUS_LOST = true;
-
-    // The color of the border when focused
-    static Color SELECTION_COLOR = new Color(181, 214, 254, 255);
 
     /**
      * Constructor.
@@ -88,11 +73,17 @@ public class TextField extends ParentView {
         enableEvents(KeyEvents);
         enableEvents(Action);
 
+        // Create TextAdapter
+        _textAdapter = new TextAdapter(new TextBlock());
+        _textAdapter.setView(this);
+        _textAdapter.setEditable(true);
+        _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
+
         // Configure label and set
-        _label = new Label();
-        _label.setPadding(0, 0, 0, 0);
-        _label.setPickable(false);
-        addChild(_label);
+        _promptLabel = new Label();
+        _promptLabel.setPadding(0, 0, 0, 0);
+        _promptLabel.setPickable(false);
+        addChild(_promptLabel);
     }
 
     /**
@@ -153,8 +144,8 @@ public class TextField extends ParentView {
     public void setPromptText(String aStr)
     {
         if (Objects.equals(aStr, _promptText)) return;
-        _label.setText(aStr);
-        _label.setTextColor(Color.LIGHTGRAY);
+        _promptLabel.setText(aStr);
+        _promptLabel.setTextColor(Color.LIGHTGRAY);
         firePropChange(PromptText_Prop, _promptText, _promptText = aStr);
     }
 
@@ -175,115 +166,7 @@ public class TextField extends ParentView {
     /**
      * Returns the label in the background.
      */
-    public Label getLabel()  { return _label; }
-
-    /**
-     * Returns the text width.
-     */
-    public double getTextWidth()
-    {
-        return length() > 0 ? Math.ceil(getFont().getStringAdvance(getText())) : 0;
-    }
-
-    /**
-     * Returns the text height.
-     */
-    public double getTextHeight()
-    {
-        return Math.ceil(getFont().getLineHeight());
-    }
-
-    /**
-     * Returns the text bounds.
-     */
-    public Rect getTextBounds(boolean inBounds)
-    {
-        // Get basic bounds for TextField size/insets and font/string width/height
-        Insets ins = getInsetsAll();
-        double viewW = getWidth();
-        double viewH = getHeight();
-        double textX = ins.left;
-        double textY = ins.top;
-        double textW = getTextWidth();
-        double textH = getTextHeight();
-
-        // If requested to return text bounds in view bounds, constrain
-        if (inBounds) {
-            if (textX + textW > viewW - ins.right)
-                textW = viewW - textX - ins.right;
-            if (textY + textH > viewH - ins.bottom)
-                textH = viewH - textY - ins.bottom;
-        }
-
-        // Adjust for PromptText if set
-        if (_label.isStringViewSet()) {
-            StringView stringView = _label.getStringView();
-            textX += stringView.getX() + stringView.getTransX();
-        }
-
-        // Adjust rect by alignment
-        double alignX = ViewUtils.getAlignX(this);
-        double alignY = ViewUtils.getAlignY(this);
-        if (alignX > 0) {
-            double extra = viewW - textX - ins.right - textW;
-            textX = Math.max(textX + extra * alignX, textX);
-        }
-        if (alignY > 0) {
-            double extra = viewH - textY - ins.bottom - textH;
-            textY = Math.max(textY + Math.round(extra * alignY), textY);
-        }
-
-        // Create/return rect
-        return new Rect(textX, textY, textW, textH);
-    }
-
-    /**
-     * Returns the char index for given point in text coordinate space.
-     */
-    public int getCharIndexAt(double anX)
-    {
-        Rect textBounds = getTextBounds(false);
-        if (anX < textBounds.getX())
-            return 0;
-        if (anX >= textBounds.getMaxX())
-            return length();
-
-        double charX = textBounds.getX();
-        Font font = getFont();
-        for (int i = 0, iMax = length(); i < iMax; i++) {
-            char loopChar = charAt(i);
-            double charW = font.getCharAdvance(loopChar, true);
-            if (anX <= charX + charW / 2)
-                return i;
-            charX += charW;
-        }
-
-        // Return length
-        return length();
-    }
-
-    /**
-     * Returns the char index for given point in text coordinate space.
-     */
-    public double getXForChar(int anIndex)
-    {
-        Rect textBounds = getTextBounds(false);
-        if (anIndex == 0)
-            return textBounds.getX();
-        if (anIndex == length())
-            return textBounds.getMaxX();
-
-        //
-        double charX = textBounds.getX();
-        Font font = getFont();
-        for (int i = 0, iMax = anIndex; i < iMax; i++) {
-            char loopChar = charAt(i);
-            charX += font.getCharAdvance(loopChar, true);
-        }
-
-        // Return char X
-        return charX;
-    }
+    public Label getLabel()  { return _promptLabel; }
 
     /**
      * Calculates the preferred width.
@@ -291,8 +174,8 @@ public class TextField extends ParentView {
     protected double getPrefWidthImpl(double aH)
     {
         Insets ins = getInsetsAll();
-        double prefW1 = getColCount() > 0 ? getTotalColWidth() : getTextWidth() + 10;
-        double prefW2 = _label.getPrefWidth();
+        double prefW1 = getColCount() > 0 ? getTotalColWidth() : _textAdapter.getPrefWidthImpl(aH);
+        double prefW2 = _promptLabel.getPrefWidth();
         double prefW3 = Math.max(prefW1, prefW2);
         return prefW3 + ins.getWidth();
     }
@@ -303,8 +186,8 @@ public class TextField extends ParentView {
     protected double getPrefHeightImpl(double aW)
     {
         Insets ins = getInsetsAll();
-        double prefH1 = getTextHeight();
-        double prefH2 = _label.getPrefHeight();
+        double prefH1 = _textAdapter.getPrefHeightImpl(aW);
+        double prefH2 = _promptLabel.getPrefHeight();
         double prefH3 = Math.max(prefH1, prefH2);
         return prefH3 + ins.getHeight() + 4;
     }
@@ -319,7 +202,10 @@ public class TextField extends ParentView {
         double areaY = ins.top;
         double areaW = getWidth() - ins.getWidth();
         double areaH = getHeight() - ins.getHeight();
-        _label.setBounds(areaX, areaY, areaW, areaH);
+        _promptLabel.setBounds(areaX, areaY, areaW, areaH);
+
+        // Reset text bounds
+        updateTextBounds();
     }
 
     /**
@@ -331,9 +217,7 @@ public class TextField extends ParentView {
         if (aValue == isFocused()) return;
         super.setFocused(aValue);
 
-        // Toggle caret animation and repaint
-        if (!aValue || _downX == 0)
-            setCaretAnim();
+        // Repaint
         repaint();
 
         // Handle focus gained: set FocusedGainedValue and select all (if not from mouse press)
@@ -347,24 +231,6 @@ public class TextField extends ParentView {
             if (isEdited() && isFireActionOnFocusLost())
                 fireActionEvent(null);
         }
-    }
-
-    /**
-     * Override to update Prompt label.
-     */
-    protected void textDidChange()
-    {
-        // If PromptText present, update Label.StringView.Visible
-        if (_promptText != null)
-            _label.getStringView().setPaintable(length() == 0);
-
-        // If focused and text has changed, updated Edited
-        if (isFocused() && !isEdited() && !Objects.equals(getText(), _focusGainedText))
-            setEdited(true);
-
-        // Relayout parent and repaint
-        relayoutParent();
-        repaint();
     }
 
     /**
@@ -396,109 +262,42 @@ public class TextField extends ParentView {
     /**
      * Returns the number of characters in the text string.
      */
-    public int length()  { return _sb.length(); }
-
-    /**
-     * Returns the individual character at given index.
-     */
-    public char charAt(int anIndex)
-    {
-        return _sb.charAt(anIndex);
-    }
+    public int length()  { return _textAdapter.length(); }
 
     /**
      * Returns the plain string of the text being edited.
      */
-    public String getText()
-    {
-        return _sb.toString();
-    }
+    public String getText()  { return _textAdapter.getText(); }
 
     /**
      * Set text string of text editor.
      */
-    public void setText(String aString)
-    {
-        replaceChars(aString, 0, length());
-    }
+    public void setText(String aString)  { _textAdapter.setText(aString); }
 
     /**
      * Returns the character index of the start of the text selection.
      */
-    public int getSelStart()  { return _selStart; }
-
-    /**
-     * Sets the selection start.
-     */
-    public void setSelStart(int aValue)
-    {
-        setSel(aValue, getSelEnd());
-    }
+    public int getSelStart()  { return _textAdapter.getSelStart(); }
 
     /**
      * Returns the character index of the end of the text selection.
      */
-    public int getSelEnd()  { return _selEnd; }
+    public int getSelEnd()  { return _textAdapter.getSelEnd(); }
 
     /**
      * Returns whether the selection is empty.
      */
-    public boolean isSelEmpty()  { return _selStart == _selEnd; }
+    public boolean isSelEmpty()  { return _textAdapter.isSelEmpty(); }
 
     /**
      * Sets the character index of the text cursor.
      */
-    public void setSel(int newStartEnd)
-    {
-        setSel(newStartEnd, newStartEnd);
-    }
+    public void setSel(int newStartEnd)  { _textAdapter.setSel(newStartEnd); }
 
     /**
      * Sets the character index of the start and end of the text selection.
      */
-    public void setSel(int aStart, int anEnd)
-    {
-        // Make sure start is before end and both are within bounds
-        if (anEnd < aStart) {
-            int temp = anEnd;
-            anEnd = aStart;
-            aStart = temp;
-        }
-        aStart = MathUtils.clamp(aStart, 0, length());
-        anEnd = MathUtils.clamp(anEnd, 0, length());
-        if (aStart == _selStart && anEnd == _selEnd)
-            return;
-
-        // Set new start/end
-        _selStart = aStart;
-        _selEnd = anEnd;
-
-        // Fire property change
-        firePropChange(Sel_Prop, aStart + ((long) anEnd) << 32, 0);
-        repaint();
-        _compSel = false;
-    }
-
-    /**
-     * Returns the selection string.
-     */
-    public String getSelString()
-    {
-        return getText();
-    }
-
-    /**
-     * Returns the selection bounds.
-     */
-    public Rect getSelBounds()
-    {
-        Rect bounds = getTextBounds(false);
-        double x1 = getXForChar(getSelStart());
-        double x2 = isSelEmpty() ? x1 : getXForChar(getSelEnd());
-        bounds.x = x1;
-        bounds.width = x2 - x1;
-        return bounds;
-    }
+    public void setSel(int aStart, int anEnd)  { _textAdapter.setSel(aStart, anEnd); }
 
     /**
      * Selects all the characters in the text editor.
@@ -512,144 +311,13 @@ public class TextField extends ParentView {
         }
 
         // Set selection
-        setSel(0, length());
+        _textAdapter.selectAll();
     }
 
     /**
      * Replaces the current selection with the given string.
      */
-    public void replaceChars(String aString)
-    {
-        replaceChars(aString, getSelStart(), getSelEnd());
-    }
-
-    /**
-     * Replaces the current selection with the given string.
-     */
-    public void replaceChars(String aString, int aStart, int anEnd)
-    {
-        // Get string length (if no string length and no char range, just return)
-        int strLen = aString != null ? aString.length() : 0;
-        if (strLen == 0 && aStart == anEnd)
-            return;
-
-        // Do actual replace chars
-        if (aStart != anEnd)
-            _sb.delete(aStart, anEnd);
-        if (aString != null)
-            _sb.insert(aStart, aString);
-
-        // Update selection to be at end of new string
-        setSel(aStart + strLen);
-
-        // Notify textDidChange
-        textDidChange();
-    }
-
-    /**
-     * Deletes the current selection.
-     */
-    public void delete()
-    {
-        delete(getSelStart(), getSelEnd());
-    }
-
-    /**
-     * Deletes the given range of chars.
-     */
-    public void delete(int aStart, int anEnd)
-    {
-        replaceChars(null, aStart, anEnd);
-    }
-
-    /**
-     * Moves the selection index forward a character (or if a range is selected, moves to end of range).
-     */
-    public void selectForward(boolean isShiftDown)
-    {
-        // If shift is down, extend selection forward, otherwise set new selection
-        if (isShiftDown) setSel(getSelStart(), getSelEnd() + 1);
-        else setSel(getSelEnd() + 1);
-    }
-
-    /**
-     * Moves the selection index backward a character (or if a range is selected, moves to beginning of range).
-     */
-    public void selectBackward(boolean isShiftDown)
-    {
-        // If shift is down, extend selection back, otherwise set new selection
-        if (isShiftDown) setSel(getSelStart() - 1, getSelEnd());
-        else setSel(getSelStart() - 1);
-    }
-
-    /**
-     * Moves the insertion point to the beginning of line.
-     */
-    public void selectLineStart()
-    {
-        setSel(0);
-    }
-
-    /**
-     * Moves the insertion point to next newline or text end.
-     */
-    public void selectLineEnd()
-    {
-        setSel(length());
-    }
-
-    /**
-     * Deletes the character before of the insertion point.
-     */
-    public void deleteBackward()
-    {
-        // If CompSel (completion selection), run extra time
-        if (_compSel) {
-            _compSel = false;
-            deleteBackward();
-        }
-
-        // If selected range, delete selected range
-        if (!isSelEmpty() || getSelStart() == 0) delete();
-
-            // Otherwise delete previous char
-        else delete(getSelStart() - 1, getSelStart());
-    }
-
-    /**
-     * Deletes the character after of the insertion point.
-     */
-    public void deleteForward()
-    {
-        if (!isSelEmpty()) {
-            delete();
-            return;
-        }
-        int start = getSelStart(), end = start + 1;
-        if (start >= length()) return;
-        delete(start, end);
-    }
-
-    /**
-     * Deletes the characters from the insertion point to the end of the line.
-     */
-    public void deleteToLineEnd()
-    {
-        // If there is a current selection, just delete it
-        if (!isSelEmpty())
-            delete();
-
-        // Otherwise delete up to next newline or line end
-        delete(getSelStart(), length());
-    }
-
-    /**
-     * Clears the text.
-     */
-    public void clear()
-    {
-        delete(0, length());
-    }
+    public void replaceChars(String aString)  { _textAdapter.replaceChars(aString); }
 
     /**
      * Sets text that represents a completion of current text. This preserves the capitalization of chars in the current
@@ -668,7 +336,7 @@ public class TextField extends ParentView {
 
         // Set sel and mark as CompletionSel
         setSel(text.length(), text2.length());
-        _compSel = true;
+        _autoCompleting = true;
     }
 
     /**
@@ -677,64 +345,10 @@ public class TextField extends ParentView {
     @Override
     protected void paintFront(Painter aPntr)
     {
-        // If empty, just paint selection and return
-        if (length() == 0) {
-            paintSel(aPntr);
-            return;
-        }
-
-        // Get text bounds
-        Rect textBounds = getTextBounds(true);
-
-        // Clip to text bounds
-        aPntr.save();
+        Rect textBounds = getTextBounds();
         aPntr.clip(textBounds);
 
-        // Paint selection
-        paintSel(aPntr);
-
-        // Get/set font/paint
-        Font font = getFont();
-        aPntr.setFont(font);
-        Color textColor = isEnabled() ? getTextColor() : Color.GRAY;
-        aPntr.setPaint(textColor);
-
-        // Paint text
-        String str = getText();
-        double baseY = textBounds.y + Math.ceil(font.getAscent());
-        aPntr.drawString(str, textBounds.x, baseY);
-
-        // Restore clip
-        aPntr.restore();
-    }
-
-    /**
-     * Paints TextField Selection.
-     */
-    protected void paintSel(Painter aPntr)
-    {
-        // If not focused, just return
-        if (!isFocused())
-            return;
-
-        // Paint caret (empty selection)
-        if (isSelEmpty()) {
-
-            // Paint caret if flash on
-            if (!_hideCaret) {
-                aPntr.setPaint(Color.BLACK);
-                aPntr.setStroke(Stroke.Stroke1);
-                Rect selBounds = getSelBounds();
-                aPntr.drawLine(selBounds.x, selBounds.y, selBounds.x, selBounds.getMaxY());
-            }
-        }
-
-        // Paint full selection
-        else {
-            aPntr.setPaint(SELECTION_COLOR);
-            Rect selBounds = getSelBounds();
-            aPntr.fill(selBounds);
-        }
+        _textAdapter.paintText(aPntr);
     }
 
     /**
@@ -743,13 +357,13 @@ public class TextField extends ParentView {
     protected void processEvent(ViewEvent anEvent)
     {
         switch (anEvent.getType()) {
-            case MousePress: mousePressed(anEvent); break;
-            case MouseDrag: mouseDragged(anEvent); break;
-            case MouseRelease: mouseReleased(); break;
-            case MouseMove: showCursor(); break;
+            case MousePress: _textAdapter.mousePressed(anEvent); break;
+            case MouseDrag: _textAdapter.mouseDragged(anEvent); break;
+            case MouseRelease: _textAdapter.mouseReleased(anEvent); break;
+            case MouseMove: _textAdapter.mouseMoved(anEvent); break;
             case KeyPress: keyPressed(anEvent); break;
-            case KeyType: keyTyped(anEvent); break;
-            case KeyRelease: setCaretAnim(); break;
+            case KeyType: _textAdapter.keyTyped(anEvent); break;
+            case KeyRelease: _textAdapter.keyReleased(anEvent); break;
             case Action: processActionEvent(anEvent);
         }
 
@@ -759,186 +373,28 @@ public class TextField extends ParentView {
     }
 
     /**
-     * Handles mouse pressed.
-     */
-    protected void mousePressed(ViewEvent anEvent)
-    {
-        // Stop caret animation
-        setCaretAnim(false);
-
-        // Store the mouse down point
-        _downX = anEvent.getX();
-
-        // Determine if word or paragraph selecting
-        if (!anEvent.isShiftDown())
-            _wordSel = _pgraphSel = false;
-        if (anEvent.getClickCount() == 2)
-            _wordSel = true;
-        else if (anEvent.getClickCount() == 3)
-            _pgraphSel = true;
-
-        // Get selected range for down point
-        int start = getCharIndexAt(_downX), end = start;
-
-        // If word selecting extend to word bounds
-        if (_wordSel) {
-            while (start > 0 && Character.isLetterOrDigit(charAt(start - 1))) start--;
-            while (end < length() && Character.isLetterOrDigit(charAt(end))) end++;
-        }
-
-        // If paragraph selecting extend to text bounds
-        else if (_pgraphSel) {
-            start = 0;
-            end = length();
-        }
-
-        // If shift is down, xor selection
-        if (anEvent.isShiftDown()) {
-            if (start <= getSelStart())
-                end = getSelEnd();
-            else start = getSelStart();
-        }
-
-        // Set selection
-        setSel(start, end);
-    }
-
-    /**
-     * Handles mouse dragged.
-     */
-    protected void mouseDragged(ViewEvent anEvent)
-    {
-        // Get selected range for down point and drag point
-        int start = getCharIndexAt(_downX);
-        int end = getCharIndexAt(anEvent.getX());
-        if (end < start) {
-            int swap = start;
-            start = end;
-            end = swap;
-        }
-
-        // If word selecting, extend to word bounds
-        if (_wordSel) {
-            while (start > 0 && Character.isLetterOrDigit(charAt(start - 1)))
-                start--;
-            while (end < length() && Character.isLetterOrDigit(charAt(end)))
-                end++;
-        }
-
-        // If paragraph selecting, extend to text bounds
-        else if (_pgraphSel) {
-            start = 0;
-            end = length();
-        }
-
-        // If shift is down, xor selection
-        if (anEvent.isShiftDown()) {
-            if (start <= getSelStart())
-                end = getSelEnd();
-            else start = getSelStart();
-        }
-
-        // Set selection
-        setSel(start, end);
-    }
-
-    /**
-     * Handles mouse released.
-     */
-    protected void mouseReleased()
-    {
-        setCaretAnim();
-        _downX = 0;
-    }
-
-    /**
      * Called when a key is pressed.
      */
     protected void keyPressed(ViewEvent anEvent)
     {
-        // Get event info
-        int keyCode = anEvent.getKeyCode();
-        boolean commandDown = anEvent.isShortcutDown();
-        boolean controlDown = anEvent.isControlDown();
-        boolean shiftDown = anEvent.isShiftDown();
-        boolean altDown = anEvent.isAltDown();
-        boolean emacsDown = SnapUtils.isWindows ? altDown : controlDown;
-        setCaretAnim(false);
-
-        // Handle command keys
-        if (commandDown) {
-
-            // If shift-down, just return
-            if (shiftDown && keyCode != KeyCode.Z) return;
-
-            // Handle common command keys
-            switch (keyCode) {
-                case KeyCode.X: cut(); anEvent.consume(); break; // Handle command-x cut
-                case KeyCode.C: copy(); anEvent.consume(); break; // Handle command-c copy
-                case KeyCode.V: paste(); anEvent.consume(); break; // Handle command-v paste
-                case KeyCode.A: selectAll(); anEvent.consume(); break; // Handle command-a select all
-                default: return; // Any other command keys just return
-            }
+        // Handle EnterKey
+        if (anEvent.isEnterKey() && !anEvent.isShortcutDown() && !anEvent.isControlDown() && !anEvent.isAltDown()) {
+            selectAll();
+            fireActionEvent(anEvent);
         }
 
-        // Handle control keys (not applicable on Windows, since they are handled by command key code above)
-        else if (emacsDown) {
+        // Handle Escape
+        else if (anEvent.isEscapeKey())
+            escape(anEvent);
 
-            // If shift down, just return
-            if (shiftDown) return;
+        // Forward to text adapter
+        else _textAdapter.keyPressed(anEvent);
 
-            // Handle common emacs key bindings
-            switch (keyCode) {
-                case KeyCode.F: selectForward(false); break; // Handle control-f key forward
-                case KeyCode.B: selectBackward(false); break; // Handle control-b key backward
-                case KeyCode.A: selectLineStart(); break; // Handle control-a line start
-                case KeyCode.E: selectLineEnd(); break; // Handle control-e line end
-                case KeyCode.D: deleteForward(); break; // Handle control-d delete forward
-                case KeyCode.K: deleteToLineEnd(); break; // Handle control-k delete line to end
-                default: return; // Any other control keys, just return
-            }
+        // Handle BackSpace: If auto-completing, run extra time to delete selection and char
+        if (_autoCompleting && anEvent.isBackSpaceKey()) {
+            _autoCompleting = false;
+            _textAdapter.deleteBackward();
         }
-
-        // Handle supported non-character keys
-        else switch (keyCode) {
-            case KeyCode.TAB: anEvent.consume(); break;
-            case KeyCode.ENTER: selectAll(); fireActionEvent(anEvent); anEvent.consume(); break; // Handle enter
-            case KeyCode.LEFT: selectBackward(shiftDown); anEvent.consume(); break; // Handle left arrow
-            case KeyCode.RIGHT: selectForward(shiftDown); anEvent.consume(); break; // Handle right arrow
-            case KeyCode.HOME: selectLineStart(); break; // Handle home key
-            case KeyCode.END: selectLineEnd(); break; // Handle end key
-            case KeyCode.BACK_SPACE: deleteBackward(); anEvent.consume(); break; // Handle Backspace key
-            case KeyCode.DELETE: deleteForward(); anEvent.consume(); break; // Handle Delete key
-            case KeyCode.ESCAPE: escape(anEvent); break;
-            default: return; // Any other non-character key, just return
-        }
-
-        // Consume the event
-        //anEvent.consume();
-    }
-
-    /**
-     * Called when a key is typed.
-     */
-    protected void keyTyped(ViewEvent anEvent)
-    {
-        // Get event info
-        String keyChars = anEvent.getKeyString();
-        char keyChar = !keyChars.isEmpty() ? keyChars.charAt(0) : 0;
-        boolean charDefined = keyChar != KeyCode.CHAR_UNDEFINED && !Character.isISOControl(keyChar);
-        boolean commandDown = anEvent.isShortcutDown(), controlDown = anEvent.isControlDown();
-        boolean emacsDown = SnapUtils.isWindows ? anEvent.isAltDown() : controlDown;
-
-        // If actual text entered, replace
-        if (charDefined && !commandDown && !controlDown && !emacsDown) {
-            replaceChars(keyChars);
-            hideCursor();
-            anEvent.consume();
-        }
-
-        // If alt-TAB or alt-ENTER
-        //if (altDown && anEvent.isEnterKey() || anEvent.isTabKey()) {
-        //    replaceChars(keyChars); hideCursor(); anEvent.consume(); }
     }
 
     /**
@@ -954,111 +410,10 @@ public class TextField extends ParentView {
 
         // Handle shared actions
         switch (action.getName()) {
-            case SharedAction.Cut_Action_Name: cut(); anEvent.consume(); break;
-            case SharedAction.Copy_Action_Name: copy(); anEvent.consume(); break;
-            case SharedAction.Paste_Action_Name: paste(); anEvent.consume(); break;
+            case SharedAction.Cut_Action_Name: _textAdapter.cut(); anEvent.consume(); break;
+            case SharedAction.Copy_Action_Name: _textAdapter.copy(); anEvent.consume(); break;
+            case SharedAction.Paste_Action_Name: _textAdapter.paste(); anEvent.consume(); break;
             case SharedAction.SelectAll_Action_Name: selectAll(); anEvent.consume(); break;
-        }
-    }
-
-    /**
-     * Shows the cursor.
-     */
-    public void showCursor()
-    {
-        setCursor(Cursor.TEXT);
-    }
-
-    /**
-     * Hides the cursor.
-     */
-    public void hideCursor()
-    {
-        setCursor(Cursor.NONE);
-    }
-
-    /**
-     * Returns whether anim is needed.
-     */
-    private boolean isCaretAnimNeeded()
-    {
-        return isFocused() && isSelEmpty() && isShowing();
-    }
-
-    /**
-     * Sets the caret animation to whether it's needed.
-     */
-    private void setCaretAnim()
-    {
-        setCaretAnim(isCaretAnimNeeded());
-    }
-
-    /**
-     * Returns whether ProgressBar is animating.
-     */
-    private boolean isCaretAnim()  { return _caretRun != null; }
-
-    /**
-     * Sets anim.
-     */
-    private void setCaretAnim(boolean aValue)
-    {
-        // If already set, just return
-        if (aValue == isCaretAnim()) return;
-
-        // Handle on
-        if (aValue) {
-            _caretRun = () -> { _hideCaret = !_hideCaret; repaint(); };
-            runIntervals(_caretRun, 500);
-        }
-
-        // Handle off
-        else {
-            stopIntervals(_caretRun);
-            _caretRun = null;
-            _hideCaret = false;
-            repaint();
-        }
-    }
-
-    /**
-     * Copies the current selection onto the clip board, then deletes the current selection.
-     */
-    public void cut()
-    {
-        copy();
-        delete();
-    }
-
-    /**
-     * Copies the current selection onto the clipboard.
-     */
-    public void copy()
-    {
-        // If valid selection, get text for selection and add to clipboard
-        if (!isSelEmpty()) {
-            String str = getSelString();
-            Clipboard cboard = Clipboard.getCleared();
-            cboard.addData(str);
-        }
-    }
-
-    /**
-     * Pasts the current clipboard data over the current selection.
-     */
-    public void paste()
-    {
-        // Get clipboard - if not loaded, come back loaded
-        Clipboard clipboard = Clipboard.get();
-        if (!clipboard.isLoaded()) {
-            clipboard.addLoadListener(() -> paste());
-            return;
-        }
-
-        // Handle clipboard String
-        if (clipboard.hasString()) {
-            String string = clipboard.getString();
-            replaceChars(string);
         }
     }
 
@@ -1088,14 +443,86 @@ public class TextField extends ParentView {
     }
 
     /**
-     * Override to check caret animation and scrollSelToVisible when showing.
+     * Called when TextAdapter has prop change.
      */
-    protected void setShowing(boolean aValue)
+    private void handleTextAdapterPropChange(PropChange aPC)
     {
-        if (aValue == isShowing()) return;
-        super.setShowing(aValue);
-        if (isFocused())
-            setCaretAnim();
+        // If SourceText prop change, forward on
+        if (aPC.getSource() instanceof TextBlock) {
+            handleSourceTextPropChange();
+            return;
+        }
+
+        String propName = aPC.getPropName();
+
+        // Handle Selection
+        if (propName == TextAdapter.Selection_Prop) {
+            firePropChange(Selection_Prop, aPC.getOldValue(), aPC.getNewValue());
+            _autoCompleting = false;
+        }
+    }
+
+    /**
+     * Called when SourceText changes (chars added, updated or deleted).
+     */
+    private void handleSourceTextPropChange()
+    {
+        // If PromptText present, update Label.StringView.Visible
+        if (_promptText != null)
+            _promptLabel.getStringView().setPaintable(length() == 0);
+
+        // If focused and text has changed, updated Edited
+        if (isFocused() && !isEdited() && !Objects.equals(getText(), _focusGainedText))
+            setEdited(true);
+
+        // Relayout parent and repaint
+        relayoutParent();
+        repaint();
+    }
+
+    /**
+     * Updates the text bounds.
+     */
+    private void updateTextBounds()
+    {
+        Rect textBounds = getTextBounds();
+        _textAdapter.getTextBlock().setBounds(textBounds);
+    }
+
+    /**
+     * Returns the text bounds.
+     */
+    private Rect getTextBounds()
+    {
+        // Get basic bounds for TextField size/insets and font/string width/height
+        Insets ins = getInsetsAll();
+        double viewW = getWidth();
+        double viewH = getHeight();
+        double textX = ins.left;
+        double textY = ins.top;
+        double textW = viewW - ins.getWidth();
+        double textH = _textAdapter.getTextBlock().getPrefHeight();
+
+        // Adjust for PromptText if set
+        if (_promptLabel.isStringViewSet()) {
+            StringView stringView = _promptLabel.getStringView();
+            textX += stringView.getX() + stringView.getTransX();
+        }
+
+        // Adjust rect by alignment
+        double alignX = ViewUtils.getAlignX(this);
+        double alignY = ViewUtils.getAlignY(this);
+        if (alignX > 0) {
+            double extra = viewW - textX - ins.right - textW;
+            textX = Math.max(textX + extra * alignX, textX);
+        }
+        if (alignY > 0) {
+            double extra = viewH - textY - ins.bottom - textH;
+            textY = Math.max(textY + Math.round(extra * alignY), textY);
+        }
+
+        // Create/return rect
+        return new Rect(textX, textY, textW, textH);
     }
 
     /**
@@ -1209,6 +636,7 @@ public class TextField extends ParentView {
             if (aTextField.isFocused())
                 ViewAnimUtils.setAlign(textFieldLabel, Pos.CENTER_LEFT, 200);
             else ViewAnimUtils.setAlign(textFieldLabel, Pos.CENTER, 600);
+            textFieldLabel.getChild(0).getAnim(0).setOnFrame(aTextField::updateTextBounds);
         }, View.Focused_Prop);
     }
 }
