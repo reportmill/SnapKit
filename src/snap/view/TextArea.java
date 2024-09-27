@@ -23,15 +23,6 @@ public class TextArea extends View {
     // Whether to synchronize text area font with text block
     private boolean _syncTextFont = true;
 
-    // Whether to send action on enter key press
-    private boolean  _fireActionOnEnterKey;
-
-    // Whether to send action on focus lost (if content changed)
-    private boolean  _fireActionOnFocusLost;
-
-    // The content on focus gained
-    private String  _focusGainedText;
-
     // Whether as-you-type spell checking is enabled
     public static boolean isSpellChecking = Prefs.getDefaultPrefs().getBoolean("SpellChecking", false);
 
@@ -44,8 +35,6 @@ public class TextArea extends View {
     public static final String WrapLines_Prop = TextAdapter.WrapLines_Prop;
     public static final String SourceText_Prop = TextAdapter.SourceText_Prop;
     public static final String Selection_Prop = TextAdapter.Selection_Prop;
-    public static final String FireActionOnEnterKey_Prop = "FireActionOnEnterKey";
-    public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
 
     /**
      * Constructor.
@@ -191,37 +180,6 @@ public class TextArea extends View {
      * Sets the default line style.
      */
     public void setDefaultLineStyle(TextLineStyle aLineStyle)  { _textAdapter.setDefaultLineStyle(aLineStyle); }
-
-    /**
-     * Returns whether text view fires action on enter key press.
-     */
-    public boolean isFireActionOnEnterKey()  { return _fireActionOnEnterKey; }
-
-    /**
-     * Sets whether text area sends action on enter key press.
-     */
-    public void setFireActionOnEnterKey(boolean aValue)
-    {
-        if (aValue == _fireActionOnEnterKey) return;
-        firePropChange(FireActionOnEnterKey_Prop, _fireActionOnEnterKey, _fireActionOnEnterKey = aValue);
-
-        // Update Actionable
-        setActionable(isFireActionOnEnterKey() || isFireActionOnFocusLost());
-    }
-
-    /**
-     * Returns whether text view fires action on focus lost (if text changed).
-     */
-    public boolean isFireActionOnFocusLost()  { return _fireActionOnFocusLost; }
-
-    /**
-     * Sets whether text area sends action on focus lost (if text changed).
-     */
-    public void setFireActionOnFocusLost(boolean aValue)
-    {
-        if (aValue == _fireActionOnFocusLost) return;
-        firePropChange(FireActionOnFocusLost_Prop, _fireActionOnFocusLost, _fireActionOnFocusLost = aValue);
-    }
 
     /**
      * Returns the number of characters in the text string.
@@ -469,17 +427,7 @@ public class TextArea extends View {
     /**
      * Called when a key is pressed.
      */
-    protected void keyPressed(ViewEvent anEvent)
-    {
-        // Handle EnterKey + FireActionOnEnterKey
-        if (anEvent.isEnterKey() && isFireActionOnEnterKey() && !anEvent.isShortcutDown() && !anEvent.isControlDown() && !anEvent.isAltDown()) {
-            selectAll();
-            fireActionEvent(anEvent);
-        }
-
-        // Forward to text adapter
-        else _textAdapter.keyPressed(anEvent);
-    }
+    protected void keyPressed(ViewEvent anEvent)  { _textAdapter.keyPressed(anEvent); }
 
     /**
      * Called when a key is typed.
@@ -616,34 +564,6 @@ public class TextArea extends View {
     }
 
     /**
-     * Override to check caret animation and repaint.
-     */
-    protected void setFocused(boolean aValue)
-    {
-        // Do normal version
-        if (aValue == isFocused()) return;
-        super.setFocused(aValue);
-
-        // Repaint ?
-        repaint();
-
-        // Handle FireActionOnFocusLost
-        if (_fireActionOnFocusLost) {
-
-            // If focus gained, set FocusedGainedValue and select all (if not from mouse press)
-            if (aValue) {
-                _focusGainedText = getText();
-                if (!ViewUtils.isMouseDown())
-                    selectAll();
-            }
-
-            // If focus lost and FocusGainedVal changed, fire action
-            else if (!Objects.equals(_focusGainedText, getText()))
-                fireActionEvent(null);
-        }
-    }
-
-    /**
      * Called when TextAdapter has prop change.
      */
     private void handleTextAdapterPropChange(PropChange aPC)
@@ -749,12 +669,10 @@ public class TextArea extends View {
     {
         super.initProps(aPropSet);
 
-        // RichText, Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
+        // RichText, Editable, WrapLines
         //aPropSet.addPropNamed(RichText_Prop, boolean.class, false);
         aPropSet.addPropNamed(Editable_Prop, boolean.class, false);
         aPropSet.addPropNamed(WrapLines_Prop, boolean.class, false);
-        aPropSet.addPropNamed(FireActionOnEnterKey_Prop, boolean.class, false);
-        aPropSet.addPropNamed(FireActionOnFocusLost_Prop, boolean.class, false);
     }
 
     /**
@@ -765,12 +683,10 @@ public class TextArea extends View {
     {
         switch (aPropName) {
 
-            // RichText, Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
+            // RichText, Editable, WrapLines
             case RichText_Prop: return isRichText();
             case Editable_Prop: return isEditable();
             case WrapLines_Prop: return isWrapLines();
-            case FireActionOnEnterKey_Prop: return isFireActionOnEnterKey();
-            case FireActionOnFocusLost_Prop: return isFireActionOnFocusLost();
 
             // Do normal version
             default: return super.getPropValue(aPropName);
@@ -785,12 +701,10 @@ public class TextArea extends View {
     {
         switch (aPropName) {
 
-            // RichText, Editable, WrapLines_Prop, FireActionOnEnterKey, FireActionOnFocusLost
+            // RichText, Editable, WrapLines_Prop
             case RichText_Prop: setRichText(Convert.boolValue(aValue)); break;
             case Editable_Prop: setEditable(Convert.boolValue(aValue)); break;
             case WrapLines_Prop: setWrapLines(Convert.boolValue(aValue)); break;
-            case FireActionOnEnterKey_Prop: setFireActionOnEnterKey(Convert.boolValue(aValue)); break;
-            case FireActionOnFocusLost_Prop: setFireActionOnFocusLost(Convert.boolValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue); break;
@@ -807,11 +721,6 @@ public class TextArea extends View {
         // Archive Editable, WrapLines
         if (!isPropDefault(Editable_Prop)) xml.add(Editable_Prop, isEditable());
         if (!isPropDefault(WrapLines_Prop)) xml.add(WrapLines_Prop, isWrapLines());
-
-        // Archive FireActionOnEnterKey, FireActionOnFocusLost
-        if (isFireActionOnEnterKey()) xml.add(FireActionOnEnterKey_Prop, true);
-        if (isFireActionOnFocusLost()) xml.add(FireActionOnFocusLost_Prop, true);
-
         return xml;
     }
 
@@ -827,12 +736,6 @@ public class TextArea extends View {
             setEditable(anElement.getAttributeBoolValue(Editable_Prop));
         if (anElement.hasAttribute(WrapLines_Prop))
             setWrapLines(anElement.getAttributeBoolValue(WrapLines_Prop));
-
-        // Unarchive FireActionOnEnterKey, FireActionOnFocusLost
-        if (anElement.hasAttribute(FireActionOnEnterKey_Prop))
-            setFireActionOnEnterKey(anElement.getAttributeBoolValue(FireActionOnEnterKey_Prop));
-        if (anElement.hasAttribute(FireActionOnFocusLost_Prop))
-            setFireActionOnFocusLost(anElement.getAttributeBoolValue(FireActionOnFocusLost_Prop));
 
         return this;
     }
