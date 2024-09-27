@@ -132,16 +132,10 @@ public class TextAdapter extends PropObject {
         // Add PropChangeListener
         _textBlock.getSourceText().addPropChangeListener(_sourceTextPropLsnr);
 
-        // Reset selection (to line end if single-line, otherwise text start)
-        int selIndex = getLineCount() == 1 && length() < 40 ? length() : 0;
-        setSel(selIndex);
-
-        // Activate undo
-        _textBlock.getSourceText().activateUndo();
-
         // Relayout parent, repaint
         if (_view != null) {
             _view.relayoutParent();
+            _view.relayout();
             _view.repaint();
         }
     }

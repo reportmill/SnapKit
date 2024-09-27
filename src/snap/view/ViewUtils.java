@@ -670,8 +670,11 @@ public class ViewUtils {
         scrollView.setBorderRadius(aView.getBorderRadius());
 
         // Replace View with ScrollView
+        boolean isFocused = aView.isFocused();
         replaceView(aView, scrollView);
         scrollView.setContent(aView);
+        if (isFocused)
+            aView.requestFocus();
     }
     /**
      * Returns an image for a View (at device dpi scale (2 for retina)).

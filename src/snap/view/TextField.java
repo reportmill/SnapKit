@@ -36,8 +36,8 @@ public class TextField extends ParentView {
     // Whether to send action on focus lost (if content changed)
     private boolean _fireActionOnFocusLost;
 
-    // Whether text field wants scroll view
-    private boolean _wantsScrollView;
+    // Whether text field accepts multiple lines of text
+    private boolean _multiline;
 
     // The value of text on focus gained
     protected String _focusGainedText;
@@ -51,7 +51,7 @@ public class TextField extends ParentView {
     // Constants for properties
     public static final String ColCount_Prop = "ColCount";
     public static final String PromptText_Prop = "PromptText";
-    public static final String WantsScrollView_Prop = "WantsScrollView";
+    public static final String Multiline_Prop = "Multiline";
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
     public static final String Selection_Prop = TextAdapter.Selection_Prop;
     public static final String Edited_Prop = "Edited";
@@ -168,17 +168,17 @@ public class TextField extends ParentView {
     }
 
     /**
-     * Returns whether text field wants scroll view if too small.
+     * Returns whether text field accepts multiple lines of text.
      */
-    public boolean isWantsScrollView()  { return _wantsScrollView; }
+    public boolean isMultiline()  { return _multiline; }
 
     /**
-     * Sets whether text field wants scroll view if too small.
+     * Sets whether text field accepts multiple lines of text.
      */
-    public void setWantsScrollView(boolean aValue)
+    public void setMultiline(boolean aValue)
     {
-        if (aValue == isWantsScrollView()) return;
-        firePropChange(WantsScrollView_Prop, _wantsScrollView, _wantsScrollView = aValue);
+        if (aValue == isMultiline()) return;
+        firePropChange(Multiline_Prop, _multiline, _multiline = aValue);
     }
 
     /**
@@ -361,10 +361,6 @@ public class TextField extends ParentView {
     @Override
     protected void layoutImpl()
     {
-        // If WantsScrollView, perform check
-        if (isWantsScrollView())
-            ViewUtils.checkWantsScrollView(this);
-
         // Layout PromptLabel
         Insets ins = getInsetsAll();
         double areaX = ins.left;
@@ -404,7 +400,8 @@ public class TextField extends ParentView {
     protected void keyPressed(ViewEvent anEvent)
     {
         // Handle EnterKey
-        if (anEvent.isEnterKey() && !anEvent.isShortcutDown() && !anEvent.isControlDown() && !anEvent.isAltDown()) {
+        if (anEvent.isEnterKey() && !isMultiline() &&
+            !anEvent.isShortcutDown() && !anEvent.isControlDown() && !anEvent.isAltDown()) {
             selectAll();
             fireActionEvent(anEvent);
         }
@@ -479,10 +476,8 @@ public class TextField extends ParentView {
             return;
         }
 
-        String propName = aPC.getPropName();
-
         // Handle Selection
-        if (propName == TextAdapter.Selection_Prop) {
+        if (aPC.getPropName() == TextAdapter.Selection_Prop) {
             firePropChange(Selection_Prop, aPC.getOldValue(), aPC.getNewValue());
             _autoCompleting = false;
         }
@@ -512,8 +507,20 @@ public class TextField extends ParentView {
      */
     private void updateTextBounds()
     {
+        // Get text bounds and set
         Rect textBounds = getTextBounds();
         _textAdapter.setTextBounds(textBounds);
+
+        // Promote to WrapLines if text is long
+        if (!_textAdapter.isWrapLines()) {
+            double prefW = _textAdapter.getPrefWidth(-1);
+            if (prefW > textBounds.width)
+                runLater(() -> _textAdapter.setWrapLines(true));
+        }
+
+        // If Multiline, check for whether to wrap in scroll view
+        if (isMultiline())
+            ViewUtils.checkWantsScrollView(this);
     }
 
     /**
@@ -566,10 +573,10 @@ public class TextField extends ParentView {
         // Do normal version
         super.initProps(aPropSet);
 
-        // ColCount, PromptText, WantsScrollView
+        // ColCount, PromptText, Multiline
         aPropSet.addPropNamed(ColCount_Prop, int.class, DEFAULT_COL_COUNT);
         aPropSet.addPropNamed(PromptText_Prop, String.class, EMPTY_OBJECT);
-        aPropSet.addPropNamed(WantsScrollView_Prop, boolean.class, false);
+        aPropSet.addPropNamed(Multiline_Prop, boolean.class, false);
     }
 
     /**
@@ -581,10 +588,10 @@ public class TextField extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // ColCount, PromptText, WantsScrollView
+            // ColCount, PromptText, Multiline
             case ColCount_Prop: return getColCount();
             case PromptText_Prop: return getPromptText();
-            case WantsScrollView_Prop: return isWantsScrollView();
+            case Multiline_Prop: return isMultiline();
 
             // Do normal version
             default: return super.getPropValue(aPropName);
@@ -600,10 +607,10 @@ public class TextField extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // ColCount, PromptText, FireActionOnFocusLost, WantsScrollView
+            // ColCount, PromptText, FireActionOnFocusLost, Multiline
             case ColCount_Prop: setColCount(Convert.intValue(aValue)); break;
             case PromptText_Prop: setPromptText(Convert.stringValue(aValue)); break;
-            case WantsScrollView_Prop: setWantsScrollView(Convert.boolValue(aValue)); break;
+            case Multiline_Prop: setMultiline(Convert.boolValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);
@@ -629,10 +636,10 @@ public class TextField extends ParentView {
         // Do normal version
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive ColCount, PromptText, WantsScrollView
+        // Archive ColCount, PromptText, Multiline
         if (!isPropDefault(ColCount_Prop)) e.add(ColCount_Prop, getColCount());
         if (!isPropDefault(PromptText_Prop)) e.add(PromptText_Prop, getPromptText());
-        if (!isPropDefault(WantsScrollView_Prop)) e.add(WantsScrollView_Prop, isWantsScrollView());
+        if (!isPropDefault(Multiline_Prop)) e.add(Multiline_Prop, isMultiline());
         return e;
     }
 
@@ -644,13 +651,13 @@ public class TextField extends ParentView {
         // Do normal version
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive ColCount, PromptText, WantsScrollView
+        // Unarchive ColCount, PromptText, Multiline
         if (anElement.hasAttribute(ColCount_Prop))
             setColCount(anElement.getAttributeIntValue(ColCount_Prop));
         if (anElement.hasAttribute(PromptText_Prop))
             setPromptText(anElement.getAttributeValue(PromptText_Prop));
-        if (anElement.hasAttribute(WantsScrollView_Prop))
-            setWantsScrollView(anElement.getAttributeBoolValue(WantsScrollView_Prop));
+        if (anElement.hasAttribute(Multiline_Prop))
+            setMultiline(anElement.getAttributeBoolValue(Multiline_Prop));
     }
 
     /**
