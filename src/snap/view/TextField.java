@@ -36,6 +36,9 @@ public class TextField extends ParentView {
     // Whether to send action on focus lost (if content changed)
     private boolean _fireActionOnFocusLost;
 
+    // Whether text field wants scroll view
+    private boolean _wantsScrollView;
+
     // The value of text on focus gained
     protected String _focusGainedText;
     
@@ -47,10 +50,11 @@ public class TextField extends ParentView {
 
     // Constants for properties
     public static final String ColCount_Prop = "ColCount";
-    public static final String Edited_Prop = "Edited";
     public static final String PromptText_Prop = "PromptText";
-    public static final String Selection_Prop = TextAdapter.Selection_Prop;
+    public static final String WantsScrollView_Prop = "WantsScrollView";
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
+    public static final String Selection_Prop = TextAdapter.Selection_Prop;
+    public static final String Edited_Prop = "Edited";
 
     // Constants for property defaults
     private static final int DEFAULT_COL_COUNT = 12;
@@ -164,49 +168,23 @@ public class TextField extends ParentView {
     }
 
     /**
+     * Returns whether text field wants scroll view if too small.
+     */
+    public boolean isWantsScrollView()  { return _wantsScrollView; }
+
+    /**
+     * Sets whether text field wants scroll view if too small.
+     */
+    public void setWantsScrollView(boolean aValue)
+    {
+        if (aValue == isWantsScrollView()) return;
+        firePropChange(WantsScrollView_Prop, _wantsScrollView, _wantsScrollView = aValue);
+    }
+
+    /**
      * Returns the label in the background.
      */
     public Label getLabel()  { return _promptLabel; }
-
-    /**
-     * Calculates the preferred width.
-     */
-    protected double getPrefWidthImpl(double aH)
-    {
-        Insets ins = getInsetsAll();
-        double prefW1 = getColCount() > 0 ? getTotalColWidth() : _textAdapter.getPrefWidthImpl(aH);
-        double prefW2 = _promptLabel.getPrefWidth();
-        double prefW3 = Math.max(prefW1, prefW2);
-        return prefW3 + ins.getWidth();
-    }
-
-    /**
-     * Calculates the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        Insets ins = getInsetsAll();
-        double prefH1 = _textAdapter.getPrefHeightImpl(aW);
-        double prefH2 = _promptLabel.getPrefHeight();
-        double prefH3 = Math.max(prefH1, prefH2);
-        return prefH3 + ins.getHeight() + 4;
-    }
-
-    /**
-     * Layout children.
-     */
-    protected void layoutImpl()
-    {
-        Insets ins = getInsetsAll();
-        double areaX = ins.left;
-        double areaY = ins.top;
-        double areaW = getWidth() - ins.getWidth();
-        double areaH = getHeight() - ins.getHeight();
-        _promptLabel.setBounds(areaX, areaY, areaW, areaH);
-
-        // Reset text bounds
-        updateTextBounds();
-    }
 
     /**
      * Override to track FocusGainedValue.
@@ -345,10 +323,58 @@ public class TextField extends ParentView {
     @Override
     protected void paintFront(Painter aPntr)
     {
-        Rect textBounds = getTextBounds();
+        Rect textBounds = _textAdapter.getTextBounds();
         aPntr.clip(textBounds);
 
         _textAdapter.paintText(aPntr);
+    }
+
+    /**
+     * Calculates the preferred width.
+     */
+    @Override
+    protected double getPrefWidthImpl(double aH)
+    {
+        Insets ins = getInsetsAll();
+        double prefW1 = getColCount() > 0 ? getTotalColWidth() : _textAdapter.getPrefWidth(aH);
+        double prefW2 = _promptLabel.getPrefWidth();
+        double prefW3 = Math.max(prefW1, prefW2);
+        return prefW3 + ins.getWidth();
+    }
+
+    /**
+     * Calculates the preferred height.
+     */
+    @Override
+    protected double getPrefHeightImpl(double aW)
+    {
+        Insets ins = getInsetsAll();
+        double prefH1 = _textAdapter.getPrefHeight(aW);
+        double prefH2 = _promptLabel.getPrefHeight();
+        double prefH3 = Math.max(prefH1, prefH2);
+        return prefH3 + ins.getHeight() + 4;
+    }
+
+    /**
+     * Layout children.
+     */
+    @Override
+    protected void layoutImpl()
+    {
+        // If WantsScrollView, perform check
+        if (isWantsScrollView())
+            ViewUtils.checkWantsScrollView(this);
+
+        // Layout PromptLabel
+        Insets ins = getInsetsAll();
+        double areaX = ins.left;
+        double areaY = ins.top;
+        double areaW = getWidth() - ins.getWidth();
+        double areaH = getHeight() - ins.getHeight();
+        _promptLabel.setBounds(areaX, areaY, areaW, areaH);
+
+        // Reset text bounds
+        updateTextBounds();
     }
 
     /**
@@ -477,6 +503,7 @@ public class TextField extends ParentView {
 
         // Relayout parent and repaint
         relayoutParent();
+        relayout();
         repaint();
     }
 
@@ -486,7 +513,7 @@ public class TextField extends ParentView {
     private void updateTextBounds()
     {
         Rect textBounds = getTextBounds();
-        _textAdapter.getTextBlock().setBounds(textBounds);
+        _textAdapter.setTextBounds(textBounds);
     }
 
     /**
@@ -501,7 +528,7 @@ public class TextField extends ParentView {
         double textX = ins.left;
         double textY = ins.top;
         double textW = viewW - ins.getWidth();
-        double textH = _textAdapter.getTextBlock().getPrefHeight();
+        double textH = viewH - ins.getHeight();
 
         // Adjust for PromptText if set
         if (_promptLabel.isStringViewSet()) {
@@ -539,11 +566,10 @@ public class TextField extends ParentView {
         // Do normal version
         super.initProps(aPropSet);
 
-        // Add props: ColCount, Edited, PromptText, Sel, FireActionOnFocusLost
+        // ColCount, PromptText, WantsScrollView
         aPropSet.addPropNamed(ColCount_Prop, int.class, DEFAULT_COL_COUNT);
-        aPropSet.addPropNamed(Edited_Prop, boolean.class).setSkipArchival(true);
         aPropSet.addPropNamed(PromptText_Prop, String.class, EMPTY_OBJECT);
-        aPropSet.addPropNamed(FireActionOnFocusLost_Prop, boolean.class, true);
+        aPropSet.addPropNamed(WantsScrollView_Prop, boolean.class, false);
     }
 
     /**
@@ -555,11 +581,10 @@ public class TextField extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // ColCount, PromptText, FireActionOnFocusLost
+            // ColCount, PromptText, WantsScrollView
             case ColCount_Prop: return getColCount();
-            case Edited_Prop: return isEdited();
             case PromptText_Prop: return getPromptText();
-            case FireActionOnFocusLost_Prop: return isFireActionOnFocusLost();
+            case WantsScrollView_Prop: return isWantsScrollView();
 
             // Do normal version
             default: return super.getPropValue(aPropName);
@@ -575,10 +600,10 @@ public class TextField extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // ColCount, PromptText, FireActionOnFocusLost
+            // ColCount, PromptText, FireActionOnFocusLost, WantsScrollView
             case ColCount_Prop: setColCount(Convert.intValue(aValue)); break;
             case PromptText_Prop: setPromptText(Convert.stringValue(aValue)); break;
-            case FireActionOnFocusLost_Prop: setFireActionOnFocusLost(Convert.boolValue(aValue)); break;
+            case WantsScrollView_Prop: setWantsScrollView(Convert.boolValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);
@@ -604,9 +629,10 @@ public class TextField extends ParentView {
         // Do normal version
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive ColCount, PromptText
+        // Archive ColCount, PromptText, WantsScrollView
         if (!isPropDefault(ColCount_Prop)) e.add(ColCount_Prop, getColCount());
         if (!isPropDefault(PromptText_Prop)) e.add(PromptText_Prop, getPromptText());
+        if (!isPropDefault(WantsScrollView_Prop)) e.add(WantsScrollView_Prop, isWantsScrollView());
         return e;
     }
 
@@ -618,11 +644,13 @@ public class TextField extends ParentView {
         // Do normal version
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive ColCount, PromptText
+        // Unarchive ColCount, PromptText, WantsScrollView
         if (anElement.hasAttribute(ColCount_Prop))
             setColCount(anElement.getAttributeIntValue(ColCount_Prop));
         if (anElement.hasAttribute(PromptText_Prop))
             setPromptText(anElement.getAttributeValue(PromptText_Prop));
+        if (anElement.hasAttribute(WantsScrollView_Prop))
+            setWantsScrollView(anElement.getAttributeBoolValue(WantsScrollView_Prop));
     }
 
     /**

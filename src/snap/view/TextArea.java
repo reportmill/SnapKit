@@ -565,12 +565,12 @@ public class TextArea extends View {
     /**
      * Returns the width needed to display all characters.
      */
-    protected double getPrefWidthImpl(double aH)  { return _textAdapter.getPrefWidthImpl(aH); }
+    protected double getPrefWidthImpl(double aH)  { return _textAdapter.getPrefWidth(aH); }
 
     /**
      * Returns the height needed to display all characters.
      */
-    protected double getPrefHeightImpl(double aW)  { return _textAdapter.getPrefHeightImpl(aW); }
+    protected double getPrefHeightImpl(double aW)  { return _textAdapter.getPrefHeight(aW); }
 
     /**
      * Sets the font of the current selection or cursor.

@@ -1437,9 +1437,19 @@ public class TextAdapter extends PropObject {
     }
 
     /**
+     * Returns the area bounds for given view.
+     */
+    public Rect getTextBounds()  { return _textBlock.getBounds(); }
+
+    /**
+     * Sets the text bounds.
+     */
+    public void setTextBounds(Rect boundsRect)  { _textBlock.setBounds(boundsRect); }
+
+    /**
      * Returns the width needed to display all characters.
      */
-    public double getPrefWidthImpl(double aH)
+    public double getPrefWidth(double aH)
     {
         Insets ins = _view.getInsetsAll();
         double h = aH >= 0 ? (aH - ins.top - ins.bottom) : aH;
@@ -1450,25 +1460,12 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the height needed to display all characters.
      */
-    public double getPrefHeightImpl(double aW)
+    public double getPrefHeight(double aW)
     {
         Insets ins = _view.getInsetsAll();
         double w = aW >= 0 ? (aW - ins.left - ins.right) : aW;
         double prefH = _textBlock instanceof TextBox ? ((TextBox) _textBlock).getPrefHeight(w) : _textBlock.getPrefHeight();
         return ins.top + prefH + ins.bottom;
-    }
-
-    /**
-     * Sets the Text.Rect from text area.
-     */
-    public Rect getTextBounds()
-    {
-        Insets ins = _view.getInsetsAll();
-        double textX = ins.left;
-        double textY = ins.top;
-        double textW = Math.max(_view.getWidth() - ins.getWidth(), 0);
-        double textH = Math.max(_view.getHeight() - ins.getHeight(), 0);
-        return new Rect(textX, textY, textW, textH);
     }
 
     /**
@@ -1502,8 +1499,8 @@ public class TextAdapter extends PropObject {
      */
     private void handleViewSizeChanged()
     {
-        Rect textBounds = getTextBounds();
-        _textBlock.setBounds(textBounds);
+        Rect textBounds = ViewUtils.getAreaBounds(_view);
+        setTextBounds(textBounds);
     }
 
     /**

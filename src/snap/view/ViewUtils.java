@@ -91,6 +91,21 @@ public class ViewUtils {
     public static Color getTextTargetedColor()  { return ViewTheme.get().getTextTargetedColor(); }
 
     /**
+     * Returns the area bounds for given view.
+     */
+    public static Rect getAreaBounds(View aView)
+    {
+        double viewW = aView.getWidth();
+        double viewH = aView.getHeight();
+        Insets ins = aView.getInsetsAll();
+        double areaX = ins.left;
+        double areaY = ins.top;
+        double areaW = Math.max(viewW - ins.getWidth(), 0);
+        double areaH = Math.max(viewH - ins.getHeight(), 0);
+        return new Rect(areaX, areaY, areaW, areaH);
+    }
+
+    /**
      * Returns the bounds of a given view list.
      */
     public static Rect getBoundsOfViews(View aPar, List <? extends View> aList)
@@ -592,6 +607,72 @@ public class ViewUtils {
         else System.err.println("ViewUtils.replaceView: Unknown parent host class: " + par.getClass());
     }
 
+    /**
+     * Checks the given view to see if it wants a ScrollView (actual size smaller than preferred).
+     * If true, replaces with ScrollView.
+     */
+    public static void checkWantsScrollView(View aView)
+    {
+        if (aView.getParent() instanceof Scroller)
+            return;
+
+        // If size less than preferred, replace with scroll view
+        double viewW = aView.getWidth();
+        double viewH = aView.getHeight();
+        double prefW = aView.getPrefWidthImpl(-1);
+        double prefH = aView.getPrefHeightImpl(viewW);
+        if (viewW < prefW || viewH < prefH)
+            runLater(() -> replaceWithScrollView(aView));
+    }
+
+    /**
+     * Replaces given view with ScrollView.
+     */
+    public static void replaceWithScrollView(View aView)
+    {
+        // Create ScrollView
+        ScrollView scrollView = new ScrollView();
+        scrollView.setBarSize(12);
+
+        // Transfer LeanX, LeanY, GrowWidth, GrowHeight
+        scrollView.setLeanX(aView.getLeanX());
+        scrollView.setLeanY(aView.getLeanY());
+        scrollView.setGrowWidth(aView.isGrowWidth());
+        scrollView.setGrowHeight(aView.isGrowHeight());
+
+        // Transfer PrefWidth, PrefHeight, MinWidth, MinHeight
+        if (aView.isPrefWidthSet()) {
+            scrollView.setPrefWidth(aView.getPrefWidth());
+            aView.setPrefWidth(-1);
+        }
+        if (aView.isPrefHeightSet()) {
+            scrollView.setPrefHeight(aView.getPrefHeight());
+            aView.setPrefHeight(-1);
+        }
+        if (aView.isMinWidthSet()) {
+            scrollView.setMinWidth(aView.getMinWidth());
+            aView.setMinWidth(-1);
+        }
+        if (aView.isMinHeightSet()) {
+            scrollView.setMinHeight(aView.getMinHeight());
+            aView.setMinHeight(-1);
+        }
+
+        // Transfer Margin, Border, BorderRadius
+        if (aView.getMargin() != null) {
+            scrollView.setMargin(aView.getMargin());
+            aView.setMargin(null);
+        }
+        if (aView.getBorder() != null) {
+            scrollView.setBorder(aView.getBorder());
+            aView.setBorder(null);
+        }
+        scrollView.setBorderRadius(aView.getBorderRadius());
+
+        // Replace View with ScrollView
+        replaceView(aView, scrollView);
+        scrollView.setContent(aView);
+    }
     /**
      * Returns an image for a View (at device dpi scale (2 for retina)).
      */
