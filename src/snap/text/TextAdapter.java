@@ -1443,23 +1443,16 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the width needed to display all characters.
      */
-    public double getPrefWidth(double aH)
-    {
-        Insets ins = _view.getInsetsAll();
-        double h = aH >= 0 ? (aH - ins.top - ins.bottom) : aH;
-        double prefW = _textBlock instanceof TextBox ? ((TextBox) _textBlock).getPrefWidth(h) : _textBlock.getPrefWidth();
-        return ins.left + prefW + ins.right;
-    }
+    public double getPrefWidth()  { return _textBlock.getPrefWidth(); }
 
     /**
      * Returns the height needed to display all characters.
      */
     public double getPrefHeight(double aW)
     {
-        Insets ins = _view.getInsetsAll();
-        double w = aW >= 0 ? (aW - ins.left - ins.right) : aW;
-        double prefH = _textBlock instanceof TextBox ? ((TextBox) _textBlock).getPrefHeight(w) : _textBlock.getPrefHeight();
-        return ins.top + prefH + ins.bottom;
+        if (_textBlock instanceof TextBox)
+            return ((TextBox) _textBlock).getPrefHeight(aW);
+        return _textBlock.getPrefHeight();
     }
 
     /**

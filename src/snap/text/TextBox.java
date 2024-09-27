@@ -673,7 +673,8 @@ public class TextBox extends TextBlock {
     /**
      * Returns the preferred width.
      */
-    public double getPrefWidth(double aH)
+    @Override
+    public double getPrefWidth()
     {
         double textPrefW = _sourceText.getPrefWidth();
         double fontScale = getFontScale();

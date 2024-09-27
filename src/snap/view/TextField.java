@@ -336,7 +336,7 @@ public class TextField extends ParentView {
     protected double getPrefWidthImpl(double aH)
     {
         Insets ins = getInsetsAll();
-        double prefW1 = getColCount() > 0 ? getTotalColWidth() : _textAdapter.getPrefWidth(aH);
+        double prefW1 = getColCount() > 0 ? getTotalColWidth() : _textAdapter.getPrefWidth();
         double prefW2 = _promptLabel.getPrefWidth();
         double prefW3 = Math.max(prefW1, prefW2);
         return prefW3 + ins.getWidth();
@@ -349,7 +349,8 @@ public class TextField extends ParentView {
     protected double getPrefHeightImpl(double aW)
     {
         Insets ins = getInsetsAll();
-        double prefH1 = _textAdapter.getPrefHeight(aW);
+        double prefW = aW >= 0 ? aW - ins.getWidth() : aW;
+        double prefH1 = _textAdapter.getPrefHeight(prefW);
         double prefH2 = _promptLabel.getPrefHeight();
         double prefH3 = Math.max(prefH1, prefH2);
         return prefH3 + ins.getHeight() + 4;
@@ -513,7 +514,7 @@ public class TextField extends ParentView {
 
         // Promote to WrapLines if text is long
         if (!_textAdapter.isWrapLines()) {
-            double prefW = _textAdapter.getPrefWidth(-1);
+            double prefW = _textAdapter.getPrefWidth();
             if (prefW > textBounds.width)
                 runLater(() -> _textAdapter.setWrapLines(true));
         }
@@ -535,7 +536,8 @@ public class TextField extends ParentView {
         double textX = ins.left;
         double textY = ins.top;
         double textW = viewW - ins.getWidth();
-        double textH = viewH - ins.getHeight();
+        double prefH = _textAdapter.getPrefHeight(textW);
+        double textH = Math.min(prefH, viewH - ins.getHeight());
 
         // Adjust for PromptText if set
         if (_promptLabel.isStringViewSet()) {
@@ -607,7 +609,7 @@ public class TextField extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // ColCount, PromptText, FireActionOnFocusLost, Multiline
+            // ColCount, PromptText, Multiline
             case ColCount_Prop: setColCount(Convert.intValue(aValue)); break;
             case PromptText_Prop: setPromptText(Convert.stringValue(aValue)); break;
             case Multiline_Prop: setMultiline(Convert.boolValue(aValue)); break;
@@ -671,7 +673,7 @@ public class TextField extends ParentView {
             if (aTextField.isFocused())
                 ViewAnimUtils.setAlign(textFieldLabel, Pos.CENTER_LEFT, 200);
             else ViewAnimUtils.setAlign(textFieldLabel, Pos.CENTER, 600);
-            textFieldLabel.getChild(0).getAnim(0).setOnFrame(aTextField::updateTextBounds);
+            textFieldLabel.getChild(0).getAnim(0).setOnFrame(aTextField::relayout);
         }, View.Focused_Prop);
     }
 }

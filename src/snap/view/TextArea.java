@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.geom.Insets;
 import snap.gfx.*;
 import snap.props.*;
 import snap.text.*;
@@ -565,12 +566,23 @@ public class TextArea extends View {
     /**
      * Returns the width needed to display all characters.
      */
-    protected double getPrefWidthImpl(double aH)  { return _textAdapter.getPrefWidth(aH); }
+    protected double getPrefWidthImpl(double aH)
+    {
+        Insets ins = getInsetsAll();
+        double prefW = _textAdapter.getPrefWidth();
+        return prefW + ins.getWidth();
+    }
 
     /**
      * Returns the height needed to display all characters.
      */
-    protected double getPrefHeightImpl(double aW)  { return _textAdapter.getPrefHeight(aW); }
+    protected double getPrefHeightImpl(double aW)
+    {
+        Insets ins = getInsetsAll();
+        double prefW = aW >= 0 ? aW - ins.getWidth() : aW;
+        double prefH = _textAdapter.getPrefHeight(prefW);
+        return prefH + ins.getHeight();
+    }
 
     /**
      * Sets the font of the current selection or cursor.
