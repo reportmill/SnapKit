@@ -26,20 +26,10 @@ public class Label extends ParentView {
     // The image name, if loaded from local resource
     private String  _imageName;
     
-    // Whether label text is editable
-    private boolean  _editable;
-    
-    // Whether label text is currently being edited
-    private boolean  _editing;
-
-    // A textfield for editing
-    private TextField  _editor;
-    
     // Constants for properties
     public static final String ImageName_Prop = "ImageName";
     public static final String Graphic_Prop = "Graphic";
     public static final String GraphicAfter_Prop = "GraphicAfter";
-    public static final String Editable_Prop = "Editable";
     public static final String Editing_Prop = "Editing";
 
     /**
@@ -269,117 +259,12 @@ public class Label extends ParentView {
     }
 
     /**
-     * Returns whether label text is editable.
+     * Returns the text bounds.
      */
-    public boolean isEditable()  { return _editable; }
-
-    /**
-     * Sets whether label text is editable.
-     */
-    public void setEditable(boolean aValue)
+    public Rect getTextBounds()
     {
-        if (aValue == isEditable()) return;
-        firePropChange(Editable_Prop, _editable, _editable = aValue);
-
-        // Enable/Disable MosueRelease
-        if (aValue)
-            enableEvents(MouseRelease);
-        else disableEvents(MouseRelease);
-
-        // If Editable, StringView should fill width
-        getStringView().setGrowWidth(isEditable());
-    }
-
-    /**
-     * Returns whether editable.
-     */
-    public boolean isEditing()  { return _editing; }
-
-    /**
-     * Sets editing.
-     */
-    public void setEditing(boolean aValue)
-    {
-        // If value already set, just return
-        if (aValue == isEditing()) return;
-        _editing = aValue;
-
-        // Handle set true
-        if (aValue) {
-            TextField editor = getEditor();
-            editor.setText(getText());
-            StringView stringView = getStringView();
-            Rect bnds = stringView.getBounds();
-            bnds.inset(-2);
-            editor.setBounds(bnds);
-            addChild(editor);
-            editor.selectAll();
-            editor.requestFocus();
-            stringView.setGrowWidth(true);
-            stringView.setPaintable(false);
-        }
-
-        // Handle set false
-        else {
-            removeChild(_editor);
-            setText(_editor.getText());
-            StringView stringView = getStringView();
-            stringView.setGrowWidth(false);
-            stringView.setPaintable(true);
-            _editor = null;
-        }
-
-        // Fire prop change
-        firePropChange(Editing_Prop, !aValue, aValue);
-    }
-
-    /**
-     * Returns the editor.
-     */
-    public TextField getEditor()
-    {
-        // If editor set, return
-        if (_editor != null) return _editor;
-
-        // Create and return editor
-        TextField editor = new TextField();
-        editor.setManaged(false);
-        editor.setBorderRadius(2);
-        editor.setFill(new Color(1,.95));
-        editor.setBorder(new Color(1,.3,.3,.5), 1);
-        editor.setPadding(1,1,1,1);
-        editor.setAlignX(getAlignX());
-        editor.setFont(getFont());
-        editor.addEventHandler(this::handleEditorActionEvent, Action);
-        editor.addPropChangeListener(pc -> editorFocusChanged(editor), Focused_Prop);
-        return _editor = editor;
-    }
-
-    /**
-     * Called when editor text field fires action event.
-     */
-    protected void handleEditorActionEvent(ViewEvent anEvent)
-    {
-        setEditing(false);
-        fireActionEvent(anEvent);
-    }
-
-    /**
-     * Called when editor focus changes.
-     */
-    protected void editorFocusChanged(TextField editor)
-    {
-        if (!editor.isFocused())
-            setEditing(false);
-    }
-
-    /**
-     * Handle events.
-     */
-    protected void processEvent(ViewEvent anEvent)
-    {
-        if (isEditable() && anEvent.isMouseRelease() && anEvent.getClickCount()==2)
-            setEditing(true);
+        if (_stringView == null) return Rect.ZeroRect;
+        return _stringView.getBounds();
     }
 
     /**
@@ -436,11 +321,10 @@ public class Label extends ParentView {
         // Do normal version
         super.initProps(aPropSet);
 
-        // ImageName, Graphic, GraphicAfter, Editable
+        // ImageName, Graphic, GraphicAfter
         aPropSet.addPropNamed(ImageName_Prop, String.class, EMPTY_OBJECT);
         //aPropSet.addPropNamed(Graphic_Prop, View.class);
         //aPropSet.addPropNamed(GraphicAfter_Prop, View.class);
-        aPropSet.addPropNamed(Editable_Prop, boolean.class);
     }
 
     /**
@@ -452,11 +336,10 @@ public class Label extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // ImageName, Graphic, GraphicAfter, Editable
+            // ImageName, Graphic, GraphicAfter
             case ImageName_Prop: return getImageName();
             case Graphic_Prop: return getGraphic();
             case GraphicAfter_Prop: return getGraphicAfter();
-            case Editable_Prop: return isEditable();
 
             // Do normal version
             default: return super.getPropValue(aPropName);
@@ -472,11 +355,10 @@ public class Label extends ParentView {
         // Handle properties
         switch (aPropName) {
 
-            // ImageName, Graphic, GraphicAfter, Editable
+            // ImageName, Graphic, GraphicAfter
             case ImageName_Prop: setImageName(Convert.stringValue(aValue)); break;
             case Graphic_Prop: setGraphic((View) aValue); break;
             case GraphicAfter_Prop: setGraphicAfter(((View) aValue)); break;
-            case Editable_Prop: setEditable(Convert.boolValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);

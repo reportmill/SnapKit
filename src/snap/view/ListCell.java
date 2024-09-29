@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.geom.Rect;
+import snap.gfx.Color;
 
 /**
  * A label subclass used to render items in Lists, Tables, Trees, Browsers.
@@ -19,7 +21,13 @@ public class ListCell <T> extends Label {
     
     // Whether cell is selected
     private boolean  _sel;
-    
+
+    // Whether label text is currently being edited
+    private boolean  _editing;
+
+    // A textfield for editing
+    private TextField  _editor;
+
     /**
      * Creates a new ListCell.
      */
@@ -57,17 +65,89 @@ public class ListCell <T> extends Label {
     public boolean isSelected()  { return _sel; }
 
     /**
-     * Override to notify ListArea.
+     * Returns whether editable.
      */
-    @Override
+    public boolean isEditing()  { return _editing; }
+
+    /**
+     * Sets editing.
+     */
     public void setEditing(boolean aValue)
     {
-        // If already set, just return, otherwise do normal
-        if (aValue==isEditing()) return;
-        super.setEditing(aValue);
+        // If value already set, just return
+        if (aValue == isEditing()) return;
+        _editing = aValue;
+
+        // Handle set true
+        if (aValue) {
+
+            // Get editor
+            TextField editor = getEditor();
+            editor.setText(getText());
+
+            // Set text bounds
+            Rect textBounds = getTextBounds();
+            textBounds.inset(-2);
+            editor.setBounds(textBounds);
+
+            // Add editor
+            addChild(editor);
+            editor.selectAll();
+            editor.requestFocus();
+        }
+
+        // Handle set false
+        else {
+            removeChild(_editor);
+            setText(_editor.getText());
+            _editor = null;
+        }
+
+        // Fire prop change
+        firePropChange(Editing_Prop, !aValue, aValue);
 
         // Nofity ListArea
-        if (_listArea!=null)
+        if (_listArea != null)
             _listArea.cellEditingChanged(this);
+    }
+
+    /**
+     * Returns the editor.
+     */
+    public TextField getEditor()
+    {
+        // If editor set, return
+        if (_editor != null) return _editor;
+
+        // Create and return editor
+        TextField editor = new TextField();
+        editor.setManaged(false);
+        editor.setBorderRadius(2);
+        editor.setFill(new Color(1,.95));
+        editor.setBorder(new Color(1,.3,.3,.5), 1);
+        editor.setPadding(1,1,1,1);
+        editor.setAlignX(getAlignX());
+        editor.setFont(getFont());
+        editor.addEventHandler(this::handleEditorActionEvent, Action);
+        editor.addPropChangeListener(pc -> editorFocusChanged(editor), Focused_Prop);
+        return _editor = editor;
+    }
+
+    /**
+     * Called when editor text field fires action event.
+     */
+    protected void handleEditorActionEvent(ViewEvent anEvent)
+    {
+        setEditing(false);
+        fireActionEvent(anEvent);
+    }
+
+    /**
+     * Called when editor focus changes.
+     */
+    protected void editorFocusChanged(TextField editor)
+    {
+        if (!editor.isFocused())
+            setEditing(false);
     }
 }
