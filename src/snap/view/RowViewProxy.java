@@ -241,11 +241,32 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
     {
         ViewProxy<?>[] children = aPar.getChildren();
         double alignX = aPar.getAlignXAsDouble();
+        double shiftX = 0;
+
         for (ViewProxy<?> child : children) {
-            alignX = Math.max(alignX, child.getLeanXAsDouble());
-            double shiftX = extra * alignX;
+
+            // If child has lean, apply shift
+            if (child.getLeanX() != null && extra > 0) {
+                int childShiftX = (int) Math.round(extra * child.getLeanX().doubleValue());
+                if (childShiftX > 0) {
+                    shiftX += childShiftX;
+                    extra -= childShiftX;
+                }
+            }
+
+            // If parent has alignment, apply shift
+            else if (alignX > 0 && extra > 0) {
+                int childShiftX = (int) Math.round(extra * alignX);
+                if (childShiftX > 0) {
+                    shiftX += childShiftX;
+                    extra -= childShiftX;
+                    alignX = 0;
+                }
+            }
+
+            // Apply shift
             if (shiftX > 0)
-                child.setX(child.getX() + extra * alignX);
+                child.setX(child.getX() + shiftX);
         }
     }
 

@@ -4,10 +4,7 @@
 package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
-
-import snap.geom.Insets;
-import snap.geom.Polygon;
-import snap.geom.Rect;
+import snap.geom.*;
 import snap.gfx.*;
 import snap.props.PropSet;
 import snap.util.*;
@@ -564,15 +561,16 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         Image image = getImage(item);
         if (image != null)
             aCell.setImage(image);
-        aCell.getStringView().setGrowWidth(true);
 
         // If parent, add branch icon
         if (isParent(item)) {
             Image branchImage = getBranchImage(item);
             if (branchImage == null)
                 branchImage = getBranchImage();
-            if (branchImage != null)
+            if (branchImage != null) {
                 aCell.setImageAfter(branchImage);
+                aCell.getGraphicAfter().setLeanX(HPos.RIGHT);
+            }
         }
 
         // If cell configure, call that

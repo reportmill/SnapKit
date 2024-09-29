@@ -1,4 +1,5 @@
 package snap.view;
+import snap.geom.HPos;
 import snap.geom.Polygon;
 import snap.geom.Pos;
 import snap.gfx.Border;
@@ -103,7 +104,6 @@ public class CollapseView extends ParentView implements ViewHost {
         label.setFill(LABEL_FILL);
         label.setTextColor(LABEL_TEXT_COLOR);
         label.setBorder(LABEL_BORDER);
-        label.getStringView().setGrowWidth(true);
         label.setAlign(Pos.CENTER);
         label.setPadding(3, 3, 3, 9);
         label.setMargin(0, 8, 0, 8);
@@ -114,8 +114,9 @@ public class CollapseView extends ParentView implements ViewHost {
 
         // Set CollapseGraphic
         View graphic = getCollapseGraphic();
-        label.setGraphic(graphic);
         graphic.setRotate(isExpanded() ? 90 : 0);
+        graphic.setLeanX(HPos.LEFT);
+        label.setGraphic(graphic);
 
         // Return
         return label;

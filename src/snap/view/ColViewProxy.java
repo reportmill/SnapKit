@@ -244,11 +244,32 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     {
         ViewProxy<?>[] children = aPar.getChildren();
         double alignY = aPar.getAlignYAsDouble();
+        double shiftY = 0;
+
         for (ViewProxy<?> child : children) {
-            alignY = Math.max(alignY, child.getLeanYAsDouble());
-            double shiftY = extra * alignY;
+
+            // If child has lean, apply shift
+            if (child.getLeanY() != null && extra > 0) {
+                int childShiftY = (int) Math.round(extra * child.getLeanY().doubleValue());
+                if (childShiftY > 0) {
+                    shiftY += childShiftY;
+                    extra -= childShiftY;
+                }
+            }
+
+            // If parent has alignment, apply shift
+            else if (alignY > 0 && extra > 0) {
+                int childShiftY = (int) Math.round(extra * alignY);
+                if (childShiftY > 0) {
+                    shiftY += childShiftY;
+                    extra -= childShiftY;
+                    alignY = 0;
+                }
+            }
+
+            // Apply shift
             if (shiftY > 0)
-                child.setY(child.getY() + extra * alignY);
+                child.setY(child.getY() + shiftY);
         }
     }
 

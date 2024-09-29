@@ -89,9 +89,9 @@ public class Label extends ParentView {
             return;
 
         // Set value and fire prop change
-        StringView sview = getStringView();
-        sview.setText(aValue);
-        sview.setVisible(aValue != null && !aValue.isEmpty());
+        StringView stringView = getStringView();
+        stringView.setText(aValue);
+        stringView.setVisible(aValue != null && !aValue.isEmpty());
         firePropChange(Text_Prop, oldVal, aValue);
     }
 
@@ -192,7 +192,6 @@ public class Label extends ParentView {
 
         // Create, configure, add StringView and return
         _stringView = new StringView();
-        _stringView.setGrowWidth(isEditable());
         _stringView.setAlignX(getAlignX());
         addChild(_stringView, getGraphic() != null ? 1 : 0);
         return _stringView;
@@ -288,8 +287,7 @@ public class Label extends ParentView {
         else disableEvents(MouseRelease);
 
         // If Editable, StringView should fill width
-        if (isStringViewSet())
-            getStringView().setGrowWidth(isEditable());
+        getStringView().setGrowWidth(isEditable());
     }
 
     /**
@@ -310,20 +308,24 @@ public class Label extends ParentView {
         if (aValue) {
             TextField editor = getEditor();
             editor.setText(getText());
-            Rect bnds = getStringView().getBounds();
+            StringView stringView = getStringView();
+            Rect bnds = stringView.getBounds();
             bnds.inset(-2);
             editor.setBounds(bnds);
             addChild(editor);
             editor.selectAll();
             editor.requestFocus();
-            getStringView().setPaintable(false);
+            stringView.setGrowWidth(true);
+            stringView.setPaintable(false);
         }
 
         // Handle set false
         else {
             removeChild(_editor);
             setText(_editor.getText());
-            getStringView().setPaintable(true);
+            StringView stringView = getStringView();
+            stringView.setGrowWidth(false);
+            stringView.setPaintable(true);
             _editor = null;
         }
 
