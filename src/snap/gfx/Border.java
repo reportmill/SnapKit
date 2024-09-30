@@ -237,6 +237,8 @@ public abstract class Border extends PropObject implements Cloneable, StringCode
         // Handle Border or null
         if (anObj instanceof Border || anObj == null)
             return (Border) anObj;
+        if (anObj.equals("null"))
+            return null;
 
         // Parse string
         String str = anObj.toString().trim();

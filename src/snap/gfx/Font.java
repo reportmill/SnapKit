@@ -519,6 +519,8 @@ public class Font extends PropObject implements XMLArchiver.Archivable, StringCo
         // Handle string: try to pick off size
         if (anObj instanceof String) {
             String str = (String) anObj;
+            if (str.equals("null"))
+                return null;
             String[] parts = str.split("\\s");
             if (parts.length > 1) {
                  double size = Convert.doubleValue(parts[parts.length - 1]);

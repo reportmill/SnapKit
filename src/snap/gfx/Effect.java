@@ -4,12 +4,13 @@
 package snap.gfx;
 import snap.geom.Rect;
 import snap.props.PropObject;
+import snap.props.StringCodec;
 import snap.util.*;
 
 /**
  * A class to represent a visual effect that can be applied to drawing done in a Painter (like blur, shadow, etc.).
  */
-public abstract class Effect extends PropObject implements XMLArchiver.Archivable {
+public abstract class Effect extends PropObject implements XMLArchiver.Archivable, StringCodec.Codeable {
 
     /**
      * Constructor.
@@ -59,6 +60,7 @@ public abstract class Effect extends PropObject implements XMLArchiver.Archivabl
     /**
      * Returns a string encoding of this effect.
      */
+    @Override
     public String codeString()  { return "unknown"; }
 
     /**
@@ -81,6 +83,7 @@ public abstract class Effect extends PropObject implements XMLArchiver.Archivabl
             case "blur": return BlurEffect.of(anObj);
             case "emboss": return EmbossEffect.of(anObj);
             case "reflect": return ReflectEffect.of(anObj);
+            case "null": return null;
             default: System.err.println("Effect.of: Invalid effect string: " + anObj); return null;
         }
     }

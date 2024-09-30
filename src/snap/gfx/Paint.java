@@ -60,6 +60,8 @@ public interface Paint extends XMLArchiver.Archivable, StringCodec.Codeable {
     {
         if (anObj instanceof Paint || anObj == null)
             return (Paint) anObj;
+        if (anObj.equals("null"))
+            return null;
         return Color.get(anObj);
     }
 }

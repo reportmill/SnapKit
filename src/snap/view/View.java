@@ -7,6 +7,7 @@ import snap.geom.*;
 import snap.gfx.*;
 import snap.props.PropObject;
 import snap.props.PropSet;
+import snap.props.StringCodec;
 import snap.text.StringBox;
 import snap.util.*;
 
@@ -3120,21 +3121,21 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Archive Fill
         if (!isPropDefault(Fill_Prop))
-            e.add(Fill_Prop, getFill().codeString());
+            e.add(Fill_Prop, StringCodec.SHARED.codeString(getFill()));
 
         // Archive Border, BorderRadius
         if (!isPropDefault(Border_Prop))
-            e.add(Border_Prop, getBorder().codeString());
+            e.add(Border_Prop, StringCodec.SHARED.codeString(getBorder()));
         if (!isPropDefault(BorderRadius_Prop))
             e.add(BorderRadius_Prop, getBorderRadius());
 
         // Archive Effect
         if (!isPropDefault(Effect_Prop))
-            e.add(Effect_Prop, getEffect().codeString());
+            e.add(Effect_Prop, StringCodec.SHARED.codeString(getEffect()));
 
         // Archive font
         if (!isPropDefault(Font_Prop))
-            e.add(Font_Prop, getFont().codeString());
+            e.add(Font_Prop, StringCodec.SHARED.codeString(getFont()));
 
         // Archive GrowWidth, GrowHeight, LeanX, LeanY
         if (isGrowWidth())
