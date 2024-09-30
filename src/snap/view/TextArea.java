@@ -12,7 +12,7 @@ import java.util.Objects;
 /**
  * A view subclass for displaying and editing a TextBlock.
  */
-public class TextArea extends View {
+public class TextArea extends ParentView {
 
     // The text adapter
     private TextAdapter _textAdapter;
@@ -50,12 +50,9 @@ public class TextArea extends View {
     public TextArea(boolean isRichText)
     {
         super();
-        setFocusPainted(false);
-        enableEvents(Action);
 
         // Create/set default TextBlock
         _textBlock = new TextBox(isRichText);
-        _textBlock.activateUndo();
 
         // Create TextAdapter
         _textAdapter = createTextAdapter(_textBlock);
@@ -601,6 +598,7 @@ public class TextArea extends View {
             setFocusable(true);
             setFocusWhenPressed(true);
             setFocusKeysEnabled(false);
+            setFocusPainted(false);
         }
 
         else {
@@ -629,6 +627,7 @@ public class TextArea extends View {
 
         // Relayout and repaint
         relayoutParent();
+        relayout();
         repaint();
     }
 

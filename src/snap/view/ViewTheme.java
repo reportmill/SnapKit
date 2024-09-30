@@ -215,8 +215,9 @@ public class ViewTheme {
         setViewStylePropValue(ComboBox.class, View.Align_Prop, Pos.CENTER_LEFT);
         setViewStylePropValue(ImageView.class, View.Align_Prop, Pos.CENTER);
 
-        // TextArea
-        setViewStylePropValue(TextArea.class, View.Padding_Prop, new Insets(2));
+        // TextArea, TextView
+        setViewStylePropValue(TextView.class, View.Padding_Prop, new Insets(2));
+        setViewStylePropValue(TextView.class, View.Fill_Prop, getContentColor());
 
         // TitleView
         setViewStylePropValue(TitleView.class, View.Padding_Prop, new Insets(2));

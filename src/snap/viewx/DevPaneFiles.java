@@ -118,8 +118,7 @@ public class DevPaneFiles extends ViewOwner {
 
         // Config FileTextView.TextArea
         TextView textView = getView("FileTextView", TextView.class);
-        TextArea textArea = textView.getTextArea();
-        textArea.setPadding(4, 4, 4, 4);
+        textView.setPadding(4, 4, 4, 4);
 
         // Add drag listener to content view
         getUI().addEventHandler(e -> handleDragEvent(e), DragEvents);

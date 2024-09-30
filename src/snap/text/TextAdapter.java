@@ -63,7 +63,7 @@ public class TextAdapter extends PropObject {
     // A PropChangeListener to enable/disable caret when window loses focus
     private PropChangeListener  _windowFocusedChangedLsnr;
 
-    // A pointer to window this TextArea is showing in so we can remove WindowFocusChangedLsnr
+    // A pointer to window that text is showing in so we can remove WindowFocusChangedLsnr
     private WindowView _showingWindow;
 
     // Whether as-you-type spell checking is enabled
@@ -744,7 +744,7 @@ public class TextAdapter extends PropObject {
         }
 
         // Complain about the unknown
-        else System.out.println("TextArea.replaceCharsWithContent: Unknown content: " + theContent);
+        else System.out.println("TextAdapter.replaceCharsWithContent: Unknown content: " + theContent);
     }
 
     /**
@@ -942,7 +942,7 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Process event. Make this public so TextArea can be used to edit text outside of normal Views.
+     * Process event.
      */
     public void processEvent(ViewEvent anEvent)
     {
@@ -1263,7 +1263,7 @@ public class TextAdapter extends PropObject {
     {
         if (_textBlock instanceof TextBox)
             ((TextBox) _textBlock).setFontScale(aValue);
-        else System.out.println("TextArea.setFontScale not supported on this text");
+        else System.out.println("TextAdapter.setFontScale not supported on this text");
         _view.relayoutParent();
     }
 
@@ -1274,7 +1274,7 @@ public class TextAdapter extends PropObject {
     {
         if (_textBlock instanceof TextBox)
             ((TextBox) _textBlock).scaleTextToFit();
-        else System.out.println("TextArea.scaleTextToFit not supported on this text");
+        else System.out.println("TextAdapter.scaleTextToFit not supported on this text");
         _view.relayoutParent();
     }
 
@@ -1538,11 +1538,13 @@ public class TextAdapter extends PropObject {
         Pos viewAlign = _view.getAlign();
 
         // Push align to TextBlock via DefaultLineStyle.Align (X) and TextBlock align Y
-        TextLineStyle lstyle = getDefaultLineStyle().copyFor(TextLineStyle.ALIGN_KEY, viewAlign.getHPos());
-        setDefaultLineStyle(lstyle);
+        TextLineStyle lineStyle = getDefaultLineStyle().copyFor(TextLineStyle.ALIGN_KEY, viewAlign.getHPos());
+        setDefaultLineStyle(lineStyle);
+
+        // Forward to text block
         if (_textBlock instanceof TextBox)
             ((TextBox) _textBlock).setAlignY(viewAlign.getVPos());
-        else System.err.println("TextArea.setAlign: Not support on this text block");
+        else System.err.println("TextAdapter.setAlign: Not support on this text block");
     }
 
     /**
