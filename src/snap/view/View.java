@@ -3131,7 +3131,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Archive Effect
         if (!isPropDefault(Effect_Prop))
-            e.add(Effect_Prop, StringCodec.SHARED.codeString(getEffect()));
+            e.add(Effect_Prop, getEffect().codeString());
 
         // Archive font
         if (!isPropDefault(Font_Prop))

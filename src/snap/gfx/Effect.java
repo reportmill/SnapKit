@@ -4,13 +4,12 @@
 package snap.gfx;
 import snap.geom.Rect;
 import snap.props.PropObject;
-import snap.props.StringCodec;
 import snap.util.*;
 
 /**
  * A class to represent a visual effect that can be applied to drawing done in a Painter (like blur, shadow, etc.).
  */
-public abstract class Effect extends PropObject implements XMLArchiver.Archivable, StringCodec.Codeable {
+public abstract class Effect extends PropObject implements XMLArchiver.Archivable {
 
     /**
      * Constructor.
@@ -60,7 +59,6 @@ public abstract class Effect extends PropObject implements XMLArchiver.Archivabl
     /**
      * Returns a string encoding of this effect.
      */
-    @Override
     public String codeString()  { return "unknown"; }
 
     /**
