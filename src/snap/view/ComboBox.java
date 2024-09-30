@@ -570,11 +570,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Layout children.
      */
-    protected void layoutImpl()
-    {
-        boolean fillHeight = !isShowTextField();
-        RowView.layout(this, fillHeight);
-    }
+    protected void layoutImpl()  { RowView.layout(this, true); }
 
     /**
      * Override to focus text or button.

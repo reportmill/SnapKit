@@ -613,7 +613,13 @@ public class ViewUtils {
      */
     public static void checkWantsScrollView(View aView)
     {
-        if (aView.getParent() instanceof Scroller)
+        // If already in scroll view, return
+        View parentView = aView.getParent();
+        if (parentView instanceof Scroller)
+            return;
+
+        // If not in host view, return
+        if (!(parentView instanceof ViewHost))
             return;
 
         // If size less than preferred, replace with scroll view

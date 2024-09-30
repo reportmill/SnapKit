@@ -353,7 +353,7 @@ public class TextField extends ParentView {
         double prefH1 = _textAdapter.getPrefHeight(prefW);
         double prefH2 = _promptLabel.getPrefHeight();
         double prefH3 = Math.max(prefH1, prefH2);
-        return prefH3 + ins.getHeight() + 4;
+        return prefH3 + ins.getHeight();
     }
 
     /**
@@ -520,7 +520,8 @@ public class TextField extends ParentView {
         }
 
         // Check for whether to wrap in scroll view
-        ViewUtils.checkWantsScrollView(this);
+        if (_textAdapter.getLineCount() > 1)
+            ViewUtils.checkWantsScrollView(this);
     }
 
     /**
