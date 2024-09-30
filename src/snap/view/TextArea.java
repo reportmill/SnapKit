@@ -573,7 +573,7 @@ public class TextArea extends ParentView {
 
         // Handle Selection, Editable
         switch (aPC.getPropName()) {
-            case Selection_Prop: handleSelectionChanged(); break;
+            case Selection_Prop: handleSelectionChanged(aPC); break;
             case Editable_Prop: handleEditableChanged(); break;
         }
     }
@@ -581,7 +581,10 @@ public class TextArea extends ParentView {
     /**
      * Called when TextAdapter selection changes.
      */
-    protected void handleSelectionChanged()  { }
+    protected void handleSelectionChanged(PropChange aPC)
+    {
+        firePropChange(Selection_Prop, aPC.getOldValue(), aPC.getNewValue());
+    }
 
     /**
      * Sets whether Text shape is editable.

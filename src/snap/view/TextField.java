@@ -519,9 +519,8 @@ public class TextField extends ParentView {
                 runLater(() -> _textAdapter.setWrapLines(true));
         }
 
-        // If Multiline, check for whether to wrap in scroll view
-        if (isMultiline())
-            ViewUtils.checkWantsScrollView(this);
+        // Check for whether to wrap in scroll view
+        ViewUtils.checkWantsScrollView(this);
     }
 
     /**
