@@ -170,12 +170,12 @@ public class Label extends ParentView {
     /**
      * Returns the StringView.
      */
-    public boolean isStringViewSet()  { return _stringView !=null; }
+    protected boolean isStringViewSet()  { return _stringView != null; }
 
     /**
      * Returns the StringView.
      */
-    public StringView getStringView()
+    protected StringView getStringView()
     {
         // If StringView already set, just return
         if (_stringView != null) return _stringView;

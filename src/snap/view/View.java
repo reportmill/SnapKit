@@ -440,7 +440,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Rect getBounds()
     {
-        return new Rect(getX(), getY(), getWidth(), getHeight());
+        return new Rect(_x + _transX, _y + _transY, _width, _height);
     }
 
     /**

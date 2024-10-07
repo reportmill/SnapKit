@@ -491,9 +491,9 @@ public class TextField extends ParentView {
      */
     private void handleSourceTextPropChange()
     {
-        // If PromptText present, update Label.StringView.Visible
+        // If PromptText present, update PromptLabel.Text
         if (_promptText != null)
-            _promptLabel.getStringView().setPaintable(length() == 0);
+            _promptLabel.setText(length() == 0 ? _promptText : "");
 
         // If focused and text has changed, updated Edited
         if (isFocused() && !isEdited() && !Objects.equals(getText(), _focusGainedText))
@@ -535,17 +535,11 @@ public class TextField extends ParentView {
         Insets ins = getInsetsAll();
         double viewW = getWidth();
         double viewH = getHeight();
-        double textX = ins.left;
+        double textX = ins.left + _promptLabel.getTextBounds().x;
         double textY = ins.top;
         double textW = viewW - ins.getWidth();
         double prefH = _textAdapter.getPrefHeight(textW);
         double textH = Math.min(prefH, viewH - ins.getHeight());
-
-        // Adjust for PromptText if set
-        if (_promptLabel.isStringViewSet()) {
-            StringView stringView = _promptLabel.getStringView();
-            textX += stringView.getX() + stringView.getTransX();
-        }
 
         // Adjust rect by alignment
         double alignX = ViewUtils.getAlignX(this);

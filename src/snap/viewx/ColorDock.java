@@ -266,20 +266,22 @@ public class ColorDock extends View {
     protected void paintFront(Painter aPntr)
     {
         // Get bounds and insets
-        Rect bounds = getBounds();
+        double viewW = getWidth();
+        double viewH = getHeight();
         Insets ins = getInsetsAll();
 
         // Get content size
-        double width = bounds.width - ins.getWidth();
-        double height = bounds.height - ins.getHeight();
+        double areaW = viewW - ins.getWidth();
+        double areaH = viewH - ins.getHeight();
 
         // Get swatch size
         int swatchW = SWATCH_SIZE;
         int swatchH = SWATCH_SIZE;
 
         // Fill background to white and clip
-        aPntr.setColor(Color.WHITE); aPntr.fillRect(ins.left, ins.top, width, height);
-        aPntr.clipRect(ins.left, ins.top, width, height);
+        aPntr.setColor(Color.WHITE);
+        aPntr.fillRect(ins.left, ins.top, areaW, areaH);
+        aPntr.clipRect(ins.left, ins.top, areaW, areaH);
 
         // Make as many rows & columns as will fit, and fill any that are present in the sparse array.
         int nrows = getRowCount();
@@ -294,9 +296,9 @@ public class ColorDock extends View {
         // Draw grid between swatches
         aPntr.setColor(Color.LIGHTGRAY);
         for (int row = 0; row <= nrows; row++)
-            aPntr.drawLine(ins.left, ins.top+row*swatchH, ins.left+width,ins.top+row*swatchH);
+            aPntr.drawLine(ins.left, ins.top+row*swatchH, ins.left+areaW,ins.top+row*swatchH);
         for (int col = 0; col <= ncols; col++)
-            aPntr.drawLine(ins.left+col*swatchW, ins.top,ins.left+col*swatchW,ins.top+height);
+            aPntr.drawLine(ins.left+col*swatchW, ins.top,ins.left+col*swatchW,ins.top+areaH);
 
         // If selected swatch or drag point, highlight
         if (getSelSwatch() != null || _dragPoint != null) {

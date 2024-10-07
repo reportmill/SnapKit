@@ -12,8 +12,8 @@ import snap.viewx.Explode;
  */
 public class DrawerView extends ParentView {
 
-    // The Content view
-    private View  _content;
+    // The view that holds the content
+    private BoxView _contentBox;
 
     // The button tab used to trigger drawer
     private Button  _tabButton;
@@ -57,6 +57,8 @@ public class DrawerView extends ParentView {
      */
     public DrawerView()
     {
+        super();
+
         // Configure basic attributes
         setPadding(24, 8, 8, 8);
         setFill(ViewUtils.getBackFill());
@@ -76,6 +78,12 @@ public class DrawerView extends ParentView {
         // Create/add Close box
         View closedBox = getCloseBox();
         addChild(closedBox);
+
+        // Create add content box
+        _contentBox = new BoxView(null, true, true);
+        _contentBox.setPadding(1, 1, 1, 1);
+        _contentBox.setBorder(Border.createLoweredBevelBorder());
+        addChild(_contentBox);
     }
 
     /**
@@ -90,29 +98,14 @@ public class DrawerView extends ParentView {
     /**
      * Returns the box content.
      */
-    public View getContent()  { return _content; }
+    public View getContent()  { return _contentBox.getContent(); }
 
     /**
      * Sets the box content.
      */
     public void setContent(View aView)
     {
-        // If already set, just return
-        if (aView == _content) return;
-
-        // Remove old content
-        if (_content != null)
-            removeChild(_content);
-
-        // Add new Content in box
-        BoxView boxView = new BoxView(aView, true, true);
-        boxView.setPadding(1, 1, 1, 1);
-        boxView.setBorder(Border.createLoweredBevelBorder());
-        _content = boxView;
-
-        // Add new Content
-        if (_content != null)
-            addChild(_content);
+        _contentBox.setContent(aView);
     }
 
     /**
@@ -435,7 +428,7 @@ public class DrawerView extends ParentView {
                 return;
 
             // Toggle drawer
-            double explodeX = _closeBox.getBounds().getMidX();
+            double explodeX = _closeBox.getMidX();
             if (anEvent.getX() > explodeX)
                 explode();
             else toggleDrawer();
@@ -519,7 +512,7 @@ public class DrawerView extends ParentView {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        return BoxView.getPrefWidth(this, getContent(), aH);
+        return BoxView.getPrefWidth(this, _contentBox, aH);
     }
 
     /**
@@ -527,7 +520,7 @@ public class DrawerView extends ParentView {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        return BoxView.getPrefHeight(this, getContent(), aW);
+        return BoxView.getPrefHeight(this, _contentBox, aW);
     }
 
     /**
@@ -535,7 +528,7 @@ public class DrawerView extends ParentView {
      */
     protected void layoutImpl()
     {
-        BoxView.layout(this, getContent(), true, true);
+        BoxView.layout(this, _contentBox, true, true);
     }
 
     /**
