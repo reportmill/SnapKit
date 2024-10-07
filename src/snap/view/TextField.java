@@ -323,10 +323,12 @@ public class TextField extends ParentView {
     @Override
     protected void paintFront(Painter aPntr)
     {
+        aPntr.save();
         Rect textBounds = _textAdapter.getTextBounds();
         aPntr.clip(textBounds);
 
         _textAdapter.paintText(aPntr);
+        aPntr.restore();
     }
 
     /**
