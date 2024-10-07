@@ -13,30 +13,36 @@ import snap.util.*;
  */
 public class Scroller extends ParentView implements ViewHost {
 
-    // The content
-    private View  _content;
-    
-    // Whether to fit content to scroller width/height
-    private boolean  _fitWidth, _fitHeight;
+    // The content view
+    private View _content;
+
+    // Whether to make content fill width
+    private boolean _fillWidth;
+
+    // Whether to make content fill height
+    private boolean _fillHeight;
 
     // The scroll amounts
-    private double  _scrollX, _scrollY;
+    private double _scrollX, _scrollY;
     
     // The content width/height being scrolled
-    private double  _scrollWidth, _scrollHeight;
+    private double _scrollWidth, _scrollHeight;
 
     // Constants for properties
     public static final String Content_Prop = "Content";
+    public static final String FillWidth_Prop = BoxView.FillWidth_Prop;
+    public static final String FillHeight_Prop = BoxView.FillHeight_Prop;
     public static final String ScrollX_Prop = "ScrollX";
     public static final String ScrollY_Prop = "ScrollY";
     public static final String ScrollWidth_Prop = "ScrollWidth";
     public static final String ScrollHeight_Prop = "ScrollHeight";
 
     /**
-     * Creates a new Scroller.
+     * Constructor.
      */
     public Scroller()
     {
+        super();
         enableEvents(Scroll);
         setClipToBounds(true);
     }
@@ -52,11 +58,12 @@ public class Scroller extends ParentView implements ViewHost {
     public void setContent(View aView)
     {
         // If already set, just return
-        View oldContent = _content; if (aView == oldContent) return;
+        if (aView == _content) return;
 
         // Remove old content, set and add new content
         if (_content != null)
             removeChild(_content);
+        View oldContent = _content;
         _content = aView;
         if (_content != null)
             addChild(aView);
@@ -68,7 +75,7 @@ public class Scroller extends ParentView implements ViewHost {
     /**
      * Returns whether this scroller fits content to its width.
      */
-    public boolean isFillWidth()  { return _fitWidth; }
+    public boolean isFillWidth()  { return _fillWidth; }
 
     /**
      * Sets whether this scroller fits content to its width.
@@ -76,13 +83,13 @@ public class Scroller extends ParentView implements ViewHost {
     public void setFillWidth(boolean aValue)
     {
         if (aValue == isFillWidth()) return;
-        firePropChange("FitWidth", _fitWidth, _fitWidth = aValue);
+        firePropChange(FillWidth_Prop, _fillWidth, _fillWidth = aValue);
     }
 
     /**
      * Returns whether this scroller fits content to its height.
      */
-    public boolean isFillHeight()  { return _fitHeight; }
+    public boolean isFillHeight()  { return _fillHeight; }
 
     /**
      * Sets whether this scroller fits content to its height.
@@ -90,7 +97,7 @@ public class Scroller extends ParentView implements ViewHost {
     public void setFillHeight(boolean aValue)
     {
         if (aValue == isFillHeight()) return;
-        firePropChange("FitHeight", _fitHeight, _fitHeight = aValue);
+        firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
     }
 
     /**

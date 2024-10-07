@@ -26,6 +26,9 @@ public class ScrollView extends ParentView implements ViewHost {
     private int  _barSize = 16;
     
     // Constants
+    public static final String Content_Prop = Scroller.Content_Prop;
+    public static final String FillWidth_Prop = Scroller.FillWidth_Prop;
+    public static final String FillHeight_Prop = Scroller.FillHeight_Prop;
     public static final String ShowHBar_Prop = "ShowHBar";
     public static final String ShowVBar_Prop = "ShowVBar";
     public static final String BarSize_Prop = "BarSize";
@@ -41,8 +44,7 @@ public class ScrollView extends ParentView implements ViewHost {
 
         // Create Scroller and add listeners for scroll changes
         _scroller = new Scroller();
-        _scroller.addPropChangeListener(pc -> scrollerDidPropChange(pc), Width_Prop, Height_Prop,
-            Scroller.ScrollX_Prop, Scroller.ScrollY_Prop, Scroller.ScrollWidth_Prop, Scroller.ScrollHeight_Prop);
+        _scroller.addPropChangeListener(this::handleScrollerPropChange);
         addChild(_scroller);
     }
 
@@ -64,6 +66,26 @@ public class ScrollView extends ParentView implements ViewHost {
      * Sets the content.
      */
     public void setContent(View aView)  { _scroller.setContent(aView); }
+
+    /**
+     * Returns whether this ScrollView fits content to its width.
+     */
+    public boolean isFillWidth()  { return _scroller.isFillWidth(); }
+
+    /**
+     * Sets whether this ScrollView fits content to its width.
+     */
+    public void setFillWidth(boolean aValue)  { _scroller.setFillWidth(aValue); }
+
+    /**
+     * Returns whether this ScrollView fits content to its height.
+     */
+    public boolean isFillHeight()  { return _scroller.isFillHeight(); }
+
+    /**
+     * Sets whether this ScrollView fits content to its height.
+     */
+    public void setFillHeight(boolean aValue)  { _scroller.setFillHeight(aValue); }
 
     /**
      * ViewHost method: Override to send to Scroller.
@@ -97,7 +119,7 @@ public class ScrollView extends ParentView implements ViewHost {
     {
         if (_hbar != null) return _hbar;
         _hbar = new ScrollBar();
-        _hbar.addPropChangeListener(pc -> scrollBarDidPropChange(pc), ScrollBar.Scroll_Prop);
+        _hbar.addPropChangeListener(this::handleScrollBarPropChange, ScrollBar.Scroll_Prop);
         return _hbar;
     }
 
@@ -109,7 +131,7 @@ public class ScrollView extends ParentView implements ViewHost {
         if (_vbar != null) return _vbar;
         _vbar = new ScrollBar();
         _vbar.setVertical(true);
-        _vbar.addPropChangeListener(pc -> scrollBarDidPropChange(pc), ScrollBar.Scroll_Prop);
+        _vbar.addPropChangeListener(this::handleScrollBarPropChange, ScrollBar.Scroll_Prop);
         return _vbar;
     }
 
@@ -211,34 +233,6 @@ public class ScrollView extends ParentView implements ViewHost {
     {
         if (aValue == _barSize) return;
         firePropChange(BarSize_Prop, _barSize, _barSize = aValue);
-    }
-
-    /**
-     * Returns whether this ScrollView fits content to its width.
-     */
-    public boolean isFillWidth()  { return _scroller.isFillWidth(); }
-
-    /**
-     * Sets whether this ScrollView fits content to its width.
-     */
-    public void setFillWidth(boolean aValue)
-    {
-        _scroller.setFillWidth(aValue);
-        relayout();
-    }
-
-    /**
-     * Returns whether this ScrollView fits content to its height.
-     */
-    public boolean isFillHeight()  { return _scroller.isFillHeight(); }
-
-    /**
-     * Sets whether this ScrollView fits content to its height.
-     */
-    public void setFillHeight(boolean aValue)
-    {
-        _scroller.setFillHeight(aValue);
-        relayout();
     }
 
     /**
@@ -394,40 +388,43 @@ public class ScrollView extends ParentView implements ViewHost {
     /**
      * Handle Scroller property changes.
      */
-    protected void scrollerDidPropChange(PropChange anEvent)
+    protected void handleScrollerPropChange(PropChange aPC)
     {
-        // Get Property Name
-        String propName = anEvent.getPropName();
+        switch (aPC.getPropName()) {
 
-        // Handle Scroller.ScrollX change
-        if (propName == Scroller.ScrollX_Prop)
-            getHBar().setScroll(_scroller.getScrollX());
+            // Handle Scroller Content, FillWidth, FillHeight
+            case Content_Prop: case FillWidth_Prop: case FillHeight_Prop:
+                firePropChange(aPC.getPropName(), aPC.getOldValue(), aPC.getNewValue());
+                relayout();
+                break;
 
-        // Handle Scroller.ScrollY change
-        else if (propName == Scroller.ScrollY_Prop)
-            getVBar().setScroll(_scroller.getScrollY());
+            // Handle Scroller ScrollX, ScrollY change
+            case Scroller.ScrollX_Prop: getHBar().setScroll(_scroller.getScrollX()); break;
+            case Scroller.ScrollY_Prop: getVBar().setScroll(_scroller.getScrollY()); break;
 
-        // Handle Scroller.Width or Scroller.ScrollWidth change
-        else if (propName == Width_Prop || propName == Scroller.ScrollWidth_Prop) {
-            getHBar().setViewSize(_scroller.getWidth());
-            getHBar().setScrollSize(_scroller.getScrollWidth());
-            getHBar().setScroll(_scroller.getScrollX());
-        }
+            // Handle Scroller.Width or Scroller.ScrollWidth change
+            case Width_Prop: case Scroller.ScrollWidth_Prop:
+                getHBar().setViewSize(_scroller.getWidth());
+                getHBar().setScrollSize(_scroller.getScrollWidth());
+                getHBar().setScroll(_scroller.getScrollX());
+                break;
 
-        // Handle Scroller.Height or Scroller.ScrollHeight change
-        else if (propName == Scroller.Height_Prop || propName == Scroller.ScrollHeight_Prop) {
-            getVBar().setViewSize(_scroller.getHeight());
-            getVBar().setScrollSize(_scroller.getScrollHeight());
-            getVBar().setScroll(_scroller.getScrollY());
+            // Handle Scroller.Height or Scroller.ScrollHeight change
+            case Height_Prop: case Scroller.ScrollHeight_Prop:
+                getVBar().setViewSize(_scroller.getHeight());
+                getVBar().setScrollSize(_scroller.getScrollHeight());
+                getVBar().setScroll(_scroller.getScrollY());
+                break;
         }
     }
 
     /**
      * Handle ScrollBar property changes.
      */
-    public void scrollBarDidPropChange(PropChange aPC)
+    protected void handleScrollBarPropChange(PropChange aPC)
     {
         String propName = aPC.getPropName();
+
         if (propName == ScrollBar.Scroll_Prop) {
             ScrollBar scrollBar = (ScrollBar) aPC.getSource();
             double val = scrollBar.getScrollRatio();
