@@ -33,16 +33,13 @@ public class DevPaneViews extends ViewOwner {
     private BrowserView<View>  _browserView;
 
     // The Property TableView
-    private TableView<PropValuePair>  _propTable;
+    private TableView<String>  _propTable;
 
     // The TextView
     private TextView  _textView;
 
-    // The array of PropValuePairs for PropTable
-    private PropValuePair[]  _propPairs;
-
     // The targeting handler
-    private EventListener  _targLsnr = e -> devPaneMouseEvent(e);
+    private EventListener  _targLsnr = e -> handleMainViewMouseEvent(e);
 
     // Constant for visible property names
     private static final String MaxX_Prop = "MaxX";
@@ -52,10 +49,13 @@ public class DevPaneViews extends ViewOwner {
             View.Width_Prop, View.Height_Prop,
             MaxX_Prop, MaxY_Prop,
             View.PrefWidth_Prop, View.PrefHeight_Prop,
-            View.Align_Prop, View.Margin_Prop, View.Padding_Prop, View.Spacing_Prop,
+            View.Align_Prop, View.Margin_Prop,
+            View.Padding_Prop, View.Spacing_Prop,
             View.GrowWidth_Prop, View.GrowHeight_Prop,
             View.LeanX_Prop, View.LeanY_Prop,
-            View.Font_Prop, View.Fill_Prop, View.Border_Prop
+            View.Font_Prop, View.Fill_Prop,
+            View.Border_Prop, View.BorderRadius_Prop,
+            View.Effect_Prop
     };
 
     /**
@@ -77,7 +77,7 @@ public class DevPaneViews extends ViewOwner {
      */
     public void setTargeting(boolean aValue)
     {
-        if (aValue==isTargeting()) return;
+        if (aValue == isTargeting()) return;
         _targeting = aValue;
 
         // If turn on
@@ -104,10 +104,10 @@ public class DevPaneViews extends ViewOwner {
      */
     public void setSelView(View aView)
     {
-        if (aView==getSelView()) return;
+        if (aView == getSelView()) return;
         _browserView.setSelItem(aView);
-        _propPairs = null;
-        _propTable.setItems(getPropValuePairs());
+        _propTable.setItems(getSelViewPropNames());
+        _propTable.updateItems();
     }
 
     /**
@@ -120,91 +120,20 @@ public class DevPaneViews extends ViewOwner {
      */
     public void setTargView(View aView)
     {
-        if (aView==_targView) return;
+        if (aView == _targView) return;
         _targView = aView;
-        _devPane._splitView.repaint();
+        repaintAll();
+        _propTable.updateItems();
     }
 
     /**
-     * Returns the list of properties.
+     * Returns property names for selected view.
      */
-    private PropValuePair[] getPropValuePairs()
+    private String[] getSelViewPropNames()
     {
-        // If already set, just return
-        if (_propPairs != null) return _propPairs;
-
-        // If no SelView, return empty list
         if (getSelView() == null)
-            return _propPairs = new PropValuePair[0];
-
-        // Create new array of PropValuePairs to clear values
-        PropValuePair[] propPairs = new PropValuePair[PROP_NAMES.length];
-        for (int i=0; i<PROP_NAMES.length; i++)
-            propPairs[i] = new PropValuePair(PROP_NAMES[i]);
-        return _propPairs = propPairs;
-    }
-
-
-    /**
-     * Called when the DevPane.SplitView gets a mouse event.
-     */
-    private void devPaneMouseEvent(ViewEvent anEvent)
-    {
-        // Handle MouseMove
-        if (anEvent.isMouseMove()) {
-            View view = getViewAtPoint(anEvent.getX(), anEvent.getY());
-            setSelView(view);
-            setTargView(view);
-        }
-
-        // Handle MouseExit
-        if (anEvent.isMouseExit()) {
-            setSelView(null);
-            setTargView(null);
-        }
-
-        // handle MousePress
-        if (anEvent.isMousePress()) {
-            setTargeting(false);
-            View view = getViewAtPoint(anEvent.getX(), anEvent.getY());
-            setTargView(null);
-            setSelView(view);
-            resetLater();
-        }
-    }
-
-    /**
-     * Returns the view at given point.
-     */
-    private View getViewAtPoint(double aX, double aY)
-    {
-        View view = ViewUtils.getDeepestViewAt(_devPane.getContent(), aX, aY);
-        View par = view!=null ? view.getParent() : null;
-        if (par instanceof Label || par instanceof ButtonBase || par instanceof TextField || par instanceof ComboBox) {
-            view = par; par = par.getParent();
-            if (par instanceof ButtonBase || par instanceof TextField || par instanceof ComboBox)
-                view = par;
-        }
-        return view;
-    }
-
-    /**
-     * Called to paint SelView.
-     */
-    public void paintViewSelection(Painter aPntr, View aHostView)
-    {
-        View selView = getTargView();
-        if (selView == null)
-            selView = getSelView();
-        if (selView==null) return;
-        if (selView.getRootView()==null) return;
-
-        Rect rect = selView.getBoundsLocal().getInsetRect(-1);
-        Shape rect2 = new RoundRect(rect.x, rect.y, rect.width, rect.height, 4);
-        Shape rect3 = selView.localToParent(rect2, aHostView);
-        aPntr.setStroke(DevPane.HIGHLIGHT_BORDER_STROKE);
-        aPntr.setColor(DevPane.HIGHLIGHT_BORDER_COLOR);
-        aPntr.draw(rect3);
+            return new String[0];
+        return PROP_NAMES;
     }
 
     /**
@@ -239,14 +168,15 @@ public class DevPaneViews extends ViewOwner {
         // Update TargetingButton
         setViewValue("TargetingButton", isTargeting());
 
-        // Update PropTable pairs
-        _propTable.setItems(getPropValuePairs());
+        // Update PropTable items
+        _propTable.setItems(getSelViewPropNames());
+        _propTable.updateItems();
 
         // Update PropNameText, PropValueText
-        PropValuePair selPair = _propTable.getSelItem();
-        setViewValue("PropNameText", selPair != null ? selPair.getPropName() : "");
+        String selPropName = _propTable.getSelItem();
+        setViewValue("PropNameText", selPropName != null ? selPropName : "");
         if (!getView("PropValueText").isFocused()) // Lame - but Fill/Border break when changed
-            setViewValue("PropValueText", selPair != null ? selPair.getValueString() : "");
+            setViewValue("PropValueText", selPropName != null ? getPropValueForPropName(selPropName) : "");
 
         // Handle RelayoutViewButton, RepaintViewButton
         setViewEnabled("RelayoutViewButton", getSelView() != null);
@@ -267,10 +197,9 @@ public class DevPaneViews extends ViewOwner {
 
             // Handle BrowserView
             case "BrowserView":
-                _devPane.getUI().repaint();
+                repaintAll();
                 setTargeting(false);
                 _updateXML = true;
-                _propPairs = null;
                 break;
 
             // Handle TargetingButton
@@ -326,14 +255,43 @@ public class DevPaneViews extends ViewOwner {
     }
 
     /**
+     * Called when the DevPane.SplitView gets a mouse event.
+     */
+    private void handleMainViewMouseEvent(ViewEvent anEvent)
+    {
+        // Handle MouseMove
+        if (anEvent.isMouseMove()) {
+            View view = getDeepestViewAtPoint(_devPane.getContent(), anEvent.getX(), anEvent.getY());
+            setSelView(view);
+            setTargView(view);
+        }
+
+        // Handle MouseExit
+        if (anEvent.isMouseExit()) {
+            setSelView(null);
+            setTargView(null);
+        }
+
+        // handle MousePress
+        if (anEvent.isMousePress()) {
+            setTargeting(false);
+            View view = getDeepestViewAtPoint(_devPane.getContent(), anEvent.getX(), anEvent.getY());
+            setTargView(null);
+            setSelView(view);
+            resetLater();
+        }
+    }
+
+    /**
      * Called when PropNameText gets Action event.
      */
     private void handlePropNameTextAction(ViewEvent anEvent)
     {
         String prefix = anEvent.getStringValue();
-        PropValuePair selPair = ArrayUtils.findMatch(_propPairs, propPair -> StringUtils.startsWithIC(propPair.getPropName(), prefix));
-        if (selPair != null)
-            _propTable.setSelItem(selPair);
+        String[] propNames = getSelViewPropNames();
+        String propName = ArrayUtils.findMatch(propNames, propPair -> StringUtils.startsWithIC(propPair, prefix));
+        if (propName != null)
+            _propTable.setSelItem(propName);
     }
 
     /**
@@ -341,12 +299,12 @@ public class DevPaneViews extends ViewOwner {
      */
     private void handlePropValueTextAction(ViewEvent anEvent)
     {
-        View selView = getSelView(); if (selView==null) return;
-        PropValuePair selPair = _propTable.getSelItem(); if (selPair == null) return;
-        String propName = selPair.getPropName();
+        View selView = getSelView(); if (selView == null) return;
+        String propName = _propTable.getSelItem(); if (propName == null) return;
         String propValue = anEvent.getStringValue();
         selView.setPropValue(propName, propValue);
-        _devPane._splitView.repaint();
+        _propTable.updateItems();
+        repaintAll();
     }
 
     /**
@@ -354,10 +312,10 @@ public class DevPaneViews extends ViewOwner {
      */
     private void handleSetPropStringTextAction(ViewEvent anEvent)
     {
-        View selView = getSelView(); if (selView==null) return;
+        View selView = getSelView(); if (selView == null) return;
         String propsStr = anEvent.getStringValue();
         selView.setPropsString(propsStr);
-        _devPane._splitView.repaint();
+        repaintAll();
     }
 
     /**
@@ -426,90 +384,88 @@ public class DevPaneViews extends ViewOwner {
     /**
      * Configures a PropTable cell.
      */
-    private void configurePropTableCell(ListCell<PropValuePair> aCell)
+    private void configurePropTableCell(ListCell<String> aCell)
     {
-        // Get PropValuePair for Cell (just return if empty cell)
-        PropValuePair propPair = aCell.getItem();
-        if (propPair == null)
+        // Get propName for Cell (just return if empty cell)
+        String propName = aCell.getItem();
+        if (propName == null)
             return;
 
         // Configure Col 0, Col 1
         int col = aCell.getCol();
         if (col == 0)
-            aCell.setText(propPair.getPropName());
-        else aCell.setText(propPair.getValueString());
+            aCell.setText(propName);
+        else aCell.setText(getPropValueStringForPropName(propName));
     }
 
     /**
-     * A class to represent a Prop/Prop-Value pair.
+     * Returns the value string.
      */
-    private class PropValuePair {
+    private String getPropValueStringForPropName(String propName)
+    {
+        Object propValue = getPropValueForPropName(propName);
+        if (propValue instanceof Insets)
+            return ((Insets) propValue).getString();
+        return Convert.stringValue(propValue);
+    }
 
-        // The property name
-        private String  _propName;
+    /**
+     * Returns the value string.
+     */
+    private Object getPropValueForPropName(String propName)
+    {
+        View selView = getSelView();
+        switch (propName) {
+            case MaxX_Prop: return selView.getX() + selView.getWidth();
+            case MaxY_Prop: return selView.getY() + selView.getHeight();
+            case View.PrefWidth_Prop: return selView.getPrefWidth();
+            case View.PrefHeight_Prop: return selView.getPrefHeight();
+            default: return selView.getPropValue(propName);
+        }
+    }
 
-        // The property value
-        private Object  _propValue;
+    /**
+     * Repaint everything.
+     */
+    private void repaintAll()  { _devPane._splitView.repaint(); }
 
-        // The property value string
-        private String  _propValueStr;
+    /**
+     * Called to paint SelView.
+     */
+    public void paintViewSelection(Painter aPntr, View aHostView)
+    {
+        View selView = getTargView();
+        if (selView == null)
+            selView = getSelView();
+        if (selView == null || selView.getRootView() == null)
+            return;
 
-        /**
-         * Constructor.
-         */
-        public PropValuePair(String aPropName)
-        {
-            _propName = aPropName;
+        Rect rect = selView.getBoundsLocal().getInsetRect(-1);
+        Shape rect2 = new RoundRect(rect.x, rect.y, rect.width, rect.height, 4);
+        Shape rect3 = selView.localToParent(rect2, aHostView);
+        aPntr.setStroke(DevPane.HIGHLIGHT_BORDER_STROKE);
+        aPntr.setColor(DevPane.HIGHLIGHT_BORDER_COLOR);
+        aPntr.draw(rect3);
+    }
+
+    /**
+     * Returns the view at given point.
+     */
+    private static View getDeepestViewAtPoint(View mainView, double aX, double aY)
+    {
+        // Get deepest view at point
+        View view = ViewUtils.getDeepestViewAt(mainView, aX, aY);
+
+        // Get HostView
+        View par = view!=null ? view.getParent() : null;
+        if (par instanceof Label || par instanceof ButtonBase || par instanceof TextField || par instanceof ComboBox) {
+            view = par; par = par.getParent();
+            if (par instanceof ButtonBase || par instanceof TextField || par instanceof ComboBox)
+                view = par;
         }
 
-        /**
-         * Returns the property name.
-         */
-        public String getPropName()  { return _propName; }
-
-        /**
-         * Returns the value.
-         */
-        public Object getValue()
-        {
-            if (_propValue != null) return _propValue;
-            return _propValue = getValueImpl();
-        }
-
-        /**
-         * Returns the value.
-         */
-        private Object getValueImpl()
-        {
-            View selView = getSelView();
-            switch (_propName) {
-                case MaxX_Prop: return selView.getX() + selView.getWidth();
-                case MaxY_Prop: return selView.getY() + selView.getHeight();
-                case View.PrefWidth_Prop: return selView.getPrefWidth();
-                case View.PrefHeight_Prop: return selView.getPrefHeight();
-                default: return getSelView().getPropValue(_propName);
-            }
-        }
-
-        /**
-         * Returns the value string.
-         */
-        public String getValueString()
-        {
-            if (_propValueStr != null) return _propValueStr;
-            return _propValueStr = getValueStringImpl();
-        }
-
-        /**
-         * Returns the value string.
-         */
-        private String getValueStringImpl()
-        {
-            Object propValue = getValue();
-            if (propValue instanceof Insets)
-                return ((Insets) propValue).getString();
-            return Convert.stringValue(propValue);
-        }
+        // Return
+        return view;
     }
 
     /**
