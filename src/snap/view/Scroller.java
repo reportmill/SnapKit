@@ -29,7 +29,7 @@ public class Scroller extends ParentView implements ViewHost {
     private double _scrollWidth, _scrollHeight;
 
     // Constants for properties
-    public static final String Content_Prop = "Content";
+    public static final String Content_Prop = BoxView.Content_Prop;
     public static final String FillWidth_Prop = BoxView.FillWidth_Prop;
     public static final String FillHeight_Prop = BoxView.FillHeight_Prop;
     public static final String ScrollX_Prop = "ScrollX";
@@ -60,10 +60,12 @@ public class Scroller extends ParentView implements ViewHost {
         // If already set, just return
         if (aView == _content) return;
 
-        // Remove old content, set and add new content
+        // Cache and remove old content
+        View oldContent = _content;
         if (_content != null)
             removeChild(_content);
-        View oldContent = _content;
+
+        // Set and add new content
         _content = aView;
         if (_content != null)
             addChild(aView);

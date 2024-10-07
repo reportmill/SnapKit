@@ -11,18 +11,18 @@ import snap.util.*;
 public class BoxView extends ParentView implements ViewHost {
     
     // The content view
-    private View  _content;
+    private View _content;
 
     // Whether to fill width
-    private boolean  _fillWidth;
+    private boolean _fillWidth;
     
     // Whether to fill height
-    private boolean  _fillHeight;
+    private boolean _fillHeight;
 
     // Constants for properties
+    public static final String Content_Prop = "Content";
     public static final String FillWidth_Prop = "FillWidth";
     public static final String FillHeight_Prop = "FillHeight";
-    public static final String Content_Prop = "Content";
 
     /**
      * Constructor.
@@ -65,7 +65,7 @@ public class BoxView extends ParentView implements ViewHost {
         // If already set, just return
         if (aView == getContent()) return;
 
-        // Remove old content, set/add new content
+        // Cache and remove old content
         View oldContent = _content;
         if (oldContent != null)
             removeChild(_content);
