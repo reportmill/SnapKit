@@ -18,10 +18,10 @@ public class PopupList<T> extends ListView<T> {
     private PopupWindow _popup;
 
     // The view given with last show
-    private View _showView;
+    private View _clientView;
 
-    // EventListener to listen to events from show view
-    private EventListener _lsnr;
+    // EventListener to listen to key press events from client view
+    private EventListener _clientViewKeyPressLsnr;
 
     /**
      * Constructor.
@@ -30,6 +30,7 @@ public class PopupList<T> extends ListView<T> {
     {
         super();
         setBorder(null);
+        _clientViewKeyPressLsnr = this::handleClientViewKeyPressEvent;
     }
 
     /**
@@ -74,28 +75,16 @@ public class PopupList<T> extends ListView<T> {
     }
 
     /**
-     * Shows the node.
+     * Shows this popup list in a popup window at given XY relative to view.
      */
     public void show(View aView, double aX, double aY)
     {
-        // Get popup window and set best size
-        PopupWindow popupWindow = getPopup();
-
-        // Configure PrefHeight
-        int prefRowCount = getPrefRowCount();
-        double prefH = prefRowCount > 0 ? prefRowCount * getRowHeight() + getInsetsAll().getHeight() : -1;
-        popupWindow.setPrefHeight(prefH);
-
-        // Configure MaxHeight
-        int maxRowCount = getMaxRowCount();
-        double maxH = maxRowCount > 0 ? maxRowCount * getRowHeight() + getInsetsAll().getHeight() : -1;
-        popupWindow.setMaxHeight(maxH);
-
-        // Size popup window
-        popupWindow.pack();
+        // Resize popup window
+        resizePopupWindow();
 
         // Show popup window
-        popupWindow.show(_showView = aView, aX, aY);
+        PopupWindow popupWindow = getPopup();
+        popupWindow.show(_clientView = aView, aX, aY);
     }
 
     /**
@@ -113,7 +102,29 @@ public class PopupList<T> extends ListView<T> {
     {
         super.setItemsList(theItems);
         if (isShowing())
-            getPopup().pack();
+            resizePopupWindow();
+    }
+
+    /**
+     * Resizes the popup window.
+     */
+    private void resizePopupWindow()
+    {
+        // Get popup window and set best size
+        PopupWindow popupWindow = getPopup();
+
+        // Configure PrefHeight
+        int prefRowCount = getPrefRowCount();
+        double prefH = prefRowCount > 0 ? prefRowCount * getRowHeight() + getInsetsAll().getHeight() : -1;
+        popupWindow.setPrefHeight(prefH);
+
+        // Configure MaxHeight
+        int maxRowCount = getMaxRowCount();
+        double maxH = maxRowCount > 0 ? maxRowCount * getRowHeight() + getInsetsAll().getHeight() : -1;
+        popupWindow.setMaxHeight(maxH);
+
+        // Size popup window
+        popupWindow.pack();
     }
 
     /**
@@ -126,32 +137,31 @@ public class PopupList<T> extends ListView<T> {
     }
 
     /**
+     * Called when PopupWindow is shown/hidden.
+     */
+    protected void handlePopupWindowShowingChanged()
+    {
+        if (_clientView == null) return;
+        PopupWindow popupWindow = getPopup();
+        boolean showing = popupWindow.isShowing();
+
+        // If showing, add EventListener, otherwise, remove
+        if (showing)
+            _clientView.addEventFilter(_clientViewKeyPressLsnr, KeyPress);
+
+        // Otherwise remove listener
+        else {
+            _clientView.removeEventFilter(_clientViewKeyPressLsnr, KeyPress);
+            _clientView = null;
+        }
+    }
+
+    /**
      * Called when owner View has KeyPress events.
      */
     protected void handleClientViewKeyPressEvent(ViewEvent anEvent)
     {
         if (anEvent.isUpArrow() || anEvent.isDownArrow() || anEvent.isEnterKey())
             processEvent(anEvent);
-    }
-
-    /**
-     * Called when PopupWindow is shown/hidden.
-     */
-    protected void handlePopupWindowShowingChanged()
-    {
-        if (_showView == null) return;
-        PopupWindow popup = getPopup();
-        boolean showing = popup.isShowing();
-
-        // If showing, add EventListener, otherwise, remove
-        if (showing)
-            _showView.addEventFilter(_lsnr = this::handleClientViewKeyPressEvent, KeyPress);
-
-        // Otherwise remove listener
-        else {
-            _showView.removeEventFilter(_lsnr, KeyPress);
-            _lsnr = null;
-            _showView = null;
-        }
     }
 }
