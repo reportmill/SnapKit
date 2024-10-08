@@ -39,12 +39,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     // The background color for alternating rows
     private Color _altRowColor;
 
-    // The Preferred number of rows
-    private int  _prefRowCount = -1;
-
-    // The maximum number of rows
-    private int  _maxRowCount = -1;
-
     // Whether list distinguishes item under the mouse
     private boolean  _targeting;
 
@@ -395,26 +389,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     public void setAltRowColor(Color aColor)  { _altRowColor = aColor; }
 
     /**
-     * Returns the preferred number of rows.
-     */
-    public int getPrefRowCount()  { return _prefRowCount; }
-
-    /**
-     * Sets the preferred number of rows.
-     */
-    public void setPrefRowCount(int aValue)  { _prefRowCount = aValue; relayoutParent(); }
-
-    /**
-     * Returns the maximum number of rows.
-     */
-    public int getMaxRowCount()  { return _maxRowCount; }
-
-    /**
-     * Sets the maximum number of rows.
-     */
-    public void setMaxRowCount(int aValue)  { _maxRowCount = aValue; relayoutParent(); }
-
-    /**
      * Returns whether list shows visual cue for item under the mouse.
      */
     public boolean isTargeting()  { return _targeting; }
@@ -600,6 +574,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the preferred width.
      */
+    @Override
     protected double getPrefWidthImpl(double aH)
     {
         if (_sampleWidth < 0)
@@ -610,28 +585,12 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the preferred height.
      */
+    @Override
     protected double getPrefHeightImpl(double aW)
     {
-        // If PrefRowCount set, return PrefRowCount*RowHeight
-        if (getPrefRowCount() > 0)
-            return getPrefRowCount() * getRowHeight() + getInsetsAll().getHeight();
-
         double rowH = getRowHeight();
         int itemCount = getItemCount();
         return rowH * itemCount;
-    }
-
-    /**
-     * Returns the maximum height.
-     */
-    public double getMaxHeight()
-    {
-        // If MaxRowCount set, return MaxRowCount * RowHeight
-        if (getMaxRowCount() > 0)
-            return getMaxRowCount() * getRowHeight() + getInsetsAll().getHeight();
-
-        // Return normal version
-        return super.getMaxHeight();
     }
 
     /**

@@ -8,6 +8,12 @@ package snap.view;
  */
 public class PopupList<T> extends ListView<T> {
 
+    // The Preferred number of rows
+    private int _prefRowCount = -1;
+
+    // The maximum number of rows
+    private int _maxRowCount = -1;
+
     // The PopupNode
     private PopupWindow  _popup;
 
@@ -24,6 +30,26 @@ public class PopupList<T> extends ListView<T> {
     {
         super();
     }
+
+    /**
+     * Returns the preferred number of rows.
+     */
+    public int getPrefRowCount()  { return _prefRowCount; }
+
+    /**
+     * Sets the preferred number of rows.
+     */
+    public void setPrefRowCount(int aValue)  { _prefRowCount = aValue; relayoutParent(); }
+
+    /**
+     * Returns the maximum number of rows.
+     */
+    public int getMaxRowCount()  { return _maxRowCount; }
+
+    /**
+     * Sets the maximum number of rows.
+     */
+    public void setMaxRowCount(int aValue)  { _maxRowCount = aValue; relayoutParent(); }
 
     /**
      * Returns the popup.
@@ -51,12 +77,24 @@ public class PopupList<T> extends ListView<T> {
      */
     public void show(View aView, double aX, double aY)
     {
-        // Get popup and set best size
-        PopupWindow popup = getPopup();
-        popup.pack();
+        // Get popup window and set best size
+        PopupWindow popupWindow = getPopup();
 
-        // Show window
-        popup.show(_showView = aView, aX, aY);
+        // Configure PrefHeight
+        int prefRowCount = getPrefRowCount();
+        double prefH = prefRowCount > 0 ? prefRowCount * getRowHeight() + getInsetsAll().getHeight() : -1;
+        popupWindow.setPrefHeight(prefH);
+
+        // Configure MaxHeight
+        int maxRowCount = getMaxRowCount();
+        double maxH = maxRowCount > 0 ? maxRowCount * getRowHeight() + getInsetsAll().getHeight() : -1;
+        popupWindow.setMaxHeight(maxH);
+
+        // Size popup window
+        popupWindow.pack();
+
+        // Show popup window
+        popupWindow.show(_showView = aView, aX, aY);
     }
 
     /**
