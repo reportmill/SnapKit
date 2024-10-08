@@ -22,10 +22,12 @@ public class TreeCol <T> extends ListView <T> {
     private boolean  _resizable;
     
     /**
-     * Creates a new TreeCol.
+     * Constructor.
      */
     public TreeCol()
     {
+        super();
+        setBorder(null);
         setGrowWidth(true);
         setAltRowColor(null);
     }

@@ -14,14 +14,14 @@ public class PopupList<T> extends ListView<T> {
     // The maximum number of rows
     private int _maxRowCount = -1;
 
-    // The PopupNode
-    private PopupWindow  _popup;
+    // The PopupWindow
+    private PopupWindow _popup;
 
     // The view given with last show
-    private View  _showView;
+    private View _showView;
 
     // EventListener to listen to events from show view
-    private EventListener  _lsnr;
+    private EventListener _lsnr;
 
     /**
      * Constructor.
@@ -29,6 +29,7 @@ public class PopupList<T> extends ListView<T> {
     public PopupList()
     {
         super();
+        setBorder(null);
     }
 
     /**
@@ -116,7 +117,7 @@ public class PopupList<T> extends ListView<T> {
     }
 
     /**
-     * Override to hide popuplist.
+     * Override to hide popup window.
      */
     protected void fireActionEvent(ViewEvent anEvent)
     {

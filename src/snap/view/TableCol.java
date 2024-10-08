@@ -27,12 +27,12 @@ public class TableCol <T> extends ListView <T> {
     public static final String Resizable_Prop = "Resizable";
 
     /**
-     * Creates a new TableCol.
+     * Constructor.
      */
     public TableCol()
     {
-        // Basic
         super();
+        setBorder(null);
         _header.setPadding(4,4,4,4);
 
         // Events

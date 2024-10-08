@@ -15,12 +15,13 @@ public class BrowserCol <T> extends ListView <T> {
     protected int  _index;
     
     /**
-     * Creates new BrowserCol for given BrowserView.
+     * Constructor.
      */
     public BrowserCol(BrowserView<T> aBrsr)
     {
         // Set browser
         _browser = aBrsr;
+        setBorder(null);
         setGrowWidth(true);
 
         // Update some attributes
