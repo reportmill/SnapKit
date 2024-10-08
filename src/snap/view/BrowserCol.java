@@ -28,18 +28,8 @@ public class BrowserCol <T> extends ListView <T> {
         setFocusWhenPressed(false);
         setRowHeight(_browser.getRowHeight());
 
-        // Configure ScrollView
-        ScrollView scrollView = getScrollView();
-        scrollView.setShowHBar(false);
-        scrollView.setShowVBar(true);
-        scrollView.setBarSize(14);
-
         // Configure ListArea to use Browser.configureBrowserCell
-        ListArea<T> listArea = getListArea();
-        listArea.setCellConfigure(lc -> _browser.configureBrowserCell(this, lc));
-
-        // Add listener for ListArea.MouseRelease to update Browser.SelCol
-        listArea.addEventFilter(e -> listAreaMouseReleased(), MouseRelease);
+        setCellConfigure(listCell -> _browser.configureBrowserCell(this, listCell));
     }
 
     /**
@@ -53,16 +43,23 @@ public class BrowserCol <T> extends ListView <T> {
     public int getIndex()  { return _index; }
 
     /**
-     * Called before ListArea.MousePress.
+     * Override to have browser select this column on MouseRelease.
      */
-    protected void listAreaMouseReleased()
+    @Override
+    protected void processEvent(ViewEvent anEvent)
     {
-        _browser.setSelColIndex(_index);
+        // Handle MouseRelease: Select browser column
+        if (anEvent.isMouseRelease())
+            _browser.setSelColIndex(_index);
+
+        // Do normal version
+        super.processEvent(anEvent);
     }
 
     /**
-     * Override to suppress ListArea and fire Browser.
+     * Override to suppress ListView and fire Browser.
      */
+    @Override
     protected void fireActionEvent(ViewEvent anEvent)
     {
         _browser.fireActionEvent(anEvent);

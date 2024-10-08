@@ -464,7 +464,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
             switch (keyCode) {
                 case KeyCode.UP: selCol.selectUp(); anEvent.consume(); break;
                 case KeyCode.DOWN: selCol.selectDown(); anEvent.consume(); break;
-                case KeyCode.ENTER: selCol.getListArea().processEnterAction(anEvent); break;
+                case KeyCode.ENTER: selCol.processEnterAction(anEvent); break;
             }
         }
     }

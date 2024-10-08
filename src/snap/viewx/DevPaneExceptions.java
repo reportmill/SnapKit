@@ -106,7 +106,7 @@ public class DevPaneExceptions extends ViewOwner {
     protected void initUI()
     {
         _thrownExceptionsList = getView("ThrownListView", ListView.class);
-        _thrownExceptionsList.getListArea().setItemTextFunction(ThrownException::getTitle);
+        _thrownExceptionsList.setItemTextFunction(ThrownException::getTitle);
         _stackTraceText = getView("StackTraceText", TextView.class);
         _stackTraceText.getTextBlock().setRichText(false);
         _descriptionText = getView("DescriptionText", TextView.class);

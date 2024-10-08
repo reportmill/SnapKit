@@ -10,9 +10,6 @@ import snap.view.*;
  */
 public abstract class SpellCheckPanel extends ViewOwner {
 
-    // The editor
-    private View _view;
-
     // The current suspected misspelled word
     private SpellCheck.Word _word;
 
@@ -45,11 +42,9 @@ public abstract class SpellCheckPanel extends ViewOwner {
      */
     protected void initUI()
     {
-        // Configure SuggestionListArea to watch for MouseClick
-        ListView<?> suggestionListView = getView("SuggestionList", ListView.class);
-        ListArea<?> suggestionListArea = suggestionListView.getListArea();
-        suggestionListArea.setName("SuggestionListArea");
-        suggestionListArea.addEventHandler(this::handleSuggestionListAreaMouseRelease, MouseRelease);
+        // Configure SuggestionList to watch for MouseClick
+        ListView<?> suggestionList = getView("SuggestionList", ListView.class);
+        suggestionList.addEventHandler(this::handleSuggestionListMouseRelease, MouseRelease);
     }
 
     /**
@@ -87,7 +82,7 @@ public abstract class SpellCheckPanel extends ViewOwner {
             doCorrection();
     }
 
-    private void handleSuggestionListAreaMouseRelease(ViewEvent anEvent)
+    private void handleSuggestionListMouseRelease(ViewEvent anEvent)
     {
         if (anEvent.getClickCount() > 1)
             doCorrection();

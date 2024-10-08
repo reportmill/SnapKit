@@ -153,8 +153,8 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     protected ListView <T> createListView()
     {
         PopupList<T> popupList = new PopupList<>();
-        popupList.getListArea().setAltRowColor(null);
-        popupList.getListArea().setTargeting(true);
+        popupList.setAltRowColor(null);
+        popupList.setTargeting(true);
         popupList.setItemTextFunction(getItemTextFunction());
         return popupList;
     }
@@ -352,12 +352,13 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     public void setText(String aString)
     {
         // If matching item, set in ListView
-        T item = getListView().getListArea().getItemForText(aString);
+        ListView<T> listView = getListView();
+        T item = listView.getItemForText(aString);
         if (item != null)
-            getListView().setSelItem(item);
+            listView.setSelItem(item);
 
         // Set in TextField or Button
-        String str = item != null ? getListView().getText(item) : aString;
+        String str = item != null ? listView.getText(item) : aString;
         if (isShowTextField())
             _textField.setText(str);
         else _button.setText(str);

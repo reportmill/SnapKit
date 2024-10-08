@@ -22,7 +22,7 @@ public class PopupList<T> extends ListView<T> {
      */
     public PopupList()
     {
-        getScrollView().setBorder(null);
+        //getScrollView().setBorder(null);
     }
 
     /**

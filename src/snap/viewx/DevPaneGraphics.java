@@ -40,7 +40,7 @@ public class DevPaneGraphics extends ViewOwner {
         ListView<String> themesListView = getView("ThemesListView", ListView.class);
         themesListView.setItems(ALL_THEMES);
         themesListView.setSelItem(CLASSIC_THEME);
-        themesListView.getListArea().setCellPadding(new Insets(4, 8, 4, 8));
+        themesListView.setCellPadding(new Insets(4, 8, 4, 8));
 
         // Init RenderersListView
         ListView<RendererFactory> rendererListView = getView("RenderersListView", ListView.class);

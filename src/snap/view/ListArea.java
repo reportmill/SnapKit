@@ -93,6 +93,8 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
 
         // Events
         setActionable(true);
+        setFocusable(true);
+        setFocusWhenPressed(true);
         enableEvents(MousePress, MouseDrag, MouseRelease);
 
         // Create/set PickList
