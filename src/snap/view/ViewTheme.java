@@ -220,13 +220,13 @@ public class ViewTheme {
         // TitleView
         setViewStylePropValue(TitleView.class, View.Padding_Prop, new Insets(2));
 
-        // ListArea
-        setViewStylePropValue(ListArea.class, View.Fill_Prop, getContentColor());
+        // ListView
+        setViewStylePropValue(ListView.class, View.Fill_Prop, getContentColor());
+        setViewStylePropValue(ListView.class, View.Border_Prop, getContentBorder());
 
-        // ScrollView, SplitView, ListView, TableView, TreeView
+        // ScrollView, SplitView, TableView, TreeView
         setViewStylePropValue(ScrollView.class, View.Border_Prop, getContentBorder());
         setViewStylePropValue(SplitView.class, View.Border_Prop, getContentBorder());
-        setViewStylePropValue(ListView.class, View.Border_Prop, getContentBorder());
         setViewStylePropValue(TableView.class, View.Border_Prop, getContentBorder());
         setViewStylePropValue(TreeView.class, View.Border_Prop, getContentBorder());
 

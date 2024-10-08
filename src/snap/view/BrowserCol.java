@@ -28,7 +28,7 @@ public class BrowserCol <T> extends ListView <T> {
         setFocusWhenPressed(false);
         setRowHeight(_browser.getRowHeight());
 
-        // Configure ListArea to use Browser.configureBrowserCell
+        // Configure ListView to use Browser.configureBrowserCell
         setCellConfigure(listCell -> _browser.configureBrowserCell(this, listCell));
     }
 

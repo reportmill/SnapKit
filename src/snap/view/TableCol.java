@@ -11,7 +11,7 @@ import snap.util.*;
 /**
  * Represents a Table Column.
  */
-public class TableCol <T> extends ListArea <T> {
+public class TableCol <T> extends ListView <T> {
     
     // The Table
     protected TableView<T> _table;

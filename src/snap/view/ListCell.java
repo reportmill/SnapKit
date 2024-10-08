@@ -10,8 +10,8 @@ import snap.gfx.Color;
  */
 public class ListCell <T> extends Label {
 
-    // The ListArea that created this cell
-    protected ListArea<T>  _listArea;
+    // The ListView that created this cell
+    protected ListView<T> _listView;
 
     // The cell item
     protected T  _item;
@@ -31,18 +31,18 @@ public class ListCell <T> extends Label {
     /**
      * Creates a new ListCell.
      */
-    public ListCell(ListArea<T> theList, T anItem, int aRow, int aCol, boolean isSel)
+    public ListCell(ListView<T> theList, T anItem, int aRow, int aCol, boolean isSel)
     {
-        _listArea = theList;
+        _listView = theList;
         _item = anItem;
         _row = aRow; _col = aCol;
         _sel = isSel;
     }
 
     /**
-     * Returns the ListArea.
+     * Returns the ListView.
      */
-    public ListArea<T> getListArea()  { return _listArea; }
+    public ListView<T> getListView()  { return _listView; }
 
     /**
      * Returns the item.
@@ -106,9 +106,9 @@ public class ListCell <T> extends Label {
         // Fire prop change
         firePropChange(Editing_Prop, !aValue, aValue);
 
-        // Nofity ListArea
-        if (_listArea != null)
-            _listArea.cellEditingChanged(this);
+        // Nofity ListView
+        if (_listView != null)
+            _listView.cellEditingChanged(this);
     }
 
     /**

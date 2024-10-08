@@ -30,7 +30,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     private double  _rowHeight, _rowHeightCached = -1;
 
     // The cell padding
-    private Insets  _cellPad = ListArea.CELL_PAD_DEFAULT;
+    private Insets  _cellPad = ListView.CELL_PAD_DEFAULT;
     
     // An optional method hook to configure cell
     private Consumer <ListCell<T>>  _cellConf;
@@ -587,7 +587,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public void setCellPadding(Insets aPad)
     {
         if (aPad == null)
-            aPad = ListArea.CELL_PAD_DEFAULT;
+            aPad = ListView.CELL_PAD_DEFAULT;
         if (aPad.equals(_cellPad)) return;
 
         firePropChange(CellPadding_Prop, _cellPad, _cellPad=aPad);

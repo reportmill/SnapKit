@@ -8,12 +8,12 @@ import snap.gfx.*;
 import snap.util.ArrayUtils;
 
 /**
- * A ListArea subclass that represents a column in TreeView.
+ * A ListView subclass that represents a column in TreeView.
  */
-public class TreeCol <T> extends ListArea <T> {
+public class TreeCol <T> extends ListView <T> {
 
     // The TreeView
-    private TreeView  _tree;
+    private TreeView<T> _tree;
     
     // The header value
     private String  _headerText;
@@ -33,12 +33,12 @@ public class TreeCol <T> extends ListArea <T> {
     /**
      * Returns the tree.
      */
-    public TreeView getTree()  { return _tree; }
+    public TreeView<T> getTree()  { return _tree; }
 
     /**
      * Sets the tree.
      */
-    protected void setTree(TreeView aTV)  { _tree = aTV; }
+    protected void setTree(TreeView<T> treeView)  { _tree = treeView; }
 
     /**
      * Returns the header value.
