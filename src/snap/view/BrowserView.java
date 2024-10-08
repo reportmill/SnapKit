@@ -223,7 +223,8 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
      */
     public BrowserCol<T> getCol(int anIndex)
     {
-        return (BrowserCol<T>) _colView.getChild(anIndex);
+        ScrollView scrollView = (ScrollView) _colView.getChild(anIndex);
+        return (BrowserCol<T>) scrollView.getContent();
     }
 
     /**
@@ -255,8 +256,16 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         BrowserCol<T> browserCol = new BrowserCol<>(this);
         int colIndex = browserCol._index = getColCount();
 
+        // Wrap in ScrollView
+        ScrollView scrollView = new ScrollView(browserCol);
+        scrollView.setBorder(null);
+        scrollView.setGrowWidth(true);
+        scrollView.setShowHBar(false);
+        scrollView.setShowVBar(true);
+        scrollView.setBarSize(14);
+
         // Add to ColBox
-        _colView.addChild(browserCol);
+        _colView.addChild(scrollView);
 
         // If not root column, set items from last
         if (colIndex > 0) {

@@ -213,28 +213,28 @@ public class ViewTheme {
         setViewStylePropValue(ComboBox.class, View.Align_Prop, Pos.CENTER_LEFT);
         setViewStylePropValue(ImageView.class, View.Align_Prop, Pos.CENTER);
 
-        // TextArea, TextView
+        // TextView
         setViewStylePropValue(TextView.class, View.Padding_Prop, new Insets(2));
         setViewStylePropValue(TextView.class, View.Fill_Prop, getContentColor());
 
-        // TitleView
+        // BoxView, RowView, ColView, StackView, TitleView
+        setViewStylePropValue(BoxView.class, View.Align_Prop, Pos.CENTER);
+        setViewStylePropValue(RowView.class, View.Align_Prop, Pos.CENTER_LEFT);
+        setViewStylePropValue(ColView.class, View.Align_Prop, Pos.TOP_LEFT);
+        setViewStylePropValue(StackView.class, View.Align_Prop, Pos.CENTER);
         setViewStylePropValue(TitleView.class, View.Padding_Prop, new Insets(2));
+
+        // ScrollView, SplitView
+        setViewStylePropValue(ScrollView.class, View.Border_Prop, getContentBorder());
+        setViewStylePropValue(SplitView.class, View.Border_Prop, getContentBorder());
 
         // ListView
         setViewStylePropValue(ListView.class, View.Fill_Prop, getContentColor());
         setViewStylePropValue(ListView.class, View.Border_Prop, getContentBorder());
 
-        // ScrollView, SplitView, TableView, TreeView
-        setViewStylePropValue(ScrollView.class, View.Border_Prop, getContentBorder());
-        setViewStylePropValue(SplitView.class, View.Border_Prop, getContentBorder());
+        // TableView, TreeView
         setViewStylePropValue(TableView.class, View.Border_Prop, getContentBorder());
         setViewStylePropValue(TreeView.class, View.Border_Prop, getContentBorder());
-
-        // BoxView, RowView, ColView, StackView
-        setViewStylePropValue(BoxView.class, View.Align_Prop, Pos.CENTER);
-        setViewStylePropValue(RowView.class, View.Align_Prop, Pos.CENTER_LEFT);
-        setViewStylePropValue(ColView.class, View.Align_Prop, Pos.TOP_LEFT);
-        setViewStylePropValue(StackView.class, View.Align_Prop, Pos.CENTER);
 
         // MenuBar, MenuItem
         setViewStylePropValue(MenuBar.class, View.Padding_Prop, new Insets(2, 10, 2, 10));

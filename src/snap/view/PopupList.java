@@ -18,11 +18,11 @@ public class PopupList<T> extends ListView<T> {
     private EventListener  _lsnr;
 
     /**
-     * Creates a new PopupList.
+     * Constructor.
      */
     public PopupList()
     {
-        //getScrollView().setBorder(null);
+        super();
     }
 
     /**
@@ -33,10 +33,14 @@ public class PopupList<T> extends ListView<T> {
         // If already set, just return
         if (_popup != null) return _popup;
 
+        // Create ScrollView
+        ScrollView scrollView = new ScrollView(this);
+        scrollView.setBorder(null);
+
         // Create/configure PopupWindow
         PopupWindow popup = new PopupWindow();
-        popup.setContent(this);
-        popup.addPropChangeListener(pce -> popupWindowShowingChanged(), Showing_Prop);
+        popup.setContent(scrollView);
+        popup.addPropChangeListener(pc -> handlePopupWindowShowingChanged(), Showing_Prop);
 
         // Set and return
         return _popup = popup;
@@ -85,7 +89,7 @@ public class PopupList<T> extends ListView<T> {
     /**
      * Called when owner View has KeyPress events.
      */
-    protected void processPopupListKeyPressEvent(ViewEvent anEvent)
+    protected void handleClientViewKeyPressEvent(ViewEvent anEvent)
     {
         if (anEvent.isUpArrow() || anEvent.isDownArrow() || anEvent.isEnterKey())
             processEvent(anEvent);
@@ -94,7 +98,7 @@ public class PopupList<T> extends ListView<T> {
     /**
      * Called when PopupWindow is shown/hidden.
      */
-    protected void popupWindowShowingChanged()
+    protected void handlePopupWindowShowingChanged()
     {
         if (_showView == null) return;
         PopupWindow popup = getPopup();
@@ -102,7 +106,7 @@ public class PopupList<T> extends ListView<T> {
 
         // If showing, add EventListener, otherwise, remove
         if (showing)
-            _showView.addEventFilter(_lsnr = e -> processPopupListKeyPressEvent(e), KeyPress);
+            _showView.addEventFilter(_lsnr = this::handleClientViewKeyPressEvent, KeyPress);
 
         // Otherwise remove listener
         else {
@@ -111,5 +115,4 @@ public class PopupList<T> extends ListView<T> {
             _showView = null;
         }
     }
-
 }
