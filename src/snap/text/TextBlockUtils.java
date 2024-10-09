@@ -188,7 +188,7 @@ public class TextBlockUtils {
     /**
      * This method returns the range of the @-sign delinated key closest to the current selection (or null if not found).
      */
-    protected static TextSel smartFindFormatRange(TextBlock textBlock, int selStart, int selEnd)
+    public static TextSel smartFindFormatRange(TextBlock textBlock, int selStart, int selEnd)
     {
         String string = textBlock.getString();
         int prevAtSignIndex = -1;

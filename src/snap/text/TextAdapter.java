@@ -461,7 +461,7 @@ public class TextAdapter extends PropObject {
     public void setTextFont(Font aFont)
     {
         if (isRichText())
-            setSelStyleValue(TextStyle.Font_Prop, aFont);
+            setSelTextStyleValue(TextStyle.Font_Prop, aFont);
         else _textBlock.setDefaultFont(aFont);
     }
 
@@ -480,7 +480,7 @@ public class TextAdapter extends PropObject {
     public void setTextColor(Color aColor)
     {
         if (isRichText())
-            setSelStyleValue(TextStyle.Color_Prop, aColor != null ? aColor : Color.BLACK);
+            setSelTextStyleValue(TextStyle.Color_Prop, aColor != null ? aColor : Color.BLACK);
         else _textBlock.setDefaultTextColor(aColor);
     }
 
@@ -511,7 +511,7 @@ public class TextAdapter extends PropObject {
             return;
 
         // If there is a format, add it to current attributes and set for selected text
-        setSelStyleValue(TextStyle.Font_Prop, aFormat);
+        setSelTextStyleValue(TextStyle.Font_Prop, aFormat);
     }
 
     /**
@@ -528,7 +528,7 @@ public class TextAdapter extends PropObject {
      */
     public void setUnderlined(boolean aValue)
     {
-        setSelStyleValue(TextStyle.Underline_Prop, aValue ? 1 : 0);
+        setSelTextStyleValue(TextStyle.Underline_Prop, aValue ? 1 : 0);
     }
 
     /**
@@ -538,7 +538,7 @@ public class TextAdapter extends PropObject {
     {
         TextStyle selStyle = getSelTextStyle();
         int state = selStyle.getScripting();
-        setSelStyleValue(TextStyle.Scripting_Prop, state == 0 ? 1 : 0);
+        setSelTextStyleValue(TextStyle.Scripting_Prop, state == 0 ? 1 : 0);
     }
 
     /**
@@ -548,7 +548,7 @@ public class TextAdapter extends PropObject {
     {
         TextStyle selStyle = getSelTextStyle();
         int state = selStyle.getScripting();
-        setSelStyleValue(TextStyle.Scripting_Prop, state == 0 ? -1 : 0);
+        setSelTextStyleValue(TextStyle.Scripting_Prop, state == 0 ? -1 : 0);
     }
 
     /**
@@ -613,7 +613,7 @@ public class TextAdapter extends PropObject {
     /**
      * Sets the attributes that are applied to current selection or newly typed chars.
      */
-    public void setSelStyleValue(String aKey, Object aValue)
+    public void setSelTextStyleValue(String aKey, Object aValue)
     {
         // If selection is zero length, just modify input style
         if (isSelEmpty() && isRichText()) {
@@ -625,7 +625,8 @@ public class TextAdapter extends PropObject {
         else {
             _textBlock.setTextStyleValue(aKey, aValue, getSelStart(), getSelEnd());
             _selStyle = null;
-            _view.repaint();
+            if (_view != null)
+                _view.repaint();
         }
     }
 
@@ -1179,7 +1180,8 @@ public class TextAdapter extends PropObject {
      */
     public void showCursor()
     {
-        _view.setCursor(Cursor.TEXT);
+        if (_view != null)
+            _view.setCursor(Cursor.TEXT);
     }
 
     /**
@@ -1187,7 +1189,8 @@ public class TextAdapter extends PropObject {
      */
     public void hideCursor()
     {
-        _view.setCursor(Cursor.NONE);
+        if (_view != null)
+            _view.setCursor(Cursor.NONE);
     }
 
     /**
@@ -1202,7 +1205,8 @@ public class TextAdapter extends PropObject {
     {
         if (aValue == _showCaret) return;
         _showCaret = aValue;
-        repaintSel();
+        if (_view != null)
+            repaintSel();
     }
 
     /**
@@ -1210,7 +1214,7 @@ public class TextAdapter extends PropObject {
      */
     protected boolean isCaretNeeded()
     {
-        if (!_view.isShowing())
+        if (_view == null || !_view.isShowing())
             return false;
         if (!_view.isFocused())
             return false;
@@ -1284,7 +1288,8 @@ public class TextAdapter extends PropObject {
         if (_textBlock instanceof TextBox)
             ((TextBox) _textBlock).setFontScale(aValue);
         else System.out.println("TextAdapter.setFontScale not supported on this text");
-        _view.relayoutParent();
+        if (_view != null)
+            _view.relayoutParent();
     }
 
     /**
@@ -1295,7 +1300,8 @@ public class TextAdapter extends PropObject {
         if (_textBlock instanceof TextBox)
             ((TextBox) _textBlock).scaleTextToFit();
         else System.out.println("TextAdapter.scaleTextToFit not supported on this text");
-        _view.relayoutParent();
+        if (_view != null)
+            _view.relayoutParent();
     }
 
     /**
@@ -1484,8 +1490,10 @@ public class TextAdapter extends PropObject {
         firePropChange(aPC);
 
         // Relayout and repaint
-        _view.relayoutParent();
-        _view.repaint();
+        if (_view != null) {
+            _view.relayoutParent();
+            _view.repaint();
+        }
     }
 
     /**
