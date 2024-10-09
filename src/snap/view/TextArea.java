@@ -129,6 +129,16 @@ public class TextArea extends ParentView {
     public void setWrapLines(boolean aValue)  { _textAdapter.setWrapLines(aValue); }
 
     /**
+     * Returns whether undo is activated.
+     */
+    public boolean isUndoActivated()  { return _textAdapter.isUndoActivated(); }
+
+    /**
+     * Called to activate undo.
+     */
+    public void setUndoActivated(boolean aValue)  { _textAdapter.setUndoActivated(aValue); }
+
+    /**
      * Returns whether to synchronize text area font with text block.
      */
     public boolean isSyncTextFont()  { return _syncTextFont; }

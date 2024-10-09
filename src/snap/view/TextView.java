@@ -23,7 +23,7 @@ public class TextView extends TextArea {
     {
         super(isRichText);
         setEditable(true);
-        getTextBlock().activateUndo();
+        setUndoActivated(true);
     }
 
     /**

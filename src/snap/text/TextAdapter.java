@@ -30,6 +30,9 @@ public class TextAdapter extends PropObject {
     // Whether text should wrap lines that overrun bounds
     private boolean  _wrapLines;
 
+    // Whether text undo is activated
+    private boolean  _undoActivated;
+
     // The char index of carat
     private int  _selIndex;
 
@@ -131,6 +134,8 @@ public class TextAdapter extends PropObject {
 
         // Add PropChangeListener
         _textBlock.getSourceText().addPropChangeListener(_sourceTextPropLsnr);
+        if (isUndoActivated())
+            _textBlock.setUndoActivated(true);
 
         // Relayout parent, repaint
         if (_view != null) {
@@ -232,6 +237,21 @@ public class TextAdapter extends PropObject {
             textBox.setWrapLines(true);
             setTextBlock(textBox);
         }
+    }
+
+    /**
+     * Returns whether undo is activated.
+     */
+    public boolean isUndoActivated()  { return _undoActivated; }
+
+    /**
+     * Called to activate undo.
+     */
+    public void setUndoActivated(boolean aValue)
+    {
+        if (aValue == isUndoActivated()) return;
+        _undoActivated = aValue;
+        _textBlock.setUndoActivated(aValue);
     }
 
     /**

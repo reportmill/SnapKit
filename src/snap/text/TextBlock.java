@@ -1328,13 +1328,26 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     public TextRun[] getUnderlineRuns(Rect aRect)  { return TextBlockUtils.getUnderlineRuns(this, aRect); }
 
     /**
+     * Returns whether undo is activated.
+     */
+    public boolean isUndoActivated()  { return _undoer != Undoer.DISABLED_UNDOER; }
+
+    /**
      * Called to activate undo.
      */
-    public void activateUndo()
+    public void setUndoActivated(boolean aValue)
     {
-        _undoer = new Undoer();
-        _undoer.setAutoSave(true);
-        _undoer.addPropChangeListener(pc -> setTextModified(_undoer.isUndoAvailable()), Undoer.UndoAvailable_Prop);
+        if (aValue == isUndoActivated()) return;
+
+        // If activating, create new undoer
+        if (aValue) {
+            _undoer = new Undoer();
+            _undoer.setAutoSave(true);
+            _undoer.addPropChangeListener(pc -> setTextModified(_undoer.isUndoAvailable()), Undoer.UndoAvailable_Prop);
+        }
+
+        // Otherwise, reset to disabled
+        else _undoer = Undoer.DISABLED_UNDOER;
     }
 
     /**
