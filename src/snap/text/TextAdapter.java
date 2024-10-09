@@ -449,7 +449,7 @@ public class TextAdapter extends PropObject {
     public Font getTextFont()
     {
         if (isRichText()) {
-            TextStyle selStyle = getSelStyle();
+            TextStyle selStyle = getSelTextStyle();
             return selStyle.getFont();
         }
         return _textBlock.getDefaultFont();
@@ -470,7 +470,7 @@ public class TextAdapter extends PropObject {
      */
     public Color getTextColor()
     {
-        TextStyle selStyle = getSelStyle();
+        TextStyle selStyle = getSelTextStyle();
         return selStyle.getColor();
     }
 
@@ -489,7 +489,7 @@ public class TextAdapter extends PropObject {
      */
     public TextFormat getFormat()
     {
-        TextStyle selStyle = getSelStyle();
+        TextStyle selStyle = getSelTextStyle();
         return selStyle.getFormat();
     }
 
@@ -519,7 +519,7 @@ public class TextAdapter extends PropObject {
      */
     public boolean isUnderlined()
     {
-        TextStyle selStyle = getSelStyle();
+        TextStyle selStyle = getSelTextStyle();
         return selStyle.isUnderlined();
     }
 
@@ -536,7 +536,7 @@ public class TextAdapter extends PropObject {
      */
     public void setSuperscript()
     {
-        TextStyle selStyle = getSelStyle();
+        TextStyle selStyle = getSelTextStyle();
         int state = selStyle.getScripting();
         setSelStyleValue(TextStyle.Scripting_Prop, state == 0 ? 1 : 0);
     }
@@ -546,7 +546,7 @@ public class TextAdapter extends PropObject {
      */
     public void setSubscript()
     {
-        TextStyle selStyle = getSelStyle();
+        TextStyle selStyle = getSelTextStyle();
         int state = selStyle.getScripting();
         setSelStyleValue(TextStyle.Scripting_Prop, state == 0 ? -1 : 0);
     }
@@ -596,7 +596,7 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the TextStyle for the current selection and/or input characters.
      */
-    public TextStyle getSelStyle()
+    public TextStyle getSelTextStyle()
     {
         // If already set, just return
         if (_selStyle != null) return _selStyle;
@@ -617,7 +617,7 @@ public class TextAdapter extends PropObject {
     {
         // If selection is zero length, just modify input style
         if (isSelEmpty() && isRichText()) {
-            TextStyle selStyle = getSelStyle();
+            TextStyle selStyle = getSelTextStyle();
             _selStyle = selStyle.copyForStyleKeyValue(aKey, aValue);
         }
 
@@ -723,7 +723,7 @@ public class TextAdapter extends PropObject {
         // Get style (might need SelStyle if replacing empty selection)
         if (textStyle == null) {
             if (aStart == getSelStart())
-                textStyle = getSelStyle();
+                textStyle = getSelTextStyle();
             else textStyle = _textBlock.getTextStyleForCharRange(aStart, anEnd);
         }
 
