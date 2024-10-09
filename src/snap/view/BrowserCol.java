@@ -23,6 +23,7 @@ public class BrowserCol <T> extends ListView <T> {
         _browser = aBrsr;
         setBorder(null);
         setGrowWidth(true);
+        setOverflow(Overflow.Visible);
 
         // Update some attributes
         setFocusable(false);

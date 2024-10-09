@@ -26,12 +26,12 @@ public class ViewAnimUtils {
             // Get old PrefW/PrefH values
             double oldPrefW = aView.isPrefWidthSet() ? aView.getPrefWidth() : -1;
             double oldPrefH = aView.isPrefHeightSet() ? aView.getPrefHeight() : -1;
-            boolean oldClipToBounds = aView.isClipToBounds();
+            View.Overflow oldOverflow = aView.getOverflow();
 
             // Make sure view is visible but transparent
             aView.setVisible(true);
             aView.setOpacity(0);
-            aView.setClipToBounds(true);
+            aView.setOverflow(View.Overflow.Clip);
 
             // If animating width, set PrefWidth from 1 to actual PrefWidth
             if (doWidth) {
@@ -54,7 +54,7 @@ public class ViewAnimUtils {
             anim.setOnFinish(() -> {
                 aView.setPrefWidth(oldPrefW);
                 aView.setPrefHeight(oldPrefH);
-                aView.setClipToBounds(oldClipToBounds);
+                aView.setOverflow(oldOverflow);
             });
 
             // Start anim
@@ -67,10 +67,10 @@ public class ViewAnimUtils {
             // Get old PrefW/PrefH values
             double prefW = aView.isPrefWidthSet() ? aView.getPrefWidth() : -1;
             double prefH = aView.isPrefHeightSet() ? aView.getPrefHeight() : -1;
-            boolean oldClipToBounds = aView.isClipToBounds();
+            View.Overflow oldOverflow = aView.getOverflow();
 
             // Make sure view is clipping to bounds
-            aView.setClipToBounds(true);
+            aView.setOverflow(View.Overflow.Clip);
 
             // If animating width, set PrefWidth to 1
             if (doWidth)
@@ -88,7 +88,7 @@ public class ViewAnimUtils {
                 aView.setVisible(false);
                 aView.setPrefWidth(prefW);
                 aView.setPrefHeight(prefH);
-                aView.setClipToBounds(oldClipToBounds);
+                aView.setOverflow(oldOverflow);
             });
 
             // Start anim

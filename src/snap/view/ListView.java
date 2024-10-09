@@ -95,6 +95,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         setActionable(true);
         setFocusable(true);
         setFocusWhenPressed(true);
+        setOverflow(Overflow.Scroll);
         enableEvents(MousePress, MouseDrag, MouseRelease);
 
         // Create/set PickList
@@ -668,6 +669,10 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         // If NeedsScrollSelToVisible, send later
         if (_needsScrollSelToVisible)
             runLater(this::scrollSelToVisible);
+
+        // Check wants ScrollView
+        if (getOverflow() == Overflow.Scroll)
+            ViewUtils.checkWantsScrollView(this);
     }
 
     /**

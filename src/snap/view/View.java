@@ -131,6 +131,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // The tooltip
     private String  _toolTip;
 
+    // How to handle content out of bounds
+    private Overflow _overflow;
+
     // The clip (if set)
     private Shape  _clip;
 
@@ -157,6 +160,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
     // The view owner of this view
     private ViewOwner  _owner;
+
+    // Constants for how to handle content out of bounds
+    public enum Overflow { Visible, Clip, Scroll }
 
     // Constants for properties
     public static final String Name_Prop = "Name";
@@ -187,7 +193,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public static final String Focused_Prop = "Focused";
     public static final String Focusable_Prop = "Focusable";
     public static final String FocusWhenPressed_Prop = "FocusWhenPressed";
-    public static final String Clip_Prop = "Clip";
+    public static final String Overflow_Prop = "Overflow";
     public static final String Cursor_Prop = "Cursor";
     public static final String Effect_Prop = "Effect";
     public static final String Opacity_Prop = "Opacity";
@@ -248,6 +254,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         _paintable = true;
         _managed = true;
         _opacity = 1;
+        _overflow = Overflow.Visible;
 
         // Initialize style props
         initStyleProps();
@@ -847,9 +854,23 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
+     * Returns how to handle content out of bounds.
+     */
+    public Overflow getOverflow()  { return _overflow; }
+
+    /**
+     * Sets how to handle content out of bounds.
+     */
+    public void setOverflow(Overflow aValue)
+    {
+        if (aValue == _overflow) return;
+        _overflow = aValue;
+    }
+
+    /**
      * Returns whether view should clip to bounds.
      */
-    public boolean isClipToBounds()  { return _clip == ClipToBoundsRect; }
+    public boolean isClipToBounds()  { return _overflow == Overflow.Clip; }
 
     /**
      * Sets whether view should clip to bounds.
@@ -857,30 +878,21 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setClipToBounds(boolean aValue)
     {
         if (aValue == isClipToBounds()) return;
-        setClip(aValue ? ClipToBoundsRect : null);
+        setOverflow(aValue ? Overflow.Clip : Overflow.Visible);
     }
-
-    // The shared rect to represent "ClipToBounds"
-    private static Rect ClipToBoundsRect = new Rect();
 
     /**
      * Returns the clip shape.
      */
     public Shape getClip()
     {
-        if (_clip == ClipToBoundsRect)
+        if (_overflow == Overflow.Clip)
             return getBoundsShape();
-        return _clip;
+        return null;
     }
 
-    /**
-     * Sets the clip shape.
-     */
-    public void setClip(Shape aShape)
-    {
-        if (Objects.equals(aShape, _clip)) return;
-        firePropChange(Clip_Prop, _clip, _clip = aShape);
-    }
+    @Deprecated
+    public void setClip(Shape aShape)  { setOverflow(Overflow.Clip); }
 
     /**
      * Returns the clip bounds.
@@ -2907,7 +2919,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case ToolTip_Prop: return getToolTip();
             case RuntimeClassName_Prop: return getRuntimeClassName();
             case Cursor_Prop: return getCursor();
-            case Clip_Prop: return getClip();
+            case Overflow_Prop: return getClip();
 
             // Disabled, Visible, Pickable, Paintable
             case Disabled_Prop: return isDisabled();
@@ -3000,7 +3012,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case ToolTip_Prop: setToolTip(Convert.stringValue(aValue)); break;
             case RuntimeClassName_Prop: setRuntimeClassName(Convert.stringValue(aValue)); break;
             case Cursor_Prop: setCursor((Cursor) aValue); break;
-            case Clip_Prop: setClip((Shape) aValue); break;
+            case Overflow_Prop: setClip((Shape) aValue); break;
 
             // Disabled, Visible, Pickable, Paintable
             case Disabled_Prop: setDisabled(Convert.boolValue(aValue)); break;

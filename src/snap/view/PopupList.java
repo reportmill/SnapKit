@@ -30,6 +30,7 @@ public class PopupList<T> extends ListView<T> {
     {
         super();
         setBorder(null);
+        setOverflow(Overflow.Visible);
         _clientViewKeyPressLsnr = this::handleClientViewKeyPressEvent;
     }
 

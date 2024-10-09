@@ -627,8 +627,10 @@ public class ViewUtils {
         double viewH = aView.getHeight();
         double prefW = aView.getPrefWidthImpl(-1);
         double prefH = aView.getPrefHeightImpl(viewW);
-        if (viewW < prefW || viewH < prefH)
+        if (viewW < prefW || viewH < prefH) {
+            aView.setOverflow(View.Overflow.Clip);
             runLater(() -> replaceWithScrollView(aView));
+        }
     }
 
     /**
@@ -636,6 +638,9 @@ public class ViewUtils {
      */
     public static void replaceWithScrollView(View aView)
     {
+        // Restore Overflow
+        aView.setOverflow(View.Overflow.Scroll);
+
         // Create ScrollView
         ScrollView scrollView = new ScrollView();
         scrollView.setBarSize(12);

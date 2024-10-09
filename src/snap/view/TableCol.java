@@ -33,6 +33,7 @@ public class TableCol <T> extends ListView <T> {
     {
         super();
         setBorder(null);
+        setOverflow(Overflow.Visible);
         _header.setPadding(4,4,4,4);
 
         // Events
