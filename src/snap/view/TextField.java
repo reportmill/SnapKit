@@ -327,7 +327,11 @@ public class TextField extends ParentView {
         Rect textBounds = _textAdapter.getTextBounds();
         aPntr.clip(textBounds);
 
+        // Paint text (only paint selection when focused)
+        if (isFocused())
+            _textAdapter.paintSel(aPntr);
         _textAdapter.paintText(aPntr);
+
         aPntr.restore();
     }
 

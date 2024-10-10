@@ -923,9 +923,9 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Paint text.
+     * Paint selection and text.
      */
-    public void paintText(Painter aPntr)
+    public void paintAll(Painter aPntr)
     {
         // Paint selection
         paintSel(aPntr);
@@ -937,7 +937,7 @@ public class TextAdapter extends PropObject {
     /**
      * Paints the selection.
      */
-    protected void paintSel(Painter aPntr)
+    public void paintSel(Painter aPntr)
     {
         // If not editable, just return
         if (!isEditable()) return;
@@ -960,6 +960,14 @@ public class TextAdapter extends PropObject {
             aPntr.setPaint(TEXT_SEL_COLOR);
             aPntr.fill(selPath);
         }
+    }
+
+    /**
+     * Paint text.
+     */
+    public void paintText(Painter aPntr)
+    {
+        _textBlock.paint(aPntr);
     }
 
     /**
