@@ -178,10 +178,6 @@ public abstract class Border extends PropObject implements Cloneable, StringCode
     @Override
     public Border decodeString(String aString)
     {
-        if (aString.equals("bevel"))
-            return createLoweredBevelBorder();
-        if (aString.equals("etch"))
-            return new Borders.EtchBorder();
         return Border.of(aString);
     }
 
@@ -243,6 +239,15 @@ public abstract class Border extends PropObject implements Cloneable, StringCode
         // Parse string
         String str = anObj.toString().trim();
         String[] parts = str.split("\\s");
+        String part0 = parts.length > 0 ? parts[0] : null;
+        if (part0 == null)
+            return null;
+
+        // Handle bevel and etch
+        if (part0.equals("bevel"))
+            return createLoweredBevelBorder();
+        if (part0.equals("etch"))
+            return new Borders.EtchBorder();
 
         // Assume color string or "color width" string
         Color color = Color.get(parts[0]);
