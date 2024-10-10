@@ -2644,7 +2644,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected void fireActionEvent(ViewEvent sourceEvent)
     {
-        WindowView window = getWindow(); if (window == null) return;
+        // Get window - can fail for menu items triggered by shortcut, so try owner (I don't love this)
+        WindowView window = getWindow();
+        if (window == null) {
+            ViewOwner viewOwner = getOwner();
+            window = viewOwner != null ? viewOwner.getUI().getWindow() : null;
+            if (window == null) {
+                System.err.println("View.fireActionEvent: Can't find window for view: " + this);
+                return;
+            }
+        }
+
         ViewEvent actionEvent = createActionEvent(sourceEvent);
         window.dispatchEventToWindow(actionEvent);
     }
