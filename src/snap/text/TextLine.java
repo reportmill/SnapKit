@@ -857,7 +857,7 @@ public class TextLine implements CharSequenceX, Cloneable {
             TextToken lastToken = getLastToken();
             double lineW = lastToken != null ? lastToken.getMaxX() : getWidth(); // getMaxX()
             double lineMaxW = _textBlock.getWidth(); //_textBlock.getMaxHitX(getY(), _height);
-            double extraW = lineMaxW - lineW;
+            double extraW = Math.max(lineMaxW - lineW, 0);
             double alignX = lineStyle.getAlign().doubleValue();
             _x = Math.round(alignX * extraW);
         }

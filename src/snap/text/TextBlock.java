@@ -368,6 +368,20 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             int moveCharsIndexInLine = charIndexInLine + theChars.length();
             moveLineCharsToNextLine(textLine, moveCharsIndexInLine);
         }
+
+        // Reset line alignment
+        textLine._x = 0;
+
+        // Perform post processing
+        addCharsToLineFinished(textLine);
+    }
+
+    /**
+     * Called after chars added to line to do further processing, like horizontal alignment or wrapping.
+     */
+    protected void addCharsToLineFinished(TextLine textLine)
+    {
+        textLine.updateAlignmentAndJustify();
     }
 
     /**
@@ -521,8 +535,12 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
         // Iterate over NextLine runs and add chars for each
         TextRun[] textRuns = nextLine.getRuns();
-        for (TextRun textRun : textRuns)
-            textLine.addCharsWithStyle(textRun.getString(), textRun.getTextStyle(), textLine.length());
+        for (TextRun textRun : textRuns) {
+            CharSequence chars = textRun.getString();
+            TextStyle textStyle = textRun.getTextStyle();
+            int endCharIndex = textLine.getEndCharIndex();
+            addCharsToLine(chars, textStyle, endCharIndex, textLine, false);
+        }
 
         // Remove NextLine
         removeLine(nextLine.getLineIndex());

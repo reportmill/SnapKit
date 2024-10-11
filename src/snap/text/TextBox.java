@@ -241,9 +241,20 @@ public class TextBox extends TextBlock {
 
         // Do normal version
         super.addCharsToLine(theChars, theStyle, charIndex, textLine, charsHaveNewline);
+    }
 
-        // Wrap line if needed
-        wrapLineIfNeeded(textLine);
+    /**
+     * Override to handle wrap lines.
+     */
+    @Override
+    protected void addCharsToLineFinished(TextLine textLine)
+    {
+        // Wrap line
+        if (isWrapLines())
+            wrapLineIfNeeded(textLine);
+
+        // Do normal version
+        super.addCharsToLineFinished(textLine);
     }
 
     /**
@@ -251,36 +262,30 @@ public class TextBox extends TextBlock {
      */
     protected void wrapLineIfNeeded(TextLine textLine)
     {
-        // Reset line alignment
-        textLine._x = 0;
+        // If no chars or line is beyond bounds, just return
+        if (textLine.getTokenCount() <= 0 || textLine.getMaxY() >= getHeight())
+            return;
 
-        // If WrapLines, do wrapping
-        if (isWrapLines() && textLine.getTokenCount() > 0 && textLine.getMaxY() < getHeight()) {
+        // Get last token
+        TextToken lastToken = textLine.getLastToken();
 
-            // Get last token
-            TextToken lastToken = textLine.getLastToken();
+        // If line is now outside bounds, move chars to new line
+        if (isHitRight(lastToken.getMaxX(), textLine.getY(), textLine.getHeight())) {
 
-            // If line is now outside bounds, move chars to new line
-            if (isHitRight(lastToken.getMaxX(), textLine.getY(), textLine.getHeight())) {
-
-                // Find first token that is outside bounds and use that instead (if any)
-                TextToken prevToken = lastToken.getPrevious();
-                while (prevToken != null && isHitRight(prevToken.getMaxX(), textLine.getY(), textLine.getHeight())) {
-                    lastToken = prevToken;
-                    prevToken = prevToken.getPrevious();
-                }
-
-                // If first token, move the minimum number of end chars to next line
-                if (lastToken.getIndex() == 0)
-                    moveMinimumLineEndCharsToNextLine(textLine, lastToken);
-
-                // Otherwise, move last token (and trailing chars) to next line
-                else moveLineCharsToNextLine(textLine, lastToken.getStartCharIndexInLine());
+            // Find first token that is outside bounds and use that instead (if any)
+            TextToken prevToken = lastToken.getPrevious();
+            while (prevToken != null && isHitRight(prevToken.getMaxX(), textLine.getY(), textLine.getHeight())) {
+                lastToken = prevToken;
+                prevToken = prevToken.getPrevious();
             }
-        }
 
-        // Update line alignment
-        textLine.updateAlignmentAndJustify();
+            // If first token, move the minimum number of end chars to next line
+            if (lastToken.getIndex() == 0)
+                moveMinimumLineEndCharsToNextLine(textLine, lastToken);
+
+            // Otherwise, move last token (and trailing chars) to next line
+            else moveLineCharsToNextLine(textLine, lastToken.getStartCharIndexInLine());
+        }
     }
 
     /**
@@ -466,20 +471,6 @@ public class TextBox extends TextBlock {
         // Forward to SourceText and update all
         _sourceText.setString(str);
         updateTextAll();
-    }
-
-    /**
-     * Override to wrap joined lines.
-     */
-    @Override
-    protected void joinLineWithNextLine(TextLine textLine)
-    {
-        // Do normal version
-        super.joinLineWithNextLine(textLine);
-
-        // Wrap joined line
-        if (isWrapLines())
-            wrapLineIfNeeded(textLine);
     }
 
     /**
