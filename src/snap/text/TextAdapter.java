@@ -1578,9 +1578,8 @@ public class TextAdapter extends PropObject {
         setDefaultLineStyle(lineStyle);
 
         // Forward to text block
-        if (_textBlock instanceof TextBox)
-            ((TextBox) _textBlock).setAlignY(viewAlign.getVPos());
-        else System.err.println("TextAdapter.setAlign: Not support on this text block");
+        _textBlock.setAlignY(viewAlign.getVPos());
+        _view.repaint();
     }
 
     /**

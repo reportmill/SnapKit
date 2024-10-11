@@ -5,6 +5,7 @@ package snap.text;
 import snap.geom.HPos;
 import snap.geom.Rect;
 import snap.geom.Shape;
+import snap.geom.VPos;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
@@ -50,6 +51,12 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     // The pref width of the text block
     protected double _prefW = -1;
 
+    // They y alignment
+    private VPos _alignY = VPos.TOP;
+
+    // The y alignment amount
+    private double _alignedY = -1;
+
     // The text undoer
     private Undoer _undoer = Undoer.DISABLED_UNDOER;
 
@@ -82,14 +89,9 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     {
         super();
         _rich = isRich;
-        TextLine defaultLine = createLine();
+        TextLine defaultLine = new TextLine(this);;
         addLine(defaultLine, 0);
     }
-
-    /**
-     * Creates a new TextLine for use in this text.
-     */
-    protected TextLine createLine()  { return new TextLine(this); }
 
     /**
      * Whether this text supports multiple styles (font, color, etc.).
@@ -111,6 +113,11 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         if (aValue && _defaultTextStyle == null)
             _defaultTextStyle = TextStyle.DEFAULT;
     }
+
+    /**
+     * Returns whether to wrap lines that overrun bounds.
+     */
+    public boolean isWrapLines()  { return false; }
 
     /**
      * Returns the root text block.
@@ -995,6 +1002,43 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
+     * Returns the Y alignment.
+     */
+    public VPos getAlignY()  { return _alignY; }
+
+    /**
+     * Sets the Y alignment.
+     */
+    public void setAlignY(VPos aPos)
+    {
+        if (aPos == _alignY) return;
+        _alignY = aPos;
+        _alignedY = -1;
+    }
+
+    /**
+     * Returns the y for alignment.
+     */
+    public double getAlignedY()
+    {
+        // If already set, just return
+        if (_alignedY >= 0) return getY() + _alignedY;
+
+        // Calculated aligned Y
+        _alignedY = 0;
+        if (_alignY != VPos.TOP) {
+            double textBoxW = getWidth();
+            double prefH = getPrefHeight(textBoxW);
+            double textBoxH = getHeight();
+            if (textBoxH > prefH)
+                _alignedY = _alignY.doubleValue() * (textBoxH - prefH);
+        }
+
+        // Return
+        return getY() + _alignedY;
+    }
+
+    /**
      * Returns the start char index (always 0, unless this is SubText).
      */
     public int getStartCharIndex()  { return 0; }
@@ -1134,11 +1178,6 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      * Returns the max Y.
      */
     public double getMaxY()  { return getY() + getHeight(); }
-
-    /**
-     * Returns the y for alignment.
-     */
-    public double getAlignedY()  { return getY(); }
 
     /**
      * Returns a path for two char indexes - it will be a simple box with extensions for first/last lines.
@@ -1292,6 +1331,25 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
+     * Returns the preferred height.
+     */
+    public double getPrefHeight(double aW)
+    {
+        // If WrapLines and given Width doesn't match current Width, setWidth
+        if (isWrapLines() && !MathUtils.equals(aW, getWidth()) && aW > 0) { //double oldW = getWidth();
+            double oldH = _height;
+            _height = Float.MAX_VALUE;
+            setWidth(aW);
+            double prefH = getPrefHeight(); //setWidth(oldW); Should really reset old width - but why would they ask,
+            _height = oldH;
+            return prefH;                     // if they didn't plan to use this width?
+        }
+
+        // Return normal version
+        return getPrefHeight();
+    }
+
+    /**
      * Creates TextTokens for a TextLine.
      */
     protected TextToken[] createTokensForTextLine(TextLine aTextLine)
@@ -1328,6 +1386,9 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             updateLine(line, i, _length);
             _length += line.length();
         }
+
+        // Reset AlignY offset
+        _alignedY = -1;
     }
 
     /**

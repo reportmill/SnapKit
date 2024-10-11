@@ -4,10 +4,8 @@
 package snap.text;
 import snap.geom.Rect;
 import snap.geom.Shape;
-import snap.geom.VPos;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
-import snap.util.MathUtils;
 import snap.util.XMLArchiver;
 import snap.util.XMLElement;
 
@@ -24,12 +22,6 @@ public class TextBox extends TextBlock {
 
     // Whether to hyphenate text
     private boolean _hyphenate;
-
-    // They y alignment
-    private VPos _alignY = VPos.TOP;
-
-    // The y alignment amount
-    private double _alignedY = -1;
 
     // Whether text is linked to another text
     private boolean _linked;
@@ -320,43 +312,6 @@ public class TextBox extends TextBlock {
     }
 
     /**
-     * Returns the Y alignment.
-     */
-    public VPos getAlignY()  { return _alignY; }
-
-    /**
-     * Sets the Y alignment.
-     */
-    public void setAlignY(VPos aPos)
-    {
-        if (aPos == _alignY) return;
-        _alignY = aPos;
-        updateTextAll();
-    }
-
-    /**
-     * Returns the y for alignment.
-     */
-    public double getAlignedY()
-    {
-        // If already set, just return
-        if (_alignedY >= 0) return getY() + _alignedY;
-
-        // Calculated aligned Y
-        _alignedY = 0;
-        if (_alignY != VPos.TOP) {
-            double textBoxW = getWidth();
-            double prefH = getPrefHeight(textBoxW);
-            double textBoxH = getHeight();
-            if (textBoxH > prefH)
-                _alignedY = _alignY.doubleValue() * (textBoxH - prefH);
-        }
-
-        // Return
-        return getY() + _alignedY;
-    }
-
-    /**
      * Returns whether to wrap lines that overrun bounds.
      */
     public boolean isWrapLines()  { return _wrapLines; }
@@ -470,7 +425,6 @@ public class TextBox extends TextBlock {
 
         // Forward to SourceText and update all
         _sourceText.setString(str);
-        updateTextAll();
     }
 
     /**
@@ -525,18 +479,6 @@ public class TextBox extends TextBlock {
             TextLineStyle newStyle = (TextLineStyle) aPC.getNewValue();
             super.setDefaultLineStyle(newStyle);
         }
-    }
-
-    /**
-     * Updates lines for given char start and an old/new char end.
-     */
-    protected void updateLines(int lineIndex)
-    {
-        // Do normal version
-        super.updateLines(lineIndex);
-
-        // Reset AlignY offset
-        _alignedY = -1;
     }
 
     /**
@@ -669,25 +611,7 @@ public class TextBox extends TextBlock {
     {
         double textPrefW = _sourceText.getPrefWidth();
         double fontScale = getFontScale();
-        double prefW = Math.ceil(textPrefW * fontScale);
-        return prefW;
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    public double getPrefHeight(double aW)
-    {
-        // If WrapLines and given Width doesn't match current Width, setWidth
-        if (isWrapLines() && !MathUtils.equals(aW, getWidth()) && aW > 0) { //double oldW = getWidth();
-            super.setHeight(Float.MAX_VALUE);
-            setWidth(aW);
-            double prefH = getPrefHeight(); //setWidth(oldW); Should really reset old width - but why would they ask,
-            return prefH;                     // if they didn't plan to use this width?
-        }
-
-        // Return normal version
-        return getPrefHeight();
+        return Math.ceil(textPrefW * fontScale);
     }
 
     /**
@@ -762,9 +686,6 @@ public class TextBox extends TextBlock {
         // If not WrapLines, check X
         if (!isWrapLines()) {
             TextLine line = getLineLongest();
-            //double lineMaxX = line != null ? line.getMaxX() : 0;
-            //double tboxMaxX = getMaxX();
-            //if (lineMaxX > tboxMaxX) return true;
             double lineW = line != null ? line.getWidth() : 0;
             double tboxW = getWidth();
             if (lineW > tboxW)
