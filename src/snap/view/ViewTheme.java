@@ -188,6 +188,7 @@ public class ViewTheme {
         // ButtonBase
         ViewStyle buttonStyle = getViewStyleForClass(ButtonBase.class);
         buttonStyle.setPropValue(View.Align_Prop, Pos.CENTER);
+        buttonStyle.setPropValue(View.Padding_Prop, new Insets(3));
         buttonStyle.setPropValue(View.BorderRadius_Prop, 4);
 
         // RadioButton
@@ -204,7 +205,7 @@ public class ViewTheme {
 
         // TextField
         ViewStyle textFieldStyle = getViewStyleForClass(TextField.class);
-        textFieldStyle.setPropValue(View.Padding_Prop, new Insets(3, 3, 3, 4));
+        textFieldStyle.setPropValue(View.Padding_Prop, new Insets(3));
         textFieldStyle.setPropValue(View.Fill_Prop, getContentColor());
         textFieldStyle.setPropValue(View.Border_Prop, getContentBorder());
         textFieldStyle.setPropValue(View.BorderRadius_Prop, 3);
