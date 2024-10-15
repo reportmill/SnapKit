@@ -51,6 +51,7 @@ public class Spinner <T> extends ParentView {
 
         // Create/configure Text
         _text = new TextField();
+        _text.setAlign(Pos.CENTER);
         _text.setGrowWidth(true);
         _text.addEventHandler(e -> textChanged(), Action);
         addChild(_text);

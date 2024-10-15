@@ -9,22 +9,16 @@ import snap.gfx.*;
 public class ArrowView extends ParentView {
 
     // The ColView to hold up/down buttons
-    ColView _col;
+    private ColView _col;
 
     // The arrow buttons
-    Button _ubtn, _dbtn, _lbtn, _rbtn, _lastBtn;
+    private Button _upButton, _downButton, _leftButton, _rightButton;
 
-    // Constants for buttons
-    public enum Arrow {Up, Down, Left, Right}
+    // The last pressed button
+    private Button _lastButton;
 
     // The arrow images
-    static Image _uimg, _dimg, _limg, _rimg;
-
-    // Constants for properties
-    public static final String ShowUp_Prop = "ShowUp";
-    public static final String ShowDown_Prop = "ShowDown";
-    public static final String ShowLeft_Prop = "ShowLeft";
-    public static final String ShowRight_Prop = "ShowRight";
+    private static Image _upImage, _downImage, _leftImage, _rightImage;
 
     /**
      * Creates a new ArrowView.
@@ -50,10 +44,7 @@ public class ArrowView extends ParentView {
     /**
      * Returns whether to show up button.
      */
-    public boolean isShowUp()
-    {
-        return _ubtn != null;
-    }
+    public boolean isShowUp()  { return _upButton != null; }
 
     /**
      * Sets whether to show up button.
@@ -65,30 +56,24 @@ public class ArrowView extends ParentView {
 
         // Add button
         if (aValue) {
-            _ubtn = new Button();
-            _ubtn.setPrefWidth(14);
-            _ubtn.setMinHeight(9);
-            _ubtn.setBorderRadius(3);
-            _ubtn.setPosition(Pos.TOP_CENTER);
-            _ubtn.setImage(getUpArrowImage());
-            _ubtn.addEventHandler(e -> buttonDidFire(_ubtn), Action);
-            _col.addChild(_ubtn, 0);
+            _upButton = createArrowButton(14, 9);
+            _upButton.setBorderRadius(3);
+            _upButton.setPosition(Pos.TOP_CENTER);
+            _upButton.setImage(getUpArrowImage());
+            _col.addChild(_upButton, 0);
         }
 
         // Remove button
         else {
-            _col.removeChild(_ubtn);
-            _ubtn = null;
+            _col.removeChild(_upButton);
+            _upButton = null;
         }
     }
 
     /**
      * Returns whether to show down button.
      */
-    public boolean isShowDown()
-    {
-        return _dbtn != null;
-    }
+    public boolean isShowDown()  { return _downButton != null; }
 
     /**
      * Sets whether to show down button.
@@ -100,30 +85,23 @@ public class ArrowView extends ParentView {
 
         // Add button
         if (aValue) {
-            _dbtn = new Button();
-            _dbtn.setPrefWidth(14);
-            _dbtn.setMinHeight(9);
-            _dbtn.setBorderRadius(3);
-            _dbtn.setPosition(Pos.BOTTOM_CENTER);
-            _dbtn.setImage(getDownArrowImage());
-            _dbtn.addEventHandler(e -> buttonDidFire(_dbtn), Action);
-            _col.addChild(_dbtn);
+            _downButton = createArrowButton(14, 9);
+            _downButton.setPosition(Pos.BOTTOM_CENTER);
+            _downButton.setImage(getDownArrowImage());
+            _col.addChild(_downButton);
         }
 
         // Remove button
         else {
-            _col.removeChild(_dbtn);
-            _dbtn = null;
+            _col.removeChild(_downButton);
+            _downButton = null;
         }
     }
 
     /**
      * Returns whether to show left button.
      */
-    public boolean isShowLeft()
-    {
-        return _lbtn != null;
-    }
+    public boolean isShowLeft()  { return _leftButton != null; }
 
     /**
      * Sets whether to show left button.
@@ -135,30 +113,23 @@ public class ArrowView extends ParentView {
 
         // Add button
         if (aValue) {
-            _lbtn = new Button();
-            _lbtn.setPrefHeight(14);
-            _lbtn.setMinWidth(9);
-            _lbtn.setBorderRadius(3);
-            _lbtn.setPosition(Pos.CENTER_LEFT);
-            _lbtn.setImage(getLeftArrowImage());
-            _lbtn.addEventHandler(e -> buttonDidFire(_lbtn), Action);
-            addChild(_lbtn, 0);
+            _leftButton = createArrowButton(9, 14);
+            _leftButton.setPosition(Pos.CENTER_LEFT);
+            _leftButton.setImage(getLeftArrowImage());
+            addChild(_leftButton, 0);
         }
 
         // Remove button
         else {
-            removeChild(_lbtn);
-            _lbtn = null;
+            removeChild(_leftButton);
+            _leftButton = null;
         }
     }
 
     /**
      * Returns whether to show right button.
      */
-    public boolean isShowRight()
-    {
-        return _rbtn != null;
-    }
+    public boolean isShowRight()  { return _rightButton != null; }
 
     /**
      * Sets whether to show right button.
@@ -170,73 +141,45 @@ public class ArrowView extends ParentView {
 
         // Add button
         if (aValue) {
-            _rbtn = new Button();
-            _rbtn.setPrefHeight(14);
-            _rbtn.setMinWidth(9);
-            _rbtn.setBorderRadius(3);
-            _rbtn.setPosition(Pos.CENTER_RIGHT);
-            _rbtn.setImage(getRightArrowImage());
-            _rbtn.addEventHandler(e -> buttonDidFire(_rbtn), Action);
-            addChild(_rbtn);
+            _rightButton = createArrowButton(9, 14);
+            _rightButton.setPosition(Pos.CENTER_RIGHT);
+            _rightButton.setImage(getRightArrowImage());
+            addChild(_rightButton);
         }
 
         // Remove button
         else {
-            removeChild(_rbtn);
-            _rbtn = null;
+            removeChild(_rightButton);
+            _rightButton = null;
         }
-    }
-
-    /**
-     * Returns the last arrow.
-     */
-    public Arrow getLastArrow()
-    {
-        if (_lastBtn == _ubtn) return Arrow.Up;
-        if (_lastBtn == _dbtn) return Arrow.Down;
-        if (_lastBtn == _lbtn) return Arrow.Left;
-        if (_lastBtn == _rbtn) return Arrow.Right;
-        return null;
     }
 
     /**
      * Returns whether last button was up.
      */
-    public boolean isUp()
-    {
-        return _lastBtn == _ubtn;
-    }
+    public boolean isUp()  { return _lastButton == _upButton; }
 
     /**
      * Returns whether last button was down.
      */
-    public boolean isDown()
-    {
-        return _lastBtn == _dbtn;
-    }
+    public boolean isDown()  { return _lastButton == _downButton; }
 
     /**
      * Returns whether last button was left.
      */
-    public boolean isLeft()
-    {
-        return _lastBtn == _lbtn;
-    }
+    public boolean isLeft()  { return _lastButton == _leftButton; }
 
     /**
      * Returns whether last button was right.
      */
-    public boolean isRight()
-    {
-        return _lastBtn == _rbtn;
-    }
+    public boolean isRight()  { return _lastButton == _rightButton; }
 
     /**
      * Called when button fires.
      */
     protected void buttonDidFire(Button aBtn)
     {
-        _lastBtn = aBtn;
+        _lastButton = aBtn;
         fireActionEvent(null);
     }
 
@@ -245,14 +188,8 @@ public class ArrowView extends ParentView {
      */
     public static Image getUpArrowImage()
     {
-        if (_uimg != null) return _uimg;
-        Image img = Image.getImageForSize(9, 7, true);
-        Painter pntr = img.getPainter();
-        Polygon poly = new Polygon(1.5, 5.5, 7.5, 5.5, 4.5, 1.5);
-        pntr.setColor(Color.DARKGRAY);
-        pntr.draw(poly);
-        pntr.fill(poly);
-        return _uimg = img;
+        if (_upImage != null) return _upImage;
+        return _upImage = createArrowImage(9, 7, new Polygon(1.5, 5.5, 7.5, 5.5, 4.5, 1.5));
     }
 
     /**
@@ -260,14 +197,8 @@ public class ArrowView extends ParentView {
      */
     public static Image getDownArrowImage()
     {
-        if (_dimg != null) return _dimg;
-        Image img = Image.getImageForSize(9, 7, true);
-        Painter pntr = img.getPainter();
-        Polygon poly = new Polygon(1.5, 1.5, 7.5, 1.5, 4.5, 5.5);
-        pntr.setColor(Color.DARKGRAY);
-        pntr.draw(poly);
-        pntr.fill(poly);
-        return _dimg = img;
+        if (_downImage != null) return _downImage;
+        return _downImage = createArrowImage(9, 7, new Polygon(1.5, 1.5, 7.5, 1.5, 4.5, 5.5));
     }
 
     /**
@@ -275,14 +206,8 @@ public class ArrowView extends ParentView {
      */
     public static Image getLeftArrowImage()
     {
-        if (_limg != null) return _limg;
-        Image img = Image.getImageForSize(7, 9, true);
-        Painter pntr = img.getPainter();
-        Polygon poly = new Polygon(5.5, 1.5, 5.5, 7.5, 1.5, 4.5);
-        pntr.setColor(Color.DARKGRAY);
-        pntr.draw(poly);
-        pntr.fill(poly);
-        return _limg = img;
+        if (_leftImage != null) return _leftImage;
+        return _leftImage = createArrowImage(7, 9, new Polygon(5.5, 1.5, 5.5, 7.5, 1.5, 4.5));
     }
 
     /**
@@ -290,37 +215,48 @@ public class ArrowView extends ParentView {
      */
     public static Image getRightArrowImage()
     {
-        if (_rimg != null) return _rimg;
-        Image img = Image.getImageForSize(7, 9, true);
-        Painter pntr = img.getPainter();
-        Polygon poly = new Polygon(1.5, 1.5, 1.5, 7.5, 5.5, 4.5);
-        pntr.setColor(Color.DARKGRAY);
-        pntr.draw(poly);
-        pntr.fill(poly);
-        return _rimg = img;
+        if (_rightImage != null) return _rightImage;
+        return _rightImage = createArrowImage(7, 9, new Polygon(1.5, 1.5, 1.5, 7.5, 5.5, 4.5));
     }
 
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)
-    {
-        return RowView.getPrefWidth(this, aH);
-    }
+    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, aH); }
 
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)
-    {
-        return RowView.getPrefHeight(this, aW);
-    }
+    protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(this, aW); }
 
     /**
      * Layout children.
      */
-    protected void layoutImpl()
+    protected void layoutImpl()  { RowView.layout(this, false); }
+
+    /**
+     * Creates an arrow button.
+     */
+    private Button createArrowButton(int buttonW, int buttonH)
     {
-        RowView.layout(this, false);
+        Button button = new Button();
+        button.setMinSize(buttonW, buttonH);
+        button.setPadding(0, 0, 0,0);
+        button.setBorderRadius(3);
+        button.addEventHandler(e -> buttonDidFire(button), Action);
+        return button;
+    }
+
+    /**
+     * Creates an arrow image.
+     */
+    private static Image createArrowImage(int imageW, int imageH, Polygon imageShape)
+    {
+        Image img = Image.getImageForSize(imageW, imageH, true);
+        Painter pntr = img.getPainter();
+        pntr.setColor(Color.DARKGRAY);
+        pntr.draw(imageShape);
+        pntr.fill(imageShape);
+        return img;
     }
 }
