@@ -1129,6 +1129,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     {
         if (aValue == _width) return;
         _width = aValue;
+        _lines.forEach(line -> line.updateAlignmentAndJustify());
     }
 
     /**
@@ -1143,6 +1144,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     {
         if (aValue == _height) return;
         _height = aValue;
+        _alignedY = -1;
     }
 
     /**
