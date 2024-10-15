@@ -3,6 +3,7 @@
  */
 package snap.viewx;
 import snap.geom.Path2D;
+import snap.geom.RoundRect;
 import snap.gfx.*;
 import snap.props.PropSet;
 import snap.util.*;
@@ -132,15 +133,14 @@ public class ColorButton extends View {
         double areaW = getWidth() - 1;
         double areaH = getHeight() - 1;
         if (_armed) {
-            aPntr.setPaint(Color.LIGHTGRAY);
-            aPntr.fillRect(0, 0, areaW, areaH);
+            aPntr.setPaint(ViewUtils.getSelectFill());
+            aPntr.fill(new RoundRect(0,0, areaW, areaH, 3));
         }
 
         // Paint border if targeted (under mouse)
         if (_targeted) {
-            aPntr.setColor(Color.BLACK);
-            aPntr.drawRect(.5,.5,areaW - 1,areaH - 1);
-            aPntr.drawLine(areaW - 10,0,areaW - 10, areaH);
+            aPntr.setPaint(ViewUtils.getTargetFill());
+            aPntr.fill(new RoundRect(0,0, areaW, areaH, 3));
         }
 
         // Paint base icon
@@ -152,9 +152,9 @@ public class ColorButton extends View {
         // If color set, paint color swatch
         if (_color != null) {
             aPntr.setColor(_color);
-            aPntr.fillRect(3, 15, 14, 4);
+            aPntr.fillRect(3, areaH - 7, 14, 4);
             aPntr.setColor(_color.darker());
-            aPntr.drawRect(3, 15, 14, 4);
+            aPntr.drawRect(3, areaH - 7, 14, 4);
         }
 
         // Otherwise paint null color
