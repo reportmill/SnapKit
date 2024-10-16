@@ -400,6 +400,16 @@ public class TextAdapter extends PropObject {
     public void selectAll()  { setSel(0, length()); }
 
     /**
+     * Selects a given line number.
+     */
+    public void selectLine(int lineIndex)
+    {
+        lineIndex = MathUtils.clamp(lineIndex, 0, getLineCount() - 1);
+        TextLine textLine = getLine(lineIndex);
+        setSel(textLine.getStartCharIndex(), textLine.getEndCharIndex());
+    }
+
+    /**
      * Repaint the selection.
      */
     protected void repaintSel()

@@ -67,7 +67,6 @@ public class TextArea extends ParentView {
     {
         super();
         setFocusPainted(false);
-        enableEvents(Action);
 
         // Set default TextBlock
         _textBlock = sourceText;
@@ -77,6 +76,11 @@ public class TextArea extends ParentView {
         _textAdapter.setView(this);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
     }
+
+    /**
+     * Returns the text adapter.
+     */
+    public TextAdapter getTextAdapter()  { return _textAdapter; }
 
     /**
      * Override to create TextAreaKeys.
@@ -573,7 +577,7 @@ public class TextArea extends ParentView {
     /**
      * Called when TextAdapter has prop change.
      */
-    private void handleTextAdapterPropChange(PropChange aPC)
+    protected void handleTextAdapterPropChange(PropChange aPC)
     {
         // If SourceText prop change, forward on
         if (aPC.getSource() instanceof TextBlock) {
@@ -583,15 +587,15 @@ public class TextArea extends ParentView {
 
         // Handle Selection, Editable
         switch (aPC.getPropName()) {
-            case Selection_Prop: handleSelectionChanged(aPC); break;
-            case Editable_Prop: handleEditableChanged(); break;
+            case Selection_Prop: handleTextAdapterSelectionChanged(aPC); break;
+            case Editable_Prop: handleTextAdapterEditableChanged(); break;
         }
     }
 
     /**
      * Called when TextAdapter selection changes.
      */
-    protected void handleSelectionChanged(PropChange aPC)
+    protected void handleTextAdapterSelectionChanged(PropChange aPC)
     {
         firePropChange(Selection_Prop, aPC.getOldValue(), aPC.getNewValue());
     }
@@ -599,7 +603,7 @@ public class TextArea extends ParentView {
     /**
      * Sets whether Text shape is editable.
      */
-    private void handleEditableChanged()
+    private void handleTextAdapterEditableChanged()
     {
         boolean editable = isEditable();
         firePropChange(Editable_Prop, !editable, editable);
@@ -611,7 +615,6 @@ public class TextArea extends ParentView {
             setFocusable(true);
             setFocusWhenPressed(true);
             setFocusKeysEnabled(false);
-            setFocusPainted(false);
         }
 
         else {

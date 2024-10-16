@@ -308,21 +308,12 @@ public class TextPane extends ViewOwner {
         DialogBox dialogBox = new DialogBox("Go to Line");
         dialogBox.setQuestionMessage(msg);
         String lineNumStr = dialogBox.showInputDialog(getUI(), Integer.toString(selStartLineIndex));
+        if (lineNumStr == null)
+            return;
 
-        // Get LineIndex from response
-        int lineIndex = lineNumStr != null ? Convert.intValue(lineNumStr) - 1 : -1;
-        if (lineIndex < 0)
-            lineIndex = 0;
-        else if (lineIndex >= textArea.getLineCount())
-            lineIndex = textArea.getLineCount() - 1;
-
-        // Select line and focus
-        TextLine line = lineIndex >= 0 && lineIndex < textArea.getLineCount() ? textArea.getLine(lineIndex) : null;
-        if (line != null) {
-            int start = line.getStartCharIndex();
-            int end = line.getEndCharIndex();
-            textArea.setSel(start, end);
-        }
+        // Get LineIndex from response and select line
+        int lineIndex = Convert.intValue(lineNumStr) - 1;
+        textArea.getTextAdapter().selectLine(lineIndex);
 
         // Focus TextArea
         requestFocus(textArea);
