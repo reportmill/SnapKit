@@ -82,6 +82,7 @@ public class TextField extends ParentView {
         _textAdapter.setView(this);
         _textAdapter.setEditable(true);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
+        _textAdapter.addSourceTextPropChangeListener(this::handleSourceTextPropChange);
 
         // Configure label and set
         _promptLabel = new Label();
@@ -477,12 +478,6 @@ public class TextField extends ParentView {
      */
     private void handleTextAdapterPropChange(PropChange aPC)
     {
-        // If SourceText prop change, forward on
-        if (aPC.getSource() instanceof TextBlock) {
-            handleSourceTextPropChange();
-            return;
-        }
-
         // Handle Selection
         if (aPC.getPropName() == TextAdapter.Selection_Prop) {
             firePropChange(Selection_Prop, aPC.getOldValue(), aPC.getNewValue());
@@ -493,7 +488,7 @@ public class TextField extends ParentView {
     /**
      * Called when SourceText changes (chars added, updated or deleted).
      */
-    private void handleSourceTextPropChange()
+    private void handleSourceTextPropChange(PropChange aPC)
     {
         // If PromptText present, update PromptLabel.Text
         if (_promptText != null)

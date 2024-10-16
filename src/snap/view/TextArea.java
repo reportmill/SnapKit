@@ -58,6 +58,7 @@ public class TextArea extends ParentView {
         _textAdapter = createTextAdapter(_textBlock);
         _textAdapter.setView(this);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
+        _textAdapter.addSourceTextPropChangeListener(this::handleSourceTextPropChange);
     }
 
     /**
@@ -75,6 +76,7 @@ public class TextArea extends ParentView {
         _textAdapter = createTextAdapter(_textBlock);
         _textAdapter.setView(this);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
+        _textAdapter.addSourceTextPropChangeListener(this::handleSourceTextPropChange);
     }
 
     /**
@@ -579,29 +581,18 @@ public class TextArea extends ParentView {
      */
     protected void handleTextAdapterPropChange(PropChange aPC)
     {
-        // If SourceText prop change, forward on
-        if (aPC.getSource() instanceof TextBlock) {
-            handleSourceTextPropChange(aPC);
-            return;
-        }
-
-        // Handle Selection, Editable
         switch (aPC.getPropName()) {
-            case Selection_Prop: handleTextAdapterSelectionChanged(aPC); break;
+
+            // Handle Selection: Repost for TextArea
+            case Selection_Prop: firePropChange(Selection_Prop, aPC.getOldValue(), aPC.getNewValue()); break;
+
+            // Handle Editable
             case Editable_Prop: handleTextAdapterEditableChanged(); break;
         }
     }
 
     /**
-     * Called when TextAdapter selection changes.
-     */
-    protected void handleTextAdapterSelectionChanged(PropChange aPC)
-    {
-        firePropChange(Selection_Prop, aPC.getOldValue(), aPC.getNewValue());
-    }
-
-    /**
-     * Sets whether Text shape is editable.
+     * Called when TextAdapter.Editable changes to repost and configure.
      */
     private void handleTextAdapterEditableChanged()
     {

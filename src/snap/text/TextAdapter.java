@@ -33,6 +33,9 @@ public class TextAdapter extends PropObject {
     // Whether text undo is activated
     private boolean  _undoActivated;
 
+    // A PropChangeListener to send SourceText PropChanges to adapter client.
+    private PropChangeListener[] _sourceTextPropChangeLsnrs = new PropChangeListener[0];
+
     // The char index of carat
     private int  _selIndex;
 
@@ -252,6 +255,22 @@ public class TextAdapter extends PropObject {
         if (aValue == isUndoActivated()) return;
         _undoActivated = aValue;
         _textBlock.setUndoActivated(aValue);
+    }
+
+    /**
+     * Adds a prop change listener to SourceText.
+     */
+    public void addSourceTextPropChangeListener(PropChangeListener propChangeListener)
+    {
+        _sourceTextPropChangeLsnrs = ArrayUtils.add(_sourceTextPropChangeLsnrs, propChangeListener);
+    }
+
+    /**
+     * Removes a prop change listener to SourceText.
+     */
+    public void removeSourceTextPropChangeListener(PropChangeListener propChangeListener)
+    {
+        _sourceTextPropChangeLsnrs = ArrayUtils.remove(_sourceTextPropChangeLsnrs, propChangeListener);
     }
 
     /**
@@ -1505,7 +1524,8 @@ public class TextAdapter extends PropObject {
     protected void handleSourceTextPropChange(PropChange aPC)
     {
         // Forward on to listeners
-        firePropChange(aPC);
+        for (PropChangeListener propChangeLsnr : _sourceTextPropChangeLsnrs)
+            propChangeLsnr.propertyChange(aPC);
 
         // Relayout and repaint
         if (_view != null) {
