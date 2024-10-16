@@ -111,6 +111,7 @@ public class TextPane extends ViewOwner {
         // Get text area and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
         _textArea = getView("TextArea", TextArea.class);
         _textArea.addPropChangeListener(this::handleTextAreaPropChange);
+        _textArea.getTextAdapter().addSourceTextPropChangeListener(this::handleSourceTextPropChange);
         setFirstFocus(_textArea);
 
         // Configure FindText
@@ -322,17 +323,12 @@ public class TextPane extends ViewOwner {
     /**
      * Called when TextArea does prop change.
      */
-    protected void handleTextAreaPropChange(PropChange aPC)
-    {
-        Object src = aPC.getSource();
-        if (src instanceof TextBlock)
-            handleTextBlockPropChange(aPC);
-    }
+    protected void handleTextAreaPropChange(PropChange aPC)  { }
 
     /**
      * Called when TextBlock does prop change.
      */
-    protected void handleTextBlockPropChange(PropChange aPC)
+    protected void handleSourceTextPropChange(PropChange aPC)
     {
         resetLater();
     }

@@ -622,9 +622,6 @@ public class TextArea extends ParentView {
      */
     protected void handleSourceTextPropChange(PropChange aPC)
     {
-        // Forward on to listeners
-        firePropChange(aPC);
-
         // Handle DefaultTextStyle and SyncTextFont
         String propName = aPC.getPropName();
         if (propName == TextBlock.DefaultTextStyle_Prop && isSyncTextFont()) {
