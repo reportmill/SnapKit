@@ -97,6 +97,7 @@ class ConsoleViewUtils {
         textArea.setBorderRadius(4);
         textArea.setFill(DEFAULT_TEXTAREA_FILL);
         textArea.setEditable(true);
+        textArea.setSyncTextFont(false);
 
         // Configure TextArea Sizing
         textArea.setGrowWidth(true);
