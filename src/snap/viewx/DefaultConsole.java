@@ -112,6 +112,11 @@ public class DefaultConsole extends ViewOwner implements Console {
     protected static void setShared(Console aConsole)  { _shared = aConsole; }
 
     /**
+     * Returns the console created handler.
+     */
+    protected static Runnable getConsoleCreatedHandler()  { return _consoleCreatedHandler; }
+
+    /**
      * Sets the console created handler.
      */
     protected static void setConsoleCreatedHandler(Runnable aRun)  { _consoleCreatedHandler = aRun; }

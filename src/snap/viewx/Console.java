@@ -37,6 +37,11 @@ public interface Console {
     static void setShared(Console aConsole)  { DefaultConsole.setShared(aConsole); }
 
     /**
+     * Returns the console created handler.
+     */
+    static Runnable getConsoleCreatedHandler()  { return DefaultConsole.getConsoleCreatedHandler(); }
+
+    /**
      * Sets the console created handler.
      */
     static void setConsoleCreatedHandler(Runnable aRun)  { DefaultConsole.setConsoleCreatedHandler(aRun); }
