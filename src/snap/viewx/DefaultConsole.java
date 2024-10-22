@@ -1,9 +1,10 @@
 package snap.viewx;
+import snap.gfx.Color;
 import snap.util.SnapUtils;
-import snap.view.ScrollView;
-import snap.view.View;
-import snap.view.ViewOwner;
-import snap.view.ViewUtils;
+import snap.view.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class is a real implementation of Console.
@@ -11,13 +12,16 @@ import snap.view.ViewUtils;
 public class DefaultConsole extends ViewOwner implements Console {
 
     // The Console view
-    private ConsoleView _consoleView;
+    private ColView _consoleView;
 
     // The maximum number of console items
     private int _maxItemCount = 1000;
 
     // Whether console has overflowed
     private boolean _overflowed;
+
+    // A cache of views for console items
+    private Map<Object,View> _itemViewsCache = new HashMap<>();
 
     // The shared console
     private static Console _shared = null;
@@ -31,7 +35,12 @@ public class DefaultConsole extends ViewOwner implements Console {
     public DefaultConsole()
     {
         super();
-        _consoleView = new ConsoleView();
+
+        // Create config ConsoleView
+        _consoleView = new ColView();
+        _consoleView.setPadding(5, 5, 5, 5);
+        _consoleView.setSpacing(6);
+        _consoleView.setFill(new Color(.99));
 
         // Set shared
         if (_shared == null)
@@ -41,41 +50,90 @@ public class DefaultConsole extends ViewOwner implements Console {
     /**
      * Shows the given object to user.
      */
+    @Override
     public void show(Object anObj)
     {
         // Handle overflow
         if (getItemCount() + 1 > _maxItemCount) {
             if (!_overflowed) {
                 _overflowed = true;
-                _consoleView.showObject("Output suspended - Too much output!!!");
+                showImpl("Output suspended - Too much output!!!");
             }
         }
 
         // Forward to ConsoleView
-        _consoleView.showObject(anObj);
+        showImpl(anObj);
+    }
+
+    /**
+     * Called by shell when there is output.
+     */
+    protected void showImpl(Object anObj)
+    {
+        // Get view for output object and add
+        View replView = getViewForObject(anObj);
+        if (!replView.isShowing()) {
+
+            // Add in event thread
+            runLater(() -> _consoleView.addChild(replView));
+
+            // This helps WebVM
+            Thread.yield();
+        }
     }
 
     /**
      * Resets the console.
      */
+    @Override
     public void resetConsole()
     {
-        _consoleView.resetDisplay();
+        _consoleView.removeChildren();
+        _itemViewsCache.clear();
     }
 
     /**
      * Returns the number of items on the console.
      */
-    public int getItemCount()
-    {
-        return _consoleView.getChildCount();
-    }
+    @Override
+    public int getItemCount()  { return _consoleView.getChildCount(); }
 
     /**
      * Returns the console view.
      */
     @Override
-    public ConsoleView getConsoleView()  { return _consoleView; }
+    public View getConsoleView()  { return _consoleView; }
+
+    /**
+     * Creates a view for given object.
+     */
+    protected View getViewForObject(Object aValue)
+    {
+        // Handle simple value: just create/return new view
+        if (isSimpleValue(aValue))
+            return DefaultConsoleUtils.createBoxViewForValue(aValue);
+
+        // Handle other values: Get cached view and create if not yet cached
+        View view = _itemViewsCache.get(aValue);
+        if (view == null) {
+            view = DefaultConsoleUtils.createBoxViewForValue(aValue);
+            _itemViewsCache.put(aValue, view);
+        }
+
+        // Return
+        return view;
+    }
+
+    /**
+     * Returns whether given value is simple (String, Number, Boolean, Character, Date).
+     */
+    protected boolean isSimpleValue(Object anObj)
+    {
+        return anObj instanceof Boolean ||
+                anObj instanceof Number ||
+                anObj instanceof String ||
+                anObj instanceof Date;
+    }
 
     /**
      * Create UI.
@@ -122,7 +180,7 @@ public class DefaultConsole extends ViewOwner implements Console {
     protected static void setConsoleCreatedHandler(Runnable aRun)  { _consoleCreatedHandler = aRun; }
 
     /**
-     * Sets the console created handler.
+     * Called when console is created.
      */
     private static void handleConsoleCreated()
     {
@@ -130,6 +188,8 @@ public class DefaultConsole extends ViewOwner implements Console {
         View consoleView = defaultConsole.getConsoleView();
         if (!SnapUtils.isWebVM)
             consoleView.setPrefSize(700, 900);
+
+        // Show console in window
         if (defaultConsole instanceof ViewOwner) {
             ViewOwner viewOwner = (ViewOwner) defaultConsole;
             viewOwner.getWindow().setMaximized(SnapUtils.isWebVM);

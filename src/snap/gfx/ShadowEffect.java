@@ -340,12 +340,15 @@ public class ShadowEffect extends Effect {
     {
         if (anObj == null || anObj instanceof ShadowEffect)
             return (ShadowEffect) anObj;
-        String str = anObj.toString().replace("shadow", "").replace('(', ' ').replace(')', ' ').trim();
+
+        // Get string
+        String str = anObj.toString().toLowerCase().replace("shadow", "");
+        str = str.replace('(', ' ').replace(')', ' ').trim();
+
+        // Get parts
         String[] parts = str.split("\\s");
-        if (parts.length < 4) {
-            System.err.println("ShadowEffect: invalid effect string: " + anObj);
-            return null;
-        }
+        if (parts.length < 4)
+            return new ShadowEffect();
 
         double radius = Convert.doubleValue(parts[0]);
         double dx = Convert.doubleValue(parts[1]);

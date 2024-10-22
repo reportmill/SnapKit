@@ -11,9 +11,9 @@ import snap.view.*;
 import java.lang.reflect.Array;
 
 /**
- * This View subclass shows snippets.
+ * Utility methods for DefaultConsole.
  */
-class ConsoleViewUtils {
+class DefaultConsoleUtils {
 
     // A helper
     private static Console.Helper _helper;

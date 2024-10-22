@@ -164,12 +164,15 @@ public class BlurEffect extends Effect {
     {
         if (anObj == null || anObj instanceof BlurEffect)
             return (BlurEffect) anObj;
-        String str = anObj.toString().replace("blur", "").replace('(', ' ').replace(')', ' ').trim();
+
+        // Get string
+        String str = anObj.toString().toLowerCase().replace("blur", "");
+        str = str.replace('(', ' ').replace(')', ' ').trim();
+
+        // Get parts
         String[] parts = str.split("\\s");
-        if (parts.length < 1) {
-            System.err.println("BlurEffect: invalid effect string: " + anObj);
-            return null;
-        }
+        if (parts.length < 1)
+            return new BlurEffect();
 
         double radius = Convert.doubleValue(parts[0]);
         return new BlurEffect(radius);

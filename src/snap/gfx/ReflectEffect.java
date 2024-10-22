@@ -281,12 +281,15 @@ public class ReflectEffect extends Effect {
     {
         if (anObj == null || anObj instanceof ReflectEffect)
             return (ReflectEffect) anObj;
-        String str = anObj.toString().replace("reflect", "").replace('(', ' ').replace(')', ' ').trim();
+
+        // Get string
+        String str = anObj.toString().toLowerCase().replace("reflect", "");
+        str = str.replace('(', ' ').replace(')', ' ').trim();
+
+        // Get parts
         String[] parts = str.split("\\s");
-        if (parts.length < 3) {
-            System.err.println("ReflectEffect: invalid effect string: " + anObj);
-            return null;
-        }
+        if (parts.length < 3)
+            return new ReflectEffect();
 
         double reflectHeight = Convert.doubleValue(parts[0]);
         double fadeHeight = Convert.doubleValue(parts[1]);

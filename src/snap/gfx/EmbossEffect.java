@@ -238,12 +238,15 @@ public class EmbossEffect extends Effect {
     {
         if (anObj == null || anObj instanceof EmbossEffect)
             return (EmbossEffect) anObj;
-        String str = anObj.toString().replace("emboss", "").replace('(', ' ').replace(')', ' ').trim();
+
+        // Get string
+        String str = anObj.toString().toLowerCase().replace("emboss", "");
+        str = str.replace('(', ' ').replace(')', ' ').trim();
+
+        // Get parts
         String[] parts = str.split("\\s");
-        if (parts.length < 3) {
-            System.err.println("EmbossEffect: invalid effect string: " + anObj);
-            return null;
-        }
+        if (parts.length < 3)
+            return new EmbossEffect();
 
         double radius = Convert.doubleValue(parts[0]);
         double altitude = Convert.doubleValue(parts[1]);
