@@ -1,8 +1,5 @@
 package snap.viewx;
-import snap.view.BoxView;
-import snap.view.ParentView;
-import snap.view.View;
-import snap.view.ViewUtils;
+import snap.view.*;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import java.lang.reflect.Method;
@@ -21,6 +18,9 @@ public class JMDViewer {
 
     // Markdown view
     private MarkDownView _markDownView;
+
+    // The console
+    private JMDRunConsole _console = new JMDRunConsole();
 
     /**
      * Constructor.
@@ -53,6 +53,7 @@ public class JMDViewer {
     {
         Runnable oldConsoleCreatedHandler = Console.getConsoleCreatedHandler();
         Console.setConsoleCreatedHandler(null);
+        Console.setShared(_console);
 
         // Create Markdown view
         WebFile mainFile = getMainFile();
@@ -65,35 +66,28 @@ public class JMDViewer {
         int runnableCount = 0;
         for (View child : children) {
             if (Objects.equals(child.getName(), "Runnable"))
-                runMethod("method" + (runnableCount++));
+                runMethodForRunnableViewAtIndex((BoxView) child, runnableCount++);
         }
 
-        // Come back later when console is loaded
-        ViewUtils.runLater(() -> runJavaMarkdownFinished(oldConsoleCreatedHandler));
+        // Set DoneConsole and run old create handler
+        Console.setShared(new JMDDoneConsole());
+        if (oldConsoleCreatedHandler != null)
+            oldConsoleCreatedHandler.run();
     }
 
     /**
-     * Runs markdown.
+     * Runs method for runnable view.
      */
-    private void runJavaMarkdownFinished(Runnable oldConsoleCreatedHandler)
+    private void runMethodForRunnableViewAtIndex(BoxView runnableBoxView, int index)
     {
-        Console console = Console.getShared();
-        ParentView parentView = (ParentView) console.getConsoleView();
+        // Run method
+        runMethod("method" + index);
 
-        // Iterate over markdown view runnables and set children
-        View[] children = _markDownView.getChildren();
-        for (View child : children) {
-            if (Objects.equals(child.getName(), "Runnable")) {
-                BoxView boxView = (BoxView) child;
-                View lastChild = parentView.getChildCount() > 0 ? parentView.getChild(0) : null;
-                boxView.setContent(lastChild);
-            }
-        }
-
-        // Add MarkDownView
-        Console.setShared(null);
-        Console.setConsoleCreatedHandler(oldConsoleCreatedHandler);
-        Console.getShared().show(_markDownView);
+        // Add children to runnable box view
+        ParentView parentView = (ParentView) _console.getConsoleView();
+        View lastChild = parentView.getChildCount() > 0 ? parentView.getChild(0) : null;
+        if (lastChild != null)
+            runnableBoxView.setContent(lastChild);
     }
 
     /**
@@ -116,5 +110,30 @@ public class JMDViewer {
         catch (Throwable e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Console class for Java markdown.
+     */
+    private static class JMDRunConsole extends DefaultConsole {
+
+        @Override
+        protected void showImpl(Object anObj)
+        {
+            View replView = getViewForObject(anObj);
+            if (!replView.isShowing()) {
+                ColView consoleView = (ColView) getConsoleView();
+                consoleView.addChild(replView);
+            }
+        }
+    }
+
+    /**
+     * Console class for Java markdown.
+     */
+    private class JMDDoneConsole extends DefaultConsole {
+
+        @Override
+        public View getConsoleView()  { return _markDownView; }
     }
 }

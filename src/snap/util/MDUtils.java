@@ -23,7 +23,7 @@ public class MDUtils {
     /**
      * Returns a Jepl string for Markdown string.
      */
-    public static String getJeplForJMD(CharSequence markDown)
+    public static String getJeplForJMD(String className, CharSequence markDown)
     {
         MDNode rootMarkdownNode = new MDParser().parseMarkdownChars(markDown);
         MDNode[] rootNodes = rootMarkdownNode.getChildNodes();
@@ -37,6 +37,11 @@ public class MDUtils {
                 sb.append("\n}\n\n");
             }
         }
+
+        // Append main method
+        sb.append("public static void main(String[] args)\n{\n");
+        sb.append("    new snap.viewx.JMDViewer(").append(className).append(".class);");
+        sb.append("\n}\n\n");
 
         // Return string
         return sb.toString();

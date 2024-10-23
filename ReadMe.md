@@ -421,6 +421,6 @@ repositories {
 dependencies {
 
     // Latest release: https://github.com/reportmill/SnapKit/releases
-    implementation 'com.reportmill:snapkit:2024.02'
+    implementation 'com.reportmill:snapkit:2024.10'
 }
 ```

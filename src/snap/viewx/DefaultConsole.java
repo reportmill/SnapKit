@@ -38,9 +38,10 @@ public class DefaultConsole extends ViewOwner implements Console {
 
         // Create config ConsoleView
         _consoleView = new ColView();
+        _consoleView.setFill(new Color(.99));
         _consoleView.setPadding(5, 5, 5, 5);
         _consoleView.setSpacing(6);
-        _consoleView.setFill(new Color(.99));
+        _consoleView.setGrowWidth(true);
 
         // Set shared
         if (_shared == null)
@@ -141,9 +142,8 @@ public class DefaultConsole extends ViewOwner implements Console {
     @Override
     protected View createUI()
     {
-        ScrollView scrollView = new ScrollView(_consoleView);
-        _consoleView.setGrowWidth(true);
-        return scrollView;
+        View consoleView = getConsoleView();
+        return new ScrollView(consoleView);
     }
 
     /**
@@ -185,13 +185,13 @@ public class DefaultConsole extends ViewOwner implements Console {
     private static void handleConsoleCreated()
     {
         Console defaultConsole = getShared();
-        View consoleView = defaultConsole.getConsoleView();
-        if (!SnapUtils.isWebVM)
-            consoleView.setPrefSize(700, 900);
 
         // Show console in window
         if (defaultConsole instanceof ViewOwner) {
             ViewOwner viewOwner = (ViewOwner) defaultConsole;
+            View consoleView = viewOwner.getUI();
+            if (!SnapUtils.isWebVM)
+                consoleView.setPrefSize(700, 900);
             viewOwner.getWindow().setMaximized(SnapUtils.isWebVM);
             ViewUtils.runLater(() -> viewOwner.setWindowVisible(true));
         }
