@@ -138,7 +138,7 @@ public class TextAdapter extends PropObject {
         // Add PropChangeListener
         _textBlock.getSourceText().addPropChangeListener(_sourceTextPropLsnr);
         if (isUndoActivated())
-            _textBlock.setUndoActivated(true);
+            _textBlock.getSourceText().setUndoActivated(true);
 
         // Relayout parent, repaint
         if (_view != null) {
@@ -254,7 +254,7 @@ public class TextAdapter extends PropObject {
     {
         if (aValue == isUndoActivated()) return;
         _undoActivated = aValue;
-        _textBlock.setUndoActivated(aValue);
+        _textBlock.getSourceText().setUndoActivated(aValue);
     }
 
     /**
@@ -1443,7 +1443,8 @@ public class TextAdapter extends PropObject {
      */
     public void undo()
     {
-        UndoSet undoSet = _textBlock.getSourceText().undo();
+        Undoer undoer = getUndoer();
+        UndoSet undoSet = undoer.undo();
         if (undoSet != null)
             setTextSelForUndoSet(undoSet, false);
         else ViewUtils.beep();
@@ -1454,7 +1455,8 @@ public class TextAdapter extends PropObject {
      */
     public void redo()
     {
-        UndoSet undoSet = _textBlock.getSourceText().redo();
+        Undoer undoer = getUndoer();
+        UndoSet undoSet = undoer.redo();
         if (undoSet != null)
             setTextSelForUndoSet(undoSet, true);
         else ViewUtils.beep();
@@ -1511,12 +1513,7 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the height needed to display all characters.
      */
-    public double getPrefHeight(double aW)
-    {
-        if (_textBlock instanceof TextBox)
-            return ((TextBox) _textBlock).getPrefHeight(aW);
-        return _textBlock.getPrefHeight();
-    }
+    public double getPrefHeight(double aW)  { return _textBlock.getPrefHeight(aW); }
 
     /**
      * Called when SourceText changes (chars added, updated or deleted).

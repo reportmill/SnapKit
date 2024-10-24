@@ -12,7 +12,6 @@ import snap.gfx.Font;
 import snap.gfx.Painter;
 import snap.props.PropChange;
 import snap.props.PropObject;
-import snap.props.UndoSet;
 import snap.props.Undoer;
 import snap.util.*;
 import java.util.ArrayList;
@@ -89,7 +88,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     {
         super();
         _rich = isRich;
-        TextLine defaultLine = new TextLine(this);;
+        TextLine defaultLine = new TextLine(this);
         addLine(defaultLine, 0);
     }
 
@@ -1437,16 +1436,6 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     public Undoer getUndoer()  { return _undoer; }
 
     /**
-     * Called to undo the last text change.
-     */
-    public UndoSet undo()  { return _undoer.undo(); }
-
-    /**
-     * Called to redo the last text change.
-     */
-    public UndoSet redo()  { return _undoer.redo(); }
-
-    /**
      * Adds a property change to undoer.
      */
     protected void undoerAddPropChange(PropChange anEvent)
@@ -1458,12 +1447,12 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
         // If TextBlock.TextModified, just return
         String propName = anEvent.getPropName();
-        if (propName == TextBlock.TextModified_Prop)
+        if (propName == TextModified_Prop)
             return;
 
         // If PlainText Style_Prop or LineStyle_Prop, just return
         if (!isRichText()) {
-            if (propName == TextBlock.Style_Prop || propName == TextBlock.LineStyle_Prop)
+            if (propName == Style_Prop || propName == LineStyle_Prop)
                 return;
         }
 
@@ -1548,10 +1537,8 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         sb.append(", LineCount=").append(getLineCount());
 
         // Add String
-        String str = "";
         for (int i = 0, iMax = Math.min(getLineCount(), 5); i < iMax; i++)
-            str += "\n" + getLine(i);
-        sb.append(str);
+            sb.append('\n').append(getLine(i));
 
         // Return
         return sb.toString();
