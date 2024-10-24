@@ -121,19 +121,33 @@ public class Tokenizer {
     }
 
     /**
-     * Returns the current parse char.
+     * Returns the next parse char.
      */
-    public final char getChar()
-    {
-        return _input.charAt(_charIndex);
-    }
+    public final char nextChar()  { return _input.charAt(_charIndex); }
 
     /**
      * Returns the char at the current index plus offset.
      */
-    public final char getChar(int anOffset)
+    public final char nextCharAt(int anOffset)  { return _input.charAt(_charIndex + anOffset); }
+
+    /**
+     * Returns whether next chars start with given string.
+     */
+    public boolean nextCharsStartWith(CharSequence startChars)
     {
-        return _input.charAt(_charIndex + anOffset);
+        // If not enough chars, return false
+        int charsLength = startChars.length();
+        if (!hasChars(charsLength))
+            return false;
+
+        // Iterate over startChars and return false if any don't match nextChars
+        for (int charIndex = 0; charIndex < charsLength; charIndex++) {
+            if (startChars.charAt(charIndex) != nextCharAt(charIndex))
+                return false;
+        }
+
+        // Return true
+        return true;
     }
 
     /**
@@ -146,7 +160,7 @@ public class Tokenizer {
 
         // If newline, look for Windows sister newline char and eat that too and clear token line
         if (eatChar == '\n' || eatChar == '\r') {
-            if (eatChar == '\r' && hasChar() && getChar() == '\n')
+            if (eatChar == '\r' && hasChar() && nextChar() == '\n')
                 _charIndex++;
             _tokenLine = null;
             getTokenLine();
@@ -154,6 +168,29 @@ public class Tokenizer {
 
         // Return
         return eatChar;
+    }
+
+    /**
+     * Advances charIndex by given char count.
+     */
+    public void eatChars(int charCount)
+    {
+        for (int i = 0; i < charCount; i++)
+            eatChar();
+    }
+
+    /**
+     * Eats the chars till line end.
+     */
+    public void eatCharsTillLineEnd()
+    {
+        // Eat chars till line end or text end
+        while (hasChar() && !CharSequenceUtils.isLineEndChar(nextChar()))
+            eatChar();
+
+        // Eat line end
+        if (hasChar())
+            eatChar();
     }
 
     /**
@@ -182,7 +219,7 @@ public class Tokenizer {
         }
 
         // Get list of matchers for next char
-        char nextChar = hasChar() ? getChar() : 0;
+        char nextChar = hasChar() ? nextChar() : 0;
         Regex[] regexes = nextChar < 128 ? getRegexesForStartChar(nextChar) : getRegexes();
 
         // Iterate over regular expressions to find best match
@@ -303,7 +340,7 @@ public class Tokenizer {
      */
     protected void skipWhiteSpace()
     {
-        while (hasChar() && Character.isWhitespace(getChar()))
+        while (hasChar() && Character.isWhitespace(nextChar()))
             eatChar();
     }
 

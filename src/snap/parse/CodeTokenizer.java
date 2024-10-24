@@ -1,5 +1,4 @@
 package snap.parse;
-import snap.util.CharSequenceUtils;
 
 /**
  * This Tokenizer subclass supports Java/C single-line and multi-line comments.
@@ -103,7 +102,7 @@ public class CodeTokenizer extends Tokenizer {
         // Look for standard Java single/multi line comments tokens
         if (!(_slc || _mlc))
             return null;
-        if (!hasChar() || getChar() != '/')
+        if (!hasChar() || nextChar() != '/')
             return null;
 
         // Look for SingleLine or DoubleLine comments
@@ -120,17 +119,10 @@ public class CodeTokenizer extends Tokenizer {
      */
     protected ParseToken getSingleLineCommentToken()
     {
-        // If next two chars are single line comment (//), return token
-        if (hasChars(2) && getChar() == '/' && getChar(1) == '/') {
-
-            // Update CharIndex to line end
+        // If next two chars are single line comment, return single line comment token for chars to line end
+        if (nextCharsStartWith("//")) {
             int tokenStart = _charIndex;
-            CharSequence inputChars = getInput();
-            _charIndex = CharSequenceUtils.indexAfterNewlineOrEnd(inputChars, _charIndex);
-            _tokenLine = null;
-            getTokenLine();
-
-            // Create/return new special token
+            eatCharsTillLineEnd();
             return createTokenForProps(SINGLE_LINE_COMMENT, null, tokenStart, _charIndex);
         }
 
@@ -144,7 +136,7 @@ public class CodeTokenizer extends Tokenizer {
     public ParseToken getMultiLineCommentToken()
     {
         // If next two chars are multi line comment (/*) prefix, return token
-        if (hasChars(2) && getChar() == '/' && getChar(1) == '*')
+        if (nextCharsStartWith("/*"))
             return getMultiLineCommentTokenMore();
         return null;
     }
@@ -162,7 +154,7 @@ public class CodeTokenizer extends Tokenizer {
         // Gobble chars until multi-line comment termination or input end
         while (hasChar()) {
             char loopChar = eatChar();
-            if (loopChar == '*' && hasChar() && getChar() == '/') {
+            if (loopChar == '*' && hasChar() && nextChar() == '/') {
                 eatChar();
                 break;
             }
