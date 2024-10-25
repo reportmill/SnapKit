@@ -12,6 +12,7 @@ import java.util.List;
  *     ![My Image Text](http:...)         |  Image
  *     @ [ Header1:CustomName]            |  Directive - to redefine rendering
  *     ``` My Code ```                    |  CodeBlock
+ *     ~~~ My Code ~~~                    |  Runnable code
  *     ---                                |  Separator (maybe soon)
  *     > My block quote                   |  BlockQuote (maybe soon)
  */
@@ -34,7 +35,7 @@ public class MDParser {
     public static final String DIRECTIVE_MARKER = "@[";
     public static final String CODE_BLOCK_MARKER = "```";
     private static final String LINK_END_MARKER = "]";
-    private static final String RUNNABLE_MARKER = "!{";
+    private static final String RUNNABLE_MARKER = "~~~";
 
     // Constant for Nodes that are stand-alone
     private static final String[] MIXABLE_NODE_MARKERS = { LINK_MARKER, IMAGE_MARKER, CODE_BLOCK_MARKER };
@@ -137,6 +138,10 @@ public class MDParser {
         if (nextCharsStartWith(CODE_BLOCK_MARKER))
             return parseCodeBlockNode();
 
+        // Handle runnable block
+        if (nextCharsStartWith(RUNNABLE_MARKER))
+            return parseRunnableNode();
+
         // Return text node
         return parseTextNode();
     }
@@ -176,8 +181,7 @@ public class MDParser {
     private MDNode parseCodeBlockNode()
     {
         eatChars(CODE_BLOCK_MARKER.length());
-        if (nextCharsStartWith(RUNNABLE_MARKER))
-            return parseRunnableNode();
+        if (nextCharsStartWith("!{")) return parseRunnableNode(); // Can go soon
         String charsTillBlockEnd = getCharsTillMatchingTerminator(CODE_BLOCK_MARKER).toString();
         return new MDNode(MDNode.NodeType.CodeBlock, charsTillBlockEnd);
     }
@@ -188,9 +192,11 @@ public class MDParser {
     private MDNode parseRunnableNode()
     {
         // Get string
-        eatChars(RUNNABLE_MARKER.length());
+        String END_MARKER = nextCharsStartWith("!{") ? CODE_BLOCK_MARKER : RUNNABLE_MARKER;
+        if (nextCharsStartWith("!{")) eatChars(2); // Can go soon
+        else eatChars(RUNNABLE_MARKER.length());
         String metaData = getCharsTillLineEnd().toString().replace("}", "");
-        String charsTillBlockEnd = getCharsTillMatchingTerminator(CODE_BLOCK_MARKER).toString();
+        String charsTillBlockEnd = getCharsTillMatchingTerminator(END_MARKER).toString();
 
         // Replace occurrences of '$<num>' with CodeBlock at that index
         for (int dollarIndex = charsTillBlockEnd.indexOf('$'); dollarIndex >= 0; dollarIndex = charsTillBlockEnd.indexOf('$', dollarIndex)) {
