@@ -742,8 +742,4 @@ public class TextArea extends ParentView {
 
         return this;
     }
-
-    @Deprecated
-    public TextStyle getDefaultStyle()  { return getDefaultTextStyle(); }
-    public void setDefaultStyle(TextStyle aStyle)  { setDefaultTextStyle(aStyle); }
 }

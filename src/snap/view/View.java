@@ -891,9 +891,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         return null;
     }
 
-    @Deprecated
-    public void setClip(Shape aShape)  { setOverflow(Overflow.Clip); }
-
     /**
      * Returns the clip bounds.
      */
@@ -2929,7 +2926,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case ToolTip_Prop: return getToolTip();
             case RuntimeClassName_Prop: return getRuntimeClassName();
             case Cursor_Prop: return getCursor();
-            case Overflow_Prop: return getClip();
+            case Overflow_Prop: return getOverflow();
 
             // Disabled, Visible, Pickable, Paintable
             case Disabled_Prop: return isDisabled();
@@ -3022,7 +3019,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case ToolTip_Prop: setToolTip(Convert.stringValue(aValue)); break;
             case RuntimeClassName_Prop: setRuntimeClassName(Convert.stringValue(aValue)); break;
             case Cursor_Prop: setCursor((Cursor) aValue); break;
-            case Overflow_Prop: setClip((Shape) aValue); break;
+            case Overflow_Prop: setOverflow((Overflow) aValue); break;
 
             // Disabled, Visible, Pickable, Paintable
             case Disabled_Prop: setDisabled(Convert.boolValue(aValue)); break;

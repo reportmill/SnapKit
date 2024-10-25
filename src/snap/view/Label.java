@@ -141,9 +141,6 @@ public class Label extends ParentView {
         getStringView().setTextColor(aColor);
     }
 
-    @Deprecated
-    public void setTextFill(Paint aPaint) { setTextColor(aPaint.getColor()); }
-
     /**
      * Returns the text style.
      */

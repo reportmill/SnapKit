@@ -786,11 +786,4 @@ public class ViewOwner extends PropObject {
      * Returns the ViewEnv for this owner.
      */
     public ViewEnv getEnv()  { return _env; }
-
-    @Deprecated
-    public void enableEvents(Object anObj, ViewEvent.Type ... theTypes)
-    {
-        View view = getView(anObj);
-        view.addEventHandler(this::dispatchEventToOwner, theTypes);
-    }
 }
