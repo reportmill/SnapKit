@@ -14,7 +14,6 @@ import snap.text.TextSel;
 import snap.util.ArrayUtils;
 import snap.util.Convert;
 import snap.view.*;
-
 import java.util.stream.Stream;
 
 /**
@@ -72,8 +71,10 @@ public class TextPane extends ViewOwner {
         _textArea = createTextArea();
         _textArea.setName("TextArea");
         _textArea.setFill(Color.WHITE);
-        _textArea.setEditable(true);
         _textArea.setGrowWidth(true);
+        _textArea.setEditable(true);
+        _textArea.setSyncTextFont(false);
+        _textArea.setUndoActivated(true);
 
         // Wrap TextArea in ScrollPane
         ScrollView scrollView = new ScrollView(_textArea);
