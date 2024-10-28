@@ -143,7 +143,9 @@ public class DefaultConsole extends ViewOwner implements Console {
     protected View createUI()
     {
         View consoleView = getConsoleView();
-        return new ScrollView(consoleView);
+        ScrollView scrollView = new ScrollView(consoleView);
+        scrollView.setFillWidth(consoleView != null && consoleView.isGrowWidth());
+        return scrollView;
     }
 
     /**

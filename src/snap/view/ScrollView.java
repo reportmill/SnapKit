@@ -22,6 +22,9 @@ public class ScrollView extends ParentView implements ViewHost {
     // Whether to show horizontal/vertical scroll bars (null means 'as-needed')
     private Boolean  _showHBar, _showVBar;
     
+    // Whether horizontal/vertical scroll bars have shown recently
+    private boolean  _showHBarHint, _showVBarHint;
+
     // The ScrollBar size
     private int  _barSize = 16;
     
@@ -183,6 +186,7 @@ public class ScrollView extends ParentView implements ViewHost {
             hbar.setViewSize(_scroller.getWidth());
             hbar.setScrollSize(_scroller.getScrollWidth());
             hbar.setScroll(_scroller.getScrollX());
+            _showHBarHint = true;
         }
 
         // Otherwise, remove
@@ -212,6 +216,7 @@ public class ScrollView extends ParentView implements ViewHost {
             vbar.setViewSize(_scroller.getHeight());
             vbar.setScrollSize(_scroller.getScrollHeight());
             vbar.setScroll(_scroller.getScrollY());
+            _showVBarHint = true;
         }
 
         // Otherwise, remove
@@ -262,7 +267,7 @@ public class ScrollView extends ParentView implements ViewHost {
     {
         Insets ins = getInsetsAll();
         double prefW = _scroller.getBestWidth(aH);
-        if (_showVBar == Boolean.TRUE)
+        if (_showVBarHint || _showVBar == Boolean.TRUE)
             prefW += getBarSize();
         return prefW + ins.getWidth();
     }
@@ -274,7 +279,7 @@ public class ScrollView extends ParentView implements ViewHost {
     {
         Insets ins = getInsetsAll();
         double prefH = _scroller.getBestHeight(aW);
-        if (_showHBar == Boolean.TRUE)
+        if (_showHBarHint || _showHBar == Boolean.TRUE)
             prefH += getBarSize();
         return prefH + ins.getHeight();
     }
@@ -341,6 +346,8 @@ public class ScrollView extends ParentView implements ViewHost {
         // Get Scroller Size
         double scrollerW = _scroller.getWidth();
         double scrollerH = _scroller.getHeight();
+        if (scrollerW <= 30 || scrollerH <= 30)
+            return false;
 
         // Get child size
         Size contentSize = _scroller.getContentPrefSize();
@@ -361,8 +368,8 @@ public class ScrollView extends ParentView implements ViewHost {
 
         // If showing both ScrollBars, but only because both ScrollBars are showing, hide them and try again
         if (isVBarShowing && isHBarShowing && showVBar && showHBar && asneedH && asneedV) {
-            boolean vbarNotReallyNeeded = contentW <= scrollerW + getVBar().getWidth();
-            boolean hbarNotReallyNeeded = contentH <= scrollerH + getHBar().getHeight();
+            boolean vbarNotReallyNeeded = contentW <= scrollerW + getBarSize();
+            boolean hbarNotReallyNeeded = contentH <= scrollerH + getBarSize();
             if (vbarNotReallyNeeded && hbarNotReallyNeeded) {
                 setVBarShowing(false);
                 setHBarShowing(false);
@@ -371,12 +378,12 @@ public class ScrollView extends ParentView implements ViewHost {
         }
 
         // If either ScrollBar in wrong Showing state, set and try again
-        if (showVBar != isVBarShowing) {
+        if (showVBar != isVBarShowing || showHBar != isHBarShowing) {
+            if (showVBar && !_showVBarHint || showHBar && !_showHBarHint)
+                runLater(this::relayoutParent);
+            _showVBarHint = showVBar;
+            _showHBarHint = showHBar;
             setVBarShowing(showVBar);
-            return true;
-        }
-
-        if (showHBar != isHBarShowing) {
             setHBarShowing(showHBar);
             return true;
         }
