@@ -70,6 +70,7 @@ public class TextField extends ParentView {
         _fireActionOnFocusLost = DEFAULT_FIRE_ACTION_ON_FOCUS_LOST;
 
         // Override default properties
+        setOverflow(Overflow.Scroll);
         setFocusable(true);
         setFocusWhenPressed(true);
         setActionable(true);
@@ -521,7 +522,7 @@ public class TextField extends ParentView {
         }
 
         // Check for whether to wrap in scroll view
-        if (_textAdapter.getLineCount() > 1)
+        if (_textAdapter.getLineCount() > 1 && getOverflow() == Overflow.Scroll)
             ViewUtils.checkWantsScrollView(this);
     }
 

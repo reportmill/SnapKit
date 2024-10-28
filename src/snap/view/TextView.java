@@ -24,6 +24,7 @@ public class TextView extends TextArea {
         super(isRichText);
         setEditable(true);
         setUndoActivated(true);
+        setOverflow(Overflow.Scroll);
     }
 
     /**
@@ -34,7 +35,8 @@ public class TextView extends TextArea {
     {
         super.layoutImpl();
 
-        ViewUtils.checkWantsScrollView(this);
+        if (getOverflow() == View.Overflow.Scroll)
+            ViewUtils.checkWantsScrollView(this);
     }
 
     /**
