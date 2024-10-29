@@ -1,5 +1,7 @@
 package snap.viewx;
+import snap.geom.Insets;
 import snap.geom.Pos;
+import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.text.TextBlock;
@@ -29,13 +31,26 @@ public class MarkDownView extends ChildView {
     // Map of directive values
     private Map<String,String> _directives = new HashMap<>();
 
+    // Constants
+    private static final Insets MARGIN_TITLE = new Insets(24, 8, 8, 8);
+    private static final Insets MARGIN_SEPARATOR = new Insets(8, 8, 8, 8);
+    private static final Insets MARGIN_GENERAL = new Insets(18, 8, 18, 8);
+    private static final Insets MARGIN_NONE = Insets.EMPTY;
+    private static final Insets PADDING_DOC = new Insets(10, 20, 20, 20);
+    private static final Insets PADDING_GENERAL = new Insets(16, 16, 16, 16);
+    private static final Insets PADDING_INLINE = new Insets(8, 8, 8, 8);
+    private static final Color BLOCK_COLOR = new Color(.96, .97, .98);
+    private static final Color BLOCK_BORDER_COLOR = BLOCK_COLOR.blend(Color.BLACK, .15);
+    private static final Border BLOCK_BORDER = Border.createLineBorder(BLOCK_BORDER_COLOR, 1);
+    private static final Color SEPARATOR_COLOR = BLOCK_COLOR.blend(Color.BLACK, .1);
+
     /**
      * Constructor.
      */
     public MarkDownView()
     {
         super();
-        setPadding(10, 20, 20, 20);
+        setPadding(PADDING_DOC);
         setFill(Color.WHITE);
     }
 
@@ -51,6 +66,9 @@ public class MarkDownView extends ChildView {
             View nodeView = createViewForNode(mdnode);
             if (nodeView != null)
                 addChild(nodeView);
+
+            if (mdnode.getNodeType() == MDNode.NodeType.Header1)
+                addChild(createViewForSeparatorNode());
         }
     }
 
@@ -117,9 +135,9 @@ public class MarkDownView extends ChildView {
     protected View createViewForHeaderNode(MDNode headerNode)
     {
         TextArea textArea = new TextArea();
-        textArea.setMargin(16, 8, 16, 8);
+        textArea.setMargin(MARGIN_TITLE);
         if (headerNode.getNodeType() == MDNode.NodeType.Header2)
-            textArea.setMargin(8, 8, 8, 8);
+            textArea.setMargin(MARGIN_GENERAL);
 
         // Reset style
         TextStyle textStyle = headerNode.getNodeType() == MDNode.NodeType.Header1 ? MDUtils.getHeader1Style() : MDUtils.getHeader2Style();
@@ -134,13 +152,26 @@ public class MarkDownView extends ChildView {
     }
 
     /**
+     * Creates a view for separator node.
+     */
+    protected View createViewForSeparatorNode()
+    {
+        RectView rectView = new RectView();
+        rectView.setPrefHeight(1);
+        rectView.setGrowWidth(true);
+        rectView.setFill(SEPARATOR_COLOR);
+        rectView.setMargin(MARGIN_SEPARATOR);
+        return rectView;
+    }
+
+    /**
      * Creates a view for text node.
      */
     protected View createViewForTextNode(MDNode contentNode)
     {
         TextArea textArea = new TextArea();
         textArea.setWrapLines(true);
-        textArea.setMargin(8, 8, 8, 8);
+        textArea.setMargin(MARGIN_GENERAL);
 
         // Reset style
         TextStyle textStyle = MDUtils.getContentStyle();
@@ -214,7 +245,7 @@ public class MarkDownView extends ChildView {
         // Wrap in box
         BoxView boxView = new BoxView(imageView);
         boxView.setAlign(Pos.CENTER_LEFT);
-        boxView.setMargin(8, 8, 8, 8);
+        boxView.setMargin(MARGIN_GENERAL);
 
         // Return
         return boxView;
@@ -227,7 +258,7 @@ public class MarkDownView extends ChildView {
     {
         // Create list view
         ColView listNodeView = new ColView();
-        listNodeView.setMargin(8, 8, 8, 8);
+        listNodeView.setMargin(MARGIN_GENERAL);
 
         // Get list item views and add to listNodeView
         MDNode[] listItemNodes = listNode.getChildNodes();
@@ -255,7 +286,7 @@ public class MarkDownView extends ChildView {
         // Otherwise create text area and insert
         else {
             View bulletTextArea = createViewForTextNode(new MDNode(MDNode.NodeType.Text, "• "));
-            bulletTextArea.setMargin(0, 0, 0, 0);
+            bulletTextArea.setMargin(MARGIN_NONE);
             mixedNodeView.addChild(bulletTextArea, 0);
         }
 
@@ -266,42 +297,30 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for code block.
      */
-    protected View createViewForCodeBlockNode(MDNode codeNode)
+    protected TextArea createViewForCodeBlockNode(MDNode codeNode)
     {
-        TextArea textArea = createTextAreaViewForCodeBlockNode(codeNode);
-
-        // Wrap in box and return
-        BoxView codeBlockBox = new BoxView(textArea);
-        codeBlockBox.setAlign(Pos.CENTER_LEFT);
-        return codeBlockBox;
-    }
-
-    /**
-     * Creates a view for code block.
-     */
-    protected TextArea createTextAreaViewForCodeBlockNode(MDNode codeNode)
-    {
-        TextArea textArea = new TextView();
-        textArea.setMargin(8, 8, 8, 8);
-        textArea.setPadding(16, 16, 16, 16);
-        textArea.setBorderRadius(8);
-        textArea.setFill(new Color(.96, .97, .98));
-        textArea.setEditable(true);
-        textArea.setFocusPainted(true);
+        TextArea textView = new TextView();
+        textView.setMargin(MARGIN_GENERAL);
+        textView.setPadding(PADDING_GENERAL);
+        textView.setBorder(BLOCK_BORDER);
+        textView.setBorderRadius(8);
+        textView.setFill(BLOCK_COLOR);
+        textView.setEditable(true);
+        textView.setFocusPainted(true);
 
         // Reset style
         TextStyle textStyle = MDUtils.getCodeStyle();
-        TextBlock textBlock = textArea.getTextBlock();
+        TextBlock textBlock = textView.getTextBlock();
         textBlock.setDefaultTextStyle(textStyle);
 
         // Set text
         textBlock.addChars(codeNode.getText());
 
         // Add listener to select code block
-        textArea.addEventFilter(e -> _selCodeBlockNode = codeNode, MousePress);
+        textView.addEventFilter(e -> _selCodeBlockNode = codeNode, MousePress);
 
         // Return
-        return textArea;
+        return textView;
     }
 
     /**
@@ -312,10 +331,11 @@ public class MarkDownView extends ChildView {
         // Wrap in box and return
         BoxView codeBlockBox = new BoxView();
         codeBlockBox.setName("Runnable");
-        codeBlockBox.setMargin(16, 16, 16, 16);
-        codeBlockBox.setPadding(16, 16, 16, 16);
+        codeBlockBox.setMargin(MARGIN_GENERAL);
+        codeBlockBox.setPadding(PADDING_GENERAL);
+        codeBlockBox.setBorder(BLOCK_BORDER);
         codeBlockBox.setBorderRadius(8);
-        codeBlockBox.setFill(new Color(.96, .97, .98));
+        codeBlockBox.setFill(BLOCK_COLOR);
         codeBlockBox.setAlign(Pos.CENTER_LEFT);
 
         // Apply style string
@@ -346,7 +366,7 @@ public class MarkDownView extends ChildView {
     {
         // Create row view for mixed node
         RowView mixedNodeView = new RowView();
-        mixedNodeView.setMargin(8, 8, 8, 8);
+        mixedNodeView.setMargin(MARGIN_GENERAL);
         mixedNodeView.setSpacing(4);
 
         // Get children
@@ -364,7 +384,7 @@ public class MarkDownView extends ChildView {
             // Otherwise create view and add
             else {
                 View childNodeView = createViewForMixedNodeChildNode(childNode);
-                childNodeView.setMargin(0, 0, 0, 0);
+                childNodeView.setMargin(MARGIN_NONE);
                 mixedNodeView.addChild(childNodeView);
                 if (childNodeView instanceof TextArea && nodeType != MDNode.NodeType.CodeBlock)
                     lastTextArea = (TextArea) childNodeView;
@@ -385,15 +405,15 @@ public class MarkDownView extends ChildView {
 
         // Handle CodeBlock special
         if (nodeType == MDNode.NodeType.CodeBlock) {
-            View childNodeView = createTextAreaViewForCodeBlockNode(childNode);
-            childNodeView.setMargin(0, 0, 0, 0);
-            childNodeView.setPadding(8, 8, 8, 8);
+            View childNodeView = createViewForCodeBlockNode(childNode);
+            childNodeView.setMargin(MARGIN_NONE);
+            childNodeView.setPadding(PADDING_INLINE);
             return childNodeView;
         }
 
         // Handle anything else
         View childNodeView = createViewForNode(childNode); assert (childNodeView != null);
-        childNodeView.setMargin(0, 0, 0, 0);
+        childNodeView.setMargin(MARGIN_NONE);
         return childNodeView;
     }
 

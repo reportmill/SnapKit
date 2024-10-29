@@ -57,7 +57,7 @@ public class MDUtils {
 
         // Create, configure
         TextStyle textStyle = TextStyle.DEFAULT;
-        Font headerFont = new Font("Arial Bold", 24);
+        Font headerFont = new Font("Arial Bold", 34);
         Color headerColor = Color.BLACK;
         TextStyle headerStyle = textStyle.copyForStyleValues(headerFont, headerColor);
 
@@ -75,7 +75,7 @@ public class MDUtils {
 
         // Create, configure
         TextStyle textStyle = TextStyle.DEFAULT;
-        Font headerFont = new Font("Arial Bold", 20);
+        Font headerFont = new Font("Arial Bold", 24);
         Color headerColor = Color.BLACK;
         TextStyle headerStyle = textStyle.copyForStyleValues(headerFont, headerColor);
 
@@ -93,7 +93,7 @@ public class MDUtils {
 
         // Create, configure
         TextStyle textStyle = TextStyle.DEFAULT;
-        Font contentFont = Font.Arial14;
+        Font contentFont = Font.Arial16;
         Color contentColor = Color.BLACK;
         TextStyle contentStyle = textStyle.copyForStyleValues(contentFont, contentColor);
 

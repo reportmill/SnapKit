@@ -26,7 +26,7 @@ public class ScrollView extends ParentView implements ViewHost {
     private boolean  _showHBarHint, _showVBarHint;
 
     // The ScrollBar size
-    private int  _barSize = 16;
+    private int  _barSize = 14;
     
     // Constants
     public static final String Content_Prop = Scroller.Content_Prop;
@@ -453,7 +453,7 @@ public class ScrollView extends ParentView implements ViewHost {
         // ShowHBar, ShowVBar, BarSize
         aPropSet.addPropNamed(ShowHBar_Prop, Boolean.class, null);
         aPropSet.addPropNamed(ShowVBar_Prop, Boolean.class, null);
-        aPropSet.addPropNamed(BarSize_Prop, int.class, 16);
+        aPropSet.addPropNamed(BarSize_Prop, int.class, 14);
     }
 
     /**
