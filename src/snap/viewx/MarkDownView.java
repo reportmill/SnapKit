@@ -446,29 +446,28 @@ public class MarkDownView extends ChildView {
      */
     private void addTextOrLinkNodeToTextArea(TextArea textArea, MDNode aNode)
     {
+        // If text already present, add space
+        if (textArea.length() > 0)
+            textArea.addChars(" ");
+
         // Handle link node
         if (aNode.getNodeType() == MDNode.NodeType.Link) {
 
             // Create link style
             String urlAddr = aNode.getOtherText();
             TextLink textLink = new TextLink(urlAddr);
-            TextBlock textBlock = textArea.getTextBlock();
-            TextStyle textStyle = textBlock.getDefaultTextStyle();
+            TextStyle textStyle = textArea.getDefaultTextStyle();
             TextStyle linkTextStyle = textStyle.copyForStyleValue(textLink);
 
-            // If text already present, add space
-            if (textBlock.length() > 0)
-                textBlock.addChars(" ");
-
             // Set text
-            textBlock.addCharsWithStyle(aNode.getText(), linkTextStyle);
+            textArea.addCharsWithStyle(aNode.getText(), linkTextStyle);
         }
 
         // Otherwise, add chars
         else {
             String nodeText = aNode.getText();
             if (nodeText != null)
-                textArea.getTextBlock().addChars(nodeText);
+                textArea.addChars(nodeText);
         }
     }
 }
