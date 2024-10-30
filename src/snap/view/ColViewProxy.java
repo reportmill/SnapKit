@@ -129,8 +129,9 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
         // Get parent info
         ViewProxy<?>[] children = getChildren();
         Insets ins = getInsetsAll(); // Should really just use Padding
+        double parentW = getWidth();
+        Insets parentPadding = getPadding();
         double parentSpacing = getSpacing();
-        boolean isFillWidth = isFillWidth() && getWidth() > 0;
 
         // Loop vars
         double childY = 0;
@@ -141,15 +142,15 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
         for (ViewProxy<?> child : children) {
 
             // Calculate spacing between lastChild and loop child
-            double loopMargin = child.getMargin().top;
-            double childSpacing = Math.max(lastMargin, loopMargin);
+            Insets childMargin = child.getMargin();
+            double childSpacing = Math.max(lastMargin, childMargin.top);
             if (lastChild != null)
                 childSpacing = Math.max(childSpacing, parentSpacing);
 
-            // If child width is fixed because of FillWidth or GrowWidth, get child width value for PrefHeight calc
-            double childW = -1;
-            if (isFillWidth || child.isGrowWidth())
-                childW = getChildFixedWidth(this, child);
+            // Get child pref width
+            double childInsetLeft = Math.max(parentPadding.left, childMargin.left);
+            double childInsetRight = Math.max(parentPadding.right, childMargin.right);
+            double childW = Math.max(parentW - childInsetLeft - childInsetRight, 0);
 
             // Update ChildY with spacing, round and set
             childY += childSpacing;
@@ -179,20 +180,6 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
         int extraY = (int) Math.round(viewH - layoutH);
         if (extraY != 0)
             addExtraSpaceY(this, extraY);
-    }
-
-    /**
-     * Returns the child fixed width.
-     */
-    private static double getChildFixedWidth(ViewProxy<?> aParent, ViewProxy<?> aChild)
-    {
-        double parW = aParent.getWidth();
-        Insets parPadding = aParent.getPadding();
-        Insets childMargin = aChild.getMargin();
-        double insLeft = Math.max(parPadding.left, childMargin.left);
-        double insRight = Math.max(parPadding.right, childMargin.right);
-        double fixedW = Math.max(parW - insLeft - insRight, 0);
-        return fixedW;
     }
 
     /**

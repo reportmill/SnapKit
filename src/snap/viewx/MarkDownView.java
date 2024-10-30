@@ -420,26 +420,17 @@ public class MarkDownView extends ChildView {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)
-    {
-        return ColView.getPrefWidth(this, aH);
-    }
+    protected double getPrefWidthImpl(double aH)  { return ColView.getPrefWidth(this, aH); }
 
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)
-    {
-        return ColView.getPrefHeight(this, aW, true);
-    }
+    protected double getPrefHeightImpl(double aW)  { return ColView.getPrefHeight(this, aW, false); }
 
     /**
      * Override to layout children with ColView layout.
      */
-    protected void layoutImpl()
-    {
-        ColView.layout(this, true);
-    }
+    protected void layoutImpl()  { ColView.layout(this, false); }
 
     /**
      * Adds a text or link node content to a given text area.

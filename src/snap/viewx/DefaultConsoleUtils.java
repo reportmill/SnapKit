@@ -20,7 +20,7 @@ class DefaultConsoleUtils {
 
     // Constants
     public static final Font DEFAULT_FONT = Font.Arial14;
-    private static final Color DEFAULT_TEXTAREA_FILL = new Color(.95);
+    private static final Color DEFAULT_TEXTAREA_FILL = Color.WHITE;
     private static final Color DEFAULT_TEXTAREA_TEXTCOLOR = Color.GRAY2;
 
     /**
@@ -78,7 +78,7 @@ class DefaultConsoleUtils {
         // Create TextBlock and configure Style
         TextBlock textBlock = new TextBlock();
         textBlock.setDefaultFont(DEFAULT_FONT);
-        textBlock.setDefaultTextStyle(textBlock.getDefaultTextStyle().copyForStyleValue(DEFAULT_TEXTAREA_TEXTCOLOR));
+        textBlock.setDefaultTextColor(DEFAULT_TEXTAREA_TEXTCOLOR);
 
         // Set string
         textBlock.setString(aString);
