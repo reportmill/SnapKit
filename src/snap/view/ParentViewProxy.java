@@ -3,6 +3,7 @@
  */
 package snap.view;
 import snap.geom.Insets;
+import snap.util.ArrayUtils;
 import snap.util.MathUtils;
 
 /**
@@ -27,8 +28,7 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
     public int getGrowWidthCount()
     {
         if (_growWidthCount >= 0) return _growWidthCount;
-        int count = 0; for (ViewProxy c : getChildren()) if (c.isGrowWidth()) count++;
-        return _growWidthCount = count;
+        return _growWidthCount = ArrayUtils.count(getChildren(), child -> child.isGrowWidth());
     }
 
     /**
@@ -37,84 +37,87 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
     public int getGrowHeightCount()
     {
         if (_growHeightCount >= 0) return _growHeightCount;
-        int count = 0; for (ViewProxy c : getChildren()) if (c.isGrowHeight()) count++;
-        return _growHeightCount = count;
+        return _growHeightCount = ArrayUtils.count(getChildren(), child -> child.isGrowHeight());
     }
 
     /**
      * Returns the MaxX of last child with insets.
      */
-    public double getChildrenMaxXLastWithInsets()
+    public double getLastChildMaxXWithInsets()
     {
-        // Get LastChildMaxX, LastChildMarginRight
-        ViewProxy[] children = getChildren();
-        ViewProxy lastChild = children.length > 0 ? children[children.length-1] : null;
-        double childMaxX = lastChild != null ? lastChild.getMaxX() : 0;
-        double lastChildMarginRight = lastChild != null ? lastChild.getMargin().right : 0;
+        // Get info
+        Insets parentPadding = getPadding();
+        Insets borderInsets = getBorderInsets();
+        ViewProxy<?> lastChild = getLastChild();
+        Insets lastChildMargin = lastChild != null ? lastChild.getMargin() : Insets.EMPTY;
 
-        // Return LastChildMaxX plus padding right
-        Insets ins = getInsetsAll();
-        double rightInset = Math.max(ins.right, lastChildMarginRight);
-        return Math.ceil(childMaxX + rightInset);
-    }
-
-    /**
-     * Returns the MaxX of children with insets.
-     */
-    public double getChildrenMaxXAllWithInsets()
-    {
-        // Get children
-        ViewProxy[] children = getChildren();
-        Insets ins = getInsetsAll();
-        double childMaxXAll = ins.getWidth();
-
-        // Iterate over children to get MaxX
-        for (ViewProxy child : children) {
-            double childMaxX = child.getMaxX();
-            childMaxX += Math.max(child.getMargin().right, ins.right);
-            childMaxXAll = Math.max(childMaxXAll, childMaxX);
-        }
-
-        // Return (round up)
-        return Math.ceil(childMaxXAll);
+        // Return LastChildMaxX plus right margin plus border right
+        double lastChildMaxX = lastChild != null ? lastChild.getMaxX() : 0;
+        double rightMargin = Math.max(parentPadding.right, lastChildMargin.right);
+        return Math.ceil(lastChildMaxX + rightMargin + borderInsets.right);
     }
 
     /**
      * Returns the MaxY of last child with insets.
      */
-    public double getChildrenMaxYLastWithInsets()
+    public double getLastChildMaxYWithInsets()
     {
-        // Get LastChildMaxY, LastChildMarginBottom
-        ViewProxy[] children = getChildren();
-        ViewProxy lastChild = children.length > 0 ? children[children.length-1] : null;
-        double lastChildMaxY = lastChild != null ? lastChild.getMaxY() : 0;
-        double lastChildMarginBottom = lastChild != null ? lastChild.getMargin().bottom : 0;
+        // Get info
+        Insets parentPadding = getPadding();
+        Insets borderInsets = getBorderInsets();
+        ViewProxy<?> lastChild = getLastChild();
+        Insets lastChildMargin = lastChild != null ? lastChild.getMargin() : Insets.EMPTY;
 
-        // Return LastChildMaxY plus padding bottom
-        Insets ins = getInsetsAll();
-        double bottomInset = Math.max(ins.bottom, lastChildMarginBottom);
-        return Math.ceil(lastChildMaxY + bottomInset);
+        // Return LastChildMaxY plus bottom margin plus border bottom
+        double lastChildMaxY = lastChild != null ? lastChild.getMaxY() : 0;
+        double bottomMargin = Math.max(parentPadding.bottom, lastChildMargin.bottom);
+        return Math.ceil(lastChildMaxY + bottomMargin + borderInsets.bottom);
+    }
+
+    /**
+     * Returns the MaxX of children with insets.
+     */
+    public double getChildrenMaxXWithInsets()
+    {
+        // Get info
+        Insets parentPadding = getPadding();
+        Insets borderInsets = getBorderInsets();
+        ViewProxy<?>[] children = getChildren();
+        double childrenMaxX = parentPadding.getWidth() + borderInsets.getWidth();
+
+        // Iterate over children to get MaxX
+        for (ViewProxy<?> child : children) {
+            double childMaxX = child.getMaxX();
+            Insets childMargin = child.getMargin();
+            double rightMargin = Math.max(childMargin.right, parentPadding.right);
+            childrenMaxX = Math.max(childrenMaxX, childMaxX + rightMargin);
+        }
+
+        // Return (round up)
+        return Math.ceil(childrenMaxX + borderInsets.right);
     }
 
     /**
      * Returns the MaxY of children with insets.
      */
-    public double getChildrenMaxYAllWithInsets()
+    public double getChildrenMaxYWithInsets()
     {
-        // Get children
-        ViewProxy[] children = getChildren();
-        Insets ins = getInsetsAll();
-        double childMaxYAll = ins.getHeight();
+        // Get info
+        Insets parentPadding = getPadding();
+        Insets borderInsets = getBorderInsets();
+        ViewProxy<?>[] children = getChildren();
+        double childMaxYAll = parentPadding.getHeight() + borderInsets.getHeight();
 
         // Iterate over children to get MaxY
-        for (ViewProxy child : children) {
+        for (ViewProxy<?> child : children) {
             double childMaxY = child.getMaxY();
-            childMaxY += Math.max(child.getMargin().bottom, ins.bottom);
-            childMaxYAll = Math.max(childMaxYAll, childMaxY);
+            Insets childMargin = child.getMargin();
+            double bottomMargin = Math.max(childMargin.bottom, parentPadding.bottom);
+            childMaxYAll = Math.max(childMaxYAll, childMaxY + bottomMargin);
         }
 
         // Return (round up)
-        return Math.ceil(childMaxYAll);
+        return Math.ceil(childMaxYAll + borderInsets.bottom);
     }
 
     /**

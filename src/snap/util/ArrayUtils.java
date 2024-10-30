@@ -491,6 +491,16 @@ public class ArrayUtils {
     }
 
     /**
+     * Returns the count of number of items in array that match given predicate.
+     */
+    public static <T> int count(T[] anArray, Predicate<? super T> aPred)
+    {
+        int count = 0;
+        for (T item : anArray) if (aPred.test(item)) count++;
+        return count;
+    }
+
+    /**
      * Returns the min value of a given array using given comparator function.
      */
     public static <T> T getMin(T[] anArray, Comparator<T> aComparator)

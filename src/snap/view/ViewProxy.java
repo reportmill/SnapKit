@@ -1,8 +1,7 @@
 package snap.view;
 import snap.geom.*;
 import snap.gfx.Border;
-import java.util.ArrayList;
-import java.util.List;
+import snap.util.ArrayUtils;
 
 /**
  * This class represents a view for the purpose of layout.
@@ -65,8 +64,7 @@ public class ViewProxy<T extends View> extends Rect {
     public double getWidth()
     {
         if (width != UNSET_DOUBLE) return width;
-        width = _view != null ? _view.getWidth() : 0;
-        return width;
+        return width = _view != null ? _view.getWidth() : 0;
     }
 
     /**
@@ -75,8 +73,7 @@ public class ViewProxy<T extends View> extends Rect {
     public double getHeight()
     {
         if (height != UNSET_DOUBLE) return height;
-        height = _view != null ? _view.getHeight() : 0;
-        return height;
+        return height = _view != null ? _view.getHeight() : 0;
     }
 
     /**
@@ -110,10 +107,10 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public void setBoundsInClient()
     {
-        if (_children!=null)
+        if (_children != null)
             for (ViewProxy<?> child : _children)
                 child.setBoundsInClient();
-        else if (_view!=null)
+        else if (_view != null)
             _view.setBounds(x, y, width, height);
     }
 
@@ -148,7 +145,7 @@ public class ViewProxy<T extends View> extends Rect {
         if (_children != null || _view == null) return _children;
         ParentView par = (ParentView) _view;
         View[] children = par.getChildrenManaged();
-        return _children = getProxies(children);
+        return _children = ArrayUtils.map(children, child -> new ViewProxy<>(child), ViewProxy.class);
     }
 
     /**
@@ -160,14 +157,21 @@ public class ViewProxy<T extends View> extends Rect {
     }
 
     /**
+     * Returns the last child.
+     */
+    public ViewProxy<?> getLastChild()
+    {
+        ViewProxy<?>[] children = getChildren();
+        return children.length > 0 ? children[children.length-1] : null;
+    }
+
+    /**
      * Returns the child for given component class.
      */
     public <E extends View> ViewProxy<E> getChildForClass(Class<E> aClass)
     {
-        for (ViewProxy<?> proxy : getChildren())
-            if (aClass.isInstance(proxy.getView()))
-                return (ViewProxy<E>) proxy;
-        return null;
+        ViewProxy<?>[] children = getChildren();
+        return (ViewProxy<E>) ArrayUtils.findMatch(children, child -> aClass.isInstance(child.getView()));
     }
 
     /**
@@ -175,11 +179,8 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public <E extends View> ViewProxy<E>[] getChildrenForClass(Class<E> aClass)
     {
-        List<ViewProxy<E>> children = new ArrayList<>();
-        for (ViewProxy<?> proxy : getChildren())
-            if (aClass.isInstance(proxy.getView()))
-                children.add((ViewProxy<E>) proxy);
-        return children.toArray(new ViewProxy[0]);
+        ViewProxy<?>[] children = getChildren();
+        return (ViewProxy<E>[]) ArrayUtils.filter(children, child -> aClass.isInstance(child.getView()));
     }
 
     /**
@@ -194,10 +195,7 @@ public class ViewProxy<T extends View> extends Rect {
     /**
      * Sets the border.
      */
-    public void setBorder(Border aBorder)
-    {
-        _border = aBorder;
-    }
+    public void setBorder(Border aBorder)  { _border = aBorder; }
 
     /**
      * Returns the border insets.
@@ -221,10 +219,7 @@ public class ViewProxy<T extends View> extends Rect {
     /**
      * Sets the margin.
      */
-    public void setMargin(Insets theIns)
-    {
-        _margin = theIns;
-    }
+    public void setMargin(Insets theIns)  { _margin = theIns; }
 
     /**
      * Returns the padding.
@@ -238,30 +233,12 @@ public class ViewProxy<T extends View> extends Rect {
     /**
      * Sets the padding.
      */
-    public void setPadding(Insets theIns)
-    {
-        _padding = theIns;
-    }
-
-    /**
-     * Returns the insets.
-     */
-    public Insets getInsetsAll()
-    {
-        Insets ins = getPadding();
-        Border border = getBorder();
-        if (border != null)
-            ins = Insets.add(ins, border.getInsets());
-        return ins;
-    }
+    public void setPadding(Insets theIns)  { _padding = theIns; }
 
     /**
      * Returns whether proxy is visible.
      */
-    public boolean isVisible()
-    {
-        return _view!=null && _view.isVisible();
-    }
+    public boolean isVisible()  { return _view != null && _view.isVisible(); }
 
     /**
      * Returns the alignment.
@@ -269,17 +246,13 @@ public class ViewProxy<T extends View> extends Rect {
     public Pos getAlign()
     {
         if (_align != null) return _align;
-        _align = _view != null ? _view.getAlign() : Pos.TOP_LEFT;
-        return _align;
+        return _align = _view != null ? _view.getAlign() : Pos.TOP_LEFT;
     }
 
     /**
      * Sets the alignment.
      */
-    public void setAlign(Pos aPos)
-    {
-        _align = aPos;
-    }
+    public void setAlign(Pos aPos)  { _align = aPos; }
 
     /**
      * Returns the LeanX.
@@ -341,18 +314,12 @@ public class ViewProxy<T extends View> extends Rect {
     /**
      * Sets spacing.
      */
-    public void setSpacing(double aValue)
-    {
-        _spacing = aValue;
-    }
+    public void setSpacing(double aValue)  { _spacing = aValue; }
 
     /**
      * Returns whether view fills width.
      */
-    public boolean isFillWidth()
-    {
-        return _fillWidth;
-    }
+    public boolean isFillWidth()  { return _fillWidth; }
 
     /**
      * Sets whether view fills width.
@@ -362,10 +329,7 @@ public class ViewProxy<T extends View> extends Rect {
     /**
      * Returns whether view fills height.
      */
-    public boolean isFillHeight()
-    {
-        return _fillHeight;
-    }
+    public boolean isFillHeight()  { return _fillHeight; }
 
     /**
      * Sets whether view fills height.
@@ -375,18 +339,12 @@ public class ViewProxy<T extends View> extends Rect {
     /**
      * Returns the best width.
      */
-    public double getBestWidth(double aH)
-    {
-        return _view.getBestWidth(aH);
-    }
+    public double getBestWidth(double aH)  { return _view.getBestWidth(aH); }
 
     /**
      * Returns the best height.
      */
-    public double getBestHeight(double aW)
-    {
-        return _view.getBestHeight(aW);
-    }
+    public double getBestHeight(double aW)  { return _view.getBestHeight(aW); }
 
     /**
      * Returns the align x factor.
@@ -422,16 +380,5 @@ public class ViewProxy<T extends View> extends Rect {
     public static ViewProxy<?> getProxy(View aView)
     {
         return aView != null ? new ViewProxy<>(aView) : null;
-    }
-
-    /**
-     * Returns an array of proxies for given array of views.
-     */
-    public static ViewProxy<?>[] getProxies(View ... theViews)
-    {
-        ViewProxy<?>[] proxies = new ViewProxy[theViews.length];
-        for(int i = 0; i < theViews.length; i++)
-            proxies[i] = new ViewProxy<>(theViews[i]);
-        return proxies;
     }
 }

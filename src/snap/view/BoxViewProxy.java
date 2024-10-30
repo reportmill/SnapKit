@@ -41,7 +41,7 @@ public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
     @Override
     protected double getPrefWidthImpl(double aH)
     {
-        double prefW = getChildrenMaxXLastWithInsets();
+        double prefW = getLastChildMaxXWithInsets();
         return prefW;
     }
 
@@ -51,7 +51,7 @@ public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
     @Override
     protected double getPrefHeightImpl(double aW)
     {
-        double prefH = getChildrenMaxYLastWithInsets();
+        double prefH = getLastChildMaxYWithInsets();
         return prefH;
     }
 

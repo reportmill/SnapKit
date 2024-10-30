@@ -29,7 +29,7 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
     @Override
     protected double getPrefWidthImpl(double aH)
     {
-        return getChildrenMaxXLastWithInsets();
+        return getLastChildMaxXWithInsets();
     }
 
     /**
@@ -38,7 +38,7 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
     @Override
     protected double getPrefHeightImpl(double aW)
     {
-        return getChildrenMaxYAllWithInsets();
+        return getChildrenMaxYWithInsets();
     }
 
     /**
@@ -68,28 +68,29 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
     {
         // Get parent info
         ViewProxy<?>[] children = getChildren();
-        Insets ins = getInsetsAll();
+        double parentH = getHeight();
+        Insets parentPadding = getPadding();
         double parentSpacing = getSpacing();
-        boolean isFillHeight = isFillHeight() && getHeight() > 0;
+        Insets borderInsets = getBorderInsets();
 
         // Loop vars
-        double childX = 0;
+        double childX = borderInsets.left;
         ViewProxy<?> lastChild = null;
-        double lastMargin = ins.left;
+        double lastMargin = parentPadding.left;
 
         // Iterate over children to calculate bounds X and Width
         for (ViewProxy<?> child : children) {
 
             // Calculate spacing between lastChild and loop child
-            double loopMargin = child.getMargin().left;
-            double childSpacing = Math.max(lastMargin, loopMargin);
+            Insets childMargin = child.getMargin();
+            double childSpacing = Math.max(lastMargin, childMargin.left);
             if (lastChild != null)
                 childSpacing = Math.max(childSpacing, parentSpacing);
 
-            // If child height is fixed because of FillHeight/GrowHeight, get child height value for PrefWidth calc
-            double childH = -1;
-            if (isFillHeight || child.isGrowHeight())
-                childH = getChildFixedHeight(this, child);
+            // If child pref height for PrefWidth calc
+            double childInsetTop = Math.max(parentPadding.top, childMargin.top);
+            double childInsetBottom = Math.max(parentPadding.bottom, childMargin.bottom);
+            double childH = Math.max(parentH - childInsetTop - childInsetBottom, 0);
 
             // Update ChildX with spacing, round and set
             childX += childSpacing;
@@ -103,7 +104,7 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
             // Update child x loop var and last child
             childX += childW;
             lastChild = child;
-            lastMargin = lastChild.getMargin().right;
+            lastMargin = childMargin.right;
         }
 
         // If Parent.Width -1, just return (laying out for PrefWidth)
@@ -112,8 +113,8 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
             return;
 
         // Calculate total layout width (last child MaxX + margin/padding)
-        double rightSpacing = Math.max(lastMargin, ins.right);
-        double layoutW = childX + rightSpacing;
+        double rightSpacing = Math.max(lastMargin, parentPadding.right);
+        double layoutW = childX + rightSpacing + borderInsets.right;
 
         // Calculate extra space and add to growers or alignment
         int extraX = (int) Math.round(viewW - layoutW);
@@ -133,20 +134,19 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
 
         // Get view bounds, insets
         double viewH = getHeight();
-        Insets ins = getInsetsAll();
+        Insets parentPadding = getPadding();
+        Insets borderInsets = getBorderInsets();
 
         // Iterate over children to calculate/set child Y & Height
         for (ViewProxy<?> child : children) {
 
             // Initialize child Y to top margin
             Insets childMarg = child.getMargin();
-            double topMarg = Math.max(ins.top, childMarg.top);
-            double btmMarg = Math.max(ins.bottom, childMarg.bottom);
-            double margH = topMarg + btmMarg;
-            double childY = topMarg;
+            double childY = borderInsets.top + Math.max(parentPadding.top, childMarg.top);
+            double childInsetBottom = borderInsets.bottom + Math.max(parentPadding.bottom, childMarg.bottom);
 
             // Initialize child Height to max height
-            double childMaxH = Math.max(viewH - margH, 0);
+            double childMaxH = Math.max(viewH - childY - childInsetBottom, 0);
             double childH = childMaxH;
 
             // If Parent.Height not set, just set height to Child.PrefHeight
@@ -176,20 +176,6 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
             child.setY(childY);
             child.setHeight(childH);
         }
-    }
-
-    /**
-     * Returns the child fixed width.
-     */
-    private static double getChildFixedHeight(ViewProxy<?> aParent, ViewProxy<?> aChild)
-    {
-        double parH = aParent.getHeight();
-        Insets parPadding = aParent.getPadding();
-        Insets childMargin = aChild.getMargin();
-        double insTop = Math.max(parPadding.top, childMargin.top);
-        double insBottom = Math.max(parPadding.bottom, childMargin.bottom);
-        double fixedH = Math.max(parH - insTop - insBottom, 0);
-        return fixedH;
     }
 
     /**
