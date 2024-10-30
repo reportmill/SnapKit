@@ -430,7 +430,7 @@ public class MarkDownView extends ChildView {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        return ColView.getPrefHeight(this, aW);
+        return ColView.getPrefHeight(this, aW, true);
     }
 
     /**

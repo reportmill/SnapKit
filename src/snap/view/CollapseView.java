@@ -339,7 +339,7 @@ public class CollapseView extends ParentView implements ViewHost {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        return ColView.getPrefHeight(this, -1);
+        return ColView.getPrefHeight(this, -1, true);
     }
 
     /**

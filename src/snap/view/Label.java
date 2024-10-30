@@ -281,7 +281,7 @@ public class Label extends ParentView {
     {
         if (isHorizontal())
             return RowView.getPrefHeight(this, aW);
-        return ColView.getPrefHeight(this, -1);
+        return ColView.getPrefHeight(this, -1, false);
     }
 
     /**

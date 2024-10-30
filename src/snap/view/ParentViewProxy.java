@@ -167,9 +167,20 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
      */
     public double getPrefHeight(double aW)
     {
-        setSize(aW, -1);
+        // If given width is not specified, see if view has explicit pref width
+        double prefW = aW > 0 ? aW : -1;
+        if (prefW < 0) {
+            View view = getView();
+            if (view != null && view.isPrefWidthSet())
+                prefW = view.getPrefWidth();
+        }
+
+        // Set size and layout
+        setSize(prefW, -1);
         layoutProxy();
-        double prefH = getPrefHeightImpl(aW);
+
+        // Return pref height
+        double prefH = getPrefHeightImpl(prefW);
         return prefH;
     }
 

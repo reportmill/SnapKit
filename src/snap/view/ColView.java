@@ -166,9 +166,10 @@ public class ColView extends ChildView {
     /**
      * Returns preferred height of given parent with given children.
      */
-    public static double getPrefHeight(ParentView aParent, double aW)
+    public static double getPrefHeight(ParentView aParent, double aW, boolean isFillWidth)
     {
         ColViewProxy<?> viewProxy = new ColViewProxy<>(aParent);
+        viewProxy.setFillWidth(isFillWidth);
         return viewProxy.getPrefHeight(aW);
     }
 

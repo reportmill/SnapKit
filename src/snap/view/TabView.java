@@ -272,7 +272,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     {
         if (_tabSide.isLeftOrRight())
             return RowView.getPrefHeight(this, aW);
-        return ColView.getPrefHeight(this, aW);
+        return ColView.getPrefHeight(this, aW, true);
     }
 
     /**
