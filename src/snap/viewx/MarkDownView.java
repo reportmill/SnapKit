@@ -480,6 +480,7 @@ public class MarkDownView extends ChildView {
             // Enable events
             textArea.setEditable(true);
             textArea.setFocusable(false);
+            textArea.getTextAdapter().setLinkHandler((e,url) -> handleLinkClick(url));
         }
 
         // Otherwise, add chars

@@ -11,6 +11,7 @@ import snap.props.*;
 import snap.util.*;
 import snap.view.*;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * This class acts as an intermediary between a 'text view' and a text block, handling selection, editing, cursor
@@ -35,6 +36,9 @@ public class TextAdapter extends PropObject {
 
     // A PropChangeListener to send SourceText PropChanges to adapter client.
     private PropChangeListener[] _sourceTextPropChangeLsnrs = new PropChangeListener[0];
+
+    // A consumer to handle link clicks
+    private BiConsumer<ViewEvent,String> _linkHandler;
 
     // The char index of carat
     private int  _selIndex;
@@ -271,6 +275,20 @@ public class TextAdapter extends PropObject {
     public void removeSourceTextPropChangeListener(PropChangeListener propChangeListener)
     {
         _sourceTextPropChangeLsnrs = ArrayUtils.remove(_sourceTextPropChangeLsnrs, propChangeListener);
+    }
+
+    /**
+     * Returns the consumer that is called when a link is activated.
+     */
+    public BiConsumer<ViewEvent,String> getLinkHandler()  { return _linkHandler; }
+
+    /**
+     * Sets the consumer that is called when a link is activated.
+     */
+    public void setLinkHandler(BiConsumer<ViewEvent,String> linkHandler)
+    {
+        if (linkHandler == getLinkHandler()) return;
+        _linkHandler = linkHandler;
     }
 
     /**
@@ -1086,7 +1104,7 @@ public class TextAdapter extends PropObject {
         if (anEvent.isMouseClick()) {
             TextLink textLink = getTextLinkForXY(anEvent.getX(), anEvent.getY());
             if (textLink != null)
-                openLink(textLink.getString());
+                handleLinkEvent(anEvent, textLink.getString());
         }
     }
 
@@ -1426,14 +1444,6 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Opens a given link.
-     */
-    protected void openLink(String aLink)
-    {
-        System.out.println("Open Link: " + aLink);
-    }
-
-    /**
      * Returns the undoer.
      */
     public Undoer getUndoer()  { return _textBlock.getSourceText().getUndoer(); }
@@ -1514,6 +1524,16 @@ public class TextAdapter extends PropObject {
      * Returns the height needed to display all characters.
      */
     public double getPrefHeight(double aW)  { return _textBlock.getPrefHeight(aW); }
+
+    /**
+     * Called when link is triggered.
+     */
+    protected void handleLinkEvent(ViewEvent anEvent, String aLink)
+    {
+        BiConsumer<ViewEvent,String> linkHandler = getLinkHandler();
+        if (linkHandler != null)
+            linkHandler.accept(anEvent, aLink);
+    }
 
     /**
      * Called when SourceText changes (chars added, updated or deleted).
