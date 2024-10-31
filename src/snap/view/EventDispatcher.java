@@ -240,7 +240,7 @@ public class EventDispatcher {
                     break;
 
                 // If View can be focused, focus and return
-                if (view.isFocusWhenPressed()) {
+                if (view.isFocusable() && view.isFocusWhenPressed()) {
                     view.requestFocus();
                     _lastMouseDown = null;
                     ViewUtils.runLater(() -> dispatchMouseEvent(anEvent));
@@ -261,7 +261,7 @@ public class EventDispatcher {
             for (View view = _mousePressView; view != null; view = view.getParent()) {
                 if (view.isFocused())
                     break;
-                if (view.isFocusWhenPressed()) {
+                if (view.isFocusable() && view.isFocusWhenPressed()) {
                     view.requestFocus();
                     break;
                 }

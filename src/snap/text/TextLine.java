@@ -139,6 +139,12 @@ public class TextLine implements CharSequenceX, Cloneable {
         if (aStyle == null || aStyle.equals(run.getTextStyle()))
             return run;
 
+        // If trying to add new style to plain text, complain
+        if (!_textBlock.isRichText()) {
+            System.out.println("TextLine.getRunForCharIndexAndStyle: Trying to add new style to plain text");
+            return run;
+        }
+
         // If empty, just set style and return
         if (run.length() == 0) {
             run.setTextStyle(aStyle);

@@ -1,9 +1,7 @@
 package snap.viewx;
 import snap.geom.Insets;
 import snap.geom.Pos;
-import snap.gfx.Border;
-import snap.gfx.Color;
-import snap.gfx.Image;
+import snap.gfx.*;
 import snap.text.TextBlock;
 import snap.text.TextLink;
 import snap.text.TextStyle;
@@ -186,7 +184,7 @@ public class MarkDownView extends ChildView {
      */
     protected View createViewForTextNode(MDNode contentNode)
     {
-        TextArea textArea = new TextArea();
+        TextArea textArea = new TextArea(true);
         textArea.setWrapLines(true);
         textArea.setMargin(GENERAL_MARGIN);
 
@@ -247,7 +245,11 @@ public class MarkDownView extends ChildView {
     /**
      * Called when link is clicked.
      */
-    protected void handleLinkClick(String urlAddr)  { }
+    protected void handleLinkClick(String urlAddr)
+    {
+        if (urlAddr.startsWith("http"))
+            GFXEnv.getEnv().openURL(urlAddr);
+    }
 
     /**
      * Creates a view for image node.
@@ -467,15 +469,24 @@ public class MarkDownView extends ChildView {
             TextStyle textStyle = textArea.getDefaultTextStyle();
             TextStyle linkTextStyle = textStyle.copyForStyleValue(textLink);
 
-            // Set text
-            textArea.addCharsWithStyle(aNode.getText(), linkTextStyle);
+            // Iterate over child nodes and add text to text area
+            MDNode[] childNodes = aNode.getChildNodes();
+            for (MDNode childNode : childNodes) {
+                if (childNode.getNodeType() == MDNode.NodeType.Text)
+                    textArea.addCharsWithStyle(childNode.getText(), linkTextStyle);
+                else System.out.println("MarkDownView: Unsupported link content type: " + childNode.getNodeType());
+            }
+
+            // Enable events
+            textArea.setEditable(true);
+            textArea.setFocusable(false);
         }
 
         // Otherwise, add chars
         else {
             String nodeText = aNode.getText();
             if (nodeText != null)
-                textArea.addChars(nodeText);
+                textArea.addCharsWithStyle(nodeText, textArea.getDefaultTextStyle());
         }
     }
 }
