@@ -1337,13 +1337,14 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     public double getPrefHeight(double aW)
     {
         // If WrapLines and given Width doesn't match current Width, setWidth
-        if (isWrapLines() && !MathUtils.equals(aW, getWidth()) && aW > 0) { //double oldW = getWidth();
-            double oldH = _height;
+        if (isWrapLines() && !MathUtils.equals(aW, _width) && aW > 0) {
+            double oldH = _height, oldW = _width;
             _height = Float.MAX_VALUE;
             setWidth(aW);
-            double prefH = getPrefHeight(); //setWidth(oldW); Should really reset old width - but why would they ask,
+            double prefH = getPrefHeight();
             _height = oldH;
-            return prefH;                     // if they didn't plan to use this width?
+            setWidth(oldW); // Seems like this should be unnecessary, since width is likely to be set to aW
+            return prefH;
         }
 
         // Return normal version
