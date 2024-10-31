@@ -1559,12 +1559,13 @@ public class TextAdapter extends PropObject {
     private void handleViewShowingChanged()
     {
         // If focused, update CaretAnim
-        if (_view.isFocused())
+        if (_view.isFocused()) {
             updateCaretAnim();
 
-        // If Showing, make sure selection is visible
-        if (_view.isShowing() && getSelStart() != 0)
-            _view.runDelayed(() -> scrollSelToVisible(), 200);
+            // If Showing, make sure selection is visible
+            if (_view.isShowing() && getSelStart() != 0)
+                _view.runDelayed(this::scrollSelToVisible, 200);
+        }
 
         // Manage listener for Window.Focus changes
         updateWindowFocusChangedLsnr();
