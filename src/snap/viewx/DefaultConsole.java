@@ -26,6 +26,9 @@ public class DefaultConsole extends ViewOwner implements Console {
     // The shared console
     private static Console _shared = null;
 
+    // Classloader used by console
+    private static ClassLoader _classLoader = DefaultConsole.class.getClassLoader();
+
     // The
     private static Runnable _consoleCreatedHandler = () -> handleConsoleCreated();
 
@@ -180,6 +183,16 @@ public class DefaultConsole extends ViewOwner implements Console {
      * Sets the console created handler.
      */
     protected static void setConsoleCreatedHandler(Runnable aRun)  { _consoleCreatedHandler = aRun; }
+
+    /**
+     * Returns the console to be used by console.
+     */
+    public static ClassLoader getConsoleClassLoader()  { return _classLoader; }
+
+    /**
+     * Sets the console to be used by console.
+     */
+    public static void setConsoleClassLoader(ClassLoader aClassLoader)  { _classLoader = aClassLoader; }
 
     /**
      * Called when console is created.

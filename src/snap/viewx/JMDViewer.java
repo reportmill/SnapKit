@@ -28,6 +28,7 @@ public class JMDViewer {
     public JMDViewer(Class<?> mainClass)
     {
         _mainClass = mainClass;
+        DefaultConsole.setConsoleClassLoader(mainClass.getClassLoader());
         runJavaMarkdown();
     }
 
@@ -115,7 +116,7 @@ public class JMDViewer {
     /**
      * Console class for Java markdown.
      */
-    private static class JMDRunConsole extends DefaultConsole {
+    protected static class JMDRunConsole extends DefaultConsole {
 
         @Override
         protected void showImpl(Object anObj)

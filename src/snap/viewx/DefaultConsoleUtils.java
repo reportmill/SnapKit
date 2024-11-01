@@ -208,7 +208,8 @@ class DefaultConsoleUtils {
     private static void installSnapChartsHelper()
     {
         try {
-            Class<Console.Helper> helperClass = (Class<Console.Helper>) Class.forName("snapcharts.charts.SnapChartsUtils");
+            ClassLoader classLoader = DefaultConsole.getConsoleClassLoader();
+            Class<Console.Helper> helperClass = (Class<Console.Helper>) Class.forName("snapcharts.charts.SnapChartsUtils", true, classLoader);
             _helper = helperClass.getConstructor().newInstance();
         }
         catch (Exception ignore) { }
