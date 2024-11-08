@@ -583,11 +583,13 @@ public class TextArea extends ParentView {
     {
         switch (aPC.getPropName()) {
 
-            // Handle Selection: Repost for TextArea
-            case Selection_Prop: firePropChange(Selection_Prop, aPC.getOldValue(), aPC.getNewValue()); break;
+            // Handle Selection, SourceText, WrapLines: Repost for TextArea
+            case TextAdapter.Selection_Prop: firePropChange(Selection_Prop, aPC.getOldValue(), aPC.getNewValue()); break;
+            case TextAdapter.SourceText_Prop: firePropChange(SourceText_Prop, aPC.getOldValue(), aPC.getNewValue()); break;
+            case TextAdapter.WrapLines_Prop: firePropChange(WrapLines_Prop, aPC.getOldValue(), aPC.getNewValue()); break;
 
             // Handle Editable
-            case Editable_Prop: handleTextAdapterEditableChanged(); break;
+            case TextAdapter.Editable_Prop: handleTextAdapterEditableChanged(); break;
         }
     }
 
