@@ -558,6 +558,27 @@ public class TextField extends ParentView {
     }
 
     /**
+     * Override to update font.
+     */
+    @Override
+    public void setFont(Font aFont)
+    {
+        if (Objects.equals(aFont, getFont())) return;
+        super.setFont(aFont);
+        _textAdapter.setTextFont(getFont());
+    }
+
+    /**
+     * Override to update font.
+     */
+    @Override
+    protected void parentFontChanged()
+    {
+        super.parentFontChanged();
+        _textAdapter.setTextFont(getFont());
+    }
+
+    /**
      * Returns a mapped property name.
      */
     public String getValuePropName()  { return "Text"; }
