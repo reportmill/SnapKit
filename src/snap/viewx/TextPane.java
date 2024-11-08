@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
+import snap.geom.Insets;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Image;
@@ -70,6 +71,7 @@ public class TextPane extends ViewOwner {
         // Create/config TextArea
         _textArea = createTextArea();
         _textArea.setName("TextArea");
+        _textArea.setPadding(new Insets(5));
         _textArea.setFill(Color.WHITE);
         _textArea.setGrowWidth(true);
         _textArea.setEditable(true);
