@@ -197,7 +197,7 @@ public class DevPaneViewOwners extends ViewOwner {
         if (selView == null || selView.getRootView() == null) return;
 
         // Get SelView visiible bounds
-        Rect rect = selView.getVisRect(); if (rect.isEmpty()) return;
+        Rect rect = selView.getVisibleBounds(); if (rect.isEmpty()) return;
         rect = rect.getInsetRect(-1);
 
         // Get SelView bounds as round rect in HostView coords
