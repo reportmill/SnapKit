@@ -464,7 +464,7 @@ public class TextAdapter extends PropObject {
     protected void scrollSelToVisible()
     {
         // Get visible rect - if no reason to scroll, just return
-        Rect visRect = _view.getClipAllBounds();
+        Rect visRect = _view.getClipBoundsAll();
         double viewW = _view.getWidth();
         double viewH = _view.getHeight();
         if (visRect == null || visRect.isEmpty() || visRect.width == viewW && visRect.height == viewH)

@@ -560,7 +560,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         else scrollBounds.width = 30;
 
         // If visible rect not set or empty or fully contains selection rect, just return
-        Rect visibleRect = getClipAllBounds();
+        Rect visibleRect = getClipBoundsAll();
         if (visibleRect == null || visibleRect.isEmpty())
             return;
         if (visibleRect.contains(scrollBounds))
@@ -595,7 +595,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Override to layout children with VBox layout.
+     * Override to layout children with ColView layout.
      */
     protected void layoutImpl()
     {
@@ -603,14 +603,10 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         double areaW = getWidth();
         double rowH = getRowHeight();
 
-        // Get clip info
-        Rect clip = getClipAllBounds();
-        if (clip == null)
-            clip = getBoundsLocal();
-
-        // Update CellStart/CellEnd for current ClipBounds
-        _cellStart = (int) Math.max(clip.y / rowH, 0);
-        _cellEnd = (int) (clip.getMaxY() / rowH);
+        // Update CellStart/CellEnd for visible bounds
+        Rect visibleBounds = getVisibleBounds();
+        _cellStart = (int) Math.max(visibleBounds.y / rowH, 0);
+        _cellEnd = (int) (visibleBounds.getMaxY() / rowH);
 
         // Remove cells before new visible range
         while (getChildCount() > 0 && getCell(0).getRow() < _cellStart)

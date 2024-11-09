@@ -905,43 +905,46 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Shape getClipAll()
     {
-        Shape vshp = getParent() != null ? getParent().getClipAll() : null;
-        if (vshp != null)
-            vshp = parentToLocal(vshp);
-        if (getClip() != null)
-            vshp = vshp != null ? Shape.intersectShapes(vshp, getClip()) : getClip();
-        return vshp;
+        // Get view clip and parent clip - if either is null, return the other
+        Shape viewClip = getClip();
+        Shape parentClip = _parent != null ? _parent.getClipAll() : null;
+        if (viewClip == null)
+            return parentClip;
+        if (parentClip == null)
+            return viewClip;
+
+        // Return intersection of view clip and parent clip in local coords
+        Shape parentClipLocal = parentToLocal(parentClip);
+        return Shape.intersectShapes(viewClip, parentClipLocal);
     }
 
     /**
      * Returns the clip bounds due to all parents.
      */
-    public Rect getClipAllBounds()
+    public Rect getClipBoundsAll()
     {
-        Shape clip = getClipAll();
-        return clip != null ? clip.getBounds() : null;
-    }
-
-    /**
-     * Returns the clipped shape for given shape.
-     */
-    public Rect getClippedRect(Rect aRect)
-    {
-        if (!isVisible()) return new Rect();
-        Rect cbnds = getClipAllBounds();
-        if (cbnds == null) return aRect;
-        Rect crect = aRect.getIntersectRect(cbnds);
-        crect.snap();
-        return crect;
+        Shape clipAll = getClipAll();
+        return clipAll != null ? clipAll.getBounds() : null;
     }
 
     /**
      * Returns the visible bounds for a view based on ancestor clips (just bound local if no clipping found).
      */
-    public Rect getVisRect()
+    public Rect getVisibleBounds()
     {
-        Rect bnds = getBoundsLocal();
-        return getClippedRect(bnds);
+        if (!isVisible())
+            return new Rect();
+
+        // Get view bounds and clip bounds - if no clip, just return view bounds
+        Rect viewBounds = getBoundsLocal();
+        Rect clipBounds = getClipBoundsAll();
+        if (clipBounds == null)
+            return viewBounds;
+
+        // Return intersection of view and clip bounds
+        Rect visibleBounds = viewBounds.getIntersectRect(clipBounds);
+        visibleBounds.snap();
+        return visibleBounds;
     }
 
     /**
@@ -979,17 +982,21 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         double y = viewY + getTransY();
         double w = getWidth();
         double h = getHeight();
-        double prx = w / 2, pry = h / 2;
+        double prx = w / 2;
+        double pry = h / 2;
         double rot = getRotate();
         double sx = getScaleX();
         double sy = getScaleY(); //skx = getSkewX(), sky = getSkewY();
 
-        // Transform about point of rotation and return
+        // Transform about point of rotation
         Transform xfm = new Transform(x + prx, y + pry);
-        if (rot != 0) xfm.rotate(rot);
+        if (rot != 0)
+            xfm.rotate(rot);
         if (sx != 1 || sy != 1)
             xfm.scale(sx, sy); //if (skx!=0 || sky!=0) t.skew(skx, sky);
         xfm.translate(-prx, -pry);
+
+        // Return
         return xfm;
     }
 

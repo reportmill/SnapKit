@@ -280,25 +280,34 @@ public class ViewUpdater {
         for (View view : views) {
 
             // If view no longer in hierarchy or has no Repaint rect, just continue
-            if (view.getRootView() != _rview)
-                continue;
-            Rect viewRect = view.getRepaintRect();
-            if (viewRect == null)
+            if (view.getRootView() != _rview || !view.isVisible())
                 continue;
 
-            // Constrain to ancestor clips
-            viewRect = view.getClippedRect(viewRect);
-            if (viewRect.isEmpty())
+            // Get view repaint rect - just continue if not set
+            Rect viewPaintRect = view.getRepaintRect();
+            if (viewPaintRect == null)
+                continue;
+
+            // Get view paint rect cliped to any ancestor view clips
+            Rect viewPaintRectClipped = viewPaintRect;
+            Rect clipBoundsAll = view.getClipBoundsAll();
+            if (clipBoundsAll != null) {
+                viewPaintRectClipped = viewPaintRectClipped.getIntersectRect(clipBoundsAll);
+                viewPaintRectClipped.snap();
+            }
+
+            // If view paint rect is empty just continue
+            if (viewPaintRectClipped.isEmpty())
                 continue;
 
             // Transform to root coords
             if (view != _rview)
-                viewRect = view.localToParent(viewRect, _rview).getBounds();
+                viewPaintRectClipped = view.localToParent(viewPaintRectClipped, _rview).getBounds();
 
             // Combine
             if (totalRect == null)
-                totalRect = viewRect;
-            else totalRect.union(viewRect);
+                totalRect = viewPaintRectClipped;
+            else totalRect.union(viewPaintRectClipped);
         }
 
         // Round rect and constrain to root bounds
