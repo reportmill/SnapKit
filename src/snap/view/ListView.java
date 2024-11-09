@@ -559,15 +559,13 @@ public class ListView <T> extends ParentView implements Selectable<T> {
             scrollBounds.inset(-1,-2);
         else scrollBounds.width = 30;
 
-        // If visible rect not set or empty or fully contains selection rect, just return
-        Rect visibleRect = getClipBoundsAll();
-        if (visibleRect == null || visibleRect.isEmpty())
-            return;
-        if (visibleRect.contains(scrollBounds))
+        // If visible bounds empty or fully contains selection rect, just return
+        Rect visibleBounds = getVisibleBounds();
+        if (visibleBounds.isEmpty() || visibleBounds.contains(scrollBounds))
             return;
 
         // If totally out of view, add buffer. Then scroll rect to visible
-        if (!scrollBounds.intersectsShape(visibleRect))
+        if (!scrollBounds.intersectsShape(visibleBounds))
             scrollBounds.inset(0,-4 * getRowHeight());
         scrollToVisible(scrollBounds);
     }

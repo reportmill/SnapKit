@@ -463,11 +463,11 @@ public class TextAdapter extends PropObject {
      */
     protected void scrollSelToVisible()
     {
-        // Get visible rect - if no reason to scroll, just return
-        Rect visRect = _view.getClipBoundsAll();
+        // Get visible bounds - if no reason to scroll, just return
+        Rect visibleBounds = _view.getVisibleBounds();
         double viewW = _view.getWidth();
         double viewH = _view.getHeight();
-        if (visRect == null || visRect.isEmpty() || visRect.width == viewW && visRect.height == viewH)
+        if (visibleBounds.isEmpty() || visibleBounds.width == viewW && visibleBounds.height == viewH)
             return;
 
         // Get selection rect with healthy margin, constrained to bounds
@@ -481,12 +481,12 @@ public class TextAdapter extends PropObject {
 
         // If sel rect covers whole width, cancel horizontal scroll
         if (selRect.x == 0 && selRect.width == viewW) {
-            selRect.x = visRect.x;
-            selRect.width = visRect.width;
+            selRect.x = visibleBounds.x;
+            selRect.width = visibleBounds.width;
         }
 
-        // If selection rect not fully contained in visible rect, scrollRectToVisible
-        if (!visRect.contains(selRect))
+        // If selection rect not fully contained in visible bounds, scrollRectToVisible
+        if (!visibleBounds.contains(selRect))
             _view.scrollToVisible(selRect);
     }
 

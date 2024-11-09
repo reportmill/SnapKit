@@ -905,16 +905,18 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Shape getClipAll()
     {
-        // Get view clip and parent clip - if either is null, return the other
+        // Get view clip and parent clip - if no parent clip, return view clip
         Shape viewClip = getClip();
         Shape parentClip = _parent != null ? _parent.getClipAll() : null;
-        if (viewClip == null)
-            return parentClip;
         if (parentClip == null)
             return viewClip;
 
-        // Return intersection of view clip and parent clip in local coords
+        // Get parent clip in local coords - if no view clip, return parent clip
         Shape parentClipLocal = parentToLocal(parentClip);
+        if (viewClip == null)
+            return parentClipLocal;
+
+        // Return intersection of view clip and parent clip in local coords
         return Shape.intersectShapes(viewClip, parentClipLocal);
     }
 
