@@ -260,8 +260,20 @@ public class Label extends ParentView {
      */
     public Rect getTextBounds()
     {
-        if (_stringView == null) return Rect.ZeroRect;
-        return _stringView.getBounds();
+        if (_stringView == null)
+            return Rect.ZeroRect;
+        if (!isNeedsLayout() && _stringView.isShowing())
+            return _stringView.getBounds();
+
+        // Layout children and return text bounds
+        int textIndex = _stringView.indexInParent();
+        ParentViewProxy<?> viewProxy = isHorizontal() ? new RowViewProxy<>(this) : new ColViewProxy<>(this);
+        View[] children = _graphic != null && _graphic.isShowing() ? new View[] { _graphic, _stringView } : new View[] { _stringView };
+        ViewProxy<?>[] childProxies = ArrayUtils.map(children, child -> ViewProxy.getProxy(child), ViewProxy.class);
+        viewProxy.setChildren(childProxies);
+        viewProxy.layoutProxy();
+        ViewProxy<?> textProxy = childProxies[textIndex];
+        return textProxy;
     }
 
     /**
