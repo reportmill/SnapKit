@@ -1,5 +1,7 @@
 package snap.view;
+import snap.geom.Insets;
 import snap.gfx.*;
+import snap.props.PropChange;
 
 /**
  * A view that encapsulates multiple scroll views (center, top, left) and keeps them in sync to provide scroll headers.
@@ -7,288 +9,145 @@ import snap.gfx.*;
 public class ScrollGroup extends ParentView {
     
     // The primary scroll view
-    private ScrollView  _scroll;
+    private ScrollView _scrollView;
 
     // The view that holds the top view
-    private Scroller  _topScroll;
+    private Scroller _topScroller;
     
-    // The view that holds the top scroller, cornerNE and corner NW
-    private RowView  _topScrollRow;
-    
-    // The view that holds the top scroll row and divider line
-    private ColView  _topScrollCol;
-
     // The view that holds the left view
-    private Scroller  _leftScroll;
-    
-    // The view that holds the left scroller and CornerSW
-    private ColView  _leftScrollCol;
+    private Scroller _leftScroller;
+
+    // The view that holds the top scroll row and divider line
+    private ColView _topScrollerCol;
 
     // The view that holds the left scroll col and divider line
-    private RowView  _leftScrollRow;
-    
-    // The view representing the NE corner (when TopView set and ScrollView.VBarShowing)
-    private BoxView  _cornerNE;
-
-    // The view representing the NW corner (when TopView set and LeftView set)
-    private BoxView  _cornerNW;
-
-    // The view representing the SW corner (when LeftView set and ScrollView.HBarShowing)
-    private BoxView  _cornerSW;
+    private RowView _leftScrollerRow;
 
     /**
      * Creates a ScrollGroup.
      */
     public ScrollGroup()
     {
-        _scroll = new ScrollView();
-        addChild(_scroll);
-        setBorder(_scroll.getBorder());
-        _scroll.setBorder(null);
+        _scrollView = new ScrollView();
+        addChild(_scrollView);
+        setBorder(_scrollView.getBorder());
+        _scrollView.setBorder(null);
+
+        // Listen for ScrollView scroll bar changes
+        _scrollView.addPropChangeListener(this::handleScrollViewPropChange,
+            ScrollView.HBarShowing_Prop, ScrollView.VBarShowing_Prop);
     }
 
     /**
      * Creates a ScrollGroup.
      */
-    public ScrollGroup(View aView)  { this(); setContent(aView); }
+    public ScrollGroup(View aView)
+    {
+        this();
+        setContent(aView);
+    }
 
     /**
      * Returns the primary content.
      */
-    public View getContent()  { return _scroll.getContent(); }
+    public View getContent()  { return _scrollView.getContent(); }
 
     /**
      * Sets the primary content.
      */
-    public void setContent(View aView)  { _scroll.setContent(aView); }
+    public void setContent(View aView)  { _scrollView.setContent(aView); }
 
     /**
      * Returns the primary scroll view.
      */
-    public ScrollView getScrollView()  { return _scroll; }
+    public ScrollView getScrollView()  { return _scrollView; }
 
     /**
      * Returns the top view.
      */
-    public View getTopView()
-    {
-        return _topScroll!=null ? _topScroll.getContent() : null;
-    }
+    public View getTopView()  { return _topScroller != null ? _topScroller.getContent() : null; }
 
     /**
      * Sets the top view.
      */
     public void setTopView(View aView)
     {
-        getTopScroll().setContent(aView);
+        if (aView == getTopView()) return;
+        Scroller topScroller = getTopScroller();
+        topScroller.setContent(aView);
     }
 
     /**
      * Returns the top Scroller.
      */
-    protected Scroller getTopScroll()
+    protected Scroller getTopScroller()
     {
-        if (_topScroll==null)
-            getTopScrollCol();
-        return _topScroll;
-    }
+        if (_topScroller != null) return _topScroller;
 
-    /**
-     * Returns the view that holds the TopScroll scroller view and corner view(s).
-     */
-    public RowView getTopScrollRow()
-    {
-        if (_topScrollRow==null)
-            getTopScrollCol();
-        return _topScrollRow;
-    }
-
-    /**
-     * Returns the view that holds the TopScrollRow and a divider line view.
-     */
-    public ColView getTopScrollCol()
-    {
-        // If already set, just return it
-        if (_topScrollCol!=null) return _topScrollCol;
-
-        // Create TopScroll
-        _topScroll = new Scroller(); _topScroll.setGrowWidth(true);
-
-        // Create TopScrollRow and add
-        _topScrollRow = new RowView(); _topScrollRow.setGrowHeight(true); _topScrollRow.setFillHeight(true);
-        _topScrollRow.addChild(_topScroll);
-
-        // Create TopScrollCol and add
-        _topScrollCol = new ColView(); _topScrollCol.setFillWidth(true);
-        LineView line = new LineView(0,.5,10,.5); line.setPrefHeight(1); line.setBorder(Color.LIGHTGRAY,1);
-        _topScrollCol.setChildren(_topScrollRow, line);
+        // Create top scroller
+        _topScroller = new Scroller();
+        _topScroller.setGrowWidth(true);
+        _topScroller.setMargin(0, 0, 0, getLeftView() != null ? getLeftView().getWidth() : 0);
 
         // Bind main ScrollView.Scroller.ScrollX to HeaderScroller (both ways)
-        Scroller scroller = _scroll.getScroller();
-        ViewUtils.bind(scroller, Scroller.ScrollX_Prop, _topScroll, true);
+        Scroller scroller = _scrollView.getScroller();
+        ViewUtils.bind(scroller, Scroller.ScrollX_Prop, _topScroller, true);
 
-        // Bind ScrollView.VBarShowing to ShowCornerNE
-        _scroll.addPropChangeListener(pc -> setShowCornerNE(_scroll.isVBarShowing()), ScrollView.VBarShowing_Prop);
+        // Create TopScrollCol and add
+        _topScrollerCol = new ColView();
+        _topScrollerCol.setFillWidth(true);
+        LineView line = new LineView(0,.5,10,.5);
+        line.setPrefHeight(1);
+        line.setBorder(Color.LIGHTGRAY,1);
+        _topScrollerCol.setChildren(_topScroller, line);
+        addChild(_topScrollerCol);
 
-        // Add TopScrollCol and return
-        addChild(_topScrollCol);
-        return _topScrollCol;
+        // Return
+        return _topScroller;
     }
 
     /**
      * Returns the left view.
      */
-    public View getLeftView()
-    {
-        return _leftScroll!=null ? _leftScroll.getContent() : null;
-    }
+    public View getLeftView()  { return _leftScroller != null ? _leftScroller.getContent() : null; }
 
     /**
      * Sets the left view.
      */
     public void setLeftView(View aView)
     {
-        getLeftScroll().setContent(aView);
-        setShowCornerNW(aView!=null);
+        if (aView == getLeftView()) return;
+        Scroller leftScroller = getLeftScroller();
+        leftScroller.setContent(aView);
     }
 
     /**
      * Returns the left Scroller.
      */
-    protected Scroller getLeftScroll()
+    protected Scroller getLeftScroller()
     {
-        if (_leftScroll==null)
-            getLeftScrollRow();
-        return _leftScroll;
-    }
+        if (_leftScroller !=null) return _leftScroller;
 
-    /**
-     * Returns the view that holds the LeftScroll scroller view and CornerSW.
-     */
-    public ColView getLeftScrollCol()
-    {
-        if (_leftScrollCol==null)
-            getLeftScrollRow();
-        return _leftScrollCol;
-    }
-
-    /**
-     * Returns the view that holds the LeftScrollCol and divider line.
-     */
-    public RowView getLeftScrollRow()
-    {
-        // If already set, just return
-        if (_leftScrollRow!=null) return _leftScrollRow;
-
-        // Create LeftScroll
-        _leftScroll = new Scroller(); _leftScroll.setGrowHeight(true);
-
-        // Create LeftScrollCol and add
-        _leftScrollCol = new ColView(); _leftScrollCol.setGrowWidth(true); _leftScrollCol.setFillWidth(true);
-        _leftScrollCol.addChild(_leftScroll);
-
-        // Create LeftScrollRow and add
-        _leftScrollRow = new RowView(); _leftScrollRow.setFillHeight(true);
-        LineView line = new LineView(.5,0,.5,10); line.setPrefWidth(1); line.setBorder(Color.LIGHTGRAY,1);
-        _leftScrollRow.setChildren(_leftScrollCol, line);
+        // Create left scroller
+        _leftScroller = new Scroller();
+        _leftScroller.setGrowHeight(true);
+        _leftScroller.addPropChangeListener(pc -> handleLeftScrollerWidthChange(), Width_Prop);
 
         // Bind main ScrollView.Scroller.ScrollY to HeaderScroller (both ways)
-        Scroller scroller = _scroll.getScroller();
-        ViewUtils.bind(scroller, Scroller.ScrollY_Prop, _leftScroll, true);
+        Scroller scroller = _scrollView.getScroller();
+        ViewUtils.bind(scroller, Scroller.ScrollY_Prop, _leftScroller, true);
 
-        // Bind ScrollView.VBarShowing to ShowCornerNE
-        _scroll.addPropChangeListener(pc -> setShowCornerSW(_scroll.isHBarShowing()), ScrollView.HBarShowing_Prop);
+        // Create LeftScrollRow and add
+        _leftScrollerRow = new RowView();
+        _leftScrollerRow.setFillHeight(true);
+        LineView line = new LineView(.5,0,.5,10);
+        line.setPrefWidth(1);
+        line.setBorder(Color.LIGHTGRAY,1);
+        _leftScrollerRow.setChildren(_leftScroller, line);
+        addChild(_leftScrollerRow);
 
-        // Add LeftScrollRow
-        addChild(_leftScrollRow);
-        return _leftScrollRow;
-    }
-
-    /**
-     * Returns the Corner view (NE).
-     */
-    public BoxView getCornerNE()
-    {
-        if (_cornerNE!=null) return _cornerNE;
-        _cornerNE = new BoxView();
-        if (_scroll.isVBarShowing())
-            _cornerNE.setPrefWidth(_scroll.getBarSize());
-        else _cornerNE.setVisible(false);
-        getTopScrollRow().addChild(_cornerNE);
-        return _cornerNE;
-    }
-
-    /**
-     * Returns whether NE Corner view is showing (true when TopView set and ScrollView.VBarShowing).
-     */
-    public boolean isShowCornerNE()  { return _cornerNE!=null && _cornerNE.isShowing(); }
-
-    /**
-     * Sets whether NE Corner view is showing (true when TopView set and ScrollView.VBarShowing).
-     */
-    protected void setShowCornerNE(boolean aValue)
-    {
-        getCornerNE().setVisible(aValue);
-        if (aValue)
-            getCornerNE().setPrefWidth(getScrollView().getBarSize());
-    }
-
-    /**
-     * Returns the Corner view (NW).
-     */
-    public BoxView getCornerNW()
-    {
-        if (_cornerNW!=null) return _cornerNW;
-        _cornerNW = new BoxView();
-        if (getLeftView()!=null)
-            _cornerNW.setPrefWidth(getLeftView().getPrefWidth());
-        else _cornerNW.setVisible(false);
-        getTopScrollRow().addChild(_cornerNW, 0);
-        return _cornerNW;
-    }
-
-    /**
-     * Returns whether NW Corner view is showing (true when TopView set and LeftView set).
-     */
-    public boolean isShowCornerNW()  { return _cornerNW!=null && _cornerNW.isShowing(); }
-
-    /**
-     * Sets whether NW Corner view is showing (true when TopView set and LeftView set).
-     */
-    protected void setShowCornerNW(boolean aValue)
-    {
-        getCornerNW().setVisible(aValue);
-        if (aValue)
-            getCornerNW().setPrefWidth(getLeftView().getPrefWidth());
-    }
-
-    /**
-     * Returns the Corner view (SW).
-     */
-    public BoxView getCornerSW()
-    {
-        if (_cornerSW!=null) return _cornerSW;
-        _cornerSW = new BoxView();
-        if (getScrollView().isHBarShowing())
-            _cornerSW.setPrefHeight(getScrollView().getBarSize());
-        else _cornerSW.setVisible(false);
-        getLeftScrollCol().addChild(_cornerSW);
-        return _cornerSW;
-    }
-
-    /**
-     * Returns whether SW Corner view is showing (true when LeftView set and ScrollView.HBarShowing).
-     */
-    public boolean isShowCornerSW()  { return _cornerSW!=null && _cornerSW.isShowing(); }
-
-    /**
-     * Sets whether NW Corner view is showing (true when LeftView set and ScrollView.HBarShowing).
-     */
-    protected void setShowCornerSW(boolean aValue)
-    {
-        getCornerSW().setVisible(aValue);
-        if (aValue)
-            getCornerSW().setPrefHeight(getScrollView().getBarSize());
+        // Return
+        return _leftScroller;
     }
 
     /**
@@ -296,7 +155,7 @@ public class ScrollGroup extends ParentView {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        return BorderView.getPrefWidth(this, _scroll, _topScrollCol, null, null, _leftScrollRow, aH);
+        return BorderView.getPrefWidth(this, _scrollView, _topScrollerCol, null, null, _leftScrollerRow, aH);
     }
 
     /**
@@ -304,7 +163,7 @@ public class ScrollGroup extends ParentView {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        return BorderView.getPrefHeight(this, _scroll, _topScrollCol, null, null, _leftScrollRow, aW);
+        return BorderView.getPrefHeight(this, _scrollView, _topScrollerCol, null, null, _leftScrollerRow, aW);
     }
 
     /**
@@ -312,8 +171,44 @@ public class ScrollGroup extends ParentView {
      */
     protected void layoutImpl()
     {
-        BorderView.layout(this, _scroll, _topScrollCol, null, null, _leftScrollRow);
-        if (_leftScrollRow!=null && _topScrollRow!=null)
-            getCornerNW().setPrefWidth(_leftScrollRow.getWidth());
+        BorderView.layout(this, _scrollView, _topScrollerCol, null, null, _leftScrollerRow);
+    }
+
+    /**
+     * Called when left scroller changes width to update top scroller.
+     */
+    private void handleLeftScrollerWidthChange()
+    {
+        if (_topScroller == null) return;
+        Insets margin = _topScroller.getMargin();
+        margin = new Insets(margin.top, margin.right, margin.bottom, _leftScrollerRow.getWidth());
+        _topScroller.setMargin(margin);
+    }
+
+    /**
+     * Called when ScrollView property changes.
+     */
+    private void handleScrollViewPropChange(PropChange aPC)
+    {
+        switch (aPC.getPropName()) {
+
+            // If horizontal scroll bar is shown/hidden, update left scroller margin
+            case ScrollView.HBarShowing_Prop:
+                if (_leftScroller != null) {
+                    Insets margin = _leftScroller.getMargin();
+                    margin = new Insets(margin.top, margin.right, _scrollView.isHBarShowing() ? _scrollView.getBarSize() : 0, margin.left);
+                    _leftScroller.setMargin(margin);
+                }
+                break;
+
+            // If vertical scroll bar is shown/hidden, update top scroller margin
+            case ScrollView.VBarShowing_Prop:
+                if (_topScroller != null) {
+                    Insets margin = _topScroller.getMargin();
+                    margin = new Insets(margin.top, _scrollView.isVBarShowing() ? _scrollView.getBarSize() : 0, margin.bottom, margin.left);
+                    _topScroller.setMargin(margin);
+                }
+                break;
+        }
     }
 }

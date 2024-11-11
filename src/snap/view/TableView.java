@@ -510,7 +510,6 @@ public class TableView <T> extends ParentView implements Selectable<T> {
 
         // Add/remove header
         _scrollGroup.setLeftView(aValue ? getHeaderCol() : null);
-        _scrollGroup.getCornerNW().setContent(aValue ? getHeaderCol().getHeader() : null);
     }
 
     /**
