@@ -1578,6 +1578,12 @@ public class TextAdapter extends PropObject {
      */
     private void handleViewShowingChanged()
     {
+        // If showing, update TextBounds
+        if (_view.isShowing()) {
+            Rect textBounds = ViewUtils.getAreaBounds(_view);
+            setTextBounds(textBounds);
+        }
+
         // If focused, update CaretAnim
         if (_view.isFocused()) {
             updateCaretAnim();
