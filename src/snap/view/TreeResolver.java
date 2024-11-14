@@ -44,8 +44,8 @@ public abstract class TreeResolver <T> {
      */
     public View getGraphic(T anItem)
     {
-        Image img = getImage(anItem);
-        return img!=null? new ImageView(img) : null;
+        Image image = getImage(anItem);
+        return image != null ? new ImageView(image) : null;
     }
 
     /**
@@ -58,8 +58,8 @@ public abstract class TreeResolver <T> {
      */
     public View getGraphicAfter(T anItem)
     {
-        Image img = getImageAfter(anItem);
-        return img != null ? new ImageView(img) : null;
+        Image image = getImageAfter(anItem);
+        return image != null ? new ImageView(image) : null;
     }
 
     /**

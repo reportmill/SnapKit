@@ -457,11 +457,12 @@ public class DevPaneViews extends ViewOwner {
         View view = ViewUtils.getDeepestViewAt(mainView, aX, aY);
 
         // Get HostView
-        View par = view!=null ? view.getParent() : null;
-        if (par instanceof Label || par instanceof ButtonBase || par instanceof TextField || par instanceof ComboBox) {
-            view = par; par = par.getParent();
-            if (par instanceof ButtonBase || par instanceof TextField || par instanceof ComboBox)
-                view = par;
+        View parent = view != null ? view.getParent() : null;
+        if (parent instanceof Label || parent instanceof ButtonBase || parent instanceof TextField || parent instanceof ComboBox) {
+            view = parent;
+            parent = parent.getParent();
+            if (parent instanceof ButtonBase || parent instanceof TextField || parent instanceof ComboBox)
+                view = parent;
         }
 
         // Return
@@ -476,26 +477,27 @@ public class DevPaneViews extends ViewOwner {
         /** Returns the parent of given item. */
         public View getParent(View anItem)
         {
-            return anItem!=_devPane.getContent() ? anItem.getParent() : null;
+            return anItem != _devPane.getContent() ? anItem.getParent() : null;
         }
 
         /** Whether given object is a parent (has children). */
         public boolean isParent(View anItem)
         {
-            if (!(anItem instanceof ParentView)) return false;
+            if (!(anItem instanceof ParentView))
+                return false;
             if (anItem instanceof Label || anItem instanceof ButtonBase || anItem instanceof Spinner ||
-                    anItem instanceof ArrowView || anItem instanceof TextField) return false;
-            if (anItem instanceof ComboBox || anItem instanceof ListView) return false;
-            return ((ParentView)anItem).getChildCount()>0;
+                anItem instanceof ArrowView || anItem instanceof TextField)
+                return false;
+            if (anItem instanceof ComboBox)
+                return false;
+            return ((ParentView) anItem).getChildCount() > 0;
         }
 
         /** Returns the children. */
         public View[] getChildren(View aParent)
         {
-            ParentView par = (ParentView) aParent;
-            //if (par instanceof ScrollView) { ScrollView sp = (ScrollView)par;
-            //    return sp.getContent()!=null ? new View[] { sp.getContent() } : new View[0]; }
-            return par.getChildren();
+            ParentView parent = (ParentView) aParent;
+            return parent.getChildren();
         }
 
         /** Returns the text to be used for given item. */
@@ -503,8 +505,8 @@ public class DevPaneViews extends ViewOwner {
         {
             String str = anItem.getClass().getSimpleName();
             String name = anItem.getName();
-            if (name!=null) str = name; //name.contains(str) ? name : (str + " - " + name);
-            //String text = anItem.getText(); if (text!=null) str += " \"" + text + "\" ";
+            if (name != null)
+                str = name;
             return str;
         }
 

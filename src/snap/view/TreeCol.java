@@ -4,6 +4,8 @@
 package snap.view;
 import java.util.List;
 import java.util.function.Consumer;
+
+import snap.geom.Insets;
 import snap.gfx.*;
 import snap.util.ArrayUtils;
 
@@ -16,10 +18,13 @@ public class TreeCol <T> extends ListView <T> {
     private TreeView<T> _tree;
     
     // The header value
-    private String  _headerText;
+    private String _headerText;
     
     // Whether is resizable
-    private boolean  _resizable;
+    private boolean _resizable;
+
+    // Constant for branch image padding
+    private static final Insets BRANCH_IMAGE_PADDING = new Insets(2, 4, 2, 4);
     
     /**
      * Constructor.
@@ -90,8 +95,8 @@ public class TreeCol <T> extends ListView <T> {
     protected void processEvent(ViewEvent anEvent)
     {
         if (anEvent.isMousePress()) {
-            int ind = ArrayUtils.indexOfId(getTree().getCols(), this);
-            getTree().setSelCol(ind);
+            int colIndex = ArrayUtils.indexOfId(getTree().getCols(), this);
+            getTree().setSelCol(colIndex);
         }
         super.processEvent(anEvent);
     }
@@ -106,12 +111,12 @@ public class TreeCol <T> extends ListView <T> {
      */
     public Consumer <ListCell<T>> getCellConfigure()
     {
-        Consumer <ListCell<T>> cconf = super.getCellConfigure();
-        return cconf!=null ? cconf : getTree().getCellConfigure();
+        Consumer <ListCell<T>> cellConf = super.getCellConfigure();
+        return cellConf != null ? cellConf : getTree().getCellConfigure();
     }
 
     /**
-     * Overrride to add branch icons.
+     * Override to add branch icons.
      */
     protected void configureCell(ListCell <T> aCell)
     {
@@ -121,36 +126,68 @@ public class TreeCol <T> extends ListView <T> {
         // Get tree, column index and cell item
         TreeView <T> tree = getTree();
         int col = getColIndex();
-        T item = aCell.getItem(); if (item==null) return;
+        T item = aCell.getItem();
+        if (item == null)
+            return;
 
-        // Configure text
-        aCell.setText(tree.getText(item, col));
-        if (col>0) return;
+        // Configure cell text
+        String itemText = tree.getText(item, col);
+        aCell.setText(itemText);
+        if (col > 0)
+            return;
 
-        // Configure graphic
-        //Image img = tree.getImage(item); if (img!=null) aCell.setImage(img);
-        View graphic = tree.getGraphic(item);
-        if (graphic!=null) aCell.setGraphic(graphic);
+        // Configure cell graphic
+        View itemGraphic = tree.getGraphic(item);
+        if (itemGraphic != null)
+            aCell.setGraphic(itemGraphic);
 
-        // Calculate and set cell indent
-        int indent = (int)tree.getExpandedImage().getWidth() + 4 + 4;
-        int levels = tree.getParentCount(item); if (!tree.isParent(item)) levels++;
-        aCell.setPadding(0, 2, 0, levels*indent);
+        // Calculate indent level
+        int indentLevel = tree.getParentCount(item);
+        if (!tree.isParent(item))
+            indentLevel++;
 
-        // If parent, configure Expand/Collapse image
+        // Set cell indent
+        double indentW = tree.getExpandedImage().getWidth() + BRANCH_IMAGE_PADDING.getWidth();
+        aCell.setPadding(0, 2, 0, indentLevel * indentW);
+
+        // If item is parent, configure branch image
         if (tree.isParent(item)) {
-            Image bimg = tree.isExpanded(item) ? tree.getExpandedImage() : tree.getCollapsedImage();
-            ImageView iview = (ImageView)aCell.getChildForName("BranchImageView");
-            if (iview!=null) {
-                iview.setImage(bimg); return; }
 
-            iview = new ImageView(bimg);
-            iview.setName("BranchImageView");
-            iview.setPadding(2,4,2,4);
-            View gview = aCell.getGraphic()!=null ? new Label(iview,null,aCell.getGraphic()) : iview;
-            if (gview instanceof Label) gview.setSpacing(0);
-            aCell.setGraphic(gview);
-            iview.addEventHandler(e -> { tree.toggleItem(item); e.consume(); }, MousePress);
+            // Get branch image
+            Image branchImage = tree.isExpanded(item) ? tree.getExpandedImage() : tree.getCollapsedImage();
+
+            // If branch image view already present, update image and return
+            ImageView branchImageView = (ImageView) aCell.getChildForName("BranchImageView");
+            if (branchImageView != null) {
+                branchImageView.setImage(branchImage);
+                return;
+            }
+
+            // Create branch image view
+            branchImageView = new ImageView(branchImage);
+            branchImageView.setName("BranchImageView");
+            branchImageView.setPadding(BRANCH_IMAGE_PADDING);
+            branchImageView.addEventHandler(e -> handleBranchImageViewMousePress(e, item), MousePress);
+
+            // If no item graphic, just set branch image as cell graphic
+            if (itemGraphic == null)
+                aCell.setGraphic(branchImageView);
+
+            // If both a branch image and an item graphic, wrap in a label
+            else {
+                View branchImageAndItemGraphicLabel = new Label(branchImageView, null, itemGraphic);
+                aCell.setGraphic(branchImageAndItemGraphicLabel);
+            }
         }
+    }
+
+    /**
+     * Called when branch image view is clicked.
+     */
+    private void handleBranchImageViewMousePress(ViewEvent anEvent, T anItem)
+    {
+        TreeView <T> tree = getTree();
+        tree.toggleItem(anItem);
+        anEvent.consume();
     }
 }

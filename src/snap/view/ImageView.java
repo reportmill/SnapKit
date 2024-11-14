@@ -283,16 +283,22 @@ public class ImageView extends View {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        // Get insets and given height minus insets (just return insets width if no image)
+        // Get insets (just return insets width if no image)
         Insets ins = getInsetsAll();
         if (_image == null)
             return ins.getWidth();
-        double imageH = aH > 0 ? aH - ins.getHeight() : aH;
 
-        // PrefWidth is image width. If height is provided, adjust pref width by aspect
+        // PrefWidth is image width.
         double prefW = _image.getWidth();
-        if (imageH > 0 && !MathUtils.equals(imageH, _image.getHeight()))
-            prefW = imageH * getAspect();
+
+        // Handle KeepAspect: If height provided and less than image height, adjust pref width by aspect
+        if (isKeepAspect() && aH > 0) {
+            double imageH = aH - ins.getHeight();
+            if (imageH > 0) {
+                if (MathUtils.lte(imageH, _image.getHeight()) || isFillHeight())
+                    prefW = imageH * getAspect();
+            }
+        }
 
         // Return PrefWidth plus insets width
         return prefW + ins.getWidth();
@@ -303,16 +309,22 @@ public class ImageView extends View {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        // Get insets and given width minus insets (just return insets height if no image)
+        // Get insets (just return insets height if no image)
         Insets ins = getInsetsAll();
         if (_image == null)
             return ins.getHeight();
-        double imageW = aW >= 0 ? aW - ins.left - ins.right : aW;
 
         // PrefHeight is image height. If width is provided, adjust pref height by aspect
         double prefH = _image.getHeight();
-        if (imageW > 0 && !MathUtils.equals(imageW, _image.getWidth()))
-            prefH = imageW / getAspect();
+
+        // Handle KeepAspect: If width provided and less than image width, adjust pref height by aspect
+        if (isKeepAspect() && aW > 0) {
+            double imageW = aW - ins.getWidth();
+            if (imageW > 0) {
+                if (MathUtils.lte(imageW, _image.getWidth()) || isFillWidth())
+                    prefH = imageW / getAspect();
+            }
+        }
 
         // Return PrefHeight plus insets height
         return prefH + ins.getHeight();
