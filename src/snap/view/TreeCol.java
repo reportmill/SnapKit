@@ -176,6 +176,7 @@ public class TreeCol <T> extends ListView <T> {
             // If both a branch image and an item graphic, wrap in a label
             else {
                 View branchImageAndItemGraphicLabel = new Label(branchImageView, null, itemGraphic);
+                branchImageAndItemGraphicLabel.setSpacing(0);
                 aCell.setGraphic(branchImageAndItemGraphicLabel);
             }
         }
