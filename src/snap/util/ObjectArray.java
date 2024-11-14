@@ -24,9 +24,17 @@ public class ObjectArray<T> implements Cloneable {
      */
     public ObjectArray(Class<T> aClass)
     {
+        this(aClass, 8);
+    }
+
+    /**
+     * Constructor.
+     */
+    public ObjectArray(Class<T> aClass, int length)
+    {
         super();
         _compClass = aClass;
-        _array = (T[]) Array.newInstance(aClass, 8);
+        _array = (T[]) Array.newInstance(aClass, length);
     }
 
     /**
@@ -86,7 +94,7 @@ public class ObjectArray<T> implements Cloneable {
     {
         // Expand components array if needed
         if (_size == _array.length)
-            _array = Arrays.copyOf(_array, Math.max(_array.length * 2, 20));
+            _array = Arrays.copyOf(_array, Math.max(_array.length * 2, 8));
 
         // If index is inside current length, shift existing elements over
         if (anIndex < _size)
@@ -123,6 +131,11 @@ public class ObjectArray<T> implements Cloneable {
     }
 
     /**
+     * Returns whether array is empty.
+     */
+    public boolean isEmpty()  { return _size == 0; }
+
+    /**
      * Returns the last item.
      */
     public T getLast()  { return _size > 0 ? _array[_size - 1] : null; }
@@ -141,10 +154,10 @@ public class ObjectArray<T> implements Cloneable {
         // Do normal version
         ObjectArray<T> clone;
         try { clone = (ObjectArray<T>) super.clone(); }
-        catch (Exception e) { throw new RuntimeException(e); }
+        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
 
         // Copy array
-        clone._array = getArray();
+        clone._array = getArray().clone();
 
         // Return
         return clone;
