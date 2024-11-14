@@ -3,12 +3,13 @@
  */
 package snap.util;
 import java.lang.reflect.Array;
+import java.util.AbstractList;
 import java.util.Arrays;
 
 /**
  * This class manages an array of object values.
  */
-public class ObjectArray<T> implements Cloneable {
+public class ObjectArray<T> extends AbstractList<T> implements Cloneable {
 
     // The String array
     protected T[]  _array;
@@ -17,7 +18,7 @@ public class ObjectArray<T> implements Cloneable {
     protected int _size;
 
     // The class
-    private Class<T>  _compClass;
+    private Class<T> _compClass;
 
     /**
      * Constructor.
@@ -69,28 +70,25 @@ public class ObjectArray<T> implements Cloneable {
     /**
      * Returns the Object value at index.
      */
+    @Override
     public T get(int anIndex)  { return _array[anIndex]; }
 
     /**
      * Sets the String value at index.
      */
-    public void set(T aValue, int anIndex)
+    @Override
+    public T set(int anIndex, T aValue)
     {
+        T oldValue = _array[anIndex];
         _array[anIndex] = aValue;
+        return oldValue;
     }
 
     /**
      * Adds the value at index.
      */
-    public void add(T aValue)
-    {
-        add(aValue, _size);
-    }
-
-    /**
-     * Adds the value at index.
-     */
-    public void add(T aValue, int anIndex)
+    @Override
+    public void add(int anIndex, T aValue)
     {
         // Expand components array if needed
         if (_size == _array.length)
@@ -106,19 +104,24 @@ public class ObjectArray<T> implements Cloneable {
     }
 
     /**
-     * Removes the float value at index.
+     * Removes the item at index.
      */
-    public void removeIndex(int anIndex)
+    public T remove(int anIndex)
     {
+        T oldValue = _array[anIndex];
+
         // Shift remaining elements in
         System.arraycopy(_array, anIndex + 1, _array, anIndex, _size - anIndex - 1);
         _size--;
+
+        // Return
+        return oldValue;
     }
 
     /**
-     * Clears the list.
+     * Returns whether array is empty.
      */
-    public void clear()  { setLength(0); }
+    public boolean isEmpty()  { return _size == 0; }
 
     /**
      * Returns the simple array (trimmed to length).
@@ -131,11 +134,6 @@ public class ObjectArray<T> implements Cloneable {
     }
 
     /**
-     * Returns whether array is empty.
-     */
-    public boolean isEmpty()  { return _size == 0; }
-
-    /**
      * Returns the last item.
      */
     public T getLast()  { return _size > 0 ? _array[_size - 1] : null; }
@@ -144,6 +142,11 @@ public class ObjectArray<T> implements Cloneable {
      * Returns the component class.
      */
     public Class<T> getComponentClass()  { return _compClass; }
+
+    /**
+     * Clears the list.
+     */
+    public void clear()  { setLength(0); }
 
     /**
      * Standard clone implementation.
