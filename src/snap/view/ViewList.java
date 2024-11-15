@@ -13,14 +13,22 @@ import snap.util.ArrayUtils;
 public class ViewList {
 
     // The views array
-    private View[]  _views = EMPTY_VIEWS;
+    private View[] _views = EMPTY_VIEWS_ARRAY;
     
     // The array of managed views (usually just the same as above)
-    protected View[]  _managed = EMPTY_VIEWS;
+    protected View[] _managed = EMPTY_VIEWS_ARRAY;
     
     // Shared empty view array
-    private static View[]  EMPTY_VIEWS = new View[0];
-    
+    private static View[] EMPTY_VIEWS_ARRAY = new View[0];
+
+    /**
+     * Constructor.
+     */
+    public ViewList()
+    {
+        super();
+    }
+
     /**
      * Returns the number of views in this list.
      */
@@ -70,72 +78,30 @@ public class ViewList {
     protected int remove(View aView)
     {
         int index = indexOf(aView);
-        if (index>=0)
+        if (index >= 0)
             remove(index);
         return index;
     }
 
     /**
-     * Removes all children from this node (in reverse order).
-     */
-    protected void removeAll()
-    {
-        for (int i=size()-1; i>=0; i--) remove(i);
-    }
-
-    /**
-     * Sets views to given list.
-     */
-    protected void setAll(View ... theViews)
-    {
-        removeAll();
-        for (View c : theViews) add(c);
-    }
-
-    /**
-     * Returns the child with given name.
-     */
-    public View getView(String aName)
-    {
-        for (View view : _views) {
-            if (aName.equals(view.getName()))
-                return view;
-            //if (view instanceof ParentView && view.getOwner()==getOwner()) {
-            //    View n = ((ParentView)view).getChild(aName); if (n!=null) return n; }
-        }
-        return null;
-    }
-
-    /**
      * Returns the index of the given child in this node's children list.
      */
-    public int indexOf(View aView)
-    {
-        for (int i=0,iMax=size();i<iMax;i++)
-            if (aView==get(i))
-                return i;
-        return -1;
-    }
+    public int indexOf(View aView)  { return ArrayUtils.indexOfId(_views, aView); }
 
     /**
      * Returns the last view of this list.
      */
-    public View getFirst()  { return size()>0 ? get(0) : null; }
+    public View getFirst()  { return size() > 0 ? get(0) : null; }
 
     /**
      * Returns the last view of this list.
      */
-    public View getLast()  { return size()>0 ? get(size()-1) : null; }
+    public View getLast()  { return size() > 0 ? get(size()-1) : null; }
 
     /**
-     * Returns the view at given point.
+     * Returns the view at given point X/Y.
      */
-    public View getViewAt(Point aPnt)  { return getViewAt(aPnt.x, aPnt.y); }
-
-    /**
-     * Returns the view at given point.
-     */
-    public View getViewAt(double aX, double aY)
+    public View getViewAtXY(double aX, double aY)
     {
         // Get children
         View[] children = getAll();
@@ -157,7 +123,7 @@ public class ViewList {
     /**
      * Returns the first view of given class (optional) hit by given shape, excluding given view (optional).
      */
-    public <T extends View> T getViewAt(Shape aShape, Class <T> aClass, View aView)
+    public <T extends View> T getViewIntersectingShape(Shape aShape, Class <T> aClass, View aView)
     {
         // Get Children
         View[] children = getAll();
@@ -215,7 +181,7 @@ public class ViewList {
         if (anInset != 0)
             bounds.inset(anInset);
         Shape boundsInParent = aView.localToParent(bounds);
-        return getViewAt(boundsInParent, aClass, aView);
+        return getViewIntersectingShape(boundsInParent, aClass, aView);
     }
 
     /**

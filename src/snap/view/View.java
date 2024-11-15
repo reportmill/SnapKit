@@ -2060,6 +2060,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected void paintAll(Painter aPntr)
     {
+        // If view clip set, save painter state and set
+        Shape viewClip = getClip();
+        if (viewClip != null) {
+            aPntr.save();
+            aPntr.clip(viewClip);
+        }
+
         // Set opacity
         double opacity = getOpacityAll(), opacityOld = 0;
         if (opacity != 1) {
@@ -2086,6 +2093,16 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Restore opacity
         if (opacity != 1)
             aPntr.setOpacity(opacityOld);
+
+        // Paint children and above children
+        if (_effect == null) {
+            paintChildren(aPntr);
+            paintAbove(aPntr);
+        }
+
+        // If ClipToBounds, Restore original clip
+        if (viewClip != null)
+            aPntr.restore();
 
         // Clear RepaintRect
         _repaintRect = null;
@@ -2123,6 +2140,16 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (getClass() == View.class)
             paintRealClassName(aPntr);
     }
+
+    /**
+     * Paint children.
+     */
+    protected void paintChildren(Painter aPntr)  { }
+
+    /**
+     * Paints above children.
+     */
+    protected void paintAbove(Painter aPntr)  { }
 
     /**
      * Returns the tool tip text.

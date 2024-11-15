@@ -236,12 +236,7 @@ public class ParentView extends View {
     /**
      * Returns the child at given point.
      */
-    public View getChildAt(Point aPnt)  { return _children.getViewAt(aPnt.x, aPnt.y); }
-
-    /**
-     * Returns the child at given point.
-     */
-    public View getChildAt(double aX, double aY)  { return _children.getViewAt(aX, aY); }
+    public View getChildAtXY(double aX, double aY)  { return _children.getViewAtXY(aX, aY); }
 
     /**
      * Returns the number of managed children.
@@ -378,7 +373,7 @@ public class ParentView extends View {
             return hit;
 
         // If any child is hit, return true
-        View hview = getViewList().getViewAt(aShape, null, null);
+        View hview = getViewList().getViewIntersectingShape(aShape, null, null);
         if (hview != null)
             return true;
         return false;
@@ -390,25 +385,15 @@ public class ParentView extends View {
     protected void paintAll(Painter aPntr)
     {
         super.paintAll(aPntr);
-        if (_effect == null) {
-            paintChildren(aPntr);
-            paintAbove(aPntr);
-        }
         _needsRepaintDeep = false;
     }
 
     /**
      * Paint children.
      */
+    @Override
     protected void paintChildren(Painter aPntr)
     {
-        // If view clip set, save painter state and set
-        Shape viewClip = getClip();
-        if (viewClip != null) {
-            aPntr.save();
-            aPntr.clip(viewClip);
-        }
-
         // Get painter clip
         Shape pntrClip = aPntr.getClip();
 
@@ -434,16 +419,7 @@ public class ParentView extends View {
             child.paintAll(aPntr);
             aPntr.restore();
         }
-
-        // If ClipToBounds, Restore original clip
-        if (viewClip != null)
-            aPntr.restore();
     }
-
-    /**
-     * Paints above children.
-     */
-    protected void paintAbove(Painter aPntr)  { }
 
     /**
      * Returns whether any children need repaint.
