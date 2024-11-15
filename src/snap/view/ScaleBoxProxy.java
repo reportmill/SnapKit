@@ -26,16 +26,6 @@ public class ScaleBoxProxy extends BoxViewProxy<View> {
     }
 
     /**
-     * Creates a new ScaleBox for content with FillWidth, FillHeight params.
-     */
-    public ScaleBoxProxy(View aParent, View aChild, boolean isFillWidth, boolean isFillHeight)
-    {
-        this(aParent);
-        setFillWidth(isFillWidth);
-        setFillHeight(isFillHeight);
-    }
-
-    /**
      * Returns whether to preserve natural aspect of content when scaling.
      */
     public boolean isKeepAspect()  { return _keepAspect; }
@@ -66,7 +56,7 @@ public class ScaleBoxProxy extends BoxViewProxy<View> {
     public double getPrefWidth(double aH)
     {
         // If scaling and value provided, return value by aspect
-        if (aH >= 0) {
+        if (aH > 0) {
             if (isFillHeight() || aH < getPrefHeight(-1))
                 return Math.ceil(aH * getAspect());
         }
@@ -82,7 +72,7 @@ public class ScaleBoxProxy extends BoxViewProxy<View> {
     public double getPrefHeight(double aW)
     {
         // If scaling and value provided, return value by aspect
-        if (aW >= 0) {
+        if (aW > 0) {
             if (isFillWidth() || aW < getPrefWidth(-1))
                 return Math.ceil(aW / getAspect());
         }
