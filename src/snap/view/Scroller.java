@@ -120,8 +120,8 @@ public class Scroller extends ParentView implements ViewHost {
         aValue = Math.round(aValue);
         if (aValue < 0)
             aValue = 0;
-        else if (aValue > getScrollLimitX())
-            aValue = getScrollLimitX();
+        else if (aValue > getScrollMaxX())
+            aValue = getScrollMaxX();
         if (MathUtils.equals(aValue, _scrollX)) return;
 
         // Set value and relayout/repaint
@@ -144,8 +144,8 @@ public class Scroller extends ParentView implements ViewHost {
         aValue = Math.round(aValue);
         if (aValue < 0)
             aValue = 0;
-        else if (aValue > getScrollLimitY())
-            aValue = getScrollLimitY();
+        else if (aValue > getScrollMaxY())
+            aValue = getScrollMaxY();
         if (MathUtils.equals(aValue, _scrollY)) return;
 
         // Set value and relayout/repaint
@@ -183,56 +183,56 @@ public class Scroller extends ParentView implements ViewHost {
     }
 
     /**
-     * Returns the maximum possible horizontal offset.
+     * Returns the maximum possible scroll X offset.
      */
-    public double getScrollLimitX()
+    public double getScrollMaxX()
     {
-        double scrollLimitX = getContentWidth() - getWidth();
-        return Math.round(Math.max(scrollLimitX, 0));
+        double scrollMaxX = getContentWidth() - getWidth();
+        return Math.round(Math.max(scrollMaxX, 0));
     }
 
     /**
-     * Returns the maximum possible vertical offset.
+     * Returns the maximum possible scroll Y offset.
      */
-    public double getScrollLimitY()
+    public double getScrollMaxY()
     {
-        double scrollLimitY = getContentHeight() - getHeight();
-        return Math.round(Math.max(scrollLimitY, 0));
+        double scrollMaxY = getContentHeight() - getHeight();
+        return Math.round(Math.max(scrollMaxY, 0));
     }
 
     /**
-     * Returns the ratio of ScrollX to ScrollXMax.
+     * Returns the ratio of ScrollX to ScrollMaxX.
      */
     public double getScrollRatioX()
     {
-        double scrollLimitX = getScrollLimitX();
-        return scrollLimitX > 0 ? _scrollX / scrollLimitX : 0;
+        double scrollMaxX = getScrollMaxX();
+        return scrollMaxX > 0 ? _scrollX / scrollMaxX : 0;
     }
 
     /**
-     * Sets ScrollX from the given ratio of ScrollY to ScrollYMax.
+     * Sets ScrollX from the given ratio of ScrollY to ScrollMaxY.
      */
     public void setScrollRatioX(double aValue)
     {
-        double scrollX = aValue * getScrollLimitX();
+        double scrollX = aValue * getScrollMaxX();
         setScrollX(scrollX);
     }
 
     /**
-     * Returns the ratio of ScrollY to ScrollYMax.
+     * Returns the ratio of ScrollY to ScrollMaxY.
      */
     public double getScrollRatioY()
     {
-        double scrollLimitY = getScrollLimitY();
-        return scrollLimitY > 0 ? _scrollY / scrollLimitY : 0;
+        double scrollMaxY = getScrollMaxY();
+        return scrollMaxY > 0 ? _scrollY / scrollMaxY : 0;
     }
 
     /**
-     * Sets ScrollY from the given ratio of ScrollY to ScrollYMax.
+     * Sets ScrollY from the given ratio of ScrollY to ScrollMaxY.
      */
     public void setScrollRatioY(double aValue)
     {
-        double scrollY = aValue * getScrollLimitY();
+        double scrollY = aValue * getScrollMaxY();
         setScrollY(scrollY);
     }
 
@@ -285,11 +285,11 @@ public class Scroller extends ParentView implements ViewHost {
         double scrollH = getHeight(); if (scrollH == 0) return;
 
         // Get shape bounds
-        Rect shapeBnds = aShape.getBounds();
-        double shapeX = shapeBnds.x;
-        double shapeY = shapeBnds.y;
-        double shapeW = shapeBnds.width;
-        double shapeH = shapeBnds.height;
+        Rect shapeBounds = aShape.getBounds();
+        double shapeX = shapeBounds.x;
+        double shapeY = shapeBounds.y;
+        double shapeW = shapeBounds.width;
+        double shapeH = shapeBounds.height;
 
         // Calculate new ScrollX: If shape rect is visible bounds, shift scroll to it; if bigger, center it
         double newScrollX = scrollX;
@@ -455,7 +455,7 @@ public class Scroller extends ParentView implements ViewHost {
             // Handle Horizontal scroll
             double scrollX = anEvent.getScrollX();
             if (scrollX != 0) {
-                double scroll2 = MathUtils.clamp(getScrollX() + scrollX * 4, 0, getScrollLimitX());
+                double scroll2 = MathUtils.clamp(getScrollX() + scrollX * 4, 0, getScrollMaxX());
                 if (scroll2 != getScrollX()) {
                     setScrollX(scroll2);
                     anEvent.consume();
@@ -464,8 +464,8 @@ public class Scroller extends ParentView implements ViewHost {
 
             // Handle vertical scroll
             double scrollY = anEvent.getScrollY();
-            if (scrollY != 0 && getScrollLimitY() != 0) {
-                double scroll2 = MathUtils.clamp(getScrollY() + scrollY * 4, 0 , getScrollLimitY());
+            if (scrollY != 0 && getScrollMaxY() != 0) {
+                double scroll2 = MathUtils.clamp(getScrollY() + scrollY * 4, 0 , getScrollMaxY());
                 if (scroll2 != getScrollY()) {
                     setScrollY(scroll2);
                     anEvent.consume();
