@@ -125,6 +125,7 @@ public class ScrollView extends ParentView implements ViewHost {
     {
         if (_hbar != null) return _hbar;
         _hbar = new ScrollBar();
+        _hbar.setBorderRadius(getBorderRadius());
         _hbar.addPropChangeListener(this::handleScrollBarPropChange, ScrollBar.Scroll_Prop);
         return _hbar;
     }
@@ -136,6 +137,7 @@ public class ScrollView extends ParentView implements ViewHost {
     {
         if (_vbar != null) return _vbar;
         _vbar = new ScrollBar();
+        _vbar.setBorderRadius(getBorderRadius());
         _vbar.setVertical(true);
         _vbar.addPropChangeListener(this::handleScrollBarPropChange, ScrollBar.Scroll_Prop);
         return _vbar;
@@ -473,6 +475,20 @@ public class ScrollView extends ParentView implements ViewHost {
                 _scroller.setScrollRatioX(val);
             else _scroller.setScrollRatioY(val);
         }
+    }
+
+    /**
+     * Override to propagate to Scroller and ScrollBars.
+     */
+    @Override
+    public void setBorderRadius(double aValue)
+    {
+        super.setBorderRadius(aValue);
+        _scroller.setBorderRadius(aValue);
+        if (_hbar != null)
+            _hbar.setBorderRadius(aValue);
+        if (_vbar != null)
+            _vbar.setBorderRadius(aValue);
     }
 
     /**

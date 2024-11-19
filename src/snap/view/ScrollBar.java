@@ -2,8 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.geom.Pos;
 import snap.geom.Rect;
 import snap.geom.RoundRect;
+import snap.geom.Shape;
 import snap.gfx.*;
 import snap.gfx.GradientPaint.Stop;
 import snap.util.MathUtils;
@@ -258,9 +260,12 @@ public class ScrollBar extends View {
 
         // Paint back: Paint background gradient and outer ring
         aPntr.setPaint(isHorizontal ? _backPntH : _backPntV);
-        aPntr.fillRect(0, 0, viewW, viewH);
+        Shape boundsShape = getBoundsShape();
+        if (boundsShape instanceof RoundRect)
+            boundsShape = ((RoundRect) boundsShape).copyForPosition(isHorizontal ? Pos.BOTTOM_CENTER : Pos.CENTER_RIGHT);
+        aPntr.fill(boundsShape);
         aPntr.setColor(_backRing);
-        aPntr.drawRect(0, 0, viewW, viewH);
+        aPntr.draw(boundsShape);
 
         // If too small to draw thumb or thumb is larger than view, just return
         if (isHorizontal && viewW < 20 || isVertical && viewH < 20)
@@ -268,47 +273,54 @@ public class ScrollBar extends View {
         if (getSizeRatio() >= 1)
             return;
 
-        // Get thumb bounds and paint thumb
-        Rect thumbBounds = getThumbBounds();
-        int state = _pressed ? Button.BUTTON_PRESSED : _targeted ? Button.BUTTON_OVER : Button.BUTTON_NORMAL;
-        paintThumb(aPntr, thumbBounds.x, thumbBounds.y, thumbBounds.width, thumbBounds.height, isHorizontal, state);
+        // Paint thumb
+        paintThumb(aPntr);
     }
 
     /**
      * Draws a button for the given rect with an option for pressed.
      */
-    private static void paintThumb(Painter aPntr, double x, double y, double w, double h, boolean isHor, int aState)
+    private void paintThumb(Painter aPntr)
     {
+        Rect thumbBounds = getThumbBounds();
+        double thumbX = thumbBounds.x;
+        double thumbY = thumbBounds.y;
+        double thumbW = thumbBounds.width;
+        double thumbH = thumbBounds.height;
+        boolean isHorizontal = isHorizontal();
+        int aState = _pressed ? Button.BUTTON_PRESSED : _targeted ? Button.BUTTON_OVER : Button.BUTTON_NORMAL;
+
         // Paint background gradient
-        RoundRect thumbBounds = new RoundRect(x, y, w, h,3);
-        aPntr.setPaint(isHor ? _thumbPntH : _thumbPntV);
-        aPntr.fill(thumbBounds);
+        double borderRadius = 3;
+        RoundRect thumbRect = new RoundRect(thumbX, thumbY, thumbW, thumbH, borderRadius);
+        aPntr.setPaint(isHorizontal ? _thumbPntH : _thumbPntV);
+        aPntr.fill(thumbRect);
 
         // Paint out bottom ring light gray
-        thumbBounds.setRect(x + .5,y + .5,w - 1, h);
+        thumbRect.setRect(thumbX + .5, thumbY + .5, thumbW - 1, thumbH);
         aPntr.setColor(_c6);
-        aPntr.draw(thumbBounds);
+        aPntr.draw(thumbRect);
 
         // Paint inner ring light gray
-        thumbBounds.setRect(x + 1.5,y + 1.5,w - 3,h - 4);
-        aPntr.setPaint(isHor ? _thumbPntH2 : _thumbPntV2);
-        aPntr.draw(thumbBounds);
+        thumbRect.setRect(thumbX + 1.5, thumbY + 1.5, thumbW - 3, thumbH - 4);
+        aPntr.setPaint(isHorizontal ? _thumbPntH2 : _thumbPntV2);
+        aPntr.draw(thumbRect);
 
         // Paint outer ring
-        thumbBounds.setRect(x + .5,y + .5,w - 1,h - 1);
+        thumbRect.setRect(thumbX + .5, thumbY + .5, thumbW - 1, thumbH - 1);
         aPntr.setColor(_c0);
-        aPntr.draw(thumbBounds);
+        aPntr.draw(thumbRect);
 
         // Handle BUTTON_OVER, BUTTON_PRESSED
         if (aState == Button.BUTTON_OVER) {
             aPntr.setPaint(_over);
-            thumbBounds.setRect(x, y, w, h);
-            aPntr.fill(thumbBounds);
+            thumbRect.setRect(thumbX, thumbY, thumbW, thumbH);
+            aPntr.fill(thumbRect);
         }
         else if (aState == Button.BUTTON_PRESSED) {
             aPntr.setPaint(_prsd);
-            thumbBounds.setRect(x, y, w, h);
-            aPntr.fill(thumbBounds);
+            thumbRect.setRect(thumbX, thumbY, thumbW, thumbH);
+            aPntr.fill(thumbRect);
         }
     }
 
