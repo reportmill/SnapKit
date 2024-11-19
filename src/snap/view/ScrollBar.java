@@ -15,14 +15,14 @@ import snap.util.MathUtils;
  */
 public class ScrollBar extends View {
 
-    // The offset into ScrollSize
+    // The offset into content
     private double _scroll;
     
-    // The size of the viewable portion of ScrollSize
-    private double _viewSize;
+    // The size of the scroller showing content
+    private double _scrollerSize;
     
     // The size of the content being scrolled
-    private double _scrollSize;
+    private double _contentSize;
     
     // Whether button is pressed
     private boolean _pressed;
@@ -35,7 +35,6 @@ public class ScrollBar extends View {
     
     // Constants for properties
     public static final String Scroll_Prop = "Scroll";
-    public static final String ScrollSize_Prop = "ScrollSize";
 
     // Constant for border insets
     private static final int BORDER_INSET = 2;
@@ -52,12 +51,12 @@ public class ScrollBar extends View {
     }
 
     /**
-     * Returns the offset into ScrollSize.
+     * Returns the offset into ContentSize.
      */
     public double getScroll()  { return _scroll; }
 
     /**
-     * Sets the offset into ScrollSize.
+     * Sets the offset into ContentSize.
      */
     public void setScroll(double aValue)
     {
@@ -76,43 +75,37 @@ public class ScrollBar extends View {
      */
     public double getScrollMax()
     {
-        double scrollMax = getScrollSize() - getViewSize();
+        double scrollMax = getContentSize() - getScrollerSize();
         return Math.round(Math.max(scrollMax, 0));
     }
 
     /**
-     * Returns the size of the viewable portion of ScrollSize.
+     * Returns the size of the scroller showing content.
      */
-    public double getViewSize()  { return _viewSize; }
+    public double getScrollerSize()  { return _scrollerSize; }
 
     /**
-     * Sets the size of the viewable portion of ScrollSize.
+     * Sets the size of the scroller showing content.
      */
-    public void setViewSize(double aValue)
+    public void setScrollerSize(double aValue)
     {
-        // If already set, just return
-        if (MathUtils.equals(aValue, _viewSize)) return;
-
-        // Set value and fire prop change
-        firePropChange(Scroll_Prop, _viewSize, _viewSize = aValue);
+        if (MathUtils.equals(aValue, _scrollerSize)) return;
+        _scrollerSize = aValue;
         repaint();
     }
 
     /**
      * Returns the size of the content being scrolled.
      */
-    public double getScrollSize()  { return _scrollSize; }
+    public double getContentSize()  { return _contentSize; }
 
     /**
      * Sets the size of the content being scrolled.
      */
-    public void setScrollSize(double aValue)
+    public void setContentSize(double aValue)
     {
-        // If already set, just return
-        if (MathUtils.equals(aValue, _scrollSize)) return;
-
-        // Set value and fire prop change
-        firePropChange(ScrollSize_Prop, _scrollSize, _scrollSize = aValue);
+        if (MathUtils.equals(aValue, _contentSize)) return;
+        _contentSize = aValue;
         repaint();
     }
 
@@ -135,13 +128,13 @@ public class ScrollBar extends View {
     }
 
     /**
-     * Returns the ratio of ViewSize to ScrollSize.
+     * Returns the ratio of ScrollerSize to ContentSize.
      */
-    public double getSizeRatio()
+    private double getScrollerToContentSizeRatio()
     {
-        double viewSize = getViewSize();
-        double scrollSize = getScrollSize();
-        return scrollSize > 0 ? viewSize / scrollSize : 1;
+        double scrollerSize = getScrollerSize();
+        double contentSize = getContentSize();
+        return contentSize > 0 ? scrollerSize / contentSize : 1;
     }
 
     /**
@@ -151,7 +144,7 @@ public class ScrollBar extends View {
     {
         boolean isHoriz = isHorizontal(), isVert = !isHoriz;
         double scrollRatio = getScrollRatio();
-        double sizeRatio = getSizeRatio();
+        double sizeRatio = getScrollerToContentSizeRatio();
         double viewW = getWidth() - BORDER_INSET_WIDTH;
         double viewH = getHeight() - BORDER_INSET_WIDTH;
         double thumbW = isHoriz ? Math.max(Math.round(sizeRatio * viewW), 20) : viewW;
@@ -167,7 +160,7 @@ public class ScrollBar extends View {
     private double getThumbSize()
     {
         boolean isHoriz = isHorizontal();
-        double sizeRatio = getSizeRatio();
+        double sizeRatio = getScrollerToContentSizeRatio();
         double areaSize = (isHoriz ? getWidth() : getHeight()) - BORDER_INSET_WIDTH;
         return Math.max(Math.round(sizeRatio * areaSize), 20);
     }
@@ -233,10 +226,10 @@ public class ScrollBar extends View {
         // Handle scroll
         else if (anEvent.isScroll()) {
             double units = isHorizontal ? anEvent.getScrollX() * 4 : anEvent.getScrollY() * 4;
-            double viewSize = isHorizontal ? getWidth() : getHeight();
+            double scrollerSize = getScrollerSize();
             double thumbSize = getThumbSize();
-            double contentSize = viewSize * viewSize / thumbSize;
-            double dv = contentSize - viewSize;
+            double contentSize = scrollerSize * scrollerSize / thumbSize;
+            double dv = contentSize - scrollerSize;
             if (dv > 0 && Math.abs(units) > 0) {
                 double newScrollRatio = getScrollRatio() + units / dv;
                 setScrollRatio(newScrollRatio);
@@ -270,7 +263,7 @@ public class ScrollBar extends View {
         // If too small to draw thumb or thumb is larger than view, just return
         if (isHorizontal && viewW < 20 || isVertical && viewH < 20)
             return;
-        if (getSizeRatio() >= 1)
+        if (getScrollerToContentSizeRatio() >= 1)
             return;
 
         // Paint thumb

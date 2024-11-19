@@ -26,7 +26,7 @@ public class Scroller extends ParentView implements ViewHost {
     private double _scrollX, _scrollY;
     
     // The content width/height being scrolled
-    private double _scrollWidth, _scrollHeight;
+    private double _contentWidth, _contentHeight;
 
     // Constants for properties
     public static final String Content_Prop = BoxView.Content_Prop;
@@ -34,8 +34,8 @@ public class Scroller extends ParentView implements ViewHost {
     public static final String FillHeight_Prop = BoxView.FillHeight_Prop;
     public static final String ScrollX_Prop = "ScrollX";
     public static final String ScrollY_Prop = "ScrollY";
-    public static final String ScrollWidth_Prop = "ScrollWidth";
-    public static final String ScrollHeight_Prop = "ScrollHeight";
+    public static final String ContentWidth_Prop = "ContentWidth";
+    public static final String ContentHeight_Prop = "ContentHeight";
 
     /**
      * Constructor.
@@ -157,29 +157,29 @@ public class Scroller extends ParentView implements ViewHost {
     /**
      * Returns the width of the content being scrolled.
      */
-    public double getScrollWidth()  { return _scrollWidth; }
+    public double getContentWidth()  { return _contentWidth; }
 
     /**
      * Sets the width of the content being scrolled.
      */
-    protected void setScrollWidth(double aValue)
+    protected void setContentWidth(double aValue)
     {
-        if (aValue == _scrollWidth) return;
-        firePropChange(ScrollWidth_Prop, _scrollWidth, _scrollWidth = aValue);
+        if (aValue == _contentWidth) return;
+        firePropChange(ContentWidth_Prop, _contentWidth, _contentWidth = aValue);
     }
 
     /**
      * Returns the height of the content being scrolled.
      */
-    public double getScrollHeight()  { return _scrollHeight; }
+    public double getContentHeight()  { return _contentHeight; }
 
     /**
      * Sets the height of the content being scrolled.
      */
-    protected void setScrollHeight(double aValue)
+    protected void setContentHeight(double aValue)
     {
-        if (aValue == _scrollHeight) return;
-        firePropChange(ScrollHeight_Prop, _scrollHeight, _scrollHeight = aValue);
+        if (aValue == _contentHeight) return;
+        firePropChange(ContentHeight_Prop, _contentHeight, _contentHeight = aValue);
     }
 
     /**
@@ -187,7 +187,7 @@ public class Scroller extends ParentView implements ViewHost {
      */
     public double getScrollLimitX()
     {
-        double scrollLimitX = getScrollWidth() - getWidth();
+        double scrollLimitX = getContentWidth() - getWidth();
         return Math.round(Math.max(scrollLimitX, 0));
     }
 
@@ -196,7 +196,7 @@ public class Scroller extends ParentView implements ViewHost {
      */
     public double getScrollLimitY()
     {
-        double scrollLimitY = getScrollHeight() - getHeight();
+        double scrollLimitY = getContentHeight() - getHeight();
         return Math.round(Math.max(scrollLimitY, 0));
     }
 
@@ -439,9 +439,9 @@ public class Scroller extends ParentView implements ViewHost {
         // Set content bounds
         _content.setBounds(-contentX, -contentY, contentW, contentH);
 
-        // Update ScrollWidth/ScrollHeight
-        setScrollWidth(contentW);
-        setScrollHeight(contentH);
+        // Update ContentWidth/ContentHeight
+        setContentWidth(contentW);
+        setContentHeight(contentH);
     }
 
     /**
@@ -482,11 +482,9 @@ public class Scroller extends ParentView implements ViewHost {
     {
         switch (aPropName) {
 
-            // ScrollX, ScrollY, ScrollWidth, ScrollHeight
+            // ScrollX, ScrollY
             case ScrollX_Prop: return getScrollX();
             case ScrollY_Prop: return getScrollY();
-            case ScrollWidth_Prop: return getScrollWidth();
-            case ScrollHeight_Prop: return getScrollHeight();
 
             // Do normal version
             default: return super.getPropValue(aPropName);
@@ -500,11 +498,9 @@ public class Scroller extends ParentView implements ViewHost {
     {
         switch (aPropName) {
 
-            // ScrollX, ScrollY, ScrollWidth, ScrollHeight
+            // ScrollX, ScrollY
             case ScrollX_Prop: setScrollX(Convert.doubleValue(aValue)); break;
             case ScrollY_Prop: setScrollY(Convert.doubleValue(aValue)); break;
-            case ScrollWidth_Prop: setScrollWidth(Convert.doubleValue(aValue)); break;
-            case ScrollHeight_Prop: setScrollHeight(Convert.doubleValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);

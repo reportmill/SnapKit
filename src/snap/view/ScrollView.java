@@ -188,8 +188,8 @@ public class ScrollView extends ParentView implements ViewHost {
         ScrollBar hbar = getHBar();
         if (aValue) {
             addChild(hbar);
-            hbar.setViewSize(_scroller.getWidth());
-            hbar.setScrollSize(_scroller.getScrollWidth());
+            hbar.setScrollerSize(_scroller.getWidth());
+            hbar.setContentSize(_scroller.getContentWidth());
             hbar.setScroll(_scroller.getScrollX());
             _showHBarHint = true;
         }
@@ -218,8 +218,8 @@ public class ScrollView extends ParentView implements ViewHost {
         ScrollBar vbar = getVBar();
         if (aValue) {
             addChild(vbar);
-            vbar.setViewSize(_scroller.getHeight());
-            vbar.setScrollSize(_scroller.getScrollHeight());
+            vbar.setScrollerSize(_scroller.getHeight());
+            vbar.setContentSize(_scroller.getContentHeight());
             vbar.setScroll(_scroller.getScrollY());
             _showVBarHint = true;
         }
@@ -446,16 +446,16 @@ public class ScrollView extends ParentView implements ViewHost {
             case Scroller.ScrollY_Prop: getVBar().setScroll(_scroller.getScrollY()); break;
 
             // Handle Scroller.Width or Scroller.ScrollWidth change
-            case Width_Prop: case Scroller.ScrollWidth_Prop:
-                getHBar().setViewSize(_scroller.getWidth());
-                getHBar().setScrollSize(_scroller.getScrollWidth());
+            case Width_Prop: case Scroller.ContentWidth_Prop:
+                getHBar().setScrollerSize(_scroller.getWidth());
+                getHBar().setContentSize(_scroller.getContentWidth());
                 getHBar().setScroll(_scroller.getScrollX());
                 break;
 
             // Handle Scroller.Height or Scroller.ScrollHeight change
-            case Height_Prop: case Scroller.ScrollHeight_Prop:
-                getVBar().setViewSize(_scroller.getHeight());
-                getVBar().setScrollSize(_scroller.getScrollHeight());
+            case Height_Prop: case Scroller.ContentHeight_Prop:
+                getVBar().setScrollerSize(_scroller.getHeight());
+                getVBar().setContentSize(_scroller.getContentHeight());
                 getVBar().setScroll(_scroller.getScrollY());
                 break;
         }
