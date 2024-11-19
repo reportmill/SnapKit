@@ -3,7 +3,10 @@
  */
 package snap.view;
 import snap.geom.Insets;
+import snap.geom.Shape;
 import snap.geom.Size;
+import snap.gfx.Border;
+import snap.gfx.Painter;
 import snap.props.PropChange;
 import snap.props.PropSet;
 import snap.util.*;
@@ -241,6 +244,25 @@ public class ScrollView extends ParentView implements ViewHost {
     }
 
     /**
+     * Override to paint content border.
+     */
+    @Override
+    protected void paintAll(Painter aPntr)
+    {
+        super.paintAll(aPntr);
+
+        // If content is overflow scroll and has border, repaint content border
+        View content = getContent();
+        if (content != null && content.getOverflow() == Overflow.Scroll) {
+            Border border = content.getBorder();
+            if (border != null) {
+                Shape boundsShape = getBoundsShape();
+                border.paint(aPntr, boundsShape);
+            }
+        }
+    }
+
+    /**
      * Calculates the minimum width.
      */
     protected double getMinWidthImpl()
@@ -399,8 +421,20 @@ public class ScrollView extends ParentView implements ViewHost {
     {
         switch (aPC.getPropName()) {
 
-            // Handle Scroller Content, FillWidth, FillHeight
-            case Content_Prop: case FillWidth_Prop: case FillHeight_Prop:
+            // Handle Scroller Content: Repost prop change and check for overflow scroll border update
+            case Content_Prop:
+                firePropChange(aPC.getPropName(), aPC.getOldValue(), aPC.getNewValue());
+
+                // If content is overflow scroll, use its border
+                View content = getContent();
+                if (content != null && content.getOverflow() == Overflow.Scroll) {
+                    setBorder(null);
+                    setBorderRadius(content.getBorderRadius());
+                }
+                break;
+
+            // Handle Scroller FillWidth, FillHeight: Repost prop change
+            case FillWidth_Prop: case FillHeight_Prop:
                 firePropChange(aPC.getPropName(), aPC.getOldValue(), aPC.getNewValue());
                 relayout();
                 break;

@@ -70,6 +70,10 @@ public class Scroller extends ParentView implements ViewHost {
         if (_content != null)
             addChild(aView);
 
+        // If content is overflow scroll, update border radius to match
+        if (_content != null && _content.getOverflow() == Overflow.Scroll)
+            setBorderRadius(_content.getBorderRadius());
+
         // Fire prop change
         firePropChange(Content_Prop, oldContent, aView);
     }

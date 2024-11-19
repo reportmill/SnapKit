@@ -669,16 +669,11 @@ public class ViewUtils {
             aView.setMinHeight(-1);
         }
 
-        // Transfer Margin, Border, BorderRadius
+        // Transfer Margin
         if (aView.getMargin() != null) {
             scrollView.setMargin(aView.getMargin());
             aView.setMargin(null);
         }
-        if (aView.getBorder() != null) {
-            scrollView.setBorder(aView.getBorder());
-            aView.setBorder(null);
-        }
-        scrollView.setBorderRadius(aView.getBorderRadius());
 
         // Replace View with ScrollView
         boolean isFocused = aView.isFocused();
