@@ -84,16 +84,6 @@ public class SegmentPath extends Shape {
     }
 
     /**
-     * Returns whether this SegmentPath contains given segment end point.
-     */
-    public boolean containsSegEnd(Segment aSeg)
-    {
-        double endX = aSeg.getX1();
-        double endY = aSeg.getY1();
-        return contains(endX, endY);
-    }
-
-    /**
      * Returns whether this SegmentPath contains given segment mid point.
      */
     public boolean containsSegMid(Segment aSeg)
