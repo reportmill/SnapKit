@@ -131,19 +131,19 @@ public class TreeCol <T> extends ListView <T> {
             return;
 
         // Configure cell text
-        String itemText = tree.getText(item, col);
+        String itemText = tree.getItemText(item, col);
         aCell.setText(itemText);
         if (col > 0)
             return;
 
         // Configure cell graphic
-        View itemGraphic = tree.getGraphic(item);
+        View itemGraphic = tree.getItemGraphic(item);
         if (itemGraphic != null)
             aCell.setGraphic(itemGraphic);
 
         // Calculate indent level
-        int indentLevel = tree.getParentCount(item);
-        if (!tree.isParent(item))
+        int indentLevel = tree.getItemParentCount(item);
+        if (!tree.isItemParent(item))
             indentLevel++;
 
         // Set cell indent
@@ -151,10 +151,10 @@ public class TreeCol <T> extends ListView <T> {
         aCell.setPadding(0, 2, 0, indentLevel * indentW);
 
         // If item is parent, configure branch image
-        if (tree.isParent(item)) {
+        if (tree.isItemParent(item)) {
 
             // Get branch image
-            Image branchImage = tree.isExpanded(item) ? tree.getExpandedImage() : tree.getCollapsedImage();
+            Image branchImage = tree.isItemExpanded(item) ? tree.getExpandedImage() : tree.getCollapsedImage();
 
             // If branch image view already present, update image and return
             ImageView branchImageView = (ImageView) aCell.getChildForName("BranchImageView");

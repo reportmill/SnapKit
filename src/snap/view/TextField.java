@@ -380,6 +380,10 @@ public class TextField extends ParentView {
 
         // Reset text bounds
         updateTextBounds();
+
+        // Check for whether to wrap in scroll view
+        if (_textAdapter.getLineCount() > 1 && getOverflow() == Overflow.Scroll)
+            ViewUtils.checkWantsScrollView(this);
     }
 
     /**
@@ -520,10 +524,6 @@ public class TextField extends ParentView {
             if (prefW > textBounds.width)
                 runLater(() -> _textAdapter.setWrapLines(true));
         }
-
-        // Check for whether to wrap in scroll view
-        if (_textAdapter.getLineCount() > 1 && getOverflow() == Overflow.Scroll)
-            ViewUtils.checkWantsScrollView(this);
     }
 
     /**

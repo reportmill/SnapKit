@@ -15,40 +15,37 @@ import snap.util.*;
 public class TreeView <T> extends ParentView implements Selectable<T> {
     
     // The items
-    private PickList <T>  _items = new PickList<>();
+    private PickList <T> _items = new PickList<>();
     
     // The selected column
-    private int  _selCol;
+    private int _selCol;
     
     // The resolver
-    private TreeResolver <T>  _resolver = new TreeResolver.Adapter<>();
+    private TreeResolver <T> _resolver = new TreeResolver.Adapter<>();
     
     // Row height
-    private int  _rowHeight = 20;
+    private int _rowHeight = 20;
 
     // The Preferred number of rows
-    private int  _prefRowCount = -1;
+    private int _prefRowCount = -1;
     
     // The maximum number of rows
-    private int  _maxRowCount = -1;
+    private int _maxRowCount = -1;
 
     // The Cell Configure method
-    private Consumer <ListCell<T>>  _cellConf;
+    private Consumer <ListCell<T>> _cellConf;
     
     // The set of expanded items
-    private Set <T>  _expanded = new HashSet<>();
+    private Set<T> _expanded = new HashSet<>();
     
     // Image for collapsed parent item
-    private Image  _clpImg;
+    private Image _clpImg;
     
     // Image for expanded parent item
-    private Image  _expImg;
+    private Image _expImg;
 
     // The SplitView to hold columns
-    private SplitView  _splitView;
-    
-    // The ScrollView to hold SplitView+Columns
-    private ScrollView  _scrollView;
+    private SplitView _splitView;
     
     // Constants
     private static final Paint DIVIDER_FILL = new Color("#EEEEEE");
@@ -63,35 +60,27 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
         setFocusable(true);
         setFocusWhenPressed(true);
         setFocusPainted(false);
+        setOverflow(Overflow.Scroll);
 
         // Create/configure Columns SplitView
         _splitView = new SplitView();
         _splitView.setBorder(null);
         _splitView.setGrowWidth(true);
         _splitView.setDividerSpan(2);
+        addChild(_splitView);
 
         // Configure SplitView.Divider
         Divider divider = _splitView.getDivider();
         divider.setFill(DIVIDER_FILL);
         divider.setBorder(null);
 
-        // Create/configure ScrollView
-        _scrollView = new ScrollView(_splitView);
-        _scrollView.setBorder(null);
-        addChild(_scrollView);
-
         // Register PickList to notify when selection changes
-        _items.addPropChangeListener(pc -> pickListSelChange(pc));
+        _items.addPropChangeListener(this::handlePickListSelChange);
 
         // Create/add first column
         TreeCol<T> treeCol = new TreeCol<>();
         addCol(treeCol);
     }
-
-    /**
-     * Returns the ScrollView.
-     */
-    public ScrollView getScrollView()  { return _scrollView; }
 
     /**
      * Returns the row height.
@@ -263,24 +252,18 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Called when PickList changes selection.
      */
-    protected void pickListSelChange(PropChange aPC)
+    protected void handlePickListSelChange(PropChange aPC)
     {
         // Handle Sel_Prop: Get array of changed indexes and update
-        String propName = aPC.getPropName();
-        if (propName == PickList.Sel_Prop) {
+        if (aPC.getPropName() == PickList.Sel_Prop) {
             ListSel sel1 = (ListSel) aPC.getOldValue();
             ListSel sel2 = (ListSel) aPC.getNewValue();
             int[] changed = ListSel.getChangedIndexes(sel1, sel2);
-            //for (int i : changed)
-            //    updateIndex(i);
 
             int oldInd = changed.length > 1 ? changed[0] : -1;
             int newInd = changed.length > 1 ? changed[changed.length-1] : -1;
             firePropChange(SelIndex_Prop, oldInd, newInd);
         }
-
-        // Scroll selection to visible
-        //if (isShowing()) scrollSelToVisible();
     }
 
     /**
@@ -293,7 +276,8 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
 
             // If item not expanded just continue
             T item = items.get(i);
-            if (!isExpanded(item)) continue;
+            if (!isItemExpanded(item))
+                continue;
 
             // If we haven't yet created new list, do it now
             if (items == theItems)
@@ -302,19 +286,19 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
             // Remove successive items decended from current item
             for (int j = i + 1, jMax = items.size(); j < jMax; j++) {
                 T next = items.get(i + 1);
-                if (isAncestor(next,item))
+                if (isItemAncestor(next,item))
                     items.remove(i + 1);
                 else break;
             }
 
             // If item no long parent (could have changed), clear state and continue
-            if (!isParent(item)) {
-                setExpanded(item,false);
+            if (!isItemParent(item)) {
+                setItemExpanded(item,false);
                 continue;
             }
 
             // Get item children and add after item
-            T[] childItems = getChildren(item);
+            T[] childItems = getItemChildren(item);
             for (int j = 0; j < childItems.length; j++)
                 items.add(i + j + 1, childItems[j]);
         }
@@ -385,16 +369,16 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     public void expandItem(T anItem)
     {
         // If not a parent or already expanded, just return
-        if (!isParent(anItem) || isExpanded(anItem))
+        if (!isItemParent(anItem) || isItemExpanded(anItem))
             return;
 
         // Make sure parent is expanded
-        T parent = getParent(anItem);
-        if (parent != null && !isExpanded(parent))
+        T parent = getItemParent(anItem);
+        if (parent != null && !isItemExpanded(parent))
             expandItem(parent);
 
         // Set item expanded state, reset items and update given item
-        setExpanded(anItem, true);
+        setItemExpanded(anItem, true);
         setItemsList(getItemsList());
         updateItem(anItem);
     }
@@ -405,20 +389,20 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     public void collapseItem(T anItem)
     {
         // If not collapsable, just return
-        if (!isParent(anItem) || !isExpanded(anItem) || !getItemsList().contains(anItem)) return;
+        if (!isItemParent(anItem) || !isItemExpanded(anItem) || !getItemsList().contains(anItem)) return;
 
         // Get items copy and remove successive items decended from given item
         List <T> items = new ArrayList<>(getItemsList());
         int index = items.indexOf(anItem);
         for (int i = index + 1, iMax = items.size(); i < iMax;i++) {
             T next = items.get(index + 1);
-            if (isAncestor(next,anItem))
+            if (isItemAncestor(next,anItem))
                 items.remove(index + 1);
             else break;
         }
 
         // Set item expanded state, reset items and update given item
-        setExpanded(anItem, false);
+        setItemExpanded(anItem, false);
         setItemsImpl(items);
         updateItem(anItem);
     }
@@ -428,7 +412,8 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      */
     public void toggleItem(T anItem)
     {
-        if (isExpanded(anItem)) collapseItem(anItem);
+        if (isItemExpanded(anItem))
+            collapseItem(anItem);
         else expandItem(anItem);
     }
 
@@ -445,23 +430,25 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the parent of given item.
      */
-    public T getParent(T anItem)  { return _resolver.getParent(anItem); }
+    public T getItemParent(T anItem)  { return _resolver.getParent(anItem); }
 
     /**
      * Returns the parent of given item.
      */
-    public int getParentCount(T anItem)
+    public int getItemParentCount(T anItem)
     {
-        int pc = 0; for (T p=getParent(anItem); p!=null; p=getParent(p)) pc++; return pc;
+        int parentCount = 0;
+        for (T parent = getItemParent(anItem); parent != null; parent = getItemParent(parent)) parentCount++;
+        return parentCount;
     }
 
     /**
      * Returns whether given item has given object as any of it's ancestors.
      */
-    public boolean isAncestor(T anItem, T aPar)
+    public boolean isItemAncestor(T anItem, T aPar)
     {
-        for (T par=getParent(anItem); par!=null; par=getParent(par))
-            if (par==aPar)
+        for (T parent = getItemParent(anItem); parent != null; parent = getItemParent(parent))
+            if (parent == aPar)
                 return true;
         return false;
     }
@@ -469,37 +456,37 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Whether given object is a parent (has children).
      */
-    public boolean isParent(T anItem)  { return _resolver.isParent(anItem); }
+    public boolean isItemParent(T anItem)  { return _resolver.isParent(anItem); }
 
     /**
      * Returns the children.
      */
-    public T[] getChildren(T aParent)  { return _resolver.getChildren(aParent); }
+    public T[] getItemChildren(T aParent)  { return _resolver.getChildren(aParent); }
 
     /**
      * Returns the text to be used for given item.
      */
-    public String getText(T anItem, int aCol)  { return _resolver.getText(anItem, aCol); }
+    public String getItemText(T anItem, int aCol)  { return _resolver.getText(anItem, aCol); }
 
     /**
      * Return the image to be used for given item.
      */
-    public Image getImage(T anItem)  { return _resolver.getImage(anItem); }
+    public Image getItemImage(T anItem)  { return _resolver.getImage(anItem); }
 
     /**
      * Return the graphic to be used for given item.
      */
-    public View getGraphic(T anItem)  { return _resolver.getGraphic(anItem); }
+    public View getItemGraphic(T anItem)  { return _resolver.getGraphic(anItem); }
 
     /**
      * Returns whether an item is expanded.
      */
-    public boolean isExpanded(T anItem)  { return _expanded.contains(anItem); }
+    public boolean isItemExpanded(T anItem)  { return _expanded.contains(anItem); }
 
     /**
      * Sets whether an item is expaned.
      */
-    public void setExpanded(T anItem, boolean aValue)
+    public void setItemExpanded(T anItem, boolean aValue)
     {
         if (aValue)
             _expanded.add(anItem);
@@ -509,7 +496,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Searches for parent of given item (only works if given item is visible).
      */
-    public T findParent(T anItem)
+    public T findItemParent(T anItem)
     {
         List <T> items = getItemsList();
         int index = items.indexOf(anItem);
@@ -518,7 +505,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
 
         for (int i = index - 1; i >= 0; i--) {
             T item = items.get(i);
-            if (isParent(item) && isExpanded(item) && ArrayUtils.contains(getChildren(item), anItem))
+            if (isItemParent(item) && isItemExpanded(item) && ArrayUtils.contains(getItemChildren(item), anItem))
                 return item;
         }
 
@@ -529,6 +516,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Override to reset cells.
      */
+    @Override
     public void setY(double aValue)
     {
         if (aValue == getY()) return;
@@ -540,6 +528,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Override to reset cells.
      */
+    @Override
     public void setHeight(double aValue)
     {
         if (aValue == getHeight()) return;
@@ -549,32 +538,50 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
+     * Override to propagate to inner views.
+     */
+    @Override
+    public void setBorderRadius(double aValue)
+    {
+        super.setBorderRadius(aValue);
+        _splitView.setBorderRadius(aValue);
+    }
+
+    /**
      * Returns the preferred width.
      */
+    @Override
     protected double getPrefWidthImpl(double aH)
     {
-        return BoxView.getPrefWidth(this, _scrollView, aH);
+        return BoxView.getPrefWidth(this, _splitView, aH);
     }
 
     /**
      * Returns the preferred height.
      */
+    @Override
     protected double getPrefHeightImpl(double aW)
     {
-        // If PrefRowCount set, return PrefRowCount*RowHeight
-        if (getPrefRowCount() > 0)
-            return getPrefRowCount() * getRowHeight() + getInsetsAll().getHeight();
+        // If PrefRowCount set, return PrefRowCount * RowHeight
+        int prefRowCount = getPrefRowCount();
+        if (prefRowCount > 0)
+            return prefRowCount * getRowHeight() + getInsetsAll().getHeight();
 
         // Return pref height of Scroll
-        return BoxView.getPrefHeight(this, _scrollView, aW);
+        return BoxView.getPrefHeight(this, _splitView, aW);
     }
 
     /**
      * Override to layout ScrollView.
      */
+    @Override
     protected void layoutImpl()
     {
-        BoxView.layout(this, _scrollView, true, true);
+        BoxView.layout(this, _splitView, true, true);
+
+        // Check wants ScrollView
+        if (getOverflow() == Overflow.Scroll)
+            ViewUtils.checkWantsScrollView(this);
     }
 
     /**
@@ -591,18 +598,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Override to ensure that DragGesture events.
-     */
-    protected void processEvent(ViewEvent anEvent)
-    {
-        // If DragGesture outside ScrollView.Scroller, just return
-        if (anEvent.isDragGesture()) {
-            if (!_scrollView.getScroller().contains(anEvent.getX(), anEvent.getY()))
-                anEvent.consume();
-        }
-    }
-
-    /**
      * Returns a mapped property name.
      */
     public String getValuePropName()  { return SelItem_Prop; }
@@ -614,9 +609,12 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     {
         // If down arrow icon hasn't been created, create it
         if (_expImg != null) return _expImg;
-        Image img = Image.getImageForSize(9,9,true); Painter pntr = img.getPainter();
+        Image img = Image.getImageForSize(9,9,true);
+        Painter pntr = img.getPainter();
         Polygon poly = new Polygon(1.5, 1.5, 7.5, 1.5, 4.5, 5.5);
-        pntr.setColor(Color.BLACK); pntr.draw(poly); pntr.fill(poly); pntr.flush();
+        pntr.setColor(Color.BLACK);
+        pntr.draw(poly);
+        pntr.fill(poly); pntr.flush();
         return _expImg = img;
     }
 
@@ -627,9 +625,12 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     {
         // If down arrow icon hasn't been created, create it
         if (_clpImg != null) return _clpImg;
-        Image img = Image.getImageForSize(9,9,true); Painter pntr = img.getPainter();
+        Image img = Image.getImageForSize(9,9,true);
+        Painter pntr = img.getPainter();
         Polygon poly = new Polygon(1.5, 1.5, 1.5, 7.5, 5.5, 4.5);
-        pntr.setColor(Color.BLACK); pntr.draw(poly); pntr.fill(poly); pntr.flush();
+        pntr.setColor(Color.BLACK);
+        pntr.draw(poly);
+        pntr.fill(poly); pntr.flush();
         return _clpImg = img;
     }
 
