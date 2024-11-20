@@ -58,12 +58,21 @@ public class SegmentPath extends Shape {
     /**
      * Adds the given segment.
      */
-    public void addSeg(Segment aSeg, int anIndex)  { _segs.add(anIndex, aSeg); }
+    public void addSeg(Segment aSeg, int anIndex)
+    {
+        _segs.add(anIndex, aSeg);
+        shapeChanged();
+    }
 
     /**
      * Removes a given segment.
      */
-    public Segment removeSeg(int anIndex)  { return _segs.remove(anIndex); }
+    public Segment removeSeg(int anIndex)
+    {
+        Segment seg = _segs.remove(anIndex);
+        shapeChanged();
+        return seg;
+    }
 
     /**
      * Returns whether this SegmentPath contains given point.
@@ -115,11 +124,11 @@ public class SegmentPath extends Shape {
     }
 
     /**
-     * Returns the first Segment from this SegmentList outside of given SegmentPath.
+     * Returns the first Segment from this SegmentList inside given SegmentPath.
      */
     public Segment getFirstSegInside(SegmentPath aShape)
     {
-        return ListUtils.findMatch(_segs, seg -> aShape.contains(seg.getX0(), seg.getY0()));
+        return ListUtils.findMatch(_segs, seg -> aShape.containsSegMid(seg));
     }
 
     /**
