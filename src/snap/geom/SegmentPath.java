@@ -12,10 +12,10 @@ import java.util.*;
 public class SegmentPath extends Shape {
     
     // The original shape
-    private Shape  _shape;
+    private Shape _shape;
     
     // The list of segments
-    private List<Segment>  _segs = new ArrayList<>();
+    private List<Segment> _segs = new ArrayList<>();
 
     /**
      * Constructor.
@@ -84,7 +84,17 @@ public class SegmentPath extends Shape {
     }
 
     /**
-     * Returns whether this SegmentPath contains given point.
+     * Returns whether this SegmentPath contains given segment end point.
+     */
+    public boolean containsSegEnd(Segment aSeg)
+    {
+        double endX = aSeg.getX1();
+        double endY = aSeg.getY1();
+        return contains(endX, endY);
+    }
+
+    /**
+     * Returns whether this SegmentPath contains given segment mid point.
      */
     public boolean containsSegMid(Segment aSeg)
     {
@@ -98,10 +108,7 @@ public class SegmentPath extends Shape {
      */
     public boolean containsEndPoint(double x, double y)
     {
-        for (Segment seg : _segs)
-            if (Segment.equals(seg.x1, x) && Segment.equals(seg.y1, y))
-                return true;
-        return false;
+        return ListUtils.hasMatch(_segs, seg -> Segment.equals(seg.x1, x) && Segment.equals(seg.y1, y));
     }
 
     /**
@@ -109,10 +116,7 @@ public class SegmentPath extends Shape {
      */
     public boolean hasSeg(Segment aSeg)
     {
-        for (Segment seg : _segs)
-            if (seg.matches(aSeg))
-                return true;
-        return false;
+        return ListUtils.hasMatch(_segs, seg -> seg.matches(aSeg));
     }
 
     /**
@@ -170,8 +174,9 @@ public class SegmentPath extends Shape {
      */
     public boolean isSelfIntersecting()
     {
-        // Iterate over all segments and return if intersects other segment
         int segCount = getSegCount();
+
+        // Iterate over all segments and return if intersects other segment
         for (int i = 0; i < segCount; i++) { Segment seg1 = getSeg(i);
             for (int j = i + 1; j < segCount; j++) { Segment seg2 = getSeg(j);
 
@@ -268,10 +273,12 @@ public class SegmentPath extends Shape {
      */
     public void splitIntersectingSegmentsAtIntersectionPoints(SegmentPath aSegmentPath)
     {
+        int segCount1 = getSegCount();
+        int setCount2 = aSegmentPath.getSegCount();
+
         // Iterate over all segments and split at all intersections with other segment
-        int sc = getSegCount(), sc2 = aSegmentPath.getSegCount();
-        for (int i=0; i<sc; i++) { Segment seg1 = getSeg(i);
-            for (int j=0; j<sc2; j++) { Segment seg2 = aSegmentPath.getSeg(j);
+        for (int i = 0; i < segCount1; i++) { Segment seg1 = getSeg(i);
+            for (int j = 0; j < setCount2; j++) { Segment seg2 = aSegmentPath.getSeg(j);
 
                 // If segments intersect
                 if (seg1.intersectsSeg(seg2)) {
@@ -280,14 +287,16 @@ public class SegmentPath extends Shape {
                     double hp1 = seg1.getHitPoint(seg2);
                     if (hp1 > .001 && hp1 < .999) {
                         Segment tail = seg1.split(hp1);
-                        addSeg(tail, i+1); sc++;
+                        addSeg(tail, i + 1);
+                        segCount1++;
                     }
 
                     // Find intersection point for seg2 and split/add if inside
                     double hp2 = seg2.getHitPoint(seg1);
                     if (hp2 > .001 && hp2 < .999) {
                         Segment tail = seg2.split(hp2);
-                        aSegmentPath.addSeg(tail, j+1); sc2++;
+                        aSegmentPath.addSeg(tail, j + 1);
+                        setCount2++;
                     }
                 }
             }
@@ -387,13 +396,13 @@ public class SegmentPath extends Shape {
                 Line line = (Line) seg;
                 if (_moveX == line.x1 && _moveY == line.y1)
                     return close();
-                return lineTo(_lineX =line.x1, _lineY =line.y1, coords);
+                return lineTo(_lineX = line.x1, _lineY = line.y1, coords);
             }
 
             // Handle Seg Quad
             if (seg instanceof Quad) {
                 Quad quad = (Quad) seg;
-                return quadTo(quad.cpx, quad.cpy, _lineX =quad.x1, _lineY =quad.y1, coords);
+                return quadTo(quad.cpx, quad.cpy, _lineX = quad.x1, _lineY = quad.y1, coords);
             }
 
             // Handle Seg Cubic)

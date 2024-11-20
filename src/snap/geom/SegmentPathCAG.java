@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.geom;
+import snap.util.ListUtils;
+
 import java.util.List;
 
 /**
@@ -48,12 +50,12 @@ public class SegmentPathCAG {
             shape3.addSeg(seg);
 
             // Search SegmentPaths for next outside segment
-            Segment nextSeg = getNextSegOutside(shape1, shape2, shape3, seg);
+            Segment nextSeg = getNextSegOutside(shape1, seg, shape2, shape3);
 
             // If not found, swap order to search second SegmentPath
             if (nextSeg == null) {
                 SegmentPath swap = shape1; shape1 = shape2; shape2 = swap;
-                nextSeg = getNextSegOutside(shape1, shape2, shape3, seg);
+                nextSeg = getNextSegOutside(shape1, seg, shape2, shape3);
             }
 
             // Update seg and add to list if non-null
@@ -145,76 +147,73 @@ public class SegmentPathCAG {
             return aShape1;
 
         // Create SegmentPaths for given shapes and new shape
-        SegmentPath shape1 = new SegmentPath(aShape1);
-        SegmentPath shape2 = new SegmentPath(aShape2);
-        SegmentPath shape3 = new SegmentPath();
+        SegmentPath segPath1 = new SegmentPath(aShape1);
+        SegmentPath segPath2 = new SegmentPath(aShape2);
+        SegmentPath newPath = new SegmentPath();
 
-        // Split segments in shape1 & shape2
-        shape1.splitIntersectingSegmentsAtIntersectionPoints(shape2);
+        // Split segments in segPaths so all intersections are segment end points
+        segPath1.splitIntersectingSegmentsAtIntersectionPoints(segPath2);
 
-        // Find first segment contained by both shape1 and shape2
-        Segment seg = shape1.getFirstSegInside(shape2);
-        if (seg == null) { // Should never happen
-            System.err.println("SegmentPathCAG.intersectShapes: No points!"); return aShape1; }
+        // Find first segment contained by both segPaths
+        Segment loopSeg = segPath1.getFirstSegInside(segPath2);
+        if (loopSeg == null) { // Should never happen
+            System.err.println("SegmentPathCAG.intersectShapes: No points!");
+            return aShape1;
+        }
+
+        // Loop vars
+        SegmentPath mainPath = segPath1;
+        SegmentPath otherPath = segPath2;
+        int maxSegments = segPath1.getSegCount() + segPath2.getSegCount() + 10;
 
         // Iterate over segments to find those with endpoints in opposing shape and add to new shape
-        SegmentPath owner = shape1;
-        SegmentPath opposingShape = shape2;
-        while (seg != null) {
+        while (loopSeg != null) {
 
-            // Add segment to new list
-            shape3.addSeg(seg);
-
-            // Get segment at end point for current seg shape
-            List<Segment> segs = owner.getSegmentsThatStartOrEndAtSegmentEndPoint(seg);
-            Segment nextSeg = null;
-            for (Segment sg : segs) {
-                if (opposingShape.contains(sg.getX1(), sg.getY1()) && !shape3.hasSeg(sg)) {
-                    nextSeg = sg; break; }
+            // Add segment to new path
+            newPath.addSeg(loopSeg);
+            if (newPath.getSegCount() > maxSegments) {
+                System.err.println("SegmentPathCAG: too many segs");
+                break;
             }
 
-            // If not found, look for seg from other shape
+            // Get the next segment inside other path
+            Segment nextSeg = getNextSegInside(mainPath, loopSeg, otherPath, newPath);
+
+            // If not found, look for seg from other path (if found, swap paths)
             if (nextSeg == null) {
-                segs = opposingShape.getSegmentsThatStartOrEndAtSegmentEndPoint(seg);
-                for (Segment sg : segs) {
-                    if (owner.contains(sg.getX1(), sg.getY1()) && !shape3.hasSeg(sg)) {
-                        nextSeg = sg;
-                        owner = opposingShape; opposingShape = opposingShape==shape1? shape2 : shape1;
-                        break;
-                    }
-                }
+                nextSeg = getNextSegInside(otherPath, loopSeg, mainPath, newPath);
+                if (nextSeg != null) {
+                    SegmentPath swap = mainPath; mainPath = otherPath; otherPath = swap; }
             }
 
-            // Update seg and add to list if non-null
-            seg = nextSeg;
-
-            // Check to see if things are out of hand (should probably go)
-            if (shape3.getSegCount() > 30) {
-                seg = null; System.err.println("SegmentPathCAG: too many segs"); }
+            // Update seg
+            loopSeg = nextSeg;
         }
 
         // Return path for segments list
-        return new Path2D(shape3);
+        return new Path2D(newPath);
     }
 
     /**
-     * Returns the next segment outside of both SegmentPath.
+     * Returns the next segment outside other path (but not in new path).
      */
-    private static Segment getNextSegOutside(SegmentPath aShp1, SegmentPath aShp2, SegmentPath aShp3, Segment aSeg)
+    private static Segment getNextSegOutside(SegmentPath mainPath, Segment prevSeg, SegmentPath otherPath, SegmentPath newSegPath)
     {
-        List <Segment> segs = aShp1.getSegmentsThatStartOrEndAtSegmentEndPoint(aSeg);
-        for (Segment seg : segs) {
-            boolean outside = !aShp2.containsSegMid(seg) || aShp2.hasSeg(seg);
-            if (outside && !aShp3.hasSeg(seg))
-                return seg;
-        }
-
-        // Return not found
-        return null;
+        List<Segment> segs = mainPath.getSegmentsThatStartOrEndAtSegmentEndPoint(prevSeg);
+        return ListUtils.findMatch(segs, seg -> isSegOutsideSegmentPaths(otherPath, seg, newSegPath));
     }
 
     /**
-     * Returns the next segment outside of both SegmentPaths.
+     * Returns the next segment inside other path (but not in new path).
+     */
+    private static Segment getNextSegInside(SegmentPath mainPath, Segment prevSeg, SegmentPath otherPath, SegmentPath newSegPath)
+    {
+        List<Segment> segs = mainPath.getSegmentsThatStartOrEndAtSegmentEndPoint(prevSeg);
+        return ListUtils.findMatch(segs, seg -> otherPath.containsSegEnd(seg) && !newSegPath.hasSeg(seg));
+    }
+
+    /**
+     * Returns the next segment outside both SegmentPaths.
      */
     private static Segment getNextSegSubtract(SegmentPath aRefShp, SegmentPath aShp1, SegmentPath aShp2, SegmentPath aShp3, Segment aSeg)
     {
@@ -227,5 +226,14 @@ public class SegmentPathCAG {
 
         // Return not found
         return null;
+    }
+
+    /**
+     * Returns whether segment is outside given SegmentPaths.
+     */
+    private static boolean isSegOutsideSegmentPaths(SegmentPath segmentPath, Segment seg, SegmentPath newSegPath)
+    {
+        boolean outside = !segmentPath.containsSegMid(seg) || segmentPath.hasSeg(seg);
+        return outside && !newSegPath.hasSeg(seg);
     }
 }
