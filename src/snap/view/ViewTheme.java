@@ -234,9 +234,14 @@ public class ViewTheme {
         setViewStylePropValue(ListView.class, View.Border_Prop, getContentBorder());
 
         // TableView, TreeView
+        setViewStylePropValue(TableView.class, View.Fill_Prop, getContentColor());
         setViewStylePropValue(TableView.class, View.Border_Prop, getContentBorder());
+        setViewStylePropValue(TableCol.class, View.Fill_Prop, null);
+        setViewStylePropValue(TableCol.class, View.Border_Prop, null);
         setViewStylePropValue(TreeView.class, View.Fill_Prop, getContentColor());
         setViewStylePropValue(TreeView.class, View.Border_Prop, getContentBorder());
+        setViewStylePropValue(TreeCol.class, View.Fill_Prop, null);
+        setViewStylePropValue(TreeCol.class, View.Border_Prop, null);
 
         // MenuBar, MenuItem
         setViewStylePropValue(MenuBar.class, View.Padding_Prop, new Insets(2, 10, 2, 10));

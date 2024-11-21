@@ -17,10 +17,10 @@ public class TableCol <T> extends ListView <T> {
     protected TableView<T> _table;
 
     // The header value
-    private Label  _header = new Label();
+    private Label _header;
     
     // Whether is resizable
-    private boolean  _resizable;
+    private boolean _resizable;
 
     // Constants for properties
     public static final String HeaderText_Prop = "HeaderText";
@@ -32,8 +32,10 @@ public class TableCol <T> extends ListView <T> {
     public TableCol()
     {
         super();
-        setBorder(null);
         setOverflow(Overflow.Visible);
+
+        // Create and config header
+        _header = new Label();
         _header.setPadding(4,4,4,4);
 
         // Events
