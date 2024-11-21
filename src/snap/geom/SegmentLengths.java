@@ -75,7 +75,7 @@ class SegmentLengths {
             Quad q = (Quad) aSeg;
             return getArcLengthFunctionQuad(q.x0, q.y0, q.cpx, q.cpy, q.x1, q.y1);
         }
-        throw new RuntimeException("SegmentLength.getArcLengthFunction: Unsupported Segement Class: " + aSeg);
+        throw new RuntimeException("SegmentLength.getArcLengthFunction: Unsupported Segment Class: " + aSeg);
     }
 
     /**
@@ -102,8 +102,8 @@ class SegmentLengths {
         //   len = Integral[0,t, Sqrt[(dx/dt)^2 + (dy/dt)^2]]
         // We calculate dx/dt and dy/dt by integrating the first level of the de Castlejau algorithm
         //   d(t)/dt = 1,  d(1-t)/dy = -1
-        final double cx[] = { cpx - x0, x1 - cpx};
-        final double cy[] = { cpy - y0, y1 - cpy};
+        final double[] cx = { cpx - x0, x1 - cpx};
+        final double[] cy = { cpy - y0, y1 - cpy};
 
         // create function for 2*Sqrt[(dx/dt)^2 + (dy/dt)^2]
         final RMFunc integrand = new RMFunc() {
@@ -139,8 +139,8 @@ class SegmentLengths {
         //   len = Integral[0,t, Sqrt[(dx/dt)^2 + (dy/dt)^2]]
         // We calculate dx/dt and dy/dt by integrating the first level of the de Castlejau algorithm
         //   d(t)/dt = 1,  d(1-t)/dy = -1
-        final double cx[] = { cp0x - x0, (cp1x - cp0x)*2, x1 - cp1x };
-        final double cy[] = { cp1y - y0, (cp1y - cp0y)*2, y1 - cp1y };
+        final double[] cx = { cp0x - x0, (cp1x - cp0x)*2, x1 - cp1x };
+        final double[] cy = { cp1y - y0, (cp1y - cp0y)*2, y1 - cp1y };
 
         // create function for 3*Sqrt[(dx/dt)^2 + (dy/dt)^2]
         final RMFunc integrand = new RMFunc() {
@@ -265,10 +265,10 @@ class SegmentLengths {
         public static class Piece {
             public double start;
             public double end;
-            public double xsamples[];
-            public double ysamples[];
+            public double[] xsamples;
+            public double[] ysamples;
 
-            public Piece(double s, double e, double x[], double y[])
+            public Piece(double s, double e, double[] x, double[] y)
             {
                 start = s; end = e;
                 xsamples = x;
@@ -281,13 +281,13 @@ class SegmentLengths {
          * of sample points using Neville's Method.
          */
         public static class NevilleFunc extends RMFunc {
-            public double xsamples[];
-            public double ysamples[];
-            public double p[];
+            public double[] xsamples;
+            public double[] ysamples;
+            public double[] p;
 
             public NevilleFunc() { }
 
-            public void setSamples(double x[], double y[])
+            public void setSamples(double[] x, double[] y)
             {
                 xsamples = x;
                 ysamples = y;
@@ -361,7 +361,7 @@ class SegmentLengths {
          */
         public static double[] cheby(int n)
         {
-            double x[] = new double[n];
+            double[] x = new double[n];
             // calculate scale factor so nodes cover entire interval [0-1]
             double c = Math.cos(Math.PI / (2 * n));
             double b = (c + 1) / (2 * c);
@@ -393,13 +393,12 @@ class SegmentLengths {
          */
         public static List<Piece> nevilleFit(RMFunc func, double start, double end, List<Piece> pieceList)
         {
-            int i, j, samples = 2;
+            int i, samples = 2;
             int outsamples = 64;
             double maxerr = 0;
             double maxerrpt = -1;
-            double x[];
-            double y[];
-            double newysample = 0;
+            double[] x;
+            double[] y;
             NevilleFunc interp = new NevilleFunc();
 
             double error_limit = 0.0004;
@@ -459,11 +458,11 @@ class SegmentLengths {
             if (maxerr > error_limit) {
                 pieceList = nevilleFit(func, start, maxerrpt, pieceList);
                 return nevilleFit(func, maxerrpt, end, pieceList);
-            } else {
-                // If the fit is good, save the samples
-                pieceList.add(new Piece(start, end, x, y));
-                return pieceList;
             }
+
+            // If the fit is good, save the samples
+            pieceList.add(new Piece(start, end, x, y));
+            return pieceList;
         }
     }
 }

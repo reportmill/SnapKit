@@ -66,26 +66,17 @@ public class Line extends Segment {
     /**
      * Returns the path iterator.
      */
-    public PathIter getPathIter(Transform aTrans)
-    {
-        return new LineIter(aTrans);
-    }
+    public PathIter getPathIter(Transform aTrans)  { return new LineIter(aTrans); }
 
     /**
      * Returns whether shape contains x/y.
      */
-    public boolean contains(double aX, double aY)
-    {
-        return false;
-    }
+    public boolean contains(double aX, double aY)  { return false; }
 
     /**
      * Returns whether shape contains x/y/w/h.
      */
-    public boolean contains(Shape aShape)
-    {
-        return false;
-    }
+    public boolean contains(Shape aShape)  { return false; }
 
     /**
      * Returns whether shape with line width contains point.
@@ -98,18 +89,12 @@ public class Line extends Segment {
     /**
      * Returns the x value at given parametric location.
      */
-    public double getX(double aLoc)
-    {
-        return x0 + aLoc * (x1 - x0);
-    }
+    public double getX(double aLoc)  { return x0 + aLoc * (x1 - x0); }
 
     /**
      * Returns the y value at given parametric location.
      */
-    public double getY(double aLoc)
-    {
-        return y0 + aLoc * (y1 - y0);
-    }
+    public double getY(double aLoc)  { return y0 + aLoc * (y1 - y0); }
 
     /**
      * Splits the line at given parametric location and return the remainder.
@@ -126,12 +111,9 @@ public class Line extends Segment {
     }
 
     /**
-     * Creates and returns the reverse of this segement.
+     * Creates and returns the reverse of this segment.
      */
-    public Line createReverse()
-    {
-        return new Line(x1, y1, x0, y0);
-    }
+    public Line createReverse()  { return new Line(x1, y1, x0, y0); }
 
     /**
      * Returns the minimum distance from the given point to this line.
@@ -155,8 +137,7 @@ public class Line extends Segment {
     public boolean equals(Object anObj)
     {
         if (anObj == this) return true;
-        Line other = anObj instanceof Line ? (Line) anObj : null;
-        if (other == null) return false;
+        Line other = anObj instanceof Line ? (Line) anObj : null; if (other == null) return false;
         return equals(x0, other.x0) && equals(y0, other.y0) &&
                 equals(x1, other.x1) && equals(y1, other.y1);
     }
@@ -167,8 +148,7 @@ public class Line extends Segment {
     public boolean matches(Object anObj)
     {
         if (equals(anObj)) return true;
-        Line other = anObj instanceof Line ? (Line) anObj : null;
-        if (other == null) return false;
+        Line other = anObj instanceof Line ? (Line) anObj : null; if (other == null) return false;
         return equals(x0, other.x1) && equals(y0, other.y1) &&
                 equals(x1, other.x0) && equals(y1, other.y0);
     }
@@ -263,28 +243,19 @@ public class Line extends Segment {
      */
     private class LineIter extends PathIter {
 
-        /**
-         * Create new LineIter.
-         */
+        int index;
+
+        /** Constructor. */
         LineIter(Transform at)
         {
             super(at);
         }
 
-        int index;
+        /** Returns whether there are more segments. */
+        public boolean hasNext()  { return index < 2; }
 
-        /**
-         * Returns whether there are more segments.
-         */
-        public boolean hasNext()
-        {
-            return index < 2;
-        }
-
-        /**
-         * Returns the coordinates and type of the current path segment in the iteration.
-         */
-        public Seg getNext(double coords[])
+        /** Returns the coordinates and type of the current path segment in the iteration. */
+        public Seg getNext(double[] coords)
         {
             switch (index++) {
                 case 0: return moveTo(x0, y0, coords);

@@ -158,12 +158,9 @@ public class Cubic extends Segment {
     }
 
     /**
-     * Creates and returns the reverse of this segement.
+     * Creates and returns the reverse of this segment.
      */
-    public Cubic createReverse()
-    {
-        return new Cubic(x1, y1, cp1x, cp1y, cp0x, cp0y, x0, y0);
-    }
+    public Cubic createReverse()  { return new Cubic(x1, y1, cp1x, cp1y, cp0x, cp0y, x0, y0); }
 
     /**
      * Standard equals implementation.
@@ -222,7 +219,10 @@ public class Cubic extends Segment {
         // A = 3*a, B = 2*b, C = c
         // t = [-B+-sqrt(B^2-4*A*C)]/(2A)
         // t = (-2*b+-sqrt(4*b*b-12*a*c)]/(6*a)
-        double ax = -x0 + 3 * xc0 - 3 * xc1 + x1, bx = 3 * x0 - 6 * xc0 + 3 * xc1, cx = -3 * x0 + 3 * xc0, dx = x0;
+        double ax = -x0 + 3 * xc0 - 3 * xc1 + x1;
+        double bx = 3 * x0 - 6 * xc0 + 3 * xc1;
+        double cx = -3 * x0 + 3 * xc0;
+        double dx = x0;
         double detx = (4 * bx * bx - 12 * ax * cx);
 
         // No solutions
@@ -232,16 +232,19 @@ public class Cubic extends Segment {
         // One solution
         else if (detx == 0) {
             double tx = -2 * bx / (6 * ax);
-            if (tx > 0 && tx < 1) aRect.addX(ax * tx * tx * tx + bx * tx * tx + cx * tx + dx);
+            if (tx > 0 && tx < 1)
+                aRect.addX(ax * tx * tx * tx + bx * tx * tx + cx * tx + dx);
         }
 
         // Two solutions
         else {
             detx = Math.sqrt(detx);
             double tx = (-2 * bx + detx) / (6 * ax);
-            if (tx > 0 && tx < 1) aRect.addX(ax * tx * tx * tx + bx * tx * tx + cx * tx + dx);
+            if (tx > 0 && tx < 1)
+                aRect.addX(ax * tx * tx * tx + bx * tx * tx + cx * tx + dx);
             tx = (-2 * bx - detx) / (6 * ax);
-            if (tx > 0 && tx < 1) aRect.addX(ax * tx * tx * tx + bx * tx * tx + cx * tx + dx);
+            if (tx > 0 && tx < 1)
+                aRect.addX(ax * tx * tx * tx + bx * tx * tx + cx * tx + dx);
         }
 
         // Do the same for y
@@ -409,9 +412,12 @@ public class Cubic extends Segment {
                                 double px, double py, int level)
     {
         // If point is above, below or to right of all curve points, return 0
-        if (py >= y0 && py >= yc0 && py >= yc1 && py >= y1) return 0;
-        if (py < y0 && py < yc0 && py < yc1 && py < y1) return 0;
-        if (px >= x0 && px >= xc0 && px >= xc1 && px >= x1) return 0;
+        if (py >= y0 && py >= yc0 && py >= yc1 && py >= y1)
+            return 0;
+        if (py < y0 && py < yc0 && py < yc1 && py < y1)
+            return 0;
+        if (px >= x0 && px >= xc0 && px >= xc1 && px >= x1)
+            return 0;
 
         // If point to the left of all curve points...
         if (px < x0 && px < xc0 && px < xc1 && px < x1) {
@@ -442,7 +448,8 @@ public class Cubic extends Segment {
         // [xy]mid are NaN if any of [xy]c0m or [xy]mc1 are NaN
         // [xy]c0m or [xy]mc1 are NaN if any of [xy][c][01] are NaN
         // These values are also NaN if opposing infinities are added
-        if (Double.isNaN(xmid) || Double.isNaN(ymid)) return 0;
+        if (Double.isNaN(xmid) || Double.isNaN(ymid))
+            return 0;
 
         int c1 = crossings(x0, y0, xc0, yc0, xc0m, yc0m, xmid, ymid, px, py, level + 1);
         int c2 = crossings(xmid, ymid, xmc1, ymc1, xc1, yc1, x1, y1, px, py, level + 1);
@@ -493,22 +500,13 @@ public class Cubic extends Segment {
 
         int index;
 
-        /**
-         * Create new CubicIter.
-         */
-        CubicIter(Transform at)
-        {
-            super(at);
-        }
+        /** Constructor. */
+        CubicIter(Transform at)  { super(at); }
 
-        /**
-         * Returns whether there are more segments.
-         */
+        /** Returns whether there are more segments. */
         public boolean hasNext()  { return index < 2; }
 
-        /**
-         * Returns the coordinates and type of the current path segment in the iteration.
-         */
+        /** Returns the coordinates and type of the current path segment in the iteration. */
         public Seg getNext(double[] coords)
         {
             switch (index++) {

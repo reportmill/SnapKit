@@ -57,7 +57,7 @@ public abstract class Shape {
     }
 
     /**
-     * Returns the total length of all shape segements.
+     * Returns the total length of all shape segments.
      */
     public double getArcLength()
     {
@@ -158,7 +158,7 @@ public abstract class Shape {
         double lineY = 0;
         Line line = new Line(0,0,0,0);
         Quad quad = null;
-        Cubic cub = null;
+        Cubic cubic = null;
 
         // Iterate over shape segments, if any segment edge intersects, return false
         while (pathIter.hasNext()) {
@@ -174,17 +174,17 @@ public abstract class Shape {
                         return false;
                     break;
                 case QuadTo:
-                    if (quad==null)
+                    if (quad == null)
                         quad = new Quad(0,0,0,0,0,0);
                     quad.setPoints(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3]);
                     if (!containsSeg(quad))
                         return false;
                     break;
                 case CubicTo:
-                    if (cub==null)
-                        cub = new Cubic(0,0,0,0,0,0,0,0);
-                    cub.setPoints(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
-                    if (!containsSeg(cub))
+                    if (cubic == null)
+                        cubic = new Cubic(0,0,0,0,0,0,0,0);
+                    cubic.setPoints(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
+                    if (!containsSeg(cubic))
                         return false;
                     break;
                 case Close:
@@ -209,7 +209,8 @@ public abstract class Shape {
             return intersectsSeg((Segment)aShape);
 
         // If bounds don't intersect, just return false
-        Rect bnds0 = getBounds(), bnds1 = aShape.getBounds();
+        Rect bnds0 = getBounds();
+        Rect bnds1 = aShape.getBounds();
         if (!bnds0.intersectsRect(bnds1))
             return false;
 
@@ -226,7 +227,7 @@ public abstract class Shape {
         double lineY = 0;
         Line line = new Line(0,0,0,0);
         Quad quad = null;
-        Cubic cub = null;
+        Cubic cubic = null;
 
         // Iterate over shape segments, if any segment intersects, return true
         while (pathIter.hasNext()) {
@@ -242,17 +243,17 @@ public abstract class Shape {
                         return true;
                     break;
                 case QuadTo:
-                    if (quad==null)
+                    if (quad == null)
                         quad = new Quad(0,0,0,0,0,0);
                     quad.setPoints(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3]);
                     if (intersectsSeg(quad))
                         return true;
                     break;
                 case CubicTo:
-                    if (cub==null)
-                        cub = new Cubic(0,0,0,0,0,0,0,0);
-                    cub.setPoints(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
-                    if (intersectsSeg(cub))
+                    if (cubic == null)
+                        cubic = new Cubic(0,0,0,0,0,0,0,0);
+                    cubic.setPoints(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
+                    if (intersectsSeg(cubic))
                         return true;
                     break;
                 case Close:
@@ -313,7 +314,7 @@ public abstract class Shape {
         double lineY = 0;
         Line line = new Line(0,0,0,0);
         Quad quad = null;
-        Cubic cub = null;
+        Cubic cubic = null;
 
         // Iterate over local segments, if any segment intersects, return true
         while (pathIter.hasNext()) {
@@ -328,17 +329,17 @@ public abstract class Shape {
                         return true;
                     break;
                 case QuadTo:
-                    if (quad==null)
+                    if (quad == null)
                         quad = new Quad(0,0,0,0,0,0);
                     quad.setPoints(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3]);
                     if (aSeg.crossesSeg(quad))
                         return true;
                     break;
                 case CubicTo:
-                    if (cub==null)
-                        cub = new Cubic(0,0,0,0,0,0,0,0);
-                    cub.setPoints(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
-                    if (aSeg.crossesSeg(cub))
+                    if (cubic == null)
+                        cubic = new Cubic(0,0,0,0,0,0,0,0);
+                    cubic.setPoints(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
+                    if (aSeg.crossesSeg(cubic))
                         return true;
                     break;
                 case Close:
@@ -403,16 +404,16 @@ public abstract class Shape {
     public boolean contains(double aX, double aY, double aLineWidth)
     {
         // If linewidth is small return normal version
-        if (aLineWidth<=1)
+        if (aLineWidth <= 1)
             return contains(aX,aY);
 
         // If extended bounds don't contain point, return false
-        if (!getBounds().getInsetRect(-aLineWidth/2).contains(aX,aY))
+        if (!getBounds().getInsetRect(-aLineWidth / 2).contains(aX, aY))
             return false;
 
         // If distance less than line width or this shape contains point, return true
         double dist = getDistance(aX, aY);
-        return dist<=aLineWidth/2 || contains(aX, aY);
+        return dist <= aLineWidth / 2 || contains(aX, aY);
     }
 
     /**
@@ -421,12 +422,12 @@ public abstract class Shape {
     public boolean intersectsXY(double aX, double aY, double aLineWidth)
     {
         // If extended bounds don't contain point, return false
-        if (!getBounds().getInsetRect(-aLineWidth/2).contains(aX,aY))
+        if (!getBounds().getInsetRect(-aLineWidth / 2).contains(aX, aY))
             return false;
 
         // If distance less than line width, return true
         double dist = getDistance(aX, aY);
-        return dist <= aLineWidth/2;
+        return dist <= aLineWidth / 2;
     }
 
     /**
@@ -435,11 +436,11 @@ public abstract class Shape {
     public boolean intersectsShape(Shape aShape, double aLineWidth)
     {
         // If linewidth is small return normal version
-        if (aLineWidth<=1)
+        if (aLineWidth <= 1)
             return intersectsShape(aShape);
 
         // If bounds don't intersect, return false
-        if (!getBounds().getInsetRect(-aLineWidth/2).intersectsShape(aShape))
+        if (!getBounds().getInsetRect(-aLineWidth / 2).intersectsShape(aShape))
             return false;
 
         // We need to outset of shape or the other
@@ -498,11 +499,11 @@ public abstract class Shape {
         }
 
         // Return true if last segment was an explicit close or ended at last move to point
-        return closed || Point.equals(lineX,lineY,moveX,moveY);
+        return closed || Point.equals(lineX, lineY, moveX, moveY);
     }
 
     /**
-     * Returns whether this shape is made up of only line segements.
+     * Returns whether this shape is made up of only line segments.
      */
     public boolean isFlat()
     {
@@ -702,5 +703,5 @@ public abstract class Shape {
 
     /** Helper. */
     private static String fmt(double aVal)  { return _fmt.format(aVal); }
-    static java.text.DecimalFormat _fmt = new java.text.DecimalFormat("#");
+    static java.text.DecimalFormat _fmt = new java.text.DecimalFormat("#.#");
 }

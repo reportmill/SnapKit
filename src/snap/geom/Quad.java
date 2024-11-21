@@ -9,7 +9,7 @@ public class Quad extends Segment {
     double cpx, cpy;
 
     /**
-     * Creates a new Quad.
+     * Constructor.
      */
     public Quad(double aX0, double aY0, double aCPX, double aCPY, double aX1, double aY1)
     {
@@ -37,9 +37,9 @@ public class Quad extends Segment {
     /**
      * Returns the point coords.
      */
-    public double[] getEndCoords(double coords[])
+    public double[] getEndCoords(double[] coords)
     {
-        if (coords==null) coords = new double[4];
+        if (coords == null) coords = new double[4];
         coords[0] = cpx; coords[1] = cpy; coords[2] = x1; coords[3] = y1;
         return coords;
     }
@@ -63,10 +63,7 @@ public class Quad extends Segment {
     /**
      * Returns a path iterator.
      */
-    public PathIter getPathIter(Transform aT)
-    {
-        return new QuadIter(aT);
-    }
+    public PathIter getPathIter(Transform aT)  { return new QuadIter(aT); }
 
     /**
      * Returns the x value at given parametric location.
@@ -109,7 +106,7 @@ public class Quad extends Segment {
     }
 
     /**
-     * Creates and returns the reverse of this segement.
+     * Creates and returns the reverse of this segment.
      */
     public Quad createReverse()  { return new Quad(x1, y1, cpx, cpy, x0, y0); }
 
@@ -118,8 +115,8 @@ public class Quad extends Segment {
      */
     public boolean equals(Object anObj)
     {
-        if (anObj==this) return true;
-        Quad other = anObj instanceof Quad ? (Quad)anObj : null; if (other==null) return false;
+        if (anObj == this) return true;
+        Quad other = anObj instanceof Quad ? (Quad) anObj : null; if (other == null) return false;
         return equals(x0,other.x0) && equals(y0,other.y0) &&
             equals(cpx,other.cpx) && equals(cpy,other.cpy) &&
             equals(x1,other.x1) && equals(y1,other.y1);
@@ -131,7 +128,7 @@ public class Quad extends Segment {
     public boolean matches(Object anObj)
     {
         if (equals(anObj)) return true;
-        Quad other = anObj instanceof Quad ? (Quad)anObj : null; if (other==null) return false;
+        Quad other = anObj instanceof Quad ? (Quad) anObj : null; if (other == null) return false;
         return equals(x0,other.x1) && equals(y0,other.y1) &&
             equals(cpx,other.cpx) && equals(cpy,other.cpy) &&
             equals(x1,other.x0) && equals(y1,other.y0);
@@ -162,19 +159,19 @@ public class Quad extends Segment {
         aRect = Line.getBounds(x0, y0, x1, y1, aRect);
 
         // this curve might have extrema:
-        double ax = x0 - 2*xc0 + x1;
-        double bx = -2*x0 + 2*xc0;
+        double ax = x0 - 2 * xc0 + x1;
+        double bx = -2 * x0 + 2 * xc0;
         double cx = x0;
-        double tx = -bx/(2*ax);
-        if (tx>0 && tx<1)
-            aRect.addX(ax*tx*tx + bx*tx + cx);
+        double tx = -bx / (2 * ax);
+        if (tx > 0 && tx < 1)
+            aRect.addX(ax * tx * tx + bx * tx + cx);
 
-        double ay = y0 - 2*yc0 + y1;
-        double by = -2*y0 + 2*yc0;
+        double ay = y0 - 2 * yc0 + y1;
+        double by = -2 * y0 + 2 * yc0;
         double cy = y0;
-        double ty = -by/(2*ay);
-        if (ty>0 && ty<1)
-            aRect.addY(ay*ty*ty + by*ty + cy);
+        double ty = -by / (2 * ay);
+        if (ty > 0 && ty < 1)
+            aRect.addY(ay * ty * ty + by * ty + cy);
 
         return aRect;
     }
@@ -189,21 +186,21 @@ public class Quad extends Segment {
 
         // For quadratic, slope at point t is just linear interpolation of slopes at the endpoints.
         // Find solution to LERP(slope0,slope1,t) == 0
-        double d = x0 - 2*x1 + x2;
-        double t = d==0 ? 0 : (x0 - x1) / d;
+        double d = x0 - 2 * x1 + x2;
+        double t = d == 0 ? 0 : (x0 - x1) / d;
 
         // If there's a valid solution, get actual x point at t and add it to the rect
-        if (t>0 && t<1) {
-            double turningpoint = x0*(1-t)*(1-t) + 2*x1*(1-t)*t + x2*t*t;
+        if (t > 0 && t < 1) {
+            double turningpoint = x0 * (1 - t) * (1 - t) + 2 * x1 * (1 - t) * t + x2 * t * t;
             p1x = Math.min(p1x, turningpoint);
             p2x = Math.max(p2x, turningpoint);
         }
 
         // Do the same for y
-        d = y0 - 2*y1 + y2;
-        t = d==0 ? 0 : (y0 - y1)/d;
-        if (t>0 && t<1) {
-            double turningpoint = y0*(1-t)*(1-t) + 2*y1*(1-t)*t + y2*t*t;
+        d = y0 - 2 * y1 + y2;
+        t = d == 0 ? 0 : (y0 - y1) / d;
+        if (t > 0 && t < 1) {
+            double turningpoint = y0 * (1 - t) * (1 - t) + 2 * y1 * (1 - t) * t + y2 * t * t;
             p1y = Math.min(p1y, turningpoint);
             p2y = Math.max(p2y, turningpoint);
         }
@@ -213,7 +210,7 @@ public class Quad extends Segment {
         p1y = Math.min(p1y, y2); p2y = Math.max(p2y, y2);
 
         // Set rect
-        if (aRect==null)
+        if (aRect == null)
             aRect = new Rect();
         aRect.setRect(p1x, p1y, p2x - p1x, p2y - p1y);
         return aRect;
@@ -249,12 +246,15 @@ public class Quad extends Segment {
     public static int crossings(double x0, double y0, double xc, double yc, double x1, double y1, double px, double py,
         int level)
     {
-        if (py<y0 && py<yc && py<y1) return 0;
-        if (py>=y0 && py>=yc && py>=y1) return 0;
+        if (py < y0 && py < yc && py < y1)
+            return 0;
+        if (py >= y0 && py >= yc && py >= y1)
+            return 0;
 
         // Note y0 could equal y1...
-        if (px>=x0 && px>=xc && px>=x1) return 0;
-        if (px<x0 && px<xc && px<x1) {
+        if (px >= x0 && px >= xc && px >= x1)
+            return 0;
+        if (px < x0 && px < xc && px < x1) {
             if (py >= y0) {
                 if (py < y1) return 1; }
             else { // py < y0
@@ -313,14 +313,14 @@ public class Quad extends Segment {
      */
     private class QuadIter extends PathIter {
 
-        /** Create new QuadIter. */
+        /** Constructor. */
         QuadIter(Transform at) { super(at); } int index;
 
         /** Returns whether there are more segments. */
-        public boolean hasNext() { return index<2; }
+        public boolean hasNext() { return index < 2; }
 
         /** Returns the coordinates and type of the current path segment in the iteration. */
-        public Seg getNext(double coords[])
+        public Seg getNext(double[] coords)
         {
             switch (index++) {
                 case 0: return moveTo(x0, y0, coords);

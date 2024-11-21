@@ -42,9 +42,9 @@ public abstract class Segment extends Shape {
     /**
      * Returns the point coords.
      */
-    public double[] getEndCoords(double coords[])
+    public double[] getEndCoords(double[] coords)
     {
-        if (coords==null) coords = new double[2];
+        if (coords == null) coords = new double[2];
         coords[0] = x1; coords[1] = y1;
         return coords;
     }
@@ -64,7 +64,7 @@ public abstract class Segment extends Shape {
      */
     public double getArcLength()
     {
-        if (_len>=0) return _len;
+        if (_len >= 0) return _len;
         return _len = getArcLengthImpl();
     }
 
@@ -74,17 +74,17 @@ public abstract class Segment extends Shape {
     protected abstract double getArcLengthImpl();
 
     /**
-     * Splits the segement at given parametric location and return the remainder.
+     * Splits the segment at given parametric location and return the remainder.
      */
     public abstract Segment split(double aLoc);
 
     /**
-     * Creates and returns the reverse of this segement.
+     * Creates and returns the reverse of this segment.
      */
     public abstract Segment createReverse();
 
     /**
-     * Returns whether segement is equal to another, regardless of direction.
+     * Returns whether segment is equal to another, regardless of direction.
      */
     public abstract boolean matches(Object anObj);
 
@@ -98,7 +98,7 @@ public abstract class Segment extends Shape {
      */
     public boolean intersectsSeg(Segment aSeg)
     {
-        return getHit(aSeg)!=null;
+        return getHit(aSeg) != null;
     }
 
     /**
@@ -106,7 +106,7 @@ public abstract class Segment extends Shape {
      */
     public boolean crossesSeg(Segment aSeg)
     {
-        return getHit(aSeg)!=null;
+        return getHit(aSeg) != null;
     }
 
     /**
@@ -114,7 +114,7 @@ public abstract class Segment extends Shape {
      */
     public SegHit getHit(Segment aSeg)
     {
-        throw new RuntimeException("Segement.getHit: Unsupported class " + getClass());
+        throw new RuntimeException("Segment.getHit: Unsupported class " + getClass());
     }
 
     /**
@@ -123,7 +123,7 @@ public abstract class Segment extends Shape {
     public double getHitPoint(Segment aSeg)
     {
         SegHit hit = getHit(aSeg);
-        return hit!=null ? hit.h0 : -1;
+        return hit != null ? hit.h0 : -1;
     }
 
     /**
@@ -132,23 +132,23 @@ public abstract class Segment extends Shape {
      */
     public double getPointAndAngle(double t, Point aPoint)
     {
-        Point cpts[] = getPoints();
+        Point[] cpts = getPoints();
         Size tangent = new Size();
 
-        evaluateBezierAndTangent(cpts.length-1, t, cpts, aPoint, tangent);
-        return Math.atan2(tangent.height, tangent.width)*180/Math.PI;
+        evaluateBezierAndTangent(cpts.length - 1, t, cpts, aPoint, tangent);
+        return Math.atan2(tangent.height, tangent.width) * 180 / Math.PI;
     }
 
     /**
      * Simultaneously find point on curve, as well as the tangent at that point.
      */
-    private static void evaluateBezierAndTangent(int degree, double t, Point cpts[], Point tpoint, Size tan)
+    private static void evaluateBezierAndTangent(int degree, double t, Point[] cpts, Point tpoint, Size tan)
     {
         // Special case for endpoints.  If one (or more) of the control points is the same as an endpoint, the tangent calculation
         // in the de Casteljau algorithm will return a point instead of the real tangent.
-        if (t==0) {
+        if (t == 0) {
             tpoint.setPoint(cpts[0]);
-            for (int i=1; i<=degree; ++i)
+            for (int i = 1; i <= degree; ++i)
                 if (!cpts[i].equals(cpts[0])) {
                     tan.width = cpts[i].x - cpts[0].x;
                     tan.height = cpts[i].y - cpts[0].y;
@@ -156,9 +156,9 @@ public abstract class Segment extends Shape {
                 }
         }
 
-        else if (t==1) {
+        else if (t == 1) {
             tpoint.setPoint(cpts[degree]);
-            for (int i=degree-1; i>=0; --i)
+            for (int i = degree-1; i >= 0; --i)
                 if (!cpts[i].equals(cpts[degree])) {
                     tan.width = cpts[degree].x - cpts[i].x;
                     tan.height = cpts[degree].y - cpts[i].y;
@@ -167,23 +167,23 @@ public abstract class Segment extends Shape {
         }
 
         else {
-            int nfloats = 2*(degree+1);
-            double points[] = new double[nfloats];
+            int nfloats = 2 * (degree + 1);
+            double[] points = new double[nfloats];
 
             int i = 0, j = 0;
-            while (i<nfloats) {
+            while (i < nfloats) {
                 points[i++] = cpts[j].x;
                 points[i++] = cpts[j++].y;
             }
 
             // Triangle computation
-            for (i=1; i<= degree; i++) {
-                if (i==degree) {
+            for (i = 1; i <= degree; i++) {
+                if (i == degree) {
                     tan.width = points[2] - points[0];
                     tan.height = points[3] - points[1];
                 }
-                for (j=0; j <= 2*(degree-i)+1; j++) {
-                    points[j] = (1.0 - t) * points[j] + t * points[j+2];
+                for (j = 0; j <= 2 * (degree - i) + 1; j++) {
+                    points[j] = (1 - t) * points[j] + t * points[j+2];
                 }
             }
             tpoint.x = points[0];
@@ -196,22 +196,18 @@ public abstract class Segment extends Shape {
     /**
      * Returns whether double values are equal to nearest tenth of pixel.
      */
-    public static final boolean equals(double v1, double v2)
-    {
-        return Math.abs(v1 - v2) < 0.1;
-    }
+    public static boolean equals(double v1, double v2)  { return Math.abs(v1 - v2) < 0.1; }
 
     /**
      * Creates a Segment for given Seg and points.
      */
-    public static Segment newSegmentForSegAndPoints(Seg aSeg, double coords[])
+    public static Segment newSegmentForSegAndPoints(Seg aSeg, double[] coords)
     {
-        if (aSeg==Seg.LineTo)
-            return new Line(coords[0], coords[1], coords[2], coords[3]);
-        if (aSeg==Seg.QuadTo)
-            return new Quad(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
-        if (aSeg==Seg.CubicTo)
-            return new Cubic(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], coords[6], coords[7]);
-        return null;
+        switch (aSeg) {
+            case LineTo: return new Line(coords[0], coords[1], coords[2], coords[3]);
+            case QuadTo: return new Quad(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
+            case CubicTo: return new Cubic(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], coords[6], coords[7]);
+            default: return null;
+        }
     }
 }

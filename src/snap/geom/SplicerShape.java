@@ -122,7 +122,7 @@ public class SplicerShape extends Shape {
             double lenRem = _lenMax - _lenRun;
             double segRatio = lenRem / len;
 
-            // Get partial segement for ratio of final seg
+            // Get partial segment for ratio of final seg
             Segment segment = _path.getSegment(_segIndex, _trans);
             segment.split(segRatio);
             segment.getEndCoords(coords);
