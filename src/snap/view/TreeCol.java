@@ -32,6 +32,7 @@ public class TreeCol <T> extends ListView <T> {
     public TreeCol()
     {
         super();
+        setFill(null);
         setBorder(null);
         setGrowWidth(true);
         setOverflow(Overflow.Visible);

@@ -235,6 +235,7 @@ public class ViewTheme {
 
         // TableView, TreeView
         setViewStylePropValue(TableView.class, View.Border_Prop, getContentBorder());
+        setViewStylePropValue(TreeView.class, View.Fill_Prop, getContentColor());
         setViewStylePropValue(TreeView.class, View.Border_Prop, getContentBorder());
 
         // MenuBar, MenuItem
