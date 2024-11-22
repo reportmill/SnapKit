@@ -3,56 +3,51 @@
  */
 package snap.text;
 import java.util.Arrays;
-
 import snap.geom.HPos;
+import snap.props.PropObject;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
  * A class to represent a line of text (for each newline) in RichText.
  */
-public class TextLineStyle implements Cloneable, XMLArchiver.Archivable {
+public class TextLineStyle extends PropObject implements Cloneable, XMLArchiver.Archivable {
 
     // Horizontal text alignment
-    private HPos  _align = HPos.LEFT;
+    private HPos _align;
 
     // Whether text in line should be justified
-    private boolean  _justify;
+    private boolean _justify;
 
     // Indentation for first line of paragraph
-    private double  _firstIndent = 0;
+    private double _firstIndent;
 
     // Indention for whole paragraph
-    private double  _leftIndent = 0;
+    private double _leftIndent;
 
     // Indentation for right margin
-    private double  _rightIndent = 0;
+    private double _rightIndent;
 
     // Space between lines expressed as a constant in points
-    private double  _spacing = 0;
+    private double _spacing;
 
     // Space between lines expressed as a factor of the current line height
-    private double  _spacingFactor = 1;
+    private double _spacingFactor;
 
     // Spacing after a newline character
-    private double  _newlineSpacing = 0;
+    private double _newlineSpacing;
 
     // Min line height
-    private double  _minHeight = 0;
+    private double _minHeight;
 
     // Max line height
-    private double  _maxHeight = Float.MAX_VALUE;
+    private double _maxHeight;
 
     // Tab stops
-    private double[]  _tabs = _defaultTabs;
+    private double[] _tabs;
 
     // Tab stop types
-    private char[]  _tabTypes = _defaultTypes;
-
-    // Default tab positions
-    private static double[]  _defaultTabs = { 36f, 72f, 108f, 144f, 180f, 216f, 252f, 288f, 324f, 360f, 396f, 432f };
-
-    // Default tab types
-    private static char[]  _defaultTypes = { 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L' };
+    private char[] _tabTypes;
 
     // Constants for tab types
     public static final char TAB_LEFT = 'L';
@@ -61,20 +56,27 @@ public class TextLineStyle implements Cloneable, XMLArchiver.Archivable {
     public static final char TAB_DECIMAL = 'D';
 
     // Constants for LineStyle keys
-    public static final String ALIGN_KEY = "Align";
-    public static final String JUSTIFY_KEY = "Justify";
-    public static final String FIRST_INDENT_KEY = "FirstIndent";
-    public static final String LEFT_INDENT_KEY = "LeftIndent";
-    public static final String RIGHT_INDENT_KEY = "RightIndent";
-    public static final String SPACING_KEY = "Spacing";
-    public static final String SPACING_FACTOR_KEY = "SpacingFactor";
-    public static final String NEWLINE_SPACING_KEY = "NewlineSpacing";
-    public static final String MIN_HEIGHT_KEY = "MinHeight";
-    public static final String MAX_HEIGHT_KEY = "MaxHeight";
+    public static final String Align_Prop = "Align";
+    public static final String Justify_Prop = "Justify";
+    public static final String FirstIndent_Prop = "FirstIndent";
+    public static final String LeftIndent_Prop = "LeftIndent";
+    public static final String RightIndent_Prop = "RightIndent";
+    public static final String Spacing_Prop = "Spacing";
+    public static final String SpacingFactor_Prop = "SpacingFactor";
+    public static final String NewlineSpacing_Prop = "NewlineSpacing";
+    public static final String MinHeight_Prop = "MinHeight";
+    public static final String MaxHeight_Prop = "MaxHeight";
 
     // The System default line style
     public static final TextLineStyle DEFAULT = new TextLineStyle();
-    public static final TextLineStyle DEFAULT_CENTERED = DEFAULT.copyFor(HPos.CENTER);
+    public static final TextLineStyle DEFAULT_CENTERED = DEFAULT.copyForAlign(HPos.CENTER);
+
+    // Constants for defaults
+    private static final HPos DEFAULT_ALIGN = HPos.LEFT;
+    private static final double DEFAULT_SPACING_FACTOR = 1;
+    private static final double DEFAULT_MAX_HEIGHT = Float.MAX_VALUE;
+    private static double[] DEFAULT_TABS = { 36f, 72f, 108f, 144f, 180f, 216f, 252f, 288f, 324f, 360f, 396f, 432f };
+    private static char[] DEFAULT_TAB_TYPES = { 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L' };
 
     /**
      * Constructor.
@@ -82,6 +84,11 @@ public class TextLineStyle implements Cloneable, XMLArchiver.Archivable {
     public TextLineStyle()
     {
         super();
+        _align = DEFAULT_ALIGN;
+        _spacingFactor = DEFAULT_SPACING_FACTOR;
+        _maxHeight = DEFAULT_MAX_HEIGHT;
+        _tabs = DEFAULT_TABS;
+        _tabTypes = DEFAULT_TAB_TYPES;
     }
 
     /**
@@ -188,7 +195,7 @@ public class TextLineStyle implements Cloneable, XMLArchiver.Archivable {
     public String getTabsString()
     {
         // Iterate over tabs and add string rep to StringBuffer
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0, iMax = _tabs.length; i < iMax; i++) {
             if (_tabs[i] == (int) _tabs[i]) // If tab is really int, append value as int
                 sb.append((int) _tabs[i]);  // Otherwise append value as double
@@ -210,7 +217,7 @@ public class TextLineStyle implements Cloneable, XMLArchiver.Archivable {
     {
         // Get individual tab strings
         String[] tabs = aString.split("\\s*\\,\\s*");
-        if (tabs.length == 1 && tabs[0].length() == 0)
+        if (tabs.length == 1 && tabs[0].isEmpty())
             tabs = new String[0];
 
         // Create tabs and types arrays
@@ -226,22 +233,17 @@ public class TextLineStyle implements Cloneable, XMLArchiver.Archivable {
     }
 
     /**
-     * Returns a clone with the new given value.
+     * Returns a copy with given align value.
      */
-    public TextLineStyle copyFor(Object anObj)
-    {
-        if (anObj instanceof HPos)
-            return copyFor(ALIGN_KEY, anObj);
-        return this;
-    }
+    public TextLineStyle copyForAlign(HPos anObj)  { return copyForPropKeyValue(Align_Prop, anObj); }
 
     /**
-     * Returns a clone with the new given value.
+     * Returns a copy with given value for given property name.
      */
-    public TextLineStyle copyFor(String aKey, Object aValue)
+    public TextLineStyle copyForPropKeyValue(String aKey, Object aValue)
     {
         TextLineStyle clone = clone();
-        clone.setValue(aKey, aValue);
+        clone.setPropValue(aKey, aValue);
         return clone;
     }
 
@@ -250,31 +252,10 @@ public class TextLineStyle implements Cloneable, XMLArchiver.Archivable {
      */
     public TextLineStyle copyForIndents(double firstIndent, double leftIndent, double rightIndent)
     {
-        TextLineStyle ls = copyFor(TextLineStyle.FIRST_INDENT_KEY, firstIndent);
-        ls = ls.copyFor(TextLineStyle.LEFT_INDENT_KEY, leftIndent);
-        ls = ls.copyFor(TextLineStyle.RIGHT_INDENT_KEY, rightIndent);
+        TextLineStyle ls = copyForPropKeyValue(TextLineStyle.FirstIndent_Prop, firstIndent);
+        ls = ls.copyForPropKeyValue(TextLineStyle.LeftIndent_Prop, leftIndent);
+        ls = ls.copyForPropKeyValue(TextLineStyle.RightIndent_Prop, rightIndent);
         return ls;
-    }
-
-    /**
-     * Sets a value for given key.
-     */
-    protected void setValue(String aKey, Object aValue)
-    {
-        if (aKey.equals(ALIGN_KEY)) {
-            _align = (HPos) aValue;
-            _justify = false;
-        }
-        else if (aKey.equals(JUSTIFY_KEY)) _justify = Convert.boolValue(aValue);
-        else if (aKey.equals(SPACING_KEY)) _spacing = Convert.doubleValue(aValue);
-        else if (aKey.equals(SPACING_FACTOR_KEY)) _spacingFactor = Convert.doubleValue(aValue);
-        else if (aKey.equals(NEWLINE_SPACING_KEY)) _newlineSpacing = Convert.doubleValue(aValue);
-        else if (aKey.equals(MIN_HEIGHT_KEY)) _minHeight = Convert.doubleValue(aValue);
-        else if (aKey.equals(MAX_HEIGHT_KEY)) _maxHeight = Convert.doubleValue(aValue);
-        else if (aKey.equals(FIRST_INDENT_KEY)) _firstIndent = Convert.doubleValue(aValue);
-        else if (aKey.equals(LEFT_INDENT_KEY)) _leftIndent = Convert.doubleValue(aValue);
-        else if (aKey.equals(RIGHT_INDENT_KEY)) _rightIndent = Convert.doubleValue(aValue);
-        else System.err.println("TextLineStyle.setValue: Unsupported key: " + aKey);
     }
 
     /**
@@ -309,6 +290,80 @@ public class TextLineStyle implements Cloneable, XMLArchiver.Archivable {
         if (!Arrays.equals(other._tabs, _tabs)) return false;
         if (!Arrays.equals(other._tabTypes, _tabTypes)) return false;
         return true;
+    }
+
+    /**
+     * Initialize Props. Override to provide custom defaults.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Align, Justify, FirstIndent, RightIndent, Spacing, SpacingFactor, NewlineSpacing, MinHeight, MaxHeight
+        aPropSet.addPropNamed(Align_Prop, HPos.class, DEFAULT_ALIGN);
+        aPropSet.addPropNamed(Justify_Prop, boolean.class, false);
+        aPropSet.addPropNamed(FirstIndent_Prop, double.class, 0d);
+        aPropSet.addPropNamed(LeftIndent_Prop, double.class, 0d);
+        aPropSet.addPropNamed(RightIndent_Prop, double.class, 0d);
+        aPropSet.addPropNamed(Spacing_Prop, double.class, 0d);
+        aPropSet.addPropNamed(SpacingFactor_Prop, double.class, DEFAULT_SPACING_FACTOR);
+        aPropSet.addPropNamed(NewlineSpacing_Prop, double.class, 0d);
+        aPropSet.addPropNamed(MinHeight_Prop, double.class, 0d);
+        aPropSet.addPropNamed(MaxHeight_Prop, double.class, DEFAULT_MAX_HEIGHT);
+    }
+
+    /**
+     * Returns the value for given prop name.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        // Handle properties
+        switch (aPropName) {
+
+            // Align, Justify, FirstIndent, LeftIndent, RightIndent, Spacing, SpacingFactor, NewlineSpacing, MinHeight, MaxHeight
+            case Align_Prop: return getAlign();
+            case Justify_Prop: return isJustify();
+            case FirstIndent_Prop: return getFirstIndent();
+            case LeftIndent_Prop: return getLeftIndent();
+            case RightIndent_Prop: return getRightIndent();
+            case Spacing_Prop: return getSpacing();
+            case SpacingFactor_Prop: return getSpacingFactor();
+            case NewlineSpacing_Prop: return getNewlineSpacing();
+            case MinHeight_Prop: return getMinHeight();
+            case MaxHeight_Prop: return getMaxHeight();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Sets the value for given prop name.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        // Handle properties
+        switch (aPropName) {
+
+            // Align, Justify, FirstIndent, LeftIndent, RightIndent, Spacing, SpacingFactor, NewlineSpacing, MinHeight, MaxHeight
+            case Align_Prop: _align = HPos.of(aValue); _justify = false; break;
+            case Justify_Prop: _justify = Convert.boolValue(aValue); break;
+            case FirstIndent_Prop: _firstIndent = Convert.doubleValue(aValue); break;
+            case LeftIndent_Prop: _leftIndent = Convert.doubleValue(aValue); break;
+            case RightIndent_Prop: _rightIndent = Convert.doubleValue(aValue); break;
+            case Spacing_Prop: _spacing = Convert.doubleValue(aValue); break;
+            case SpacingFactor_Prop: _spacingFactor = Convert.doubleValue(aValue); break;
+            case NewlineSpacing_Prop: _newlineSpacing = Convert.doubleValue(aValue); break;
+            case MinHeight_Prop: _minHeight = Convert.doubleValue(aValue); break;
+            case MaxHeight_Prop: _maxHeight = Convert.doubleValue(aValue); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**
@@ -351,7 +406,7 @@ public class TextLineStyle implements Cloneable, XMLArchiver.Archivable {
         if (_newlineSpacing != 0) e.add("pgraph-space", _newlineSpacing);
 
         // Archive Tabs
-        if (!Arrays.equals(_tabs, _defaultTabs) || !Arrays.equals(_tabTypes, _defaultTypes))
+        if (!Arrays.equals(_tabs, DEFAULT_TABS) || !Arrays.equals(_tabTypes, DEFAULT_TAB_TYPES))
             e.add("tabs", getTabsString());
 
         // Return element

@@ -612,7 +612,7 @@ public class TextAdapter extends PropObject {
      */
     public void setLineAlign(HPos anAlign)
     {
-        setSelLineStyleValue(TextLineStyle.ALIGN_KEY, anAlign);
+        setSelLineStyleValue(TextLineStyle.Align_Prop, anAlign);
     }
 
     /**
@@ -629,7 +629,7 @@ public class TextAdapter extends PropObject {
      */
     public void setLineJustify(boolean aValue)
     {
-        setSelLineStyleValue(TextLineStyle.JUSTIFY_KEY, aValue);
+        setSelLineStyleValue(TextLineStyle.Justify_Prop, aValue);
     }
 
     /**
@@ -1628,7 +1628,7 @@ public class TextAdapter extends PropObject {
         Pos viewAlign = _view.getAlign();
 
         // Push align to TextBlock via DefaultLineStyle.Align (X) and TextBlock align Y
-        TextLineStyle lineStyle = getDefaultLineStyle().copyFor(TextLineStyle.ALIGN_KEY, viewAlign.getHPos());
+        TextLineStyle lineStyle = getDefaultLineStyle().copyForPropKeyValue(TextLineStyle.Align_Prop, viewAlign.getHPos());
         setDefaultLineStyle(lineStyle);
 
         // Forward to text block

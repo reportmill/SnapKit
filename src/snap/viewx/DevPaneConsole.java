@@ -93,7 +93,7 @@ public class DevPaneConsole extends ViewOwner {
 
             // Change line spacing
             TextLineStyle lineStyle = textBlock.getDefaultLineStyle();
-            TextLineStyle lineStyle2 = lineStyle.copyFor(TextLineStyle.SPACING_KEY, 5);
+            TextLineStyle lineStyle2 = lineStyle.copyForPropKeyValue(TextLineStyle.Spacing_Prop, 5);
             textBlock.setDefaultLineStyle(lineStyle2);
 
             // Set Prompt

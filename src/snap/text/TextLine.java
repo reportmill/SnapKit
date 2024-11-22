@@ -728,7 +728,7 @@ public class TextLine implements CharSequenceX, Cloneable {
      */
     public void setAlignX(HPos anAlign)
     {
-        TextLineStyle lineStyle = getLineStyle().copyFor(anAlign);
+        TextLineStyle lineStyle = getLineStyle().copyForAlign(anAlign);
         setLineStyle(lineStyle);
     }
 

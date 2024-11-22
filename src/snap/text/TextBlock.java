@@ -673,7 +673,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         // Handle plain
         else {
             TextLineStyle oldStyle = getLine(0).getLineStyle();
-            TextLineStyle newStyle = oldStyle.copyFor(aKey, aValue);
+            TextLineStyle newStyle = oldStyle.copyForPropKeyValue(aKey, aValue);
             setLineStyle(newStyle, 0, length());
         }
 
@@ -714,7 +714,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         for (int i = startLineIndex; i <= endLineIndex; i++) {
             TextLine line = getLine(i);
             TextLineStyle oldStyle = line.getLineStyle();
-            TextLineStyle newStyle = oldStyle.copyFor(aKey, aValue);
+            TextLineStyle newStyle = oldStyle.copyForPropKeyValue(aKey, aValue);
             if (!newStyle.equals(oldStyle)) {
                 line.setLineStyle(newStyle);
                 if (isPropChangeEnabled())
@@ -997,7 +997,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void setAlignX(HPos anAlignX)
     {
-        setLineStyleValue(TextLineStyle.ALIGN_KEY, anAlignX, 0, length());
+        setLineStyleValue(TextLineStyle.Align_Prop, anAlignX, 0, length());
     }
 
     /**
