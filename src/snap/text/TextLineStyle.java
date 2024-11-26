@@ -67,16 +67,16 @@ public class TextLineStyle extends PropObject implements Cloneable, XMLArchiver.
     public static final String MinHeight_Prop = "MinHeight";
     public static final String MaxHeight_Prop = "MaxHeight";
 
-    // The System default line style
-    public static final TextLineStyle DEFAULT = new TextLineStyle();
-    public static final TextLineStyle DEFAULT_CENTERED = DEFAULT.copyForAlign(HPos.CENTER);
-
     // Constants for defaults
     private static final HPos DEFAULT_ALIGN = HPos.LEFT;
     private static final double DEFAULT_SPACING_FACTOR = 1;
     private static final double DEFAULT_MAX_HEIGHT = Float.MAX_VALUE;
     private static double[] DEFAULT_TABS = { 36f, 72f, 108f, 144f, 180f, 216f, 252f, 288f, 324f, 360f, 396f, 432f };
     private static char[] DEFAULT_TAB_TYPES = { 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L' };
+
+    // The System default line style
+    public static final TextLineStyle DEFAULT = new TextLineStyle();
+    public static final TextLineStyle DEFAULT_CENTERED = DEFAULT.copyForAlign(HPos.CENTER);
 
     /**
      * Constructor.
