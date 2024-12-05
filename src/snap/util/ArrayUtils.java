@@ -482,6 +482,19 @@ public class ArrayUtils {
     }
 
     /**
+     * Returns first non-null value for given array and Function.
+     */
+    public static <T,R> R findNonNull(T[] anArray, Function<? super T, ? extends R> aFunction)
+    {
+        for (T item : anArray) {
+            R value = aFunction.apply(item);
+            if (value != null)
+                return value;
+        }
+        return null;
+    }
+
+    /**
      * Maps an array of items to strings using given function, then joins them by given delimiter.
      */
     public static <T> String mapToStringsAndJoin(T[] anArray, Function<T,String> aFunc, String aDelim)
