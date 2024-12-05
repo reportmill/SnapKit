@@ -142,6 +142,9 @@ public class ScaleBoxProxy extends BoxViewProxy<View> {
             return;
         }
 
+        // Make sure scale is reset
+        child.getView().setScale(1);
+
         // Handle normal layout
         double childX = Math.round(areaX + (areaW - childW) * alignX);
         double childY = Math.round(areaY + (areaH - childH) * alignY);
