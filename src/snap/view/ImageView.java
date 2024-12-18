@@ -79,7 +79,7 @@ public class ImageView extends View {
     public ImageView(Object aSource)
     {
         this();
-        _image = Image.getImageForSource(aSource);
+        setImage(Image.getImageForSource(aSource));
     }
 
     /**
@@ -99,7 +99,7 @@ public class ImageView extends View {
 
         // If image not done loading - listen for load
         if (_image != null && !_image.isLoaded())
-            _image.addLoadListener(() -> imageFinishedLoading());
+            _image.addLoadListener(this::imageFinishedLoading);
     }
 
     /** Called when image finishes loading. */
