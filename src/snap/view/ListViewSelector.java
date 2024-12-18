@@ -10,16 +10,16 @@ class ListViewSelector {
     private final ListView<?> _listView;
 
     // Whether selection allowed on MouseDrag
-    protected boolean  _dragSelect;
+    protected boolean _dragSelect;
 
     // The Selection on MousePress
-    private ListSel  _mouseDownSel;
+    private ListSel _mouseDownSel;
 
     // The new SelAnchor (index of MousePress)
-    protected int  _newAnchor;
+    protected int _newAnchor;
 
     // Whether list previously wanted drag
-    private boolean  _dragGestureEnabled;
+    private boolean _dragGestureEnabled;
 
     /**
      * Constructor.
@@ -73,7 +73,8 @@ class ListViewSelector {
         // Handle MouseMove
         else if (anEvent.isMouseMove() && _listView.isTargeting()) {
             int index = _listView.getRowIndexForY(anEvent.getY());
-            if (index>= _listView.getItemCount()) index = -1;
+            if (index >= _listView.getItemCount())
+                index = -1;
             _listView.setTargetedIndex(index);
         }
 
@@ -93,7 +94,7 @@ class ListViewSelector {
         _newAnchor = _listView.getRowIndexForY(anEvent.getY());
 
         // Set DragSelect
-        _dragSelect = !_listView.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture) || anEvent.getClickCount()>1;
+        _dragSelect = !_listView.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture) || anEvent.getClickCount() > 1;
 
         // Do basic Press or Drag selection
         mousePressOrDrag(anEvent);
@@ -120,12 +121,12 @@ class ListViewSelector {
     {
         // Get row-index/cell at mouse point (if no cell, just return)
         int newLead = _listView.getRowIndexForY(anEvent.getY());
-        ListCell cell = _listView.getCellForRow(newLead);
-        if (cell==null || !cell.isEnabled())
+        ListCell<?> cell = _listView.getCellForRow(newLead);
+        if (cell == null || !cell.isEnabled())
             return;
 
         // Handle ShortCut down: If AnchorCellSelected then add, otherwise remove
-        if (anEvent.isShortcutDown()) {
+        if (anEvent.isShortcutDown() && !anEvent.isPopupTrigger()) {
             ListSel sel = _mouseDownSel.copyForMetaAdd(_newAnchor, newLead);
             _listView.setSel(sel);
         }
@@ -157,8 +158,9 @@ class ListViewSelector {
 
         // Start editing if needed
         if (anEvent.isMouseClick() && anEvent.getClickCount()>1 && _listView.isEditable()) {
-            ListCell cell = _listView.getCellForY(anEvent.getY()); if (cell==null) return;
-            _listView.editCell(cell);
+            ListCell cell = _listView.getCellForY(anEvent.getY());
+            if (cell != null)
+                _listView.editCell(cell);
         }
     }
 }
