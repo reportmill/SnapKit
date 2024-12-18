@@ -320,17 +320,17 @@ public class J2DImage extends Image {
     public BufferedImage getNative()
     {
         // If already set, just return
-        if (_native!=null) return _native;
+        if (_native != null) return _native;
 
         // Get image for source (complain if not found and use error image)
-        BufferedImage img = getNativeImpl();
-        if (img == null) {
+        BufferedImage buffImage = getNativeImpl();
+        if (buffImage == null) {
             System.err.println("J2DImage.getNativeImpl: Image not found for source: " + getSource());
-            img = (BufferedImage) DialogBox.errorImage.getNative();
+            buffImage = (BufferedImage) DialogBox.errorImage.getNative();
         }
 
         // Set/return image
-        return _native = img;
+        return _native = buffImage;
     }
 
     /**
@@ -338,12 +338,11 @@ public class J2DImage extends Image {
      */
     private BufferedImage getNativeImpl()
     {
-        // If already set, just return
-        if (_native != null) return _native;
-
+        // Not sure this is used - should replace with static createForNative()?
         if (getSource() instanceof java.awt.Image)
-            return _native = AWTImageUtils.getBufferedImage((java.awt.Image)getSource());
+            return _native = AWTImageUtils.getBufferedImage((java.awt.Image) getSource());
 
+        // Special gif support for anim
         if (getType() == "gif")
             return getGif();
 

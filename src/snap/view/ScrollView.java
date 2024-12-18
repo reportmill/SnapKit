@@ -500,7 +500,9 @@ public class ScrollView extends ParentView implements ViewHost {
         // Do normal version
         super.initProps(aPropSet);
 
-        // ShowHBar, ShowVBar, BarSize
+        // FillWidth, FillHeight, ShowHBar, ShowVBar, BarSize
+        aPropSet.addPropNamed(FillWidth_Prop, boolean.class, false);
+        aPropSet.addPropNamed(FillHeight_Prop, boolean.class, false);
         aPropSet.addPropNamed(ShowHBar_Prop, Boolean.class, null);
         aPropSet.addPropNamed(ShowVBar_Prop, Boolean.class, null);
         aPropSet.addPropNamed(BarSize_Prop, int.class, 14);
@@ -514,7 +516,9 @@ public class ScrollView extends ParentView implements ViewHost {
     {
         switch (aPropName) {
 
-            // ShowHBar, ShowVBar, BarSize
+            // FillWidth, FillHeight, ShowHBar, ShowVBar, BarSize
+            case FillWidth_Prop: return isFillWidth();
+            case FillHeight_Prop: return isFillHeight();
             case ShowHBar_Prop: return getShowHBar();
             case ShowVBar_Prop: return getShowVBar();
             case BarSize_Prop: return getBarSize();
@@ -532,7 +536,9 @@ public class ScrollView extends ParentView implements ViewHost {
     {
         switch (aPropName) {
 
-            // ShowHBar, ShowVBar, BarSize
+            // FillWidth, FillHeight, ShowHBar, ShowVBar, BarSize
+            case FillWidth_Prop: setFillWidth(Convert.boolValue(aValue)); break;
+            case FillHeight_Prop: setFillHeight(Convert.boolValue(aValue)); break;
             case ShowHBar_Prop: setShowHBar(Convert.booleanValue(aValue)); break;
             case ShowVBar_Prop: setShowVBar(Convert.booleanValue(aValue)); break;
             case BarSize_Prop: setBarSize(Convert.intValue(aValue)); break;
@@ -550,7 +556,9 @@ public class ScrollView extends ParentView implements ViewHost {
         // Archive basic view attributes
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive ShowHBar, ShowVBar, BarSize
+        // Archive FillWidth, FillHeight, ShowHBar, ShowVBar, BarSize
+        if (!isPropDefault(FillWidth_Prop)) e.add(FillWidth_Prop, isFillWidth());
+        if (!isPropDefault(FillHeight_Prop)) e.add(FillHeight_Prop, isFillWidth());
         if (!isPropDefault(ShowHBar_Prop)) e.add(ShowHBar_Prop, getShowHBar());
         if (!isPropDefault(ShowVBar_Prop)) e.add(ShowVBar_Prop, getShowVBar());
         if (!isPropDefault(BarSize_Prop)) e.add(BarSize_Prop, getBarSize());
@@ -565,7 +573,9 @@ public class ScrollView extends ParentView implements ViewHost {
         // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive ShowHBar, ShowVBar, BarSize
+        // Unarchive FillWidth, FillHeight, ShowHBar, ShowVBar, BarSize
+        if (anElement.hasAttribute(FillWidth_Prop)) setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
+        if (anElement.hasAttribute(FillHeight_Prop)) setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop));
         if (anElement.hasAttribute(ShowHBar_Prop)) setShowHBar(anElement.getAttributeBoolValue(ShowHBar_Prop));
         if (anElement.hasAttribute(ShowVBar_Prop)) setShowVBar(anElement.getAttributeBoolValue(ShowVBar_Prop));
         if (anElement.hasAttribute(BarSize_Prop)) setBarSize(anElement.getAttributeIntValue(BarSize_Prop));
