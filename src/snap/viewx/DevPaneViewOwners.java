@@ -5,6 +5,7 @@ import snap.geom.Shape;
 import snap.gfx.GFXEnv;
 import snap.gfx.Painter;
 import snap.util.FileUtils;
+import snap.util.ListUtils;
 import snap.util.SnapUtils;
 import snap.view.*;
 import snap.view.EventListener;
@@ -470,18 +471,14 @@ public class DevPaneViewOwners extends ViewOwner {
         public boolean isParent(View anItem)
         {
             List<ViewOwner> list = getChildViewOwnersForView(anItem);
-            return list.size() > 0;
+            return !list.isEmpty();
         }
 
         /** Returns the children. */
-        public View[] getChildren(View aParent)
+        public List<View> getChildren(View aParent)
         {
             List<ViewOwner> list = getChildViewOwnersForView(aParent);
-            ViewOwner[] owners = list.toArray(new ViewOwner[0]);
-            View[] views = new View[owners.length];
-            for (int i=0; i<owners.length; i++)
-                views[i] = owners[i].getUI();
-            return views;
+            return ListUtils.map(list, viewOwner -> viewOwner.getUI());
         }
 
         /** Returns the text to be used for given item. */

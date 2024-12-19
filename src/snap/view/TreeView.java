@@ -298,9 +298,9 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
             }
 
             // Get item children and add after item
-            T[] childItems = getItemChildren(item);
-            for (int j = 0; j < childItems.length; j++)
-                items.add(i + j + 1, childItems[j]);
+            List<T> childItems = getItemChildren(item);
+            for (int j = 0; j < childItems.size(); j++)
+                items.add(i + j + 1, childItems.get(j));
         }
 
         // Return items
@@ -461,7 +461,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the children.
      */
-    public T[] getItemChildren(T aParent)  { return _resolver.getChildren(aParent); }
+    public List<T> getItemChildren(T aParent)  { return _resolver.getChildren(aParent); }
 
     /**
      * Returns the text to be used for given item.
@@ -505,7 +505,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
 
         for (int i = index - 1; i >= 0; i--) {
             T item = items.get(i);
-            if (isItemParent(item) && isItemExpanded(item) && ArrayUtils.contains(getItemChildren(item), anItem))
+            if (isItemParent(item) && isItemExpanded(item) && ListUtils.contains(getItemChildren(item), anItem))
                 return item;
         }
 

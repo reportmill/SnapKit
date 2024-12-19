@@ -10,7 +10,9 @@ import snap.util.Convert;
 import snap.util.StringUtils;
 import snap.view.*;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * A DevPane tab for inspecting the view tree.
@@ -494,10 +496,10 @@ public class DevPaneViews extends ViewOwner {
         }
 
         /** Returns the children. */
-        public View[] getChildren(View aParent)
+        public List<View> getChildren(View aParent)
         {
             ParentView parent = (ParentView) aParent;
-            return parent.getChildren();
+            return Arrays.asList(parent.getChildren());
         }
 
         /** Returns the text to be used for given item. */

@@ -10,6 +10,7 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -172,9 +173,9 @@ class WebSitePaneUtils {
     /**
      * Returns the visible files for given array of files.
      */
-    public static WebFile[] getVisibleFiles(WebFile[] theFiles)
+    public static List<WebFile> getVisibleFiles(WebFile[] theFiles)
     {
-        return ArrayUtils.filter(theFiles, file -> !file.getName().startsWith("."));
+        return ArrayUtils.filterToList(theFiles, file -> !file.getName().startsWith("."));
     }
 
     /**
@@ -240,7 +241,7 @@ class WebSitePaneUtils {
         /**
          * Returns the children.
          */
-        public WebFile[] getChildren(WebFile aPar)
+        public List<WebFile> getChildren(WebFile aPar)
         {
             return getVisibleFiles(aPar.getFiles());
         }

@@ -426,6 +426,14 @@ public class ArrayUtils {
     /**
      * Returns a filtered array for given original and Predicate.
      */
+    public static <T> List<T> filterToList(T[] anArray, Predicate<? super T> aPredicate)
+    {
+        return Arrays.asList(filter(anArray, aPredicate));
+    }
+
+    /**
+     * Returns a filtered array for given original and Predicate.
+     */
     public static <T,R> R[] filterByClass(T[] anArray, Class<R> aClass)
     {
         Stream<T> filteredStream = Stream.of(anArray).filter(obj -> aClass.isInstance(obj));

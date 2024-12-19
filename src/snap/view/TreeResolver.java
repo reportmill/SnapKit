@@ -3,6 +3,7 @@
  */
 package snap.view;
 import snap.gfx.Image;
+import java.util.List;
 
 /**
  * An interface for providing tree item information.
@@ -22,7 +23,7 @@ public abstract class TreeResolver <T> {
     /**
      * Returns the children.
      */
-    public abstract T[] getChildren(T aParent);
+    public abstract List<T> getChildren(T aParent);
 
     /**
      * Returns the text to be used for given item.
@@ -79,6 +80,6 @@ public abstract class TreeResolver <T> {
         public boolean isParent(T anItem)  { return false; }
 
         /** Returns the children. */
-        public T[] getChildren(T aParent)  { return null; }
+        public List<T> getChildren(T aParent)  { return null; }
     }
 }

@@ -271,8 +271,8 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         if (colIndex > 0) {
             BrowserCol<T> lastCol = getCol(colIndex - 1);
             T item = lastCol.getSelItem();
-            T[] items = getChildren(item);
-            browserCol.setItems(items);
+            List<T> items = getChildren(item);
+            browserCol.setItemsList(items);
         }
 
         // Reset all cached widths
@@ -690,7 +690,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     // Convenience resolver methods
     private boolean isParent(T anItem)  { return _resolver.isParent(anItem); }
     private T getParent(T anItem)  { return _resolver.getParent(anItem); }
-    private T[] getChildren(T aParent)  { return _resolver.getChildren(aParent); }
+    private List<T> getChildren(T aParent)  { return _resolver.getChildren(aParent); }
     private String getText(T anItem)  { return _resolver.getText(anItem); }
     private Image getImage(T anItem)  { return _resolver.getImage(anItem); }
     private Image getBranchImage(T anItem)  { return _resolver.getBranchImage(anItem); }
