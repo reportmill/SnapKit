@@ -267,7 +267,7 @@ public class ProgressBar extends View {
         switch (aPropName) {
 
             // Progress, Indeterminate
-            case Progress_Prop: setProgress(Convert.doubleValue(aValue)); break;
+            case Progress_Prop: case "Value": setProgress(Convert.doubleValue(aValue)); break;
             case Indeterminate_Prop: setIndeterminate(Convert.boolValue(aValue)); break;
 
             // Do normal version
