@@ -414,6 +414,16 @@ public class ArrayUtils {
     }
 
     /**
+     * Move the given object to the front of the list.
+     */
+    public static <T> T[] moveToFront(T[] anArray, T anObj)
+    {
+        anArray = remove(anArray, anObj);
+        anArray = add(anArray, anObj, 0);
+        return anArray;
+    }
+
+    /**
      * Returns a filtered array for given original and Predicate.
      */
     public static <T> T[] filter(T[] anArray, Predicate<? super T> aPredicate)
