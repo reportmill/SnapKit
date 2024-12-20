@@ -20,6 +20,9 @@ import java.util.stream.Stream;
  */
 public class MarkDownView extends ChildView {
 
+    // The source url (and it's parent)
+    private WebURL _sourceUrl, _sourceDirUrl;
+
     // The root markdown node
     private MDNode _rootMarkdownNode;
 
@@ -51,6 +54,21 @@ public class MarkDownView extends ChildView {
         super();
         setPadding(DOC_PADDING);
         setFill(Color.WHITE);
+    }
+
+    /**
+     * Returns the Source URL.
+     */
+    public WebURL getSourceUrl()  { return _sourceUrl; }
+
+    /**
+     * Sets the Source URL.
+     */
+    public void setSourceUrl(WebURL sourceUrl)
+    {
+        _sourceUrl = sourceUrl;
+        if (_sourceUrl != null)
+            _sourceDirUrl = sourceUrl.getParent();
     }
 
     /**
@@ -257,17 +275,29 @@ public class MarkDownView extends ChildView {
     protected View createViewForImageNode(MDNode imageNode)
     {
         String urlAddr = imageNode.getOtherText();
-        WebURL url = WebURL.getURL(urlAddr);
+        WebURL url = getUrlForAddress(urlAddr);
         Image image = url != null ? Image.getImageForSource(url) : null;
         ImageView imageView = new ImageView(image);
+        imageView.setKeepAspect(true);
 
         // Wrap in box
         BoxView boxView = new BoxView(imageView);
         boxView.setAlign(Pos.CENTER_LEFT);
         boxView.setMargin(GENERAL_MARGIN);
+        boxView.setFillWidth(true);
 
         // Return
         return boxView;
+    }
+
+    /**
+     * Returns a URL for given url address.
+     */
+    protected WebURL getUrlForAddress(String urlAddr)
+    {
+        if (getSourceUrl() != null && !urlAddr.contains(":"))
+            return _sourceDirUrl.getChild(urlAddr);
+        return WebURL.getURL(urlAddr);
     }
 
     /**
