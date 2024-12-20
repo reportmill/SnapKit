@@ -226,6 +226,11 @@ public class ProgressBar extends View {
     }
 
     /**
+     * Returns a mapped property name.
+     */
+    public String getValuePropName()  { return Progress_Prop; }
+
+    /**
      * Initialize Props. Override to provide custom defaults.
      */
     protected void initProps(PropSet aPropSet)

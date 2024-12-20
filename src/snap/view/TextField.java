@@ -581,7 +581,7 @@ public class TextField extends ParentView {
     /**
      * Returns a mapped property name.
      */
-    public String getValuePropName()  { return "Text"; }
+    public String getValuePropName()  { return Text_Prop; }
 
     /**
      * Override to customize for this class.
