@@ -8,6 +8,17 @@ package snap.web;
  */
 public class WebUtils {
 
+    // The cors proxy address
+    private static String CORS_PROXY_SERVER = "https://corsproxy.io/?url=";
+
+    /**
+     * Returns a cors proxy URL address for given address.
+     */
+    public static String getCorsProxyAddress(String urlAddr)
+    {
+        return CORS_PROXY_SERVER + urlAddr;
+    }
+
     /**
      * Returns the common ancestor of this file and given file.
      */
