@@ -178,7 +178,7 @@ public class MarkDownView extends ChildView {
         textBlock.setDefaultTextStyle(textStyle);
 
         // Set text
-        textBlock.addChars(headerNode.getText());
+        addNodeTextToTextArea(textArea, headerNode.getText());
 
         // Return
         return textArea;
@@ -212,7 +212,7 @@ public class MarkDownView extends ChildView {
         textBlock.setDefaultTextStyle(textStyle);
 
         // Set text
-        textBlock.addChars(contentNode.getText());
+        addNodeTextToTextArea(textArea, contentNode.getText());
 
         // Return
         return textArea;
@@ -517,7 +517,80 @@ public class MarkDownView extends ChildView {
         else {
             String nodeText = aNode.getText();
             if (nodeText != null)
-                textArea.addCharsWithStyle(nodeText, textArea.getDefaultTextStyle());
+                addNodeTextToTextArea(textArea, nodeText);
+        }
+    }
+
+    /**
+     * Adds node text (markdown formatted string) to a text area.
+     */
+    private static void addNodeTextToTextArea(TextArea textArea, String nodeText)
+    {
+        String fontStyle = nodeText.contains("*") ? "BoldItalic" : null;
+        addNodeTextToTextAreaImpl(textArea, nodeText, fontStyle);
+    }
+
+    /**
+     * Adds text to a text area.
+     */
+    private static void addNodeTextToTextAreaImpl(TextArea textArea, String nodeText, String fontStyle)
+    {
+        // If no fontStyle, just add chars with default font
+        if (fontStyle == null) {
+            TextBlock textBlock = textArea.getTextBlock();
+            TextStyle textStyle = textArea.getDefaultTextStyle();
+            textBlock.addCharsWithStyle(nodeText, textStyle);
+            return;
+        }
+
+        // Get strings separated by '***'
+        String regex = getRegexForFontStyle(fontStyle);
+        String[] splitStrings = nodeText.split(regex);
+        String nextFontStyle = getNextFontStyleForFontStyle(fontStyle);
+
+        // Iterate over separated strings
+        for (int i = 0; i < splitStrings.length; i += 2) {
+            addNodeTextToTextAreaImpl(textArea, splitStrings[i], nextFontStyle);
+            if (i + 1 < splitStrings.length)
+                addTextAreaTextForFontStyle(textArea, splitStrings[i + 1], fontStyle);
+        }
+    }
+
+    // Adds given string to given text area with "Bold", "Italic" or "BoldItalic" default font.
+    private static void addTextAreaTextForFontStyle(TextArea textArea, String theChars, String fontStyle)
+    {
+        // Get font for given fontStyle
+        TextBlock textBlock = textArea.getTextBlock();
+        Font defaultFont = textBlock.getDefaultFont();
+        switch (fontStyle) {
+            case "Bold": defaultFont = defaultFont.getBold(); break;
+            case "Italic": defaultFont = defaultFont.getItalic(); break;
+            case "BoldItalic": defaultFont = defaultFont.getBold().getItalic(); break;
+        }
+
+        // Get text style for font and add chars
+        TextStyle textStyle = textArea.getDefaultTextStyle().copyForStyleValue(defaultFont);
+        textBlock.addCharsWithStyle(theChars, textStyle);
+    }
+
+    // Return regex for FontStyle
+    private static String getRegexForFontStyle(String fontStyle)
+    {
+        switch (fontStyle) {
+            case "BoldItalic": return "(?<!\\\\)\\*\\*\\*";
+            case "Bold": return "(?<!\\\\)\\*\\*";
+            case "Italic": return "(?<!\\\\)\\*";
+            default: throw new RuntimeException("Unknown font style: " + fontStyle);
+        }
+    }
+
+    // Return next FontStyle
+    private static String getNextFontStyleForFontStyle(String fontStyle)
+    {
+        switch (fontStyle) {
+            case "Bold": return "Italic";
+            case "BoldItalic": return "Bold";
+            default: return null;
         }
     }
 }
