@@ -254,6 +254,14 @@ public class ListUtils {
     }
 
     /**
+     * Returns list of given class for given original.
+     */
+    public static <T,R> List<R> filterByClass(Collection<T> aList, Class<R> aClass)
+    {
+        return (List<R>) filter(aList, obj -> aClass.isInstance(obj));
+    }
+
+    /**
      * Returns a filtered array for given original and Predicate.
      */
     public static <T,R> R[] filterToArray(Collection<T> aList, Predicate<? super T> pred, Class<R> aClass)

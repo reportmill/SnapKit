@@ -9,8 +9,7 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropSet;
 import snap.util.*;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -224,13 +223,10 @@ public class ParentView extends View {
     /**
      * Returns the children for given component class.
      */
-    public <E extends View> E[] getChildrenForClass(Class<E> aClass)
+    public <E extends View> List<E> getChildrenForClass(Class<E> aClass)
     {
-        List<E> children = new ArrayList<>();
-        for (View child : getChildren())
-            if (aClass.isInstance(child))
-                children.add((E) child);
-        return children.toArray((E[]) Array.newInstance(aClass, children.size()));
+        List<View> children = Arrays.asList(getChildren());
+        return ListUtils.filterByClass(children, aClass);
     }
 
     /**

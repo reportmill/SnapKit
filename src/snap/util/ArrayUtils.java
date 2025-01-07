@@ -434,20 +434,20 @@ public class ArrayUtils {
     }
 
     /**
-     * Returns a filtered array for given original and Predicate.
-     */
-    public static <T> List<T> filterToList(T[] anArray, Predicate<? super T> aPredicate)
-    {
-        return Arrays.asList(filter(anArray, aPredicate));
-    }
-
-    /**
-     * Returns a filtered array for given original and Predicate.
+     * Returns array of items of given class for given original.
      */
     public static <T,R> R[] filterByClass(T[] anArray, Class<R> aClass)
     {
         Stream<T> filteredStream = Stream.of(anArray).filter(obj -> aClass.isInstance(obj));
         return filteredStream.toArray(size -> (R[]) Array.newInstance(aClass, size));
+    }
+
+    /**
+     * Returns a filtered array for given original and Predicate.
+     */
+    public static <T> List<T> filterToList(T[] anArray, Predicate<? super T> aPredicate)
+    {
+        return Arrays.asList(filter(anArray, aPredicate));
     }
 
     /**
@@ -467,6 +467,14 @@ public class ArrayUtils {
         Stream<R> filteredStream = Stream.of(anArray).map(aFunction);
         Stream<R> filteredNonNull = filteredStream.filter(item -> item != null);
         return filteredNonNull.toArray(size -> (R[]) Array.newInstance(aClass, size));
+    }
+
+    /**
+     * Returns a mapped list for given array, Function and class.
+     */
+    public static <T,R> List<R> mapToList(T[] anArray, Function<? super T, ? extends R> aFunction)
+    {
+        return Stream.of(anArray).map(aFunction).collect(Collectors.toList());
     }
 
     /**

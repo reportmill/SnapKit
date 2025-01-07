@@ -487,10 +487,7 @@ public class DevPaneViews extends ViewOwner {
         {
             if (!(anItem instanceof ParentView))
                 return false;
-            if (anItem instanceof Label || anItem instanceof ButtonBase || anItem instanceof Spinner ||
-                anItem instanceof ArrowView || anItem instanceof TextField)
-                return false;
-            if (anItem instanceof ComboBox)
+            if (anItem instanceof Label || anItem instanceof ButtonBase || anItem instanceof TextField || anItem instanceof ComboBox)
                 return false;
             return ((ParentView) anItem).getChildCount() > 0;
         }
