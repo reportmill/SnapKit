@@ -40,11 +40,6 @@ public class ViewList {
     public View get(int anIndex)  { return _views[anIndex]; }
 
     /**
-     * Returns the contained views as an array.
-     */
-    public View[] getAll()  { return _views; }
-
-    /**
      * Adds the given view to end of this list.
      */
     protected void add(View aView)
@@ -97,6 +92,11 @@ public class ViewList {
      * Returns the last view of this list.
      */
     public View getLast()  { return size() > 0 ? get(size()-1) : null; }
+
+    /**
+     * Returns the contained views as an array.
+     */
+    public View[] getAll()  { return _views; }
 
     /**
      * Returns the view at given point X/Y.
@@ -192,26 +192,11 @@ public class ViewList {
         // If already set, just return
         if (_managed != null) return _managed;
 
-        // Get ChildCount, ManagedCount
-        int childCount = size();
-        int managedCount = 0;
-        for (View child : getAll())
-            if (child.isManagedVisible())
-                managedCount++;
-
-        // If same, just return children
-        if (managedCount == childCount)
+        // If all views are managed and visible, just return children
+        if (!ArrayUtils.hasMatch(_views, view -> !view.isManagedVisible()))
             return _managed = _views;
 
-        // Get managed array
-        View[] managed = new View[managedCount];
-        for (int i = 0, j = 0; i < childCount; i++) {
-            View child = get(i);
-            if (child.isManagedVisible())
-                managed[j++] = child;
-        }
-
         // Set, return
-        return _managed = managed;
+        return _managed = ArrayUtils.filter(_views, view -> view.isManagedVisible());
     }
 }
