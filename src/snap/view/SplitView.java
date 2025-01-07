@@ -339,9 +339,6 @@ public class SplitView extends ParentView implements ViewHost {
     {
         ParentViewProxy<?> viewProxy = getViewProxy();
         viewProxy.layoutView();
-
-        // After any layout, all pref sizes should be set
-        makeSurePrefSizesAreSet();
     }
 
     /**
@@ -474,28 +471,6 @@ public class SplitView extends ParentView implements ViewHost {
         if (viewIndex < getItemCount() - 1) {
             Divider divider = getDivider(viewIndex);
             setDividerVisibleAndDisabled(divider);
-        }
-    }
-
-    /**
-     * After any layout, all pref sizes should be set
-     */
-    private void makeSurePrefSizesAreSet()
-    {
-        List<View> items = getItems();
-
-        // Handle Vertical: Iterate over items and make sure PrefHeight is set
-        if (isVertical()) {
-            for (View item : items)
-                if (!item.isPrefHeightSet() && item.isVisible())
-                    item.setPrefHeight(item.getHeight());
-        }
-
-        // Handle Vertical: Iterate over items and make sure PrefWidth is set
-        else {
-            for (View item : items)
-                if (!item.isPrefWidthSet() && item.isVisible())
-                    item.setPrefWidth(item.getWidth());
         }
     }
 
