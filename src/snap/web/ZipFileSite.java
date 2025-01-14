@@ -50,15 +50,19 @@ public class ZipFileSite extends WebSite {
         if (javaFile == null)
             return null;
 
-        // If ZipFile
-        if (!_jar) {
-            try { return _zipFile = new ZipFile(javaFile); }
-            catch(IOException e) { throw new RuntimeException(e); }
+        // Return file
+        try {
+
+            // If Jar, use JarFile
+            if (_jar)
+                return _zipFile = new JarFile(javaFile);
+
+            // Otherwise return ZipFile
+            return _zipFile = new ZipFile(javaFile);
         }
 
-        // Otherwise, get local file and create JarFile
-        try { return _zipFile = new JarFile(javaFile); }
-        catch(IOException e) { throw new RuntimeException(e); }
+        // Rethrow exception
+        catch(IOException e) { throw new RuntimeException("ZipFileSize.getZipFile: Error opening " + javaFile.getPath(), e); }
     }
 
     /**
