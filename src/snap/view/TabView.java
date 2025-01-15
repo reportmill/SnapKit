@@ -66,6 +66,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
         _separator = new RectView();
         _separator.setFill(Color.GRAY8);
         _separator.setPrefSize(1, 1);
+        _separator.setVisible(false);
 
         // Create and configure content cradle
         _contentBox = new BoxView(null, true, true);
