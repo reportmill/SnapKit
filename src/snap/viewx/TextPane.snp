@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RowView Padding="4" Spacing="2">
+<RowView Padding="3" Spacing="2">
   <Button Name="SaveButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Save" ImageName="File_Save.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
   <Button Name="CutButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Cut" ImageName="Edit_Cut.png" ShowArea="false" />
