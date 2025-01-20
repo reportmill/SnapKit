@@ -310,6 +310,17 @@ public class SnapUtils {
     }
 
     /**
+     * Returns the current java version as integer.
+     */
+    public static int getJavaVersionInt()
+    {
+        String javaVersion = System.getProperty("java.version");
+        if (javaVersion.startsWith("1."))
+            javaVersion = javaVersion.substring(2);
+        return Convert.intValue(javaVersion);
+    }
+
+    /**
      * Returns the number of processors on this machine.
      */
     public static int getProcessorCount()
