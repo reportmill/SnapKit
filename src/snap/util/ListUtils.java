@@ -330,7 +330,7 @@ public class ListUtils {
     /**
      * Returns first non-null value for given list and Function.
      */
-    public static <T,R> R findNonNull(List<T> aList, Function<? super T, ? extends R> aFunction)
+    public static <T,R> R findNonNull(Collection<T> aList, Function<? super T, ? extends R> aFunction)
     {
         for (T item : aList) {
             R value = aFunction.apply(item);
@@ -343,7 +343,7 @@ public class ListUtils {
     /**
      * Maps a list of items to strings using given function, then joins them by given delimiter.
      */
-    public static <T> String mapToStringsAndJoin(List<T> aList, Function<T,String> aFunc, String aDelim)
+    public static <T> String mapToStringsAndJoin(Collection<T> aList, Function<T,String> aFunc, String aDelim)
     {
         return aList.stream().map(aFunc).collect(Collectors.joining(aDelim));
     }
