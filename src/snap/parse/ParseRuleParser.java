@@ -14,6 +14,13 @@ public class ParseRuleParser extends Parser {
 
     /**
      * Creates a new ParseRule rule.
+     * <br>
+     * Grammar { ParseRule* }
+     * ParseRule { Name "{" Expression "}" }
+     * Expression { AndExpr ( "|" AndExpr )* }
+     * AndExpr { CountExpr CountExpr* }
+     * CountExpr { Primary ( "*" "+" "?" )? }
+     * Primary { String | "LookAhead" "(" (Number | Expression) ")" | Name | "(" Expression ")"
      */
     public ParseRule createRule()
     {
@@ -22,37 +29,41 @@ public class ParseRuleParser extends Parser {
         ParseRule string = new ParseRule("String").setPattern("\"(([^\"\\\\])|(\\\\.))*\"");
         ParseRule name = new ParseRule("Name").setPattern("[$a-zA-Z][$\\w]*");
 
-        // Predefine Expression
-        ParseRule expression = new ParseRule("Expression");
+        // Predefine Primary
+        ParseRule primary = new ParseRule("Primary");
 
-        // CountExpr { Expression ( "*" "+" "?" )? }
+        // CountExpr { Primary ( "*" "+" "?" )? }
         ParseRule countExpr = new ParseRule("CountExpr");
-        countExpr.or(expression).and(new ParseRule().or("*").or("+").or("?"), '?');
+        countExpr.or(primary).and(new ParseRule().or("*").or("+").or("?"), '?');
 
         // AndExpr { CountExpr CountExpr* }
         ParseRule andExpr = new ParseRule("AndExpr").or(countExpr).and(countExpr, '*');
 
-        // OrExpr { AndExpr ( "|" AndExpr )* }
-        ParseRule orExpr = new ParseRule("OrExpr").or(andExpr).and(new ParseRule().or("|").and(andExpr), '*');
+        // Expression { AndExpr ( "|" AndExpr )* }
+        ParseRule expression = new ParseRule("Expression").or(andExpr).and(new ParseRule().or("|").and(andExpr), '*');
 
-        // Expression { String | "LookAhead" "(" (Number | OrExpr) ")" | Name | "(" OrExpr ")" }
-        expression.or(string).or("LookAhead").and("(").and(new ParseRule().or(number).or(orExpr)).and(")");
-        expression.or(name).or("(").and(orExpr).and(")");
+        // Primary { String | "LookAhead" "(" (Number | Expression) ")" | Name | "(" Expression ")" }
+        primary.or(string);
+        primary.or("LookAhead").and("(").and(new ParseRule().or(number).or(expression)).and(")");
+        primary.or(name);
+        primary.or("(").and(expression).and(")");
 
-        // ParseRule { Name "{" OrExpr "}" }
-        ParseRule prrule = new ParseRule("ParseRule").or(name).and("{").and(orExpr).and("}");
+        // ParseRule { Name "{" Expression "}" }
+        ParseRule parseRule = new ParseRule("ParseRule").or(name).and("{").and(expression).and("}");
 
-        // ParseRuleFile { ParseRule* }
-        ParseRule prfile = new ParseRule("ParseRuleFile", Op.ZeroOrMore, prrule);
+        // Grammar { ParseRule* }
+        ParseRule grammar = new ParseRule("Grammar", Op.ZeroOrMore, parseRule);
 
-        // Set handlers and return file rule
+        // Set handlers
+        grammar.setHandler(new GrammarHandler());
+        parseRule.setHandler(new ParseRuleHandler());
         expression.setHandler(new ExpressionHandler());
-        countExpr.setHandler(new CountExprHandler());
         andExpr.setHandler(new AndExprHandler());
-        orExpr.setHandler(new OrExprHandler());
-        prrule.setHandler(new ParseRuleHandler());
-        prfile.setHandler(new ParseRuleFileHandler());
-        return prfile;
+        countExpr.setHandler(new CountExprHandler());
+        primary.setHandler(new PrimaryHandler());
+
+        // Return
+        return grammar;
     }
 
     /**
@@ -81,9 +92,9 @@ public class ParseRuleParser extends Parser {
     static Map<String, ParseRule> _rules = new HashMap<>();
 
     /**
-     * ParseRuleFile Handler: { ParseRule* }
+     * Grammar Handler: { ParseRule* }
      */
-    public static class ParseRuleFileHandler extends ParseHandler<ParseRule> {
+    public static class GrammarHandler extends ParseHandler<ParseRule> {
 
         /**
          * Returns the part class.
@@ -115,7 +126,7 @@ public class ParseRuleParser extends Parser {
     }
 
     /**
-     * ParseRule Handler: { Name "{" OrExpr "}" }
+     * ParseRule Handler: { Name "{" Expression "}" }
      */
     public static class ParseRuleHandler extends ParseHandler<ParseRule> {
 
@@ -131,8 +142,8 @@ public class ParseRuleParser extends Parser {
             if (anId == "Name")
                 _part = getRule2(aNode.getString());
 
-            // Handle OrExpr
-            if (anId == "OrExpr") {
+            // Handle Expression
+            else if (anId == "Expression") {
                 ParseRule rule = (ParseRule) aNode.getCustomNode();
                 _part._op = rule._op;
                 _part._child0 = rule._child0;
@@ -144,9 +155,9 @@ public class ParseRuleParser extends Parser {
     }
 
     /**
-     * OrExpr Handler: { AndExpr ( "|" AndExpr )* }
+     * Expression Handler: { AndExpr ( "|" AndExpr )* }
      */
-    public static class OrExprHandler extends ParseHandler<ParseRule> {
+    public static class ExpressionHandler extends ParseHandler<ParseRule> {
 
         ParseRule _more;
 
@@ -212,7 +223,7 @@ public class ParseRuleParser extends Parser {
     }
 
     /**
-     * CountExpr Handler: { Expression ( "*" "+" "?" )? }
+     * CountExpr Handler: { Primary ( "*" "+" "?" )? }
      */
     public static class CountExprHandler extends ParseHandler<ParseRule> {
 
@@ -228,8 +239,8 @@ public class ParseRuleParser extends Parser {
         {
             switch (anId) {
 
-                // Handle Expression
-                case "Expression": _part = (ParseRule) aNode.getCustomNode(); break;
+                // Handle Primary
+                case "Primary": _part = (ParseRule) aNode.getCustomNode(); break;
 
                 // Handle Counts
                 case "*": _part = new ParseRule(Op.ZeroOrMore, _part); break;
@@ -240,9 +251,9 @@ public class ParseRuleParser extends Parser {
     }
 
     /**
-     * Expression Handler: { String | "LookAhead" "(" (Number | OrExpr) ")" | Name | "(" OrExpr ")" }
+     * Primary Handler: { String | "LookAhead" "(" (Number | Expression) ")" | Name | "(" Expression ")" }
      */
-    public static class ExpressionHandler extends ParseHandler<ParseRule> {
+    public static class PrimaryHandler extends ParseHandler<ParseRule> {
 
         /**
          * Returns the part class.
@@ -254,20 +265,22 @@ public class ParseRuleParser extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle Name
             switch (anId) {
+
+                // Handle Name
                 case "Name":
                     _part = getRule2(aNode.getString());
                     break;
 
-                // Handle string
+                // Handle String
                 case "String":
-                    String string = aNode.getString(), pattern = string.substring(1, string.length() - 1);
+                    String string = aNode.getString();
+                    String pattern = string.substring(1, string.length() - 1);
                     getPart().setPattern(pattern);
                     break;
 
-                // Handle OrExpr
-                case "OrExpr":
+                // Handle Expression
+                case "Expression":
                     ParseRule rule = (ParseRule) aNode.getCustomNode();
                     if (_part == null) _part = rule;
                     else _part._child0 = rule;  // LookAhead
