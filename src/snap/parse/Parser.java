@@ -81,7 +81,8 @@ public class Parser {
      */
     protected ParseRule createRule()
     {
-        return ParseUtils.loadRule(getClass(), null);
+        Grammar grammar = Grammar.createGrammarForParserClass(getClass());
+        return grammar.getPrimaryRule();
     }
 
     /**
@@ -180,7 +181,7 @@ public class Parser {
     protected ParseToken getNextToken()
     {
         // If LookAheadTokens has available token, remove and return it
-        if (_lookAheadTokens.size() > 0)
+        if (!_lookAheadTokens.isEmpty())
             return _lookAheadTokens.remove(0);
 
         // Get next token
@@ -578,15 +579,6 @@ public class Parser {
         if (aHandler != null)
             aHandler.reset();
         throw new ParseException(this, aRule);
-    }
-
-    /**
-     * Parses given input and returns custom parse tree node (convenience).
-     */
-    public <T> T parseCustom(CharSequence anInput, Class<T> aClass)
-    {
-        setInput(anInput);
-        return parseCustom(aClass);
     }
 
     /**

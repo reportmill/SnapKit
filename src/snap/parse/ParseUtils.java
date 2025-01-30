@@ -4,9 +4,7 @@
 package snap.parse;
 import snap.parse.ParseRule.Op;
 import snap.util.ArrayUtils;
-import snap.util.SnapUtils;
 import snap.web.WebFile;
-import snap.web.WebURL;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
@@ -212,70 +210,6 @@ public class ParseUtils {
         }
         sb.append('"');
         return sb.toString();
-    }
-
-    /**
-     * Loads a rule for a class.
-     */
-    public static ParseRule loadRule(Class<?> aClass, String aName)
-    {
-        // Get resource for rule
-        String name = aName != null ? aName : aClass.getSimpleName() + ".txt";
-        WebURL url = WebURL.getURL(aClass, name); //java.net.URL url = aClass.getResource(name);
-        if (url == null) {
-            System.err.println("ParseUtils.loadRule: Couldn't find " + name);
-            return null;
-        }
-
-        // Get text for parser grammar
-        String grammarStr = SnapUtils.getText(url);
-        if (grammarStr == null) return null;
-
-        // Load rule from string
-        try {
-            ParseRuleParser parseRuleParser = new ParseRuleParser();
-            ParseNode parseNode = parseRuleParser.parse(grammarStr);
-            return parseNode.getCustomNode(ParseRule.class);
-        }
-
-        // Handle exceptions
-        catch (ParseException e) { throw new RuntimeException(e); }
-    }
-
-    /**
-     * Searches given class for inner handler classes and installs instance in rule.
-     */
-    public static void installHandlersForParentClass(Class<?> aClass, ParseRule aRule)
-    {
-        // Get handler classes
-        Class<? extends ParseHandler<?>>[] handlerClasses = getHandlerClassesInsideClass(aClass);
-
-        // Iterate over handler classes and install in rule for each
-        for(Class<? extends ParseHandler<?>> handlerClass : handlerClasses)
-            installHandlerForClass(handlerClass, aRule);
-    }
-
-    /**
-     * Searches given class for inner handler classes and installs instance in rule.
-     */
-    public static void installHandlerForClass(Class<? extends ParseHandler<?>> handlerClass, ParseRule aRule)
-    {
-        // Get rule name and rule by stripping "Handler" from class name
-        String simpleName = handlerClass.getSimpleName();
-        String ruleName = simpleName.substring(0, simpleName.length() - "Handler".length());
-        ParseRule parseRule = aRule.getRule(ruleName);
-        if (parseRule == null) {
-            System.out.println("ParseUtils.installHandlerForClass: Couldn't find rule for name: " + ruleName);
-            return;
-        }
-
-        // Create handler instance
-        ParseHandler<?> parseHandler;
-        try { parseHandler = handlerClass.newInstance(); }
-        catch(Exception e) { throw new RuntimeException(e); }
-
-        // Install handler in rule
-        parseRule.setHandler(parseHandler);
     }
 
     /**

@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * A Parser to parse simple snap grammar rule files.
  */
-public class ParseRuleParser extends Parser {
+public class GrammarParser extends Parser {
 
     /**
      * Creates a new ParseRule rule.
