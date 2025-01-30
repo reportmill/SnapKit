@@ -10,15 +10,24 @@ import snap.parse.*;
 public class XMLParser extends Parser {
     
     /**
-     * Creates a new XMLParser.
+     * Constructor.
      */
     public XMLParser()
     {
-        // Install handlers: ParseUtils.installHandlers(getClass(), getRule());
-        getRule("Document").setHandler(new DocumentHandler());
-        getRule("Prolog").setHandler(new PrologHandler());
-        getRule("Element").setHandler(new ElementHandler());
-        getRule("Attribute").setHandler(new AttributeHandler());
+        super();
+    }
+
+    /**
+     * Override to install handlers.
+     */
+    @Override
+    protected void initGrammar()
+    {
+        Grammar grammar = getGrammar();
+        grammar.installHandlerForClass(DocumentHandler.class);
+        grammar.installHandlerForClass(PrologHandler.class);
+        grammar.installHandlerForClass(ElementHandler.class);
+        grammar.installHandlerForClass(AttributeHandler.class);
     }
 
     /**

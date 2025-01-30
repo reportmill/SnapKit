@@ -37,22 +37,22 @@ public class KeyChainParser extends Parser {
     /**
      * Load rule from rule file and install handlers.
      */
-    protected void initRule()
+    protected void initGrammar()
     {
         // Install Handlers (TeaVM doesn't like auto version)
         //ParseUtils.installHandlers(getClass(), rule);  // Install Handlers
-        getRule("Statement").setHandler(new StatementHandler());
-        getRule("Expression").setHandler(new ExpressionHandler());
-        getRule("LogicalOrExpr").setHandler(new LogicalOrExprHandler());
-        getRule("LogicalAndExpr").setHandler(new LogicalAndExprHandler());
-        getRule("EqualityExpr").setHandler(new EqualityExprHandler());
-        getRule("ComparativeExpr").setHandler(new ComparativeExprHandler());
-        getRule("AdditiveExpr").setHandler(new AdditiveExprHandler());
-        getRule("MultiplicativeExpr").setHandler(new MultiplicativeExprHandler());
-        getRule("UnaryExpr").setHandler(new UnaryExprHandler());
-        getRule("KeyChain").setHandler(new KeyChainHandler());
-        getRule("Object").setHandler(new ObjectHandler());
-        getRule("ArgList").setHandler(new ArgListHandler());
+        getRuleForName("Statement").setHandler(new StatementHandler());
+        getRuleForName("Expression").setHandler(new ExpressionHandler());
+        getRuleForName("LogicalOrExpr").setHandler(new LogicalOrExprHandler());
+        getRuleForName("LogicalAndExpr").setHandler(new LogicalAndExprHandler());
+        getRuleForName("EqualityExpr").setHandler(new EqualityExprHandler());
+        getRuleForName("ComparativeExpr").setHandler(new ComparativeExprHandler());
+        getRuleForName("AdditiveExpr").setHandler(new AdditiveExprHandler());
+        getRuleForName("MultiplicativeExpr").setHandler(new MultiplicativeExprHandler());
+        getRuleForName("UnaryExpr").setHandler(new UnaryExprHandler());
+        getRuleForName("KeyChain").setHandler(new KeyChainHandler());
+        getRuleForName("Object").setHandler(new ObjectHandler());
+        getRuleForName("ArgList").setHandler(new ArgListHandler());
     }
 
     /**

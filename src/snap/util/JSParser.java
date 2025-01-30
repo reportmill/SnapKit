@@ -11,15 +11,24 @@ import snap.web.*;
 public class JSParser extends Parser {
     
     /**
-     * Creates a JSONParser.
+     * Constructor.
      */
     public JSParser()
     {
-        // Install Hanlders
-        getRule("Object").setHandler(new ObjectHandler());
-        getRule("Pair").setHandler(new PairHandler());
-        getRule("Array").setHandler(new ArrayHandler());
-        getRule("Value").setHandler(new ValueHandler());
+        super();
+    }
+
+    /**
+     * Override to install handlers.
+     */
+    @Override
+    protected void initGrammar()
+    {
+        Grammar grammar = getGrammar();
+        grammar.installHandlerForClass(ObjectHandler.class);
+        grammar.installHandlerForClass(PairHandler.class);
+        grammar.installHandlerForClass(ArrayHandler.class);
+        grammar.installHandlerForClass(ValueHandler.class);
     }
 
     /**

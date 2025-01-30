@@ -12,8 +12,8 @@ import java.util.Set;
  */
 public class Parser {
 
-    // The top level rule
-    private ParseRule  _rule;
+    // The grammar
+    private Grammar _grammar;
 
     // The current parse character input
     private CharSequence  _input;
@@ -45,57 +45,45 @@ public class Parser {
     }
 
     /**
-     * Constructor for given rule.
+     * Returns the grammar.
      */
-    public Parser(ParseRule aRule)
+    public Grammar getGrammar()
     {
-        setRule(aRule);
+        if (_grammar != null) return _grammar;
+        _grammar = createGrammar();
+        initGrammar();
+        return _grammar;
     }
 
     /**
-     * Returns the top level rule.
+     * Creates the grammar.
      */
-    public ParseRule getRule()
+    protected Grammar createGrammar()
     {
-        // If already set, just return
-        if (_rule != null) return _rule;
-
-        // Create/init/set rule
-        _rule = createRule();
-        initRule();
-
-        // Return
-        return _rule;
+        return Grammar.createGrammarForParserClass(getClass());
     }
 
     /**
-     * Sets the top level rule.
+     * Initializes grammar.
      */
-    public void setRule(ParseRule aRule)
-    {
-        _rule = aRule;
-    }
+    protected void initGrammar()  { }
 
     /**
-     * Creates the top level rule. Default version tries to load rules from ClassName.txt.
+     * Returns the primary rule.
      */
-    protected ParseRule createRule()
+    public ParseRule getPrimaryRule()
     {
-        Grammar grammar = Grammar.createGrammarForParserClass(getClass());
+        Grammar grammar = getGrammar();
         return grammar.getPrimaryRule();
     }
 
     /**
-     * Initializes rule(s).
-     */
-    protected void initRule()  { }
-
-    /**
      * Returns a named rule.
      */
-    public ParseRule getRule(String aName)
+    public ParseRule getRuleForName(String aName)
     {
-        return getRule().getRule(aName);
+        Grammar grammar = getGrammar();
+        return grammar.getRuleForName(aName);
     }
 
     /**
@@ -145,7 +133,7 @@ public class Parser {
         Tokenizer tokenizer = createTokenizer();
 
         // Add Patterns for Rule
-        ParseRule rule = getRule();
+        ParseRule rule = getPrimaryRule();
         tokenizer.setRegexesForPatternRulesInRule(rule);
 
         // Set, return
@@ -237,8 +225,8 @@ public class Parser {
      */
     public ParseNode parse()
     {
-        ParseRule rule = getRule();
-        return parse(rule);
+        ParseRule primaryRule = getPrimaryRule();
+        return parse(primaryRule);
     }
 
     /**
@@ -268,8 +256,8 @@ public class Parser {
      */
     public <T> T parseCustom(Class<T> aClass)
     {
-        ParseRule rule = getRule();
-        return parseCustom(rule, aClass);
+        ParseRule primaryRule = getPrimaryRule();
+        return parseCustom(primaryRule, aClass);
     }
 
     /**
@@ -586,8 +574,8 @@ public class Parser {
      */
     private void resetAllHandlers()
     {
-        ParseRule rule = getRule();
-        resetHandlersForRuleDeep(rule, new HashSet<>());
+        ParseRule primaryRule = getPrimaryRule();
+        resetHandlersForRuleDeep(primaryRule, new HashSet<>());
     }
 
     /**

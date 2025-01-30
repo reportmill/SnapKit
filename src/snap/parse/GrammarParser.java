@@ -22,7 +22,8 @@ public class GrammarParser extends Parser {
      * CountExpr { Primary ( "*" "+" "?" )? }
      * Primary { String | "LookAhead" "(" (Number | Expression) ")" | Name | "(" Expression ")"
      */
-    public ParseRule createRule()
+    @Override
+    protected Grammar createGrammar()
     {
         // Number, String, Name
         ParseRule number = new ParseRule("Number").setPattern("[1-9][0-9]*");
@@ -63,7 +64,7 @@ public class GrammarParser extends Parser {
         primary.setHandler(new PrimaryHandler());
 
         // Return
-        return grammar;
+        return new Grammar(grammar);
     }
 
     /**
