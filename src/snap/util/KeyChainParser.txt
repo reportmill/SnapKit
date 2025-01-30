@@ -1,7 +1,7 @@
 
 Statement { LookAhead(2) KEY ("=" | "+=") Expression | Expression }
 
-Expression { LogicalOrExpr (LookAhead(2) "?" Expression (LookAhead(2) ":" Expression)?)? }
+Expression { LogicalOrExpr ("?" Expression (":" Expression)?)? }
 
 LogicalOrExpr { LogicalAndExpr ("||" LogicalAndExpr)* }
 
@@ -21,7 +21,10 @@ KeyChain { Object ("." Object)* }
 
 Object
 {
-    LookAhead(3) KEY "(" ArgList? ")" | LookAhead(2) KEY "[" Expression "]" | LookAhead(3) KEY | INT | FLOAT | STRING | "(" Expression ")"
+    LookAhead(2) KEY "(" ArgList? ")" |
+    LookAhead(2) KEY "[" Expression "]" |
+    KEY | INT | FLOAT | STRING |
+    "(" Expression ")"
 }
 
 ArgList { Expression ("," Expression)* }
