@@ -55,16 +55,6 @@ public class Tokenizer {
     public void setRegexes(Regex[] theRegexes)  { _regexes = theRegexes; }
 
     /**
-     * Sets regexes for pattern rules in given rule.
-     */
-    public void setRegexesForPatternRulesInRule(ParseRule aRule)
-    {
-        ParseRule[] patternRules = ParseUtils.getPatternRulesForRule(aRule);
-        Regex[] regexes = ArrayUtils.map(patternRules, rule -> new Regex(rule.getName(), rule.getPattern()), Regex.class);
-        setRegexes(regexes);
-    }
-
-    /**
      * Returns the current tokenizer input.
      */
     public CharSequence getInput()  { return _input; }

@@ -329,7 +329,7 @@ public class ParseRule {
      */
     public String toString()
     {
-        String str = ParseUtils.getString(this);
+        String str = ParseUtils.getStringForRule(this);
         String strTrim = str.replaceAll("\\s+", " ").trim();
         return strTrim;
     }

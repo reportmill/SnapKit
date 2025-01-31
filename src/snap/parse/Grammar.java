@@ -1,6 +1,9 @@
 package snap.parse;
+import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
 import snap.web.WebURL;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * This class manages a set of parse rules.
@@ -27,6 +30,43 @@ public class Grammar {
      * Returns the rule for name.
      */
     public ParseRule getRuleForName(String ruleName)  { return _primaryRule.getRule(ruleName); }
+
+    /**
+     * Returns all unique rules.
+     */
+    public ParseRule[] getAllRules()
+    {
+        Set<ParseRule> allRules = new LinkedHashSet<>();
+        findAllRulesForRule(_primaryRule, allRules);
+        return allRules.toArray(new ParseRule[0]);
+    }
+
+    /**
+     * Returns all rules with a name.
+     */
+    public ParseRule[] getAllNamedRules()
+    {
+        ParseRule[] allRules = getAllRules();
+        return ArrayUtils.filter(allRules, rule -> rule.getName() != null);
+    }
+
+    /**
+     * Returns all rules with a pattern.
+     */
+    public ParseRule[] getAllPatternRules()
+    {
+        ParseRule[] allRules = getAllRules();
+        return ArrayUtils.filter(allRules, rule -> rule.getPattern() != null);
+    }
+
+    /**
+     * Returns the Regexes for all token patterns.
+     */
+    public Regex[] getAllRegexes()
+    {
+        ParseRule[] patternRules = getAllPatternRules();
+        return ArrayUtils.map(patternRules, rule -> new Regex(rule.getName(), rule.getPattern()), Regex.class);
+    }
 
     /**
      * Finds the rule with same name as handler class and sets handler instance.
@@ -86,5 +126,21 @@ public class Grammar {
 
         // Handle exceptions
         catch (ParseException e) { throw new RuntimeException(e); }
+    }
+
+    /**
+     * Finds all unique rules nested in given rule and adds to given set.
+     */
+    private static void findAllRulesForRule(ParseRule aRule, Set<ParseRule> allRules)
+    {
+        allRules.add(aRule);
+
+        // Recurse into rule nested left / right rules
+        ParseRule rule0 = aRule.getChild0();
+        if (rule0 != null && !allRules.contains(rule0))
+            findAllRulesForRule(rule0, allRules);
+        ParseRule rule1 = aRule.getChild1();
+        if (rule1 != null && !allRules.contains(rule1))
+            findAllRulesForRule(rule1, allRules);
     }
 }

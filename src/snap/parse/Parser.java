@@ -132,9 +132,10 @@ public class Parser {
         // Create tokenizer
         Tokenizer tokenizer = createTokenizer();
 
-        // Add Patterns for Rule
-        ParseRule rule = getPrimaryRule();
-        tokenizer.setRegexesForPatternRulesInRule(rule);
+        // Set grammar regexes in tokenizer
+        Grammar grammar = getGrammar();
+        Regex[] regexes = grammar.getAllRegexes();
+        tokenizer.setRegexes(regexes);
 
         // Set, return
         setTokenizer(tokenizer);

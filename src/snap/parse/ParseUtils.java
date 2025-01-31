@@ -6,7 +6,6 @@ import snap.parse.ParseRule.Op;
 import snap.util.ArrayUtils;
 import snap.web.WebFile;
 import java.lang.reflect.Modifier;
-import java.util.*;
 
 /**
  * Reads/Writes ParseRules from/to file.
@@ -14,56 +13,12 @@ import java.util.*;
 public class ParseUtils {
 
     /**
-     * Returns all unique rules nested in given rule.
-     */
-    public static ParseRule[] getAllRulesForRule(ParseRule aRule)
-    {
-        Set<ParseRule> allRules = new LinkedHashSet<>();
-        findAllRulesForRule(aRule, allRules);
-        return allRules.toArray(new ParseRule[0]);
-    }
-
-    /**
-     * Finds all unique rules nested in given rule and adds to given set.
-     */
-    private static void findAllRulesForRule(ParseRule aRule, Set<ParseRule> allRules)
-    {
-        allRules.add(aRule);
-
-        // Recurse into rule nested left / right rules
-        ParseRule rule0 = aRule.getChild0();
-        if (rule0 != null && !allRules.contains(rule0))
-            findAllRulesForRule(rule0, allRules);
-        ParseRule rule1 = aRule.getChild1();
-        if (rule1 != null && !allRules.contains(rule1))
-            findAllRulesForRule(rule1, allRules);
-    }
-
-    /**
-     * Returns all rules with a name for given top level rule.
-     */
-    public static ParseRule[] getNamedRulesForRule(ParseRule aRule)
-    {
-        ParseRule[] allRules = getAllRulesForRule(aRule);
-        return ArrayUtils.filter(allRules, rule -> rule.getName() != null);
-    }
-
-    /**
-     * Returns all rules with a pattern for given top level rule.
-     */
-    public static ParseRule[] getPatternRulesForRule(ParseRule aRule)
-    {
-        ParseRule[] allRules = getAllRulesForRule(aRule);
-        return ArrayUtils.filter(allRules, rule -> rule.getPattern() != null);
-    }
-
-    /**
      * Prints the names of all rules.
      */
     public static void printAllRuleNames(ParseRule aRule, int namesPerLine)
     {
         // Get all rule names in quotes
-        ParseRule[] namedRules = getNamedRulesForRule(aRule);
+        ParseRule[] namedRules = new Grammar(aRule).getAllNamedRules();
         String[] quotedRuleNames = ArrayUtils.map(namedRules, rule -> '"' + rule.getName() + '"', String.class);
 
         // Iterate over names and print with newline for every namesPerLine
@@ -79,7 +34,7 @@ public class ParseUtils {
     public static void writeAllRulesForRuleToFile(ParseRule aRule, WebFile aFile)
     {
         // Get string for given rule
-        ParseRule[] allRules = ParseUtils.getAllRulesForRule(aRule);
+        ParseRule[] allRules = new Grammar(aRule).getAllRules();
         String rulesString = getStringForRules(allRules);
 
         // Set in file
@@ -99,7 +54,8 @@ public class ParseUtils {
         // Write normal rules
         for (ParseRule rule : theRules) {
             if (rule.getName() != null && rule.getPattern() == null) {
-                String s = getString(rule), s2 = s.replaceAll("\\s+", " ").trim();
+                String s = getStringForRule(rule);
+                String s2 = s.replaceAll("\\s+", " ").trim();
                 if (s2.length() <= 120) s = s2 + "\n\n";
                 sb.append(s);
             }
@@ -108,7 +64,7 @@ public class ParseUtils {
         // Write Regex rules
         for (ParseRule rule : theRules) {
             if (rule.getPattern() != null && rule.getName() != null) {
-                String s = getString(rule);
+                String s = getStringForRule(rule);
                 sb.append(s);
             }
         }
@@ -119,14 +75,15 @@ public class ParseUtils {
     /**
      * Returns string definition of rule.
      */
-    public static String getString(ParseRule aRule)
+    public static String getStringForRule(ParseRule aRule)
     {
-        String str = getStringBody(aRule);
-        String name = aRule.getName();
+        String str = getStringBodyForRule(aRule);
+        String ruleName = aRule.getName();
         String pattern = aRule.getPattern();
-        if (name != null) {
-            if (pattern != null) str = name + " { " + str + " }\n\n";
-            else str = name + "\n{\n    " + str + "\n}\n\n";
+        if (ruleName != null) {
+            if (pattern != null)
+                str = ruleName + " { " + str + " }\n\n";
+            else str = ruleName + "\n{\n    " + str + "\n}\n\n";
         }
         return str;
     }
@@ -134,7 +91,7 @@ public class ParseUtils {
     /**
      * Returns string definition of rule body.
      */
-    private static String getStringBody(ParseRule aRule)
+    private static String getStringBodyForRule(ParseRule aRule)
     {
         ParseRule.Op ruleOp = aRule.getOp();
 
