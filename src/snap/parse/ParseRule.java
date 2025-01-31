@@ -2,8 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.parse;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A class to represent a parse rule.
@@ -28,9 +26,6 @@ public class ParseRule {
     // The handler for parse rule
     private ParseHandler<?>  _handler;
 
-    // The named rules
-    private Map<String, ParseRule>  _namedRules;
-
     // Constants for booleans operators
     public enum Op {Or, And, ZeroOrOne, ZeroOrMore, OneOrMore, LookAhead, Pattern}
 
@@ -43,7 +38,7 @@ public class ParseRule {
     }
 
     /**
-     * Creates a new parse rule for given name
+     * Constructor for given name
      */
     public ParseRule(String aName)
     {
@@ -51,7 +46,7 @@ public class ParseRule {
     }
 
     /**
-     * Creates a new parse rule for given name
+     * Constructor for op and child rule
      */
     public ParseRule(Op anOp, ParseRule aPR)
     {
@@ -59,7 +54,7 @@ public class ParseRule {
     }
 
     /**
-     * Creates a new parse rule for given op and child rules.
+     * Constructor for given op and child rules.
      */
     public ParseRule(Op anOp, ParseRule aPR1, ParseRule aPR2)
     {
@@ -67,7 +62,7 @@ public class ParseRule {
     }
 
     /**
-     * Creates a new parse rule for given name, op and child rule.
+     * Constructor for given name, op and child rule.
      */
     public ParseRule(String aName, Op anOp, ParseRule aPR)
     {
@@ -75,7 +70,7 @@ public class ParseRule {
     }
 
     /**
-     * Creates a new parse rule for given name, op and child rules.
+     * Constructor for given name, op and child rules.
      */
     public ParseRule(String aName, Op anOp, ParseRule aPR1, ParseRule aPR2)
     {
@@ -183,47 +178,6 @@ public class ParseRule {
     {
         _lookAheadCount = aValue;
         _op = Op.LookAhead;
-    }
-
-    /**
-     * Returns a rule with given name.
-     */
-    public ParseRule getRule(String aName)
-    {
-        ParseRule rule = getNamedRules().get(aName);
-        if (rule == null)
-            throw new RuntimeException("ParseRule: Rule not found for name " + aName);
-        return rule;
-    }
-
-    /**
-     * Returns all the rules.
-     */
-    private Map<String, ParseRule> getNamedRules()
-    {
-        if (_namedRules != null) return _namedRules;
-        addNamedRule(this, new HashMap<>());
-        return _namedRules;
-    }
-
-    /**
-     * Loads the named rules.
-     */
-    private void addNamedRule(ParseRule aRule, Map<String, ParseRule> aMap)
-    {
-        String name = aRule.getName();
-        if (name != null && aMap.get(name) != null)
-            return;
-        if (name != null) {
-            aMap.put(name, aRule);
-            aRule._namedRules = aMap;
-        }
-
-        // Recurse for children
-        if (aRule.getChild0() != null)
-            addNamedRule(aRule.getChild0(), aMap);
-        if (aRule.getChild1() != null)
-            addNamedRule(aRule.getChild1(), aMap);
     }
 
     /**

@@ -2,7 +2,9 @@ package snap.parse;
 import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
 import snap.web.WebURL;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -12,6 +14,9 @@ public class Grammar {
 
     // The primary rule
     private ParseRule _primaryRule;
+
+    // The named rules
+    private Map<String, ParseRule> _namedRules;
 
     /**
      * Constructor.
@@ -29,7 +34,13 @@ public class Grammar {
     /**
      * Returns the rule for name.
      */
-    public ParseRule getRuleForName(String ruleName)  { return _primaryRule.getRule(ruleName); }
+    public ParseRule getRuleForName(String ruleName)
+    {
+        ParseRule rule = getNamedRules().get(ruleName);
+        if (rule == null)
+            throw new RuntimeException("Grammar.getRuleForName: Rule not found for name " + ruleName);
+        return rule;
+    }
 
     /**
      * Returns all unique rules.
@@ -66,6 +77,17 @@ public class Grammar {
     {
         ParseRule[] patternRules = getAllPatternRules();
         return ArrayUtils.map(patternRules, rule -> new Regex(rule.getName(), rule.getPattern()), Regex.class);
+    }
+
+    /**
+     * Returns all the rules.
+     */
+    private Map<String, ParseRule> getNamedRules()
+    {
+        if (_namedRules != null) return _namedRules;
+        Map<String, ParseRule> namedRules = new HashMap<>();
+        findNamedRulesForRule(_primaryRule, namedRules);
+        return _namedRules = namedRules;
     }
 
     /**
@@ -142,5 +164,24 @@ public class Grammar {
         ParseRule rule1 = aRule.getChild1();
         if (rule1 != null && !allRules.contains(rule1))
             findAllRulesForRule(rule1, allRules);
+    }
+
+    /**
+     * Finds the named rules for given rule and adds to given map (recursively).
+     */
+    private static void findNamedRulesForRule(ParseRule aRule, Map<String, ParseRule> aMap)
+    {
+        String ruleName = aRule.getName();
+        if (ruleName != null) {
+            if (aMap.get(ruleName) != null)
+                return;
+            aMap.put(ruleName, aRule);
+        }
+
+        // Recurse for children
+        if (aRule.getChild0() != null)
+            findNamedRulesForRule(aRule.getChild0(), aMap);
+        if (aRule.getChild1() != null)
+            findNamedRulesForRule(aRule.getChild1(), aMap);
     }
 }
