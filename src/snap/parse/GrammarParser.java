@@ -13,6 +13,14 @@ import java.util.Map;
 public class GrammarParser extends Parser {
 
     /**
+     * Constructor.
+     */
+    public GrammarParser()
+    {
+        super();
+    }
+
+    /**
      * Creates a new ParseRule rule.
      * <br>
      * Grammar { ParseRule* }
@@ -25,35 +33,45 @@ public class GrammarParser extends Parser {
     @Override
     protected Grammar createGrammar()
     {
+        // Create rule builder
+        ParseRuleBuilder builder = new ParseRuleBuilder();
+
         // Number, String, Name
-        ParseRule number = new ParseRule("Number").setPattern("[1-9][0-9]*");
-        ParseRule string = new ParseRule("String").setPattern("\"(([^\"\\\\])|(\\\\.))*\"");
-        ParseRule name = new ParseRule("Name").setPattern("[$a-zA-Z][$\\w]*");
+        ParseRule number = builder.name("Number").pattern("[1-9][0-9]*").build();
+        ParseRule string = builder.name("String").pattern("\"(([^\"\\\\])|(\\\\.))*\"").build();
+        ParseRule name = builder.name("Name").pattern("[$a-zA-Z][$\\w]*").build();
 
         // Predefine Primary
-        ParseRule primary = new ParseRule("Primary");
+        ParseRule primary = builder.name("Primary").build();
 
         // CountExpr { Primary ( "*" "+" "?" )? }
-        ParseRule countExpr = new ParseRule("CountExpr");
-        countExpr.or(primary).and(new ParseRule().or("*").or("+").or("?"), '?');
+        ParseRule countOpsRule = builder.or("*").or("+").or("?").build();
+        builder.name("CountExpr");
+        builder.or(primary).and(countOpsRule, '?');
+        ParseRule countExpr = builder.build();
 
         // AndExpr { CountExpr CountExpr* }
-        ParseRule andExpr = new ParseRule("AndExpr").or(countExpr).and(countExpr, '*');
+        ParseRule andExpr = builder.name("AndExpr").or(countExpr).and(countExpr, '*').build();
 
         // Expression { AndExpr ( "|" AndExpr )* }
-        ParseRule expression = new ParseRule("Expression").or(andExpr).and(new ParseRule().or("|").and(andExpr), '*');
+        ParseRule andExprMore = builder.or("|").and(andExpr).build();
+        builder.name("Expression").or(andExpr).and(andExprMore, '*');
+        ParseRule expression = builder.build();
 
         // Primary { String | "LookAhead" "(" (Number | Expression) ")" | Name | "(" Expression ")" }
-        primary.or(string);
-        primary.or("LookAhead").and("(").and(new ParseRule().or(number).or(expression)).and(")");
-        primary.or(name);
-        primary.or("(").and(expression).and(")");
+        ParseRule lookAheadArg = builder.or(number).or(expression).build();
+        builder.reset(primary);
+        builder.or(string);
+        builder.or("LookAhead").and("(").and(lookAheadArg).and(")");
+        builder.or(name);
+        builder.or("(").and(expression).and(")");
+        builder.build();
 
         // ParseRule { Name "{" Expression "}" }
-        ParseRule parseRule = new ParseRule("ParseRule").or(name).and("{").and(expression).and("}");
+        ParseRule parseRule = builder.name("ParseRule").or(name).and("{").and(expression).and("}").build();
 
         // Grammar { ParseRule* }
-        ParseRule grammar = new ParseRule("Grammar", Op.ZeroOrMore, parseRule);
+        ParseRule grammar = builder.name("Grammar").op(Op.ZeroOrMore).rule(parseRule).build();
 
         // Set handlers
         grammar.setHandler(new GrammarHandler());
@@ -119,10 +137,11 @@ public class GrammarParser extends Parser {
         /**
          * Override to reset Rules map.
          */
-        public ParseRule parsedAll()
+        @Override
+        public void reset()
         {
+            super.reset();
             _rules = new HashMap<>();
-            return super.parsedAll();
         }
     }
 

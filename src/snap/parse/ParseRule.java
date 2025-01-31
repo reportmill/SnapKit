@@ -9,22 +9,22 @@ package snap.parse;
 public class ParseRule {
 
     // The name
-    private String  _name;
+    private String _name;
 
     // The op
-    protected Op  _op;
+    protected Op _op;
 
     // The child rules
-    protected ParseRule  _child0, _child1;
+    protected ParseRule _child0, _child1;
 
     // Rule pattern - if simple regex
-    protected String  _pattern;
+    protected String _pattern;
 
     // The look ahead count (implies this rule is really just a look ahead
     protected int _lookAheadCount;
 
     // The handler for parse rule
-    private ParseHandler<?>  _handler;
+    private ParseHandler<?> _handler;
 
     // Constants for booleans operators
     public enum Op {Or, And, ZeroOrOne, ZeroOrMore, OneOrMore, LookAhead, Pattern}
@@ -62,14 +62,6 @@ public class ParseRule {
     }
 
     /**
-     * Constructor for given name, op and child rule.
-     */
-    public ParseRule(String aName, Op anOp, ParseRule aPR)
-    {
-        this(aName, anOp, aPR, null);
-    }
-
-    /**
      * Constructor for given name, op and child rules.
      */
     public ParseRule(String aName, Op anOp, ParseRule aPR1, ParseRule aPR2)
@@ -88,7 +80,7 @@ public class ParseRule {
     /**
      * Sets rule name.
      */
-    public void setName(String aName)
+    protected void setName(String aName)
     {
         _name = aName != null ? aName.intern() : null;
     }
@@ -124,7 +116,7 @@ public class ParseRule {
     /**
      * Sets the rule pattern if simple pattern.
      */
-    public ParseRule setPattern(String anPattern)
+    protected ParseRule setPattern(String anPattern)
     {
         _pattern = anPattern.intern();
         _op = Op.Pattern;
@@ -174,109 +166,11 @@ public class ParseRule {
     /**
      * Sets the look ahead count.
      */
-    public void setLookAheadCount(int aValue)
+    protected void setLookAheadCount(int aValue)
     {
         _lookAheadCount = aValue;
         _op = Op.LookAhead;
     }
-
-    /**
-     * Adds an Or rule to this rule with given pattern.
-     */
-    public ParseRule or(String aPattern)
-    {
-        return or(aPattern, '1');
-    }
-
-    /**
-     * Adds an Or rule to this rule with given count and pattern.
-     */
-    public ParseRule or(String aPattern, char aCount)
-    {
-        ParseRule r = new ParseRule();
-        r.setPattern(aPattern);
-        return or(r, aCount);
-    }
-
-    /**
-     * Adds an Or rule to this rule with given rule.
-     */
-    public ParseRule or(ParseRule aRule)
-    {
-        return or(aRule, '1');
-    }
-
-    /**
-     * Adds an Or rule to this rule with given rule.
-     */
-    public ParseRule or(ParseRule aRule, char aCount)
-    {
-        // Wrap rule in count rule
-        if (aCount == '?') aRule = new ParseRule(Op.ZeroOrOne, aRule);
-        else if (aCount == '*') aRule = new ParseRule(Op.ZeroOrMore, aRule);
-        else if (aCount == '+') aRule = new ParseRule(Op.OneOrMore, aRule);
-
-        // Get tail Or rule and add
-        if (_child0 == null) {
-            _op = Op.Or;
-            _child0 = aRule;
-        } else if (_child1 == null) _child1 = aRule;
-        else {
-            _tailOr._child1 = new ParseRule(Op.Or, _tailOr._child1, aRule);
-            _tailOr = _tailAnd = _tailOr._child1;
-        }
-        return this;
-    }
-
-    /**
-     * Adds an And rule to this rule with given pattern.
-     */
-    public ParseRule and(String aPattern)
-    {
-        return and(aPattern, '1');
-    }
-
-    /**
-     * Adds an And rule to this rule with given count and pattern.
-     */
-    public ParseRule and(String aPattern, char aCount)
-    {
-        ParseRule r = new ParseRule();
-        r.setPattern(aPattern);
-        return and(r, aCount);
-    }
-
-    /**
-     * Adds an And rule to this rule with given rule.
-     */
-    public ParseRule and(ParseRule aRule)
-    {
-        return and(aRule, '1');
-    }
-
-    /**
-     * Adds an And rule to this rule with given rule.
-     */
-    public ParseRule and(ParseRule aRule, char aCount)
-    {
-        // Wrap rule in count rule
-        if (aCount == '?') aRule = new ParseRule(Op.ZeroOrOne, aRule);
-        else if (aCount == '*') aRule = new ParseRule(Op.ZeroOrMore, aRule);
-        else if (aCount == '+') aRule = new ParseRule(Op.OneOrMore, aRule);
-
-        // Get tail Or or And rule and add
-        if (_child1 == null) {
-            _op = Op.And;
-            _child1 = aRule;
-        } else {
-            _tailAnd._child1 = new ParseRule(Op.And, _tailAnd._child1, aRule);
-            _tailAnd = _tailAnd._child1;
-        }
-        return this;
-    }
-
-    // Bogus ivars for building rules programatically.
-    private ParseRule _tailOr = this, _tailAnd = this;
 
     /**
      * Returns a string representation.
