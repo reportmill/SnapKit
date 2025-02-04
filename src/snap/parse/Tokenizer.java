@@ -397,24 +397,17 @@ public class Tokenizer {
         skipWhiteSpace();
 
         // Look for standard Java single/multi line comments tokens
-        if (!_codeComments)
-            return null;
-        if (!hasChar() || nextChar() != '/')
-            return null;
+        if (_codeComments)
+            return getCodeCommentToken();
 
-        // Look for SingleLine or DoubleLine comments
-        ParseToken specialToken = getSingleLineCommentToken();
-        if (specialToken == null)
-            specialToken = getMultiLineCommentToken();
-
-        // Return special token
-        return specialToken;
+        // Return not found
+        return null;
     }
 
     /**
      * Processes and returns a single line comment token if next up in input.
      */
-    protected ParseToken getSingleLineCommentToken()
+    protected ParseToken getCodeCommentToken()
     {
         // If next two chars are single line comment, return single line comment token for chars to line end
         if (nextCharsStartWith("//")) {
@@ -423,18 +416,11 @@ public class Tokenizer {
             return createTokenForProps(SINGLE_LINE_COMMENT, null, tokenStart, _charIndex);
         }
 
-        // Return not found
-        return null;
-    }
-
-    /**
-     * Process and return a multi-line comment if next up in input.
-     */
-    public ParseToken getMultiLineCommentToken()
-    {
         // If next two chars are multi line comment (/*) prefix, return token
         if (nextCharsStartWith("/*"))
             return getMultiLineCommentTokenMore();
+
+        // Return not found
         return null;
     }
 
