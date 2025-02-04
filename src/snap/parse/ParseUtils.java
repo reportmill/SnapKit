@@ -4,8 +4,9 @@
 package snap.parse;
 import snap.parse.ParseRule.Op;
 import snap.util.ArrayUtils;
-import snap.web.WebFile;
+import snap.util.ListUtils;
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 /**
  * Reads/Writes ParseRules from/to file.
@@ -15,58 +16,34 @@ public class ParseUtils {
     /**
      * Prints the names of all rules.
      */
-    public static void printAllRuleNames(ParseRule aRule, int namesPerLine)
+    public static void printRuleNames(Grammar aGrammar, int namesPerLine)
     {
         // Get all rule names in quotes
-        ParseRule[] namedRules = new Grammar(aRule).getAllNamedRules();
-        String[] quotedRuleNames = ArrayUtils.map(namedRules, rule -> '"' + rule.getName() + '"', String.class);
+        List<ParseRule> namedRules = aGrammar.getNamedRules();
+        List<String> quotedRuleNames = ListUtils.map(namedRules, rule -> '"' + rule.getName() + '"');
 
         // Iterate over names and print with newline for every namesPerLine
-        for (int i = 0; i < quotedRuleNames.length; i++) {
-            System.out.print(quotedRuleNames[i] + ", ");
+        for (int i = 0; i < quotedRuleNames.size(); i++) {
+            System.out.print(quotedRuleNames.get(i) + ", ");
             if (i > 0 && i % namesPerLine == 0) System.out.println();
         }
     }
 
     /**
-     * Writes a rule to a file.
-     */
-    public static void writeAllRulesForRuleToFile(ParseRule aRule, WebFile aFile)
-    {
-        // Get string for given rule
-        ParseRule[] allRules = new Grammar(aRule).getAllRules();
-        String rulesString = getStringForRules(allRules);
-
-        // Set in file
-        aFile.setText(rulesString);
-        try { aFile.save(); }
-        catch (Exception e) { throw new RuntimeException(e); }
-    }
-
-    /**
      * Returns a string for the currently loaded set of rules.
      */
-    public static String getStringForRules(ParseRule[] theRules)
+    public static String getStringForRules(Grammar aGrammar)
     {
+        List<ParseRule> allRules = aGrammar.getNamedRules();
         StringBuilder sb = new StringBuilder();
         sb.append('\n');
 
         // Write normal rules
-        for (ParseRule rule : theRules) {
-            if (rule.getName() != null && rule.getPattern() == null) {
-                String s = getStringForRule(rule);
-                String s2 = s.replaceAll("\\s+", " ").trim();
-                if (s2.length() <= 120) s = s2 + "\n\n";
-                sb.append(s);
-            }
-        }
-
-        // Write Regex rules
-        for (ParseRule rule : theRules) {
-            if (rule.getPattern() != null && rule.getName() != null) {
-                String s = getStringForRule(rule);
-                sb.append(s);
-            }
+        for (ParseRule rule : allRules) {
+            String s = getStringForRule(rule);
+            String s2 = s.replaceAll("\\s+", " ").trim();
+            if (s2.length() <= 120) s = s2 + "\n\n";
+            sb.append(s);
         }
 
         return sb.toString();

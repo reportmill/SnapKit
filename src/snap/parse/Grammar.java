@@ -2,28 +2,66 @@ package snap.parse;
 import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
 import snap.web.WebURL;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class manages a set of parse rules.
  */
 public class Grammar {
 
+    // The list of top level named rules for the grammar
+    private List<ParseRule> _namedRules;
+
     // The primary rule
     private ParseRule _primaryRule;
 
     // The named rules
-    private Map<String, ParseRule> _namedRules;
+    private Map<String, ParseRule> _namedRulesMap;
 
     /**
      * Constructor.
      */
+    protected Grammar()
+    {
+        _namedRules = new ArrayList<>();
+        _namedRulesMap = new HashMap<>();
+    }
+
+    /**
+     * Constructor for given primary rule.
+     */
     protected Grammar(ParseRule primaryRule)
     {
         _primaryRule = primaryRule;
+        _namedRulesMap = new HashMap<>();
+        findNamedRulesForRule(primaryRule, _namedRulesMap);
+        _namedRules = new ArrayList<>(_namedRulesMap.values());
+    }
+
+    /**
+     * The set of top level named rules in this grammar.
+     */
+    public List<ParseRule> getNamedRules()  { return _namedRules; }
+
+    /**
+     * Adds a rule for given name.
+     */
+    public ParseRule addRuleForName(String ruleName)
+    {
+        // If rule name is present, just return
+        ParseRule namedRule = _namedRulesMap.get(ruleName);
+        if (namedRule != null)
+            return namedRule;
+
+        // Create new rule and add to list/map (set primary to first rule)
+        namedRule = new ParseRule(ruleName);
+        _namedRules.add(namedRule);
+        _namedRulesMap.put(ruleName, namedRule);
+        if (_primaryRule == null)
+            _primaryRule = namedRule;
+
+        // Return
+        return namedRule;
     }
 
     /**
@@ -36,7 +74,7 @@ public class Grammar {
      */
     public ParseRule getRuleForName(String ruleName)
     {
-        ParseRule rule = getNamedRules().get(ruleName);
+        ParseRule rule = _namedRulesMap.get(ruleName);
         if (rule == null)
             throw new RuntimeException("Grammar.getRuleForName: Rule not found for name " + ruleName);
         return rule;
@@ -50,15 +88,6 @@ public class Grammar {
         Set<ParseRule> allRules = new LinkedHashSet<>();
         findAllRulesForRule(_primaryRule, allRules);
         return allRules.toArray(new ParseRule[0]);
-    }
-
-    /**
-     * Returns all rules with a name.
-     */
-    public ParseRule[] getAllNamedRules()
-    {
-        ParseRule[] allRules = getAllRules();
-        return ArrayUtils.filter(allRules, rule -> rule.getName() != null);
     }
 
     /**
@@ -77,17 +106,6 @@ public class Grammar {
     {
         ParseRule[] patternRules = getAllPatternRules();
         return ArrayUtils.map(patternRules, rule -> new Regex(rule.getName(), rule.getPattern()), Regex.class);
-    }
-
-    /**
-     * Returns all the rules.
-     */
-    private Map<String, ParseRule> getNamedRules()
-    {
-        if (_namedRules != null) return _namedRules;
-        Map<String, ParseRule> namedRules = new HashMap<>();
-        findNamedRulesForRule(_primaryRule, namedRules);
-        return _namedRules = namedRules;
     }
 
     /**
@@ -141,9 +159,7 @@ public class Grammar {
         // Load rule from string
         try {
             GrammarParser grammarParser = new GrammarParser();
-            ParseNode parseNode = grammarParser.parse(grammarStr);
-            ParseRule primaryRule = parseNode.getCustomNode(ParseRule.class);
-            return new Grammar(primaryRule);
+            return grammarParser.parseGrammarString(grammarStr);
         }
 
         // Handle exceptions

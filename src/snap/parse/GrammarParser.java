@@ -4,13 +4,13 @@
 package snap.parse;
 import snap.parse.ParseRule.Op;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * A Parser to parse simple snap grammar rule files.
  */
 public class GrammarParser extends Parser {
+
+    // The Grammar currently being read
+    private static Grammar _grammar;
 
     /**
      * Constructor.
@@ -18,6 +18,18 @@ public class GrammarParser extends Parser {
     public GrammarParser()
     {
         super();
+    }
+
+    /**
+     * Parses given grammar string and returns grammar.
+     */
+    public Grammar parseGrammarString(String grammarStr)
+    {
+        synchronized (GrammarParser.class) {
+            _grammar = new Grammar();
+            parse(grammarStr);
+            return _grammar;
+        }
     }
 
     /**
@@ -98,50 +110,22 @@ public class GrammarParser extends Parser {
     }
 
     /**
-     * Returns a named rule.
-     */
-    private static ParseRule getRule2(String aName)
-    {
-        ParseRule rule = _rules.get(aName);
-        if (rule == null)
-            _rules.put(aName, rule = new ParseRule(aName));
-        return rule;
-    }
-
-    static Map<String, ParseRule> _rules = new HashMap<>();
-
-    /**
      * Grammar Handler: { ParseRule* }
      */
-    public static class GrammarHandler extends ParseHandler<ParseRule> {
+    public static class GrammarHandler extends ParseHandler<Grammar> {
 
         /**
          * Returns the part class.
          */
-        protected Class<ParseRule> getPartClass()
+        protected Class<Grammar> getPartClass()
         {
-            return ParseRule.class;
+            return Grammar.class;
         }
 
         // Called when node is parsed.
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get first
-            if (_part == null) {
-                ParseRule rule = (ParseRule) aNode.getCustomNode();
-                if (rule.getPattern() == null)
-                    _part = rule;
-            }
-        }
-
-        /**
-         * Override to reset Rules map.
-         */
-        @Override
-        public void reset()
-        {
-            super.reset();
-            _rules = new HashMap<>();
+            _part = _grammar;
         }
     }
 
@@ -159,8 +143,10 @@ public class GrammarParser extends Parser {
         protected void parsedOne(ParseNode aNode, String anId)
         {
             // Handle Name
-            if (anId == "Name")
-                _part = getRule2(aNode.getString());
+            if (anId == "Name") {
+                String ruleName = aNode.getString();
+                _part = _grammar.addRuleForName(ruleName);
+            }
 
             // Handle Expression
             else if (anId == "Expression") {
@@ -289,7 +275,8 @@ public class GrammarParser extends Parser {
 
                 // Handle Name
                 case "Name":
-                    _part = getRule2(aNode.getString());
+                    String ruleName = aNode.getString();
+                    _part = _grammar.addRuleForName(ruleName);
                     break;
 
                 // Handle String
