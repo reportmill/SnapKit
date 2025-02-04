@@ -32,6 +32,9 @@ public class Tokenizer {
     // The current token doc
     private TokenDoc _tokenDoc;
 
+    // Whether to support standard Java style comments
+    private boolean _codeComments;
+
     // Constants for common special token names
     public static final String SINGLE_LINE_COMMENT = "SingleLineComment";
     public static final String MULTI_LINE_COMMENT = "MultiLineComment";
@@ -208,6 +211,14 @@ public class Tokenizer {
             tokenLine.addSpecialToken(specialToken);
         }
 
+        return getNextTokenImpl();
+    }
+
+    /**
+     * Returns the next token.
+     */
+    protected ParseToken getNextTokenImpl()
+    {
         // Get list of matchers for next char
         char nextChar = hasChar() ? nextChar() : 0;
         Regex[] regexes = nextChar < 128 ? getRegexesForStartChar(nextChar) : getRegexes();
@@ -316,16 +327,6 @@ public class Tokenizer {
     }
 
     /**
-     * Processes and returns a special token if found.
-     * This version just skips whitespace.
-     */
-    public ParseToken getNextSpecialToken()
-    {
-        skipWhiteSpace();
-        return null;
-    }
-
-    /**
      * Gobble input characters until next non-whitespace or input end.
      */
     protected void skipWhiteSpace()
@@ -341,5 +342,122 @@ public class Tokenizer {
     protected ParseToken tokenizerFailed(String nextChars)
     {
         throw new ParseException("Token not found for: " + nextChars);
+    }
+
+    /**
+     * Turns on Java style comments.
+     */
+    public void enableCodeComments()  { _codeComments = true; }
+
+    /**
+     * Returns next special token or token.
+     */
+    public ParseToken getNextSpecialTokenOrToken()
+    {
+        ParseToken token = getNextSpecialToken();
+        if (token == null)
+            token = getNextToken();
+        return token;
+    }
+
+    /**
+     * Processes and returns a special token if found.
+     * If more than one in a row, returns last one, which points to previous ones.
+     */
+    public ParseToken getNextSpecialToken()
+    {
+        // Get next special token - just return null if not found
+        ParseToken specialToken = getNextSpecialTokenImpl();
+        if (specialToken == null)
+            return null;
+
+        // Keep getting special tokens until we have the last one
+        while (true) {
+
+            // Look for another special token - just stop if not found
+            ParseToken nextSpecialToken = getNextSpecialTokenImpl();
+            if (nextSpecialToken == null)
+                break;
+
+            // Set NextSpecialToken.SpecialToken to current loop token
+            //nextSpecialToken._specialToken = specialToken;
+            specialToken = nextSpecialToken;
+        }
+
+        // Return
+        return specialToken;
+    }
+
+    /**
+     * Processes and returns next special token.
+     */
+    protected ParseToken getNextSpecialTokenImpl()
+    {
+        // Skip whitespace
+        skipWhiteSpace();
+
+        // Look for standard Java single/multi line comments tokens
+        if (!_codeComments)
+            return null;
+        if (!hasChar() || nextChar() != '/')
+            return null;
+
+        // Look for SingleLine or DoubleLine comments
+        ParseToken specialToken = getSingleLineCommentToken();
+        if (specialToken == null)
+            specialToken = getMultiLineCommentToken();
+
+        // Return special token
+        return specialToken;
+    }
+
+    /**
+     * Processes and returns a single line comment token if next up in input.
+     */
+    protected ParseToken getSingleLineCommentToken()
+    {
+        // If next two chars are single line comment, return single line comment token for chars to line end
+        if (nextCharsStartWith("//")) {
+            int tokenStart = _charIndex;
+            eatCharsTillLineEnd();
+            return createTokenForProps(SINGLE_LINE_COMMENT, null, tokenStart, _charIndex);
+        }
+
+        // Return not found
+        return null;
+    }
+
+    /**
+     * Process and return a multi-line comment if next up in input.
+     */
+    public ParseToken getMultiLineCommentToken()
+    {
+        // If next two chars are multi line comment (/*) prefix, return token
+        if (nextCharsStartWith("/*"))
+            return getMultiLineCommentTokenMore();
+        return null;
+    }
+
+    /**
+     * Returns a token from the current char to multi-line comment termination or input end.
+     */
+    public ParseToken getMultiLineCommentTokenMore()
+    {
+        // Mark start of MultiLineComment token (just return null if at input end)
+        int start = _charIndex;
+        if (start == length())
+            return null;
+
+        // Gobble chars until multi-line comment termination or input end
+        while (hasChar()) {
+            char loopChar = eatChar();
+            if (loopChar == '*' && hasChar() && nextChar() == '/') {
+                eatChar();
+                break;
+            }
+        }
+
+        // Create and return token
+        return createTokenForProps(MULTI_LINE_COMMENT, null, start, _charIndex);
     }
 }
