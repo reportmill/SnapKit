@@ -72,6 +72,11 @@ public class Grammar {
     /**
      * Returns the rule for name.
      */
+    public boolean isRuleSetForName(String ruleName)  { return _namedRulesMap.containsKey(ruleName); }
+
+    /**
+     * Returns the rule for name.
+     */
     public ParseRule getRuleForName(String ruleName)
     {
         ParseRule rule = _namedRulesMap.get(ruleName);
@@ -86,7 +91,8 @@ public class Grammar {
     public ParseRule[] getAllRules()
     {
         Set<ParseRule> allRules = new LinkedHashSet<>();
-        findAllRulesForRule(_primaryRule, allRules);
+        for (ParseRule namedRule : _namedRules)
+            findAllRulesForRule(namedRule, allRules);
         return allRules.toArray(new ParseRule[0]);
     }
 

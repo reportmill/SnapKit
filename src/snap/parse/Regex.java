@@ -36,17 +36,7 @@ public class Regex {
     {
         _name = aName != null ? aName.intern() : null;
         _pattern = aPattern.intern();
-        _literal = _pattern.length() < 3 || _pattern.indexOf('[') < 0;
-    }
-
-    /**
-     * Constructor with given pattern and name.
-     */
-    public Regex(String aName, String aPattern, boolean isLiteral)
-    {
-        _name = aName != null ? aName.intern() : null;
-        _pattern = aPattern.intern();
-        _literal = isLiteral;
+        _literal = isLiteralPattern(aPattern);
     }
 
     /**
@@ -148,6 +138,25 @@ public class Regex {
     }
 
     /**
+     * Returns whether given pattern is literal.
+     */
+    private static boolean isLiteralPattern(String pattern)
+    {
+        if (pattern.length() < 3)
+            return true;
+        if (pattern.equals("\\s+") || pattern.equals("//.*"))
+            return false;
+        if (pattern.indexOf('[') < 0)
+            return true;
+        return false;
+
+//        int literalLength = getLiteralLength(pattern);
+//        if (literalLength < pattern.length())
+//            return false;
+//        return true;
+    }
+
+    /**
      * Returns the literal length of pattern.
      */
     private static int getLiteralLength(String aPattern)
@@ -186,8 +195,11 @@ public class Regex {
         char c = aPattern.charAt(0);
         if (!isSpecialChar(c) || (c == ']' || c == '}' || c == '-' || c == '&'))
             return c;
-        if (c == '\\')
-            return aPattern.charAt(1);
+        if (c == '\\') {
+            char c1 = aPattern.charAt(1);
+            if (c1 != 's' && c1 != 'b' && c1 != 'd')
+                return aPattern.charAt(1);
+        }
         return 0;
     }
 

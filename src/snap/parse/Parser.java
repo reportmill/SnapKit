@@ -134,8 +134,7 @@ public class Parser {
 
         // Set grammar regexes in tokenizer
         Grammar grammar = getGrammar();
-        Regex[] regexes = grammar.getAllRegexes();
-        tokenizer.setRegexes(regexes);
+        tokenizer.setRegexesForGrammar(grammar);
 
         // Set, return
         setTokenizer(tokenizer);

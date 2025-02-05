@@ -41,6 +41,7 @@ public class Tokenizer {
     // Constants for common special token names
     public static final String SINGLE_LINE_COMMENT = "SingleLineComment";
     public static final String MULTI_LINE_COMMENT = "MultiLineComment";
+    public static final String SKIP = "Skip";
 
     /**
      * Constructor.
@@ -61,8 +62,27 @@ public class Tokenizer {
     public void setRegexes(Regex[] theRegexes)
     {
         _regexes = theRegexes;
-        if (_codeComments)
-            _regexes = ArrayUtils.add(_regexes, new Regex(SINGLE_LINE_COMMENT, "//.*", false));
+    }
+
+    /**
+     * Sets the regexes for given grammar.
+     */
+    public void setRegexesForGrammar(Grammar aGrammar)
+    {
+        // If no Skip rule, add it
+        if (!aGrammar.isRuleSetForName(SKIP)) {
+            ParseRule skipRule = aGrammar.addRuleForName(SKIP);
+            skipRule.setPattern("\\s+");
+        }
+
+        // If no SingleLineComment rule, add it
+        if (_codeComments && !aGrammar.isRuleSetForName(SINGLE_LINE_COMMENT)) {
+            ParseRule singleLineCommentRule = aGrammar.addRuleForName(SINGLE_LINE_COMMENT);
+            singleLineCommentRule.setPattern("//.*");
+        }
+
+        Regex[] regexes = aGrammar.getAllRegexes();
+        setRegexes(regexes);
     }
 
     /**
@@ -275,6 +295,12 @@ public class Tokenizer {
             return nextToken;
         }
 
+        // Handle skip
+        if (match.getName() == SKIP) {
+            _charIndex = matchEnd;
+            return getNextTokenImpl();
+        }
+
         // Create new token for match
         String matchName = match.getName();
         String matchPattern = match.getPattern();
@@ -347,15 +373,6 @@ public class Tokenizer {
     }
 
     /**
-     * Gobble input characters until next non-whitespace or input end.
-     */
-    protected void skipWhiteSpace()
-    {
-        while (hasChar() && Character.isWhitespace(nextChar()))
-            eatChar();
-    }
-
-    /**
      * Called when next chars don't conform to any known token pattern.
      * Default implementation just throws ParseExcpetion.
      */
@@ -379,9 +396,6 @@ public class Tokenizer {
      */
     private ParseToken getNextSpecialToken()
     {
-        // Skip whitespace
-        skipWhiteSpace();
-
         // Look for standard Java multi line comments tokens
         if (_codeComments && nextCharsStartWith("/*"))
             return getMultiLineCommentTokenMore();
