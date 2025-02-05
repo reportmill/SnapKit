@@ -1,5 +1,4 @@
 package snap.parse;
-import snap.util.ArrayUtils;
 import snap.util.CharSequenceX;
 
 /**
@@ -21,12 +20,6 @@ public class TokenLine implements CharSequenceX {
 
     // The line index
     protected int _lineIndex;
-
-    // Special tokens in line
-    private ParseToken[] _specialTokens = EMPTY_TOKENS_ARRAY;
-
-    // Constants
-    private static final ParseToken[] EMPTY_TOKENS_ARRAY = new ParseToken[0];
 
     /**
      * Constructor.
@@ -71,19 +64,6 @@ public class TokenLine implements CharSequenceX {
     {
         int prevIndex = _lineIndex - 1;
         return prevIndex >= 0 ? _tokenDoc.getLine(prevIndex) : null;
-    }
-
-    /**
-     * Returns the special tokens in line.
-     */
-    public ParseToken[] getSpecialTokens()  { return _specialTokens; }
-
-    /**
-     * Adds a special token to line.
-     */
-    protected void addSpecialToken(ParseToken aToken)
-    {
-        _specialTokens = ArrayUtils.add(_specialTokens, aToken);
     }
 
     /**

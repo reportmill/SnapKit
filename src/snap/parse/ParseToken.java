@@ -44,6 +44,15 @@ public interface ParseToken {
     int getEndCharIndexInLine();
 
     /**
+     * Returns whether token is special token.
+     */
+    default boolean isSpecial()
+    {
+        String name = getName();
+        return name == Tokenizer.SINGLE_LINE_COMMENT || name == Tokenizer.MULTI_LINE_COMMENT;
+    }
+
+    /**
      * Returns the string.
      */
     String getString();

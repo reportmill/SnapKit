@@ -35,6 +35,9 @@ public class Tokenizer {
     // Whether to support standard Java style comments
     private boolean _codeComments;
 
+    // Whether to ignore special tokens
+    private boolean _specialTokens;
+
     // Constants for common special token names
     public static final String SINGLE_LINE_COMMENT = "SingleLineComment";
     public static final String MULTI_LINE_COMMENT = "MultiLineComment";
@@ -204,14 +207,13 @@ public class Tokenizer {
      */
     public ParseToken getNextToken()
     {
-        // Get next special token
-        ParseToken specialToken = getNextSpecialToken();
-        if (specialToken != null) {
-            TokenLine tokenLine = getTokenLine();
-            tokenLine.addSpecialToken(specialToken);
-        }
+        ParseToken nextToken = getNextTokenImpl();
 
-        return getNextTokenImpl();
+        // If next token is special token and those are ignored, get next token
+        while (nextToken != null && nextToken.isSpecial() && !_specialTokens)
+            nextToken = getNextTokenImpl();
+
+        return nextToken;
     }
 
     /**
@@ -219,6 +221,11 @@ public class Tokenizer {
      */
     protected ParseToken getNextTokenImpl()
     {
+        // Look for special tokens
+        ParseToken specialToken = getNextSpecialToken();
+        if (specialToken != null)
+            return specialToken;
+
         // Get list of matchers for next char
         char nextChar = hasChar() ? nextChar() : 0;
         Regex[] regexes = nextChar < 128 ? getRegexesForStartChar(nextChar) : getRegexes();
@@ -350,21 +357,15 @@ public class Tokenizer {
     public void enableCodeComments()  { _codeComments = true; }
 
     /**
-     * Returns next special token or token.
+     * Turns on special tokens.
      */
-    public ParseToken getNextSpecialTokenOrToken()
-    {
-        ParseToken token = getNextSpecialToken();
-        if (token == null)
-            token = getNextToken();
-        return token;
-    }
+    public void enableSpecialTokens()  { _specialTokens = true; }
 
     /**
      * Processes and returns a special token if found.
      * If more than one in a row, returns last one, which points to previous ones.
      */
-    public ParseToken getNextSpecialToken()
+    private ParseToken getNextSpecialToken()
     {
         // Get next special token - just return null if not found
         ParseToken specialToken = getNextSpecialTokenImpl();
@@ -391,7 +392,7 @@ public class Tokenizer {
     /**
      * Processes and returns next special token.
      */
-    protected ParseToken getNextSpecialTokenImpl()
+    private ParseToken getNextSpecialTokenImpl()
     {
         // Skip whitespace
         skipWhiteSpace();
