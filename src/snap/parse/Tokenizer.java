@@ -58,7 +58,12 @@ public class Tokenizer {
     /**
      * Sets the array of regexes.
      */
-    public void setRegexes(Regex[] theRegexes)  { _regexes = theRegexes; }
+    public void setRegexes(Regex[] theRegexes)
+    {
+        _regexes = theRegexes;
+        if (_codeComments)
+            _regexes = ArrayUtils.add(_regexes, new Regex(SINGLE_LINE_COMMENT, "//.*", false));
+    }
 
     /**
      * Returns the current tokenizer input.
@@ -127,6 +132,14 @@ public class Tokenizer {
     public final char nextCharAt(int anOffset)  { return _input.charAt(_charIndex + anOffset); }
 
     /**
+     * Returns whether next char is equal to given char.
+     */
+    public boolean nextCharEquals(char aChar)
+    {
+        return  hasChar() && nextChar() == aChar;
+    }
+
+    /**
      * Returns whether next chars start with given string.
      */
     public boolean nextCharsStartWith(CharSequence startChars)
@@ -156,7 +169,7 @@ public class Tokenizer {
 
         // If newline, look for Windows sister newline char and eat that too and clear token line
         if (eatChar == '\n' || eatChar == '\r') {
-            if (eatChar == '\r' && hasChar() && nextChar() == '\n')
+            if (eatChar == '\r' && nextCharEquals('\n'))
                 _charIndex++;
             _tokenLine = null;
             getTokenLine();
@@ -363,62 +376,14 @@ public class Tokenizer {
 
     /**
      * Processes and returns a special token if found.
-     * If more than one in a row, returns last one, which points to previous ones.
      */
     private ParseToken getNextSpecialToken()
-    {
-        // Get next special token - just return null if not found
-        ParseToken specialToken = getNextSpecialTokenImpl();
-        if (specialToken == null)
-            return null;
-
-        // Keep getting special tokens until we have the last one
-        while (true) {
-
-            // Look for another special token - just stop if not found
-            ParseToken nextSpecialToken = getNextSpecialTokenImpl();
-            if (nextSpecialToken == null)
-                break;
-
-            // Set NextSpecialToken.SpecialToken to current loop token
-            //nextSpecialToken._specialToken = specialToken;
-            specialToken = nextSpecialToken;
-        }
-
-        // Return
-        return specialToken;
-    }
-
-    /**
-     * Processes and returns next special token.
-     */
-    private ParseToken getNextSpecialTokenImpl()
     {
         // Skip whitespace
         skipWhiteSpace();
 
-        // Look for standard Java single/multi line comments tokens
-        if (_codeComments)
-            return getCodeCommentToken();
-
-        // Return not found
-        return null;
-    }
-
-    /**
-     * Processes and returns a single line comment token if next up in input.
-     */
-    protected ParseToken getCodeCommentToken()
-    {
-        // If next two chars are single line comment, return single line comment token for chars to line end
-        if (nextCharsStartWith("//")) {
-            int tokenStart = _charIndex;
-            eatCharsTillLineEnd();
-            return createTokenForProps(SINGLE_LINE_COMMENT, null, tokenStart, _charIndex);
-        }
-
-        // If next two chars are multi line comment (/*) prefix, return token
-        if (nextCharsStartWith("/*"))
+        // Look for standard Java multi line comments tokens
+        if (_codeComments && nextCharsStartWith("/*"))
             return getMultiLineCommentTokenMore();
 
         // Return not found
@@ -438,7 +403,7 @@ public class Tokenizer {
         // Gobble chars until multi-line comment termination or input end
         while (hasChar()) {
             char loopChar = eatChar();
-            if (loopChar == '*' && hasChar() && nextChar() == '/') {
+            if (loopChar == '*' && nextCharEquals('/')) {
                 eatChar();
                 break;
             }

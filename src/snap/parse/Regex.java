@@ -40,6 +40,16 @@ public class Regex {
     }
 
     /**
+     * Constructor with given pattern and name.
+     */
+    public Regex(String aName, String aPattern, boolean isLiteral)
+    {
+        _name = aName != null ? aName.intern() : null;
+        _pattern = aPattern.intern();
+        _literal = isLiteral;
+    }
+
+    /**
      * Returns the regex name.
      */
     public String getName()  { return _name; }

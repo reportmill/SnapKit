@@ -72,38 +72,29 @@ public class XMLParser extends Parser {
         {
             // Mark content start and skip to next element-start char
             int start = _charIndex;
-            while (!isNext("<") && hasChar())
+            while (!nextCharEquals('<') && hasChar())
                 eatChar();
 
             // Handle CDATA: Gobble until close and return string
-            if (isNext("<![CDATA[")) {
-                _charIndex += "<![CDATA[".length();
-                if (Character.isWhitespace(_charIndex)) eatChar();
+            if (nextCharsStartWith("<![CDATA[")) {
+                eatChars("<![CDATA[".length());
+                if (Character.isWhitespace(nextChar()))
+                    eatChar();
                 start = _charIndex;
-                while (!isNext("]]>")) eatChar();
+                while (!nextCharsStartWith("]]>"))
+                    eatChar();
                 String str = getInput().subSequence(start, _charIndex).toString();
-                _charIndex += "]]>".length();
+                eatChars("]]>".length());
                 return str;
             }
 
             // If next char isn't close tag, return null (assumes we hit child element instead of text content)
-            if (!isNext("</"))
+            if (!nextCharsStartWith("</"))
                 return null;
 
             // Return string for content
             String str = getInput().subSequence(start, _charIndex).toString();
             return decodeXMLString(str);
-        }
-
-        /** Returns whether the given string is up next. */
-        public boolean isNext(String aStr)
-        {
-            if (_charIndex + aStr.length() > length())
-                return false;
-            for (int i = 0, iMax = aStr.length(); i < iMax;i++)
-                if (charAt(_charIndex+i) != aStr.charAt(i))
-                    return false;
-            return true;
         }
     }
 
