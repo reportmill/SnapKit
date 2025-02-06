@@ -5,6 +5,7 @@ package snap.parse;
 import snap.util.ArrayUtils;
 import snap.util.CharSequenceUtils;
 import java.util.regex.Matcher;
+import java.util.stream.Stream;
 
 /**
  * A class to extract tokens from a char sequence.
@@ -15,16 +16,16 @@ public class Tokenizer {
     private Regex[] _regexes = new Regex[0];
 
     // The tokenizer input
-    private CharSequence  _input;
+    private CharSequence _input;
 
     // The input length
-    private int  _length;
+    private int _length;
 
     // The current char index
-    protected int  _charIndex;
+    protected int _charIndex;
 
     // A map of char to matchers
-    private Regex[][]  _charMatchers = new Regex[128][];
+    private Regex[][] _charMatchers = new Regex[128][];
 
     // The current token line
     protected TokenLine _tokenLine;
@@ -37,6 +38,12 @@ public class Tokenizer {
 
     // Whether to ignore special tokens
     private boolean _specialTokens;
+
+    // The last token
+    private ParseToken _lastToken;
+
+    // Multiline regexes
+    private Regex[] _multilineRegexes;
 
     // Constants for common special token names
     public static final String SINGLE_LINE_COMMENT = "SingleLineComment";
@@ -79,6 +86,8 @@ public class Tokenizer {
         if (_codeComments && !aGrammar.isRuleSetForName(SINGLE_LINE_COMMENT)) {
             ParseRule singleLineCommentRule = aGrammar.addRuleForName(SINGLE_LINE_COMMENT);
             singleLineCommentRule.setPattern("//.*");
+            ParseRule multiLineCommentRule = aGrammar.addRuleForName(MULTI_LINE_COMMENT);
+            multiLineCommentRule.setPattern("/*");
         }
 
         Regex[] regexes = aGrammar.getAllRegexes();
@@ -98,6 +107,7 @@ public class Tokenizer {
         // Set input
         _input = anInput;
         _length = _input.length();
+        _lastToken = null;
 
         // Reset char index
         setCharIndex(0);
@@ -110,6 +120,8 @@ public class Tokenizer {
         // Reset matchers
         for (Regex regex : _regexes)
             regex.getMatcher().reset(_input);
+        if (_multilineRegexes != null)
+            Stream.of(_multilineRegexes).forEach(regex -> regex.getMatcher().reset(_input));
     }
 
     /**
@@ -236,15 +248,28 @@ public class Tokenizer {
     }
 
     /**
+     * Returns the last token.
+     */
+    public ParseToken getLastToken()  { return _lastToken; }
+
+    /**
+     * Sets the last token.
+     */
+    public void setLastToken(ParseToken aToken)
+    {
+        _lastToken = aToken;
+    }
+
+    /**
      * Returns the next token.
      */
     public ParseToken getNextToken()
     {
-        ParseToken nextToken = getNextTokenImpl();
+        ParseToken nextToken = _lastToken = getNextTokenImpl();
 
         // If next token is special token and those are ignored, get next token
         while (nextToken != null && nextToken.isSpecial() && !_specialTokens)
-            nextToken = getNextTokenImpl();
+            nextToken = _lastToken = getNextTokenImpl();
 
         return nextToken;
     }
@@ -254,18 +279,17 @@ public class Tokenizer {
      */
     protected ParseToken getNextTokenImpl()
     {
-        // Look for special tokens
-        ParseToken specialToken = getNextSpecialToken();
-        if (specialToken != null)
-            return specialToken;
+        // If no chars, just return
+        if (!hasChar())
+            return null;
 
         // Get list of matchers for next char
-        char nextChar = hasChar() ? nextChar() : 0;
+        char nextChar = nextChar();
         Regex[] regexes = nextChar < 128 ? getRegexesForStartChar(nextChar) : getRegexes();
-
-        // Iterate over regular expressions to find best match
         Regex match = null;
         int matchEnd = _charIndex;
+
+        // Iterate over regular expressions to find best match
         for (Regex regex : regexes) {
 
             // Get matcher
@@ -282,12 +306,8 @@ public class Tokenizer {
             }
         }
 
-        // If no match, return null
+        // If no match, return bogus token
         if (match == null) {
-
-            // If no more chars, just return null
-            if (!hasChar())
-                return null;
 
             // Get next chars and let tokenizerFailed() decide whether to throw, stop or provide alt token
             String nextChars = getInput().subSequence(_charIndex, Math.min(_charIndex + 30, length())).toString();
@@ -316,6 +336,10 @@ public class Tokenizer {
      */
     private Regex[] getRegexesForStartChar(char aChar)
     {
+        // If LastToken is MultiLineComment, use special regexes
+        if (_lastToken != null && _lastToken.getName() == MULTI_LINE_COMMENT && !_lastToken.getPattern().equals("*/"))
+            return _multilineRegexes;
+
         // Get cached regex array for char, just return if found
         Regex[] regexesForChar = _charMatchers[aChar];
         if (regexesForChar != null)
@@ -384,46 +408,16 @@ public class Tokenizer {
     /**
      * Turns on Java style comments.
      */
-    public void enableCodeComments()  { _codeComments = true; }
+    public void enableCodeComments()
+    {
+        _codeComments = true;
+        _multilineRegexes = new Regex[2];
+        _multilineRegexes[0] = new Regex(MULTI_LINE_COMMENT, "(?s).*?(?=\\*/|\\z)");
+        _multilineRegexes[1] = new Regex(MULTI_LINE_COMMENT, "*/");
+    }
 
     /**
      * Turns on special tokens.
      */
     public void enableSpecialTokens()  { _specialTokens = true; }
-
-    /**
-     * Processes and returns a special token if found.
-     */
-    private ParseToken getNextSpecialToken()
-    {
-        // Look for standard Java multi line comments tokens
-        if (_codeComments && nextCharsStartWith("/*"))
-            return getMultiLineCommentTokenMore();
-
-        // Return not found
-        return null;
-    }
-
-    /**
-     * Returns a token from the current char to multi-line comment termination or input end.
-     */
-    public ParseToken getMultiLineCommentTokenMore()
-    {
-        // Mark start of MultiLineComment token (just return null if at input end)
-        int start = _charIndex;
-        if (start == length())
-            return null;
-
-        // Gobble chars until multi-line comment termination or input end
-        while (hasChar()) {
-            char loopChar = eatChar();
-            if (loopChar == '*' && nextCharEquals('/')) {
-                eatChar();
-                break;
-            }
-        }
-
-        // Create and return token
-        return createTokenForProps(MULTI_LINE_COMMENT, null, start, _charIndex);
-    }
 }

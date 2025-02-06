@@ -144,7 +144,7 @@ public class Regex {
     {
         if (pattern.length() < 3)
             return true;
-        if (pattern.equals("\\s+") || pattern.equals("//.*"))
+        if (pattern.equals("\\s+") || pattern.equals("//.*") || pattern.contains(".+") || pattern.contains(".*"))
             return false;
         if (pattern.indexOf('[') < 0)
             return true;
