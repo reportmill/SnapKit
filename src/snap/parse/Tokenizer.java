@@ -45,10 +45,15 @@ public class Tokenizer {
     // Multiline regexes
     private Regex[] _multilineRegexes;
 
+    // TextBlock regexes
+    private Regex[] _textBlockRegexes;
+
     // Constants for common special token names
+    public static final String SKIP = "Skip";
     public static final String SINGLE_LINE_COMMENT = "SingleLineComment";
     public static final String MULTI_LINE_COMMENT = "MultiLineComment";
-    public static final String SKIP = "Skip";
+    public static final String TEXT_BLOCK = "TextBlock";
+    public static final String TEXT_BLOCK_PATTERN = "\"\"\"";
 
     /**
      * Constructor.
@@ -88,6 +93,17 @@ public class Tokenizer {
             singleLineCommentRule.setPattern("//.*");
             ParseRule multiLineCommentRule = aGrammar.addRuleForName(MULTI_LINE_COMMENT);
             multiLineCommentRule.setPattern("/*");
+            _multilineRegexes = new Regex[2];
+            _multilineRegexes[0] = new Regex(MULTI_LINE_COMMENT, "(?s).*?(?=\\*/|\\z)");
+            _multilineRegexes[1] = new Regex(MULTI_LINE_COMMENT, "*/");
+        }
+
+        // If no TextBlock rule, add it
+        if (aGrammar.isRuleSetForName(TEXT_BLOCK)) {
+            aGrammar.getRuleForName(TEXT_BLOCK).setPattern(TEXT_BLOCK_PATTERN);
+            _textBlockRegexes = new Regex[2];
+            _textBlockRegexes[0] = new Regex(TEXT_BLOCK, "(?s).*?(?=\"\"\"|\\z)");
+            _textBlockRegexes[1] = new Regex("TextBlockEnd", TEXT_BLOCK_PATTERN);
         }
 
         Regex[] regexes = aGrammar.getAllRegexes();
@@ -122,6 +138,8 @@ public class Tokenizer {
             regex.getMatcher().reset(_input);
         if (_multilineRegexes != null)
             Stream.of(_multilineRegexes).forEach(regex -> regex.getMatcher().reset(_input));
+        if (_textBlockRegexes != null)
+            Stream.of(_textBlockRegexes).forEach(regex -> regex.getMatcher().reset(_input));
     }
 
     /**
@@ -337,8 +355,13 @@ public class Tokenizer {
     private Regex[] getRegexesForStartChar(char aChar)
     {
         // If LastToken is MultiLineComment, use special regexes
-        if (_lastToken != null && _lastToken.getName() == MULTI_LINE_COMMENT && !_lastToken.getPattern().equals("*/"))
-            return _multilineRegexes;
+        if (_lastToken != null) {
+            String lastTokenName = _lastToken.getName();
+            if (lastTokenName == MULTI_LINE_COMMENT && !_lastToken.getPattern().equals("*/"))
+                return _multilineRegexes;
+            if (lastTokenName == TEXT_BLOCK)
+                return _textBlockRegexes;
+        }
 
         // Get cached regex array for char, just return if found
         Regex[] regexesForChar = _charMatchers[aChar];
@@ -408,13 +431,7 @@ public class Tokenizer {
     /**
      * Turns on Java style comments.
      */
-    public void enableCodeComments()
-    {
-        _codeComments = true;
-        _multilineRegexes = new Regex[2];
-        _multilineRegexes[0] = new Regex(MULTI_LINE_COMMENT, "(?s).*?(?=\\*/|\\z)");
-        _multilineRegexes[1] = new Regex(MULTI_LINE_COMMENT, "*/");
-    }
+    public void enableCodeComments()  { _codeComments = true; }
 
     /**
      * Turns on special tokens.
