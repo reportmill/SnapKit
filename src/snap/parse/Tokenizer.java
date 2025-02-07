@@ -53,6 +53,7 @@ public class Tokenizer {
     public static final String SINGLE_LINE_COMMENT = "SingleLineComment";
     public static final String MULTI_LINE_COMMENT = "MultiLineComment";
     public static final String TEXT_BLOCK = "TextBlock";
+    public static final String TEXT_BLOCK_MORE = "TextBlockMore";
     public static final String TEXT_BLOCK_PATTERN = "\"\"\"";
 
     /**
@@ -102,8 +103,8 @@ public class Tokenizer {
         if (aGrammar.isRuleSetForName(TEXT_BLOCK)) {
             aGrammar.getRuleForName(TEXT_BLOCK).setPattern(TEXT_BLOCK_PATTERN);
             _textBlockRegexes = new Regex[2];
-            _textBlockRegexes[0] = new Regex(TEXT_BLOCK, "(?s).*?(?=\"\"\"|\\z)");
-            _textBlockRegexes[1] = new Regex("TextBlockEnd", TEXT_BLOCK_PATTERN);
+            _textBlockRegexes[0] = new Regex(TEXT_BLOCK_MORE, "(?s).*?(?=\"\"\"|\\z)");
+            _textBlockRegexes[1] = new Regex(TEXT_BLOCK_MORE, TEXT_BLOCK_PATTERN);
         }
 
         Regex[] regexes = aGrammar.getAllRegexes();
@@ -359,7 +360,7 @@ public class Tokenizer {
             String lastTokenName = _lastToken.getName();
             if (lastTokenName == MULTI_LINE_COMMENT && !_lastToken.getPattern().equals("*/"))
                 return _multilineRegexes;
-            if (lastTokenName == TEXT_BLOCK)
+            if (lastTokenName == TEXT_BLOCK || lastTokenName == TEXT_BLOCK_MORE && !_lastToken.getPattern().equals(TEXT_BLOCK_PATTERN))
                 return _textBlockRegexes;
         }
 

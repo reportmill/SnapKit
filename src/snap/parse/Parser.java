@@ -371,8 +371,15 @@ public class Parser {
             // Handle Pattern
             case Pattern: {
 
-                // If no match, just return
-                if (aRule.getPattern() != token.getPattern())
+                // If named rule and token name doesn't match, just return
+                String ruleName = aRule.getName();
+                if (ruleName != null) {
+                    if (ruleName != token.getName())
+                        return null;
+                }
+
+                // If not named rule and pattern doesn't match, just return
+                else if (aRule.getPattern() != token.getPattern())
                     return null;
 
                 // Otherwise, create node, send handler parsedOne and parsedAll and return
