@@ -89,11 +89,13 @@ public class Tokenizer {
         }
 
         // If no SingleLineComment rule, add it
-        if (_codeComments && !aGrammar.isRuleSetForName(SINGLE_LINE_COMMENT)) {
-            ParseRule singleLineCommentRule = aGrammar.addRuleForName(SINGLE_LINE_COMMENT);
-            singleLineCommentRule.setPattern("//.*");
-            ParseRule multiLineCommentRule = aGrammar.addRuleForName(MULTI_LINE_COMMENT);
-            multiLineCommentRule.setPattern("/*");
+        if (_codeComments) {
+             if (!aGrammar.isRuleSetForName(SINGLE_LINE_COMMENT)) {
+                 ParseRule singleLineCommentRule = aGrammar.addRuleForName(SINGLE_LINE_COMMENT);
+                 singleLineCommentRule.setPattern("//.*");
+                 ParseRule multiLineCommentRule = aGrammar.addRuleForName(MULTI_LINE_COMMENT);
+                 multiLineCommentRule.setPattern("/*");
+             }
             _multilineRegexes = new Regex[2];
             _multilineRegexes[0] = new Regex(MULTI_LINE_COMMENT, "(?s).*?(?=\\*/|\\z)");
             _multilineRegexes[1] = new Regex(MULTI_LINE_COMMENT, "*/");
