@@ -5,6 +5,7 @@ package snap.text;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.parse.ParseToken;
+import snap.parse.Tokenizer;
 import snap.util.StringUtils;
 
 /**
@@ -407,6 +408,17 @@ public class TextToken implements ParseToken, Cloneable {
         StringUtils.appendProp(sb, "X", _x);
         StringUtils.appendProp(sb, "String", getString());
         return sb.toString();
+    }
+
+    /**
+     * Returns whether token is special token.
+     * This is needed because of CJ error !!!!!!!!
+     */
+    @Override
+    public boolean isSpecial()
+    {
+        String name = getName();
+        return name == Tokenizer.SINGLE_LINE_COMMENT || name == Tokenizer.MULTI_LINE_COMMENT;
     }
 
     /**
