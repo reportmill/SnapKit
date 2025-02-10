@@ -357,6 +357,19 @@ public class ViewUpdater {
     }
 
     /**
+     * Returns whether view is animating or inside animating view.
+     */
+    public boolean isViewAnimating(View aView)
+    {
+        for (ViewAnim viewAnim : _viewAnims) {
+            View view = viewAnim.getView();
+            if (aView == view || aView.isAncestor(view))
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * Adds a ViewUpdater listener.
      */
     public void addListener(ViewUpdater.Listener aLsnr)

@@ -2712,6 +2712,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
+     * Returns whether view is in animation.
+     */
+    public boolean isAnimActive()
+    {
+        ViewUpdater updater = getUpdater();
+        return updater != null && updater.isViewAnimating(this);
+    }
+
+    /**
      * Returns the anim for the given time.
      */
     public ViewAnim getAnim(int aTime)

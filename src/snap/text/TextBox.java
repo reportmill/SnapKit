@@ -65,8 +65,6 @@ public class TextBox extends TextBlock {
     public TextBox(TextBlock sourceText)
     {
         super(sourceText.isRichText());
-        _defaultTextStyle = sourceText._defaultTextStyle;
-        _defaultLineStyle = sourceText._defaultLineStyle;
         setSourceText(sourceText);
     }
 
@@ -88,6 +86,10 @@ public class TextBox extends TextBlock {
             _sourceText.removePropChangeListener(_textBlockLsnr);
         _sourceText = aTextBlock;
         _sourceText.addPropChangeListener(_textBlockLsnr);
+
+        // Sync TextStyle/LineStyle
+        super.setDefaultTextStyle(aTextBlock.getDefaultTextStyle());
+        super.setDefaultLineStyle(aTextBlock.getDefaultLineStyle());
 
         // Update all
         updateTextAll();

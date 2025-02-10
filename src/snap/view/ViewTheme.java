@@ -205,6 +205,7 @@ public class ViewTheme {
 
         // TextField
         ViewStyle textFieldStyle = getViewStyleForClass(TextField.class);
+        textFieldStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
         textFieldStyle.setPropValue(View.Padding_Prop, new Insets(3));
         textFieldStyle.setPropValue(View.Fill_Prop, getContentColor());
         textFieldStyle.setPropValue(View.Border_Prop, getContentBorder());

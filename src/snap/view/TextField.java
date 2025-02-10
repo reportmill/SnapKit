@@ -181,6 +181,10 @@ public class TextField extends ParentView {
     {
         if (aValue == isMultiline()) return;
         firePropChange(Multiline_Prop, _multiline, _multiline = aValue);
+
+        // This can't be good
+        if (getAlign() == getPropDefault(Align_Prop) && isPrefHeightSet())
+            setAlign(Pos.TOP_LEFT);
     }
 
     /**
@@ -521,7 +525,7 @@ public class TextField extends ParentView {
         // Promote to WrapLines if text is long
         if (!_textAdapter.isWrapLines()) {
             double prefW = _textAdapter.getPrefWidth();
-            if (prefW > textBounds.width)
+            if (prefW > textBounds.width && !isAnimActive())
                 runLater(() -> _textAdapter.setWrapLines(true));
         }
     }
@@ -537,7 +541,7 @@ public class TextField extends ParentView {
         double viewH = getHeight();
         double textX = ins.left + _promptLabel.getTextBounds().x;
         double textY = ins.top;
-        double textW = viewW - ins.getWidth();
+        double textW = Math.max(viewW - ins.getWidth(), 0);
         double prefH = _textAdapter.getPrefHeight(textW);
         double textH = Math.min(prefH, viewH - ins.getHeight());
 
