@@ -509,7 +509,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         firePropChange("ShowHeaderCol", _showHeaderCol, _showHeaderCol = aValue);
 
         // Add/remove header
-        _scrollGroup.setLeftView(aValue ? getHeaderCol() : null);
+        _scrollGroup.setLeftView(aValue ? getHeaderColBox() : null);
     }
 
     /**
@@ -531,6 +531,20 @@ public class TableView <T> extends ParentView implements Selectable<T> {
 
         // Return
         return _headerCol;
+    }
+
+    /**
+     * Returns a header col box to add separator line.
+     */
+    private RowView getHeaderColBox()
+    {
+        RowView headerColBox = new RowView();
+        headerColBox.setFillHeight(true);
+        LineView line = new LineView(.5,0,.5,10);
+        line.setPrefWidth(1);
+        line.setBorder(Color.LIGHTGRAY,1);
+        headerColBox.setChildren(getHeaderCol(), line);
+        return headerColBox;
     }
 
     /**

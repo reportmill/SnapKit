@@ -20,9 +20,6 @@ public class ScrollGroup extends ParentView {
     // The view that holds the top scroll row and divider line
     private ColView _topScrollerCol;
 
-    // The view that holds the left scroll col and divider line
-    private RowView _leftScrollerRow;
-
     /**
      * Creates a ScrollGroup.
      */
@@ -138,13 +135,7 @@ public class ScrollGroup extends ParentView {
         ViewUtils.bind(scroller, Scroller.ScrollY_Prop, _leftScroller, true);
 
         // Create LeftScrollRow and add
-        _leftScrollerRow = new RowView();
-        _leftScrollerRow.setFillHeight(true);
-        LineView line = new LineView(.5,0,.5,10);
-        line.setPrefWidth(1);
-        line.setBorder(Color.LIGHTGRAY,1);
-        _leftScrollerRow.setChildren(_leftScroller, line);
-        addChild(_leftScrollerRow);
+        addChild(_leftScroller);
 
         // Return
         return _leftScroller;
@@ -155,7 +146,7 @@ public class ScrollGroup extends ParentView {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        return BorderView.getPrefWidth(this, _scrollView, _topScrollerCol, null, null, _leftScrollerRow, aH);
+        return BorderView.getPrefWidth(this, _scrollView, _topScrollerCol, null, null, _leftScroller, aH);
     }
 
     /**
@@ -163,7 +154,7 @@ public class ScrollGroup extends ParentView {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        return BorderView.getPrefHeight(this, _scrollView, _topScrollerCol, null, null, _leftScrollerRow, aW);
+        return BorderView.getPrefHeight(this, _scrollView, _topScrollerCol, null, null, _leftScroller, aW);
     }
 
     /**
@@ -171,7 +162,7 @@ public class ScrollGroup extends ParentView {
      */
     protected void layoutImpl()
     {
-        BorderView.layout(this, _scrollView, _topScrollerCol, null, null, _leftScrollerRow);
+        BorderView.layout(this, _scrollView, _topScrollerCol, null, null, _leftScroller);
     }
 
     /**
@@ -181,7 +172,7 @@ public class ScrollGroup extends ParentView {
     {
         if (_topScroller == null) return;
         Insets margin = _topScroller.getMargin();
-        margin = new Insets(margin.top, margin.right, margin.bottom, _leftScrollerRow.getWidth());
+        margin = new Insets(margin.top, margin.right, margin.bottom, _leftScroller.getWidth());
         _topScroller.setMargin(margin);
     }
 
