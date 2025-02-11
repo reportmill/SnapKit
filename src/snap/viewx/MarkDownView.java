@@ -41,10 +41,10 @@ public class MarkDownView extends ChildView {
     private static final Insets GENERAL_PADDING = new Insets(16, 16, 16, 16);
     private static final Insets NO_MARGIN = Insets.EMPTY;
     private static final Insets INLINE_PADDING = new Insets(8, 8, 8, 8);
-    private static final Color BLOCK_COLOR = new Color(.96, .97, .98);
-    private static final Color BLOCK_BORDER_COLOR = BLOCK_COLOR.blend(Color.BLACK, .15);
-    private static final Border BLOCK_BORDER = Border.createLineBorder(BLOCK_BORDER_COLOR, 1);
-    private static final Color SEPARATOR_COLOR = BLOCK_COLOR.blend(Color.BLACK, .1);
+    private static Color BLOCK_COLOR = new Color(.96, .97, .98);
+    private static Color BLOCK_BORDER_COLOR = BLOCK_COLOR.blend(Color.BLACK, .15);
+    private static Border BLOCK_BORDER = Border.createLineBorder(BLOCK_BORDER_COLOR, 1);
+    private static Color SEPARATOR_COLOR = BLOCK_COLOR.blend(Color.BLACK, .1);
 
     /**
      * Constructor.
@@ -53,7 +53,7 @@ public class MarkDownView extends ChildView {
     {
         super();
         setPadding(DOC_PADDING);
-        setFill(Color.WHITE);
+        setFill(ViewTheme.get().getContentColor());
     }
 
     /**
