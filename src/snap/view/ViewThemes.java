@@ -7,7 +7,7 @@ import snap.gfx.Color;
 public class ViewThemes {
 
     // Cached themes
-    private static ViewTheme _light, _classic;
+    private static ViewTheme _light, _dark, _classic;
 
     /**
      * Returns the light theme.
@@ -16,6 +16,15 @@ public class ViewThemes {
     {
         if (_light != null) return _light;
         return _light = new LightTheme();
+    }
+
+    /**
+     * Returns the dark theme.
+     */
+    public static ViewTheme getDark()
+    {
+        if (_dark != null) return _dark;
+        return _dark = new DarkTheme();
     }
 
     /**
@@ -35,7 +44,7 @@ public class ViewThemes {
         // Set new theme
         switch (aName) {
             case "Light": return getLight();
-            case "Dark": return new ViewThemes.DarkTheme();
+            case "Dark": return getDark();
             case "LightBlue": return new LightBlueTheme();
             case "Classic": return getClassic();
             case "BlackAndWhite": return new ViewThemes.BlackAndWhiteTheme();

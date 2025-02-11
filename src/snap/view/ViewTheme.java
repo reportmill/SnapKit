@@ -289,6 +289,11 @@ public class ViewTheme {
     public static ViewTheme getLight()  { return ViewThemes.getLight(); }
 
     /**
+     * Returns the dark theme.
+     */
+    public static ViewTheme getDark()  { return ViewThemes.getDark(); }
+
+    /**
      * Returns the classic theme.
      */
     public static ViewTheme getClassic()  { return ViewThemes.getClassic(); }
