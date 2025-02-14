@@ -12,10 +12,10 @@ import snap.text.TextBlock;
 import snap.text.TextDoc;
 import snap.text.TextLine;
 import snap.text.TextSel;
-import snap.util.ArrayUtils;
 import snap.util.Convert;
+import snap.util.ListUtils;
 import snap.view.*;
-import java.util.stream.Stream;
+import java.util.List;
 
 /**
  * A panel for editing text files.
@@ -108,8 +108,8 @@ public class TextPane extends ViewOwner {
     protected void initUI()
     {
         // Disable all toolbar button focus
-        ButtonBase[] toolBarButtons = ArrayUtils.filterByClass(_toolBarPane.getChildren(), ButtonBase.class);
-        Stream.of(toolBarButtons).forEach(button -> button.setFocusable(false));
+        List<ButtonBase> toolBarButtons = ListUtils.filterByClass(_toolBarPane.getChildren(), ButtonBase.class);
+        toolBarButtons.forEach(button -> button.setFocusable(false));
 
         // Get text area and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
         _textArea = getView("TextArea", TextArea.class);

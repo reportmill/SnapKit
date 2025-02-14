@@ -31,7 +31,7 @@ public class MenuBar extends ParentView {
      */
     public Menu[] getMenus()
     {
-        View[] children = getChildren();
+        View[] children = getChildrenArray();
         return ArrayUtils.filterByClass(children, Menu.class);
     }
 

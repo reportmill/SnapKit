@@ -45,7 +45,7 @@ public class GridView extends ChildView {
         if (_cellPrefWidth>0) return _cellPrefWidth;
 
         if (isUniform()) {
-            View cell = getViewList().getFirst();
+            View cell = getChildren().getFirst();
             return cell!=null ? cell.getPrefWidth() : 0;
         }
 
@@ -64,7 +64,7 @@ public class GridView extends ChildView {
         if (_cellPrefHeight>0) return _cellPrefHeight;
 
         if (isUniform()) {
-            View cell = getViewList().getFirst();
+            View cell = getChildren().getFirst();
             return cell!=null ? cell.getPrefHeight() : 0;
         }
 

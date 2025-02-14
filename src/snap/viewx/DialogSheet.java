@@ -40,7 +40,7 @@ public class DialogSheet extends DialogBox {
         _hostView.setClipToBounds(true);
 
         // Make current HostView.Children invisible to mouse clicks
-        _hostChildren = _hostView.getChildren().clone();
+        _hostChildren = _hostView.getChildrenArray().clone();
         for (View child : _hostChildren)
             child.setPickable(false);
 

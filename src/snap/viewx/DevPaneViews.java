@@ -496,7 +496,7 @@ public class DevPaneViews extends ViewOwner {
         public List<View> getChildren(View aParent)
         {
             ParentView parent = (ParentView) aParent;
-            return Arrays.asList(parent.getChildren());
+            return parent.getChildren();
         }
 
         /** Returns the text to be used for given item. */

@@ -384,7 +384,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     @Override
     protected void setOwnerChildren(ViewOwner anOwner)
     {
-        View[] children = getChildren();
+        ViewList children = getChildren();
         for (View child : children) {
             if (child == _tabBar)
                 _tabBar.setOwnerChildren(anOwner);

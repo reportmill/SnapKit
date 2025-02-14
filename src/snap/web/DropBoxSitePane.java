@@ -32,7 +32,7 @@ public class DropBoxSitePane extends WebSitePaneX {
 
         // Get RowView for normal DirComboBox
         RowView rowView = _dirComboBox.getParent(RowView.class);
-        View[] children = rowView.getChildren();
+        View[] children = rowView.getChildrenArray();
         for (int i = 1; i < children.length; i++)
             children[i].setVisible(false);
 

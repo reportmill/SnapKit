@@ -9,7 +9,6 @@ import snap.geom.VPos;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropNode;
-import snap.props.PropObject;
 import snap.util.*;
 
 /**
@@ -99,7 +98,7 @@ public class SpringView extends ChildView {
      */
     protected void layoutImpl()
     {
-        View[] children = getChildren();
+        ViewList children = getChildren();
         double pw = getWidth();
         double ph = getHeight();
         if (pw == _oldW && ph == _oldH)

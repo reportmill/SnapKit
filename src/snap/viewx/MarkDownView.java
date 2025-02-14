@@ -225,12 +225,12 @@ public class MarkDownView extends ChildView {
     {
         // Create view for mixed node
         RowView linkedNodeView = createViewForMixedNode(linkNode);
-        View[] linkNodeViewChildren = linkedNodeView.getChildren();
+        ViewList linkNodeViewChildren = linkedNodeView.getChildren();
 
         // Add link to children
         String urlAddr = linkNode.getOtherText();
         if (urlAddr != null)
-            Stream.of(linkNodeViewChildren).forEach(childView -> addLinkToLinkView(childView, urlAddr));
+            linkNodeViewChildren.forEach(childView -> addLinkToLinkView(childView, urlAddr));
 
         // Return
         return linkedNodeView;

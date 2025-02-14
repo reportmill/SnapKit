@@ -431,9 +431,9 @@ public class DialogBox extends FormBuilder {
     protected void addOptionButtons()
     {
         // If there is only a label in RootView, make it at least an inch tall
-        View[] formViewChildren = _formView.getChildren();
-        if (formViewChildren.length == 1 && formViewChildren[0] instanceof Label)
-            formViewChildren[0].setMinHeight(60);
+        ViewList formViewChildren = _formView.getChildren();
+        if (formViewChildren.getFirst() instanceof Label)
+            formViewChildren.getFirst().setMinHeight(60);
 
         // Add OK/Cancel buttons
         String[] titles = getOptions();
@@ -441,7 +441,7 @@ public class DialogBox extends FormBuilder {
         ArrayUtils.reverse(titlesReversed);
         _buttonBox = addButtons(titlesReversed, titlesReversed);
         _buttonBox.setPadding(15, 15, 15, 15); //_buttonBox.setAlign(Pos.CENTER_RIGHT);
-        View[] buttonBoxButtons = _buttonBox.getChildren();
+        ViewList buttonBoxButtons = _buttonBox.getChildren();
         for (View button : buttonBoxButtons) {
             button.setMinWidth(100);
             button.setMinHeight(24);

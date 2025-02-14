@@ -63,7 +63,7 @@ public class JMDViewer {
         _markDownView.setGrowWidth(true);
 
         // Iterate over markdown view runnables and run methods
-        View[] children = _markDownView.getChildren();
+        ViewList children = _markDownView.getChildren();
         int runnableCount = 0;
         for (View child : children) {
             if (Objects.equals(child.getName(), "Runnable"))

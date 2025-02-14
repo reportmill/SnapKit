@@ -396,7 +396,7 @@ public class ViewUtils {
     {
         ParentView par = aView instanceof ParentView ? (ParentView) aView : null;
         if (par == null) return null;
-        View[] children = par.getChildren();
+        View[] children = par.getChildrenArray();
 
         for (int i = children.length - 1; i >= 0; i--) {
             View child = children[i];
@@ -445,7 +445,7 @@ public class ViewUtils {
     {
         // Get view as parent, get children
         ParentView parent = aView instanceof ParentView ? (ParentView) aView : null; if (parent == null) return null;
-        View[] children = parent.getChildren();
+        View[] children = parent.getChildrenArray();
 
         // Iterate over children
         for (int i = children.length - 1; i >= 0; i--) {

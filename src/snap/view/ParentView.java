@@ -9,7 +9,6 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropSet;
 import snap.util.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,7 +51,7 @@ public class ParentView extends View {
     /**
      * Returns the ViewList that holds children.
      */
-    public ViewList getViewList()  { return _children; }
+    public ViewList getChildren()  { return _children; }
 
     /**
      * Returns the number of children associated with this view.
@@ -67,7 +66,7 @@ public class ParentView extends View {
     /**
      * Returns the array of children associated with this view.
      */
-    public View[] getChildren()  { return _children.getAll(); }
+    public View[] getChildrenArray()  { return _children.getAll(); }
 
     /**
      * Adds the given child to the end of this view's children list.
@@ -167,7 +166,7 @@ public class ParentView extends View {
     /**
      * Returns the children in paint order.
      */
-    protected View[] getChildrenInPaintOrder()  { return getChildren(); }
+    protected View[] getChildrenInPaintOrder()  { return getChildrenArray(); }
 
     /**
      * Returns the child with given name.
@@ -225,7 +224,7 @@ public class ParentView extends View {
      */
     public <E extends View> List<E> getChildrenForClass(Class<E> aClass)
     {
-        List<View> children = Arrays.asList(getChildren());
+        ViewList children = getChildren();
         return ListUtils.filterByClass(children, aClass);
     }
 
@@ -369,7 +368,7 @@ public class ParentView extends View {
             return hit;
 
         // If any child is hit, return true
-        View hview = getViewList().getViewIntersectingShape(aShape, null, null);
+        View hview = getChildren().getViewIntersectingShape(aShape, null, null);
         if (hview != null)
             return true;
         return false;

@@ -442,7 +442,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     public void updateItems()
     {
         // Add items from all visible/existing cells
-        View[] children = getChildren();
+        ViewList children = getChildren();
         for (View child : children) {
             ListCell<T> cell = child instanceof ListCell ? (ListCell<T>) child : null;
             T item = cell != null ? cell.getItem() : null;
@@ -495,7 +495,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      */
     public ListCell <T> getCellForY(double aY)
     {
-        View[] children = getChildren();
+        ViewList children = getChildren();
 
         // Iterate over children
         for (View child : children) {
