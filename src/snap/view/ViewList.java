@@ -10,7 +10,7 @@ import snap.util.ArrayUtils;
 /**
  * A class to manage a list of views.
  */
-public class ViewList {
+public class ViewList extends AbstractList<View> {
 
     // The views array
     private View[] _views = EMPTY_VIEWS_ARRAY;
@@ -40,17 +40,9 @@ public class ViewList {
     public View get(int anIndex)  { return _views[anIndex]; }
 
     /**
-     * Adds the given view to end of this list.
-     */
-    protected void add(View aView)
-    {
-        add(aView, size());
-    }
-
-    /**
      * Adds the given view to this list at given index.
      */
-    protected void add(View aView, int anIndex)
+    protected void addView(View aView, int anIndex)
     {
         _views = ArrayUtils.add(_views, aView, anIndex);
         _managed = null;
@@ -59,23 +51,12 @@ public class ViewList {
     /**
      * Remove's the view at the given index from this list.
      */
-    protected View remove(int anIndex)
+    protected View removeView(int anIndex)
     {
         View child = _views[anIndex];
         _views = ArrayUtils.remove(_views, anIndex);
         _managed = null;
         return child;
-    }
-
-    /**
-     * Removes the given view from this list.
-     */
-    protected int remove(View aView)
-    {
-        int index = indexOf(aView);
-        if (index >= 0)
-            remove(index);
-        return index;
     }
 
     /**

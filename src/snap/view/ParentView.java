@@ -93,7 +93,7 @@ public class ParentView extends View {
         aChild.setParent(this);
 
         // Add child to Children list
-        _children.add(aChild, anIndex);
+        _children.addView(aChild, anIndex);
         relayout();
         relayoutParent();
         repaint();
@@ -115,7 +115,7 @@ public class ParentView extends View {
     protected View removeChild(int anIndex)
     {
         // Remove child from children list and clear parent
-        View child = _children.remove(anIndex);
+        View child = _children.removeView(anIndex);
         child.setParent(null);
 
         // If this view has child prop listeners, clear from child
