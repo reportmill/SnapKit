@@ -1152,6 +1152,7 @@ public class TextAdapter extends PropObject {
                         redo();
                     else undo();
                     anEvent.consume(); break; // Handle command-z undo
+                case KeyCode.Y: redo(); break;
             }
         }
 
