@@ -374,7 +374,7 @@ public class Parser {
                 // If named rule and token name doesn't match, just return
                 String ruleName = aRule.getName();
                 if (ruleName != null) {
-                    if (ruleName != token.getName())
+                    if (ruleName != token.getName() && aRule.getPattern() != token.getPattern())
                         return null;
                 }
 
