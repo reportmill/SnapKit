@@ -252,13 +252,15 @@ public class ScrollBar extends View {
         double viewH = getHeight();
 
         // Paint back: Paint background gradient and outer ring
-        aPntr.setPaint(isHorizontal ? _backPntH : _backPntV);
+        aPntr.setPaint(isHorizontal ? BACK_PAINT_H : BACK_PAINT_V);
+        aPntr.setOpacity(.1);
         Shape boundsShape = getBoundsShape();
         if (boundsShape instanceof RoundRect)
             boundsShape = ((RoundRect) boundsShape).copyForPosition(isHorizontal ? Pos.BOTTOM_CENTER : Pos.CENTER_RIGHT);
         aPntr.fill(boundsShape);
-        aPntr.setColor(_backRing);
+        aPntr.setColor(BACK_BORDER_COLOR);
         aPntr.draw(boundsShape);
+        aPntr.setOpacity(1);
 
         // If too small to draw thumb or thumb is larger than view, just return
         if (isHorizontal && viewW < 20 || isVertical && viewH < 20)
@@ -275,68 +277,32 @@ public class ScrollBar extends View {
      */
     private void paintThumb(Painter aPntr)
     {
+        // Set thumb color
+        Color thumbColor = THUMB_COLOR;
+        if (_pressed || _targeted)
+            thumbColor = THUMB_COLOR_OVER;
+        aPntr.setPaint(thumbColor);
+
+        // Paint thumb shape
         Rect thumbBounds = getThumbBounds();
-        double thumbX = thumbBounds.x;
-        double thumbY = thumbBounds.y;
-        double thumbW = thumbBounds.width;
-        double thumbH = thumbBounds.height;
-        boolean isHorizontal = isHorizontal();
-        int aState = _pressed ? Button.BUTTON_PRESSED : _targeted ? Button.BUTTON_OVER : Button.BUTTON_NORMAL;
-
-        // Paint background gradient
         double borderRadius = 3;
-        RoundRect thumbRect = new RoundRect(thumbX, thumbY, thumbW, thumbH, borderRadius);
-        aPntr.setPaint(isHorizontal ? _thumbPntH : _thumbPntV);
+        if (isHorizontal() && getHeight() >= 14 || isVertical() && getWidth() >= 14) {
+            if (isHorizontal()) { thumbBounds.x += 2; thumbBounds.width -= 2; }
+            else { thumbBounds.y += 2; thumbBounds.height -= 2; }
+            borderRadius = 4;
+        }
+        RoundRect thumbRect = new RoundRect(thumbBounds, borderRadius);
         aPntr.fill(thumbRect);
-
-        // Paint out bottom ring light gray
-        thumbRect.setRect(thumbX + .5, thumbY + .5, thumbW - 1, thumbH);
-        aPntr.setColor(_c6);
-        aPntr.draw(thumbRect);
-
-        // Paint inner ring light gray
-        thumbRect.setRect(thumbX + 1.5, thumbY + 1.5, thumbW - 3, thumbH - 4);
-        aPntr.setPaint(isHorizontal ? _thumbPntH2 : _thumbPntV2);
-        aPntr.draw(thumbRect);
-
-        // Paint outer ring
-        thumbRect.setRect(thumbX + .5, thumbY + .5, thumbW - 1, thumbH - 1);
-        aPntr.setColor(_c0);
-        aPntr.draw(thumbRect);
-
-        // Handle BUTTON_OVER, BUTTON_PRESSED
-        if (aState == Button.BUTTON_OVER) {
-            aPntr.setPaint(_over);
-            thumbRect.setRect(thumbX, thumbY, thumbW, thumbH);
-            aPntr.fill(thumbRect);
-        }
-        else if (aState == Button.BUTTON_PRESSED) {
-            aPntr.setPaint(_prsd);
-            thumbRect.setRect(thumbX, thumbY, thumbW, thumbH);
-            aPntr.fill(thumbRect);
-        }
     }
 
     // Outer ring and outer lighted ring
-    static Color _c0 = Color.get("#a6a6a6"), _c6 = Color.get("#ffffffBB");
-    static Color _backRing = Color.get("#d8d8d8");
-    static Color _over = Color.get("#FFFFFF50"), _prsd = Color.get("#00000004");
+    private static Color THUMB_COLOR = Color.get("#C2");
+    private static Color THUMB_COLOR_OVER = Color.get("#7F");
+    private static Color BACK_BORDER_COLOR = Color.get("#d8d8d8");
 
     // ScrollBar background gradient (light gray top to dark gray bottom)
-    static Color _b1 = Color.get("#e6e6e6"), _b2 = Color.get("#f1f1f1");
-    static Stop[] _backStops = { new Stop(0, _b1), new Stop(.5,_b2), new Stop(1, _b1) };
-    static GradientPaint _backPntH = new GradientPaint(.5,0,.5,1, _backStops);
-    static GradientPaint _backPntV = new GradientPaint(0,.5,1,.5, _backStops);
-
-    // Thumb button gradient (light gray top to dark gray bottom)
-    static Color _t1 = Color.get("#ebebeb"), _t2 = Color.get("#d6d6d6");
-    static Stop[] _thumbStops = { new Stop(0,_t1), new Stop(1,_t2) };
-    static GradientPaint _thumbPntH = new GradientPaint(.5,0,.5,1, _thumbStops);
-    static GradientPaint _thumbPntV = new GradientPaint(0,.5,1,.5, _thumbStops);
-
-    // Button inner ring gradient (light gray top to dark gray bottom)
-    static Color _t3 = Color.get("#fbfbfb"), _t4 = Color.get("#dbdbdb");
-    static Stop[] _thumbStops2 = { new Stop(0,_t3), new Stop(1, _t4) };
-    static GradientPaint _thumbPntH2 = new GradientPaint(.5,0,.5,1, _thumbStops2);
-    static GradientPaint _thumbPntV2 = new GradientPaint(0,.5,1,.5, _thumbStops2);
+    private static Color _b1 = Color.get("#e6e6e6"), _b2 = Color.get("#f1f1f1");
+    private static Stop[] _backStops = { new Stop(0, _b1), new Stop(.5,_b2), new Stop(1, _b1) };
+    private static GradientPaint BACK_PAINT_H = new GradientPaint(.5,0,.5,1, _backStops);
+    private static GradientPaint BACK_PAINT_V = new GradientPaint(0,.5,1,.5, _backStops);
 }
