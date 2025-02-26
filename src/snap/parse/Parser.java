@@ -202,6 +202,11 @@ public class Parser {
     public ParseToken getLastValidToken()  { return _lastValidToken; }
 
     /**
+     * Returns the last token that was parsed or attempted to parse.
+     */
+    public ParseToken getLastProcessedToken()  { return _token != null ? _token : getLastValidToken(); }
+
+    /**
      * Clears any currently set tokens.
      */
     protected void clearTokens()

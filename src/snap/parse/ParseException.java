@@ -21,6 +21,9 @@ public class ParseException extends RuntimeException {
     // The char index
     private int _charIndex;
 
+    // The last processed token
+    private ParseToken _lastToken;
+
     /**
      * Creates a new parse exception.
      */
@@ -28,7 +31,12 @@ public class ParseException extends RuntimeException {
     {
         _parser = aParser;
         _rule = aRule;
-        getMessage();
+        _lastToken = _parser.getLastProcessedToken();
+        _charIndex = _lastToken != null ? _lastToken.getStartCharIndex() : _parser.getCharIndex();
+        if (_parser.getToken() == null && _lastToken != null)
+            _charIndex = _lastToken.getEndCharIndex();
+        //_lineIndex = token != null ? token.getLineIndex() : 0;
+        //_colIndex = token != null ? token.getEndCharIndexInLine() : 0;
     }
 
     /**
@@ -45,38 +53,20 @@ public class ParseException extends RuntimeException {
     public String getMessage()
     {
         if (_msg != null) return _msg;
-        return _msg = createMessage();
+
+        String ruleName = _rule.getName() != null ? _rule.getName() : _rule.toString();
+        return _msg = "Expecting " + ruleName;
     }
 
     /**
-     * Create message.
+     * Returns the characters from error to end of line or input.
      */
-    protected String createMessage()
+    public CharSequence getErrorChars()
     {
-        // Get last valid token
-        ParseToken token = _parser.getLastValidToken();
-        if (token == null)
-            token = _parser.getToken();
-
-        // Get some useful line/char positions
-        _charIndex = token != null ? token.getEndCharIndex() : _parser.getTokenizer().getCharIndex();
-        int lineIndex = token != null ? token.getLineIndex() : 0;
-        int colIndex = token != null ? token.getEndCharIndexInLine() : 0;
-
-        // Get Error region
         CharSequence inputText = _parser.getInput();
         int lineEnd = CharSequenceUtils.indexOfNewline(inputText, _charIndex);
-        if (lineEnd < 0)
-            lineEnd = inputText.length();
-        CharSequence errorChars = inputText.subSequence(_charIndex, lineEnd);
-
-        // Basic message
-        String ruleName = _rule.getName() != null ? _rule.getName() : _rule.toString();
-        String msg = "Failed to parse at line " + (lineIndex + 1) + ", char " + colIndex + ": " + errorChars + '\n' +
-                "Expecting: " + ruleName;
-
-        // Return string
-        return msg;
+        if (lineEnd < 0) lineEnd = inputText.length();
+        return inputText.subSequence(_charIndex, lineEnd);
     }
 
     /**
