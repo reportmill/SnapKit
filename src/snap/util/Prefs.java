@@ -148,6 +148,30 @@ public abstract class Prefs {
     }
 
     /**
+     * Adds a string for given key.
+     */
+    public void addStringForKey(String aString, String aKey)
+    {
+        List<String> strings = getStringsForKey(aKey);
+        if (!strings.contains(aString)) {
+            strings.add(aString);
+            setStringsForKey(strings, aKey);
+        }
+    }
+
+    /**
+     * Removes a string for given key.
+     */
+    public void removeStringForKey(String aString, String aKey)
+    {
+        List<String> strings = getStringsForKey(aKey);
+        if (strings.contains(aString)) {
+            strings.remove(aString);
+            setStringsForKey(strings, aKey);
+        }
+    }
+
+    /**
      * Clears strings for key.
      */
     public void clearStringsForKey(String aKey)
