@@ -1,7 +1,6 @@
 package snap.util;
 import snap.gfx.GFXEnv;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A platform implementation of preferences.
@@ -107,6 +106,60 @@ public abstract class Prefs {
      * Returns the currently set prefs keys.
      */
     public abstract String[] getKeys();
+
+    /**
+     * Returns a list of strings for key.
+     */
+    public List<String> getStringsForKey(String aKey)
+    {
+        Prefs keyNode = getChild(aKey);
+
+        // Add to the list only if the file is around and readable
+        List<String> strings = new ArrayList<>();
+        for (int i = 0; ; i++) {
+            String string = keyNode.getString("index" + i, null);
+            if (string == null)
+                break;
+            if (!strings.contains(string))
+                strings.add(string);
+        }
+
+        // Return
+        return strings;
+    }
+
+    /**
+     * Sets a list of strings for key.
+     */
+    public void setStringsForKey(List<String> theStrings, String aKey)
+    {
+        Prefs keyNode = getChild(aKey);
+
+        // Add strings to node
+        for (int i = 0; i < theStrings.size(); i++)
+            keyNode.setValue("index" + i, theStrings.get(i));
+
+        // Remove old end index
+        keyNode.remove("index" + theStrings.size());
+
+        // Flush prefs
+        try { keyNode.flush(); }
+        catch (Exception e) { System.err.println(e.getMessage()); }
+    }
+
+    /**
+     * Clears strings for key.
+     */
+    public void clearStringsForKey(String aKey)
+    {
+        Prefs keyNode = getChild(aKey);
+        for (int i = 0; ; i++) {
+            String string = keyNode.getString("index" + i, null);
+            if (string == null)
+                break;
+            keyNode.remove("index" + i);
+        }
+    }
 
     /**
      * Returns a child prefs for given name.
