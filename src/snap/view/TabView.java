@@ -395,13 +395,15 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     /**
      * ViewHost method: Returns the number of guest views.
      */
-    public int getGuestCount()  { return getTabCount(); }
+    public int getGuestCount()  { return getTabCount() + 1; }
 
     /**
      * ViewHost method: Returns the guest view at given index.
      */
     public View getGuest(int anIndex)
     {
+        if (anIndex == getTabCount())
+            return _contentBox;
         return getTab(anIndex).getContent();
     }
 
