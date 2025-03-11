@@ -126,9 +126,9 @@ public class TaskMonitorPanel extends TaskMonitor {
      * Override to reset UI if needed.
      */
     @Override
-    protected void monitorDidChange(PropChange aPC)
+    protected void handleMonitorPropChange(PropChange aPC)
     {
-        super.monitorDidChange(aPC);
+        super.handleMonitorPropChange(aPC);
         _viewOwner.resetLater();
     }
 

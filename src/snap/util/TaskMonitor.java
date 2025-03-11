@@ -262,7 +262,7 @@ public class TaskMonitor extends PropObject {
 
         // Start listening
         if (_monitor != null) {
-            _monitor.addPropChangeListener(_monitorLsnr = this::monitorDidChange);
+            _monitor.addPropChangeListener(_monitorLsnr = this::handleMonitorPropChange);
 
             // Copy all props from other
             Prop[] allProps = getPropSet().getProps();
@@ -291,7 +291,7 @@ public class TaskMonitor extends PropObject {
     /**
      * Called when source monitor changes.
      */
-    protected void monitorDidChange(PropChange aPC)
+    protected void handleMonitorPropChange(PropChange aPC)
     {
         String propName = aPC.getPropName();
         Object value = _monitor.getPropValue(propName);
