@@ -32,6 +32,7 @@ public class TableCol <T> extends ListView <T> {
     public TableCol()
     {
         super();
+        setFocusable(false);
         setOverflow(Overflow.Visible);
 
         // Create and config header

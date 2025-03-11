@@ -2361,16 +2361,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Set and fire prop change
         firePropChange(Focused_Prop, _focused, _focused = aValue);
 
-        // Register for repaint
+        // Register for repaint (use focus effect bounds)
         if (isFocusPainted()) {
-            if (aValue)
-                repaint();
-            else {
-                Effect focusEffect = ViewEffect.getFocusEffect();
-                Rect bounds = getBoundsLocal();
-                Rect repaintRect = focusEffect.getBounds(bounds);
-                repaint(repaintRect);
-            }
+            Effect focusEffect = ViewEffect.getFocusEffect();
+            Rect bounds = getBoundsLocal();
+            Rect repaintRect = focusEffect.getBounds(bounds);
+            repaint(repaintRect);
         }
     }
 

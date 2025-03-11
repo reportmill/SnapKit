@@ -4,7 +4,6 @@
 package snap.view;
 import java.util.List;
 import java.util.function.Consumer;
-
 import snap.geom.Insets;
 import snap.gfx.*;
 import snap.util.ArrayUtils;
@@ -32,6 +31,7 @@ public class TreeCol <T> extends ListView <T> {
     public TreeCol()
     {
         super();
+        setFocusable(false);
         setGrowWidth(true);
         setOverflow(Overflow.Visible);
         setAltRowColor(null);
