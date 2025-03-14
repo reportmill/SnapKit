@@ -1,7 +1,10 @@
 package snap.viewx;
 import snap.view.*;
 import snap.web.*;
+
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -93,7 +96,7 @@ public class DevPaneFiles extends ViewOwner {
         StringBuilder sb = new StringBuilder();
         if (selFile.isFile())
             sb.append("Size: ").append(selFile.getSize()).append(" bytes\n");
-        else sb.append("File count: ").append(selFile.getFiles().length).append('\n');
+        else sb.append("File count: ").append(selFile.getFiles().size()).append('\n');
 
         // Add last modified date
         Date lastModDate = selFile.getLastModDate();
@@ -191,7 +194,7 @@ public class DevPaneFiles extends ViewOwner {
     private void resetFileBrowser()
     {
         if (_fileBrowser == null) return;
-        WebFile[] rootFiles = getRootFiles();
+        List<WebFile> rootFiles = getRootFiles();
         _fileBrowser.setItems(rootFiles);
         setSelFile(null);
         resetLater();
@@ -315,7 +318,7 @@ public class DevPaneFiles extends ViewOwner {
      */
     private WebSite getRootSite()
     {
-        if (_rootUrlString == null || _rootUrlString.length() == 0 || _rootUrlString.equals("/"))
+        if (_rootUrlString == null || _rootUrlString.isEmpty() || _rootUrlString.equals("/"))
             return getRootFileSite();
 
         WebURL rootUrl = WebURL.getURL(_rootUrlString);
@@ -327,11 +330,11 @@ public class DevPaneFiles extends ViewOwner {
     /**
      * Returns the root files.
      */
-    private WebFile[] getRootFiles()
+    private List<WebFile> getRootFiles()
     {
         WebSite rootSite = getRootSite();
         WebFile rootDir = rootSite != null ? rootSite.getRootDir() : null;
-        return rootDir != null ? rootDir.getFiles() : new WebFile[0];
+        return rootDir != null ? rootDir.getFiles() : Collections.emptyList();
     }
 
     /**

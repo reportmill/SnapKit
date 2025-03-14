@@ -166,7 +166,7 @@ public class WebSitePaneX extends WebSitePane {
 
         // Get root dir files and set in browser
         WebFile rootDir = getSite().getRootDir();
-        WebFile[] dirFiles = rootDir.getFiles();
+        List<WebFile> dirFiles = rootDir.getFiles();
         List<WebFile> dirFilesFiltered = WebSitePaneUtils.getVisibleFiles(dirFiles);
         _fileBrowser.setItems(dirFilesFiltered);
 

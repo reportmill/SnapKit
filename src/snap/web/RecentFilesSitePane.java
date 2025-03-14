@@ -4,10 +4,11 @@
 package snap.web;
 import snap.geom.Insets;
 import snap.gfx.Color;
-import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.viewx.WebSitePane;
+import java.util.List;
 
 /**
  * This WebSitePane subclass displays files for RecentFilesSite.
@@ -91,12 +92,12 @@ public class RecentFilesSitePane extends WebSitePane {
         rootDir.reset();
 
         // Get valid files
-        WebFile[] recentFiles = rootDir.getFiles();
-        WebFile[] recentFilesValid = ArrayUtils.filter(recentFiles, file -> isValidFile(file));
+        List<WebFile> recentFiles = rootDir.getFiles();
+        List<WebFile> recentFilesValid = ListUtils.filter(recentFiles, file -> isValidFile(file));
         _filesTable.setItems(recentFilesValid);
 
         // Set SelFile
-        WebFile recentFile = recentFilesValid.length > 0 ? recentFilesValid[0] : null;
+        WebFile recentFile = !recentFilesValid.isEmpty() ? recentFilesValid.get(0) : null;
         setSelFile(recentFile);
         _filesTable.setSelItem(recentFile);
     }
@@ -242,8 +243,8 @@ public class RecentFilesSitePane extends WebSitePane {
         WebSite recentFilesSite = getSite();
         if (aFile != null && aFile.getSite() != recentFilesSite) {
             WebFile rootDir = recentFilesSite.getRootDir();
-            WebFile[] localRecentFiles = rootDir.getFiles();
-            localFile = ArrayUtils.findMatch(localRecentFiles, locFile -> locFile.getLinkFile() == aFile);
+            List<WebFile> localRecentFiles = rootDir.getFiles();
+            localFile = ListUtils.findMatch(localRecentFiles, locFile -> locFile.getLinkFile() == aFile);
         }
 
         // Return

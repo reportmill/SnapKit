@@ -11,6 +11,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Represents a file from a WebSite.
@@ -42,7 +44,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     private byte[]  _bytes;
 
     // The directory files
-    private WebFile[]  _files;
+    private List<WebFile> _files;
 
     // The MIME type
     private String  _mimeType;
@@ -356,14 +358,14 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public int getFileCount()
     {
-        WebFile[] files = getFiles();
-        return files.length;
+        List<WebFile> files = getFiles();
+        return files.size();
     }
 
     /**
      * Returns the directory files list.
      */
-    public synchronized WebFile[] getFiles()
+    public synchronized List<WebFile> getFiles()
     {
         // If already set, just return
         if (_files != null) return _files;
@@ -378,7 +380,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
             if (resp.getException() != null)
                 throw new ResponseException(resp);
             System.err.println("WebFile.getFiles: Response error: " + resp.getCodeString() + " (" + getUrlAddress() + ')');
-            return _files = new WebFile[0];
+            return _files = Collections.emptyList();
         }
 
         // Get content files from site
@@ -392,12 +394,17 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
 
         // Get files sorted
         WebSite site = getSite();
-        WebFile[] files = ArrayUtils.map(fileHeaders, fhdr -> site.getFileForFileHeader(fhdr), WebFile.class);
-        Arrays.sort(files);
+        List<WebFile> files = Stream.of(fileHeaders).map(fhdr -> site.getFileForFileHeader(fhdr))
+                .sorted().collect(Collectors.toList());
 
         // Return
         return _files = files;
     }
+
+    /**
+     * Returns the directory files list.
+     */
+    public WebFile[] getFilesArray()  { return getFiles().toArray(new WebFile[0]); }
 
     /**
      * Saves the file.

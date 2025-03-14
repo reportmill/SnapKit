@@ -318,7 +318,7 @@ public abstract class WebSite {
 
         // If directory, delete child files
         if (aFile.isDir()) {
-            WebFile[] childFiles = aFile.getFiles();
+            List<WebFile> childFiles = aFile.getFiles();
             for (WebFile file : childFiles)
                 file.delete();
         }

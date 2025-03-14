@@ -2,10 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
-import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
-
+import snap.util.ListUtils;
 import java.io.File;
+import java.util.List;
 
 /**
  * A data source implementation that draws from a directory WebFile.
@@ -74,8 +74,8 @@ public class DirSite extends WebSite {
         }
 
         // Otherwise, get/set dir FileHeaders
-        WebFile[] dirFiles = dirFile.getFiles();
-        FileHeader[] fileHeaders = ArrayUtils.map(dirFiles, file -> createFileHeaderForFile(filePath, file), FileHeader.class);
+        List<WebFile> dirFiles = dirFile.getFiles();
+        FileHeader[] fileHeaders = ListUtils.mapToArray(dirFiles, file -> createFileHeaderForFile(filePath, file), FileHeader.class);
         aResp.setFileHeaders(fileHeaders);
     }
 

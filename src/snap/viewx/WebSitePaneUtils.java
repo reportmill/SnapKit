@@ -4,6 +4,7 @@
 package snap.viewx;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
+import snap.util.ListUtils;
 import snap.util.StringUtils;
 import snap.view.TreeResolver;
 import snap.web.WebFile;
@@ -35,7 +36,7 @@ class WebSitePaneUtils {
         String inputText = getInputText(sitePane);
 
         // If empty just return dir path
-        if (inputText.length() == 0) {
+        if (inputText.isEmpty()) {
             WebFile selDir = sitePane.getSelDir();
             return selDir.getPath();
         }
@@ -139,11 +140,11 @@ class WebSitePaneUtils {
 
         // Get directory files and valid file types
         String fileName = FilePathUtils.getFilename(aPath);
-        WebFile[] dirFiles = parentDir.getFiles();
+        List<WebFile> dirFiles = parentDir.getFiles();
 
         // Look for valid completion file
         Predicate<WebFile> fileValidator = file -> StringUtils.startsWithIC(file.getName(), fileName) && sitePane.isValidFile(file);
-        WebFile firstValidFile = ArrayUtils.findMatch(dirFiles, fileValidator);
+        WebFile firstValidFile = ListUtils.findMatch(dirFiles, fileValidator);
         if (firstValidFile != null)
             return firstValidFile;
 
@@ -173,9 +174,9 @@ class WebSitePaneUtils {
     /**
      * Returns the visible files for given array of files.
      */
-    public static List<WebFile> getVisibleFiles(WebFile[] theFiles)
+    public static List<WebFile> getVisibleFiles(List<WebFile> theFiles)
     {
-        return ArrayUtils.filterToList(theFiles, file -> !file.getName().startsWith("."));
+        return ListUtils.filter(theFiles, file -> !file.getName().startsWith("."));
     }
 
     /**

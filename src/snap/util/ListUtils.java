@@ -303,6 +303,16 @@ public class ListUtils {
     }
 
     /**
+     * Returns a mapped list for given original and Function.
+     */
+    public static <T,R> List<R> mapNonNull(Collection<T> anArray, Function<? super T, ? extends R> aFunction)
+    {
+        Stream<R> filteredStream = anArray.stream().map(aFunction);
+        Stream<R> filteredNonNull = filteredStream.filter(item -> item != null);
+        return filteredNonNull.collect(Collectors.toList());
+    }
+
+    /**
      * Returns a mapped array for given original and Function.
      */
     public static <T,R> R[] mapToArray(Collection<T> aList, Function<? super T, ? extends R> aFunction, Class<R> aClass)
