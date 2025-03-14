@@ -103,7 +103,7 @@ public class TableCol <T> extends ListView <T> {
     /**
      * Override to suppress setting items in pick list (already done by TableView).
      */
-    public void setItemsList(List <T> theItems)  { }
+    public void setItems(List <T> theItems)  { }
 
     /**
      * Override to account for header (if showing).

@@ -10,7 +10,6 @@ import snap.util.Convert;
 import snap.util.StringUtils;
 import snap.view.*;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -147,7 +146,7 @@ public class DevPaneViews extends ViewOwner {
         // Configure BrowserView
         _browserView = getView("BrowserView", BrowserView.class);
         _browserView.setResolver(new ViewTreeResolver());
-        _browserView.setItemsList(Collections.singletonList(_devPane.getContent()));
+        _browserView.setItems(Collections.singletonList(_devPane.getContent()));
 
         // Configure PropTableView
         _propTable = getView("PropTableView", TableView.class);

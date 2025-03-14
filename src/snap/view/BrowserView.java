@@ -156,41 +156,32 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
      * Returns the items.
      */
     @Override
-    public List<T> getItemsList()
+    public List<T> getItems()
     {
-        return _col0.getItemsList();
+        return _col0.getItems();
     }
 
     /**
      * Sets the items.
      */
     @Override
-    public void setItemsList(List<T> theItems)
+    public void setItems(List<T> theItems)
     {
         // If already set, just return
-        if (ListUtils.equalsId(theItems, getItemsList())) return;
-        if (theItems.equals(getItemsList())) return;
+        if (ListUtils.equalsId(theItems, getItems())) return;
+        if (theItems.equals(getItems())) return;
 
         // Get current selected item and col0 selected item
         T selItem = getSelItem();
         T selItem0 = _col0.getSelItem();
 
         // Set items
-        _col0.setItemsList(theItems);
+        _col0.setItems(theItems);
 
         // Reset SelItem
         if (selItem0 == _col0.getSelItem())
             setSelItem(selItem);
         else setSelItem(null);
-    }
-
-    /**
-     * Sets the items.
-     */
-    @Override
-    public void setItems(T[] theItems)
-    {
-        setItemsList(Arrays.asList(theItems));
     }
 
     /**
@@ -270,7 +261,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
             BrowserCol<T> lastCol = getCol(colIndex - 1);
             T item = lastCol.getSelItem();
             List<T> items = getChildren(item);
-            browserCol.setItemsList(items);
+            browserCol.setItems(items);
         }
 
         // Reset all cached widths
@@ -372,7 +363,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
 
         // If item in last column, select it
         BrowserCol<T> lastCol = getLastCol();
-        if (lastCol.getItemsList().contains(anItem)) {
+        if (lastCol.getItems().contains(anItem)) {
             lastCol.setSelItem(anItem);
             setSelColIndex(lastCol.getIndex());
             return;

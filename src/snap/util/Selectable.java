@@ -1,5 +1,6 @@
 package snap.util;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,19 +15,23 @@ public interface Selectable<T> {
     String SelItem_Prop = "SelItem";
 
     /**
-     * Sets the items for a given name or UI view.
+     * Returns the items.
      */
-    default void setItems(T[] theItems)  { }
+    List<T> getItems();
 
     /**
-     * Returns the items for a given name or UI view.
+     * Sets the items.
      */
-    default List<T> getItemsList() { return null; }
+    void setItems(List<T> theItems);
 
     /**
      * Sets the items for a given name or UI view.
      */
-    default void setItemsList(List<T> theItems)  { }
+    default void setItems(T[] theItems)
+    {
+        List<T> itemsList = theItems != null ? Arrays.asList(theItems) : null;
+        setItems(itemsList);
+    }
 
     /**
      * Returns the selected index for given name or UI view.
@@ -44,7 +49,7 @@ public interface Selectable<T> {
     default T getSelItem()
     {
         int ind = getSelIndex();
-        List<T> items = getItemsList();
+        List<T> items = getItems();
         return ind>=0 && items!=null ? items.get(ind) : null;
     }
 
@@ -53,7 +58,7 @@ public interface Selectable<T> {
      */
     default void setSelItem(T anItem)
     {
-        List<T> items = getItemsList(); if (items==null) return;
+        List<T> items = getItems(); if (items==null) return;
         int ind = items.indexOf(anItem);
         setSelIndex(ind);
     }
@@ -63,11 +68,11 @@ public interface Selectable<T> {
      */
     default boolean removeItem(T anItem)
     {
-        List<T> itemsList = getItemsList();
+        List<T> itemsList = getItems();
         List<T> newItemsList = new ArrayList<>(itemsList);
         boolean didRemove = newItemsList.remove(anItem);
         if (didRemove)
-            setItemsList(newItemsList);
+            setItems(newItemsList);
         return didRemove;
     }
 
@@ -83,7 +88,7 @@ public interface Selectable<T> {
 
         // If item was selected, update to select next item (or previous if last item, or none if only item)
         if (isSelected) {
-            int newSelIndex = Math.min(selIndex, getItemsList().size() - 1);
+            int newSelIndex = Math.min(selIndex, getItems().size() - 1);
             setSelIndex(newSelIndex);
         }
     }
@@ -95,13 +100,13 @@ public interface Selectable<T> {
     {
         // Handle null
         if (theItems == null)
-            aSelectable.setItemsList(Collections.emptyList());
+            aSelectable.setItems(Collections.emptyList());
 
         // Handle List
         else if (theItems instanceof List) {
             Selectable<Object> selectable = (Selectable<Object>) aSelectable;
             List<Object> itemsList = (List<Object>) theItems;
-            selectable.setItemsList(itemsList);
+            selectable.setItems(itemsList);
         }
 
         // Handle Array

@@ -5,31 +5,58 @@ package snap.view;
 import snap.geom.Insets;
 import snap.util.*;
 
+import java.util.List;
+
 /**
  * A pane to show a specific child pane from a list.
  */
-public class SwitchView extends ChildView implements Selectable {
+public class SwitchView extends ChildView implements Selectable<View> {
 
     // The selected index
     private int _selIndex;
 
     /**
+     * Constructor.
+     */
+    public SwitchView()
+    {
+        super();
+    }
+
+    /**
      * Returns the view with the given name.
      */
-    public View getPane(String aName)
+    public View getPaneForName(String aName)
     {
         for (View child : getChildren()) if (aName.equals(child.getName())) return child;
         return null; // Return null since pane not found
     }
 
     /**
+     * Returns the items.
+     */
+    @Override
+    public List<View> getItems()  { return getChildren(); }
+
+    /**
+     * Sets the items.
+     */
+    @Override
+    public void setItems(List<View> theItems)
+    {
+        setChildren(theItems.toArray(new View[0]));
+    }
+
+    /**
      * Returns the SwitchView's selected index.
      */
+    @Override
     public int getSelIndex()  { return _selIndex; }
 
     /**
      * Sets the SwitchView's selected index.
      */
+    @Override
     public void setSelIndex(int anIndex)
     {
         firePropChange(SelIndex_Prop, _selIndex, _selIndex =anIndex);

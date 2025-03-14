@@ -11,6 +11,8 @@ import snap.props.PropChange;
 import snap.props.PropNode;
 import snap.util.*;
 
+import java.util.List;
+
 /**
  * A View subclass to show multiple children under user selectable tabs.
  */
@@ -213,23 +215,39 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     }
 
     /**
+     * Returns the items.
+     */
+    @Override
+    public List<Tab> getItems()  { return _tabBar.getItems(); }
+
+    /**
+     * Sets the items.
+     */
+    @Override
+    public void setItems(List<Tab> theItems)  { _tabBar.setItems(theItems); }
+
+    /**
      * Returns the tap pane's selected index.
      */
+    @Override
     public int getSelIndex()  { return _tabBar.getSelIndex(); }
 
     /**
      * Sets the TabView's selected index.
      */
+    @Override
     public void setSelIndex(int anIndex)  { _tabBar.setSelIndex(anIndex); }
 
     /**
      * Returns the selected item (tab).
      */
+    @Override
     public Tab getSelItem()  { return  _tabBar.getSelItem(); }
 
     /**
      * Sets the selected item (tab).
      */
+    @Override
     public void setSelItem(Tab aTab)  { _tabBar.setSelItem(aTab); }
 
     /**

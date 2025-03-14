@@ -86,7 +86,7 @@ public class TreeCol <T> extends ListView <T> {
     /**
      * Override to suppress setting items in pick list (already done by TreeView).
      */
-    public void setItemsList(List <T> theItems)  { }
+    public void setItems(List <T> theItems)  { }
 
     /**
      * Override to set TreeView.SelCol.

@@ -15,6 +15,30 @@ import java.util.stream.Stream;
 public class ListUtils {
 
     /**
+     * Creates list of given elements.
+     */
+    @SafeVarargs
+    public static <E> List<E> of(E... elements)  { return Arrays.asList(elements); }
+
+    /**
+     * Creates list of given elements.
+     */
+    public static <E> List<E> of(E element)  { return Collections.singletonList(element); }
+
+    /**
+     * Creates list of given elements.
+     */
+    public static <E> List<E> of(E e1, E e2)  { return Arrays.asList(e1, e2); }
+
+    /**
+     * Returns an unmodifiable List containing the elements of the given Collection.
+     */
+    public static <E> List<E> copyOf(Collection<? extends E> aCollection)
+    {
+        return Collections.unmodifiableList(new ArrayList<>(aCollection));
+    }
+
+    /**
      * Returns the size of a list (accepts null list).
      */
     public static int size(List<?> aList)

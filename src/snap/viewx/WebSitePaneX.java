@@ -91,7 +91,7 @@ public class WebSitePaneX extends WebSitePane {
             selDirs.add(dir);
 
         // Update DirComboBox
-        _dirComboBox.setItemsList(selDirs);
+        _dirComboBox.setItems(selDirs);
         _dirComboBox.setSelItem(selDir);
     }
 
@@ -168,7 +168,7 @@ public class WebSitePaneX extends WebSitePane {
         WebFile rootDir = getSite().getRootDir();
         WebFile[] dirFiles = rootDir.getFiles();
         List<WebFile> dirFilesFiltered = WebSitePaneUtils.getVisibleFiles(dirFiles);
-        _fileBrowser.setItemsList(dirFilesFiltered);
+        _fileBrowser.setItems(dirFilesFiltered);
 
         // If SelFile, set
         WebFile selFile = getSelFile();

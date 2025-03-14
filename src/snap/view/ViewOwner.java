@@ -369,7 +369,7 @@ public class ViewOwner extends PropObject {
     public List<?> getViewItems(Object anObj)
     {
         Selectable<?> selectable = getView(anObj, Selectable.class);
-        return selectable.getItemsList();
+        return selectable.getItems();
     }
 
     /**
@@ -378,7 +378,7 @@ public class ViewOwner extends PropObject {
     public void setViewItems(Object anObj, List<?> theItems)
     {
         Selectable selectable = getView(anObj, Selectable.class);
-        selectable.setItemsList(theItems);
+        selectable.setItems(theItems);
     }
 
     /**

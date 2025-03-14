@@ -209,13 +209,31 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     }
 
     /**
+     * Returns the items.
+     */
+    @Override
+    public List<Tab> getItems()  { return _tabs; }
+
+    /**
+     * Sets the items.
+     */
+    @Override
+    public void setItems(List<Tab> theItems)
+    {
+        removeTabs();
+        theItems.forEach(this::addTab);
+    }
+
+    /**
      * Returns the tap pane's selected index.
      */
+    @Override
     public int getSelIndex()  { return _selIndex; }
 
     /**
      * Sets the TabView's selected index.
      */
+    @Override
     public void setSelIndex(int anIndex)
     {
         // If already set, just return
@@ -237,6 +255,7 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     /**
      * Returns the selected item (tab).
      */
+    @Override
     public Tab getSelItem()
     {
         return _selIndex >= 0 ? getTab(_selIndex) : null;
@@ -245,6 +264,7 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     /**
      * Sets the selected item (tab).
      */
+    @Override
     public void setSelItem(Tab aTab)
     {
         int index = _tabs.indexOf(aTab);

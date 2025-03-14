@@ -290,19 +290,13 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
      * Returns the items.
      */
     @Override
-    public List <T> getItemsList()  { return getListView().getItemsList(); }
+    public List <T> getItems()  { return getListView().getItems(); }
 
     /**
      * Sets the items.
      */
     @Override
-    public void setItemsList(List <T> theItems)  { getListView().setItemsList(theItems); }
-
-    /**
-     * Sets the items.
-     */
-    @Override
-    public void setItems(T[] theItems)  { getListView().setItems(theItems); }
+    public void setItems(List <T> theItems)  { getListView().setItems(theItems); }
 
     /**
      * Returns the selected index.
@@ -384,13 +378,13 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         // On focus gained: SelectAll, get copy of current items,
         if (_textField.isFocused()) {
             _textField.selectAll();
-            _items = new ArrayList<>(getListView().getItemsList());
+            _items = new ArrayList<>(getListView().getItems());
             if (isPopup() && getItemCount()>0)
                 showPopup();
         }
 
         // On focus lost: Restore list items after delay (twice, in case textFieldFiredAction with scrollSelToVisible)
-        else getEnv().runLater(() -> getEnv().runLater(() -> { _list.setItemsList(_items); _items = null; }));
+        else getEnv().runLater(() -> getEnv().runLater(() -> { _list.setItems(_items); _items = null; }));
     }
 
     /**
@@ -413,7 +407,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
 
             // If value has changed, reset to focus gained values
             if (_textField.isEdited()) {
-                _list.setItemsList(_items);
+                _list.setItems(_items);
                 _list.setText(_textField._focusGainedText);
                 _textField.selectAll();
                 if (getItemCount() == 0 && isPopup() && isPopupShowing())
@@ -453,7 +447,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
             item = getSelItem();
 
         // Set ListView Items, SelItem
-        if (isFilterList()) _list.setItemsList(items);
+        if (isFilterList()) _list.setItems(items);
         _list.setSelItem(item);
         if (items.size() <= 1 && isPopup() && isPopupShowing())
             getPopupList().hide();

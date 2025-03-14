@@ -173,19 +173,19 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the number of rows.
      */
-    public int getRowCount()  { return getItemsList().size(); }
+    public int getRowCount()  { return getItems().size(); }
 
     /**
      * Returns the items.
      */
     @Override
-    public List <T> getItemsList()  { return _items; }
+    public List <T> getItems()  { return _items; }
 
     /**
      * Sets the items.
      */
     @Override
-    public void setItemsList(List <T> theItems)
+    public void setItems(List <T> theItems)
     {
         List <T> items = getExpandedItems(theItems);
         setItemsImpl(items);
@@ -206,7 +206,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
 
         // Iterate over columns and setItems
         for (TreeCol<T> treeCol : getCols())
-            treeCol.setItemsList(theItems);
+            treeCol.setItems(theItems);
         setSelItem(selItem);
 
         // Prune removed items from expanded set
@@ -214,15 +214,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
         for (T item : expanded)
             if (!_items.contains(item))
                 _expanded.remove(item);
-    }
-
-    /**
-     * Sets the items.
-     */
-    @Override
-    public void setItems(T[] theItems)
-    {
-        setItemsList(Arrays.asList(theItems));
     }
 
     /**
@@ -361,7 +352,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Expands all tree nodes.
      */
-    public void expandAll()  { for (int i = 0; i< getItemsList().size(); i++) expandItem(getItemsList().get(i)); }
+    public void expandAll()  { for (int i = 0; i< getItems().size(); i++) expandItem(getItems().get(i)); }
 
     /**
      * Expands the given item.
@@ -379,7 +370,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
 
         // Set item expanded state, reset items and update given item
         setItemExpanded(anItem, true);
-        setItemsList(getItemsList());
+        setItems(getItems());
         updateItem(anItem);
     }
 
@@ -389,10 +380,10 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     public void collapseItem(T anItem)
     {
         // If not collapsable, just return
-        if (!isItemParent(anItem) || !isItemExpanded(anItem) || !getItemsList().contains(anItem)) return;
+        if (!isItemParent(anItem) || !isItemExpanded(anItem) || !getItems().contains(anItem)) return;
 
         // Get items copy and remove successive items decended from given item
-        List <T> items = new ArrayList<>(getItemsList());
+        List <T> items = new ArrayList<>(getItems());
         int index = items.indexOf(anItem);
         for (int i = index + 1, iMax = items.size(); i < iMax;i++) {
             T next = items.get(index + 1);
@@ -498,7 +489,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      */
     public T findItemParent(T anItem)
     {
-        List <T> items = getItemsList();
+        List <T> items = getItems();
         int index = items.indexOf(anItem);
         if (index < 0)
             return null;
@@ -639,6 +630,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      */
     protected boolean equalsItems(List<T> theItems)
     {
-        return ListUtils.equalsId(theItems, getItemsList()) || theItems.equals(getItemsList());
+        return ListUtils.equalsId(theItems, getItems()) || theItems.equals(getItems());
     }
 }
