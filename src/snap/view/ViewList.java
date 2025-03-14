@@ -180,4 +180,37 @@ public class ViewList extends AbstractList<View> {
         // Set, return
         return _managed = ArrayUtils.filter(_views, view -> view.isManagedVisible());
     }
+
+    /**
+     * Override to iterate directly on internal array to avoid co-modification when children added/removed during iterating.
+     */
+    @Override
+    public Iterator<View> iterator()
+    {
+        return new ArrayIterator<>(_views);
+    }
+
+    /**
+     * Iterator implementation to run directly on Views array to avoid co-modification.
+     */
+    private static class ArrayIterator<T> implements Iterator<T> {
+
+        private final T[] array;
+        private int index = 0;
+
+        public ArrayIterator(T[] array) { this.array = array; }
+
+        @Override
+        public boolean hasNext() { return index < array.length; }
+
+        @Override
+        public T next() {
+            if (!hasNext())
+                throw new NoSuchElementException();
+            return array[index++];
+        }
+
+        @Override
+        public void remove() { throw new UnsupportedOperationException("Remove operation is not supported."); }
+    }
 }
