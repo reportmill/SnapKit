@@ -26,9 +26,6 @@ public class ZipFileSite extends WebSite {
     // Whether Zip is really a Jar
     private boolean _jar;
 
-    // Whether to trim entries via isInterestingPath (silly Jar feature)
-    private boolean _trim;
-
     /**
      * Constructor.
      */
@@ -96,10 +93,6 @@ public class ZipFileSite extends WebSite {
      */
     protected void addZipEntry(ZipEntry anEntry)
     {
-        // If performing trim, check entry name
-        if (_trim && !anEntry.isDirectory() && !isInterestingPath(anEntry.getName()))
-            return;
-
         // Get path and add entry to entries and path to dirs lists
         String filePath = FilePathUtils.getNormalizedPath('/' + anEntry.getName());
         _entries.put(filePath, anEntry);
@@ -139,6 +132,7 @@ public class ZipFileSite extends WebSite {
     /**
      * Handles a get or head request.
      */
+    @Override
     protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
     {
         // Get request file path
@@ -239,6 +233,7 @@ public class ZipFileSite extends WebSite {
     /**
      * Override to turn on file trimming from system jars.
      */
+    @Override
     public void setURL(WebURL aURL)
     {
         // Do normal version
@@ -247,22 +242,5 @@ public class ZipFileSite extends WebSite {
         // Turn on file trimming if system jar
         String urls = aURL.getString().toLowerCase();
         _jar = urls.endsWith(".jar");
-        _trim = _jar && (urls.contains("/rt.jar") || urls.contains("/jfxrt.jar"));
-    }
-
-    /**
-     * Adds an entry (override to ignore).
-     */
-    protected boolean isInterestingPath(String aPath)
-    {
-        // Bogus excludes
-        if (aPath.startsWith("sun")) return false;
-        if (aPath.startsWith("com/sun")) return false;
-        if (aPath.startsWith("com/apple")) return false;
-        if (aPath.startsWith("javax/swing/plaf")) return false;
-        if (aPath.startsWith("org/omg")) return false;
-        int dollar = aPath.endsWith(".class")? aPath.lastIndexOf('$') : -1;
-        if (dollar > 0 && Character.isDigit(aPath.charAt(dollar+1))) return false;
-        return true;
     }
 }
