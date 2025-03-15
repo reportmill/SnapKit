@@ -16,7 +16,7 @@ public class PopupWindow extends WindowView {
     {
         setType(TYPE_PLAIN);
         setAlwaysOnTop(true);
-        setOpacity(.9);
+        //setOpacity(.9);
 
         RootView rview = getRootView();
         rview.setFill(Color.WHITE);
