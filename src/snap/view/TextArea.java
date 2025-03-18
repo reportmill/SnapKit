@@ -546,6 +546,18 @@ public class TextArea extends ParentView {
     }
 
     /**
+     * Override to trigger parent layout if WrapLines.
+     */
+    @Override
+    public void setWidth(double aValue)
+    {
+        if (aValue == getWidth()) return;
+        super.setWidth(aValue);
+        if (isWrapLines())
+            relayoutParent();
+    }
+
+    /**
      * Sets the font of the current selection or cursor.
      */
     @Override
