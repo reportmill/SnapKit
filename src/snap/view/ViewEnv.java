@@ -50,7 +50,7 @@ public abstract class ViewEnv {
             className = "snapcj.CJViewEnv";
 
         // Create instance
-        try { Class.forName(className).newInstance(); }
+        try { Class.forName(className).newInstance(); return; }
         catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set ViewEnv: " + className + ", " + e); }
 
         // Fall back on swing (but so teavm doesn't try to include swing classes)

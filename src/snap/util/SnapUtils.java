@@ -47,14 +47,28 @@ public class SnapUtils {
         if (name == null) name = "TeaVM";
         String vend = System.getProperty("java.vendor");
         if (vend == null) vend = "TeaVM";
+        //System.out.println("os.name: " + name);
+        //System.out.println("java.vendor: " + vend);
+
+        // Windows
         if (name.contains("Windows"))
             return SnapUtils.Platform.WINDOWS;
+
+        // Mac
         if (name.contains("Mac OS X"))
             return SnapUtils.Platform.MAC;
-        if (vend.contains("Leaning"))
+
+        // CheerpJ
+        String runtimeVersion = System.getProperty("java.runtime.version");
+        //System.out.println("java.runtime.version: " + runtimeVersion);
+        if (vend.contains("Leaning") || runtimeVersion.contains("adhoc"))
             return SnapUtils.Platform.CHEERP;
+
+        // TeaVM
         if (name.contains("TeaVM"))
             return SnapUtils.Platform.TEAVM;
+
+        // Unknown
         return Platform.UNKNOWN;
     }
 

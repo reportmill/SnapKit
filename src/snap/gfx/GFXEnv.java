@@ -38,7 +38,7 @@ public abstract class GFXEnv {
             className = "snapcj.CJEnv";
 
         // Get GFXEnv class and create instance to set
-        try { Class.forName(className).newInstance(); }
+        try { Class.forName(className).newInstance(); return; }
         catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set GFXEnv " + className + ", " + e); }
 
         // Fall back on swing (but so teavm doesn't try to include swing classes)
