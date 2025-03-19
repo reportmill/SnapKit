@@ -194,23 +194,26 @@ public class HTTPSite extends WebSite {
     @Override
     public WebFile getLocalFile(WebFile aFile, boolean doCache)
     {
-        WebFile cacheFile = getCacheFile(aFile.getPath());
-        if (cacheFile.getExists() && cacheFile.getLastModTime() >= aFile.getLastModTime())
-            return cacheFile;
-        cacheFile.setBytes(aFile.getBytes());
-        cacheFile.save();
-        return cacheFile;
-    }
-
-    /**
-     * Returns a cache file for path.
-     */
-    private WebFile getCacheFile(String aPath)
-    {
         WebSite sandboxSite = getSandboxSite();
-        WebFile sandboxCacheFile = sandboxSite.getFileForPath("/Cache" + aPath);
-        if (sandboxCacheFile == null)
-            sandboxCacheFile = sandboxSite.createFileForPath("/Cache" + aPath, false);
-        return sandboxCacheFile;
+        String localFilePath = "/Cache" + aFile.getPath();
+        if (SnapUtils.isWebVM) // Shorten name to avoid prefs 'key too long' error
+            localFilePath = "/Cache/" + aFile.getName();
+
+        // Get local sandbox file (create if missing)
+        WebFile localFile = sandboxSite.getFileForPath(localFilePath);
+        if (localFile == null)
+            localFile = sandboxSite.createFileForPath(localFilePath, false);
+
+        // If file exists and is up to date, just return
+        if (localFile.getExists() && localFile.getLastModTime() >= aFile.getLastModTime())
+            return localFile;
+
+        // Copy bytes from remote file and save
+        byte[] remoteFileBytes = aFile.getBytes();
+        localFile.setBytes(remoteFileBytes);
+        localFile.save();
+
+        // Return
+        return localFile;
     }
 }
