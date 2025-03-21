@@ -120,13 +120,6 @@ public class FileSite extends WebSite {
      */
     protected FileHeader[] getFileHeadersForJavaFile(File parentFile)
     {
-        // Workaround for WebVM bug on root dir
-        if (SnapUtils.isWebVM && parentFile.getPath().equals("/")) {
-            File f1 = new File("/app"), f2 = new File("/files");
-            File[] files = new File[] { f1, f2 };
-            return ArrayUtils.mapNonNull(files, file -> getFileHeaderForJavaFile(file), FileHeader.class);
-        }
-
         // Get java file children (if null, just return)
         File[] dirFiles = parentFile.listFiles();
         if (dirFiles == null) {

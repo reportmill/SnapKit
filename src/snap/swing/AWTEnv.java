@@ -220,20 +220,6 @@ public class AWTEnv extends GFXEnv {
     }
 
     /**
-     * Creates a site for a URL.
-     */
-    public WebSite createSiteForURL(WebURL aSiteURL)
-    {
-        // Handle JRT - Java runtime modules URLs
-        String scheme = aSiteURL.getScheme();
-        if (scheme.equals("jrt"))
-            return new JRTSite();
-
-        // Return not found
-        return null;
-    }
-
-    /**
      * This is really just here to help with TeaVM.
      */
     public void exit(int aValue)
