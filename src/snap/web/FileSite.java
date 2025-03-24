@@ -292,7 +292,7 @@ public class FileSite extends WebSite {
     private static long getLastModTimeCached(File javaFile)
     {
         String filePath = javaFile.getPath();
-        if (GFXEnv.isWebVMSwing) // AWTPrefs has 80 char key limit
+        if (GFXEnv.isWebVMSwing && filePath.length() > 80) // AWTPrefs has 80 char key limit
             filePath = String.valueOf(filePath.hashCode());
 
         long lastModTime = _lastModTimesPrefsNode.getLong(filePath, 0);
@@ -310,7 +310,7 @@ public class FileSite extends WebSite {
     private static void setLastModTimeCached(File javaFile, long aValue)
     {
         String filePath = javaFile.getPath();
-        if (GFXEnv.isWebVMSwing) // AWTPrefs has 80 char key limit
+        if (GFXEnv.isWebVMSwing && filePath.length() > 80) // AWTPrefs has 80 char key limit
             filePath = String.valueOf(filePath.hashCode());
 
         if (aValue == 0)
