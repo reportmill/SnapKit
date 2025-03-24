@@ -4,6 +4,7 @@
 package snap.web;
 import java.io.File;
 import java.io.IOException;
+import snap.gfx.GFXEnv;
 import snap.util.*;
 
 /**
@@ -291,6 +292,9 @@ public class FileSite extends WebSite {
     private static long getLastModTimeCached(File javaFile)
     {
         String filePath = javaFile.getPath();
+        if (GFXEnv.isWebVMSwing) // AWTPrefs has 80 char key limit
+            filePath = String.valueOf(filePath.hashCode());
+
         long lastModTime = _lastModTimesPrefsNode.getLong(filePath, 0);
         if (lastModTime == 0) {
             lastModTime = System.currentTimeMillis();
@@ -306,6 +310,9 @@ public class FileSite extends WebSite {
     private static void setLastModTimeCached(File javaFile, long aValue)
     {
         String filePath = javaFile.getPath();
+        if (GFXEnv.isWebVMSwing) // AWTPrefs has 80 char key limit
+            filePath = String.valueOf(filePath.hashCode());
+
         if (aValue == 0)
             _lastModTimesPrefsNode.remove(filePath);
         else _lastModTimesPrefsNode.setValue(filePath, aValue);

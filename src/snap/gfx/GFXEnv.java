@@ -17,6 +17,9 @@ public abstract class GFXEnv {
     // The node environment
     protected static GFXEnv  _env;
 
+    // Whether is WebVM Swing
+    public static boolean isWebVMSwing;
+
     /**
      * Returns the Graphics environment.
      */
@@ -40,6 +43,9 @@ public abstract class GFXEnv {
         // Get GFXEnv class and create instance to set
         try { Class.forName(className).newInstance(); return; }
         catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set GFXEnv " + className + ", " + e); }
+
+        if (SnapUtils.isWebVM)
+            isWebVMSwing = true;
 
         // Fall back on swing (but so teavm doesn't try to include swing classes)
         try { Class.forName("fool-teavm".length() > 0 ? "snap.swing.AWTEnv" : "").newInstance(); }
