@@ -11,10 +11,10 @@ import java.net.URL;
 public class FilePathUtils {
     
     // Separator
-    public static final String    SEPARATOR = SnapUtils.isWindows ? "\\" : "/"; //java.io.File.separator;
-    public static final char      SEPARATOR_CHAR = SnapUtils.isWindows ? '\\' : '/'; //java.io.File.separatorChar;
-    public static final String    PATH_SEPARATOR = SnapUtils.isWindows ? ";" : ":"; //java.io.File.pathSeparator;
-    public static final char      PATH_SEPARATOR_CHAR = SnapUtils.isWindows ? ';' : ':'; //java.io.File.pathSeparator;
+    public static final String    SEPARATOR = SnapEnv.isWindows ? "\\" : "/"; //java.io.File.separator;
+    public static final char      SEPARATOR_CHAR = SnapEnv.isWindows ? '\\' : '/'; //java.io.File.separatorChar;
+    public static final String    PATH_SEPARATOR = SnapEnv.isWindows ? ";" : ":"; //java.io.File.pathSeparator;
+    public static final char      PATH_SEPARATOR_CHAR = SnapEnv.isWindows ? ';' : ':'; //java.io.File.pathSeparator;
 
     /**
      * Returns the path in standard unix format (forward slash separator with leading slash and no trailing slash).

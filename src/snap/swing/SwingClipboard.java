@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.*;
 import javax.swing.*;
 import snap.gfx.Image;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import snap.view.*;
 import snap.view.Clipboard;
 
@@ -194,7 +194,7 @@ public class SwingClipboard extends Clipboard implements DragSourceListener, Dra
         java.awt.Image img = getDragImage()!=null ? (java.awt.Image)getDragImage().getNative() : null;
         double dx = img!=null ? getDragImageOffset().x : 0;
         double dy = img!=null ? getDragImageOffset().y : 0;
-        if (SnapUtils.isMac) { dx = -dx; dy = -dy; } // Mac is flipped?
+        if (SnapEnv.isMac) { dx = -dx; dy = -dy; } // Mac is flipped?
         java.awt.Point pnt = img!=null ? new java.awt.Point((int)dx, (int)dy) : null;
 
         // Start drag

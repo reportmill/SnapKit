@@ -204,7 +204,7 @@ public class URLUtils {
      */
     public static void primeNetworkConnection()
     {
-        if (SnapUtils.isWebVM) return;
+        if (SnapEnv.isWebVM) return;
         CompletableFuture.runAsync(URLUtils::primeNetworkConnectionImpl);
     }
 

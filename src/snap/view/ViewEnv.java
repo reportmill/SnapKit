@@ -35,27 +35,11 @@ public abstract class ViewEnv {
     public static ViewEnv getEnv()
     {
         if (_env != null) return _env;
-        setDefaultEnv();
-        return _env;
-    }
 
-    /**
-     * Sets the SwingEnv.
-     */
-    private static void setDefaultEnv()
-    {
-        // Get class name for platform GFXEnv
-        String className = SnapUtils.isTeaVM ? "snaptea.TV" : "snap.swing.SwingViewEnv";
-        if (SnapUtils.isWebVM)
-            className = "snapcj.CJViewEnv";
-
-        // Create instance
-        try { Class.forName(className).newInstance(); return; }
-        catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set ViewEnv: " + className + ", " + e); }
-
-        // Fall back on swing (but so teavm doesn't try to include swing classes)
-        try { Class.forName("fool-teavm".length() > 0 ? "snap.swing.SwingViewEnv" : "").newInstance(); }
-        catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set ViewEnv: " + className + ", " + e); }
+        // Create/set GfxEnvClass
+        Class<? extends ViewEnv> gfxEnvClass = SnapEnv.getViewEnvClass();
+        try { return _env = gfxEnvClass.newInstance(); }
+        catch (InstantiationException | IllegalAccessException e) { throw new RuntimeException(e); }
     }
 
     /**

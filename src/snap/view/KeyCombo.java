@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 
 /**
  * A class to model specific key strokes, including the key code and modifiers (shift, alt, etc.).
@@ -32,8 +32,8 @@ public class KeyCombo {
         _command = isCmd;
         _control = isCntr;
         _shift = isShift;
-        if (isCommandDown() && SnapUtils.isMac) _shortcut = true;
-        if (isControlDown() && SnapUtils.isWindows) _shortcut = true;
+        if (isCommandDown() && SnapEnv.isMac) _shortcut = true;
+        if (isControlDown() && SnapEnv.isWindows) _shortcut = true;
     }
 
     /**
@@ -57,9 +57,9 @@ public class KeyCombo {
         }
 
         // Set Shortcut
-        if (keyCombo.isCommandDown() && SnapUtils.isMac)
+        if (keyCombo.isCommandDown() && SnapEnv.isMac)
             keyCombo._shortcut = true;
-        if (keyCombo.isControlDown() && SnapUtils.isWindows)
+        if (keyCombo.isControlDown() && SnapEnv.isWindows)
             keyCombo._shortcut = true;
         if (aStr.contains("Shortcut"))
             keyCombo._shortcut = true;
@@ -141,8 +141,8 @@ public class KeyCombo {
      */
     private static String getPart(String part)
     {
-        if (part.equals("Shortcut")) return SnapUtils.isWindows ? "CONTROL" : "COMMAND";
-        if (part.equals("meta")) return SnapUtils.isWindows ? "CONTROL" : "COMMAND";
+        if (part.equals("Shortcut")) return SnapEnv.isWindows ? "CONTROL" : "COMMAND";
+        if (part.equals("meta")) return SnapEnv.isWindows ? "CONTROL" : "COMMAND";
         if (part.equals("shift")) return "SHIFT";
         return part;
     }

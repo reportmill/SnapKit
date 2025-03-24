@@ -1,5 +1,5 @@
 package snap.web;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.*;
@@ -42,7 +42,7 @@ public class JRTSite extends WebSite {
             URI jrtURI = URI.create("jrt:/");
             String javaHome = System.getProperty("java.home");
             Map<String,String> javaHomeMap = Collections.singletonMap("java.home", javaHome);
-            if (SnapUtils.isWebVM)
+            if (SnapEnv.isWebVM)
                 javaHomeMap = Collections.emptyMap();
             _fileSystem = FileSystems.newFileSystem(jrtURI, javaHomeMap);
         }

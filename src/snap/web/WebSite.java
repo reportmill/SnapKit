@@ -7,7 +7,7 @@ import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
 import snap.util.FilePathUtils;
 import snap.util.FileUtils;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import java.io.File;
 import java.util.*;
 
@@ -289,7 +289,7 @@ public abstract class WebSite {
         // Update LastModTime
         long lastModTime = putResponse.getLastModTime();
         if (lastModTime == 0) {
-            if (!SnapUtils.isWebVM)
+            if (!SnapEnv.isWebVM)
                 System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getUrlAddress());
             lastModTime = System.currentTimeMillis();
         }

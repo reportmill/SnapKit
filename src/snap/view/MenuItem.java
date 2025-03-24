@@ -89,7 +89,7 @@ public class MenuItem extends ButtonBase implements Cloneable {
     {
         KeyCombo keyCombo = getShortcutCombo();
         String key = Character.toString((char) keyCombo.getKeyCode());
-        String str = (SnapUtils.isMac ? Character.toString((char)8984) : "^") + key;
+        String str = (SnapEnv.isMac ? Character.toString((char)8984) : "^") + key;
         if (keyCombo.isShiftDown())
             str = (char) 8679 + str;
         return str;

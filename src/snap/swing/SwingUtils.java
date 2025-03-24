@@ -6,8 +6,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.List;
 import javax.swing.*;
-
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 
 /**
  * This class offers a number of useful general purpose Swing utilities.
@@ -48,7 +47,7 @@ public class SwingUtils {
 
         // Handle FileList
         List<File> files = getFiles(aTrans);
-        if (files != null && files.size() > 0)
+        if (files != null && !files.isEmpty())
             return files.get(0).getAbsolutePath();
 
         // Otherwise return null
@@ -103,7 +102,7 @@ public class SwingUtils {
         if (key.equals("BACKSPACE")) key = "BACK_SPACE";
 
         // If Windows, convert "meta" to "control"
-        if (SnapUtils.isWindows) key = key.replace("meta", "control");
+        if (SnapEnv.isWindows) key = key.replace("meta", "control");
 
         // Try normal KeyStroke method
         KeyStroke kstroke = KeyStroke.getKeyStroke(key);
@@ -185,5 +184,4 @@ public class SwingUtils {
         point.y += aY;
         return point;
     }
-
 }

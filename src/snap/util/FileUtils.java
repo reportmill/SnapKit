@@ -160,8 +160,8 @@ public class FileUtils {
     public static File getTempDir()
     {
         // Hack for TeaVM, WebVM
-        if (SnapUtils.isTeaVM) return new File("/");
-        if (SnapUtils.isWebVM) {
+        if (SnapEnv.isTeaVM) return new File("/");
+        if (SnapEnv.isWebVM) {
             File tempDir = new File("/files/temp/");
             if (!tempDir.exists())
                 if (!tempDir.mkdirs())
@@ -206,9 +206,9 @@ public class FileUtils {
     {
         // Get user home + AppDataDir (platform specific) + name (if provided)
         String dir = System.getProperty("user.home");
-        if (SnapUtils.isWindows)
+        if (SnapEnv.isWindows)
             dir += File.separator + "AppData" + File.separator + "Local";
-        else if (SnapUtils.isMac)
+        else if (SnapEnv.isMac)
             dir += File.separator + "Library" + File.separator + "Application Support";
         if (aName!=null)
             dir += File.separator + aName;

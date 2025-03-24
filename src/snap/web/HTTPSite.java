@@ -196,7 +196,7 @@ public class HTTPSite extends WebSite {
     {
         WebSite sandboxSite = getSandboxSite();
         String localFilePath = "/Cache" + aFile.getPath();
-        if (SnapUtils.isWebVM) // Shorten name to avoid prefs 'key too long' error
+        if (SnapEnv.isWebVM) // Shorten name to avoid prefs 'key too long' error
             localFilePath = "/Cache/" + aFile.getName();
 
         // Get local sandbox file (create if missing)

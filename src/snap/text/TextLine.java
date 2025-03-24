@@ -5,7 +5,7 @@ package snap.text;
 import snap.geom.HPos;
 import snap.util.ArrayUtils;
 import snap.util.CharSequenceX;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 
 /**
  * This class represents a line of text in a Text.
@@ -86,7 +86,7 @@ public class TextLine implements CharSequenceX, Cloneable {
      */
     public int indexOf(String aStr, int aStart)
     {
-        if (SnapUtils.isTeaVM)
+        if (SnapEnv.isTeaVM)
             return _sb.toString().indexOf(aStr, aStart);
         return _sb.indexOf(aStr, aStart);
     }

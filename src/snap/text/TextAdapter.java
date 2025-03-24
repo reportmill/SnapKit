@@ -1128,7 +1128,7 @@ public class TextAdapter extends PropObject {
         int keyCode = anEvent.getKeyCode();
         boolean shortcutDown = anEvent.isShortcutDown();
         boolean controlDown = anEvent.isControlDown();
-        boolean emacsDown = SnapUtils.isWindows ? anEvent.isAltDown() : controlDown;
+        boolean emacsDown = SnapEnv.isWindows ? anEvent.isAltDown() : controlDown;
         boolean shiftDown = anEvent.isShiftDown();
 
         // Reset caret
@@ -1214,7 +1214,7 @@ public class TextAdapter extends PropObject {
         boolean charDefined = keyChar != KeyCode.CHAR_UNDEFINED && !Character.isISOControl(keyChar);
         boolean commandDown = anEvent.isShortcutDown();
         boolean controlDown = anEvent.isControlDown();
-        boolean emacsDown = SnapUtils.isWindows ? anEvent.isAltDown() : controlDown;
+        boolean emacsDown = SnapEnv.isWindows ? anEvent.isAltDown() : controlDown;
 
         // If actual text entered, replace
         if (charDefined && !commandDown && !controlDown && !emacsDown) {

@@ -4,7 +4,6 @@
 package snap.web;
 import java.io.File;
 import java.io.IOException;
-import snap.gfx.GFXEnv;
 import snap.util.*;
 
 /**
@@ -26,7 +25,7 @@ public class FileSite extends WebSite {
         super();
 
         // If CheerpJ, get LastModTimes prefs node
-        if (SnapUtils.isWebVM)
+        if (SnapEnv.isWebVM)
             _lastModTimesPrefsNode = Prefs.getPrefsForName("LastModTimes");
     }
 
@@ -39,7 +38,7 @@ public class FileSite extends WebSite {
         super.setURL(aURL);
 
         // If Windows, get drive letter path
-        if (SnapUtils.isWindows)
+        if (SnapEnv.isWindows)
             _windowsDriveLetterPath = aURL.getWindowsDriveLetterPath();
     }
 
@@ -107,7 +106,7 @@ public class FileSite extends WebSite {
         fileHeader.setSize(javaFile.length());
 
         // If WebVM, get LastModTime from cache
-        if (SnapUtils.isWebVM) {
+        if (SnapEnv.isWebVM) {
             long lastModTime = getLastModTimeCached(javaFile);
             fileHeader.setLastModTime(lastModTime);
         }
@@ -164,7 +163,7 @@ public class FileSite extends WebSite {
         long lastModTime = javaFile.lastModified();
 
         // Hack for WebVM missing mod times: Set LastModTime to current time, and if file update parent as well, if file being created
-        if (SnapUtils.isWebVM) {
+        if (SnapEnv.isWebVM) {
             lastModTime = System.currentTimeMillis();
             setLastModTimeCached(javaFile, lastModTime);
             if (!fileExists) {
@@ -191,7 +190,7 @@ public class FileSite extends WebSite {
         FileUtils.deleteDeep(javaFile);
 
         // Hack for WebVM missing mod times: Remove cached LastModTime and update parent
-        if (SnapUtils.isWebVM) {
+        if (SnapEnv.isWebVM) {
             setLastModTimeCached(javaFile, 0);
             File parentFile = javaFile.getParentFile();
             setLastModTimeCached(parentFile, System.currentTimeMillis());
@@ -210,12 +209,12 @@ public class FileSite extends WebSite {
         // Get java file and set last modified time
         File javaFile = aFile.getJavaFile();
         if (!javaFile.setLastModified(aTime)) {
-            if (!SnapUtils.isWebVM)
+            if (!SnapEnv.isWebVM)
                 System.err.println("FileSite.setModTimeForFile: Error setting mod time for file: " + javaFile.getPath());
         }
 
         // Hack support to save last mod times
-        if (SnapUtils.isWebVM)
+        if (SnapEnv.isWebVM)
             setLastModTimeCached(javaFile, aTime);
 
         // Do normal version
@@ -292,7 +291,7 @@ public class FileSite extends WebSite {
     private static long getLastModTimeCached(File javaFile)
     {
         String filePath = javaFile.getPath();
-        if (GFXEnv.isWebVMSwing && filePath.length() > 80) // AWTPrefs has 80 char key limit
+        if (SnapEnv.isWebVMSwing && filePath.length() > 80) // AWTPrefs has 80 char key limit
             filePath = String.valueOf(filePath.hashCode());
 
         long lastModTime = _lastModTimesPrefsNode.getLong(filePath, 0);
@@ -310,7 +309,7 @@ public class FileSite extends WebSite {
     private static void setLastModTimeCached(File javaFile, long aValue)
     {
         String filePath = javaFile.getPath();
-        if (GFXEnv.isWebVMSwing && filePath.length() > 80) // AWTPrefs has 80 char key limit
+        if (SnapEnv.isWebVMSwing && filePath.length() > 80) // AWTPrefs has 80 char key limit
             filePath = String.valueOf(filePath.hashCode());
 
         if (aValue == 0)

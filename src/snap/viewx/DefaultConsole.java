@@ -1,6 +1,6 @@
 package snap.viewx;
 import snap.gfx.Color;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import snap.view.*;
 import java.util.Date;
 import java.util.HashMap;
@@ -205,9 +205,9 @@ public class DefaultConsole extends ViewOwner implements Console {
         if (defaultConsole instanceof ViewOwner) {
             ViewOwner viewOwner = (ViewOwner) defaultConsole;
             View consoleView = viewOwner.getUI();
-            if (!SnapUtils.isWebVM)
+            if (!SnapEnv.isWebVM)
                 consoleView.setPrefSize(700, 900);
-            viewOwner.getWindow().setMaximized(SnapUtils.isWebVM);
+            viewOwner.getWindow().setMaximized(SnapEnv.isWebVM);
             ViewUtils.runLater(() -> viewOwner.setWindowVisible(true));
         }
     }

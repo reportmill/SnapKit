@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
+import snap.util.SnapEnv;
 import snap.util.SnapUtils;
 import java.io.*;
 import java.net.*;
@@ -184,8 +185,8 @@ public class HTTPRequest {
 
         // Get ContentType, Length, LastModified
         resp._contentType = connection.getContentType();
-        resp._contentLength = SnapUtils.isTeaVM ? 0 : connection.getContentLength();
-        resp._lastModified = SnapUtils.isTeaVM || SnapUtils.isWebVM ? 0 : connection.getLastModified();
+        resp._contentLength = SnapEnv.isTeaVM ? 0 : connection.getContentLength();
+        resp._lastModified = SnapEnv.isTeaVM || SnapEnv.isWebVM ? 0 : connection.getLastModified();
 
         // Get response bytes
         if (!method.equals("HEAD")) {

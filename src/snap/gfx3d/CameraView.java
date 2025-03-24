@@ -4,7 +4,7 @@ import snap.geom.Rect;
 import snap.gfx.*;
 import snap.props.PropChange;
 import snap.util.Convert;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import snap.view.*;
 
 /**
@@ -132,7 +132,7 @@ public class CameraView extends ParentView {
         _camera.paintScene(aPntr);
 
         // This is an ugly fix for Jogl/MacOS bug where 3D painting doesn't seem to work when mouse dragging
-        if (!isShowCubeView() && SnapUtils.isMac) {  // P.S. - I don't know why it works
+        if (!isShowCubeView() && SnapEnv.isMac) {  // P.S. - I don't know why it works
             aPntr.clipRect(0, 0, .1, .1);
             getCubeView().paintFront(aPntr);
         }

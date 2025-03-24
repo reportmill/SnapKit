@@ -3,7 +3,7 @@
  */
 package snap.web;
 import snap.util.FilePathUtils;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 
 /**
  * A class to parse a URL string and provide the parts.
@@ -105,7 +105,7 @@ public class ParsedURL {
             }
 
             // IF Windows and no device letter, add default /C:
-            else if (SnapUtils.isWindows)
+            else if (SnapEnv.isWindows)
                 str = _windowsDriveLetterPath = "/C:";
         }
 

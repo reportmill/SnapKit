@@ -14,63 +14,14 @@ import java.util.*;
  */
 public class SnapUtils {
 
-    // The current platform
-    private static Platform platform = getPlatform();
-
-    // Whether app is currently running on Windows
-    public static boolean isWindows = platform == Platform.WINDOWS;
-
-    // Whether app is currently running on Mac
-    public static boolean isMac = platform == Platform.MAC;
-
-    // Whether app is currently running on TeaVM
-    public static boolean isTeaVM = platform == Platform.TEAVM;
-
-    // Whether app is currently running on CheerpJ
-    public static boolean isWebVM = platform == Platform.CHEERP;
+    // Legacy
+    public static boolean isWebVM = SnapEnv.isWebVM;
 
     // The build info string from "BuildInfo.txt" (eg, "Aug-31-04")
     private static String _buildInfo;
 
     // A map to track "print once" messages
     private static Map<String, Integer> _doOnceMap = new HashMap<>();
-
-    // Constants for platform
-    public enum Platform { WINDOWS, MAC, CHEERP, TEAVM, UNKNOWN }
-
-    /**
-     * Returns the current platform.
-     */
-    public static Platform getPlatform()
-    {
-        String name = System.getProperty("os.name");
-        if (name == null) name = "TeaVM";
-        String vend = System.getProperty("java.vendor");
-        if (vend == null) vend = "TeaVM";
-        //System.out.println("os.name: " + name);
-        //System.out.println("java.vendor: " + vend);
-
-        // Windows
-        if (name.contains("Windows"))
-            return SnapUtils.Platform.WINDOWS;
-
-        // Mac
-        if (name.contains("Mac OS X"))
-            return SnapUtils.Platform.MAC;
-
-        // CheerpJ
-        String runtimeVersion = System.getProperty("java.runtime.version");
-        //System.out.println("java.runtime.version: " + runtimeVersion);
-        if (vend.contains("Leaning") || runtimeVersion.contains("adhoc"))
-            return SnapUtils.Platform.CHEERP;
-
-        // TeaVM
-        if (name.contains("TeaVM"))
-            return SnapUtils.Platform.TEAVM;
-
-        // Unknown
-        return Platform.UNKNOWN;
-    }
 
     /**
      * Returns a clone of the given object (supports List, Map, Cloneable and null).
@@ -152,8 +103,8 @@ public class SnapUtils {
     public static String getTempDir()
     {
         // Hack for TeaVM, WebVM
-        if (isTeaVM) return "/";
-        if (isWebVM) return "/files/temp/";
+        if (SnapEnv.isTeaVM) return "/";
+        if (SnapEnv.isWebVM) return "/files/temp/";
 
         // Get System property and make sure it ends with dir char
         String tempDir = System.getProperty("java.io.tmpdir");

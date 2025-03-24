@@ -151,7 +151,7 @@ public class TaskRunner<T> {
         });
 
         // Start thread
-        if (!SnapUtils.isTeaVM)
+        if (!SnapEnv.isTeaVM)
             _thread.setName(getName());
         _thread.start();
 
