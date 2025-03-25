@@ -2,15 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
-import snap.props.PropChange;
-import snap.props.PropChangeListener;
-import snap.props.PropChangeSupport;
 import snap.view.ViewUtils;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
 /**
- * A class for running operations in the background.
+ * This class runs a task on a separate thread.
  */
 public class TaskRunner<T> {
 
@@ -47,14 +44,8 @@ public class TaskRunner<T> {
     // The finished handler
     private Runnable _finishedHandler;
 
-    // The PropChangeSupport
-    private PropChangeSupport _pcs = PropChangeSupport.EMPTY;
-
     // Constants for status
     public enum Status { Idle, Running, Finished, Cancelled, Failed }
-
-    // Constants for Runner PropertyChanges
-    public static final String Status_Prop = "Status";
 
     /**
      * Constructor.
@@ -104,11 +95,7 @@ public class TaskRunner<T> {
     protected void setStatus(Status aStatus)
     {
         if (aStatus == _status) return;
-        firePropChange(Status_Prop, _status, _status = aStatus);
-
-        // Forward Cancelled to monitor
-        if (aStatus == Status.Cancelled && _monitor != null)
-            _monitor.setCancelled(true);
+        _status = aStatus;
     }
 
     /**
@@ -144,11 +131,8 @@ public class TaskRunner<T> {
      */
     public TaskRunner<T> start()
     {
-        // Create new thread to run this runner's run method then success/failure/finished method with result/exception
-        _thread = new Thread(() -> {
-            invokeRun();
-            ViewUtils.runLater(() -> invokeFinished());
-        });
+        // Create new thread to run task
+        _thread = new Thread(this::runTask);
 
         // Start thread
         if (!SnapEnv.isTeaVM)
@@ -175,34 +159,6 @@ public class TaskRunner<T> {
         cancel();
         getThread().interrupt();
     }
-
-    /**
-     * The method to run.
-     */
-    public T run() throws Exception
-    {
-        return _taskFunction.call();
-    }
-
-    /**
-     * This method is called on success.
-     */
-    protected void success(T aResult)  { }
-
-    /**
-     * This method is called when cancelled.
-     */
-    protected void cancelled(Exception e)  { }
-
-    /**
-     * This method is called on failure.
-     */
-    protected void failure(Exception e)  { }
-
-    /**
-     * This method is called when finished (after success()/failure() call).
-     */
-    protected void finished()  { }
 
     /**
      * Returns the result.
@@ -249,6 +205,7 @@ public class TaskRunner<T> {
      */
     public synchronized void setOnSuccess(Consumer<T> aHandler)
     {
+        if (aHandler == getOnSuccess()) return;
         _successHandler = aHandler;
 
         // If already finished, call handler
@@ -259,13 +216,14 @@ public class TaskRunner<T> {
     /**
      * Returns the failure handler.
      */
-    public Consumer<Exception> getOnFailure(Consumer<Exception> aHandler)  { return _failureHandler; }
+    public Consumer<Exception> getOnFailure()  { return _failureHandler; }
 
     /**
      * Sets the failure handler.
      */
     public synchronized void setOnFailure(Consumer<Exception> aHandler)
     {
+        if (aHandler == getOnFailure()) return;
         _failureHandler = aHandler;
 
         // If already finished, call handler
@@ -282,7 +240,7 @@ public class TaskRunner<T> {
 
         // If already finished, call handler
         if (_cancelledHandler != null && _status == Status.Cancelled)
-            ViewUtils.runLater(() -> _cancelledHandler.run());
+            ViewUtils.runLater(_cancelledHandler);
     }
 
     /**
@@ -294,43 +252,45 @@ public class TaskRunner<T> {
 
         // If already finished, call handler
         if (_finishedHandler != null && (_status == Status.Finished || _status == Status.Failed || _status == Status.Cancelled))
-            ViewUtils.runLater(() -> _finishedHandler.run());
+            ViewUtils.runLater(_finishedHandler);
     }
 
     /**
      * Runs the run method.
      */
-    protected void invokeRun()
+    protected void runTask()
     {
-        // Set start time and run status
-        _exception = null;
+        // Set run status
         setStatus(Status.Running);
 
-        // Call run()
-        try { _result = run(); }
+        // Run task
+        try { _result = _taskFunction.call(); }
         catch (Exception e) { _exception = e; }
         catch (Throwable e) { _exception = new RuntimeException(e); }
-    }
 
-    /**
-     * Runs the success method.
-     */
-    protected synchronized void invokeFinished()
-    {
         // Update status
         if (getStatus() != Status.Cancelled)
             setStatus(_exception == null ? Status.Finished : Status.Failed);
 
+        // Handle task finished
+        ViewUtils.runLater(this::handleTaskFinished);
+    }
+
+    /**
+     * Called when task has completed.
+     */
+    protected synchronized void handleTaskFinished()
+    {
         // If cancelled, call cancelled
         if (getStatus() == Status.Cancelled) {
-            cancelled(_exception);
+            if (_monitor != null)
+                _monitor.setCancelled(true);
             if (_cancelledHandler != null)
                 _cancelledHandler.run();
         }
 
         // Call success/failure
         else if (_exception == null) {
-            success(_result);
             if (_successHandler != null)
                 _successHandler.accept(_result);
         }
@@ -339,44 +299,14 @@ public class TaskRunner<T> {
         else {
             if (_monitor != null)
                 _monitor.setCancelled(true);
-            failure(_exception);
             if (_failureHandler != null)
                 _failureHandler.accept(_exception);
         }
 
         // Call finished
-        finished();
         if (_monitor != null)
             _monitor.setFinished(true);
         if (_finishedHandler != null)
             _finishedHandler.run();
-    }
-
-    /**
-     * Add listener.
-     */
-    public void addPropChangeListener(PropChangeListener aLsnr)
-    {
-        if (_pcs == PropChangeSupport.EMPTY)
-            _pcs = new PropChangeSupport(this);
-        _pcs.addPropChangeListener(aLsnr);
-    }
-
-    /**
-     * Remove listener.
-     */
-    public void removePropChangeListener(PropChangeListener aLsnr)
-    {
-        _pcs.removePropChangeListener(aLsnr);
-    }
-
-    /**
-     * Fires a property change for given property name, old value, new value and index.
-     */
-    protected void firePropChange(String aProp, Object oldVal, Object newVal)
-    {
-        if (!_pcs.hasListener(aProp)) return;
-        PropChange pc = new PropChange(this, aProp, oldVal, newVal);
-        _pcs.firePropChange(pc);
     }
 }
