@@ -184,27 +184,23 @@ public class HTTPSite extends WebSite {
     protected File getJavaFileForUrl(WebURL aURL)
     {
         WebFile file = aURL.getFile();
-        WebFile localFile = getLocalFile(file, false);
+        WebFile localFile = getLocalFileForFile(file);
         return localFile.getJavaFile();
     }
 
     /**
-     * Returns a local file for given file (with option to cache for future use).
+     * Returns a local file for given file.
      */
     @Override
-    public WebFile getLocalFile(WebFile aFile, boolean doCache)
+    public WebFile getLocalFileForFile(WebFile aFile)
     {
         WebSite sandboxSite = getSandboxSite();
         String localFilePath = "/Cache" + aFile.getPath();
         if (SnapEnv.isWebVM) // Shorten name to avoid prefs 'key too long' error
             localFilePath = "/Cache/" + aFile.getName();
 
-        // Get local sandbox file (create if missing)
-        WebFile localFile = sandboxSite.getFileForPath(localFilePath);
-        if (localFile == null)
-            localFile = sandboxSite.createFileForPath(localFilePath, false);
-
-        // If file exists and is up to date, just return
+        // Get local sandbox file (just return if exists and is up to date)
+        WebFile localFile = sandboxSite.createFileForPath(localFilePath, false);
         if (localFile.getExists() && localFile.getLastModTime() >= aFile.getLastModTime())
             return localFile;
 

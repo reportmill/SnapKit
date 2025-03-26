@@ -14,9 +14,9 @@ import snap.util.SnapUtils;
  */
 public class ZipFileSite extends WebSite {
 
-    // The ZipFile
-    private ZipFile _zipFile;
-    
+    // The JRE ZipFile
+    private ZipFile _javaZipFile;
+
     // A map of paths to ZipEntry
     private Map<String,ZipEntry> _entries;
     
@@ -35,16 +35,40 @@ public class ZipFileSite extends WebSite {
     }
 
     /**
+     * Returns the file for the zip file URL.
+     */
+    public WebFile getZipFile()
+    {
+        WebURL zipFileUrl = getURL();
+        return zipFileUrl.getFile();
+    }
+
+    /**
+     * Returns the local file for the zip file URL (copied to Sandbox if remote).
+     */
+    private WebFile getLocalZipFile()
+    {
+        WebFile zipFile = getZipFile();
+        if (zipFile == null)
+            return null;
+
+        // Get local file in case file is over http
+        WebSite zipFileSite = zipFile.getSite();
+        return zipFileSite.getLocalFileForFile(zipFile);
+    }
+
+    /**
      * Returns the ZipFile.
      */
-    protected ZipFile getZipFile()
+    protected ZipFile getJavaZipFile()
     {
         // If already set, just return
-        if (_zipFile != null) return _zipFile;
+        if (_javaZipFile != null) return _javaZipFile;
 
         // Get java file
-        File javaFile = getJavaFile();
-        if (javaFile == null)
+        WebFile localZipFile = getLocalZipFile();
+        File localZipFileJavaFile = localZipFile != null ? localZipFile.getJavaFile() : null;
+        if (localZipFileJavaFile == null)
             return null;
 
         // Return file
@@ -52,14 +76,14 @@ public class ZipFileSite extends WebSite {
 
             // If Jar, use JarFile
             if (_jar)
-                return _zipFile = new JarFile(javaFile);
+                return _javaZipFile = new JarFile(localZipFileJavaFile);
 
             // Otherwise return ZipFile
-            return _zipFile = new ZipFile(javaFile);
+            return _javaZipFile = new ZipFile(localZipFileJavaFile);
         }
 
         // Rethrow exception
-        catch(IOException e) { throw new RuntimeException("ZipFileSize.getZipFile: Error opening " + javaFile.getPath(), e); }
+        catch(IOException e) { throw new RuntimeException("ZipFileSite.getZipFile: Error opening " + localZipFileJavaFile.getPath(), e); }
     }
 
     /**
@@ -75,7 +99,7 @@ public class ZipFileSite extends WebSite {
         _dirs = new HashMap<>();
 
         // Get ZipFile
-        ZipFile zipFile = getZipFile();
+        ZipFile zipFile = getJavaZipFile();
         if (zipFile == null)
             return _entries;
 
@@ -159,7 +183,7 @@ public class ZipFileSite extends WebSite {
         if (fileHeader.isFile()) {
             try {
                 ZipEntry zipEntry = getEntries().get(filePath);
-                InputStream inputStream = _zipFile.getInputStream(zipEntry);
+                InputStream inputStream = _javaZipFile.getInputStream(zipEntry);
                 byte[] bytes = SnapUtils.getInputStreamBytes(inputStream);
                 aResp.setBytes(bytes);
             }
@@ -213,21 +237,6 @@ public class ZipFileSite extends WebSite {
 
         // Return
         return fileHeader;
-    }
-
-    /**
-     * Returns a Java file for the zip file URL (copied to Sandbox if remote).
-     */
-    protected File getJavaFile()
-    {
-        WebURL url = getURL();
-        WebFile file = url.getFile();
-        if (file == null)
-            return null;
-
-        // Get local file in case file is over http
-        WebFile localFile = file.getSite().getLocalFile(file, true);
-        return localFile.getJavaFile();
     }
 
     /**

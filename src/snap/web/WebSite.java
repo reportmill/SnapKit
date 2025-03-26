@@ -538,7 +538,7 @@ public abstract class WebSite {
     /**
      * Returns a local file for given file (with option to cache for future use).
      */
-    public WebFile getLocalFile(WebFile aFile, boolean doCache)
+    public WebFile getLocalFileForFile(WebFile aFile)
     {
         return aFile;
     }
