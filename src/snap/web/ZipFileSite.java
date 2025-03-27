@@ -23,9 +23,6 @@ public class ZipFileSite extends WebSite {
     // A map of directory paths to List of child paths
     private Map<String,List<String>> _dirs;
     
-    // Whether Zip is really a Jar
-    private boolean _jar;
-
     /**
      * Constructor.
      */
@@ -60,7 +57,7 @@ public class ZipFileSite extends WebSite {
     /**
      * Returns the ZipFile.
      */
-    protected ZipFile getJavaZipFile()
+    private ZipFile getJavaZipFile()
     {
         // If already set, just return
         if (_javaZipFile != null) return _javaZipFile;
@@ -75,7 +72,7 @@ public class ZipFileSite extends WebSite {
         try {
 
             // If Jar, use JarFile
-            if (_jar)
+            if (localZipFile.getFileType().equals("jar"))
                 return _javaZipFile = new JarFile(localZipFileJavaFile);
 
             // Otherwise return ZipFile
@@ -83,13 +80,13 @@ public class ZipFileSite extends WebSite {
         }
 
         // Rethrow exception
-        catch(IOException e) { throw new RuntimeException("ZipFileSite.getZipFile: Error opening " + localZipFileJavaFile.getPath(), e); }
+        catch(IOException e) { throw new RuntimeException("ZipFileSite.getJavaZipFile: Error opening " + localZipFileJavaFile.getPath(), e); }
     }
 
     /**
      * Returns a map of ZipFile paths to ZipEntry(s).
      */
-    protected synchronized Map <String,ZipEntry> getEntries()
+    private synchronized Map <String,ZipEntry> getEntries()
     {
         // If already set, just return
         if (_entries != null) return _entries;
@@ -115,7 +112,7 @@ public class ZipFileSite extends WebSite {
     /**
      * Adds a ZipEntry to WebSite.
      */
-    protected void addZipEntry(ZipEntry anEntry)
+    private void addZipEntry(ZipEntry anEntry)
     {
         // Get path and add entry to entries and path to dirs lists
         String filePath = FilePathUtils.getNormalizedPath('/' + anEntry.getName());
@@ -126,7 +123,7 @@ public class ZipFileSite extends WebSite {
     /**
      * Returns a dir list for a path.
      */
-    protected List <String> getDirList(String aPath)
+    private List <String> getDirList(String aPath)
     {
         // Get parent path and return list for path
         String parentPath =  FilePathUtils.getParentPath(aPath);
@@ -143,7 +140,7 @@ public class ZipFileSite extends WebSite {
     /**
      * Returns a dir list for a path.
      */
-    protected void addDirListPath(String aPath)
+    private void addDirListPath(String aPath)
     {
         if (aPath.length() <= 1) return;
         String path = FilePathUtils.getNormalizedPath(aPath);
@@ -237,19 +234,5 @@ public class ZipFileSite extends WebSite {
 
         // Return
         return fileHeader;
-    }
-
-    /**
-     * Override to turn on file trimming from system jars.
-     */
-    @Override
-    public void setURL(WebURL aURL)
-    {
-        // Do normal version
-        super.setURL(aURL);
-
-        // Turn on file trimming if system jar
-        String urls = aURL.getString().toLowerCase();
-        _jar = urls.endsWith(".jar");
     }
 }
