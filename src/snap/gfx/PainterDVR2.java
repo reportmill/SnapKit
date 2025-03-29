@@ -73,8 +73,6 @@ public class PainterDVR2 extends PainterImpl {
     {
         super();
         _pntr = aPntr;
-        super.setTransform(_pntr.getTransform());
-        super.clip(_pntr.getClip());
     }
 
     /**
