@@ -2,10 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
-import snap.geom.Path2D;
-import snap.geom.PathIter;
-import snap.geom.Shape;
-import snap.geom.Transform;
+import snap.geom.*;
 import java.util.Arrays;
 
 /**
@@ -38,7 +35,7 @@ public class PainterDVR2 extends PainterImpl {
     protected int _stringStackSize = 0;
 
     // The native stack
-    protected Object[] _nativeStack = new String[100];
+    protected Object[] _nativeStack = new Object[100];
 
     // The native stack size
     protected int _nativeStackSize = 0;
@@ -62,6 +59,7 @@ public class PainterDVR2 extends PainterImpl {
     public static final int SET_TRANSFORM = 13;
     public static final int GSAVE = 14;
     public static final int GRESTORE = 15;
+    public static final int CLEAR_RECT = 16;
 
     /**
      * Constructor.
@@ -69,12 +67,14 @@ public class PainterDVR2 extends PainterImpl {
     public PainterDVR2()  { }
 
     /**
-     * Creates a new PainterDVR for given painter (which supports applyEffect()).
+     * Constructor for given painter (which supports applyEffect()).
      */
     public PainterDVR2(Painter aPntr)
     {
         super();
         _pntr = aPntr;
+        super.setTransform(_pntr.getTransform());
+        super.clip(_pntr.getClip());
     }
 
     /**
@@ -127,6 +127,12 @@ public class PainterDVR2 extends PainterImpl {
         _nativeStack[_nativeStackSize++] = aValue;
     }
 
+    @Override
+    public void flush()
+    {
+        new Executor(_pntr).exec();
+    }
+
     /**
      * Executes the instructions stored in this PainterDVR to given painter.
      */
@@ -141,6 +147,8 @@ public class PainterDVR2 extends PainterImpl {
      */
     public void clear()
     {
+        _gsize = 0;
+        _gstate = new GState();
         _instructionStackSize = 0;
         _intStackSize = 0;
         _doubleStackSize = 0;
@@ -213,7 +221,7 @@ public class PainterDVR2 extends PainterImpl {
     /** Stroke the given shape. */
     public void draw(Shape aShape)
     {
-        super.draw(aShape);
+        //super.draw(aShape);
         addInstruction(DRAW_SHAPE);
         addShape(aShape);
     }
@@ -221,7 +229,7 @@ public class PainterDVR2 extends PainterImpl {
     /** Fill the given shape. */
     public void fill(Shape aShape)
     {
-        super.fill(aShape);
+        //super.fill(aShape);
         addInstruction(FILL_SHAPE);
         addShape(aShape);
     }
@@ -229,7 +237,7 @@ public class PainterDVR2 extends PainterImpl {
     /** Draw image with transform. */
     public void drawImage(Image anImg, Transform aTrans)
     {
-        super.drawImage(anImg,aTrans);
+        //super.drawImage(anImg,aTrans);
         addInstruction(DRAW_IMAGE2);
         addNative(anImg);
         addTransform(aTrans);
@@ -238,7 +246,7 @@ public class PainterDVR2 extends PainterImpl {
     /** Draw image in rect. */
     public void drawImage(Image img, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh)
     {
-        super.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+        //super.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
         addInstruction(DRAW_IMAGE);
         addNative(img);
         addDouble(sx); addDouble(sy);
@@ -250,7 +258,7 @@ public class PainterDVR2 extends PainterImpl {
     /** Draw string at location with char spacing. */
     public void drawString(String aStr, double aX, double aY, double charSpacing)
     {
-        super.drawString(aStr, aX, aY, charSpacing);
+        //super.drawString(aStr, aX, aY, charSpacing);
         addInstruction(DRAW_STRING);
         addString(aStr);
         addDouble(aX);
@@ -261,7 +269,7 @@ public class PainterDVR2 extends PainterImpl {
     /** Stroke string at location with char spacing. */
     public void strokeString(String aStr, double aX, double aY, double charSpacing)
     {
-        super.strokeString(aStr, aX, aY, charSpacing);
+        //super.strokeString(aStr, aX, aY, charSpacing);
         addInstruction(STROKE_STRING);
         addString(aStr);
         addDouble(aX);
@@ -307,6 +315,16 @@ public class PainterDVR2 extends PainterImpl {
     {
         super.restore();
         addInstruction(GRESTORE);
+    }
+
+    /**
+     * Clears a rect.
+     */
+    public void clearRect(double aX, double aY, double aW, double aH)
+    {
+        addInstruction(CLEAR_RECT);
+        addDouble(aX); addDouble(aY);
+        addDouble(aW); addDouble(aH);
     }
 
     /** Override to forward to real painter. */
@@ -452,7 +470,8 @@ public class PainterDVR2 extends PainterImpl {
 
         public void setStroke()
         {
-            Stroke stroke = (Stroke) getNative();
+            double width = getDouble();
+            Stroke stroke = Stroke.getStroke(width);
             _painter.setStroke(stroke);
         }
 
@@ -552,7 +571,7 @@ public class PainterDVR2 extends PainterImpl {
         public Shape getShape()
         {
             int opCount = getInt();
-            Path2D path2D = null;
+            Path2D path2D = new Path2D();
             for (int i = 0; i < opCount; i++) {
                 int op = getInt();
                 switch (op) {
