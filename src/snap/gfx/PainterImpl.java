@@ -156,7 +156,7 @@ public abstract class PainterImpl extends Painter {
     public void setTransform(Transform aTrans)
     {
         // Transform clip & mark shape back to world coords
-        _gfxState.clip = _gfxState.clip.copyFor(_gfxState.xform.getInverse());
+        _gfxState.clip = _gfxState.clip.copyFor(_gfxState.xform);
         if (_markedShape != null)
             _markedShape = _markedShape.copyFor(_gfxState.xform.getInverse());
 
@@ -164,7 +164,7 @@ public abstract class PainterImpl extends Painter {
         _gfxState.xform = aTrans;
 
         // Transform clip and mark shape back to local coords
-        _gfxState.clip = _gfxState.clip.copyFor(aTrans);
+        _gfxState.clip = _gfxState.clip.copyFor(aTrans.getInverse());
         if (_markedShape != null)
             _markedShape = _markedShape.copyFor(aTrans);
     }
@@ -175,7 +175,7 @@ public abstract class PainterImpl extends Painter {
     public void transform(Transform aTrans)
     {
         _gfxState.xform.concat(aTrans);
-        _gfxState.clip = _gfxState.clip.copyFor(aTrans);
+        _gfxState.clip = _gfxState.clip.copyFor(aTrans.getInverse());
         if (_markedShape != null)
             _markedShape = _markedShape.copyFor(aTrans);
     }
