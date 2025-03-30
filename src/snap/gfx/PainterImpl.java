@@ -5,7 +5,6 @@ package snap.gfx;
 import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.geom.Transform;
-
 import java.util.Arrays;
 
 /**
@@ -14,43 +13,51 @@ import java.util.Arrays;
 public abstract class PainterImpl extends Painter {
 
     // The current graphics state
-    protected GState  _gstate = new GState();
+    protected GState _gfxState = new GState();
     
     // The GState stack
-    protected GState[]  _gstates = new GState[8];
+    protected GState[] _gfxStateStack = new GState[8];
     
     // The GState stack size
-    protected int  _gsize;
+    protected int _gfxStateStackSize;
     
     // The current marked shape
-    private Shape _mshape;
+    private Shape _markedShape;
     
     // Whether marked shape is opaque
-    private boolean  _opaque = true;
+    private boolean _opaque = true;
+
+    /**
+     * Constructor.
+     */
+    public PainterImpl()
+    {
+        super();
+    }
 
     /** Returns the current font. */
-    public Font getFont()  { return _gstate.font; }
+    public Font getFont()  { return _gfxState.font; }
 
     /** Sets the current font. */
-    public void setFont(Font aFont)  { _gstate.font = aFont; }
+    public void setFont(Font aFont)  { _gfxState.font = aFont; }
 
     /** Returns the current paint. */
-    public Paint getPaint()  { return _gstate.paint; }
+    public Paint getPaint()  { return _gfxState.paint; }
 
     /** Sets the current paint. */
-    public void setPaint(Paint aPaint)  { _gstate.paint = aPaint; }
+    public void setPaint(Paint aPaint)  { _gfxState.paint = aPaint; }
 
     /** Returns the current stroke. */
-    public Stroke getStroke()  { return _gstate.stroke; }
+    public Stroke getStroke()  { return _gfxState.stroke; }
 
     /** Sets the current stroke. */
-    public void setStroke(Stroke aStroke)  { _gstate.stroke = aStroke; }
+    public void setStroke(Stroke aStroke)  { _gfxState.stroke = aStroke; }
 
     /** Returns the opacity. */
-    public double getOpacity()  { return _gstate.opacity; }
+    public double getOpacity()  { return _gfxState.opacity; }
 
     /** Sets the opacity. */
-    public void setOpacity(double aValue)  { _gstate.opacity = aValue; }
+    public void setOpacity(double aValue)  { _gfxState.opacity = aValue; }
 
     /** Stroke the given shape. */
     public void draw(Shape aShape)
@@ -65,16 +72,16 @@ public abstract class PainterImpl extends Painter {
     }
 
     /** Draw image with transform. */
-    public void drawImage(Image anImg, Transform aTrans)
+    public void drawImage(Image image, Transform aTrans)
     {
-        Shape shp = new Rect(0,0,anImg.getWidth(),anImg.getHeight()).copyFor(aTrans);
-        updateMarkedBounds(shp, !anImg.hasAlpha());
+        Shape imageBounds = new Rect(0,0, image.getWidth(), image.getHeight()).copyFor(aTrans);
+        updateMarkedBounds(imageBounds, !image.hasAlpha());
     }
 
     /** Draw image in rect. */
-    public void drawImage(Image img, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh)
+    public void drawImage(Image image, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh)
     {
-        updateMarkedBounds(new Rect(dx,dy,dw,dh), !img.hasAlpha());
+        updateMarkedBounds(new Rect(dx, dy, dw, dh), !image.hasAlpha());
     }
 
     /** Draw string at location with char spacing. */
@@ -104,25 +111,25 @@ public abstract class PainterImpl extends Painter {
     private void updateMarkedBounds(Shape aShape, boolean isOpaque)
     {
         // Get marked shape in world coords
-        Shape mshp = aShape.copyFor(_gstate.xform);
+        Shape mshp = aShape.copyFor(_gfxState.xform);
 
         // If shape not in clip, clip
-        if (!_gstate.clip.contains(mshp) && _gstate.clip.intersectsShape(mshp))
-            mshp = Shape.intersectShapes(_gstate.clip, mshp);
+        if (!_gfxState.clip.contains(mshp) && _gfxState.clip.intersectsShape(mshp))
+            mshp = Shape.intersectShapes(_gfxState.clip, mshp);
 
         // If no marked shape yet, just set
-        if (_mshape == null) {
-            _mshape = mshp; _opaque = isOpaque;
+        if (_markedShape == null) {
+            _markedShape = mshp; _opaque = isOpaque;
         }
 
         // Otherwise if new shape doesn't fit in current marked bounds, set to new shape (if it ecompasses) or union shape
-        else if (!_mshape.contains(mshp)) {
-            if (mshp.contains(_mshape))  {
-                _mshape = mshp;
+        else if (!_markedShape.contains(mshp)) {
+            if (mshp.contains(_markedShape))  {
+                _markedShape = mshp;
                 _opaque = isOpaque;
             }
             else {
-                _mshape = _mshape.getBounds().getUnionRect(mshp.getBounds());
+                _markedShape = _markedShape.getBounds().getUnionRect(mshp.getBounds());
                 _opaque = false;
             }
         }
@@ -131,7 +138,7 @@ public abstract class PainterImpl extends Painter {
     /**
      * Returns the marked shape.
      */
-    public Shape getMarkedShape()  { return _mshape; }
+    public Shape getMarkedShape()  { return _markedShape; }
 
     /**
      * Returns whether marked shape is opaque.
@@ -141,7 +148,7 @@ public abstract class PainterImpl extends Painter {
     /**
      * Transform by transform.
      */
-    public Transform getTransform()  { return _gstate.xform; }
+    public Transform getTransform()  { return _gfxState.xform; }
 
     /**
      * Transform by transform.
@@ -149,19 +156,17 @@ public abstract class PainterImpl extends Painter {
     public void setTransform(Transform aTrans)
     {
         // Transform clip & mark shape back to world coords
-        if (_gstate.clip != null)
-            _gstate.clip = _gstate.clip.copyFor(_gstate.xform.getInverse());
-        if (_mshape != null)
-            _mshape = _mshape.copyFor(_gstate.xform.getInverse());
+        _gfxState.clip = _gfxState.clip.copyFor(_gfxState.xform.getInverse());
+        if (_markedShape != null)
+            _markedShape = _markedShape.copyFor(_gfxState.xform.getInverse());
 
         // Set new transform
-        _gstate.xform = aTrans;
+        _gfxState.xform = aTrans;
 
         // Transform clip and mark shape back to local coords
-        if (_gstate.clip != null)
-            _gstate.clip = _gstate.clip.copyFor(aTrans);
-        if (_mshape != null)
-            _mshape = _mshape.copyFor(aTrans);
+        _gfxState.clip = _gfxState.clip.copyFor(aTrans);
+        if (_markedShape != null)
+            _markedShape = _markedShape.copyFor(aTrans);
     }
 
     /**
@@ -169,24 +174,23 @@ public abstract class PainterImpl extends Painter {
      */
     public void transform(Transform aTrans)
     {
-        _gstate.xform.concat(aTrans);
-        if (_gstate.clip != null)
-            _gstate.clip = _gstate.clip.copyFor(aTrans);
-        if (_mshape != null)
-            _mshape = _mshape.copyFor(aTrans);
+        _gfxState.xform.concat(aTrans);
+        _gfxState.clip = _gfxState.clip.copyFor(aTrans);
+        if (_markedShape != null)
+            _markedShape = _markedShape.copyFor(aTrans);
     }
 
     /**
      * Return clip shape.
      */
-    public Shape getClip()  { return _gstate.clip; }
+    public Shape getClip()  { return _gfxState.clip; }
 
     /**
      * Clip by shape.
      */
     public void clip(Shape aShape)
     {
-        _gstate.clip = _gstate.clip != null ? Shape.intersectShapes(_gstate.clip, aShape) : aShape;
+        _gfxState.clip = Shape.intersectShapes(_gfxState.clip, aShape);
     }
 
     /**
@@ -194,9 +198,10 @@ public abstract class PainterImpl extends Painter {
      */
     public void save()
     {
-        if (_gsize==_gstates.length)
-            _gstates = Arrays.copyOf(_gstates, _gstates.length*2);
-        _gstates[_gsize++] = _gstate; _gstate = _gstate.clone();
+        if (_gfxStateStackSize == _gfxStateStack.length)
+            _gfxStateStack = Arrays.copyOf(_gfxStateStack, _gfxStateStack.length*2);
+        _gfxStateStack[_gfxStateStackSize++] = _gfxState;
+        _gfxState = _gfxState.clone();
     }
 
     /**
@@ -204,13 +209,13 @@ public abstract class PainterImpl extends Painter {
      */
     public void restore()
     {
-        _gstate = _gstates[--_gsize];
+        _gfxState = _gfxStateStack[--_gfxStateStackSize];
     }
 
     /**
      * Returns the current gstate.
      */
-    public GState getGState()  { return _gstate; }
+    public GState getGState()  { return _gfxState; }
 
     /**
      * The graphics state.
@@ -218,28 +223,35 @@ public abstract class PainterImpl extends Painter {
     public static class GState implements Cloneable {
 
         // Paint
-        public Paint         paint = Color.BLACK;
+        public Paint paint = Color.BLACK;
 
         // Font
-        public Font          font = Font.Arial12;
+        public Font font = Font.Arial12;
 
         // Stroke
-        public Stroke        stroke = Stroke.Stroke1;
+        public Stroke stroke = Stroke.Stroke1;
 
         // Opacity
-        public double        opacity = 1;
+        public double opacity = 1;
 
         // Transform
-        public Transform     xform = new Transform();
+        public Transform xform = new Transform();
 
         // Clip
-        public Shape         clip = NO_CLIP;
-        public static Shape  NO_CLIP = new Rect(-5000000,-5000000,10000000,10000000);
+        public Shape clip = NO_CLIP;
+
+        // Default clip
+        private static final Shape NO_CLIP = new Rect(-5000000,-5000000,10000000,10000000);
+
+        /**
+         * Constructor.
+         */
+        public GState()  { }
 
         /** Standard clone implementation. */
         public GState clone()
         {
-            GState clone = null; try { clone = (GState)super.clone(); }
+            GState clone; try { clone = (GState)super.clone(); }
             catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
             clone.xform = xform.clone();
             return clone;

@@ -145,8 +145,8 @@ public class PainterDVR2 extends PainterImpl {
      */
     public void clear()
     {
-        _gsize = 0;
-        _gstate = new GState();
+        _gfxStateStackSize = 0;
+        _gfxState = new GState();
         _instructionStackSize = 0;
         _intStackSize = 0;
         _doubleStackSize = 0;
@@ -357,6 +357,15 @@ public class PainterDVR2 extends PainterImpl {
      */
     private void addShape(Shape aShape)
     {
+        // If rect, handle special: Add special op count and bounds values
+        if (aShape instanceof Rect) {
+            Rect rect = (Rect) aShape;
+            addInt(-1);
+            addDouble(rect.getX()); addDouble(rect.getY());
+            addDouble(rect.getWidth()); addDouble(rect.getHeight());
+            return;
+        }
+
         double[] pnts = new double[6];
         PathIter pathIter = aShape.getPathIter(null);
         int intOpCount = 0;
@@ -372,33 +381,6 @@ public class PainterDVR2 extends PainterImpl {
             }
         }
         _intStack[intStackIndex] = intOpCount;
-    }
-
-    /**
-     * Returns JS font string for snap font.
-     */
-    public static String getFontString(Font aFont)
-    {
-        String str = "";
-        if (aFont.isBold()) str += "Bold ";
-        if (aFont.isItalic()) str += "Italic ";
-        str += ((int) aFont.getSize()) + "px ";
-        str += aFont.getFamily();
-        return str;
-    }
-
-    /**
-     * Returns JavaScript color for snap color.
-     */
-    public static String getColorString(Color aColor)
-    {
-        if (aColor == null) return null;
-        int r = aColor.getRedInt(), g = aColor.getGreenInt(), b = aColor.getBlueInt(), a = aColor.getAlphaInt();
-        StringBuilder sb = new StringBuilder(a == 255 ? "rgb(" : "rgba(");
-        sb.append(r).append(',').append(g).append(',').append(b);
-        if (a == 255) sb.append(')');
-        else sb.append(',').append(a / 255d).append(')');
-        return sb.toString();
     }
 
     /**
@@ -430,10 +412,11 @@ public class PainterDVR2 extends PainterImpl {
          */
         public void exec()
         {
-            int instructionEnd = _instructionStackSize;
+            // Iterate over instructions
+            for (int i = 0; i < _instructionStackSize; i++) {
 
-            while (_instructionIndex < instructionEnd) {
-                switch (getInstruction()) {
+                // Get next instruction and handle
+                switch (_instructionStack[i]) {
                     case SET_FONT: setFont(); break;
                     case SET_PAINT: setPaint(); break;
                     case SET_STROKE: setStroke(); break;
@@ -557,18 +540,21 @@ public class PainterDVR2 extends PainterImpl {
         public Transform getTransform()
         {
             double[] matrix = new double[6];
-            matrix[0] = getDouble();
-            matrix[1] = getDouble();
-            matrix[2] = getDouble();
-            matrix[3] = getDouble();
-            matrix[4] = getDouble();
-            matrix[5] = getDouble();
+            matrix[0] = getDouble(); matrix[1] = getDouble();
+            matrix[2] = getDouble(); matrix[3] = getDouble();
+            matrix[4] = getDouble(); matrix[5] = getDouble();
             return new Transform(matrix);
         }
 
         public Shape getShape()
         {
             int opCount = getInt();
+
+            // Handle rect special case
+            if (opCount == -1)
+                return new Rect(getDouble(), getDouble(), getDouble(), getDouble());
+
+            // Unpack path
             Path2D path2D = new Path2D();
             for (int i = 0; i < opCount; i++) {
                 int op = getInt();
@@ -579,11 +565,12 @@ public class PainterDVR2 extends PainterImpl {
                     case 3: path2D.close(); break;
                 }
             }
+
+            // Return
             return path2D;
         }
 
         // Get stack values
-        private int getInstruction()  { return _instructionStack[_instructionIndex++]; }
         private int getInt()  { return _intStack[_intIndex++]; }
         private double getDouble()  { return _doubleStack[_doubleIndex++]; }
         private String getString()  { return _stringStack[_stringIndex++]; }
