@@ -3,6 +3,7 @@
  */
 package snap.gfx;
 import snap.geom.*;
+import snap.util.SnapUtils;
 import java.util.Arrays;
 
 /**
@@ -233,20 +234,30 @@ public class PainterDVR2 extends PainterImpl {
     }
 
     /** Draw image with transform. */
-    public void drawImage(Image anImg, Transform aTrans)
+    public void drawImage(Image image, Transform aTrans)
     {
         //super.drawImage(anImg,aTrans);
         addInstruction(DRAW_IMAGE2);
-        addNative(anImg);
+        addNative(image);
         addTransform(aTrans);
     }
 
     /** Draw image in rect. */
-    public void drawImage(Image img, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh)
+    public void drawImage(Image image, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh)
     {
+        // Correct source width/height for image dpi
+        if (SnapUtils.isWebVM) {
+            double scaleX = image.getDpiX() / 72;
+            double scaleY = image.getDpiY() / 72;
+            if (scaleX != 1 || scaleY != 1) {
+                sx *= scaleX; sy *= scaleX;
+                sw *= scaleY; sh *= scaleY;
+            }
+        }
+
         //super.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
         addInstruction(DRAW_IMAGE);
-        addNative(img);
+        addNative(image);
         addDouble(sx); addDouble(sy);
         addDouble(sw); addDouble(sh);
         addDouble(dx); addDouble(dy);
