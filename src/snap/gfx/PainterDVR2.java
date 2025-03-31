@@ -184,29 +184,34 @@ public class PainterDVR2 extends PainterImpl {
         // Set LineWidth
         addDouble(aStroke.getWidth());
 
-        // Set DashArray null:, DashOffset
-        //double[] dashArray = aStroke.getDashArray();
-        //_cntx.setLineDash(dashArray);
+        // Set DashArray and DashOffset
+        double[] dashArray = aStroke.getDashArray();
+        int dashArrayLen = dashArray != null ? dashArray.length : 0;
+        addInt(dashArrayLen);
+        if (dashArrayLen > 0) {
+            for (double dashArrayVal : dashArray)
+                addDouble(dashArrayVal);
 
-        // Set DashOffset
-        //_cntx.setLineDashOffset(aStroke.getDashOffset());
+            // Set DashOffset
+            addDouble(aStroke.getDashOffset());
+        }
 
         // Set cap
-//        switch (aStroke.getCap()) {
-//            case Round: _cntx.setLineCap("round"); break;
-//            case Butt: _cntx.setLineCap("butt"); break;
-//            case Square: _cntx.setLineCap("square"); break;
-//        }
+        switch (aStroke.getCap()) {
+            case Round: addInt(0); break;
+            case Butt: addInt(1); break;
+            case Square: addInt(2); break;
+        }
 
         // Set join
-//        switch (aStroke.getJoin()) {
-//            case Miter:
-//                _cntx.setLineJoin("miter");
-//                _cntx.setMiterLimit(aStroke.getMiterLimit());
-//                break;
-//            case Round: _cntx.setLineJoin("round"); break;
-//            case Bevel: _cntx.setLineJoin("bevel"); break;
-//        }
+        switch (aStroke.getJoin()) {
+            case Round: addInt(0); break;
+            case Bevel: addInt(1); break;
+            case Miter:
+                addInt(2);
+                addDouble(aStroke.getMiterLimit());
+                break;
+        }
     }
 
     /** Sets the opacity. */
@@ -462,8 +467,29 @@ public class PainterDVR2 extends PainterImpl {
 
         public void setStroke()
         {
-            double width = getDouble();
-            Stroke stroke = Stroke.getStroke(width);
+            // Get line width
+            double lineWidth = getDouble();
+
+            // Get line dash
+            int dashArrayLen = getInt();
+            double[] dashArray = new double[dashArrayLen];
+            for (int i = 0; i < dashArrayLen; i++)
+                dashArray[i] = getDouble();
+
+            // Get line dash offset
+            double dashOffset = dashArrayLen > 0 ? getDouble() : 0;
+
+            // Get line cap
+            int capInt = getInt();
+            Stroke.Cap cap = capInt == 0 ? Stroke.Cap.Round : capInt == 1 ? Stroke.Cap.Butt : Stroke.Cap.Square;
+
+            // Get line join
+            int joinInt = getInt();
+            Stroke.Join join = joinInt == 0 ? Stroke.Join.Round : joinInt == 1 ? Stroke.Join.Bevel : Stroke.Join.Miter;
+            double miterLimit = joinInt == 2 ? getDouble() : 0;
+
+            // Create/set stroke
+            Stroke stroke = new Stroke(lineWidth, cap, join, miterLimit, dashArray, dashOffset);
             _painter.setStroke(stroke);
         }
 
