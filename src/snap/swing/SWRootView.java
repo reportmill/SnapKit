@@ -1,11 +1,9 @@
 package snap.swing;
-
 import java.awt.*;
 import java.awt.dnd.*;
 import java.awt.event.*;
 import javax.swing.JComponent;
 import javax.swing.ToolTipManager;
-
 import snap.gfx.Painter;
 import snap.geom.Rect;
 import snap.view.*;
@@ -28,7 +26,7 @@ public class SWRootView extends JComponent implements DragGestureListener {
     private int _lx, _ly;
 
     /**
-     * Creates a SWRootView.
+     * Constructor.
      */
     public SWRootView(WindowView aWin, RootView aRootView)
     {
@@ -80,15 +78,8 @@ public class SWRootView extends JComponent implements DragGestureListener {
 
         // Add component listener to check for rare case of Snap RootView manually installed in JComponent hierarchy
         addComponentListener(new ComponentAdapter() {
-            public void componentShown(ComponentEvent e)
-            {
-                swingShowingChanged();
-            }
-
-            public void componentHidden(ComponentEvent e)
-            {
-                swingShowingChanged();
-            }
+            public void componentShown(ComponentEvent e)  { swingShowingChanged(); }
+            public void componentHidden(ComponentEvent e)  { swingShowingChanged(); }
         });
     }
 
@@ -135,14 +126,13 @@ public class SWRootView extends JComponent implements DragGestureListener {
         Painter pntr = new J2DPainter(aGr);
         java.awt.Rectangle crect = aGr.getClipBounds();
         _win.getUpdater().paintViews(pntr, new Rect(crect.x, crect.y, crect.width, crect.height));
+        pntr.flush();
     }
 
     /**
      * Override to suppress child paint.
      */
-    protected void paintChildren(Graphics aGr)
-    {
-    }
+    protected void paintChildren(Graphics aGr)  { }
 
     /**
      * Override to forward MouseEvents to RootView.
@@ -151,7 +141,8 @@ public class SWRootView extends JComponent implements DragGestureListener {
     {
         // Do normal version (just return if consumed)
         super.processEvent(anEvent);
-        if (anEvent instanceof InputEvent && ((InputEvent) anEvent).isConsumed()) return;
+        if (anEvent instanceof InputEvent && ((InputEvent) anEvent).isConsumed())
+            return;
 
         // Handle MouseEvents
         if (anEvent instanceof MouseEvent) {
