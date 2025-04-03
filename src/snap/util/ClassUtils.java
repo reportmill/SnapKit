@@ -48,15 +48,10 @@ public class ClassUtils {
     }
 
     /**
-     * Returns the package name of given class. Needed b/c CheerpJ 11 returns null for Class.getPackage().
+     * Returns the package name of given class.
      */
     public static String getPackageName(Class<?> aClass)
     {
-        if (SnapUtils.isWebVM) {
-            String className = aClass.getName();
-            int lastDot = className.lastIndexOf('.');
-            return lastDot > 0 ? className.substring(0, lastDot) : "";
-        }
         Package pkg = aClass.getPackage();
         return pkg != null ? pkg.getName() : "";
     }
