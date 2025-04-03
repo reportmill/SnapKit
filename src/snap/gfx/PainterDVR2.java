@@ -225,6 +225,10 @@ public class PainterDVR2 extends PainterImpl {
     /** Stroke the given shape. */
     public void draw(Shape aShape)
     {
+        // If gradient is set, resize to given shape
+        if (getPaint() instanceof GradientPaint)
+            sizeGradientPaintToShape(aShape);
+
         //super.draw(aShape);
         addInstruction(DRAW_SHAPE);
         addShape(aShape);
@@ -233,9 +237,25 @@ public class PainterDVR2 extends PainterImpl {
     /** Fill the given shape. */
     public void fill(Shape aShape)
     {
+        // If gradient is set, resize to given shape
+        if (getPaint() instanceof GradientPaint)
+            sizeGradientPaintToShape(aShape);
+
         //super.fill(aShape);
         addInstruction(FILL_SHAPE);
         addShape(aShape);
+    }
+
+    /**
+     * Resets gradient paint to given shape.
+     */
+    private void sizeGradientPaintToShape(Shape aShape)
+    {
+        GradientPaint gradientPaint = (GradientPaint) getPaint();
+        if (!gradientPaint.isAbsolute()) {
+            GradientPaint gradientPaint2 = gradientPaint.copyForRect(aShape.getBounds());
+            setPaint(gradientPaint2);
+        }
     }
 
     /** Draw image with transform. */
