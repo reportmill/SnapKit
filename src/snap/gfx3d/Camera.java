@@ -13,11 +13,11 @@ import snap.view.ViewEvent;
 /**
  * This class represent a camera focusing on a scene and manages a display list of simple paths based on
  * the scene shapes and the camera transform.
- * 
+ * <br>
  * Camera transform is currently relative to scene. At some point, that may become an option instead.
- * 
+ * <br>
  * 3D conventions:
- * 
+ * <br>
  *   Coordinate system: Right handed (not left handed)
  *   Polygon front: Right hand rule (counter-clockwise defined polygons face forward)
  *   Transforms: Row major notation (as opposed to column major, points are assumed row vectors) 
@@ -529,7 +529,7 @@ public class Camera {
         double viewW = getViewWidth();
         double viewH = getViewHeight();
         Matrix3D cameraToView = new Matrix3D().translate(viewW / 2, viewH / 2, 0);
-        cameraToView.scale(2 / 2, -2 / 2, 1);
+        cameraToView.scale(1, -1, 1);
 
         // Convert camera view XY point to 3D point in camera coords
         Matrix3D viewToCamera = cameraToView.clone().invert();
@@ -558,6 +558,8 @@ public class Camera {
     public void paintScene(Painter aPntr)
     {
         if (getScene().getChildCount() == 0)
+            return;
+        if (getViewWidth() < 1 || getViewHeight() < 1)
             return;
 
         Renderer renderer = getRenderer();
