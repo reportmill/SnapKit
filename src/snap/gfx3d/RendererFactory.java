@@ -1,5 +1,9 @@
 package snap.gfx3d;
 import snap.util.ArrayUtils;
+import snap.util.SnapEnv;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Used to create new renderers.
@@ -65,25 +69,23 @@ public abstract class RendererFactory {
     {
         if (_factories != null) return _factories;
 
-        // Try to find known factories
-        String JOGL_RENDERER_FACTORY = "snapgl.JGLRenderer$JGLRendererFactory";
-        String[] knownFactoryClassNames = { JOGL_RENDERER_FACTORY };
-        RendererFactory[] factories = new RendererFactory[0];
-        for (String knownFactoryClassName : knownFactoryClassNames) {
-            try {
-                Class<? extends RendererFactory> knownFactoryClass = (Class<? extends RendererFactory>) Class.forName(knownFactoryClassName);
-                RendererFactory factory = knownFactoryClass.newInstance();
-                factories = ArrayUtils.add(factories, factory);
-            }
-            catch (Exception ignore) { }
+        List<RendererFactory> factories = new ArrayList<>();
+
+        // If desktop, try to add Jogl
+        if (SnapEnv.isDesktop) try {
+            String JOGL_RENDERER_FACTORY = "snapgl.JGLRenderer$JGLRendererFactory";
+            Class<? extends RendererFactory> joglRendererFactoryClass = (Class<? extends RendererFactory>) Class.forName(JOGL_RENDERER_FACTORY);
+            RendererFactory joglRendererFactory = joglRendererFactoryClass.newInstance();
+            factories.add(joglRendererFactory);
         }
+        catch (Exception ignore) { }
 
         // Add Renderer2D
         RendererFactory renderer2dFactory = new Renderer2D.Renderer2DFactory();
-        factories = ArrayUtils.add(factories, renderer2dFactory);
+        factories.add(renderer2dFactory);
 
         // Return
-        return _factories = factories;
+        return _factories = factories.toArray(new RendererFactory[0]);
     }
 
     /**

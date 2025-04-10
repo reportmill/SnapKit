@@ -25,6 +25,9 @@ public class SnapEnv {
     // Whether is WebVM Swing
     public static boolean isWebVMSwing;
 
+    // Whether app is currently running on desktop
+    public static boolean isDesktop = !isWebVM && !isTeaVM;
+
     // Constants for platform
     public enum Platform { WINDOWS, MAC, CHEERP, TEAVM, UNKNOWN }
 
