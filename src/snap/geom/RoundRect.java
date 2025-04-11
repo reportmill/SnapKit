@@ -95,7 +95,7 @@ public class RoundRect extends RectBase {
      */
     public PathIter getPathIter(Transform aTrans)
     {
-        if (getRadius() <= 0)
+        if (width <= 1 || height <= 1 || _radius < 1)
             return getBounds().getPathIter(aTrans);
         return new RoundRectIter(this, aTrans);
     }
