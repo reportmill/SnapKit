@@ -145,8 +145,8 @@ public class RoundRect extends RectBase {
             double rad = r.getRadius();
             roundW = Math.min(rad, w / 2);
             roundH = Math.min(rad, h / 2);
-            noTopOrBottomEdges = roundW <= rad;
-            noRightOrLeftEdges = roundH <= rad;
+            noTopOrBottomEdges = MathUtils.lte(w / 2, rad);
+            noRightOrLeftEdges = MathUtils.lte(h / 2, rad);
             roundNW = r._roundNW; roundNE = r._roundNE;
             roundSW = r._roundSW; roundSE = r._roundSE;
             if (w < 0 || h < 0)
@@ -167,7 +167,7 @@ public class RoundRect extends RectBase {
 
                 // Top edge
                 case 1:
-                    if (noTopOrBottomEdges)
+                    if (noTopOrBottomEdges && roundNE)
                         return getNext(coords);
                     if (roundNE)
                         return lineTo(maxX - roundW, y, coords);
@@ -179,7 +179,7 @@ public class RoundRect extends RectBase {
 
                 // Right edge
                 case 3:
-                    if (noRightOrLeftEdges)
+                    if (noRightOrLeftEdges && roundSE)
                         return getNext(coords);
                     if (roundSE)
                         return lineTo(maxX, maxY - roundH, coords);
@@ -191,7 +191,7 @@ public class RoundRect extends RectBase {
 
                 // Bottom edge
                 case 5:
-                    if (noTopOrBottomEdges)
+                    if (noTopOrBottomEdges && roundSW)
                         return getNext(coords);
                     if (roundSW)
                         return lineTo(x + roundW, maxY, coords);
@@ -203,7 +203,7 @@ public class RoundRect extends RectBase {
 
                 // Left edge
                 case 7:
-                    if (noRightOrLeftEdges)
+                    if (noRightOrLeftEdges && roundNW)
                         return getNext(coords);
                     if (roundNW)
                         return lineTo(x, y + roundH, coords);
