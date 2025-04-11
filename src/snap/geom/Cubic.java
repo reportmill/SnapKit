@@ -121,6 +121,9 @@ public class Cubic extends Segment {
      */
     public Cubic split(double aLoc)
     {
+        if (aLoc <= 0 || aLoc >= 1)
+            System.err.println("Cubic.split: illegal split location: " + aLoc);
+
         // Calculate new x control points to split cubic into two
         double nxc0 = average(x0, cp0x, aLoc);
         double xca = average(cp0x, cp1x, aLoc);

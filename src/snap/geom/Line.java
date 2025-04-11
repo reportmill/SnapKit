@@ -101,6 +101,9 @@ public class Line extends Segment {
      */
     public Line split(double aLoc)
     {
+        if (aLoc <= 0 || aLoc >= 1)
+            System.err.println("Line.split: illegal split location: " + aLoc);
+
         double x = x0 + aLoc * (x1 - x0);
         double y = y0 + aLoc * (y1 - y0);
         Line rem = new Line(x, y, x1, y1);

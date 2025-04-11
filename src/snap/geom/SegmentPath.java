@@ -60,6 +60,11 @@ public class SegmentPath extends Shape {
      */
     public void addSeg(Segment aSeg, int anIndex)
     {
+        if (aSeg.x0 == aSeg.x1 && aSeg.y0 == aSeg.y1 && getArcLength() == 0) {
+            System.err.println("SegmentPath.addSet: trying to add zero length segment");
+            return;
+        }
+
         _segs.add(anIndex, aSeg);
         shapeChanged();
     }
@@ -316,28 +321,28 @@ public class SegmentPath extends Shape {
                 // Handle LineTo
                 case LineTo: {
                     Line lineTo = new Line(lineX, lineY, lineX = points[0], lineY = points[1]);
-                    _segs.add(lineTo);
+                    addSeg(lineTo);
                     break;
                 }
 
                 // Handle QuadTo
                 case QuadTo: {
                     Quad quadTo = new Quad(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3]);
-                    _segs.add(quadTo);
+                    addSeg(quadTo);
                     break;
                 }
 
                 // Handle CubicTo
                 case CubicTo: {
                     Cubic cubicTo = new Cubic(lineX, lineY, points[0], points[1], points[2], points[3],lineX = points[4], lineY = points[5]);
-                    _segs.add(cubicTo);
+                    addSeg(cubicTo);
                     break;
                 }
 
                 // Handle Close
                 case Close:
                     if (lineX != moveX || lineY != moveY)
-                        _segs.add(new Line(lineX, lineY, lineX = moveX, lineY = moveY));
+                        addSeg(new Line(lineX, lineY, lineX = moveX, lineY = moveY));
                     break;
             }
         }
