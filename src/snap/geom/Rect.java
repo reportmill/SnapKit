@@ -28,7 +28,8 @@ public class Rect extends RectBase {
      */
     protected Rect getBoundsImpl()
     {
-        if (width>=0 && height>=0) return this;
+        if (width >= 0 && height >= 0)
+            return this;
         return super.getBoundsImpl();
     }
 
@@ -53,9 +54,12 @@ public class Rect extends RectBase {
      */
     public void intersect(Rect aRect)
     {
-        double x2 = Math.max(x, aRect.x), w2 = Math.min(getMaxX(), aRect.getMaxX()) - x2;
-        double y2 = Math.max(y, aRect.y), h2 = Math.min(getMaxY(), aRect.getMaxY()) - y2;
-        if (w2<0 || h2<0) { x2 = x; y2 = y; w2 = h2 = 0; }
+        double x2 = Math.max(x, aRect.x);
+        double w2 = Math.min(getMaxX(), aRect.getMaxX()) - x2;
+        double y2 = Math.max(y, aRect.y);
+        double h2 = Math.min(getMaxY(), aRect.getMaxY()) - y2;
+        if (w2 < 0 || h2 < 0) {
+            x2 = x; y2 = y; w2 = h2 = 0; }
         setRect(x2, y2, w2, h2);
     }
 
@@ -64,9 +68,12 @@ public class Rect extends RectBase {
      */
     public Rect getIntersectRect(Rect aRect)
     {
-        double x2 = Math.max(x, aRect.x), w2 = Math.min(getMaxX(), aRect.getMaxX()) - x2;
-        double y2 = Math.max(y, aRect.y), h2 = Math.min(getMaxY(), aRect.getMaxY()) - y2;
-        if (w2<0 || h2<0) { x2 = x; y2 = y; w2 = h2 = 0; }
+        double x2 = Math.max(x, aRect.x);
+        double w2 = Math.min(getMaxX(), aRect.getMaxX()) - x2;
+        double y2 = Math.max(y, aRect.y);
+        double h2 = Math.min(getMaxY(), aRect.getMaxY()) - y2;
+        if (w2 < 0 || h2 < 0) {
+            x2 = x; y2 = y; w2 = h2 = 0; }
         return new Rect(x2, y2, w2, h2);
     }
 
@@ -75,7 +82,7 @@ public class Rect extends RectBase {
      */
     public boolean contains(double aX, double aY)
     {
-        return (x<=aX) && (aX<=x+width) && (y<=aY) && (aY<=y+height);
+        return (x <= aX) && (aX <= x + width) && (y <= aY) && (aY <= y + height);
     }
 
     /**
@@ -83,16 +90,17 @@ public class Rect extends RectBase {
      */
     public boolean contains(Shape aShape)
     {
-        return containsRect(aShape.getBounds());
+        Rect shapeBounds = aShape.getBounds();
+        return containsRect(shapeBounds);
     }
 
     /**
-     * Override to omptimize rect-to-rect case.
+     * Override to optimize rect-to-rect case.
      */
     public boolean intersectsShape(Shape aShape)
     {
         if (aShape instanceof Rect)
-            return intersectsRect((Rect)aShape);
+            return intersectsRect((Rect) aShape);
         return super.intersectsShape(aShape);
     }
 
@@ -109,8 +117,9 @@ public class Rect extends RectBase {
      */
     public boolean intersectsRect(Rect aRect)
     {
-        double aX = aRect.x, aY = aRect.y, aW = aRect.width, aH = aRect.height;
-        return x<aX+aW && aX<x+width && y<aY+aH && aY<y+height;
+        double aX = aRect.x, aY = aRect.y;
+        double aW = aRect.width, aH = aRect.height;
+        return x < aX + aW && aX < x + width && y < aY + aH && aY < y + height;
     }
 
     /**
@@ -127,8 +136,9 @@ public class Rect extends RectBase {
      */
     public boolean contains(double x, double y, double aLineWidth)
     {
-        if (aLineWidth<=1) return contains(x,y);
-        return getInsetRect(-aLineWidth/2).contains(x,y);
+        if (aLineWidth <= 1)
+            return contains(x,y);
+        return getInsetRect(-aLineWidth / 2).contains(x,y);
     }
 
     /**
@@ -137,7 +147,7 @@ public class Rect extends RectBase {
     public boolean intersectsShape(Shape aShape, double aLineWidth)
     {
         if (aShape instanceof Rect)
-            return getInsetRect(-aLineWidth/2).intersectsRect((Rect)aShape);
+            return getInsetRect(-aLineWidth / 2).intersectsRect((Rect) aShape);
         return super.intersectsShape(aShape, aLineWidth);
     }
 
@@ -149,7 +159,12 @@ public class Rect extends RectBase {
     /**
      * Returns a copy of this rect inset by given amount.
      */
-    public Rect getInsetRect(double xIns, double yIns)  { Rect r = clone(); r.inset(xIns,yIns); return r; }
+    public Rect getInsetRect(double xIns, double yIns)
+    {
+        Rect copy = clone();
+        copy.inset(xIns, yIns);
+        return copy;
+    }
 
     /**
      * Returns a copy of this rect inset by given insets.
@@ -157,25 +172,15 @@ public class Rect extends RectBase {
     public Rect getInsetRect(Insets anIns)
     {
         Rect rect = clone();
-        if (anIns!=null)
-            rect.setRect(x+anIns.left,y+anIns.top,width - anIns.getWidth(),height - anIns.getHeight());
+        if (anIns != null)
+            rect.setRect(x + anIns.left,y + anIns.top,width - anIns.getWidth(),height - anIns.getHeight());
         return rect;
     }
 
     /**
-     * Offsets the receiver by the given x & y.
-     */
-    public Rect getOffsetRect(double dx, double dy)  { return new Rect(x+dx, y+dy, width, height); }
-
-    /**
      * Scales the receiver rect by the given amount.
      */
-    public void scale(double anAmt)  { setRect(getX()*anAmt, getY()*anAmt, getWidth()*anAmt, getHeight()*anAmt); }
-
-    /**
-     * Creates a rect derived from the receiver scaled by the given amount.
-     */
-    public Rect getScaledRect(double anAmt)  { Rect r = clone(); r.scale(anAmt); return r; }
+    public void scale(double anAmt)  { setRect(x * anAmt, y * anAmt, width * anAmt, height * anAmt); }
 
     /**
      * Sets this rect to combined bounds of both rects, even if either is empty.
@@ -183,15 +188,12 @@ public class Rect extends RectBase {
     public void add(Rect r2)
     {
         //if (r2==null) return;
-        double nx = Math.min(x, r2.x), nw = Math.max(x + width, r2.x + r2.width) - nx;
-        double ny = Math.min(y, r2.y), nh = Math.max(y + height, r2.y + r2.height) - ny;
+        double nx = Math.min(x, r2.x);
+        double ny = Math.min(y, r2.y);
+        double nw = Math.max(x + width, r2.x + r2.width) - nx;
+        double nh = Math.max(y + height, r2.y + r2.height) - ny;
         setRect(nx, ny, nw, nh);
     }
-
-    /**
-     * Returns rect for combined bounds of both rects, even if either is empty.
-     */
-    public Rect getAddRect(Rect r2)  { Rect r = clone(); r.add(r2); return r; }
 
     /**
      * Sets this rect to combined area with given rect. If either rect is empty, bounds are set to other rect.
@@ -203,17 +205,24 @@ public class Rect extends RectBase {
      */
     public void union(double aX, double aY, double aW, double aH)
     {
-        if (width<=0 || height<=0) { setRect(aX, aY, aW, aH); return; }
-        if (aW<=0 || aH<=0) return;
-        double nx = Math.min(x, aX), nw = Math.max(x + width, aX + aW) - nx;
-        double ny = Math.min(y, aY), nh = Math.max(y + height, aY + aH) - ny;
+        if (width <= 0 || height <= 0) {
+            setRect(aX, aY, aW, aH); return; }
+        if (aW <= 0 || aH <= 0)
+            return;
+        double nx = Math.min(x, aX);
+        double ny = Math.min(y, aY);
+        double nw = Math.max(x + width, aX + aW) - nx;
+        double nh = Math.max(y + height, aY + aH) - ny;
         setRect(nx, ny, nw, nh);
     }
 
     /**
      * Returns rect for combined area with given rect. If either rect is empty, bounds are from other rect.
      */
-    public Rect getUnionRect(Rect r2)  { Rect r = clone(); r.union(r2); return r; }
+    public Rect getUnionRect(Rect r2)
+    {
+        Rect r = clone(); r.union(r2); return r;
+    }
 
     /**
      * Unions the receiver rect with the given rect.
@@ -225,8 +234,10 @@ public class Rect extends RectBase {
      */
     public void add(double newx, double newy)
     {
-        double x1 = Math.min(getMinX(), newx), x2 = Math.max(getMaxX(), newx);
-        double y1 = Math.min(getMinY(), newy), y2 = Math.max(getMaxY(), newy);
+        double x1 = Math.min(getMinX(), newx);
+        double x2 = Math.max(getMaxX(), newx);
+        double y1 = Math.min(getMinY(), newy);
+        double y2 = Math.max(getMaxY(), newy);
         setRect(x1, y1, x2 - x1, y2 - y1);
     }
 
@@ -235,7 +246,8 @@ public class Rect extends RectBase {
      */
     public void addX(double newx)
     {
-        double x1 = Math.min(getMinX(), newx), x2 = Math.max(getMaxX(), newx);
+        double x1 = Math.min(getMinX(), newx);
+        double x2 = Math.max(getMaxX(), newx);
         setRect(x1, y, x2 - x1, height);
     }
 
@@ -244,7 +256,8 @@ public class Rect extends RectBase {
      */
     public void addY(double newy)
     {
-        double y1 = Math.min(getMinY(), newy), y2 = Math.max(getMaxY(), newy);
+        double y1 = Math.min(getMinY(), newy);
+        double y2 = Math.max(getMaxY(), newy);
         setRect(x, y1, width, y2 - y1);
     }
 
@@ -253,8 +266,10 @@ public class Rect extends RectBase {
      */
     public void snap()
     {
-        double x2 = Math.floor(x), w2 = Math.ceil(x+width) - x2;
-        double y2 = Math.floor(y), h2 = Math.ceil(y+height) - y2;
+        double x2 = Math.floor(x);
+        double y2 = Math.floor(y);
+        double w2 = Math.ceil(x+width) - x2;
+        double h2 = Math.ceil(y+height) - y2;
         setRect(x2, y2, w2, h2);
     }
 
@@ -264,7 +279,7 @@ public class Rect extends RectBase {
     public Point[] getPoints()
     {
         double x2 = x + width, y2 = y + height;
-        return new Point[] { new Point(x,y), new Point(x2,y), new Point(x2,y2), new Point(x,y2) };
+        return new Point[] { new Point(x, y), new Point(x2, y), new Point(x2, y2), new Point(x, y2) };
     }
 
     /**
@@ -272,8 +287,8 @@ public class Rect extends RectBase {
      */
     public Rect getRectCenteredInside(double aW, double aH)
     {
-        double x = Math.round((getWidth() - aW)/2);
-        double y = Math.round((getHeight() - aH)/2);
+        double x = Math.round((getWidth() - aW) / 2);
+        double y = Math.round((getHeight() - aH) / 2);
         return new Rect(x, y, aW, aH);
     }
 
@@ -289,7 +304,10 @@ public class Rect extends RectBase {
     {
         // Equation for ellipse is: x = a cos(n), y = b sin(n)
         // Define the ellipse a & b axis length constants as half the rect width & height
-        double a = width/2, b = height/2; if (a==0 || b==0) return new Point();
+        double a = width / 2;
+        double b = height / 2;
+        if (a == 0 || b == 0)
+            return new Point();
 
         // If not elliptical, change a & b to min length so we use normal circle instead of elliptical radians
         if (!doEllipse)
@@ -300,15 +318,15 @@ public class Rect extends RectBase {
         double y1 = b * MathUtils.sin(anAngle);
 
         // First, let's assume the perimeter x coord is on the rect's left or right border
-        double x2 = width/2 * MathUtils.sign(x1);
+        double x2 = width / 2 * MathUtils.sign(x1);
 
         // Then calculate the y perimeter coord by assuming y2/x2 = y1/x1
-        double y2 = x2 * y1/x1;
+        double y2 = x2 * y1 / x1;
 
         // If final perimeter height outside rect height, recalc but assume final perimeter y is top or bottom border
-        if (Math.abs(y2)>b) {
-            y2 = height/2 * MathUtils.sign(y1);
-            x2 = y2 * x1/y1;
+        if (Math.abs(y2) > b) {
+            y2 = height / 2 * MathUtils.sign(y1);
+            x2 = y2 * x1 / y1;
         }
 
         // Get point in rect coords
@@ -318,25 +336,28 @@ public class Rect extends RectBase {
     /**
      * Standard clone implementation.
      */
-    public Rect clone()  { return new Rect(x,y,width,height); }
+    @Override
+    public Rect clone()  { return new Rect(x, y, width, height); }
 
     /**
      * Standard hashCode implementation.
      */
+    @Override
     public int hashCode()
     {
-        long bits = Double.doubleToLongBits(getX()); bits += Double.doubleToLongBits(getY()) * 37;
-        bits += Double.doubleToLongBits(getWidth()) * 43; bits += Double.doubleToLongBits(getHeight()) * 47;
+        long bits = Double.doubleToLongBits(x); bits += Double.doubleToLongBits(y) * 37;
+        bits += Double.doubleToLongBits(width) * 43; bits += Double.doubleToLongBits(height) * 47;
         return (((int) bits) ^ ((int) (bits >> 32)));
     }
 
     /**
      * Standard equals implementation.
      */
+    @Override
     public boolean equals(Object anObj)
     {
-        if (anObj==this) return true;
-        Rect other = anObj instanceof Rect ? (Rect) anObj : null; if (other==null) return false;
+        if (anObj == this) return true;
+        Rect other = anObj instanceof Rect ? (Rect) anObj : null; if (other == null) return false;
         return super.equals(other);
     }
 
@@ -345,7 +366,7 @@ public class Rect extends RectBase {
      */
     public static boolean contains(double x, double y, double w, double h, double aX, double aY)
     {
-        return (x<=aX) && (aX<=x+w) && (y<=aY) && (aY<=y+h);
+        return (x <= aX) && (aX <= x + w) && (y <= aY) && (aY <= y + h);
     }
 
     /**
@@ -355,14 +376,14 @@ public class Rect extends RectBase {
     {
         switch(aPos) {
             case TOP_LEFT: return new Point(aX, aY);
-            case TOP_CENTER: return new Point(aX+aW/2, aY);
-            case TOP_RIGHT: return new Point(aX+aW, aY);
-            case CENTER_LEFT: return new Point(aX, aY+aH/2);
-            case CENTER: return new Point(aX+aW/2, aY+aH/2);
-            case CENTER_RIGHT: return new Point(aX+aW, aY+aH/2);
-            case BOTTOM_LEFT: return new Point(aX, aY+aH);
-            case BOTTOM_CENTER: return new Point(aX+aW/2, aY+aH);
-            case BOTTOM_RIGHT: return new Point(aX+aW, aY+aH);
+            case TOP_CENTER: return new Point(aX + aW / 2, aY);
+            case TOP_RIGHT: return new Point(aX + aW, aY);
+            case CENTER_LEFT: return new Point(aX, aY + aH / 2);
+            case CENTER: return new Point(aX + aW / 2, aY + aH / 2);
+            case CENTER_RIGHT: return new Point(aX + aW, aY + aH / 2);
+            case BOTTOM_LEFT: return new Point(aX, aY + aH);
+            case BOTTOM_CENTER: return new Point(aX + aW / 2, aY + aH);
+            case BOTTOM_RIGHT: return new Point(aX + aW, aY + aH);
             default: return null;
         }
     }
@@ -392,7 +413,7 @@ public class Rect extends RectBase {
     public static Rect getRectForPoints(Point ... thePoints)
     {
         // If no points, just return empty rect
-        if (thePoints.length==0) return new Rect(0,0,0,0);
+        if (thePoints.length == 0) return new Rect(0,0,0,0);
 
         // Get initial x/y/w/h
         double x = thePoints[0].x;
@@ -400,7 +421,7 @@ public class Rect extends RectBase {
         double w = x, h = y;
 
         // Iterate over remaining points to get min/max
-        for (int i=1; i<thePoints.length; i++) {
+        for (int i = 1; i < thePoints.length; i++) {
             x = Math.min(x, thePoints[i].x);
             y = Math.min(y, thePoints[i].y);
             w = Math.max(w, thePoints[i].x);
@@ -408,7 +429,7 @@ public class Rect extends RectBase {
         }
 
         // Return new rect
-        return new Rect(x, y, w-x, h-y);
+        return new Rect(x, y, w - x, h - y);
     }
 
     /**

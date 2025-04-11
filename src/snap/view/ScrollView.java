@@ -340,10 +340,8 @@ public class ScrollView extends ParentView implements ViewHost {
                 _recursingLayout = false;
                 return;
             }
-            else {
-                //updateScrollBarsShowing();
-                System.err.println("ScrollView: Confused about whether we get eliminate scrollbars");
-            }
+            //else updateScrollBarsShowing();
+            //else System.err.println("ScrollView: Confused about whether we get eliminate scrollbars");
         }
 
         // If horizontal scrollbar showing, set bounds

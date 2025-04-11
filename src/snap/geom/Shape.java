@@ -145,12 +145,21 @@ public abstract class Shape {
             return containsSeg((Segment)aShape);
 
         // If bounds don't contain shape, just return false
-        Rect bnds0 = getBounds(), bnds1 = aShape.getBounds();
+        Rect bnds0 = getBounds();
+        Rect bnds1 = aShape.getBounds();
         if (!bnds0.containsRect(bnds1))
             return false;
 
-        // Get path iterator and declare iter vars
+        // Return whether contains shape path iter
         PathIter pathIter = aShape.getPathIter(null);
+        return containsPathIter(pathIter);
+    }
+
+    /**
+     * Returns whether shape contains given path iterator.
+     */
+    private boolean containsPathIter(PathIter pathIter)
+    {
         double[] points = new double[6];
         double moveX = 0;
         double moveY = 0;
@@ -215,11 +224,22 @@ public abstract class Shape {
             return false;
 
         // If other shape bounds contains this shape bounds, have other shape do check
-        if (bnds1.containsRect(bnds0))
+        if (bnds1.containsRect(bnds0)) {
+            if (bnds1.equals(bnds0))
+                return true;
             return aShape.intersectsShape(this);
+        }
 
-        // Get path iterator and declare iter vars
+        // Returns whether intersects shape path iter
         PathIter pathIter = aShape.getPathIter(null);
+        return intersectsPathIterator(pathIter);
+    }
+
+    /**
+     * Returns whether this shape intersects given path iterator.
+     */
+    private boolean intersectsPathIterator(PathIter pathIter)
+    {
         double[] points = new double[6];
         double moveX = 0;
         double moveY = 0;
