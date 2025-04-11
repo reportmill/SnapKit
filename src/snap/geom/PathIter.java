@@ -169,7 +169,7 @@ public abstract class PathIter {
                     break;
 
                 // Handle Close
-                case Close: break;
+                case Close: continue;
             }
 
             // Combine bounds for segment (I wish this was union() instead, so it didn't include (0,0))
