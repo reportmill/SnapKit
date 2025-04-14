@@ -14,19 +14,12 @@ public class FileSite extends WebSite {
     // The drive letter path prefix for Windows
     private String _windowsDriveLetterPath;
 
-    // A cache for LastModTimes for local files in CheerpJ
-    private static Prefs _lastModTimesPrefsNode;
-
     /**
      * Constructor.
      */
     public FileSite()
     {
         super();
-
-        // If CheerpJ, get LastModTimes prefs node
-        if (SnapEnv.isWebVM)
-            _lastModTimesPrefsNode = Prefs.getPrefsForName("LastModTimes");
     }
 
     /**
@@ -105,12 +98,6 @@ public class FileSite extends WebSite {
         fileHeader.setLastModTime(javaFile.lastModified());
         fileHeader.setSize(javaFile.length());
 
-        // If WebVM, get LastModTime from cache
-        if (SnapEnv.isWebVM) {
-            long lastModTime = getLastModTimeCached(javaFile);
-            fileHeader.setLastModTime(lastModTime);
-        }
-
         // Return
         return fileHeader;
     }
@@ -162,16 +149,6 @@ public class FileSite extends WebSite {
         // Get last modified time from java file and set in response
         long lastModTime = javaFile.lastModified();
 
-        // Hack for WebVM missing mod times: Set LastModTime to current time, and if file update parent as well, if file being created
-        if (SnapEnv.isWebVM) {
-            lastModTime = System.currentTimeMillis();
-            setLastModTimeCached(javaFile, lastModTime);
-            if (!fileExists) {
-                File parentFile = javaFile.getParentFile();
-                setLastModTimeCached(parentFile, lastModTime);
-            }
-        }
-
         // Set LastModTime in response
         aResp.setLastModTime(lastModTime);
     }
@@ -188,13 +165,6 @@ public class FileSite extends WebSite {
 
         // Do delete
         FileUtils.deleteDeep(javaFile);
-
-        // Hack for WebVM missing mod times: Remove cached LastModTime and update parent
-        if (SnapEnv.isWebVM) {
-            setLastModTimeCached(javaFile, 0);
-            File parentFile = javaFile.getParentFile();
-            setLastModTimeCached(parentFile, System.currentTimeMillis());
-        }
     }
 
     /**
@@ -208,14 +178,8 @@ public class FileSite extends WebSite {
 
         // Get java file and set last modified time
         File javaFile = aFile.getJavaFile();
-        if (!javaFile.setLastModified(aTime)) {
-            if (!SnapEnv.isWebVM)
-                System.err.println("FileSite.setModTimeForFile: Error setting mod time for file: " + javaFile.getPath());
-        }
-
-        // Hack support to save last mod times
-        if (SnapEnv.isWebVM)
-            setLastModTimeCached(javaFile, aTime);
+        if (!javaFile.setLastModified(aTime))
+            System.err.println("FileSite.setModTimeForFile: Error setting mod time for file: " + javaFile.getPath());
 
         // Do normal version
         super.saveLastModTimeForFile(aFile, aTime);
@@ -283,38 +247,5 @@ public class FileSite extends WebSite {
 
         // Return normalized path
         return FilePathUtils.getNormalizedPath(filePath);
-    }
-
-    /**
-     * Hack for get/set last mod time in cheerpJ.
-     */
-    private static long getLastModTimeCached(File javaFile)
-    {
-        String filePath = javaFile.getPath();
-        if (SnapEnv.isWebVMSwing && filePath.length() > 80) // AWTPrefs has 80 char key limit
-            filePath = String.valueOf(filePath.hashCode());
-
-        long lastModTime = _lastModTimesPrefsNode.getLong(filePath, 0);
-        if (lastModTime == 0) {
-            lastModTime = System.currentTimeMillis();
-            setLastModTimeCached(javaFile, lastModTime);
-        }
-        //System.out.println("GetLastModTime: " + filePath + " = " + lastModTime);
-        return lastModTime;
-    }
-
-    /**
-     * Hack for get/set last mod time in cheerpJ.
-     */
-    private static void setLastModTimeCached(File javaFile, long aValue)
-    {
-        String filePath = javaFile.getPath();
-        if (SnapEnv.isWebVMSwing && filePath.length() > 80) // AWTPrefs has 80 char key limit
-            filePath = String.valueOf(filePath.hashCode());
-
-        if (aValue == 0)
-            _lastModTimesPrefsNode.remove(filePath);
-        else _lastModTimesPrefsNode.setValue(filePath, aValue);
-        //System.out.println("SetLastModTime: " + filePath + " = " + aValue);
     }
 }
