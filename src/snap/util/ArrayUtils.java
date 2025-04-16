@@ -478,6 +478,16 @@ public class ArrayUtils {
     }
 
     /**
+     * Returns a mapped list for given array, Function and class.
+     */
+    public static <T,R> List<R> mapNonNullToList(T[] anArray, Function<? super T, ? extends R> aFunction)
+    {
+        Stream<R> filteredStream = Stream.of(anArray).map(aFunction);
+        Stream<R> filteredNonNull = filteredStream.filter(item -> item != null);
+        return filteredNonNull.collect(Collectors.toList());
+    }
+
+    /**
      * Returns whether given array has match for given predicate.
      */
     public static <T> boolean hasMatch(T[] anArray, Predicate<? super T> aPred)
