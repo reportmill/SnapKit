@@ -33,6 +33,9 @@ public class DialogBox extends FormBuilder {
     // The content for dialog box
     private View  _content;
 
+    // The prompt text for input dialog
+    private String _inputPromptText;
+
     // Whether dialog box can be confirmed (confirm button is enabled)
     private boolean  _confirmEnabled = true;
 
@@ -240,6 +243,16 @@ public class DialogBox extends FormBuilder {
     }
 
     /**
+     * Returns the prompt text for input dialog.
+     */
+    public String getInputPromptText()  { return _inputPromptText; }
+
+    /**
+     * Sets the prompt text for input dialog.
+     */
+    public void setInputPromptText(String aValue)  { _inputPromptText = aValue; }
+
+    /**
      * Returns whether dialog box can be confirmed (confirm button is enabled).
      */
     public boolean isConfirmEnabled()  { return _confirmEnabled; }
@@ -346,6 +359,12 @@ public class DialogBox extends FormBuilder {
         TextField textField = addTextField("InputText", aDefault);
         textField.setMinWidth(150);
         setFirstFocus(textField);
+        if (getInputPromptText() != null)
+            textField.setPromptText(getInputPromptText());
+
+        // Listen for InputText KeyRelease events to update ConfirmEnabled
+        setConfirmEnabled(aDefault != null && !aDefault.isEmpty());
+        textField.addEventFilter(e -> runLater(() -> setConfirmEnabled(!textField.getText().isEmpty())), KeyRelease);
 
         // Show panel
         if (!showPanel(aView))
