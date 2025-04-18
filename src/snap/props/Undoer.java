@@ -202,7 +202,7 @@ public class Undoer extends PropObject {
 
         // If there are Undos, remove last undo, execute and add to RedoSets
         UndoSet undoSet = null;
-        if (_undoSets.size() > 0) {
+        if (!_undoSets.isEmpty()) {
             undoSet = _undoSets.remove(_undoSets.size() - 1);
             undoSet._closed = true;
             _redoSets.add(undoSet);
@@ -228,7 +228,7 @@ public class Undoer extends PropObject {
 
         // If there are Redos, remove last redo, execute and add to RedoSets
         UndoSet undoSet = null;
-        if (_redoSets.size() > 0) {
+        if (!_redoSets.isEmpty()) {
             undoSet = _redoSets.remove(_redoSets.size() - 1);
             _undoSets.add(undoSet);
             undoSet.redo();
@@ -272,7 +272,7 @@ public class Undoer extends PropObject {
      */
     public boolean hasUndos()
     {
-        return _undoSets.size() > 0 || !_activeUndoSet.isEmpty();
+        return !_undoSets.isEmpty() || !_activeUndoSet.isEmpty();
     }
 
     /**

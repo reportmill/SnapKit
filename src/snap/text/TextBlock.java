@@ -1424,7 +1424,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         if (aValue) {
             _undoer = new Undoer();
             _undoer.setAutoSave(true);
-            _undoer.addPropChangeListener(pc -> setTextModified(_undoer.isUndoAvailable()), Undoer.UndoAvailable_Prop);
+            _undoer.addPropChangeListener(pc -> handleUndoerPropChange(), Undoer.UndoAvailable_Prop);
         }
 
         // Otherwise, reset to disabled
@@ -1459,6 +1459,15 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
         // Add property
         undoer.addPropChange(anEvent);
+    }
+
+    /**
+     * Called when Undoer has prop change.
+     */
+    private void handleUndoerPropChange()
+    {
+        boolean hasUndo = _undoer.isUndoAvailable();
+        setTextModified(hasUndo);
     }
 
     /**
