@@ -1158,8 +1158,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         }
 
         // Ask WindowHpr to do it
-        WindowView.WindowHpr<?> hpr = win.getHelper();
-        Point pnt = hpr.viewToScreen(this, aX, aY);
+        WindowView.WindowHpr winHpr = win.getHelper();
+        Point pnt = winHpr.convertViewPointToScreen(this, aX, aY);
         return pnt;
     }
 

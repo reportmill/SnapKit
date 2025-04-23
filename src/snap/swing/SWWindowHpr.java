@@ -15,7 +15,7 @@ import snap.web.WebURL;
 /**
  * A WindowHpr map snap Window functionality to Swing.
  */
-public class SWWindowHpr extends WindowView.WindowHpr<Window> {
+public class SWWindowHpr extends WindowView.WindowHpr {
 
     // The snap Window
     private WindowView _win;
@@ -41,14 +41,13 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     /**
      * Returns the snap Window.
      */
-    public WindowView getWindow()
-    {
-        return _win;
-    }
+    @Override
+    public WindowView getWindow()  { return _win; }
 
     /**
      * Sets the snap Window Swing.
      */
+    @Override
     public void setWindow(WindowView aWin)
     {
         // Set window
@@ -68,6 +67,7 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     /**
      * Returns the native being helped.
      */
+    @Override
     public Window getNative()
     {
         // If already set, just return
@@ -88,11 +88,13 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     /**
      * Returns the native for the window content.
      */
+    @Override
     public JComponent getContentNative()  { return _rviewNtv; }
 
     /**
      * Initialize native window.
      */
+    @Override
     public void initWindow()
     {
         // Get native, window view and root view
@@ -153,6 +155,7 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     /**
      * Show window at given screen x and y.
      */
+    @Override
     public void show()
     {
         // If always-on-top, turn this on (since this is can be turned off in setWindowVisible(false))
@@ -186,6 +189,7 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     /**
      * Hides the window.
      */
+    @Override
     public void hide()
     {
         _winNtv.setVisible(false);
@@ -195,22 +199,20 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     /**
      * Order window to front.
      */
-    public void toFront()
-    {
-        _winNtv.toFront();
-    }
+    @Override
+    public void toFront()  { _winNtv.toFront(); }
 
     /**
      * Override to correct for case of RootView not in Swing Window.
      */
     @Override
-    public Point viewToScreen(View aView, double aX, double aY)
+    public Point convertViewPointToScreen(View aView, double aX, double aY)
     {
         // Make sure we have right window
         WindowView win = aView.getWindow();
         if (win != _win) {
-            WindowView.WindowHpr<?> hpr = win.getHelper();
-            return hpr.viewToScreen(aView, aX, aY);
+            WindowView.WindowHpr hpr = win.getHelper();
+            return hpr.convertViewPointToScreen(aView, aX, aY);
         }
 
         // Get point in RootView
@@ -257,6 +259,7 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     /**
      * Sets the document file for the window title bar proxy icon.
      */
+    @Override
     public void setDocURL(WebURL aURL)
     {
         // If not local, just bail
@@ -287,6 +290,7 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     /**
      * Registers a view for repaint.
      */
+    @Override
     public void requestPaint(Rect aRect)
     {
         _rviewNtv.repaint(aRect);

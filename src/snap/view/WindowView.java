@@ -64,7 +64,7 @@ public class WindowView extends ParentView {
     private View  _focusedView, _focusedViewLast;
     
     // The helper to map window functionality to native platform
-    protected WindowHpr  _helper;
+    protected WindowHpr _helper;
     
     // A class to handle view updates (repaint, relayout, resetUI, animation)
     private ViewUpdater  _updater;
@@ -287,7 +287,7 @@ public class WindowView extends ParentView {
     public void setDocURL(WebURL aURL)
     {
         // If already set, just return
-        if (Objects.equals(aURL, _docURL)) return;
+        if (Objects.equals(aURL, getDocURL())) return;
 
         // Set
         _docURL = aURL;
@@ -354,10 +354,16 @@ public class WindowView extends ParentView {
         }
 
         // Get view - if null, try to find something better
-        View view = aView != null ? aView : getFocusViewForNull();
+        View newFocusView = aView;
+        if (newFocusView == null) {
+            newFocusView = getFocusViewForNull();
+            if (newFocusView == getFocusedView())
+                newFocusView = null;
+        }
 
         // If already set, just return
-        if (view == getFocusedView()) return;
+        if (newFocusView == getFocusedView())
+            return;
 
         // If existing FocusedView, clear View.Focused
         if (_focusedView != null)
@@ -365,7 +371,7 @@ public class WindowView extends ParentView {
 
         // Update FocusViewLast, FocusView
         _focusedViewLast = _focusedView;
-        _focusedView = view;
+        _focusedView = newFocusView;
 
         // If new FocusedView, set View.Focused
         if (_focusedView != null)
@@ -627,8 +633,8 @@ public class WindowView extends ParentView {
             _eventDispatcher.dispatchMouseMoveOutsideWindow();
 
             // Register to check later to exit if still no open windows
-            if (_openWins.size() == 0)
-                ViewUtils.runDelayed(() -> checkForExitWhenAllWindowsClosed(), 250);
+            if (_openWins.isEmpty())
+                ViewUtils.runDelayed(WindowView::checkForExitWhenAllWindowsClosed, 250);
         }
     }
 
@@ -805,14 +811,14 @@ public class WindowView extends ParentView {
      */
     private static void checkForExitWhenAllWindowsClosed()
     {
-        if (_openWins.size() == 0)
+        if (_openWins.isEmpty())
             System.exit(0);
     }
 
     /**
      * A class to map snap Window functionality to native platform.
      */
-    public abstract static class WindowHpr <T> {
+    public abstract static class WindowHpr {
 
         /** Returns the snap Window. */
         public abstract WindowView getWindow();
@@ -821,7 +827,7 @@ public class WindowView extends ParentView {
         public abstract void setWindow(WindowView aWin);
 
         /** Returns the native being helped. */
-        public abstract T getNative();
+        public abstract Object getNative();
 
         /** Returns the native for the window content. */
         public Object getContentNative()  { return null; }
@@ -842,7 +848,7 @@ public class WindowView extends ParentView {
         public abstract void toFront();
 
         /** Convert given point x/y from given view to screen. */
-        public Point viewToScreen(View aView, double aX, double aY)
+        public Point convertViewPointToScreen(View aView, double aX, double aY)
         {
             return aView.localToParent(aX, aY, null);
         }
