@@ -36,7 +36,7 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     private snap.view.Cursor _cursor;
 
     // Runnable to update cursor
-    private Runnable _cursRun, _cursRunShared = () -> setCursorNow();
+    private Runnable _setRootViewNativeCursorRun;
 
     /**
      * Returns the snap Window.
@@ -61,11 +61,8 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
         _rview = aWin.getRootView();
         _rviewNtv = new SWRootView(_win, _rview);
 
-        // Add listener to update bounds
-        _win.addPropChangeListener(pc -> snapWindowPropertyChanged(pc));
-
-        // Add listener to update native cursor
-        _win.addPropChangeListener(pc -> snapWindowActiveCursorChanged(), WindowView.ActiveCursor_Prop);
+        // Add listener to handle window prop changes
+        _win.addPropChangeListener(this::handleSnapWindowPropertyChange);
     }
 
     /**
@@ -91,10 +88,7 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     /**
      * Returns the native for the window content.
      */
-    public JComponent getContentNative()
-    {
-        return _rviewNtv;
-    }
+    public JComponent getContentNative()  { return _rviewNtv; }
 
     /**
      * Initialize native window.
@@ -145,33 +139,15 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
 
         // Add WindowListener to dispatch window events
         winNtv.addWindowListener(new WindowAdapter() {
-            public void windowActivated(WindowEvent anEvent)
-            {
-                swingWindowActiveChanged(anEvent);
-            }
-
-            public void windowDeactivated(WindowEvent anEvent)
-            {
-                swingWindowActiveChanged(anEvent);
-            }
-
-            public void windowOpened(WindowEvent anEvent)
-            {
-                sendWinEvent(anEvent, ViewEvent.Type.WinOpen);
-            }
-
-            public void windowClosing(WindowEvent anEvent)
-            {
-                sendWinEvent(anEvent, ViewEvent.Type.WinClose);
-            }
-
-            public void windowClosed(WindowEvent anEvent)
-            {
-            }
+            public void windowActivated(WindowEvent anEvent)  { handleSwingWindowActiveChange(anEvent); }
+            public void windowDeactivated(WindowEvent anEvent)  { handleSwingWindowActiveChange(anEvent); }
+            public void windowOpened(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinOpen); }
+            public void windowClosing(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinClose); }
+            public void windowClosed(WindowEvent anEvent)  { }
         });
 
         // Sync Window bounds to WindowView
-        swingWindowBoundsChanged();
+        handleSwingWindowBoundsChanged();
     }
 
     /**
@@ -189,7 +165,7 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
         // Set WinNtv location and make visible
         _winNtv.setLocation(x, y);
         _winNtv.setVisible(true);
-        swingWindowShowingChanged();
+        handleSwingWindowShowingChange();
 
         // If window is modal, just return
         if (_win.isModal()) return;
@@ -213,7 +189,7 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     public void hide()
     {
         _winNtv.setVisible(false);
-        swingWindowShowingChanged(); // So change is reflected immediately
+        handleSwingWindowShowingChange(); // So change is reflected immediately
     }
 
     /**
@@ -233,7 +209,7 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
         // Make sure we have right window
         WindowView win = aView.getWindow();
         if (win != _win) {
-            WindowView.WindowHpr hpr = win.getHelper();
+            WindowView.WindowHpr<?> hpr = win.getHelper();
             return hpr.viewToScreen(aView, aX, aY);
         }
 
@@ -271,8 +247,10 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
      */
     public void setResizable(boolean aValue)
     {
-        if (_winNtv instanceof JFrame) ((JFrame) _winNtv).setResizable(aValue);
-        else if (_winNtv instanceof JDialog) ((JDialog) _winNtv).setResizable(aValue);
+        if (_winNtv instanceof JFrame)
+            ((JFrame) _winNtv).setResizable(aValue);
+        else if (_winNtv instanceof JDialog)
+            ((JDialog) _winNtv).setResizable(aValue);
         else System.err.println("WindowHpr.setTitle: Not supported " + _winNtv);
     }
 
@@ -307,53 +285,26 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     }
 
     /**
+     * Registers a view for repaint.
+     */
+    public void requestPaint(Rect aRect)
+    {
+        _rviewNtv.repaint(aRect);
+    }
+
+    /**
      * Called when window is shown/hidden.
      */
-    protected void swingWindowShowingChanged()
+    protected void handleSwingWindowShowingChange()
     {
         boolean showing = _winNtv.isShowing();
         ViewUtils.setShowing(_win, showing);
     }
 
     /**
-     * Returns the listener that listens to Swing window move/resize/show/hide.
-     */
-    protected ComponentAdapter getNativeWindowBoundsListener()
-    {
-        // If already set, just return
-        if (_ntvWinBndsLsnr != null) return _ntvWinBndsLsnr;
-
-        // Create listener
-        ComponentAdapter lsnr = new ComponentAdapter() {
-            public void componentMoved(ComponentEvent e)
-            {
-                swingWindowBoundsChanged();
-            }
-
-            public void componentResized(ComponentEvent e)
-            {
-                swingWindowBoundsChanged();
-            }
-
-            public void componentShown(ComponentEvent e)
-            {
-                swingWindowShowingChanged();
-            }
-
-            public void componentHidden(ComponentEvent e)
-            {
-                swingWindowShowingChanged();
-            }
-        };
-
-        // Set and return
-        return _ntvWinBndsLsnr = lsnr;
-    }
-
-    /**
      * Handles when Swing window bounds changed.
      */
-    protected void swingWindowBoundsChanged()
+    protected void handleSwingWindowBoundsChanged()
     {
         int x = _winNtv.getX(), y = _winNtv.getY();
         int w = _winNtv.getWidth(), h = _winNtv.getHeight();
@@ -365,17 +316,9 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     }
 
     /**
-     * Registers a view for repaint.
-     */
-    public void requestPaint(Rect aRect)
-    {
-        _rviewNtv.repaint(aRect);
-    }
-
-    /**
      * Handles active changed.
      */
-    protected void swingWindowActiveChanged(WindowEvent anEvent)
+    protected void handleSwingWindowActiveChange(WindowEvent anEvent)
     {
         // Update Window.Focused from SwingWindow.Active
         boolean active = _winNtv.isActive();
@@ -392,23 +335,49 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     /**
      * Called when WindowView changes to update native.
      */
-    protected void snapWindowPropertyChanged(PropChange aPC)
+    protected void handleSnapWindowPropertyChange(PropChange aPC)
     {
-        String propName = aPC.getPropName();
-        switch (propName) {
+        switch (aPC.getPropName()) {
+
+            // Handle bounds changes
             case View.X_Prop: setX((Double) aPC.getNewValue()); break;
             case View.Y_Prop: setY((Double) aPC.getNewValue()); break;
             case View.Width_Prop: setWidth((Double) aPC.getNewValue()); break;
             case View.Height_Prop: setHeight((Double) aPC.getNewValue()); break;
+
+            // Handle AlwaysOnTop
             case WindowView.AlwaysOnTop_Prop:
                 _winNtv.setAlwaysOnTop(Convert.booleanValue(aPC.getNewValue()));
                 break;
+
+            // Handle Image, Title, Resizble
             case WindowView.Image_Prop: setImage((Image) aPC.getNewValue()); break;
             case WindowView.Title_Prop: setTitle((String) aPC.getNewValue()); break;
-            case WindowView.Resizable_Prop:
-                setResizable(Convert.booleanValue(aPC.getNewValue()));
-                break;
+            case WindowView.Resizable_Prop: setResizable(Convert.booleanValue(aPC.getNewValue())); break;
+
+            // Handle Cursor
+            case WindowView.ActiveCursor_Prop: handleSnapWindowActiveCursorChange(); break;
         }
+    }
+
+    /**
+     * Called when RootView CurrentCursor changes.
+     */
+    private void handleSnapWindowActiveCursorChange()
+    {
+        _cursor = _win.getActiveCursor();
+        if (_setRootViewNativeCursorRun == null)
+            SwingUtilities.invokeLater(_setRootViewNativeCursorRun = this::setRootViewNativeCursor);
+    }
+
+    /**
+     * Called to set cursor immediately.
+     */
+    private void setRootViewNativeCursor()
+    {
+        java.awt.Cursor cursor = AWT.get(_cursor);
+        _rviewNtv.setCursor(cursor);
+        _setRootViewNativeCursorRun = null;
     }
 
     /**
@@ -435,25 +404,23 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     }
 
     /**
-     * Called when RootView CurrentCursor changes.
+     * Returns the listener that listens to Swing window move/resize/show/hide.
      */
-    void snapWindowActiveCursorChanged()
+    protected ComponentAdapter getNativeWindowBoundsListener()
     {
-        _cursor = _win.getActiveCursor();
-        if (_cursRun == null)
-            SwingUtilities.invokeLater(_cursRun = _cursRunShared);
-    }
+        // If already set, just return
+        if (_ntvWinBndsLsnr != null) return _ntvWinBndsLsnr;
 
-    /**
-     * Called to set cursor immediately.
-     */
-    private void setCursorNow()
-    {
-        if (!SnapEnv.isWebVM) {
-            java.awt.Cursor cursor = AWT.get(_cursor);
-            _rviewNtv.setCursor(cursor);
-        }
-        _cursRun = null;
+        // Create listener
+        ComponentAdapter lsnr = new ComponentAdapter() {
+            public void componentMoved(ComponentEvent e)  { handleSwingWindowBoundsChanged(); }
+            public void componentResized(ComponentEvent e)  { handleSwingWindowBoundsChanged(); }
+            public void componentShown(ComponentEvent e)  { handleSwingWindowShowingChange(); }
+            public void componentHidden(ComponentEvent e)  { handleSwingWindowShowingChange(); }
+        };
+
+        // Set and return
+        return _ntvWinBndsLsnr = lsnr;
     }
 
     /**
@@ -506,19 +473,8 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
 
         WindowView _wview;
 
-        public void componentMoved(ComponentEvent e)
-        {
-            setFrameString(e);
-        }
-
-        public void componentResized(ComponentEvent e)
-        {
-            setFrameString(e);
-        }
-
-        private void setFrameString(ComponentEvent e)
-        {
-            _wview.saveFrame();
-        }
+        public void componentMoved(ComponentEvent e)  { setFrameString(e); }
+        public void componentResized(ComponentEvent e)  { setFrameString(e); }
+        private void setFrameString(ComponentEvent e)  { _wview.saveFrame(); }
     }
 }
