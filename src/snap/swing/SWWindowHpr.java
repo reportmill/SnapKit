@@ -120,10 +120,8 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
             frame.setResizable(win.isResizable());
             if (win.getType() == WindowView.TYPE_UTILITY)
                 frame.getRootPane().putClientProperty("Window.style", "small");
-            else if (win.getType() == WindowView.TYPE_PLAIN) {
+            else if (win.getType() == WindowView.TYPE_PLAIN)
                 frame.setUndecorated(true);
-                frame.setFocusableWindowState(false);
-            }
         }
 
         // Set common attributes
@@ -149,12 +147,12 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
         winNtv.addWindowListener(new WindowAdapter() {
             public void windowActivated(WindowEvent anEvent)
             {
-                swingWindowActiveChanged();
+                swingWindowActiveChanged(anEvent);
             }
 
             public void windowDeactivated(WindowEvent anEvent)
             {
-                swingWindowActiveChanged();
+                swingWindowActiveChanged(anEvent);
             }
 
             public void windowOpened(WindowEvent anEvent)
@@ -377,15 +375,18 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
     /**
      * Handles active changed.
      */
-    protected void swingWindowActiveChanged()
+    protected void swingWindowActiveChanged(WindowEvent anEvent)
     {
         // Update Window.Focused from SwingWindow.Active
         boolean active = _winNtv.isActive();
         ViewUtils.setFocused(_win, active);
 
-        // If window deactivated and it has Popup, hide popup
-        if (!active && _win.getPopup() != null)
-            _win.getPopup().hide();
+        // If window deactivated and it has Popup and popup isn't new active window, hide popup
+        if (!active && _win.getPopup() != null) {
+            PopupWindow popupWindow = _win.getPopup();
+            if (popupWindow.getHelper().getNative() != anEvent.getOppositeWindow())
+                _win.getPopup().hide();
+        }
     }
 
     /**
