@@ -10,21 +10,24 @@ import snap.gfx.Color;
 public class PopupWindow extends WindowView {
 
     /**
-     * Creates a new PopupWindow.
+     * Constructor.
      */
     public PopupWindow()
     {
+        super();
         setType(TYPE_PLAIN);
         setAlwaysOnTop(true);
         //setOpacity(.9);
 
-        RootView rview = getRootView();
-        rview.setFill(Color.WHITE);
-        rview.setBorder(Color.LIGHTGRAY, 1);
+        // Configure RootView
+        RootView rootView = getRootView();
+        rootView.setFill(Color.WHITE);
+        rootView.setBorder(Color.LIGHTGRAY, 1);
+        rootView.addEventHandler(this::handleRootViewKeyPressEvent, ViewEvent.Type.KeyPress);
     }
 
     /**
-     * Shows the node.
+     * Shows this popup window at point XY in given view coords.
      */
     public void show(View aView, double aX, double aY)
     {
@@ -32,9 +35,21 @@ public class PopupWindow extends WindowView {
         super.show(aView, aX, aY);
 
         // Set this popup as aView.Window.Popup
-        WindowView win = aView != null ? aView.getWindow() : null;
-        if (win != null)
-            win.setPopup(this);
+        WindowView viewWindow = aView != null ? aView.getWindow() : null;
+        if (viewWindow != null)
+            viewWindow.setPopup(this);
         else System.err.println("PopupWindow.show: No Window found");
+    }
+
+    /**
+     * Called when RootView gets a KeyPress.
+     */
+    private void handleRootViewKeyPressEvent(ViewEvent anEvent)
+    {
+        // Handle Escape key: Hide window
+        if (anEvent.isEscapeKey()) {
+            hide();
+            anEvent.consume();
+        }
     }
 }
