@@ -24,7 +24,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     private Button  _button;
     
     // The ListView
-    private ListView <T>  _list;
+    private ListView <T> _listView;
     
     // The function to format text
     private Function <T,String>  _itemTextFunc;
@@ -70,8 +70,8 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     public void setItemTextFunction(Function <T,String> aFunc)
     {
         _itemTextFunc = aFunc;
-        if (_list != null)
-            _list.setItemTextFunction(aFunc);
+        if (_listView != null)
+            _listView.setItemTextFunction(aFunc);
     }
 
     /**
@@ -85,9 +85,10 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Sets method to configure list cells.
      */
-    public void setCellConfigure(Consumer<ListCell<T>> aCC)
+    public void setCellConfigure(Consumer<ListCell<T>> cellConfigure)
     {
-        getListView().setCellConfigure(aCC);
+        if (cellConfigure == getCellConfigure()) return;
+        getListView().setCellConfigure(cellConfigure);
     }
 
     /**
@@ -125,9 +126,9 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
      */
     public ListView <T> getListView()
     {
-        if (_list == null)
+        if (_listView == null)
             setListView(createListView());
-        return _list;
+        return _listView;
     }
 
     /**
@@ -136,11 +137,11 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     public void setListView(ListView <T> aListView)
     {
         // Set List
-        _list = aListView;
+        _listView = aListView;
 
         // Start listening to Action and SelIndex changes
-        _list.addEventHandler(e -> listViewFiredAction(), Action);
-        _list.addPropChangeListener(pce -> listViewSelectionChanged(), ListView.Sel_Prop);
+        _listView.addEventHandler(e -> listViewFiredAction(), Action);
+        _listView.addPropChangeListener(pce -> listViewSelectionChanged(), ListView.Sel_Prop);
 
         // If not PopupList, turn off button and start listening to TextField KeyType events
         if (!(aListView instanceof PopupList))
@@ -210,7 +211,11 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Sets the function to return filtered items from a prefix
      */
-    public void setPrefixFunction(Function <String,List<T>> aFunc)  { _prefixFunction = aFunc; }
+    public void setPrefixFunction(Function <String,List<T>> aFunc)
+    {
+        if (aFunc == getPrefixFunction()) return;
+        _prefixFunction = aFunc;
+    }
 
     /**
      * Called when Button/TextField changes.
@@ -251,7 +256,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
      */
     public PopupList <T> getPopupList()
     {
-        return getListView() instanceof PopupList? (PopupList<T>) _list : null;
+        return getListView() instanceof PopupList? (PopupList<T>) _listView : null;
     }
 
     /**
@@ -384,7 +389,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         }
 
         // On focus lost: Restore list items after delay (twice, in case textFieldFiredAction with scrollSelToVisible)
-        else getEnv().runLater(() -> getEnv().runLater(() -> { _list.setItems(_items); _items = null; }));
+        else getEnv().runLater(() -> getEnv().runLater(() -> { _listView.setItems(_items); _items = null; }));
     }
 
     /**
@@ -403,25 +408,32 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         }
 
         // Handle EscapeKey
-        else if (anEvent.isEscapeKey()) {
+        else if (anEvent.isEscapeKey())
+            handleTextFieldEscapeKeyPressEvent(anEvent);
+    }
 
-            // If value has changed, reset to focus gained values
-            if (_textField.isEdited()) {
-                _list.setItems(_items);
-                _list.setText(_textField._focusGainedText);
-                _textField.selectAll();
-                if (getItemCount() == 0 && isPopup() && isPopupShowing())
-                    getPopupList().hide();
-            }
-
-            // Otherwise have RootView.FocusedViewLast request focus
-            else if (getWindow().getFocusedViewLast() != null) {
-                if (isPopup() && isPopupShowing())
-                    getPopupList().hide();
-                getWindow().getFocusedViewLast().requestFocus();
-            }
-
+    /**
+     * Called to handle escape key press.
+     */
+    private void handleTextFieldEscapeKeyPressEvent(ViewEvent anEvent)
+    {
+        // If value has changed, reset to focus gained values
+        if (_textField.isEdited()) {
+            _listView.setItems(_items);
+            _listView.setText(_textField._focusGainedText);
+            _textField.selectAll();
+            if (getItemCount() == 0 && isPopup() && isPopupShowing())
+                getPopupList().hide();
             anEvent.consume();
+        }
+
+        // Otherwise hide popup and resign focus
+        else {
+            if (isPopup() && isPopupShowing())
+                getPopupList().hide();
+            getWindow().requestFocus(null);
+            if (getWindow().getFocusedView() != null)
+                anEvent.consume();
         }
     }
 
@@ -447,8 +459,8 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
             item = getSelItem();
 
         // Set ListView Items, SelItem
-        if (isFilterList()) _list.setItems(items);
-        _list.setSelItem(item);
+        if (isFilterList()) _listView.setItems(items);
+        _listView.setSelItem(item);
         if (items.size() <= 1 && isPopup() && isPopupShowing())
             getPopupList().hide();
 
@@ -483,7 +495,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         // Otherwise, return items that start with prefix
         List <T> itemsForPrefix = new ArrayList<>();
         for (T item : _items) {
-            if (StringUtils.startsWithIC(_list.getText(item), aStr))
+            if (StringUtils.startsWithIC(_listView.getText(item), aStr))
                 itemsForPrefix.add(item);
         }
 

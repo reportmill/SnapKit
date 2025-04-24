@@ -61,8 +61,11 @@ public class WindowView extends ParentView {
     private boolean  _saveSize;
     
     // The focused view
-    private View  _focusedView, _focusedViewLast;
+    private View  _focusedView;
     
+    // The previous focused view
+    private View _lastFocusedView;
+
     // The helper to map window functionality to native platform
     protected WindowHpr _helper;
     
@@ -340,7 +343,7 @@ public class WindowView extends ParentView {
     /**
      * Returns the previous focus view.
      */
-    public View getFocusedViewLast()  { return _focusedViewLast; }
+    public View getLastFocusedView()  { return _lastFocusedView; }
 
     /**
      * Tries to makes the given view the view that receives KeyEvents.
@@ -370,7 +373,7 @@ public class WindowView extends ParentView {
             _focusedView.setFocused(false);
 
         // Update FocusViewLast, FocusView
-        _focusedViewLast = _focusedView;
+        _lastFocusedView = aView != null ? _focusedView : null;
         _focusedView = newFocusView;
 
         // If new FocusedView, set View.Focused
@@ -387,8 +390,8 @@ public class WindowView extends ParentView {
      */
     private View getFocusViewForNull()
     {
-        if (getFocusedViewLast() != null)
-            return getFocusedViewLast();
+        if (getLastFocusedView() != null)
+            return getLastFocusedView();
         for (View view = getFocusedView(); view != null; view = view.getParent())
             if (view.isFocusable())
                 return view;
