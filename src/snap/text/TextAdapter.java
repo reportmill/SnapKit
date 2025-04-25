@@ -1279,8 +1279,11 @@ public class TextAdapter extends PropObject {
 
         // If there is a window, it should be focused: It is possible to be set Showing, but not in Window
         WindowView window = _view.getWindow();
-        if (window != null && !window.isFocused())
-            return false;
+        if (window != null && !window.isFocused()) {
+            PopupWindow popupWindow = window.getPopup();
+            if (popupWindow == null || !popupWindow.isFocused())
+                return false;
+        }
 
         // Return true
         return true;
