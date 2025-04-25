@@ -131,8 +131,19 @@ public class EventDispatcher {
             dispatchMouseEvent(anEvent);
 
         // Handle Key events
-        else if (anEvent.isKeyEvent())
+        else if (anEvent.isKeyEvent()) {
+
+            // Forward to dispatchKeyEvent
             dispatchKeyEvent(anEvent);
+
+            // If event not handled and window is popup, forward to popup parent window
+            if (!anEvent.isConsumed() && _win instanceof PopupWindow) {
+                PopupWindow popupWin = (PopupWindow) _win;
+                WindowView parentWin = popupWin.getParentWindow();
+                if (parentWin != null)
+                    parentWin.dispatchEventToWindow(anEvent);
+            }
+        }
 
         // Handle Action events
         else if (anEvent.isActionEvent())
