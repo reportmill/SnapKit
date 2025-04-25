@@ -131,19 +131,8 @@ public class EventDispatcher {
             dispatchMouseEvent(anEvent);
 
         // Handle Key events
-        else if (anEvent.isKeyEvent()) {
-
-            // Forward to dispatchKeyEvent
+        else if (anEvent.isKeyEvent())
             dispatchKeyEvent(anEvent);
-
-            // If event not handled and window is popup, forward to popup parent window
-            if (!anEvent.isConsumed() && _win instanceof PopupWindow) {
-                PopupWindow popupWin = (PopupWindow) _win;
-                WindowView parentWin = popupWin.getParentWindow();
-                if (parentWin != null)
-                    parentWin.dispatchEventToWindow(anEvent);
-            }
-        }
 
         // Handle Action events
         else if (anEvent.isActionEvent())
@@ -378,7 +367,8 @@ public class EventDispatcher {
             if (view.getEventAdapter().isEnabled(anEvent.getType())) {
                 ViewEvent e2 = anEvent.copyForView(view);
                 view.processEventFilters(e2);
-                if (e2.isConsumed()) return;
+                if (e2.isConsumed())
+                    return;
             }
         }
 
@@ -400,6 +390,14 @@ public class EventDispatcher {
                 if (event.isConsumed())
                     return;
             }
+        }
+
+        // If window is popup window, forward to popup parent window
+        if (_win instanceof PopupWindow) {
+            PopupWindow popupWin = (PopupWindow) _win;
+            WindowView parentWin = popupWin.getParentWindow();
+            if (parentWin != null)
+                parentWin.dispatchEventToWindow(anEvent);
         }
     }
 
