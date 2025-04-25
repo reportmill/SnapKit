@@ -12,6 +12,9 @@ public class PopupWindow extends WindowView {
     // The parent window
     private WindowView _parentWindow;
 
+    // The view given with last show
+    private View _clientView;
+
     /**
      * Constructor.
      */
@@ -35,11 +38,18 @@ public class PopupWindow extends WindowView {
     public WindowView getParentWindow()  { return _parentWindow; }
 
     /**
+     * Returns the view last used for show.
+     */
+    public View getClientView()  { return _clientView; }
+
+    /**
      * Shows this popup window at point XY in given view coords.
      */
     @Override
     public void show(View aView, double aX, double aY)
     {
+        _clientView = aView;
+
         // Show node
         super.show(aView, aX, aY);
 
@@ -58,6 +68,7 @@ public class PopupWindow extends WindowView {
     {
         super.hide();
         _parentWindow = null;
+        _clientView = null;
     }
 
     /**

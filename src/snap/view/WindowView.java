@@ -96,6 +96,7 @@ public class WindowView extends ParentView {
     public static final String Maximized_Prop = "Maximized";
     public static final String Resizable_Prop = "Resizable";
     public static final String Title_Prop = "Title";
+    public static final String FocusView_Prop = "FocusView";
 
     /**
      * Creates a WindowView.
@@ -341,9 +342,31 @@ public class WindowView extends ParentView {
     }
 
     /**
-     * Returns the previous focus view.
+     * Sets the view that currently receives KeyEvents.
      */
-    public View getLastFocusedView()  { return _lastFocusedView; }
+    protected void setFocusView(View aView)
+    {
+        if (aView == getFocusedView()) return;
+
+        // If existing FocusedView, clear View.Focused
+        if (_focusedView != null)
+            _focusedView.setFocused(false);
+
+        // Update FocusViewLast, FocusView
+        _lastFocusedView = _focusedView;
+        _focusedView = aView;
+
+        // If new FocusedView, set View.Focused
+        if (_focusedView != null)
+            _focusedView.setFocused(true);
+
+        // Tell WindowHpr
+        WindowHpr helper = getHelper();
+        helper.focusDidChange(_focusedView);
+
+        // Fire prop change
+        firePropChange(FocusView_Prop, _focusedView, _lastFocusedView);
+    }
 
     /**
      * Tries to makes the given view the view that receives KeyEvents.
@@ -364,26 +387,18 @@ public class WindowView extends ParentView {
                 newFocusView = null;
         }
 
-        // If already set, just return
-        if (newFocusView == getFocusedView())
-            return;
+        // Sets the focus view
+        setFocusView(newFocusView);
 
-        // If existing FocusedView, clear View.Focused
-        if (_focusedView != null)
-            _focusedView.setFocused(false);
-
-        // Update FocusViewLast, FocusView
-        _lastFocusedView = aView != null ? _focusedView : null;
-        _focusedView = newFocusView;
-
-        // If new FocusedView, set View.Focused
-        if (_focusedView != null)
-            _focusedView.setFocused(true);
-
-        // Tell WindowHpr
-        WindowHpr helper = getHelper();
-        helper.focusDidChange(_focusedView);
+        // If resigning focus, reset last focus view, too
+        if (aView == null)
+            _lastFocusedView = null;
     }
+
+    /**
+     * Returns the previous focus view.
+     */
+    public View getLastFocusedView()  { return _lastFocusedView; }
 
     /**
      * Returns a view to use when focus is null.

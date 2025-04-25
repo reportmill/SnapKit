@@ -1281,7 +1281,7 @@ public class TextAdapter extends PropObject {
         WindowView window = _view.getWindow();
         if (window != null && !window.isFocused()) {
             PopupWindow popupWindow = window.getPopup();
-            if (popupWindow == null || !popupWindow.isFocused())
+            if (popupWindow == null || !popupWindow.isFocused() || popupWindow.getFocusedView() != null)
                 return false;
         }
 
@@ -1610,7 +1610,7 @@ public class TextAdapter extends PropObject {
         if (_view.isShowing()) {
             _showingWindow = _view.getWindow();
             if (_showingWindow != null) {
-                _windowFocusedChangedLsnr = e -> updateCaretAnim();
+                _windowFocusedChangedLsnr = pc -> handleViewWindowFocusedChanged();
                 _showingWindow.addPropChangeListener(_windowFocusedChangedLsnr, View.Focused_Prop);
             }
         }
@@ -1641,13 +1641,20 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Override to check caret animation and repaint.
+     * Called when view focus property changes to update caret anim.
      */
     private void handleViewFocusedChanged()
     {
-        // Update caret
         setShowCaret(false);
         updateCaretAnim();
+    }
+
+    /**
+     * Called when view window focus property changes to update caret anim.
+     */
+    private void handleViewWindowFocusedChanged()
+    {
+        ViewUtils.runLater(this::updateCaretAnim);
     }
 
     /**
