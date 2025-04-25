@@ -391,14 +391,6 @@ public class EventDispatcher {
                     return;
             }
         }
-
-        // If window is popup window with no focus, forward to popup parent window
-        if (_win instanceof PopupWindow && _win.getFocusedView() == null) {
-            PopupWindow popupWin = (PopupWindow) _win;
-            WindowView parentWin = popupWin.getParentWindow();
-            if (parentWin != null)
-                parentWin.dispatchEventToWindow(anEvent);
-        }
     }
 
     /**

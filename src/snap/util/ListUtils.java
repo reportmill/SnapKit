@@ -362,6 +362,19 @@ public class ListUtils {
     }
 
     /**
+     * Returns the last item in collection that matches given predicate (or null).
+     */
+    public static <T> T findLastMatch(List<T> aList, Predicate<? super T> aPred)
+    {
+        for (int i = aList.size() - 1; i >= 0; i--) {
+            T item = aList.get(i);
+            if (aPred.test(item))
+                return item;
+        }
+        return null;
+    }
+
+    /**
      * Returns first non-null value for given list and Function.
      */
     public static <T,R> R findNonNull(Collection<T> aList, Function<? super T, ? extends R> aFunction)

@@ -99,10 +99,13 @@ public class WindowView extends ParentView {
     public static final String FocusView_Prop = "FocusView";
 
     /**
-     * Creates a WindowView.
+     * Constructor.
      */
     public WindowView()
     {
+        super();
+        setFocusable(true);
+
         // Create and add RootView
         _rootView = new RootView();
         addChild(_rootView);

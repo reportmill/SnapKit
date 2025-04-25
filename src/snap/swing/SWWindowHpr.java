@@ -121,6 +121,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         }
 
         // Set common attributes
+        winNtv.setFocusableWindowState(win.isFocusable());
         winNtv.setAlwaysOnTop(win.isAlwaysOnTop());
         winNtv.setOpacity((float) win.getOpacity());
 
@@ -326,7 +327,8 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     {
         // Update Window.Focused from SwingWindow.Active
         boolean active = _winNtv.isActive();
-        ViewUtils.setFocused(_win, active);
+        if (_win.isFocusable())
+            ViewUtils.setFocused(_win, active);
 
         // If window deactivated and it has Popup and popup isn't new active window, hide popup
         if (!active && _win.getPopup() != null) {

@@ -1281,7 +1281,7 @@ public class TextAdapter extends PropObject {
         WindowView window = _view.getWindow();
         if (window != null && !window.isFocused()) {
             PopupWindow popupWindow = window.getPopup();
-            if (popupWindow == null || !popupWindow.isFocused() || popupWindow.getFocusedView() != null)
+            if (popupWindow == null || popupWindow.isFocused())
                 return false;
         }
 
