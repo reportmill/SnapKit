@@ -33,12 +33,13 @@ public class DropBoxSite extends WebSite {
     private static DateFormat _fmt = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
 
     // Shared instances
-    private static Map<String,DropBoxSite>  _dropBoxSites = new HashMap<>();
+    private static Map<String,DropBoxSite> _dropBoxSites = new HashMap<>();
 
     // Default email
-    private static String  _defaultEmail;
+    private static String _defaultEmail;
 
     // Constants
+    private static String APP_PREFIX = "/Apps/SnapUsers";
     private static final String DEFAULT_EMAIL = "DefaultDropBoxEmail";
 
     /**
@@ -92,7 +93,7 @@ public class DropBoxSite extends WebSite {
     protected void doHead(WebRequest aReq, WebResponse aResp)
     {
         // If no email, set response to not found
-        if (_email == null || _email.length() == 0) {
+        if (_email == null || _email.isEmpty()) {
             aResp.setCode(WebResponse.NOT_FOUND);
             return;
         }
@@ -235,7 +236,7 @@ public class DropBoxSite extends WebSite {
                     aResp.setLastModTime(date.getTime());
                     System.out.println("Save ModTime: " + date);
                 }
-                catch (Exception e) { System.err.println(e); }
+                catch (Exception e) { System.err.println(e.getMessage()); }
             }
             else System.err.println("DropBoxSite.doPutFile: Can't get save mod time: " + json);
         }
@@ -367,11 +368,11 @@ public class DropBoxSite extends WebSite {
                     Date date = _fmt.parse(mod);
                     fileHeader.setLastModTime(date.getTime());
                 }
-                catch (Exception e) { System.err.println(e); }
+                catch (Exception e) { System.err.println(e.getMessage()); }
             }
         }
 
-        // Return FileHeader
+        // Return
         return fileHeader;
     }
 
@@ -398,7 +399,7 @@ public class DropBoxSite extends WebSite {
 
         // Add name and return
         path += emailName;
-        return path;
+        return APP_PREFIX + path;
     }
 
     /**
