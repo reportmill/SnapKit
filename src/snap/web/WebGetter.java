@@ -182,6 +182,10 @@ public class WebGetter {
         if (scheme.equals("http") || scheme.equals("https"))
             return new HTTPSite();
 
+        // Handle DirSite
+        if (!sitePath.isEmpty() && aSiteURL.getSite() != null)
+            return new DirSite();
+
         // Return site
         System.err.println("WebGetter: Site not found for " + aSiteURL);
         return null;
