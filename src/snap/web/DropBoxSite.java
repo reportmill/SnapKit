@@ -18,6 +18,9 @@ public class DropBoxSite extends WebSite {
     // The Site path
     private String  _sitePath;
 
+    // Shared instance
+    private static DropBoxSite _shared;
+
     // Constants for DropBox endpoints
     private static final String GET_METADATA = "https://api.dropboxapi.com/2/files/get_metadata";
     private static final String LIST_FOLDER = "https://api.dropboxapi.com/2/files/list_folder";
@@ -27,20 +30,33 @@ public class DropBoxSite extends WebSite {
     private static final String GET_CONTENT = "https://content.dropboxapi.com/2/files/download";
 
     // Header value
-    private static String _atok = "";
+    private static String _atok;
 
     // Date format
     private static DateFormat _fmt = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
 
     // Shared instances
-    private static Map<String,DropBoxSite> _dropBoxSites = new HashMap<>();
+    private static Map<String,WebSite> _dropBoxSites = new HashMap<>();
 
     // Default email
     private static String _defaultEmail;
 
     // Constants
-    private static String APP_PREFIX = "/Apps/SnapUsers";
+    private static final String DROPBOX_ROOT = "dbox://dbox.com";
+    private static final String APP_PREFIX = "/Apps/SnapUsers";
     private static final String DEFAULT_EMAIL = "DefaultDropBoxEmail";
+
+    /**
+     * Constructor.
+     */
+    private DropBoxSite()
+    {
+        super();
+
+        // Create/set URL
+        WebURL url = WebURL.getURL(DROPBOX_ROOT);
+        setURL(url);
+    }
 
     /**
      * Constructor.
@@ -52,7 +68,6 @@ public class DropBoxSite extends WebSite {
         _sitePath = getPathForEmail(anEmail);
 
         // Create/set URL
-        String DROPBOX_ROOT = "dbox://dbox.com";
         String urls = DROPBOX_ROOT + _sitePath;
         WebURL url = WebURL.getURL(urls);
         setURL(url);
@@ -92,15 +107,9 @@ public class DropBoxSite extends WebSite {
      */
     protected void doHead(WebRequest aReq, WebResponse aResp)
     {
-        // If no email, set response to not found
-        if (_email == null || _email.isEmpty()) {
-            aResp.setCode(WebResponse.NOT_FOUND);
-            return;
-        }
-
         // Create Request
         HTTPRequest httpReq = new HTTPRequest(GET_METADATA);
-        httpReq.addHeader("Authorization", "Bearer " + _atok);
+        httpReq.addHeader("Authorization", "Bearer " + getAccess());
         httpReq.addHeader("Content-Type", "application/json");
 
         // Add path param as JSON content
@@ -130,7 +139,7 @@ public class DropBoxSite extends WebSite {
     {
         // Create Request
         HTTPRequest httpRequest = new HTTPRequest(LIST_FOLDER);
-        httpRequest.addHeader("Authorization", "Bearer " + _atok);
+        httpRequest.addHeader("Authorization", "Bearer " + getAccess());
         httpRequest.addHeader("Content-Type", "application/json");
 
         // Add path param as JSON content
@@ -165,7 +174,7 @@ public class DropBoxSite extends WebSite {
 
         // Strip SitePath from FileHeaders
         for (FileHeader fileHeader : fileHeaders) {
-            String filePath = fileHeader.getPath().substring(_sitePath.length());
+            String filePath = fileHeader.getPath(); //.substring(_sitePath.length());
             fileHeader.setPath(filePath);
         }
 
@@ -180,7 +189,7 @@ public class DropBoxSite extends WebSite {
     {
         // Create Request
         HTTPRequest httpReq = new HTTPRequest(GET_CONTENT);
-        httpReq.addHeader("Authorization", "Bearer " + _atok);
+        httpReq.addHeader("Authorization", "Bearer " + getAccess());
 
         // Add path param as JSON header
         String dropBoxPath = getDropBoxPathForURL(aReq.getURL());
@@ -208,7 +217,7 @@ public class DropBoxSite extends WebSite {
     {
         // Create Request
         HTTPRequest httpReq = new HTTPRequest(UPLOAD);
-        httpReq.addHeader("Authorization", "Bearer " + _atok);
+        httpReq.addHeader("Authorization", "Bearer " + getAccess());
         httpReq.addHeader("Content-Type", "application/octet-stream");
 
         // Add path param as JSON header
@@ -249,7 +258,7 @@ public class DropBoxSite extends WebSite {
     {
         // Create Request
         HTTPRequest httpReq = new HTTPRequest(CREATE_FOLDER);
-        httpReq.addHeader("Authorization", "Bearer " + _atok);
+        httpReq.addHeader("Authorization", "Bearer " + getAccess());
         httpReq.addHeader("Content-Type", "application/json");
 
         // Add path param as JSON content
@@ -276,7 +285,7 @@ public class DropBoxSite extends WebSite {
     {
         // Create Request
         HTTPRequest httpReq = new HTTPRequest(DELETE);
-        httpReq.addHeader("Authorization", "Bearer " + _atok);
+        httpReq.addHeader("Authorization", "Bearer " + getAccess());
         httpReq.addHeader("Content-Type", "application/json");
 
         // Add path param as JSON content
@@ -293,7 +302,29 @@ public class DropBoxSite extends WebSite {
     private String getDropBoxPathForURL(WebURL aURL)
     {
         String filePath = aURL.getPath();
-        return _sitePath + (filePath.length() > 1 ? filePath : "");
+        return filePath; //_sitePath + (filePath.length() > 1 ? filePath : "");
+    }
+
+    /**
+     * Returns the access token.
+     */
+    private static String getAccess()
+    {
+        if (_atok != null) return _atok;
+
+        try {
+            HTTPRequest httpReq = new HTTPRequest("https://get-dbox.jeff-b76.workers.dev");
+            HTTPResponse httpResp = httpReq.getResponse();
+            if (httpResp == null || httpResp.getCode() != HTTPResponse.OK) {
+                System.err.println("DropBoxSite.putFile: " + (httpResp != null ? httpResp.getMessage() : "null"));
+                return null;
+            }
+
+            JSObject json = (JSObject) httpResp.getJSON();
+            return _atok = json.getStringValue("access_token");
+        }
+
+        catch (Exception e) { System.err.println(e.getMessage()); return null; }
     }
 
     /**
@@ -405,11 +436,11 @@ public class DropBoxSite extends WebSite {
     /**
      * Returns shared instance.
      */
-    public static DropBoxSite getSiteForEmail(String anEmail)
+    public static WebSite getSiteForEmail(String anEmail)
     {
         // Get cached dropbox for email
         String email = anEmail != null ? anEmail.toLowerCase() : null;
-        DropBoxSite dropBoxSite = _dropBoxSites.get(email);
+        WebSite dropBoxSite = _dropBoxSites.get(email);
         if (dropBoxSite != null || _atok == null)
             return dropBoxSite;
 
@@ -442,5 +473,41 @@ public class DropBoxSite extends WebSite {
 
         // Update Prefs
         Prefs.getDefaultPrefs().setValue(DEFAULT_EMAIL, _defaultEmail);
+    }
+
+    /**
+     * Returns the shared DropboxSite.
+     */
+    public static DropBoxSite getShared()
+    {
+        if (_shared != null) return _shared;
+        return _shared = new DropBoxSite();
+    }
+
+    /**
+     * Returns shared instance.
+     */
+    public static WebSite getSiteForUrl(WebURL siteUrl)
+    {
+        // Get cached dropbox for email
+        String siteUrlAddress = siteUrl.getString();
+        WebSite projectSite = _dropBoxSites.get(siteUrlAddress);
+        if (projectSite != null)
+            return projectSite;
+
+        // Get shared
+        DropBoxSite dropboxSite = getShared();
+
+        // Get project dir path and project dir
+        String projectDirPath = siteUrl.getPath();
+        WebFile projectDir = dropboxSite.createFileForPath(projectDirPath, true);
+
+        // Get dir as site
+        WebURL projectDirUrl = projectDir.getURL();
+        projectSite = projectDirUrl.getAsSite();
+
+        // Add to cache and return
+        _dropBoxSites.put(siteUrlAddress, projectSite);
+        return projectSite;
     }
 }

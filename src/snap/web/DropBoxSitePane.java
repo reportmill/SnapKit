@@ -71,7 +71,7 @@ public class DropBoxSitePane extends WebSitePaneX {
         if (anEvent.getView() == _userEmailText) {
             String userEmail = anEvent.getStringValue();
             DropBoxSite.setDefaultEmail(userEmail);
-            DropBoxSite newSite = DropBoxSite.getSiteForEmail(userEmail);
+            WebSite newSite = DropBoxSite.getSiteForEmail(userEmail);
             setSite(newSite);
         }
 
