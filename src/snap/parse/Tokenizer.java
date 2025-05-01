@@ -355,7 +355,7 @@ public class Tokenizer {
     /**
      * Returns list of Regex for a starting char.
      */
-    private Regex[] getRegexesForStartChar(char aChar)
+    protected Regex[] getRegexesForStartChar(char aChar)
     {
         // If LastToken is MultiLineComment, use special regexes
         if (_lastToken != null) {

@@ -116,7 +116,7 @@ public class ParseRule {
     /**
      * Sets the rule pattern if simple pattern.
      */
-    protected ParseRule setPattern(String anPattern)
+    public ParseRule setPattern(String anPattern)
     {
         _pattern = anPattern.intern();
         _op = Op.Pattern;

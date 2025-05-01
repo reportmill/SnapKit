@@ -4,6 +4,7 @@
 package snap.util;
 import snap.parse.*;
 import snap.web.*;
+import java.util.stream.Stream;
 
 /**
  * A JSONParser subclass (with handlers).
@@ -29,6 +30,7 @@ public class JSParser extends Parser {
         grammar.installHandlerForClass(PairHandler.class);
         grammar.installHandlerForClass(ArrayHandler.class);
         grammar.installHandlerForClass(ValueHandler.class);
+        grammar.installHandlerForClass(StringHandler.class);
     }
 
     /**
@@ -52,6 +54,12 @@ public class JSParser extends Parser {
         catch(Throwable e) { e.printStackTrace(); }
         return null;
     }
+
+    /**
+     * Override to return custom tokenizer to handle string.
+     */
+    @Override
+    protected Tokenizer createTokenizer()  { return new JSTokenizer(); }
 
     /**
      * Object Handler.
@@ -88,11 +96,8 @@ public class JSParser extends Parser {
             JSPair jsonPair = getPart();
 
             // Handle String
-            if (anId == "String") {
-                String key = aNode.getString();
-                key = key.substring(1, key.length()-1);
-                jsonPair._key = key;
-            }
+            if (anId == "String")
+                jsonPair._key = aNode.getCustomNode(String.class);
 
             // Handle Value
             else if (anId == "Value") {
@@ -140,27 +145,50 @@ public class JSParser extends Parser {
         /** ParseHandler method. */
         public void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle INT or Float
-            if (anId == "Int" || anId == "Float") {
-                try { _part = Double.valueOf(aNode.getString()); }
-                catch(Exception e) { _part = new java.math.BigDecimal(aNode.getString()); }
+            switch (anId) {
+
+                // Handle INT or Float
+                case "Int": case "Float":
+                    try { _part = Double.valueOf(aNode.getString()); }
+                    catch (Exception e) { _part = new java.math.BigDecimal(aNode.getString()); }
+                    break;
+
+                // Handle String
+                case "String": _part = aNode.getCustomNode(String.class); break;
+
+                // Handle Boolean
+                case "Boolean": _part = Boolean.valueOf(aNode.getString()); break;
+
+                // Handle Object or Array
+                case "Object": case "Array": _part = aNode.getCustomNode(); break;
             }
+        }
+    }
 
-            // Handle String: Get string, strip quotes, convert any escaped forward slash to forward slash
-            else if (anId == "String") {
-                String str = aNode.getString();
-                str = str.substring(1, str.length()-1);
-                str = str.replace("\\/", "/");
-                _part = str;
+    /**
+     * String Handler.
+     */
+    public static class StringHandler extends ParseHandler<String> {
+
+        /**
+         * ParseHandler method.
+         */
+        public void parsedOne(ParseNode aNode, String anId)
+        {
+            switch (anId) {
+
+                // Handle StringStart
+                case "StringStart": _part = ""; break;
+
+                // Handle StringMore: convert any escaped forward slash to forward slash
+                case "StringMore":
+                    String strMore = aNode.getString();
+                    if (!strMore.equals("\"")) {
+                        strMore = strMore.replace("\\/", "/");
+                        _part += strMore;
+                    }
+                    break;
             }
-
-            // Handle Boolean
-            else if (anId == "Boolean")
-                _part = Boolean.valueOf(aNode.getString());
-
-            // Handle Object or Array
-            else if (anId == "Object" || anId == "Array")
-                _part = aNode.getCustomNode();
         }
     }
 
@@ -168,5 +196,62 @@ public class JSParser extends Parser {
     {
         JSValue jnode = new JSParser().readSource(args[0]);
         System.out.println(jnode);
+    }
+
+    /**
+     * Custom tokenizer to handle string.
+     */
+    private static class JSTokenizer extends Tokenizer {
+
+        // String regexes
+        private Regex[] _stringRegexes;
+
+        // Constants
+        public static final String STRING_START = "StringStart";
+        public static final String STRING_MORE = "StringMore";
+        public static final String STRING_PATTERN = "\"";
+
+        /**
+         * Sets the regexes for given grammar.
+         */
+        public void setRegexesForGrammar(Grammar aGrammar)
+        {
+            // If no TextBlock rule, add it
+            aGrammar.getRuleForName(STRING_START).setPattern(STRING_PATTERN);
+            _stringRegexes = new Regex[2];
+            _stringRegexes[0] = new Regex(STRING_MORE, "(?s).*?(?=\"|\\z)");
+            _stringRegexes[1] = new Regex(STRING_MORE, STRING_PATTERN);
+
+            // Do normal
+            super.setRegexesForGrammar(aGrammar);
+        }
+
+        /**
+         * Sets the current tokenizer input.
+         */
+        @Override
+        public void setInput(CharSequence anInput)
+        {
+            super.setInput(anInput);
+            Stream.of(_stringRegexes).forEach(regex -> regex.getMatcher().reset(anInput));
+        }
+
+        /**
+         * Returns list of Regex for a starting char.
+         */
+        @Override
+        protected Regex[] getRegexesForStartChar(char aChar)
+        {
+            // If LastToken is MultiLineComment, use special regexes
+            ParseToken lastToken = getLastToken();
+            if (lastToken != null) {
+                String lastTokenName = lastToken.getName();
+                if (lastTokenName == STRING_START || lastTokenName == STRING_MORE && !lastToken.getPattern().equals(STRING_PATTERN))
+                    return _stringRegexes;
+            }
+
+            // Do normal version
+            return super.getRegexesForStartChar(aChar);
+        }
     }
 }

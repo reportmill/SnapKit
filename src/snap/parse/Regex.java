@@ -142,8 +142,11 @@ public class Regex {
      */
     private static boolean isLiteralPattern(String pattern)
     {
-        if (pattern.length() < 3)
+        if (pattern.length() < 3) {
+            if (pattern.equals("\\\""))
+                return false;
             return true;
+        }
         if (pattern.equals("\\s+") || pattern.equals("//.*") || pattern.contains(".+") || pattern.contains(".*"))
             return false;
         if (pattern.indexOf('[') < 0)

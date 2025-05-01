@@ -7,7 +7,11 @@ Array { "[" (Value ("," Value)*)? "]" }
 
 Value { String | Number | Object | Array | Boolean | Null }
 
-String { "\"(([^\"\\])|(\\([\"\\/bfnrt]|u[\da-fA-F]{4})))*\"" }
+String { StringStart StringMore+ }
+
+StringStart { "zzz" }
+
+StringMore { "zzz" }
 
 Number { Int | Float }
 
