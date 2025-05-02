@@ -182,6 +182,10 @@ public class WebGetter {
         if (scheme.equals("http") || scheme.equals("https"))
             return new HTTPSite();
 
+        // Handle Dropbox
+        if (scheme.equals("dbox") && sitePath.isEmpty())
+            return new DropboxSite();
+
         // Handle DirSite
         if (!sitePath.isEmpty() && aSiteURL.getSite() != null)
             return new DirSite();

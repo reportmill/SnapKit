@@ -574,16 +574,6 @@ public class FilePanel extends ViewOwner {
      */
     public static void addDefaultSite(WebSite aSite)
     {
-        // Get sites
-        WebSite[] defaultSites = getDefaultSites();
-
-        // Make sure we don't double-add DropBoxSite (fix this!)
-        if (aSite instanceof DropBoxSite) {
-            WebSite oldDropBoxSite = ArrayUtils.findMatch(defaultSites, site -> site instanceof DropBoxSite);
-            if (oldDropBoxSite != null)
-                removeDefaultSite(oldDropBoxSite);
-        }
-
         // Add site
         int index = aSite instanceof RecentFilesSite ? 0 : _defaultSites.length;
         _defaultSites = ArrayUtils.addId(_defaultSites, aSite, index);
@@ -607,8 +597,6 @@ public class FilePanel extends ViewOwner {
             return "Local Files";
         if (aSite instanceof RecentFilesSite)
             return "Recent Files";
-        if (aSite instanceof DropBoxSite)
-            return "Cloud Files";
         return "Files";
     }
 }

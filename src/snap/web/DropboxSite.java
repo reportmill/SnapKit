@@ -8,24 +8,18 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * A Class to work with DropBox.
+ * A Class to work with Dropbox.
  */
-public class DropBoxSite extends WebSite {
-
-    // Shared instance
-    private static DropBoxSite _shared;
+public class DropboxSite extends WebSite {
 
     // Header value
     private static String _atok;
 
-    // Shared instances
-    private static Map<String,WebSite> _dropBoxSites = new HashMap<>();
-
     // Constants
-    private static final String DROPBOX_ROOT = "dbox://dbox.com";
+    //private static final String DROPBOX_ROOT = "dbox://dbox.com";
     private static DateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
 
-    // Constants for DropBox endpoints
+    // Constants for Dropbox endpoints
     private static final String GET_METADATA = "https://api.dropboxapi.com/2/files/get_metadata";
     private static final String LIST_FOLDER = "https://api.dropboxapi.com/2/files/list_folder";
     private static final String CREATE_FOLDER = "https://api.dropboxapi.com/2/files/create_folder_v2";
@@ -36,13 +30,9 @@ public class DropBoxSite extends WebSite {
     /**
      * Constructor.
      */
-    private DropBoxSite()
+    public DropboxSite()
     {
         super();
-
-        // Create/set URL
-        WebURL url = WebURL.getURL(DROPBOX_ROOT);
-        setURL(url);
     }
 
     /**
@@ -105,7 +95,7 @@ public class DropBoxSite extends WebSite {
         // Get Entries Node, complain if not array
         JSValue entriesNode = jsonResp.getValue("entries");
         if (!(entriesNode instanceof JSArray)) {
-            aResp.setException(new Exception("DropBoxSite.doGetDir: Unexpected response: " + entriesNode.getValueAsString()));
+            aResp.setException(new Exception("DropboxSite.doGetDir: Unexpected response: " + entriesNode.getValueAsString()));
             return;
         }
 
@@ -169,7 +159,7 @@ public class DropBoxSite extends WebSite {
             if (lastModifiedDate != null)
                 aResp.setLastModTime(lastModifiedDate.getTime());
         }
-        else System.err.println("DropBoxSite.doPutFile: Can't get save mod time: " + jsonResp);
+        else System.err.println("DropboxSite.doPutFile: Can't get save mod time: " + jsonResp);
     }
 
     /**
@@ -222,7 +212,7 @@ public class DropBoxSite extends WebSite {
             HTTPRequest httpReq = new HTTPRequest("https://get-dbox.jeff-b76.workers.dev");
             HTTPResponse httpResp = httpReq.getResponse();
             if (httpResp == null || httpResp.getCode() != HTTPResponse.OK) {
-                System.err.println("DropBoxSite.getAccess: " + (httpResp != null ? httpResp.getMessage() : "null"));
+                System.err.println("DropboxSite.getAccess: " + (httpResp != null ? httpResp.getMessage() : "null"));
                 return null;
             }
 
@@ -278,7 +268,7 @@ public class DropBoxSite extends WebSite {
         // Get JSON response
         JSObject jsonResp = (JSObject) httpResp.getJSON();
         if (jsonResp == null)
-            aResp.setException(new Exception("DropBoxSite.getJsonResponse: null response"));
+            aResp.setException(new Exception("DropboxSite.getJsonResponse: null response"));
 
         // Return
         return jsonResp;
@@ -300,7 +290,7 @@ public class DropBoxSite extends WebSite {
     }
 
     /**
-     * Returns a FileHeader for DropBox File Entry JSONNode.
+     * Returns a FileHeader for Dropbox File Entry JSONNode.
      */
     private static FileHeader createFileHeaderForJSON(JSObject fileEntry)
     {
@@ -340,41 +330,5 @@ public class DropBoxSite extends WebSite {
     {
         try { return JSON_DATE_FORMAT.parse(dateString); }
         catch (Exception e) { System.err.println(e.getMessage()); return null; }
-    }
-
-    /**
-     * Returns the shared DropboxSite.
-     */
-    public static DropBoxSite getShared()
-    {
-        if (_shared != null) return _shared;
-        return _shared = new DropBoxSite();
-    }
-
-    /**
-     * Returns shared instance.
-     */
-    public static WebSite getSiteForUrl(WebURL siteUrl)
-    {
-        // Get cached dropbox for email
-        String siteUrlAddress = siteUrl.getString();
-        WebSite projectSite = _dropBoxSites.get(siteUrlAddress);
-        if (projectSite != null)
-            return projectSite;
-
-        // Get shared
-        DropBoxSite dropboxSite = getShared();
-
-        // Get project dir path and project dir
-        String projectDirPath = siteUrl.getPath();
-        WebFile projectDir = dropboxSite.createFileForPath(projectDirPath, true);
-
-        // Get dir as site
-        WebURL projectDirUrl = projectDir.getURL();
-        projectSite = projectDirUrl.getAsSite();
-
-        // Add to cache and return
-        _dropBoxSites.put(siteUrlAddress, projectSite);
-        return projectSite;
     }
 }
