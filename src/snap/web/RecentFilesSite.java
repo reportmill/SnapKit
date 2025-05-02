@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
+import java.util.*;
 
 /**
  * This WebSite manages recent files.
@@ -49,16 +50,17 @@ public class RecentFilesSite extends WebSite {
 
         // Get recent files
         WebFile[] recentFiles = RecentFiles.getFiles();
-        FileHeader[] fileHeaders = new FileHeader[recentFiles.length];
+        List<FileHeader> fileHeaders = new ArrayList<>(recentFiles.length);
 
         // Iterate over rootDir files and recent files and set each as link
         for (int i = 0; i < recentFiles.length; i++) {
             WebFile recentFile = recentFiles[i];
             WebURL recentFileURL = recentFile.getURL();
             String recentFilePath = "/RecentFile-" + i + "-" + recentFileURL.getFilename();
-            FileHeader fileHdr = fileHeaders[i] = new FileHeader(recentFilePath, recentFile.isDir());
+            FileHeader fileHdr = new FileHeader(recentFilePath, recentFile.isDir());
             fileHdr.setLastModTime(1000);
             fileHdr.setLinkUrl(recentFileURL);
+            fileHeaders.add(fileHdr);
         }
 
         // Set FileHeaders

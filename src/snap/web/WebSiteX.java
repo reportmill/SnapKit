@@ -1,4 +1,5 @@
 package snap.web;
+import java.util.List;
 
 /**
  * This WebSite subclass implements some conveniences.
@@ -47,7 +48,7 @@ public class WebSiteX extends WebSite {
 
         // Handle directory file contents
         else {
-            FileHeader[] fileHeaders = getFileHeadersForPath(filePath);
+            List<FileHeader> fileHeaders = getFileHeadersForPath(filePath);
             aResp.setFileHeaders(fileHeaders);
         }
     }
@@ -63,7 +64,7 @@ public class WebSiteX extends WebSite {
     /**
      * Returns FileHeaders for dir file path.
      */
-    protected FileHeader[] getFileHeadersForPath(String filePath)
+    protected List<FileHeader> getFileHeadersForPath(String filePath)
     {
         throw new RuntimeException("WebSite.getFileHeaderForPath: Not implemented");
     }

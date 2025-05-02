@@ -6,6 +6,9 @@ import snap.util.FilePathUtils;
 import snap.util.JSValue;
 import snap.util.JSParser;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * The response.
  */
@@ -39,7 +42,7 @@ public class WebResponse {
     private FileHeader  _fileHeader;
     
     // The response files (if directory get)
-    private FileHeader[]  _fileHeaders;
+    private List<FileHeader> _fileHeaders;
     
     // An exception if response represents an exception
     private Throwable  _exception;
@@ -216,12 +219,12 @@ public class WebResponse {
     /**
      * Returns the files (for directory request).
      */
-    public FileHeader[] getFileHeaders()  { return _fileHeaders; }
+    public List<FileHeader> getFileHeaders()  { return _fileHeaders; }
 
     /**
      * Sets the files (for directory request).
      */
-    public void setFileHeaders(FileHeader[] fileHeaders)
+    public void setFileHeaders(List<FileHeader> fileHeaders)
     {
         _fileHeaders = fileHeaders;
     }

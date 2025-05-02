@@ -205,7 +205,7 @@ public class ZipFileSite extends WebSite {
             }
 
             // Set file headers
-            aResp.setFileHeaders(fileHeaders.toArray(new FileHeader[0]));
+            aResp.setFileHeaders(fileHeaders);
         }
     }
 

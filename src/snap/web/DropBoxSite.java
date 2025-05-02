@@ -115,7 +115,7 @@ public class DropBoxSite extends WebSite {
 
         // Get file headers for JSON file entries and set in response
         List<FileHeader> fileHeaders = ListUtils.map(fileEntries, e -> createFileHeaderForJSON((JSObject) e));
-        aResp.setFileHeaders(fileHeaders.toArray(new FileHeader[0]));
+        aResp.setFileHeaders(fileHeaders);
     }
 
     /**

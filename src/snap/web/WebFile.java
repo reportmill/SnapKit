@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Represents a file from a WebSite.
@@ -388,13 +387,13 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         _lastModTime = Math.max(_lastModTime, resp.getLastModTime());
 
         // Get file headers
-        FileHeader[] fileHeaders = resp.getFileHeaders();
+        List<FileHeader> fileHeaders = resp.getFileHeaders();
         if (fileHeaders == null)
-            fileHeaders = new FileHeader[0];
+            fileHeaders = Collections.emptyList();
 
         // Get files sorted
         WebSite site = getSite();
-        List<WebFile> files = Stream.of(fileHeaders).map(fhdr -> site.getFileForFileHeader(fhdr))
+        List<WebFile> files = fileHeaders.stream().map(fhdr -> site.getFileForFileHeader(fhdr))
                 .sorted().collect(Collectors.toList());
 
         // Return
@@ -585,7 +584,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         /**
          * Saves the file.
          */
-        public void updateFile(WebFile aFile);
+        void updateFile(WebFile aFile);
     }
 
     /**
@@ -704,15 +703,6 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     public String toString()
     {
         return "WebFile: " + getUrlAddress() + (isDir() && !isRoot() ? "/" : "");
-    }
-
-    /**
-     * Returns a WebFile for given source.
-     */
-    public static WebFile getFileForSource(Object fileSource)
-    {
-        WebURL url = WebURL.getURL(fileSource);
-        return url != null ? url.getFile() : null;
     }
 
     /**

@@ -87,7 +87,7 @@ public class JRTSite extends WebSite {
         // Handle Get directory: configure directory info and return
         else {
             List<FileHeader> fileHeaders = getFileHeadersForUrlPath(filePath);
-            aResp.setFileHeaders(fileHeaders.toArray(new FileHeader[0]));
+            aResp.setFileHeaders(fileHeaders);
         }
     }
 

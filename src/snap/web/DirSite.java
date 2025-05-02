@@ -75,7 +75,7 @@ public class DirSite extends WebSite {
 
         // Otherwise, get/set dir FileHeaders
         List<WebFile> dirFiles = dirFile.getFiles();
-        FileHeader[] fileHeaders = ListUtils.mapToArray(dirFiles, file -> createFileHeaderForFile(filePath, file), FileHeader.class);
+        List<FileHeader> fileHeaders = ListUtils.map(dirFiles, file -> createFileHeaderForFile(filePath, file));
         aResp.setFileHeaders(fileHeaders);
     }
 

@@ -58,12 +58,9 @@ public class HTTPSite extends WebSite {
         // Set Bytes
         aResp.setBytes(httpResp.getBytes());
 
-        // If directory, configure directory info and return
+        // If directory, get directory file headers and set in response
         if (isdir) {
-            String path = url.getPath();
-            if (path.isEmpty())
-                path = "/";
-            FileHeader[] fileHeaders = getFileHeaders(path, httpResp.getBytes());
+            List<FileHeader> fileHeaders = getFileHeadersForDirResponse(aResp);
             aResp.setFileHeaders(fileHeaders);
         }
     }
@@ -88,69 +85,29 @@ public class HTTPSite extends WebSite {
     }
 
     /**
-     * Returns files at path.
+     * Returns directory file headers for directory file response.
      */
-    private FileHeader[] getFileHeaders(String aPath, byte[] bytes)
+    private List<FileHeader> getFileHeadersForDirResponse(WebResponse aResp)
     {
-        // Create files list
-        FileHeader[] fileFromHTML = getFilesFromHTMLBytes(aPath, bytes);
-        if (fileFromHTML != null)
-            return fileFromHTML;
+        // Get directory
+        String dirPath = aResp.getURL().getPath();
+        if (dirPath.isEmpty())
+            dirPath = "/";
 
-        // Gets files from html
-        List<FileHeader> files = new ArrayList<>();
+        // If response text is HTML file, return file headers
+        String respText = aResp.getText();
+        if (respText.contains("<HTML>"))
+            return getFileHeadersFromDirPathAndIndexHtmlText(dirPath, respText);
 
-        // If ".index" file exists, load children
-        String indexFilePath = FilePathUtils.getChildPath(aPath, ".index");
+        // Get ".index" file (just return if not found)
+        String indexFilePath = FilePathUtils.getChildPath(dirPath, ".index");
         WebFile indexFile = getFileForPath(indexFilePath);
-        if(indexFile != null) {
-            String indexFileString = StringUtils.getISOLatinString(indexFile.getBytes());
-            String[] fileEntries = indexFileString.split("\n");
-            for (String fileEntry : fileEntries) {
-                if (fileEntry.isEmpty())
-                    continue;
-                String[] fileInfo = fileEntry.split("\t");
-                String filePath = FilePathUtils.getChildPath(aPath, fileInfo[0]);
-                FileHeader file = new FileHeader(filePath, false);
-                files.add(file);
-            }
-        }
+        String indexFileText = indexFile != null ? indexFile.getText() : null;
+        if (indexFileText == null)
+            return Collections.emptyList();
 
-        // Return files
-        return files.toArray(new FileHeader[0]);
-    }
-
-    /**
-     * Returns files from HTML.
-     */
-    private FileHeader[] getFilesFromHTMLBytes(String aPath, byte[] bytes)
-    {
-        String text = new String(bytes);
-        int htmlTagIndex = text.indexOf("<HTML>");
-        if (htmlTagIndex < 0)
-            return null;
-        List<FileHeader> files = new ArrayList<>();
-
-        for (int i = text.indexOf("HREF=\"", htmlTagIndex); i > 0; i = text.indexOf("HREF=\"", i + 8)) {
-            int end = text.indexOf("\"", i+6);
-            if (end < 0)
-                continue;
-            String name = text.substring(i+6,end);
-            if (name.length() < 2 || !Character.isLetterOrDigit(name.charAt(0)))
-                continue;
-            boolean isDir = false;
-            if (name.endsWith("/")) {
-                isDir = true;
-                name = name.substring(0, name.length()-1);
-            }
-            String filePath = FilePathUtils.getChildPath(aPath, name);
-            FileHeader file = new FileHeader(filePath, isDir);
-            file.setLastModTime(System.currentTimeMillis());
-            files.add(file);
-        }
-
-        // Return array
-        return files.toArray(new FileHeader[0]);
+        // Return file headers for index file text
+        return getFileHeadersFromDirPathAndIndexText(dirPath, indexFileText);
     }
 
     /**
@@ -211,5 +168,57 @@ public class HTTPSite extends WebSite {
 
         // Return
         return localFile;
+    }
+
+    /**
+     * Returns file headers for directory path and HTML text.
+     */
+    private static List<FileHeader> getFileHeadersFromDirPathAndIndexHtmlText(String dirPath, String indexText)
+    {
+        int htmlTagIndex = indexText.indexOf("<HTML>");
+        List<FileHeader> fileHeaders = new ArrayList<>();
+
+        for (int i = indexText.indexOf("HREF=\"", htmlTagIndex); i > 0; i = indexText.indexOf("HREF=\"", i + 8)) {
+            int end = indexText.indexOf("\"", i+6);
+            if (end < 0)
+                continue;
+            String name = indexText.substring(i+6,end);
+            if (name.length() < 2 || !Character.isLetterOrDigit(name.charAt(0)))
+                continue;
+            boolean isDir = false;
+            if (name.endsWith("/")) {
+                isDir = true;
+                name = name.substring(0, name.length()-1);
+            }
+            String filePath = FilePathUtils.getChildPath(dirPath, name);
+            FileHeader file = new FileHeader(filePath, isDir);
+            file.setLastModTime(System.currentTimeMillis());
+            fileHeaders.add(file);
+        }
+
+        // Return
+        return fileHeaders;
+    }
+
+    /**
+     * Returns file headers for directory path and text.
+     */
+    private static List<FileHeader> getFileHeadersFromDirPathAndIndexText(String dirPath, String indexText)
+    {
+        String[] fileEntries = indexText.split("\n");
+        return ArrayUtils.mapNonNullToList(fileEntries, fileEntry -> createFileHeaderForDirPathAndIndexEntry(dirPath, fileEntry));
+    }
+
+    /**
+     * Converts a directory path + filename to a file header.
+     */
+    private static FileHeader createFileHeaderForDirPathAndIndexEntry(String dirPath, String indexEntry)
+    {
+        if (indexEntry.isEmpty())
+            return null;
+
+        String[] fileInfo = indexEntry.split("\t");
+        String filePath = FilePathUtils.getChildPath(dirPath, fileInfo[0]);
+        return new FileHeader(filePath, false);
     }
 }

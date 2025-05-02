@@ -4,6 +4,8 @@
 package snap.web;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import snap.util.*;
 
 /**
@@ -76,7 +78,7 @@ public class FileSite extends WebSite {
 
         // If directory, configure directory info and return
         else {
-            FileHeader[] fileHeaders = getFileHeadersForJavaFile(javaFile);
+            List<FileHeader> fileHeaders = getFileHeadersForJavaFile(javaFile);
             aResp.setFileHeaders(fileHeaders);
         }
     }
@@ -105,17 +107,17 @@ public class FileSite extends WebSite {
     /**
      * Returns the child file headers at given path.
      */
-    protected FileHeader[] getFileHeadersForJavaFile(File parentFile)
+    protected List<FileHeader> getFileHeadersForJavaFile(File parentFile)
     {
         // Get java file children (if null, just return)
         File[] dirFiles = parentFile.listFiles();
         if (dirFiles == null) {
             System.err.println("FileSite.getFileHeaders: error from list files for file: " + parentFile.getPath());
-            return new FileHeader[0];
+            return Collections.emptyList();
         }
 
         // Return file headers for files
-        return ArrayUtils.mapNonNull(dirFiles, file -> getFileHeaderForJavaFile(file), FileHeader.class);
+        return ArrayUtils.mapNonNullToList(dirFiles, file -> getFileHeaderForJavaFile(file));
     }
 
     /**
