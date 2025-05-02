@@ -47,6 +47,14 @@ public class HTTPResponse {
     public static final int NOT_FOUND = 404;
 
     /**
+     * Constructor.
+     */
+    public HTTPResponse()
+    {
+        super();
+    }
+
+    /**
      * Returns the response return code.
      */
     public int getCode()  { return _code; }
@@ -76,7 +84,7 @@ public class HTTPResponse {
      */
     public String getHeaderString()
     {
-        if (getHeaders().size() == 0)
+        if (getHeaders().isEmpty())
             return "";
         StringBuilder sb = new StringBuilder();
         for (Header header : getHeaders())
@@ -96,7 +104,7 @@ public class HTTPResponse {
     public String getCookieString()
     {
         // If none or one, just return
-        if (getCookies().size() == 0) return null;
+        if (getCookies().isEmpty()) return null;
         if (getCookies().size() == 1) return getCookies().get(0);
 
         // Add cookie strings joined
@@ -177,7 +185,7 @@ public class HTTPResponse {
             case UNAUTHORIZED: return "Unauthorized";
             case FORBIDDEN: return "Forbidden";
             case NOT_FOUND: return "NotFound";
-            default: return "Unknown code" + Integer.toString(aCode);
+            default: return "Unknown code" + aCode;
         }
     }
 

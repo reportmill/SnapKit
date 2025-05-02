@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
+import snap.util.ListUtils;
 import snap.util.SnapEnv;
 import snap.util.SnapUtils;
 import java.io.*;
@@ -86,6 +87,9 @@ public class HTTPRequest {
     public void addHeader(String aKey, String aValue)
     {
         if (_headers == null) _headers = new ArrayList<>();
+        Header header = ListUtils.findMatch(_headers, hdr -> hdr.key.equals(aKey));
+        if (header != null)
+            _headers.remove(header);
         _headers.add(new Header(aKey, aValue));
     }
 

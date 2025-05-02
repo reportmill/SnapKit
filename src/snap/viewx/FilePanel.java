@@ -499,8 +499,6 @@ public class FilePanel extends ViewOwner {
     {
         if (aSite instanceof RecentFilesSite)
             return new RecentFilesSitePane();
-        if (aSite instanceof DropBoxSite)
-            return new DropBoxSitePane();
         return new WebSitePaneX();
     }
 

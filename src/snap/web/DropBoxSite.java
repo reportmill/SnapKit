@@ -12,14 +12,18 @@ import java.util.*;
  */
 public class DropBoxSite extends WebSite {
 
-    // The Email for this DropBox
-    private String  _email;
-
-    // The Site path
-    private String  _sitePath;
-
     // Shared instance
     private static DropBoxSite _shared;
+
+    // Header value
+    private static String _atok;
+
+    // Shared instances
+    private static Map<String,WebSite> _dropBoxSites = new HashMap<>();
+
+    // Constants
+    private static final String DROPBOX_ROOT = "dbox://dbox.com";
+    private static DateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
 
     // Constants for DropBox endpoints
     private static final String GET_METADATA = "https://api.dropboxapi.com/2/files/get_metadata";
@@ -28,23 +32,6 @@ public class DropBoxSite extends WebSite {
     private static final String DELETE = "https://api.dropboxapi.com/2/files/delete_v2";
     private static final String UPLOAD = "https://content.dropboxapi.com/2/files/upload";
     private static final String GET_CONTENT = "https://content.dropboxapi.com/2/files/download";
-
-    // Header value
-    private static String _atok;
-
-    // Date format
-    private static DateFormat _fmt = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
-
-    // Shared instances
-    private static Map<String,WebSite> _dropBoxSites = new HashMap<>();
-
-    // Default email
-    private static String _defaultEmail;
-
-    // Constants
-    private static final String DROPBOX_ROOT = "dbox://dbox.com";
-    private static final String APP_PREFIX = "/Apps/SnapUsers";
-    private static final String DEFAULT_EMAIL = "DefaultDropBoxEmail";
 
     /**
      * Constructor.
@@ -57,26 +44,6 @@ public class DropBoxSite extends WebSite {
         WebURL url = WebURL.getURL(DROPBOX_ROOT);
         setURL(url);
     }
-
-    /**
-     * Constructor.
-     */
-    private DropBoxSite(String anEmail)
-    {
-        // Set ivars
-        _email = anEmail;
-        _sitePath = getPathForEmail(anEmail);
-
-        // Create/set URL
-        String urls = DROPBOX_ROOT + _sitePath;
-        WebURL url = WebURL.getURL(urls);
-        setURL(url);
-    }
-
-    /**
-     * Returns the DropBox email.
-     */
-    public String getEmail()  { return _email; }
 
     /**
      * Handles getting file info, contents or directory files.
@@ -107,28 +74,17 @@ public class DropBoxSite extends WebSite {
      */
     protected void doHead(WebRequest aReq, WebResponse aResp)
     {
-        // Create Request
-        HTTPRequest httpReq = new HTTPRequest(GET_METADATA);
-        httpReq.addHeader("Authorization", "Bearer " + getAccess());
-        httpReq.addHeader("Content-Type", "application/json");
+        // Create http request
+        HTTPRequest httpReq = createHttpRequestForEndpoint(GET_METADATA);
+        addParamsToRequestAsJsonBody(httpReq, "path", aReq.getFilePath());
 
-        // Add path param as JSON content
-        String dropBoxPath = getDropBoxPathForURL(aReq.getURL());
-        addParamsToRequestAsJSON(httpReq, false, "path", dropBoxPath);
-
-        // Get HTTP Response
-        HTTPResponse httpResp = getResponseHTTP(httpReq, aResp);
-        if (httpResp == null || httpResp.getCode() != HTTPResponse.OK)
+        // Get JSON response
+        JSObject jsonResp = getJsonResponse(httpReq, aResp);
+        if (jsonResp == null)
             return;
 
         // Get JSON response
-        JSObject json = (JSObject) httpResp.getJSON();
-        if (json == null)
-            return;
-
-        // Get JSON response
-        FileHeader fileHeader = createFileHeaderForJSON(json);
-        fileHeader.setPath(aReq.getURL().getPath());
+        FileHeader fileHeader = createFileHeaderForJSON(jsonResp);
         aResp.setFileHeader(fileHeader);
     }
 
@@ -137,48 +93,28 @@ public class DropBoxSite extends WebSite {
      */
     protected void doGetDir(WebRequest aReq, WebResponse aResp)
     {
-        // Create Request
-        HTTPRequest httpRequest = new HTTPRequest(LIST_FOLDER);
-        httpRequest.addHeader("Authorization", "Bearer " + getAccess());
-        httpRequest.addHeader("Content-Type", "application/json");
-
-        // Add path param as JSON content
-        String dropBoxPath = getDropBoxPathForURL(aReq.getURL());
-        addParamsToRequestAsJSON(httpRequest, false, "path", dropBoxPath);
-
-        // Get HTTP Response
-        HTTPResponse httpResp = getResponseHTTP(httpRequest, aResp);
-        if (httpResp == null || httpResp.getCode() != HTTPResponse.OK)
-            return;
+        // Create http request
+        HTTPRequest httpReq = createHttpRequestForEndpoint(LIST_FOLDER);
+        addParamsToRequestAsJsonBody(httpReq, "path", aReq.getFilePath());
 
         // Get JSON response
-        JSObject json = (JSObject) httpResp.getJSON();
-        if (json == null) {
-            System.err.println("DropBoxSite.doGetDir: null response");
+        JSObject jsonResp = getJsonResponse(httpReq, aResp);
+        if (jsonResp == null)
             return;
-        }
 
         // Get Entries Node, complain if not array
-        JSValue entriesNode = json.getValue("entries");
+        JSValue entriesNode = jsonResp.getValue("entries");
         if (!(entriesNode instanceof JSArray)) {
-            System.err.println("DropBoxSite.doGetDir: Unexpected response: " + entriesNode.getValueAsString());
+            aResp.setException(new Exception("DropBoxSite.doGetDir: Unexpected response: " + entriesNode.getValueAsString()));
             return;
         }
 
         // Get json for entries
-        JSArray entriesArray = (JSArray) json.getValue("entries");
-        List<JSValue> entryNodes = entriesArray.getValues();
+        JSArray fileEntriesArray = (JSArray) jsonResp.getValue("entries");
+        List<JSValue> fileEntries = fileEntriesArray.getValues();
 
-        // Get FileHeader List for json entries
-        List<FileHeader> fileHeaders = ListUtils.map(entryNodes, e -> createFileHeaderForJSON((JSObject) e));
-
-        // Strip SitePath from FileHeaders
-        for (FileHeader fileHeader : fileHeaders) {
-            String filePath = fileHeader.getPath(); //.substring(_sitePath.length());
-            fileHeader.setPath(filePath);
-        }
-
-        // Set FileHeaders
+        // Get file headers for JSON file entries and set in response
+        List<FileHeader> fileHeaders = ListUtils.map(fileEntries, e -> createFileHeaderForJSON((JSObject) e));
         aResp.setFileHeaders(fileHeaders.toArray(new FileHeader[0]));
     }
 
@@ -187,16 +123,13 @@ public class DropBoxSite extends WebSite {
      */
     protected void doGetFileContents(WebRequest aReq, WebResponse aResp)
     {
-        // Create Request
+        // Create http request
         HTTPRequest httpReq = new HTTPRequest(GET_CONTENT);
         httpReq.addHeader("Authorization", "Bearer " + getAccess());
-
-        // Add path param as JSON header
-        String dropBoxPath = getDropBoxPathForURL(aReq.getURL());
-        addParamsToRequestAsJSON(httpReq, true, "path", dropBoxPath);
+        addParamsToRequestAsJsonHeader(httpReq, "path", aReq.getFilePath());
 
         // Get response
-        getResponseHTTP(httpReq, aResp);
+        getHttpResponse(httpReq, aResp);
     }
 
     /**
@@ -215,40 +148,28 @@ public class DropBoxSite extends WebSite {
      */
     protected void doPutFile(WebRequest aReq, WebResponse aResp)
     {
-        // Create Request
-        HTTPRequest httpReq = new HTTPRequest(UPLOAD);
-        httpReq.addHeader("Authorization", "Bearer " + getAccess());
+        // Create http request
+        HTTPRequest httpReq = createHttpRequestForEndpoint(UPLOAD);
         httpReq.addHeader("Content-Type", "application/octet-stream");
-
-        // Add path param as JSON header
-        String dboxPath = getDropBoxPathForURL(aReq.getURL());
-        addParamsToRequestAsJSON(httpReq, true, "path", dboxPath, "mode", "overwrite");
+        addParamsToRequestAsJsonHeader(httpReq, "path", aReq.getFilePath(), "mode", "overwrite");
 
         // Add bytes
         byte[] bytes = aReq.getSendBytes();
         httpReq.setBytes(bytes);
 
-        // Get HTTP Response
-        HTTPResponse httpResp = getResponseHTTP(httpReq, aResp);
-        if (httpResp == null || httpResp.getCode() != HTTPResponse.OK) {
-            System.err.println("DropBoxSite.putFile: " + (httpResp != null ? httpResp.getMessage() : "null"));
-            return;
-        }
-
         // Get JSON response
-        JSObject json = (JSObject) httpResp.getJSON();
-        if (json != null) {
-            String mod = json.getStringValue("server_modified");
-            if (mod != null && mod.endsWith("Z")) {
-                try {
-                    Date date = _fmt.parse(mod);
-                    aResp.setLastModTime(date.getTime());
-                    System.out.println("Save ModTime: " + date);
-                }
-                catch (Exception e) { System.err.println(e.getMessage()); }
-            }
-            else System.err.println("DropBoxSite.doPutFile: Can't get save mod time: " + json);
+        JSObject jsonResp = getJsonResponse(httpReq, aResp);
+        if (jsonResp == null)
+            return;
+
+        // Get last modified date from JSON response and set in web response
+        String lastModifiedDateStr = jsonResp.getStringValue("server_modified");
+        if (lastModifiedDateStr != null && lastModifiedDateStr.endsWith("Z")) {
+            Date lastModifiedDate = parseJsonDateString(lastModifiedDateStr);
+            if (lastModifiedDate != null)
+                aResp.setLastModTime(lastModifiedDate.getTime());
         }
+        else System.err.println("DropBoxSite.doPutFile: Can't get save mod time: " + jsonResp);
     }
 
     /**
@@ -256,26 +177,14 @@ public class DropBoxSite extends WebSite {
      */
     protected void doPutDir(WebRequest aReq, WebResponse aResp)
     {
-        // Create Request
-        HTTPRequest httpReq = new HTTPRequest(CREATE_FOLDER);
-        httpReq.addHeader("Authorization", "Bearer " + getAccess());
-        httpReq.addHeader("Content-Type", "application/json");
-
-        // Add path param as JSON content
-        String dropBoxPath = getDropBoxPathForURL(aReq.getURL());
-        addParamsToRequestAsJSON(httpReq, false, "path", dropBoxPath);
-
-        // Get HTTP Response
-        HTTPResponse httpResp = getResponseHTTP(httpReq, aResp);
-        if (httpResp == null || httpResp.getCode() != HTTPResponse.OK) {
-            System.err.println("DropBoxSite.createFolder: " + (httpResp != null ? httpResp.getMessage() : "null"));
-            return;
-        }
+        // Create http request
+        HTTPRequest httpReq = createHttpRequestForEndpoint(CREATE_FOLDER);
+        addParamsToRequestAsJsonBody(httpReq, "path", aReq.getFilePath());
 
         // Get JSON response
-        JSValue json = httpResp.getJSON();
-        if (json!=null)
-            System.out.println(json);
+        JSObject jsonResp = getJsonResponse(httpReq, aResp);
+        if (jsonResp != null)
+            System.out.println(jsonResp);
     }
 
     /**
@@ -283,26 +192,23 @@ public class DropBoxSite extends WebSite {
      */
     protected void doDelete(WebRequest aReq, WebResponse aResp)
     {
-        // Create Request
-        HTTPRequest httpReq = new HTTPRequest(DELETE);
-        httpReq.addHeader("Authorization", "Bearer " + getAccess());
-        httpReq.addHeader("Content-Type", "application/json");
-
-        // Add path param as JSON content
-        String dropBoxPath = getDropBoxPathForURL(aReq.getURL());
-        addParamsToRequestAsJSON(httpReq, false, "path", dropBoxPath);
+        // Create http request
+        HTTPRequest httpReq = createHttpRequestForEndpoint(DELETE);
+        addParamsToRequestAsJsonBody(httpReq, "path", aReq.getFilePath());
 
         // Get response
-        getResponseHTTP(httpReq, aResp);
+        getHttpResponse(httpReq, aResp);
     }
 
     /**
-     * Returns the dropbox path for URL.
+     * Creates an HTTP request for given endpoint.
      */
-    private String getDropBoxPathForURL(WebURL aURL)
+    private static HTTPRequest createHttpRequestForEndpoint(String anEndpoint)
     {
-        String filePath = aURL.getPath();
-        return filePath; //_sitePath + (filePath.length() > 1 ? filePath : "");
+        HTTPRequest httpReq = new HTTPRequest(anEndpoint);
+        httpReq.addHeader("Authorization", "Bearer " + getAccess());
+        httpReq.addHeader("Content-Type", "application/json");
+        return httpReq;
     }
 
     /**
@@ -316,21 +222,21 @@ public class DropBoxSite extends WebSite {
             HTTPRequest httpReq = new HTTPRequest("https://get-dbox.jeff-b76.workers.dev");
             HTTPResponse httpResp = httpReq.getResponse();
             if (httpResp == null || httpResp.getCode() != HTTPResponse.OK) {
-                System.err.println("DropBoxSite.putFile: " + (httpResp != null ? httpResp.getMessage() : "null"));
+                System.err.println("DropBoxSite.getAccess: " + (httpResp != null ? httpResp.getMessage() : "null"));
                 return null;
             }
 
-            JSObject json = (JSObject) httpResp.getJSON();
-            return _atok = json.getStringValue("access_token");
+            JSObject jsonResp = (JSObject) httpResp.getJSON();
+            return _atok = jsonResp.getStringValue("access_token");
         }
 
         catch (Exception e) { System.err.println(e.getMessage()); return null; }
     }
 
     /**
-     * Adds a JSON Header to given HTTP Request.
+     * Adds parameters to http request as JSON Header.
      */
-    private static void addParamsToRequestAsJSON(HTTPRequest aReq, boolean asHeader, String ... thePairs)
+    private static void addParamsToRequestAsJsonHeader(HTTPRequest httpReq, String ... thePairs)
     {
         // Create JSON Request and add pairs
         JSObject jsonReq = new JSObject();
@@ -338,33 +244,55 @@ public class DropBoxSite extends WebSite {
             jsonReq.setNativeValue(thePairs[i], thePairs[i + 1]);
 
         // Add as header
-        if (asHeader) {
-            String jsonReqStr = jsonReq.toStringCompacted();
-            jsonReqStr = jsonReqStr.replace("\"", "\\\"");
-            jsonReqStr = jsonReqStr.replace("\\", "");
-            aReq.addHeader("Dropbox-API-Arg", jsonReqStr);
-        }
+        String jsonReqStr = jsonReq.toStringCompacted();
+        jsonReqStr = jsonReqStr.replace("\"", "\\\"");
+        jsonReqStr = jsonReqStr.replace("\\", "");
+        httpReq.addHeader("Dropbox-API-Arg", jsonReqStr);
+    }
+
+    /**
+     * Adds parameters to http request as JSON Body.
+     */
+    private static void addParamsToRequestAsJsonBody(HTTPRequest httpReq, String ... thePairs)
+    {
+        // Create JSON Request and add pairs
+        JSObject jsonReq = new JSObject();
+        for (int i = 0; i < thePairs.length; i += 2)
+            jsonReq.setNativeValue(thePairs[i], thePairs[i + 1]);
 
         // Add as send-bytes
-        else {
-            String jsonReqStr = jsonReq.toString();
-            aReq.setBytes(jsonReqStr.getBytes());
-        }
+        String jsonReqStr = jsonReq.toString();
+        httpReq.setBytes(jsonReqStr.getBytes());
+    }
+
+    /**
+     * Sends the HTTP request and loads results into WebResponse and returns the JSON response.
+     */
+    private static JSObject getJsonResponse(HTTPRequest httpReq, WebResponse aResp)
+    {
+        // Get HTTP Response
+        HTTPResponse httpResp = getHttpResponse(httpReq, aResp);
+        if (httpResp == null || httpResp.getCode() != HTTPResponse.OK)
+            return null;
+
+        // Get JSON response
+        JSObject jsonResp = (JSObject) httpResp.getJSON();
+        if (jsonResp == null)
+            aResp.setException(new Exception("DropBoxSite.getJsonResponse: null response"));
+
+        // Return
+        return jsonResp;
     }
 
     /**
      * Sends the HTTP request and loads results into WebResponse.
      */
-    private static HTTPResponse getResponseHTTP(HTTPRequest aReq, WebResponse aResp)
+    private static HTTPResponse getHttpResponse(HTTPRequest aReq, WebResponse aResp)
     {
         // Get response
         HTTPResponse httpResp;
         try { httpResp = aReq.getResponse(); }
-        catch (Exception e)
-        {
-            aResp.setException(e);
-            return null;
-        }
+        catch (Exception e) { aResp.setException(e); return null; }
 
         // Copy response
         aResp.copyResponse(httpResp);
@@ -374,11 +302,11 @@ public class DropBoxSite extends WebSite {
     /**
      * Returns a FileHeader for DropBox File Entry JSONNode.
      */
-    private static FileHeader createFileHeaderForJSON(JSObject aFileEntryNode)
+    private static FileHeader createFileHeaderForJSON(JSObject fileEntry)
     {
         // Get attributes
-        String filePath = aFileEntryNode.getStringValue("path_display");
-        String tag = aFileEntryNode.getStringValue(".tag");
+        String filePath = fileEntry.getStringValue("path_display");
+        String tag = fileEntry.getStringValue(".tag");
         boolean isFile = tag.equals("file");
 
         // Create FileHeader
@@ -388,18 +316,16 @@ public class DropBoxSite extends WebSite {
         if (isFile) {
 
             // Get/set size
-            String sizeStr = aFileEntryNode.getStringValue("size");
+            String sizeStr = fileEntry.getStringValue("size");
             long size = Long.parseLong(sizeStr);
             fileHeader.setSize(size);
 
-            // Get/set ModTime
-            String mod = aFileEntryNode.getStringValue("server_modified");
-            if (mod.endsWith("Z")) {
-                try {
-                    Date date = _fmt.parse(mod);
-                    fileHeader.setLastModTime(date.getTime());
-                }
-                catch (Exception e) { System.err.println(e.getMessage()); }
+            // Get/set last modified date
+            String lastModifiedDateStr = fileEntry.getStringValue("server_modified");
+            if (lastModifiedDateStr.endsWith("Z")) {
+                Date lastModifiedDate = parseJsonDateString(lastModifiedDateStr);
+                if (lastModifiedDate != null)
+                    fileHeader.setLastModTime(lastModifiedDate.getTime());
             }
         }
 
@@ -408,71 +334,12 @@ public class DropBoxSite extends WebSite {
     }
 
     /**
-     * Returns a path for email. E.G.: jack@abc.com = /com/abc/jack.
-     * We're storing files at DropBox in this format.
+     * Parses a string as a JSON formatted date.
      */
-    private String getPathForEmail(String anEmail)
+    private static Date parseJsonDateString(String dateString)
     {
-        // Get email name
-        int domainIndex = anEmail != null ? anEmail.indexOf('@') : -1;
-        if (domainIndex < 0)
-            return "unknown";
-        String emailName = anEmail.substring(0, domainIndex).replace('.', '_');
-
-        // Get email domain parts
-        String domainName = anEmail.substring(domainIndex + 1);
-        String[] dirs = domainName.split("\\.");
-
-        // Add domain parts
-        String path = "/";
-        for (int i = dirs.length - 1; i >= 0; i--)
-            path += dirs[i] + '/';
-
-        // Add name and return
-        path += emailName;
-        return APP_PREFIX + path;
-    }
-
-    /**
-     * Returns shared instance.
-     */
-    public static WebSite getSiteForEmail(String anEmail)
-    {
-        // Get cached dropbox for email
-        String email = anEmail != null ? anEmail.toLowerCase() : null;
-        WebSite dropBoxSite = _dropBoxSites.get(email);
-        if (dropBoxSite != null || _atok == null)
-            return dropBoxSite;
-
-        // Otherwise, create and set
-        //System.setProperty("javax.net.debug","all");
-        dropBoxSite = new DropBoxSite(anEmail);
-        _dropBoxSites.put(email, dropBoxSite);
-        return dropBoxSite;
-    }
-
-    /**
-     * Returns the default email.
-     */
-    public static String getDefaultEmail()
-    {
-        if (_defaultEmail != null) return _defaultEmail;
-        return _defaultEmail = Prefs.getDefaultPrefs().getString(DEFAULT_EMAIL);
-    }
-
-    /**
-     * Sets the default email.
-     */
-    public static void setDefaultEmail(String aString)
-    {
-        // If already set, just return
-        if (Objects.equals(aString, getDefaultEmail())) return;
-
-        // Set and clear RecentFiles
-        _defaultEmail = aString;
-
-        // Update Prefs
-        Prefs.getDefaultPrefs().setValue(DEFAULT_EMAIL, _defaultEmail);
+        try { return JSON_DATE_FORMAT.parse(dateString); }
+        catch (Exception e) { System.err.println(e.getMessage()); return null; }
     }
 
     /**
