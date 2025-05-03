@@ -136,8 +136,9 @@ public class HTTPRequest {
         URL url = getURL();
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-        // Some servers require a User-Agent header
-        connection.addRequestProperty("User-Agent", "Mozilla/5.0 (SnapKit)");
+        // Add User-Agent header because some servers need it (desktop only, browsers add automatically)
+        if (SnapEnv.isDesktop)
+            connection.addRequestProperty("User-Agent", "Mozilla/5.0 (SnapKit)");
 
         // Set request method
         String method = getMethod();
