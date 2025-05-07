@@ -174,7 +174,7 @@ public class DropboxSite extends WebSite {
         // Get JSON response
         JSObject jsonResp = getJsonResponse(httpReq, aResp);
         if (jsonResp != null)
-            System.out.println(jsonResp);
+            aResp.setLastModTime(System.currentTimeMillis()); //System.out.println(jsonResp);
     }
 
     /**
