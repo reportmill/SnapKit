@@ -491,6 +491,11 @@ public abstract class Image implements Loadable {
     /**
      * Creates image from URL and resource path.
      */
+    public static Image getImageForUrl(WebURL imageUrl)  { return GFXEnv.getEnv().getImageForSource(imageUrl); }
+
+    /**
+     * Creates image from URL and resource path.
+     */
     public static Image getImageForUrlResource(WebURL aBaseURL, String aName)
     {
         // If either param is null, just return
