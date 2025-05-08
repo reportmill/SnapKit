@@ -4,6 +4,7 @@
 package snap.props;
 import snap.util.ArrayUtils;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -212,10 +213,14 @@ public class PropArchiver {
                     assert (nodeValue instanceof PropNode[]);
                     PropNode[] relationNodeArray = (PropNode[]) nodeValue;
 
-                    // Create native array for prop
+                    // Create native list or array for prop
                     Class<?> nativeArrayClass = prop.getPropClass();
-                    Class<?> nativeCompClass = nativeArrayClass.getComponentType();
-                    nativeValue = Array.newInstance(nativeCompClass, relationNodeArray.length);
+                    if (List.class.isAssignableFrom(nativeArrayClass))
+                        nativeValue = new ArrayList<>(relationNodeArray.length);
+                    else {
+                        Class<?> nativeCompClass = nativeArrayClass.getComponentType();
+                        nativeValue = Array.newInstance(nativeCompClass, relationNodeArray.length);
+                    }
 
                     // Fill native array
                     for (int i = 0; i < relationNodeArray.length; i++) {
@@ -229,7 +234,9 @@ public class PropArchiver {
                             relationNative = ((PropObjectProxy<?>) relationNative).getReal();
 
                         // Set in nativeValue array
-                        Array.set(nativeValue, i, relationNative);
+                        if (nativeValue instanceof List)
+                            ((List<Object>) nativeValue).add(relationNative);
+                        else Array.set(nativeValue, i, relationNative);
                     }
                 }
 
