@@ -227,11 +227,6 @@ public class Explode extends View {
         double x1 = dX + dist * Math.sin(angle);
         double y1 = dY + dist * Math.cos(angle);
 
-        // Create random rotation and duration of piece
-        double rot = _rand.nextDouble() * 720 - 360;
-        int varTime = _runTime / 4;
-        int time = _runTime - varTime + _rand.nextInt(varTime);
-
         // Create new frag
         Frag frag = new Frag();
         frag.ix = aX;
@@ -240,8 +235,16 @@ public class Explode extends View {
         frag.y = frag.y0 = dY;
         frag.x1 = x1;
         frag.y1 = y1;
-        frag.rot1 = rot;
-        frag.time = time;
+
+        // Create random rotation and duration of piece
+        if (_iw > 4 || _ih > 4)
+            frag.rot1 = _rand.nextDouble() * 720 - 360;
+
+        // Create random duration of piece
+        int varTime = _runTime / 4;
+        frag.time = _runTime - varTime + _rand.nextInt(varTime);
+
+        // Return
         return frag;
     }
 

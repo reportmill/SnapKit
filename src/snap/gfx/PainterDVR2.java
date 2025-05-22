@@ -61,6 +61,7 @@ public class PainterDVR2 extends PainterImpl {
     public static final int GSAVE = 14;
     public static final int GRESTORE = 15;
     public static final int CLEAR_RECT = 16;
+    public static final int SET_IMAGE_QUALITY = 17;
 
     /**
      * Constructor.
@@ -361,6 +362,14 @@ public class PainterDVR2 extends PainterImpl {
         addDouble(aW); addDouble(aH);
     }
 
+    /** Sets image rendering quality. */
+    @Override
+    public void setImageQuality(double aValue)
+    {
+        addInstruction(SET_IMAGE_QUALITY);
+        addDouble(aValue);
+    }
+
     /** Override to forward to real painter. */
     public Props getProps()
     {
@@ -468,6 +477,7 @@ public class PainterDVR2 extends PainterImpl {
                     case SET_TRANSFORM: setTransform(); break;
                     case GSAVE: save(); break;
                     case GRESTORE: restore(); break;
+                    case SET_IMAGE_QUALITY: setImageQuality(); break;
                     default: System.out.println("Executor.exec: Unknown instruction"); break;
                 }
             }
@@ -593,6 +603,12 @@ public class PainterDVR2 extends PainterImpl {
         public void save()  { _painter.save(); }
 
         public void restore()  { _painter.restore(); }
+
+        public void setImageQuality()
+        {
+            double quality = getDouble();
+            _painter.setImageQuality(quality);
+        }
 
         public Transform getTransform()
         {
