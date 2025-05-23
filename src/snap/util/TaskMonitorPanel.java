@@ -90,14 +90,14 @@ public class TaskMonitorPanel extends TaskMonitor {
      * Override to register for showPanel check.
      */
     @Override
-    protected void setTasksTotal(int aValue)
+    protected void setTaskCount(int aValue)
     {
         // If going from zero to non-zero, trigger showPanel after delay
-        if (getTasksTotal() == 0 && aValue != 0)
+        if (getTaskCount() == 0 && aValue != 0)
             ViewUtils.runDelayed(this::checkForShowPanel, _delay);
 
         // Do normal version
-        super.setTasksTotal(aValue);
+        super.setTaskCount(aValue);
     }
 
     /**
@@ -209,9 +209,9 @@ public class TaskMonitorPanel extends TaskMonitor {
         {
             // Update ActivityLabel
             String taskTitle = getTaskTitle();
-            int tasksDone = getTasksDone() + 1;
-            int tasksTotal = getTasksTotal();
-            String activityText = String.format("%s (%d of %d)", taskTitle, tasksDone + 1, tasksTotal);
+            int taskNumber = getTaskIndex() + 1;
+            int taskCount = getTaskCount();
+            String activityText = String.format("%s (%d of %d)", taskTitle, taskNumber, taskCount);
             setViewValue(_activityLabel, activityText);
 
             // Update ProgressBar

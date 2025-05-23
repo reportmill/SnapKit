@@ -16,16 +16,16 @@ public class TaskMonitor extends PropObject {
     private String _title;
 
     // The total number of tasks
-    private int _tasksTotal;
+    private int _taskCount;
 
-    // The number of tasks completed
-    private int _tasksDone;
+    // The current of task index
+    private int _taskIndex;
 
     // The total number of task work units
-    private int _taskTotal;
+    private int _taskWorkUnitCount;
 
-    // The number of task work units completed
-    private int _taskDone;
+    // The current task work unit index
+    private int _taskWorkUnitIndex;
 
     // The current task title
     private String _taskTitle = "First Task";
@@ -47,11 +47,11 @@ public class TaskMonitor extends PropObject {
 
     // Constants for properties
     public static final String Title_Prop = "Title";
-    public static final String TasksTotal_Prop = "TasksTotal";
-    public static final String TasksDone_Prop = "TasksDone";
-    public static final String TaskTotal_Prop = "TaskTotal";
-    public static final String TaskDone_Prop = "TaskDone";
+    public static final String TaskCount_Prop = "TaskCount";
+    public static final String TaskIndex_Prop = "TaskIndex";
     public static final String TaskTitle_Prop = "TaskTitle";
+    public static final String TaskWorkUnitCount_Prop = "TaskWorkUnitCount";
+    public static final String TaskWorkUnitIndex_Prop = "TaskWorkUnitIndex";
     public static final String Cancelled_Prop = "Cancelled";
     public static final String Finished_Prop = "Finished";
 
@@ -98,57 +98,44 @@ public class TaskMonitor extends PropObject {
     /**
      * Returns the total number of tasks.
      */
-    public int getTasksTotal()  { return _tasksTotal; }
+    public int getTaskCount()  { return _taskCount; }
 
     /**
      * Sets the total number of tasks.
      */
-    protected void setTasksTotal(int aValue)
+    protected void setTaskCount(int aValue)
     {
-        if (aValue == _tasksTotal) return;
-        firePropChange(TasksTotal_Prop, _tasksTotal, _tasksTotal = aValue);
+        if (aValue == _taskCount) return;
+        firePropChange(TaskCount_Prop, _taskCount, _taskCount = aValue);
     }
 
     /**
-     * Returns the number of tasks done.
+     * Returns the current task index.
      */
-    public int getTasksDone()  { return _tasksDone; }
+    public int getTaskIndex()  { return _taskIndex; }
 
     /**
-     * Sets the number of tasks done.
+     * Sets the current task index.
      */
-    protected void setTasksDone(int aValue)
+    protected void setTaskIndex(int aValue)
     {
-        if (aValue == _tasksDone) return;
-        firePropChange(TasksDone_Prop, _tasksDone, _tasksDone = aValue);
+        if (aValue == _taskIndex) return;
+        _taskWorkUnitCount = 0;
+        firePropChange(TaskIndex_Prop, _taskIndex, _taskIndex = aValue);
     }
 
     /**
      * Returns the total number of task work units.
      */
-    public int getTaskTotal()  { return _taskTotal; }
+    public int getTaskWorkUnitCount()  { return _taskWorkUnitCount; }
 
     /**
      * Sets the total number of task work units.
      */
-    protected void setTaskTotal(int aValue)
+    protected void setTaskWorkUnitCount(int aValue)
     {
-        if (aValue == _taskTotal) return;
-        firePropChange(TaskTotal_Prop, _taskTotal, _taskTotal = aValue);
-    }
-
-    /**
-     * Returns the number of task work units completed.
-     */
-    public int getTaskDone()  { return _taskDone; }
-
-    /**
-     * Sets the number of task work units completed.
-     */
-    protected void setTaskDone(int aValue)
-    {
-        if (aValue == _taskDone) return;
-        firePropChange(TaskDone_Prop, _taskDone, _taskDone = aValue);
+        if (aValue == _taskWorkUnitCount) return;
+        firePropChange(TaskWorkUnitCount_Prop, _taskWorkUnitCount, _taskWorkUnitCount = aValue);
     }
 
     /**
@@ -166,25 +153,39 @@ public class TaskMonitor extends PropObject {
     }
 
     /**
+     * Returns the number of task work units completed.
+     */
+    public int getTaskWorkUnitIndex()  { return _taskWorkUnitIndex; }
+
+    /**
+     * Sets the number of task work units completed.
+     */
+    protected void setTaskWorkUnitIndex(int aValue)
+    {
+        if (aValue == _taskWorkUnitIndex) return;
+        firePropChange(TaskWorkUnitIndex_Prop, _taskWorkUnitIndex, _taskWorkUnitIndex = aValue);
+    }
+
+    /**
      * Advise the monitor of the total number of subtasks (invoke only once).
      */
-    public void startTasks(int aTaskCount)
+    public void startForTaskCount(int taskCount)
     {
-        setTasksTotal(aTaskCount);
+        setTaskCount(taskCount);
         if (_writer != null)
-            println("StartTasks: " + aTaskCount);
+            println("StartTasks: " + taskCount);
     }
     
     /**
      * Begin processing a single task.
      */
-    public void beginTask(String aTitle, int theTotalWork)
+    public void beginTask(String taskTitle, int workUnitCount)
     {
-        setTaskTitle(aTitle);
-        setTaskTotal(theTotalWork);
-        setTaskDone(0);
+        setTaskTitle(taskTitle);
+        setTaskWorkUnitCount(workUnitCount);
+        setTaskWorkUnitIndex(0);
         if (_writer != null) {
-            String msg = String.format("Begin task %d of %d: %s (%d parts)", _tasksDone + 1, _tasksTotal, aTitle, theTotalWork);
+            String msg = String.format("Begin task %d of %d: %s (%d parts)", _taskIndex + 1, _taskCount, taskTitle, workUnitCount);
             println(msg);
         }
     }
@@ -192,11 +193,11 @@ public class TaskMonitor extends PropObject {
     /**
      * Denote that some work units have been completed.
      */
-    public void updateTask(int theWorkDone)
+    public void updateTask(int workUnitsDone)
     {
-        setTaskDone(_taskDone + theWorkDone);
+        setTaskWorkUnitIndex(_taskWorkUnitIndex + workUnitsDone);
         if (_writer != null)
-            println("UpdateTask " + (_tasksDone + 1) + ": " + theWorkDone);
+            println("UpdateTask " + (_taskIndex + 1) + ": " + workUnitsDone);
     }
     
     /**
@@ -204,12 +205,11 @@ public class TaskMonitor extends PropObject {
      */
     public void endTask()
     {
-        setTasksDone(_tasksDone + 1);
-        setTaskDone(_taskTotal);
-        if (_tasksDone >= _taskTotal)
+        setTaskIndex(_taskIndex + 1);
+        if (_taskIndex >= _taskCount)
             setFinished(true);
         if (_writer != null)
-            println("EndTask " + _tasksDone);
+            println("EndTask " + _taskIndex);
     }
     
     /**
@@ -276,7 +276,20 @@ public class TaskMonitor extends PropObject {
     /**
      * Returns the task progress.
      */
-    public double getTaskProgress()  { return _taskDone / (double) _taskTotal; }
+    public double getTaskProgress()
+    {
+        if (getTaskCount() <= 0)
+            return -1;
+
+        // Get number of tasks done (including fraction of current task done)
+        double tasksDone = getTaskIndex();
+        if (_taskWorkUnitIndex > 0 && _taskWorkUnitCount > 0)
+            tasksDone += _taskWorkUnitIndex / (double) _taskWorkUnitCount;
+
+        // Return fraction of tasks done
+        double progress = tasksDone / getTaskCount();
+        return Math.max(0, Math.min(progress, 1));
+    }
 
     /**
      * Creates a monitor panel to show progress.
@@ -317,10 +330,10 @@ public class TaskMonitor extends PropObject {
 
         // Title, TasksTotal, TasksDone, TaskTotal, TaskDone, TaskTitle, Cancelled, Finished
         aPropSet.addPropNamed(Title_Prop, String.class, null);
-        aPropSet.addPropNamed(TasksTotal_Prop, int.class, 0);
-        aPropSet.addPropNamed(TasksDone_Prop, int.class, 0);
-        aPropSet.addPropNamed(TaskTotal_Prop, int.class, 0);
-        aPropSet.addPropNamed(TaskDone_Prop, int.class, 0);
+        aPropSet.addPropNamed(TaskCount_Prop, int.class, 0);
+        aPropSet.addPropNamed(TaskIndex_Prop, int.class, 0);
+        aPropSet.addPropNamed(TaskWorkUnitCount_Prop, int.class, 0);
+        aPropSet.addPropNamed(TaskWorkUnitIndex_Prop, int.class, 0);
         aPropSet.addPropNamed(TaskTitle_Prop, String.class, null);
         aPropSet.addPropNamed(Cancelled_Prop, boolean.class, false);
         aPropSet.addPropNamed(Finished_Prop, boolean.class, false);
@@ -336,10 +349,10 @@ public class TaskMonitor extends PropObject {
 
             // Title, TasksTotal, TasksDone, TaskTotal, TaskDone, TaskTitle, Cancelled, Finished
             case Title_Prop: return getTitle();
-            case TasksTotal_Prop: return getTasksTotal();
-            case TasksDone_Prop: return getTasksDone();
-            case TaskTotal_Prop: return getTaskTotal();
-            case TaskDone_Prop: return getTaskDone();
+            case TaskCount_Prop: return getTaskCount();
+            case TaskIndex_Prop: return getTaskIndex();
+            case TaskWorkUnitCount_Prop: return getTaskWorkUnitCount();
+            case TaskWorkUnitIndex_Prop: return getTaskWorkUnitIndex();
             case TaskTitle_Prop: return getTaskTitle();
             case Cancelled_Prop: return isCancelled();
             case Finished_Prop: return isFinished();
@@ -359,10 +372,10 @@ public class TaskMonitor extends PropObject {
 
             // Title, TasksTotal, TasksDone, TaskTotal, TaskDone, TaskTitle, Cancelled, Finished
             case Title_Prop: setTitle(Convert.stringValue(aValue)); break;
-            case TasksTotal_Prop: setTasksTotal(Convert.intValue(aValue)); break;
-            case TasksDone_Prop: setTasksDone(Convert.intValue(aValue)); break;
-            case TaskTotal_Prop: setTaskTotal(Convert.intValue(aValue)); break;
-            case TaskDone_Prop: setTaskDone(Convert.intValue(aValue)); break;
+            case TaskCount_Prop: setTaskCount(Convert.intValue(aValue)); break;
+            case TaskIndex_Prop: setTaskIndex(Convert.intValue(aValue)); break;
+            case TaskWorkUnitCount_Prop: setTaskWorkUnitCount(Convert.intValue(aValue)); break;
+            case TaskWorkUnitIndex_Prop: setTaskWorkUnitIndex(Convert.intValue(aValue)); break;
             case TaskTitle_Prop: setTaskTitle(Convert.stringValue(aValue)); break;
             case Cancelled_Prop: setCancelled(Convert.boolValue(aValue)); break;
             case Finished_Prop: setFinished(Convert.boolValue(aValue)); break;
