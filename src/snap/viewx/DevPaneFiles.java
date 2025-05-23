@@ -217,7 +217,7 @@ public class DevPaneFiles extends ViewOwner {
         selFile.delete();
         parent.resetAndVerify();
         setSelFile(parent);
-        _fileBrowser.updateItems(new WebFile[] { parent });
+        _fileBrowser.updateItem(parent);
     }
 
     /**

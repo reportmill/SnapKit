@@ -185,6 +185,32 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     }
 
     /**
+     * Called to update given item that may have changed.
+     */
+    public void updateItem(T theItems)
+    {
+        boolean found = false;
+
+        // Iterate over columns
+        for (BrowserCol<T> col : getCols()) {
+
+            // If item already found in previous column, update all items
+            if (found) {
+                col.updateItems();
+                continue;
+            }
+
+            // If item found in this column, update item and set found
+            if (col.getItems().contains(theItems)) {
+                col.updateItem(theItems);
+                if (!col.getSelItem().equals(theItems))
+                    return;
+                found = true;
+            }
+        }
+    }
+
+    /**
      * Called to update items that have changed.
      */
     public void updateItems(T[] theItems)
