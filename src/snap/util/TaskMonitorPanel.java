@@ -119,7 +119,7 @@ public class TaskMonitorPanel extends TaskMonitor {
     {
         super.setFinished(aValue);
         if (aValue)
-            ViewUtils.runLater(this::hide);
+            ViewUtils.runDelayed(this::hide, 500);
     }
 
     /**
@@ -190,7 +190,7 @@ public class TaskMonitorPanel extends TaskMonitor {
             titleLabel.setText(getTitle());
             _activityLabel = new Label();
             _progressBar = new ProgressBar();
-            _progressBar.setPrefWidth(360);
+            _progressBar.setPrefSize(360, 16);
 
             // Create main col view with UI
             ColView colView = new ColView();
@@ -216,7 +216,9 @@ public class TaskMonitorPanel extends TaskMonitor {
 
             // Update ProgressBar
             double taskProgress = getTaskProgress();
-            _progressBar.setProgress(taskProgress);
+            if (taskProgress > 0)
+                _progressBar.getAnimCleared(500).setValue(ProgressBar.Progress_Prop, taskProgress).play();
+            else _progressBar.setProgress(0);
         }
     }
 }

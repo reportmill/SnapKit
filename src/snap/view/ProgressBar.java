@@ -241,6 +241,10 @@ public class ProgressBar extends View {
         // Add properties for this subclass
         aPropSet.addPropNamed(Progress_Prop, double.class, 0);
         aPropSet.addPropNamed(Indeterminate_Prop, boolean.class, false);
+
+        // Override defaults
+        aPropSet.getPropForName(PrefWidth_Prop).setDefaultValue(120d);
+        aPropSet.getPropForName(PrefHeight_Prop).setDefaultValue(16d);
     }
 
     /**
