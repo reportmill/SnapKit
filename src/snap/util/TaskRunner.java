@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+import snap.props.PropObject;
 import snap.view.ViewUtils;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -9,7 +10,7 @@ import java.util.function.Consumer;
 /**
  * This class runs a task on a separate thread.
  */
-public class TaskRunner<T> {
+public class TaskRunner<T> extends PropObject {
 
     // The name of this runner
     private String _name = getClass().getSimpleName();
@@ -46,6 +47,9 @@ public class TaskRunner<T> {
 
     // Constants for status
     public enum Status { Idle, Running, Finished, Cancelled, Failed }
+
+    // Constants for properties
+    public static final String Status_Prop = "Status";
 
     /**
      * Constructor.
@@ -95,7 +99,7 @@ public class TaskRunner<T> {
     protected void setStatus(Status aStatus)
     {
         if (aStatus == _status) return;
-        _status = aStatus;
+        firePropChange(Status_Prop, _status, _status = aStatus);
     }
 
     /**
