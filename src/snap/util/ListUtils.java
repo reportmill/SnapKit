@@ -396,6 +396,16 @@ public class ListUtils {
     }
 
     /**
+     * Returns the count of number of items in array that match given predicate.
+     */
+    public static <T> int count(List<T> aList, Predicate<? super T> aPred)
+    {
+        int count = 0;
+        for (T item : aList) if (aPred.test(item)) count++;
+        return count;
+    }
+
+    /**
      * Returns the min value of a given list using given comparator function.
      */
     public static <T> T getMin(List<T> aList, Comparator<T> aComparator)
