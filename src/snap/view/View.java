@@ -3197,6 +3197,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (!isPropDefault(Font_Prop))
             e.add(Font_Prop, StringCodec.SHARED.codeString(getFont()));
 
+        // Archive TextColor
+        if (!isPropDefault(TextColor_Prop))
+            e.add(TextColor_Prop, StringCodec.SHARED.codeString(getTextColor()));
+
         // Archive GrowWidth, GrowHeight, LeanX, LeanY
         if (isGrowWidth())
             e.add(GrowWidth_Prop, true);
@@ -3331,6 +3335,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         XMLElement fontXML = anElement.getElement(Font_Prop);
         if (fontXML != null)
             setFont((Font) anArchiver.fromXML(fontXML, this));
+
+        // Unarchive TextColor
+        if (anElement.hasAttribute(TextColor_Prop))
+            setTextColor(Color.get(anElement.getAttributeValue(TextColor_Prop)));
 
         // Unarchive Disabled, Visible, Opacity
         if (anElement.hasAttribute(Disabled_Prop))
