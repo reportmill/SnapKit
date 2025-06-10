@@ -124,29 +124,6 @@ public class ListUtils {
     }
 
     /**
-     * Adds all object from second list to first list (creates first list if missing).
-     */
-    public static <T> void addAllUnique(List<T> aList, T... theObjects)
-    {
-        addAllUnique(aList, aList != null ? aList.size() : 0, theObjects);
-    }
-
-    /**
-     * Adds all object from second list to first list (creates first list if missing).
-     */
-    public static <T> void addAllUnique(List<T> aList, int anIndex, T... theObjects)
-    {
-        // If list is null, create it
-        if (aList == null) aList = new ArrayList<>();
-
-        // Add objects unique
-        for (T object : theObjects) {
-            if (!aList.contains(object))
-                aList.add(anIndex++, object);
-        }
-    }
-
-    /**
      * Removes the last object from given list.
      */
     public static <T> T removeLast(List<T> aList)
@@ -259,14 +236,6 @@ public class ListUtils {
         if (aList instanceof Vector)
             return (List<T>) ((Vector<T>) aList).clone();
         return aList != null ? new ArrayList<>(aList) : null;
-    }
-
-    /**
-     * Returns a list of derived items for given collection of original items.
-     */
-    public static <T> List<T> getFiltered(Collection<T> aList, Predicate<? super T> pred)
-    {
-        return aList.stream().filter(pred).collect(Collectors.toList());
     }
 
     /**
