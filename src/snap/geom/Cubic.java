@@ -9,18 +9,11 @@ public class Cubic extends Segment {
     public double cp0x, cp0y, cp1x, cp1y;
 
     /**
-     * Creates a new Cubic.
+     * Constructor.
      */
     public Cubic(double aX0, double aY0, double aXC0, double aYC0, double aXC1, double aYC1, double aX1, double aY1)
     {
-        x0 = aX0;
-        y0 = aY0;
-        cp0x = aXC0;
-        cp0y = aYC0;
-        cp1x = aXC1;
-        cp1y = aYC1;
-        x1 = aX1;
-        y1 = aY1;
+        x0 = aX0; y0 = aY0; cp0x = aXC0; cp0y = aYC0; cp1x = aXC1; cp1y = aYC1; x1 = aX1; y1 = aY1;
     }
 
     /**
@@ -37,14 +30,7 @@ public class Cubic extends Segment {
      */
     public void setPoints(double aX0, double aY0, double aXC0, double aYC0, double aXC1, double aYC1, double aX1, double aY1)
     {
-        x0 = aX0;
-        y0 = aY0;
-        cp0x = aXC0;
-        cp0y = aYC0;
-        cp1x = aXC1;
-        cp1y = aYC1;
-        x1 = aX1;
-        y1 = aY1;
+        x0 = aX0; y0 = aY0; cp0x = aXC0; cp0y = aYC0; cp1x = aXC1; cp1y = aYC1; x1 = aX1; y1 = aY1;
         shapeChanged();
     }
 
@@ -53,14 +39,8 @@ public class Cubic extends Segment {
      */
     public double[] getEndCoords(double[] coords)
     {
-        if (coords == null)
-            coords = new double[6];
-        coords[0] = cp1x;
-        coords[1] = cp1y;
-        coords[2] = cp1x;
-        coords[3] = cp1y;
-        coords[4] = x1;
-        coords[5] = y1;
+        if (coords == null) coords = new double[6];
+        coords[0] = cp1x; coords[1] = cp1y; coords[2] = cp1x; coords[3] = cp1y; coords[4] = x1; coords[5] = y1;
         return coords;
     }
 
@@ -89,31 +69,30 @@ public class Cubic extends Segment {
     }
 
     /**
-     * Returns the x value at given parametric location. p' = (1-t)^3*p0 + 3*t*(1-t)^2*p1 + 3*t^2*(1-t)*p2 + t^3*p3.
+     * Returns the X value at given parametric location using De Casteljau's algorithm.
+     * p' = (1-t)^3*p0 + 3*t*(1-t)^2*p1 + 3*t^2*(1-t)*p2 + t^3*p3.
      */
     public double getX(double aLoc)
     {
-        //double t=aLoc, s=1-t, s2 = s*s, s3 = s2*s, t2 = t*t, t3 = t2*t; return s3*x0 + 3*t*s2*xc0 + 3*t2*s*xc1 + t3*x1;
-        double nxc0 = average(x0, cp0x, aLoc);
-        double xca = average(cp0x, cp1x, aLoc);
-        double nxc1 = average(nxc0, xca, aLoc);
-        double nxc3 = average(cp1x, x1, aLoc);
-        double nxc2 = average(nxc3, xca, aLoc);
-        return average(nxc1, nxc2, aLoc);
+        double A = lerp(x0, cp0x, aLoc);
+        double B = lerp(cp0x, cp1x, aLoc);
+        double C = lerp(cp1x, x1, aLoc);
+        double D = lerp(A, B, aLoc);
+        double E = lerp(B, C, aLoc);
+        return lerp(D, E, aLoc);
     }
 
     /**
-     * Returns the y value at given parametric location. p' = (1-t)^3*p0 + 3*t*(1-t)^2*p1 + 3*t^2*(1-t)*p2 + t^3*p3.
+     * Returns the Y value at given parametric location using De Casteljau's algorithm.
      */
     public double getY(double aLoc)
     {
-        //double t=aLoc, s=1-t, s2 = s*s, s3 = s2*s, t2 = t*t, t3 = t2*t; return s3*y0 + 3*t*s2*yc0 + 3*t2*s*yc1 + t3*y1;
-        double nyc0 = average(y0, cp0y, aLoc);
-        double yca = average(cp0y, cp1y, aLoc);
-        double nyc1 = average(nyc0, yca, aLoc);
-        double nyc3 = average(cp1y, y1, aLoc);
-        double nyc2 = average(nyc3, yca, aLoc);
-        return average(nyc1, nyc2, aLoc);
+        double A = lerp(y0, cp0y, aLoc);
+        double B = lerp(cp0y, cp1y, aLoc);
+        double C = lerp(cp1y, y1, aLoc);
+        double D = lerp(A, B, aLoc);
+        double E = lerp(B, C, aLoc);
+        return lerp(D, E, aLoc);
     }
 
     /**
@@ -125,40 +104,31 @@ public class Cubic extends Segment {
             System.err.println("Cubic.split: illegal split location: " + aLoc);
 
         // Calculate new x control points to split cubic into two
-        double nxc0 = average(x0, cp0x, aLoc);
-        double xca = average(cp0x, cp1x, aLoc);
-        double nxc3 = average(cp1x, x1, aLoc);
-        double nxc1 = average(nxc0, xca, aLoc);
-        double nxc2 = average(xca, nxc3, aLoc);
-        double midpx = average(nxc1, nxc2, aLoc);
+        double AX = lerp(x0, cp0x, aLoc);
+        double BX = lerp(cp0x, cp1x, aLoc);
+        double CX = lerp(cp1x, x1, aLoc);
+        double DX = lerp(AX, BX, aLoc);
+        double EX = lerp(BX, CX, aLoc);
+        double FX = lerp(DX, EX, aLoc);
 
         // Calculate new y control points to split cubic into two
-        double nyc0 = average(y0, cp0y, aLoc);
-        double yca = average(cp0y, cp1y, aLoc);
-        double nyc3 = average(cp1y, y1, aLoc);
-        double nyc1 = average(nyc0, yca, aLoc);
-        double nyc2 = average(yca, nyc3, aLoc);
-        double midpy = average(nyc1, nyc2, aLoc);
+        double AY = lerp(y0, cp0y, aLoc);
+        double BY = lerp(cp0y, cp1y, aLoc);
+        double CY = lerp(cp1y, y1, aLoc);
+        double DY = lerp(AY, BY, aLoc);
+        double EY = lerp(BY, CY, aLoc);
+        double FY = lerp(DY, EY, aLoc);
 
         // Create new remainder shape, update this shape and return remainder
-        Cubic rem = new Cubic(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1);
-        cp0x = nxc0;
-        cp0y = nyc0;
-        cp1x = nxc1;
-        cp1y = nyc1;
-        x1 = midpx;
-        y1 = midpy;
-        shapeChanged();
+        Cubic rem = new Cubic(FX, FY, EX, EY, CX, CY, x1, y1);
+        setPoints(x0, y0, AX, AY, DX, DY, FX, FY);
         return rem;
     }
 
     /**
-     * Returns the weighted average of this point with another point.
+     * Returns the linear interpolation of given two values at given parametric value t.
      */
-    private static double average(double x0, double x1, double t)
-    {
-        return x0 + t * (x1 - x0);
-    }
+    private static double lerp(double p0, double p1, double t)  { return p0 + (p1 - p0) * t; }
 
     /**
      * Creates and returns the reverse of this segment.
@@ -389,22 +359,23 @@ public class Cubic extends Segment {
             return Line.getDistanceSquared(x0, y0, x1, y1, aX, aY);
 
         // Calculate new control points to split cubic into two
-        double nxc0 = (x0 + xc0) / 2;
-        double nyc0 = (y0 + yc0) / 2;
-        double xca = (xc0 + xc1) / 2;
-        double yca = (yc0 + yc1) / 2;
-        double nxc1 = (nxc0 + xca) / 2;
-        double nyc1 = (nyc0 + yca) / 2;
-        double nxc3 = (xc1 + x1) / 2;
-        double nyc3 = (yc1 + y1) / 2;
-        double nxc2 = (nxc3 + xca) / 2;
-        double nyc2 = (nyc3 + yca) / 2;
-        double midpx = (nxc1 + nxc2) / 2;
-        double midpy = (nyc1 + nyc2) / 2;
+        double AX = (x0 + xc0) / 2;
+        double BX = (xc0 + xc1) / 2;
+        double CX = (xc1 + x1) / 2;
+        double DX = (AX + BX) / 2;
+        double EX = (BX + CX) / 2;
+        double FX = (DX + EX) / 2;
+
+        double AY = (y0 + yc0) / 2;
+        double BY = (yc0 + yc1) / 2;
+        double CY = (yc1 + y1) / 2;
+        double DY = (AY + BY) / 2;
+        double EY = (BY + CY) / 2;
+        double FY = (DY + EY) / 2;
 
         // If either intersect, return true
-        double d1 = getDistanceSquared(x0, y0, nxc0, nyc0, nxc1, nyc1, midpx, midpy, aX, aY);
-        double d2 = getDistanceSquared(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1, aX, aY);
+        double d1 = getDistanceSquared(x0, y0, AX, AY, DX, DY, FX, FY, aX, aY);
+        double d2 = getDistanceSquared(FX, FY, EX, EY, CX, CY, x1, y1, aX, aY);
         return Math.min(d1, d2);
     }
 
