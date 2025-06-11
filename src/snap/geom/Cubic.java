@@ -1,4 +1,5 @@
 package snap.geom;
+import snap.util.FormatUtils;
 
 /**
  * A Segment representing a Cubic curve.
@@ -136,30 +137,6 @@ public class Cubic extends Segment {
     public Cubic createReverse()  { return new Cubic(x1, y1, cp1x, cp1y, cp0x, cp0y, x0, y0); }
 
     /**
-     * Standard equals implementation.
-     */
-    public boolean equals(Object anObj)
-    {
-        if (anObj == this) return true;
-        Cubic other = anObj instanceof Cubic ? (Cubic) anObj : null;
-        if (other == null) return false;
-        return equals(x0, other.x0) && equals(y0, other.y0) && equals(cp0x, other.cp0x) && equals(cp0y, other.cp0y) &&
-                equals(cp1x, other.cp1x) && equals(cp1y, other.cp1y) && equals(x1, other.x1) && equals(y1, other.y1);
-    }
-
-    /**
-     * Returns whether cubic is equal to another, regardless of direction.
-     */
-    public boolean matches(Object anObj)
-    {
-        if (equals(anObj)) return true;
-        Cubic other = anObj instanceof Cubic ? (Cubic) anObj : null;
-        if (other == null) return false;
-        return equals(x0, other.x1) && equals(y0, other.y1) && equals(cp0x, other.cp1x) && equals(cp0y, other.cp1y) &&
-                equals(cp1x, other.cp0x) && equals(cp1y, other.cp0y) && equals(x1, other.x0) && equals(y1, other.y0);
-    }
-
-    /**
      * Returns the hit for given segment.
      */
     public SegHit getHit(Segment aSeg)
@@ -176,6 +153,42 @@ public class Cubic extends Segment {
         }
 
         return SegHit.getHitCubicLine(x0, y0, cp0x, cp0y, cp1x, cp1y, x1, y1, aSeg.x0, aSeg.y0, aSeg.x1, aSeg.y1);
+    }
+
+    /**
+     * Returns whether cubic is equal to another, regardless of direction.
+     */
+    public boolean matches(Object anObj)
+    {
+        if (equals(anObj)) return true;
+        Cubic other = anObj instanceof Cubic ? (Cubic) anObj : null;
+        if (other == null) return false;
+        return equals(x0, other.x1) && equals(y0, other.y1) && equals(cp0x, other.cp1x) && equals(cp0y, other.cp1y) &&
+                equals(cp1x, other.cp0x) && equals(cp1y, other.cp0y) && equals(x1, other.x0) && equals(y1, other.y0);
+    }
+
+    /**
+     * Standard equals implementation.
+     */
+    public boolean equals(Object anObj)
+    {
+        if (anObj == this) return true;
+        Cubic other = anObj instanceof Cubic ? (Cubic) anObj : null;
+        if (other == null) return false;
+        return equals(x0, other.x0) && equals(y0, other.y0) && equals(cp0x, other.cp0x) && equals(cp0y, other.cp0y) &&
+                equals(cp1x, other.cp1x) && equals(cp1y, other.cp1y) && equals(x1, other.x1) && equals(y1, other.y1);
+    }
+
+    /**
+     * Standard toString implementation.
+     */
+    @Override
+    public String toString()
+    {
+        return String.format("Cubic { p0:(%s, %s), p1:(%s, %s), p2:(%s, %s), p3:(%s, %s) }",
+                FormatUtils.formatNum(x0), FormatUtils.formatNum(y0), FormatUtils.formatNum(cp0x),
+                FormatUtils.formatNum(cp0y), FormatUtils.formatNum(cp1x), FormatUtils.formatNum(cp1y),
+                FormatUtils.formatNum(x1), FormatUtils.formatNum(y1));
     }
 
     /**
