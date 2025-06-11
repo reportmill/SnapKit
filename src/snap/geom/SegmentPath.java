@@ -11,11 +11,8 @@ import java.util.*;
  */
 public class SegmentPath extends Shape {
     
-    // The original shape
-    private Shape _shape;
-    
     // The list of segments
-    private List<Segment> _segs = new ArrayList<>();
+    private List<Segment> _segs;
 
     /**
      * Constructor.
@@ -23,6 +20,7 @@ public class SegmentPath extends Shape {
     public SegmentPath()
     {
         super();
+        _segs = new ArrayList<>();
     }
 
     /**
@@ -30,8 +28,7 @@ public class SegmentPath extends Shape {
      */
     public SegmentPath(Shape aShape)
     {
-        super();
-        _shape = aShape;
+        this();
         appendShape(aShape);
     }
 
@@ -84,8 +81,12 @@ public class SegmentPath extends Shape {
      */
     public boolean contains(double aX, double aY)
     {
-        boolean c1 = containsEndPoint(aX, aY);
-        return c1 || _shape.contains(aX,aY);
+        // If given point is an endpoint, return true
+        if (containsEndPoint(aX, aY))
+            return true;
+
+        // Do normal version
+        return super.contains(aX, aY);
     }
 
     /**
@@ -372,11 +373,17 @@ public class SegmentPath extends Shape {
         }
 
         /** Returns whether this iter has another segment. */
-        public boolean hasNext()  { return _segIndex < _segs.length; }
+        public boolean hasNext()  { return _segIndex <= _segs.length; }
 
         /** Returns the next segment. */
         public Seg getNext(double[] coords)
         {
+            // If at end, return close
+            if (_segIndex == _segs.length) {
+                _segIndex++;
+                return close();
+            }
+
             Segment seg = _segs[_segIndex];
 
             // If last end point was last move point, add moveTo
