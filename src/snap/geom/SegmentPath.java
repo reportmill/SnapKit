@@ -251,7 +251,7 @@ public class SegmentPath extends Shape {
 
                     // Find intersection point for seg2 and split/add if inside
                     double hitPoint2 = seg2.getHitPoint(seg1);
-                    if (hitPoint2 > .001 && hitPoint2 < .999) {
+                    if (hitPoint2 > .01 && hitPoint2 < .99) {
                         Segment tail = seg2.split(hitPoint2);
                         addSeg(tail, j+1); segCount++;
                         didSplit = true;
@@ -259,7 +259,7 @@ public class SegmentPath extends Shape {
 
                     // Find intersection point for seg1 and split/add if inside
                     double hitPoint1 = seg1.getHitPoint(seg2);
-                    if (hitPoint1 > .001 && hitPoint1 < .999) {
+                    if (hitPoint1 > .01 && hitPoint1 < .99) {
                         Segment tail = seg1.split(hitPoint1);
                         addSeg(tail, i+1); segCount++;
                         didSplit = true;

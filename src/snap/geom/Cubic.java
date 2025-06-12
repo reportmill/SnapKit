@@ -448,36 +448,7 @@ public class Cubic extends Segment {
      */
     public static boolean isLine(double x0, double y0, double xc0, double yc0, double xc1, double yc1, double x1, double y1)
     {
-        //if (Point.getDistanceSquared(x0,y0,x1,y1)<.1) return true;
         return Line.getDistanceSquared(x0, y0, x1, y1, xc0, yc0) < .01 && Line.getDistanceSquared(x0, y0, x1, y1, xc1, yc1) < .01;
-    }
-
-    /**
-     * Returns whether Cubic for given points is intersected by line with given points.
-     */
-    public static boolean intersectsLine(double x0, double y0, double xc0, double yc0, double xc1, double yc1,
-                                         double x1, double y1, double px0, double py0, double px1, double py1)
-    {
-        return SegHit.getHitCubicLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, px0, py0, px1, py1) != null;
-    }
-
-    /**
-     * Returns whether Cubic for given points is intersected by line with given points.
-     */
-    public static boolean intersectsQuad(double x0, double y0, double xc0, double yc0, double xc1, double yc1,
-                                         double x1, double y1, double px0, double py0, double pxc0, double pyc0, double px1, double py1)
-    {
-        return SegHit.getHitCubicQuad(x0, y0, xc0, yc0, xc1, yc1, x1, y1, px0, py0, pxc0, pyc0, px1, py1) != null;
-    }
-
-    /**
-     * Returns whether Cubic for given points is intersected by Quad with given points.
-     */
-    public static boolean intersectsCubic(double x0, double y0, double xc0, double yc0, double xc1, double yc1,
-                                          double x1, double y1, double px0, double py0, double pxc0, double pyc0, double pxc1, double pyc1, double px1,
-                                          double py1)
-    {
-        return SegHit.getHitCubicCubic(x0, y0, xc0, yc0, xc1, yc1, x1, y1, px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1) != null;
     }
 
     /**

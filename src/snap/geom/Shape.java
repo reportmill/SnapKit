@@ -84,26 +84,29 @@ public abstract class Shape {
      */
     public boolean contains(double aX, double aY)
     {
+        // If point not in bounds, return false
         if (!getBounds().contains(aX, aY))
             return false;
-        int cross = getCrossings(aX, aY);
-        int mask = -1;
-        boolean contains = ((cross & mask) != 0);
-        return contains;
+
+        // If point definitely in shape, return true
+        int crossings = getCrossings(aX, aY);
+        if (crossings != 0)
+            return true;
+
+        // If point on edge, return true
+        return isOnEdge(aX, aY);
     }
 
     /**
      * Returns the number of crossings for the ray from given point extending to the right.
      */
-    public int getCrossings(double aX, double aY)
+    private int getCrossings(double aX, double aY)
     {
         // Get path iterator and declare iter vars
         PathIter pathIter = getPathIter(null);
         double[] points = new double[6];
-        double moveX = 0;
-        double moveY = 0;
-        double lineX = 0;
-        double lineY = 0;
+        double moveX = 0, moveY = 0;
+        double lineX = 0, lineY = 0;
         int cross = 0;
 
         // Iterate over path segments
@@ -111,8 +114,6 @@ public abstract class Shape {
             Seg seg = pathIter.getNext(points);
             switch (seg) {
                 case MoveTo:
-                    if (lineY != moveY)
-                        cross += Line.crossings(lineX, lineY, moveX, moveY, aX, aY);
                     lineX = moveX = points[0];
                     lineY = moveY = points[1];
                     break;
@@ -127,12 +128,55 @@ public abstract class Shape {
                             lineX = points[4], lineY = points[5], aX, aY, 0);
                     break;
                 case Close:
-                    if (lineY!=moveY)
+                    if (!Point.equals(moveX, moveY, lineX, lineY))
                         cross += Line.crossings(lineX, lineY, lineX = moveX, lineY = moveY, aX, aY);
                     break;
             }
         }
         return cross;
+    }
+
+    /**
+     * Returns the number of crossings for the ray from given point extending to the right.
+     */
+    private boolean isOnEdge(double aX, double aY)
+    {
+        // Get path iterator and declare iter vars
+        PathIter pathIter = getPathIter(null);
+        double[] points = new double[6];
+        double moveX = 0, moveY = 0;
+        double lineX = 0, lineY = 0;
+        double epsilon = 0.001;
+
+        // Iterate over path segments
+        while (pathIter.hasNext()) {
+            Seg seg = pathIter.getNext(points);
+            switch (seg) {
+                case MoveTo:
+                    lineX = moveX = points[0];
+                    lineY = moveY = points[1];
+                    break;
+                case LineTo:
+                    if (Line.getDistanceSquared(lineX, lineY, lineX = points[0], lineY = points[1], aX, aY) <= epsilon)
+                        return true;
+                    break;
+                case QuadTo:
+                    if (Quad.getDistanceSquared(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3], aX, aY) <= epsilon)
+                        return true;
+                    break;
+                case CubicTo:
+                    if (Cubic.getDistanceSquared(lineX, lineY, points[0], points[1], points[2], points[3],
+                            lineX = points[4], lineY = points[5], aX, aY) <= epsilon)
+                        return true;
+                    break;
+                case Close:
+                    if (!Point.equals(moveX, moveY, lineX, lineY))
+                        if (Line.getDistanceSquared(lineX, lineY, lineX = moveX, lineY = moveY, aX, aY) <= epsilon)
+                            return true;
+                    break;
+            }
+        }
+        return false;
     }
 
     /**
@@ -183,15 +227,13 @@ public abstract class Shape {
                         return false;
                     break;
                 case QuadTo:
-                    if (quad == null)
-                        quad = new Quad(0,0,0,0,0,0);
+                    if (quad == null) quad = new Quad(0,0,0,0,0,0);
                     quad.setPoints(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3]);
                     if (!containsSeg(quad))
                         return false;
                     break;
                 case CubicTo:
-                    if (cubic == null)
-                        cubic = new Cubic(0,0,0,0,0,0,0,0);
+                    if (cubic == null) cubic = new Cubic(0,0,0,0,0,0,0,0);
                     cubic.setPoints(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
                     if (!containsSeg(cubic))
                         return false;
@@ -263,15 +305,13 @@ public abstract class Shape {
                         return true;
                     break;
                 case QuadTo:
-                    if (quad == null)
-                        quad = new Quad(0,0,0,0,0,0);
+                    if (quad == null) quad = new Quad(0,0,0,0,0,0);
                     quad.setPoints(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3]);
                     if (intersectsSeg(quad))
                         return true;
                     break;
                 case CubicTo:
-                    if (cubic == null)
-                        cubic = new Cubic(0,0,0,0,0,0,0,0);
+                    if (cubic == null) cubic = new Cubic(0,0,0,0,0,0,0,0);
                     cubic.setPoints(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
                     if (intersectsSeg(cubic))
                         return true;
@@ -349,15 +389,13 @@ public abstract class Shape {
                         return true;
                     break;
                 case QuadTo:
-                    if (quad == null)
-                        quad = new Quad(0,0,0,0,0,0);
+                    if (quad == null) quad = new Quad(0,0,0,0,0,0);
                     quad.setPoints(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3]);
                     if (aSeg.crossesSeg(quad))
                         return true;
                     break;
                 case CubicTo:
-                    if (cubic == null)
-                        cubic = new Cubic(0,0,0,0,0,0,0,0);
+                    if (cubic == null) cubic = new Cubic(0,0,0,0,0,0,0,0);
                     cubic.setPoints(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
                     if (aSeg.crossesSeg(cubic))
                         return true;

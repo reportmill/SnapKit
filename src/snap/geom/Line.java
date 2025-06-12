@@ -226,13 +226,15 @@ public class Line extends Segment {
      */
     public static int crossings(double x0, double y0, double x1, double y1, double px, double py)
     {
-        if (py < y0 && py < y1) return 0;
-        if (py >= y0 && py >= y1) return 0;
-        if (px >= x0 && px >= x1) return 0;
-        if (px < x0 && px < x1) return y0 < y1 ? 1 : -1;
-        double xintercept = x0 + (py - y0) * (x1 - x0) / (y1 - y0);
-        if (px >= xintercept) return 0;
-        return y0 < y1 ? 1 : -1;
+        if (py >= y0)
+            return (py < y1 && isLeft(x0, y0, x1, y1, px, py) > 0) ? 1 : 0;
+        return (py >= y1 && isLeft(x0, y0, x1, y1, px, py) < 0) ? -1 : 0;
+    }
+
+    // Returns whether point is left (>0), on (=0), or right (<0) of the line from p0 to p1
+    private static double isLeft(double x0, double y0, double x1, double y1, double px, double py)
+    {
+        return (x1 - x0) * (py - y0) - (px - x0) * (y1 - y0);
     }
 
     /**
