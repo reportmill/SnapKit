@@ -502,7 +502,7 @@ public class PainterDVR2 extends PainterImpl {
 
             // Get line dash
             int dashArrayLen = getInt();
-            double[] dashArray = new double[dashArrayLen];
+            double[] dashArray = dashArrayLen > 0 ? new double[dashArrayLen] : null;
             for (int i = 0; i < dashArrayLen; i++)
                 dashArray[i] = getDouble();
 

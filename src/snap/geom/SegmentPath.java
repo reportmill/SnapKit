@@ -14,6 +14,9 @@ public class SegmentPath extends Shape {
     // The list of segments
     private List<Segment> _segs;
 
+    // The original shape, if set
+    private Shape _origShape;
+
     /**
      * Constructor.
      */
@@ -30,6 +33,7 @@ public class SegmentPath extends Shape {
     {
         this();
         appendShape(aShape);
+        _origShape = aShape;
     }
 
     /**
@@ -63,7 +67,7 @@ public class SegmentPath extends Shape {
         }
 
         _segs.add(anIndex, aSeg);
-        shapeChanged();
+        shapeChanged(); _origShape = null;
     }
 
     /**
@@ -72,7 +76,7 @@ public class SegmentPath extends Shape {
     public Segment removeSeg(int anIndex)
     {
         Segment seg = _segs.remove(anIndex);
-        shapeChanged();
+        shapeChanged(); _origShape = null;
         return seg;
     }
 
@@ -84,6 +88,10 @@ public class SegmentPath extends Shape {
         // If given point is an endpoint, return true
         if (containsEndPoint(aX, aY))
             return true;
+
+        // If original shape available, use it
+        if (_origShape != null)
+            return _origShape.contains(aX, aY);
 
         // Do normal version
         return super.contains(aX, aY);
@@ -373,17 +381,11 @@ public class SegmentPath extends Shape {
         }
 
         /** Returns whether this iter has another segment. */
-        public boolean hasNext()  { return _segIndex <= _segs.length; }
+        public boolean hasNext()  { return _segIndex < _segs.length; }
 
         /** Returns the next segment. */
         public Seg getNext(double[] coords)
         {
-            // If at end, return close
-            if (_segIndex == _segs.length) {
-                _segIndex++;
-                return close();
-            }
-
             Segment seg = _segs[_segIndex];
 
             // If last end point was last move point, add moveTo
@@ -396,7 +398,7 @@ public class SegmentPath extends Shape {
             // Handle Seg Line
             if (seg instanceof Line) {
                 Line line = (Line) seg;
-                if (_moveX == line.x1 && _moveY == line.y1)
+                if (Point.equals(_moveX, _moveY, line.x1, line.y1))
                     return close();
                 return lineTo(_lineX = line.x1, _lineY = line.y1, coords);
             }

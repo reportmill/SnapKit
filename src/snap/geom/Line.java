@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.geom;
+import snap.util.FormatUtils;
 import snap.util.MathUtils;
 
 /**
@@ -135,14 +136,19 @@ public class Line extends Segment {
     }
 
     /**
-     * Standard equals implementation.
+     * Returns the hit for given segment.
      */
-    public boolean equals(Object anObj)
+    public SegHit getHit(Segment aSeg)
     {
-        if (anObj == this) return true;
-        Line other = anObj instanceof Line ? (Line) anObj : null; if (other == null) return false;
-        return equals(x0, other.x0) && equals(y0, other.y0) &&
-                equals(x1, other.x1) && equals(y1, other.y1);
+        if (aSeg instanceof Cubic) {
+            Cubic s2 = (Cubic) aSeg;
+            return SegHit.getHitLineCubic(x0, y0, x1, y1, s2.x0, s2.y0, s2.cp0x, s2.cp0y, s2.cp1x, s2.cp1y, s2.x1, s2.y1);
+        }
+        if (aSeg instanceof Quad) {
+            Quad s2 = (Quad) aSeg;
+            return SegHit.getHitLineQuad(x0, y0, x1, y1, s2.x0, s2.y0, s2.cpx, s2.cpy, s2.x1, s2.y1);
+        }
+        return SegHit.getHitLineLine(x0, y0, x1, y1, aSeg.x0, aSeg.y0, aSeg.x1, aSeg.y1);
     }
 
     /**
@@ -157,19 +163,25 @@ public class Line extends Segment {
     }
 
     /**
-     * Returns the hit for given segment.
+     * Standard equals implementation.
      */
-    public SegHit getHit(Segment aSeg)
+    @Override
+    public boolean equals(Object anObj)
     {
-        if (aSeg instanceof Cubic) {
-            Cubic s2 = (Cubic) aSeg;
-            return SegHit.getHitLineCubic(x0, y0, x1, y1, s2.x0, s2.y0, s2.cp0x, s2.cp0y, s2.cp1x, s2.cp1y, s2.x1, s2.y1);
-        }
-        if (aSeg instanceof Quad) {
-            Quad s2 = (Quad) aSeg;
-            return SegHit.getHitLineQuad(x0, y0, x1, y1, s2.x0, s2.y0, s2.cpx, s2.cpy, s2.x1, s2.y1);
-        }
-        return SegHit.getHitLineLine(x0, y0, x1, y1, aSeg.x0, aSeg.y0, aSeg.x1, aSeg.y1);
+        if (anObj == this) return true;
+        Line other = anObj instanceof Line ? (Line) anObj : null; if (other == null) return false;
+        return equals(x0, other.x0) && equals(y0, other.y0) &&
+                equals(x1, other.x1) && equals(y1, other.y1);
+    }
+
+    /**
+     * Standard toString implementation.
+     */
+    @Override
+    public String toString()
+    {
+        return String.format("Line { p0:(%s, %s), p1:(%s, %s) }", FormatUtils.formatNum(x0), FormatUtils.formatNum(y0),
+                FormatUtils.formatNum(x1), FormatUtils.formatNum(y1));
     }
 
     /**
