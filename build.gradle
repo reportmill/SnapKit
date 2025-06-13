@@ -22,6 +22,10 @@ repositories {
 dependencies {
 }
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-parameters"
+}
+
 tasks.publish.doFirst() {
     def user = System.getenv("GITHUB_USER")
     def pw = System.getenv("GITHUB_TOKEN")
