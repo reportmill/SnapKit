@@ -385,6 +385,13 @@ public class DialogBox extends FormBuilder {
         window.setType(WindowView.TYPE_UTILITY);
         window.setModal(true);
 
+        // Make sure UI fits
+        View rootView = window.getRootView();
+        if (rootView.getPrefWidth() + 20 > GFXEnv.getEnv().getScreenBoundsInset().getWidth())
+            rootView.setMaxWidth(GFXEnv.getEnv().getScreenBoundsInset().getWidth() - 20);
+        if (rootView.getPrefHeight() + 40 > GFXEnv.getEnv().getScreenBoundsInset().getHeight())
+            rootView.setMaxHeight(GFXEnv.getEnv().getScreenBoundsInset().getHeight() - 40);
+
         // Make sure stage and Builder.FirstFocus are focused
         runLater(() -> notifyDidShow());
 
