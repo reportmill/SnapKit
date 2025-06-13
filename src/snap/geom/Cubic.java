@@ -448,7 +448,7 @@ public class Cubic extends Segment {
      */
     public static boolean isLine(double x0, double y0, double xc0, double yc0, double xc1, double yc1, double x1, double y1)
     {
-        return Line.getDistanceSquared(x0, y0, x1, y1, xc0, yc0) < .01 && Line.getDistanceSquared(x0, y0, x1, y1, xc1, yc1) < .01;
+        return Line.getDistanceSquared(x0, y0, x1, y1, xc0, yc0) < .00001 && Line.getDistanceSquared(x0, y0, x1, y1, xc1, yc1) < .00001;
     }
 
     /**

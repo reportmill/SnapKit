@@ -185,12 +185,11 @@ public class SegmentPath extends Shape {
             for (int j = i + 1; j < segCount; j++) { Segment seg2 = getSeg(j);
 
                 // If segments intersect somewhere not on an end-point, return true
-                if (seg1.intersectsSeg(seg2)) {
-                    double hitPoint2 = seg2.getHitPoint(seg1);
-                    if (hitPoint2 > .001 && hitPoint2 < .999)
+                SegHit segHit = seg1.getHit(seg2);
+                if (segHit != null) {
+                    if (segHit.h0 > .000001 && segHit.h0 < .999999)
                         return true;
-                    double hitPoint1 = seg1.getHitPoint(seg2);
-                    if (hitPoint1 > .001 && hitPoint1 < .999)
+                    if (segHit.h1 > .000001 && segHit.h1 < .999999)
                         return true;
                 }
             }
@@ -247,19 +246,20 @@ public class SegmentPath extends Shape {
             for (int j = i + 1; j < segCount; j++) { Segment seg2 = getSeg(j);
 
                 // If segments intersect
-                if (seg1.intersectsSeg(seg2)) {
+                SegHit segHit = seg1.getHit(seg2);
+                if (segHit != null) {
 
                     // Find intersection point for seg2 and split/add if inside
-                    double hitPoint2 = seg2.getHitPoint(seg1);
-                    if (hitPoint2 > .01 && hitPoint2 < .99) {
+                    double hitPoint2 = segHit.h1;
+                    if (hitPoint2 > .000001 && hitPoint2 < .999999) {
                         Segment tail = seg2.split(hitPoint2);
                         addSeg(tail, j+1); segCount++;
                         didSplit = true;
                     }
 
                     // Find intersection point for seg1 and split/add if inside
-                    double hitPoint1 = seg1.getHitPoint(seg2);
-                    if (hitPoint1 > .01 && hitPoint1 < .99) {
+                    double hitPoint1 = segHit.h0;
+                    if (hitPoint1 > .000001 && hitPoint1 < .999999) {
                         Segment tail = seg1.split(hitPoint1);
                         addSeg(tail, i+1); segCount++;
                         didSplit = true;
@@ -285,19 +285,20 @@ public class SegmentPath extends Shape {
             for (int j = 0; j < setCount2; j++) { Segment seg2 = aSegmentPath.getSeg(j);
 
                 // If segments intersect
-                if (seg1.intersectsSeg(seg2)) {
+                SegHit segHit = seg1.getHit(seg2);
+                if (segHit != null) {
 
                     // Find intersection point for seg1 and split/add if inside
-                    double hp1 = seg1.getHitPoint(seg2);
-                    if (hp1 > .001 && hp1 < .999) {
+                    double hp1 = segHit.h0;
+                    if (hp1 > .000001 && hp1 < .999999) {
                         Segment tail = seg1.split(hp1);
                         addSeg(tail, i + 1);
                         segCount1++;
                     }
 
                     // Find intersection point for seg2 and split/add if inside
-                    double hp2 = seg2.getHitPoint(seg1);
-                    if (hp2 > .001 && hp2 < .999) {
+                    double hp2 = segHit.h1;
+                    if (hp2 > .000001 && hp2 < .999999) {
                         Segment tail = seg2.split(hp2);
                         aSegmentPath.addSeg(tail, j + 1);
                         setCount2++;
@@ -394,6 +395,12 @@ public class SegmentPath extends Shape {
                 return moveTo(_moveX = seg.x0, _moveY = seg.y0, coords);
             }
             _segIndex++;
+
+            // Make sure last segment closes path
+            if (_segIndex == _segs.length) {
+                seg.x1 = _moveX;
+                seg.y1 = _moveY;
+            }
 
             // Handle Seg Line
             if (seg instanceof Line) {

@@ -287,25 +287,7 @@ public class Quad extends Segment {
      */
     public static boolean isLine(double x0, double y0, double xc0, double yc0, double x1, double y1)
     {
-        return Line.getDistanceSquared(x0,y0,x1,y1,xc0,yc0)<.01;
-    }
-
-    /**
-     * Returns whether Quad for given points is intersected by line with given points.
-     */
-    public static boolean intersectsLine(double x0, double y0, double xc0, double yc0, double x1, double y1,
-        double px0, double py0, double px1, double py1)
-    {
-        return SegHit.getHitQuadLine(x0, y0, xc0, yc0, x1, y1, px0, py0, px1, py1)!=null;
-    }
-
-    /**
-     * Returns whether Quad for given points is intersected by Quad with given points.
-     */
-    public static boolean intersectsQuad(double x0, double y0, double xc0, double yc0, double x1, double y1,
-        double px0, double py0, double pxc0, double pyc0, double px1, double py1)
-    {
-        return SegHit.getHitQuadQuad(x0, y0, xc0, yc0, x1, y1, px0, py0, pxc0, pyc0, px1, py1)!=null;
+        return Line.getDistanceSquared(x0, y0, x1, y1, xc0, yc0) < .00001;
     }
 
     /**
