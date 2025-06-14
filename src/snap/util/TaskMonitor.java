@@ -205,6 +205,7 @@ public class TaskMonitor extends PropObject {
      */
     public void endTask()
     {
+        _taskWorkUnitIndex = 0;
         setTaskIndex(_taskIndex + 1);
         if (_taskIndex >= _taskCount)
             setFinished(true);
