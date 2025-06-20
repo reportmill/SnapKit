@@ -305,6 +305,7 @@ public class TaskRunner<T> extends PropObject {
                 _monitor.setCancelled(true);
             if (_failureHandler != null)
                 _failureHandler.accept(_exception);
+            else _exception.printStackTrace();
         }
 
         // Call finished
