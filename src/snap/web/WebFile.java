@@ -3,10 +3,7 @@
  */
 package snap.web;
 import snap.props.PropObject;
-import snap.util.ArrayUtils;
-import snap.util.FilePathUtils;
-import snap.util.FileUtils;
-import snap.util.StringUtils;
+import snap.util.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -451,6 +448,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
 
         // Cache current LastModTime
         long oldLastModTime = getLastModTime();
+        int dirFileCount = _dir && _files != null ? _files.size() : -1;
 
         // Reset file
         reset();
@@ -467,6 +465,10 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         else {
             long newLastModTime = getLastModTime();
             if (oldLastModTime != newLastModTime)
+                firePropChange(LastModTime_Prop, oldLastModTime, newLastModTime);
+
+            // Hack for WebVM lack of support for directory LastModTime updating - hopefully remote soon !!!
+            else if (SnapEnv.isWebVM && dirFileCount >= 0 && dirFileCount != getFileCount())
                 firePropChange(LastModTime_Prop, oldLastModTime, newLastModTime);
         }
     }
