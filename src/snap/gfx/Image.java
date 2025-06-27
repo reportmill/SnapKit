@@ -259,6 +259,18 @@ public abstract class Image implements Loadable {
     public abstract int getRGB(int aX, int aY);
 
     /**
+     * Sets an RGB integer for given x, y.
+     */
+    public void setRGB(int aX, int aY, int rgb)
+    {
+        Painter pntr = getPainter();
+        pntr.setComposite(Painter.Composite.SRC_IN);
+        pntr.setColor(new Color(rgb));
+        pntr.fillRect(aX, aY, 1, 1);
+        pntr.setComposite(Painter.Composite.SRC_OVER);
+    }
+
+    /**
      * Returns the decoded RGB bytes of this image.
      */
     public byte[] getBytesRGB()

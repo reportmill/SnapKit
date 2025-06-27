@@ -93,6 +93,14 @@ public class J2DImage extends Image {
     public int getRGB(int aX, int aY)  { return getNative().getRGB(aX, aY); }
 
     /**
+     * Sets an RGB integer for given x, y.
+     */
+    public void setRGB(int aX, int aY, int rgb)
+    {
+        getNative().setRGB(aX, aY, rgb);
+    }
+
+    /**
      * Returns the decoded RGB bytes of this image.
      */
     protected byte[] getBytesRGBImpl()
