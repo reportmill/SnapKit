@@ -67,6 +67,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     public static final String Modified_Prop = "Modified";
     public static final String Updater_Prop = "Updater";
     public static final String Exists_Prop = "Exists";
+    public static final String Verified_Prop = "Verified";
 
     /**
      * Constructor.
@@ -433,10 +434,15 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         _bytes = null;
         _files = null;
         _updater = null;
-        _exists = null;
         _lastModTime = 0;
         _size = 0;
         setModified(false);
+
+        // If file previously existed, reset Verified and firePropChange
+        boolean didExist = _exists != null && _exists;
+        _exists = null;
+        if (didExist)
+            firePropChange(Verified_Prop, true, false);
     }
 
     /**
