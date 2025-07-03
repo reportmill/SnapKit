@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
+import snap.props.PropChange;
 import snap.util.FilePathUtils;
 import snap.util.ListUtils;
 import java.io.File;
@@ -33,6 +34,10 @@ public class DirSite extends WebSite {
         // Get dir
         WebURL siteURL = getURL();
         WebFile dir = siteURL.createFile(true);
+
+        // Start listening to file prop changes
+        WebSite dirFileSite = siteURL.getSite();
+        dirFileSite.addFileChangeListener(this::handleDirSiteFilePropChange);
 
         // Set and return
         return _dir = dir;
@@ -147,12 +152,38 @@ public class DirSite extends WebSite {
      * Override to forward to dir file.
      */
     @Override
-    protected void fileDidReset(WebFile aFile)
+    protected void resetFile(WebFile aFile)
     {
-        super.fileDidReset(aFile);
+        super.resetFile(aFile);
         WebFile dirFile = getDirFileForPath(aFile.getPath());
         if (dirFile != null)
             dirFile.reset();
+    }
+
+    /**
+     * Called when dir file site has file change. Used to reset local file when source file is deleted.
+     */
+    private void handleDirSiteFilePropChange(PropChange propChange)
+    {
+        // If not Exists prop, just return
+        if (propChange.getPropName() != WebFile.Exists_Prop)
+            return;
+
+        // If given file created, just return
+        WebFile dirSiteFile = (WebFile) propChange.getSource();
+        if (dirSiteFile.getExists())
+            return;
+
+        // If given file not in this site, just return
+        String dirSiteFilePath = dirSiteFile.getPath();
+        if (!dirSiteFilePath.startsWith(getDir().getPath()))
+            return;
+
+        // Get local file and reset if verified
+        String localPath = dirSiteFilePath.substring(getDir().getPath().length());
+        WebFile localFile = createFileForPath(localPath.isEmpty() ? "/" : localPath, dirSiteFile.isDir());
+        if (localFile.isVerified())
+            localFile.resetAndVerify();
     }
 
     /**

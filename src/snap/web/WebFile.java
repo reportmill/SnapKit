@@ -423,7 +423,12 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     /**
      * Resets the file to unverified state where nothing is known about size, mod-time, saved.
      */
-    public void reset()
+    public void reset()  { _site.resetFile(this); }
+
+    /**
+     * Resets the file to unverified state where nothing is known about size, mod-time, saved.
+     */
+    protected void resetImpl()
     {
         _bytes = null;
         _files = null;
@@ -432,9 +437,6 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         _lastModTime = 0;
         _size = 0;
         setModified(false);
-
-        // Notify site
-        _site.fileDidReset(this);
     }
 
     /**

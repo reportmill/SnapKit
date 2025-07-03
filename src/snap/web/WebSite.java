@@ -549,9 +549,9 @@ public abstract class WebSite {
     public void flush() throws Exception  { }
 
     /**
-     * Called to notify site when file is reset.
+     * Resets the given file (provides a hook for subclasses).
      */
-    protected void fileDidReset(WebFile aFile)  { }
+    protected void resetFile(WebFile aFile)  { aFile.resetImpl(); }
 
     /**
      * Fires a property change for given property name, old value, new value and index.
