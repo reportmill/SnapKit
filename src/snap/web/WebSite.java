@@ -28,8 +28,8 @@ public abstract class WebSite {
     // The map of files previously vended by this data source
     private Map<String,WebFile>  _files = new HashMap<>();
 
-    // A WebSite that can be used for writing persistent support files
-    private WebSite  _sandbox;
+    // A directory that can be used for writing persistent support files
+    private WebFile _sandboxDir;
 
     // A map of properties associated with file
     private Map<String,Object>  _props = new HashMap<>();
@@ -481,10 +481,10 @@ public abstract class WebSite {
     /**
      * Returns a WebSite that can be used for storing persistent support files.
      */
-    public WebSite getSandboxSite()
+    public WebFile getSandboxDir()
     {
         // If already set, just return
-        if (_sandbox != null) return _sandbox;
+        if (_sandboxDir != null) return _sandboxDir;
 
         // Get sandbox file: ~/Snapcode/Sandboxes/<site_name>
         String sandboxName = getSandboxSiteName();
@@ -492,12 +492,9 @@ public abstract class WebSite {
         File sandboxesDir = new File(snapCodeDir, "Sandboxes");
         File sandboxDir = new File(sandboxesDir, sandboxName);
 
-        // Get sandbox site
-        WebURL sandboxURL = WebURL.getURL(sandboxDir);
-        WebSite sandboxSite = sandboxURL.getAsSite();
-
-        // Set and return
-        return _sandbox = sandboxSite;
+        // Get sandbox dir
+        WebURL sandboxDirUrl = WebURL.getURL(sandboxDir); assert sandboxDirUrl != null;
+        return _sandboxDir = sandboxDirUrl.createFile(true);
     }
 
     /**

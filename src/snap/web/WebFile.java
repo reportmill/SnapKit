@@ -671,6 +671,21 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     }
 
     /**
+     * Creates a child file for given relative file path.
+     */
+    public WebFile createChildFileForPath(String filePath, boolean isDir)
+    {
+        WebURL fileUrl = getURL();
+        WebURL childFileUrl = fileUrl.getChild(filePath);
+        return childFileUrl.createFile(isDir);
+    }
+
+    /**
+     * Returns the file as a site.
+     */
+    public WebSite getAsSite()  { return getURL().getAsSite(); }
+
+    /**
      * Standard equals implementation.
      */
     public boolean equals(Object anObj)

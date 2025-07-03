@@ -151,13 +151,13 @@ public class HTTPSite extends WebSite {
     @Override
     public WebFile getLocalFileForFile(WebFile aFile)
     {
-        WebSite sandboxSite = getSandboxSite();
+        WebFile sandboxDir = getSandboxDir();
         String localFilePath = "/Cache" + aFile.getPath();
         if (SnapEnv.isWebVM) // Shorten name to avoid prefs 'key too long' error
             localFilePath = "/Cache/" + aFile.getName();
 
         // Get local sandbox file (just return if exists and is up to date)
-        WebFile localFile = sandboxSite.createFileForPath(localFilePath, false);
+        WebFile localFile = sandboxDir.createChildFileForPath(localFilePath, false);
         if (localFile.getExists() && localFile.getLastModTime() >= aFile.getLastModTime())
             return localFile;
 
