@@ -10,10 +10,10 @@ import snap.util.SnapEnv;
 public class KeyCombo {
 
     // Key code
-    private int  _kcode;
+    private int _kcode;
 
     // Modifiers
-    private boolean  _alt, _command, _control, _shift, _shortcut;
+    private boolean _shift, _control, _alt, _command, _shortcut;
 
     /**
      * Creates a new KeyCombo.
@@ -25,15 +25,14 @@ public class KeyCombo {
     /**
      * Creates a new KeyCombo for key code and modifiers.
      */
-    protected KeyCombo(int aKC, boolean isAlt, boolean isCmd, boolean isCntr, boolean isShift)
+    protected KeyCombo(int aKC, boolean isShift, boolean isCntr, boolean isAlt, boolean isCmd)
     {
         _kcode = aKC;
-        _alt = isAltDown();
-        _command = isCmd;
-        _control = isCntr;
         _shift = isShift;
-        if (isCommandDown() && SnapEnv.isMac) _shortcut = true;
-        if (isControlDown() && SnapEnv.isWindows) _shortcut = true;
+        _control = isCntr;
+        _alt = isAlt;
+        _command = isCmd;
+        _shortcut = SnapEnv.isWindows || SnapEnv.isWebVM_Windows ? isCntr : isCmd;
     }
 
     /**
@@ -86,12 +85,7 @@ public class KeyCombo {
     /**
      * Returns whether alt is down.
      */
-    public boolean isAltDown()  { return _alt; }
-
-    /**
-     * Returns whether command is down.
-     */
-    public boolean isCommandDown()  { return _command; }
+    public boolean isShiftDown()  { return _shift; }
 
     /**
      * Returns whether control is down.
@@ -101,7 +95,12 @@ public class KeyCombo {
     /**
      * Returns whether alt is down.
      */
-    public boolean isShiftDown()  { return _shift; }
+    public boolean isAltDown()  { return _alt; }
+
+    /**
+     * Returns whether command is down.
+     */
+    public boolean isCommandDown()  { return _command; }
 
     /**
      * Returns whether shortcut is down.

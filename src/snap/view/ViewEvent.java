@@ -425,7 +425,7 @@ public abstract class ViewEvent implements Cloneable {
     public KeyCombo getKeyCombo()
     {
         if (_keyCombo != null) return _keyCombo;
-        return _keyCombo = new KeyCombo(getKeyCode(), isAltDown(), isMetaDown(), isControlDown(), isShiftDown());
+        return _keyCombo = new KeyCombo(getKeyCode(), isShiftDown(), isControlDown(), isAltDown(), isMetaDown());
     }
 
     /**

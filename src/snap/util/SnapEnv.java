@@ -25,6 +25,15 @@ public class SnapEnv {
     // Whether is WebVM Swing
     public static boolean isWebVMSwing;
 
+    // Whether is WebVM Windows
+    public static boolean isWebVM_Windows;
+
+    // Whether is WebVM Mac
+    public static boolean isWebVM_Mac;
+
+    // Whether is WebVM iOS
+    public static boolean isWebVM_iOS;
+
     // Whether app is currently running on desktop
     public static boolean isDesktop = !isWebVM && !isTeaVM;
 
