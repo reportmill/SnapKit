@@ -155,7 +155,7 @@ public class XMLArchiver {
 
         // Try to get SourceURL from source
         if (getSourceURL() == null) {
-            WebURL surl = WebURL.getURL(aSource);
+            WebURL surl = WebURL.getUrl(aSource);
             setSourceURL(surl);
         }
 

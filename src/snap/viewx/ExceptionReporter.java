@@ -180,7 +180,7 @@ public class ExceptionReporter extends ViewOwner implements Thread.UncaughtExcep
     {
         // Create full message text, create URL, post text bytes and return response string
         String text = String.format("To=%s\nFrom=%s\nSubject=%s\n%s", toAddr, fromAddr, aSubj, aBody);
-        WebURL url = WebURL.getURL(aURL);
+        WebURL url = WebURL.getUrl(aURL);
         byte bytes[] = url.postBytes(text.getBytes());
         return bytes!=null? new String(bytes) : null;
     }

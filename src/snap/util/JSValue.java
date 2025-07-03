@@ -105,7 +105,7 @@ public class JSValue {
      */
     public static JSValue readSource(Object aSource)
     {
-        WebURL url = WebURL.getURL(aSource);
+        WebURL url = WebURL.getUrl(aSource);
         JSParser parser = new JSParser();
         String text = url.getText();
         return parser.readString(text);

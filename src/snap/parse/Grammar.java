@@ -153,7 +153,7 @@ public class Grammar {
     {
         // Get resource for rule
         String name = parserClass.getSimpleName() + ".txt";
-        WebURL url = WebURL.getURL(parserClass, name); //java.net.URL url = aClass.getResource(name);
+        WebURL url = WebURL.getResourceUrl(parserClass, name); //java.net.URL url = aClass.getResource(name);
         if (url == null)
             throw new RuntimeException("Couldn't find grammar file for class " + parserClass.getName());
 

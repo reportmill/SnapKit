@@ -257,12 +257,12 @@ public class ParsedURL {
     /**
      * Returns whether URL specifies only the file (no query/hashtags).
      */
-    public boolean isFileURL()  { return getQuery() == null && getHashtag() == null; }
+    public boolean isFileUrl()  { return getQuery() == null && getHashtag() == null; }
 
     /**
      * Returns the URL string for the file only (no query/hashtags).
      */
-    public String getFileURL()
+    public String getFileUrl()
     {
         // Get normal url string
         String urlStr = getString();
@@ -281,12 +281,12 @@ public class ParsedURL {
     /**
      * Returns whether URL specifies only file and query (no hashtag references).
      */
-    public boolean isQueryURL()  { return getHashtag() == null; }
+    public boolean isQueryUrl()  { return getHashtag() == null; }
 
     /**
      * Returns the URL string for the file and query only (no hashtag references).
      */
-    public String getQueryURL()
+    public String getQueryUrl()
     {
         String urlStr = getString();
         int refStart = urlStr.indexOf('#');

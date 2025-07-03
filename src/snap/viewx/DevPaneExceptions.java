@@ -381,7 +381,7 @@ public class DevPaneExceptions extends ViewOwner {
     private static String sendMail(String toAddr, String fromAddr, String aSubj, String aBody)
     {
         // Get URL
-        WebURL sendMailUrl = WebURL.getURL("https://www.reportmill.com/cgi-bin/SendMail.py");
+        WebURL sendMailUrl = WebURL.getUrl("https://www.reportmill.com/cgi-bin/SendMail.py");
         assert (sendMailUrl != null);
 
         // Create full message text

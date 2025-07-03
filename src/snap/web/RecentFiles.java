@@ -34,7 +34,7 @@ public class RecentFiles extends ViewOwner {
     public static WebURL[] getURLs()
     {
         List<String> urlStrings = getUrlStrings();
-        return ListUtils.mapNonNullToArray(urlStrings, urlStr -> WebURL.getURL(urlStr), WebURL.class);
+        return ListUtils.mapNonNullToArray(urlStrings, urlStr -> WebURL.getUrl(urlStr), WebURL.class);
     }
 
     /**

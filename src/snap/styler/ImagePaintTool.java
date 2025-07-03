@@ -68,7 +68,7 @@ public class ImagePaintTool extends StylerOwner {
         if (anEvent.equals("ChooseButton")) {
             String path = FilePanel.showOpenPanel(getUI(), "Image File", "png", "jpg", "gif");
             if (path!=null) {
-                WebURL url = WebURL.getURL(path);
+                WebURL url = WebURL.getUrl(path);
                 Image img = Image.getImageForSource(url);
                 fill = img!=null ? new ImagePaint(img) : null;
             }

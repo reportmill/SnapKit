@@ -22,7 +22,7 @@ public class RecentFilesSite extends WebSite {
         // Create/set URL
         String RECENT_FILES_ROOT = "recent:";
         String urls = RECENT_FILES_ROOT;
-        WebURL url = WebURL.getURL(urls);
+        WebURL url = WebURL.getUrl(urls);
         setURL(url);
 
         // Set this to shared
@@ -55,7 +55,7 @@ public class RecentFilesSite extends WebSite {
         // Iterate over rootDir files and recent files and set each as link
         for (int i = 0; i < recentFiles.length; i++) {
             WebFile recentFile = recentFiles[i];
-            WebURL recentFileURL = recentFile.getURL();
+            WebURL recentFileURL = recentFile.getUrl();
             String recentFilePath = "/RecentFile-" + i + "-" + recentFileURL.getFilename();
             FileHeader fileHdr = new FileHeader(recentFilePath, recentFile.isDir());
             fileHdr.setLastModTime(1000);

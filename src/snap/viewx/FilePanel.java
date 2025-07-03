@@ -229,7 +229,7 @@ public class FilePanel extends ViewOwner {
         WebFile selFile = getSelFile();
 
         // Add to recent files
-        WebURL selFileURL = selFile != null ? selFile.getURL() : null;
+        WebURL selFileURL = selFile != null ? selFile.getUrl() : null;
         if (selFileURL != null)
             RecentFiles.addURL(selFileURL);
 

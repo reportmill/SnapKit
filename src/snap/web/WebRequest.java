@@ -47,7 +47,7 @@ public class WebRequest {
     {
         super();
         _file = aFile;
-        _url = aFile.getURL();
+        _url = aFile.getUrl();
     }
 
     /**

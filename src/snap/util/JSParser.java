@@ -38,7 +38,7 @@ public class JSParser extends Parser {
      */
     public JSValue readSource(Object aSource)
     {
-        WebURL url = WebURL.getURL(aSource);
+        WebURL url = WebURL.getUrl(aSource);
         assert (url != null);
         String urlText = url.getText();
         return readString(urlText);

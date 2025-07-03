@@ -25,7 +25,7 @@ public class WebGetter {
     /**
      * Returns a java.net.URL for given source.
      */
-    public static URL getJavaURL(Object anObj) // throws MalformedURLException, IOException, IllegalArgumentException
+    public static URL getJavaUrl(Object anObj) // throws MalformedURLException, IOException, IllegalArgumentException
     {
         // Handle String
         if (anObj instanceof String)
@@ -125,7 +125,7 @@ public class WebGetter {
         // If File URL and nested (contains '!' path separator), flatten URL and use that to avoid unnecessary dir references
         if (aSiteURL.getScheme().equals("file") && aSiteURL.getPath().contains("!")) {
             String flatSiteAddress = aSiteURL.getString().replace("!", "");
-            WebURL flatSiteURL = WebURL.getURL(flatSiteAddress); assert (flatSiteURL != null);
+            WebURL flatSiteURL = WebURL.getUrl(flatSiteAddress); assert (flatSiteURL != null);
             WebSite flatSite = flatSiteURL.getAsSite();
             setSite(aSiteURL, flatSite);
             return flatSite;
@@ -166,7 +166,7 @@ public class WebGetter {
             return new ZipFileSite();
 
         // Handle DirSite
-        WebURL parentSiteURL = aSiteURL.getSiteURL();
+        WebURL parentSiteURL = aSiteURL.getSiteUrl();
         String parentSitePath = parentSiteURL != null ? parentSiteURL.getPath() : "";
         if (!parentSitePath.isEmpty())
             return new DirSite();

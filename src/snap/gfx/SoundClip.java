@@ -100,11 +100,11 @@ public abstract class SoundClip {
     {
         // Look for named sound file in same directory as class
         String name = aName; if (name.indexOf('.')<0) name += ".wav";
-        WebURL url = WebURL.getURL(aClass, name);
+        WebURL url = WebURL.getResourceUrl(aClass, name);
         if (url==null)
-            url = WebURL.getURL(aClass, "sounds/" + name);
+            url = WebURL.getResourceUrl(aClass, "sounds/" + name);
         if (url==null)
-            url = WebURL.getURL(aClass, "/sounds/" + name);
+            url = WebURL.getResourceUrl(aClass, "/sounds/" + name);
         return url;
     }
 }

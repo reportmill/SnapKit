@@ -111,7 +111,7 @@ public class AWTEnv extends GFXEnv {
         if (aSource instanceof WebFile)
             aSource = ((WebFile) aSource).getJavaFile();
         if (aSource instanceof WebURL)
-            aSource = ((WebURL) aSource).getJavaURL();
+            aSource = ((WebURL) aSource).getJavaUrl();
         File file = FileUtils.getFile(aSource);
 
         // Open with Desktop API
@@ -126,8 +126,8 @@ public class AWTEnv extends GFXEnv {
     {
         // Get URL/URI and open with Desktop API
         try {
-            WebURL snapURL = WebURL.getURL(aSource);
-            URL javaURL = snapURL != null ? snapURL.getJavaURL() : null;
+            WebURL snapURL = WebURL.getUrl(aSource);
+            URL javaURL = snapURL != null ? snapURL.getJavaUrl() : null;
             URI uri = javaURL != null ? javaURL.toURI() : null;
             if (uri != null)
                 Desktop.getDesktop().browse(uri);
@@ -146,7 +146,7 @@ public class AWTEnv extends GFXEnv {
         if (aSource instanceof WebFile)
             aSource = ((WebFile) aSource).getJavaFile();
         if (aSource instanceof WebURL)
-            aSource = ((WebURL) aSource).getJavaURL();
+            aSource = ((WebURL) aSource).getJavaUrl();
         File file = FileUtils.getFile(aSource);
 
         // Open with Runtime.exec "open -e <file-name>"

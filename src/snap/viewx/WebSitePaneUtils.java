@@ -194,7 +194,7 @@ class WebSitePaneUtils {
      */
     public static WebSite getLocalFileSystemSite()
     {
-        WebURL defaultSiteURL = WebURL.getURL("/");
+        WebURL defaultSiteURL = WebURL.getUrl("/");
         assert (defaultSiteURL != null);
         return defaultSiteURL.getSite();
     }

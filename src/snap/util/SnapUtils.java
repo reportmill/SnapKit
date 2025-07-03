@@ -150,7 +150,7 @@ public class SnapUtils {
             return ((WebFile) aSource).getBytes();
 
         // Handle WebURL (URL, File, String path)
-        WebURL url = WebURL.getURL(aSource);
+        WebURL url = WebURL.getUrl(aSource);
         if (url != null)
             return url.getBytesOrThrow();
 
@@ -194,7 +194,7 @@ public class SnapUtils {
      */
     public static byte[] getBytes(Class<?> aClass, String aName)
     {
-        WebURL url = WebURL.getURL(aClass, aName);
+        WebURL url = WebURL.getResourceUrl(aClass, aName);
         return getBytes(url);
     }
 
@@ -203,7 +203,7 @@ public class SnapUtils {
      */
     public static String getText(Class<?> aClass, String aName)
     {
-        WebURL url = WebURL.getURL(aClass, aName);
+        WebURL url = WebURL.getResourceUrl(aClass, aName);
         return getText(url);
     }
 
@@ -223,7 +223,7 @@ public class SnapUtils {
             return ((WebFile) aSource).getInputStream();
 
         // Handle WebURL (URL, File, String path)
-        WebURL url = WebURL.getURL(aSource);
+        WebURL url = WebURL.getUrl(aSource);
         if (url != null)
             return url.getInputStream();
 

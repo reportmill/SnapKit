@@ -74,7 +74,7 @@ public class ClipboardData {
         if (_sourceURL != null) return _sourceURL;
         if (_source instanceof byte[])
             return null;
-        return _sourceURL = WebURL.getURL(_source);
+        return _sourceURL = WebURL.getUrl(_source);
     }
 
     /**

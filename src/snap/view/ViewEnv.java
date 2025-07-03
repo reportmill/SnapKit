@@ -144,7 +144,7 @@ public abstract class ViewEnv {
     {
         // Look for snap file with same name as class
         String name = aClass.getSimpleName() + ".snp";
-        WebURL url = WebURL.getURL(aClass, name);
+        WebURL url = WebURL.getResourceUrl(aClass, name);
         if (url!=null)
             return url;
 

@@ -296,8 +296,8 @@ public class MarkDownView extends ChildView {
     protected WebURL getUrlForAddress(String urlAddr)
     {
         if (getSourceUrl() != null && !urlAddr.contains(":"))
-            return _sourceDirUrl.getChild(urlAddr);
-        return WebURL.getURL(urlAddr);
+            return _sourceDirUrl.getChildUrlForPath(urlAddr);
+        return WebURL.getUrl(urlAddr);
     }
 
     /**

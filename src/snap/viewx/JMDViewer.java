@@ -38,7 +38,7 @@ public class JMDViewer {
     public WebFile getMainFile()
     {
         if (_mainFile != null) return _mainFile;
-        WebURL mainFileUrl = WebURL.getURL(_mainClass, _mainClass.getSimpleName() + ".jmd");
+        WebURL mainFileUrl = WebURL.getResourceUrl(_mainClass, _mainClass.getSimpleName() + ".jmd");
         return _mainFile = mainFileUrl != null ? mainFileUrl.getFile() : null;
     }
 

@@ -321,7 +321,7 @@ public class DevPaneFiles extends ViewOwner {
         if (_rootUrlString == null || _rootUrlString.isEmpty() || _rootUrlString.equals("/"))
             return getRootFileSite();
 
-        WebURL rootUrl = WebURL.getURL(_rootUrlString);
+        WebURL rootUrl = WebURL.getUrl(_rootUrlString);
         if (rootUrl == null)
             return getRootFileSite();
         return rootUrl.getAsSite();
@@ -342,7 +342,7 @@ public class DevPaneFiles extends ViewOwner {
      */
     private WebSite getRootFileSite()
     {
-        WebURL fileSiteURL = WebURL.getURL("/");
+        WebURL fileSiteURL = WebURL.getUrl("/");
         assert (fileSiteURL != null);
         return fileSiteURL.getSite();
     }

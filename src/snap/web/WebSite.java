@@ -17,28 +17,28 @@ import java.util.*;
 public abstract class WebSite {
 
     // The URL describing this WebSite
-    private WebURL  _url;
+    private WebURL _url;
 
     // The user name for authentication purposes
-    private String  _userName;
+    private String _userName;
 
     // The password for authentication purposes
-    private String  _password;
+    private String _password;
 
     // The map of files previously vended by this data source
-    private Map<String,WebFile>  _files = new HashMap<>();
+    private Map<String,WebFile> _files = new HashMap<>();
 
     // A directory that can be used for writing persistent support files
     private WebFile _sandboxDir;
 
     // A map of properties associated with file
-    private Map<String,Object>  _props = new HashMap<>();
+    private Map<String,Object> _props = new HashMap<>();
 
     // PropChangeListener for file changes
-    private PropChangeListener  _fileLsnr = pc -> fileDidPropChange(pc);
+    private PropChangeListener _filePropChangeLsnr = pc -> handleFilePropChange(pc);
 
     // The PropChangeSupport for site file listeners
-    private PropChangeSupport  _filePCS = PropChangeSupport.EMPTY;
+    private PropChangeSupport _filePCS = PropChangeSupport.EMPTY;
 
     /**
      * Constructor.
@@ -238,7 +238,7 @@ public abstract class WebSite {
 
         // Add to cache and start listening to file changes
         _files.put(filePath, file);
-        file.addPropChangeListener(_fileLsnr);
+        file.addPropChangeListener(_filePropChangeLsnr);
 
         // Return
         return file;
@@ -427,7 +427,7 @@ public abstract class WebSite {
             return (File) src;
 
         // If native URL if possible and try to get file
-        java.net.URL url = aURL.getJavaURL();
+        java.net.URL url = aURL.getJavaUrl();
         return url != null ? FileUtils.getFile(url) : null;
     }
 
@@ -438,7 +438,7 @@ public abstract class WebSite {
     {
         // If given path is already full URL string, return URL for it
         if (aFilePath.indexOf(':') >= 0)
-            return WebURL.getURL(aFilePath);
+            return WebURL.getUrl(aFilePath);
 
         // Get file path
         String filePath = FilePathUtils.getNormalizedPath(aFilePath);
@@ -449,7 +449,7 @@ public abstract class WebSite {
 
         // Get full URL string and return URL for it
         String fullUrlString = siteUrlString + filePath;
-        return WebURL.getURL(fullUrlString);
+        return WebURL.getUrl(fullUrlString);
     }
 
     /**
@@ -493,7 +493,7 @@ public abstract class WebSite {
         File sandboxDir = new File(sandboxesDir, sandboxName);
 
         // Get sandbox dir
-        WebURL sandboxDirUrl = WebURL.getURL(sandboxDir); assert sandboxDirUrl != null;
+        WebURL sandboxDirUrl = WebURL.getUrl(sandboxDir); assert sandboxDirUrl != null;
         return _sandboxDir = sandboxDirUrl.createFile(true);
     }
 
@@ -576,7 +576,7 @@ public abstract class WebSite {
     /**
      * Called when any site file changes.
      */
-    protected void fileDidPropChange(PropChange aPC)
+    protected void handleFilePropChange(PropChange aPC)
     {
         _filePCS.firePropChange(aPC);
     }

@@ -192,7 +192,7 @@ public class TextHyphenDict {
     private void loadHyphenDict() throws IOException
     {
         // Get bytes for aSource
-        byte bytes[] = SnapUtils.getBytes(WebURL.getURL(getClass(), "TextHyphenDict_US.dic"));
+        byte bytes[] = SnapUtils.getBytes(WebURL.getResourceUrl(getClass(), "TextHyphenDict_US.dic"));
         
         // Get Charset
         String charset = null;

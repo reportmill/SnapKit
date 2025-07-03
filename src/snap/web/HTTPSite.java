@@ -27,7 +27,7 @@ public class HTTPSite extends WebSite {
     {
         // Create HTTPRequest for java.net.URL
         WebURL url = aReq.getURL();
-        HTTPRequest httpRequest = new HTTPRequest(url.getJavaURL());
+        HTTPRequest httpRequest = new HTTPRequest(url.getJavaUrl());
         if (isHead)
             httpRequest.setMethod("HEAD");
 

@@ -146,7 +146,7 @@ public class RecentFilesSitePane extends WebSitePane {
 
         // Get URL string and set in cell
         WebFile recentFile = file.getRealFile();
-        WebURL directoryURL = recentFile.getURL().getParent();
+        WebURL directoryURL = recentFile.getUrl().getParent();
         String directoryUrlString = RecentFiles.getNormalizedUrlString(directoryURL.getString());
         aCell.setText(directoryUrlString);
         aCell.setTextColor(Color.DARKGRAY);
@@ -199,7 +199,7 @@ public class RecentFilesSitePane extends WebSitePane {
 
         // Clear RecentFile
         WebFile realFile = file.getRealFile();
-        WebURL fileURL = realFile.getURL();
+        WebURL fileURL = realFile.getUrl();
         RecentFiles.removeURL(fileURL);
 
         // Clear RecentFiles, SelFile and trigger reset

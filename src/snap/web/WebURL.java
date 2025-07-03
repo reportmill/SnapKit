@@ -23,22 +23,22 @@ import java.util.function.Consumer;
 public class WebURL {
 
     // The source object (String, File, URL)
-    private Object  _src;
+    private Object _src;
 
     // The source object as URL
-    private URL  _srcURL;
+    private URL _srcURL;
 
     // The native URL
-    private URL  _jurl;
+    private URL _javaUrl;
 
     // The Parsed URL
-    private ParsedURL  _parsedUrl;
+    private ParsedURL _parsedUrl;
 
     // The URL of WebSite this WebURL belongs to (just this WebURL if no path)
-    private WebURL  _siteURL;
+    private WebURL _siteUrl;
 
     // The WebSite for the URL
-    protected WebSite  _asSite;
+    protected WebSite _asSite;
 
     /**
      * Constructor for given source.
@@ -49,7 +49,7 @@ public class WebURL {
         _src = aSource;
 
         // Get/set Source Java URL
-        _srcURL = WebGetter.getJavaURL(aSource);
+        _srcURL = WebGetter.getJavaUrl(aSource);
 
         // Get URLString for parts
         String urls = URLUtils.getString(_srcURL);
@@ -59,22 +59,22 @@ public class WebURL {
     /**
      * Returns a URL for given object.
      */
-    public static WebURL getURL(Object anObj)
+    public static WebURL getUrl(Object anObj)
     {
-        try { return getURLOrThrow(anObj); }
+        try { return createUrl(anObj); }
         catch (Exception e) { return null; }
     }
 
     /**
      * Returns a URL for given object.
      */
-    public static WebURL getURLOrThrow(Object anObj)
+    public static WebURL createUrl(Object anObj)
     {
-        // Handle null, WebURL, WebFile
-        if (anObj == null || anObj instanceof WebURL)
+        // Handle WebURL, WebFile
+        if (anObj instanceof WebURL)
             return (WebURL) anObj;
         if (anObj instanceof WebFile)
-            return ((WebFile) anObj).getURL();
+            return ((WebFile) anObj).getUrl();
 
         // Get URL
         return new WebURL(anObj);
@@ -83,7 +83,7 @@ public class WebURL {
     /**
      * Returns a URL for given class and resource name.
      */
-    public static WebURL getURL(Class<?> aClass, String aName)
+    public static WebURL getResourceUrl(Class<?> aClass, String aName)
     {
         URL url = WebGetter.getJavaUrlForClass(aClass, aName);
         if (url != null)
@@ -97,9 +97,9 @@ public class WebURL {
     public Object getSource()  { return _src; }
 
     /**
-     * Returns the source as standard Java URL. Might contain site-path separator. See getJavaURL().
+     * Returns the source as standard Java URL. Might contain site-path separator. See getJavaUrl().
      */
-    public URL getSourceURL()  { return _srcURL; }
+    public URL getSourceUrl()  { return _srcURL; }
 
     /**
      * Returns the full URL string.
@@ -170,24 +170,24 @@ public class WebURL {
      */
     public WebSite getSite()
     {
-        WebURL siteURL = getSiteURL();
+        WebURL siteURL = getSiteUrl();
         return siteURL.getAsSite();
     }
 
     /**
      * Returns the URL for the site that this URL belongs to.
      */
-    public WebURL getSiteURL()
+    public WebURL getSiteUrl()
     {
         // If already set, just return
-        if (_siteURL != null) return _siteURL;
+        if (_siteUrl != null) return _siteUrl;
 
         // Get site for site string
         String siteURLString = _parsedUrl.getSiteUrl();
-        WebURL siteURL = getURL(siteURLString);
+        WebURL siteURL = getUrl(siteURLString);
 
         // Set/return
-        return _siteURL = siteURL;
+        return _siteUrl = siteURL;
     }
 
     /**
@@ -232,56 +232,56 @@ public class WebURL {
     /**
      * Returns whether URL specifies only the file (no query/hashtags).
      */
-    public boolean isFileURL()
+    public boolean isFileUrl()
     {
-        return _parsedUrl.isFileURL();
+        return _parsedUrl.isFileUrl();
     }
 
     /**
      * Returns the URL for the file only (no query/hashtags).
      */
-    public WebURL getFileURL()
+    public WebURL getFileUrl()
     {
-        if (isFileURL())
+        if (isFileUrl())
             return this;
-        String fileUrlStr = _parsedUrl.getFileURL();
-        return getURL(fileUrlStr);
+        String fileUrlStr = _parsedUrl.getFileUrl();
+        return getUrl(fileUrlStr);
     }
 
     /**
      * Returns whether URL specifies only file and query (no hashtag references).
      */
-    public boolean isQueryURL()
+    public boolean isQueryUrl()
     {
-        return _parsedUrl.isQueryURL();
+        return _parsedUrl.isQueryUrl();
     }
 
     /**
      * Returns the URL for the file and query only (no hashtag references).
      */
-    public WebURL getQueryURL()
+    public WebURL getQueryUrl()
     {
-        if (isQueryURL())
+        if (isQueryUrl())
             return this;
-        String queryUrlStr = _parsedUrl.getQueryURL();
-        return getURL(queryUrlStr);
+        String queryUrlStr = _parsedUrl.getQueryUrl();
+        return getUrl(queryUrlStr);
     }
 
     /**
      * Returns the source as standard Java URL (if possible).
      */
-    public URL getJavaURL()
+    public URL getJavaUrl()
     {
         // If already set, just return
-        if (_jurl != null) return _jurl;
+        if (_javaUrl != null) return _javaUrl;
 
         // If URL doesn't have site path, just set/return SourceURL
         if (getString().indexOf('!') < 0)
-            return _jurl = _srcURL;
+            return _javaUrl = _srcURL;
 
         // Get URL string without site path separator and create/set/return URL
         String urlString = getString().replace("!", "");
-        try { return _jurl = new URL(urlString); }
+        try { return _javaUrl = new URL(urlString); }
         catch (Exception e) { throw new RuntimeException(e); }
     }
 
@@ -322,7 +322,7 @@ public class WebURL {
 
         // Handle URL
         if (_src instanceof URL) {
-            URL url = getJavaURL();
+            URL url = getJavaUrl();
             return URLUtils.getLastModTime(url);
         }
 
@@ -450,7 +450,7 @@ public class WebURL {
     /**
      * Returns the child URL for given name.
      */
-    public WebURL getChild(String aName)
+    public WebURL getChildUrlForPath(String aName)
     {
         WebSite site = getSite();
         String filePath = getPath();

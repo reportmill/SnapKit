@@ -108,7 +108,7 @@ public abstract class Image implements Loadable {
         if (_source == null) return null;
 
         // Get, set, return
-        WebURL url = WebURL.getURL(_source);
+        WebURL url = WebURL.getUrl(_source);
         return _url = url;
     }
 
@@ -494,9 +494,9 @@ public abstract class Image implements Loadable {
      */
     public static Image getImageForClassResource(Class<?> aClass, String aPath)
     {
-        WebURL url = WebURL.getURL(aClass, aPath);
+        WebURL url = WebURL.getResourceUrl(aClass, aPath);
         if (url == null)
-            url = WebURL.getURL(aClass, "pkg.images/" + aPath);
+            url = WebURL.getResourceUrl(aClass, "pkg.images/" + aPath);
         return url != null ? Image.getImageForSource(url) : null;
     }
 
