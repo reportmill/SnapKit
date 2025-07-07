@@ -796,20 +796,17 @@ public class TextAdapter extends PropObject {
     public void replaceCharsWithContent(Object theContent)
     {
         // If Clipboard has TextBlock, paste it
-        if (theContent instanceof TextBlock) {
-            TextBlock textBlock = (TextBlock) theContent;
+        if (theContent instanceof TextBlock textBlock) {
             int selStart = getSelStart();
             int selEnd = getSelEnd();
             _textBlock.removeChars(selStart, selEnd);
             _textBlock.addTextBlock(textBlock, selStart);
-            setSel(selStart, selStart + textBlock.length());
+            setSel(selStart + textBlock.length());
         }
 
         // If Clipboard has String, paste it
-        else if (theContent instanceof String) {
-            String str = (String) theContent;
+        else if (theContent instanceof String str)
             replaceChars(str);
-        }
 
         // Complain about the unknown
         else System.out.println("TextAdapter.replaceCharsWithContent: Unknown content: " + theContent);
