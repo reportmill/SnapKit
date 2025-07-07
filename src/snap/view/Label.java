@@ -129,7 +129,7 @@ public class Label extends ParentView {
     @Override
     public Color getTextColor()
     {
-        return _stringView != null ? _stringView.getTextColor() : null;
+        return _stringView != null ? _stringView.getTextColor() : (Color) getPropDefault(TextColor_Prop);
     }
 
     /**
