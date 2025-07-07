@@ -108,9 +108,7 @@ public class DevPaneExceptions extends ViewOwner {
         _thrownExceptionsList = getView("ThrownListView", ListView.class);
         _thrownExceptionsList.setItemTextFunction(ThrownException::getTitle);
         _stackTraceText = getView("StackTraceText", TextView.class);
-        _stackTraceText.getTextBlock().setRichText(false);
         _descriptionText = getView("DescriptionText", TextView.class);
-        _descriptionText.getTextBlock().setRichText(false);
 
         // Initialize UserName, UserEmail
         Prefs prefs = Prefs.getDefaultPrefs();
