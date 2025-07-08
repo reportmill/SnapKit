@@ -505,11 +505,6 @@ public class TextArea extends ParentView {
     public void paste()  { _textAdapter.paste(); }
 
     /**
-     * Returns the clipboard content.
-     */
-    protected Object getClipboardContent(Clipboard clipboard)  { return _textAdapter.getClipboardContent(clipboard); }
-
-    /**
      * Returns the undoer.
      */
     public Undoer getUndoer()  { return _textAdapter.getUndoer(); }

@@ -1467,17 +1467,15 @@ public class TextAdapter extends PropObject {
             return;
         }
 
-        // Get clipboard content
+        // Get clipboard content and replace chars
         Object content = getClipboardContent(clipboard);
-
-        // Paste clipboard content
         replaceCharsWithContent(content);
     }
 
     /**
      * Returns the clipboard content.
      */
-    public Object getClipboardContent(Clipboard clipboard)
+    private Object getClipboardContent(Clipboard clipboard)
     {
         // If Clipboard has RICHTEXT_TYPE, paste it
         if (clipboard.hasData(SNAP_RICHTEXT_TYPE)) {
