@@ -31,8 +31,8 @@ public class TextAdapter extends PropObject {
     // Whether text should wrap lines that overrun bounds
     private boolean  _wrapLines;
 
-    // Whether text undo is activated
-    private boolean  _undoActivated;
+    // The text undoer
+    private Undoer _undoer = Undoer.DISABLED_UNDOER;
 
     // A PropChangeListener to send SourceText PropChanges to adapter client.
     private PropChangeListener[] _sourceTextPropChangeLsnrs = new PropChangeListener[0];
@@ -141,8 +141,6 @@ public class TextAdapter extends PropObject {
 
         // Add PropChangeListener
         _textBlock.getSourceText().addPropChangeListener(_sourceTextPropLsnr);
-        if (isUndoActivated())
-            _textBlock.getSourceText().setUndoActivated(true);
 
         // Relayout parent, repaint
         if (_view != null) {
@@ -247,9 +245,14 @@ public class TextAdapter extends PropObject {
     }
 
     /**
+     * Returns the text undoer.
+     */
+    public Undoer getUndoer()  { return _undoer; }
+
+    /**
      * Returns whether undo is activated.
      */
-    public boolean isUndoActivated()  { return _undoActivated; }
+    public boolean isUndoActivated()  { return _undoer != Undoer.DISABLED_UNDOER; }
 
     /**
      * Called to activate undo.
@@ -257,8 +260,53 @@ public class TextAdapter extends PropObject {
     public void setUndoActivated(boolean aValue)
     {
         if (aValue == isUndoActivated()) return;
-        _undoActivated = aValue;
-        _textBlock.getSourceText().setUndoActivated(aValue);
+
+        // If activating, create new undoer
+        if (aValue) {
+            _undoer = new Undoer();
+            _undoer.setAutoSave(true);
+            _undoer.addPropChangeListener(pc -> handleUndoerPropChange(), Undoer.UndoAvailable_Prop);
+        }
+
+        // Otherwise, reset to disabled
+        else _undoer = Undoer.DISABLED_UNDOER;
+    }
+
+    /**
+     * Adds a property change to undoer.
+     */
+    private void addSourceTextPropChangeToUndoer(PropChange propChange)
+    {
+        // Get undoer (just return if null or disabled)
+        Undoer undoer = getUndoer();
+        if (!undoer.isEnabled())
+            return;
+
+        // Handle TextModified: Reset undoer if false, then return
+        String propName = propChange.getPropName();
+        if (propName == TextBlock.TextModified_Prop) {
+            if (!getSourceText().isTextModified() && undoer.isUndoAvailable())
+                undoer.reset();
+            return;
+        }
+
+        // If PlainText Style_Prop or LineStyle_Prop, just return
+        if (!isRichText()) {
+            if (propName == TextBlock.Style_Prop || propName == TextBlock.LineStyle_Prop)
+                return;
+        }
+
+        // Add property
+        undoer.addPropChange(propChange);
+    }
+
+    /**
+     * Called when Undoer has prop change.
+     */
+    private void handleUndoerPropChange()
+    {
+        boolean hasUndo = _undoer.isUndoAvailable();
+        getSourceText().setTextModified(hasUndo);
     }
 
     /**
@@ -925,7 +973,17 @@ public class TextAdapter extends PropObject {
     /**
      * Clears the text.
      */
-    public void clear()  { _textBlock.clear(); }
+    public void clear()
+    {
+        // Disable undo
+        Undoer undoer = getUndoer();
+        undoer.disable();
+
+        _textBlock.clear();
+
+        // Reset undo
+        undoer.reset();
+    }
 
     /**
      * Returns the number of lines.
@@ -1445,11 +1503,6 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Returns the undoer.
-     */
-    public Undoer getUndoer()  { return _textBlock.getSourceText().getUndoer(); }
-
-    /**
      * Called to undo the last text change.
      */
     public void undo()
@@ -1539,11 +1592,14 @@ public class TextAdapter extends PropObject {
     /**
      * Called when SourceText changes (chars added, updated or deleted).
      */
-    protected void handleSourceTextPropChange(PropChange aPC)
+    protected void handleSourceTextPropChange(PropChange propChange)
     {
+        // Add prop change to undoer
+        addSourceTextPropChangeToUndoer(propChange);
+
         // Forward on to listeners
         for (PropChangeListener propChangeLsnr : _sourceTextPropChangeLsnrs)
-            propChangeLsnr.propertyChange(aPC);
+            propChangeLsnr.propertyChange(propChange);
 
         // Relayout and repaint
         if (_view != null) {
@@ -1555,13 +1611,13 @@ public class TextAdapter extends PropObject {
     /**
      * Called when view has prop change.
      */
-    private void handleViewPropChanged(PropChange aPC)
+    private void handleViewPropChanged(PropChange propChange)
     {
-        switch (aPC.getPropName()) {
-            case View.Width_Prop: case View.Height_Prop: handleViewSizeChanged(); break;
-            case View.Showing_Prop: handleViewShowingChanged(); break;
-            case View.Focused_Prop: handleViewFocusedChanged(); break;
-            case View.Align_Prop: handleViewAlignChanged(); break;
+        switch (propChange.getPropName()) {
+            case View.Width_Prop, View.Height_Prop -> handleViewSizeChanged();
+            case View.Showing_Prop -> handleViewShowingChanged();
+            case View.Focused_Prop -> handleViewFocusedChanged();
+            case View.Align_Prop -> handleViewAlignChanged();
         }
     }
 
