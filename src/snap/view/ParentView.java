@@ -206,7 +206,7 @@ public class ParentView extends View {
     /**
      * Returns the last child of this view.
      */
-    public View getChildLast()  { return _children.getLast(); }
+    public View getLastChild()  { return _children.getLast(); }
 
     /**
      * Returns the child for given component class.

@@ -121,7 +121,7 @@ public class Divider extends View {
 
         // Handle nobody grows (compensate using last item)
         else if (growCount == 0 && !parGrows) {
-            View child = par.getChildLast();
+            View child = par.getLastChild();
             child.setPrefWidth(child.getWidth() + extra);
         }
     }
@@ -159,7 +159,7 @@ public class Divider extends View {
 
         // Handle nobody grows (compensate using last item)
         else if (growCount == 0 && !parGrows) {
-            View child = par.getChildLast();
+            View child = par.getLastChild();
             child.setPrefHeight(child.getHeight() + extra);
         }
     }

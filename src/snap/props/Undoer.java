@@ -77,12 +77,12 @@ public class Undoer extends PropObject {
     /**
      * Returns the last undo.
      */
-    public UndoSet getUndoSetLast()  { return ListUtils.getLast(_undoSets); }
+    public UndoSet getLastUndoSet()  { return ListUtils.getLast(_undoSets); }
 
     /**
      * Returns the last redo.
      */
-    public UndoSet getRedoSetLast()  { return ListUtils.getLast(_redoSets); }
+    public UndoSet getLastRedoSet()  { return ListUtils.getLast(_redoSets); }
 
     /**
      * Sets whether to auto save changes.
@@ -139,7 +139,7 @@ public class Undoer extends PropObject {
             return false;
 
         // LastUndoSet is null or closed, just return false
-        UndoSet lastUndoSet = getUndoSetLast();
+        UndoSet lastUndoSet = getLastUndoSet();
         if (lastUndoSet == null || lastUndoSet._closed)
             return false;
 
@@ -184,7 +184,7 @@ public class Undoer extends PropObject {
     private void saveChangesAndClose()
     {
         saveChanges();
-        UndoSet lastUndoSet = getUndoSetLast();
+        UndoSet lastUndoSet = getLastUndoSet();
         if (lastUndoSet != null)
             lastUndoSet._closed = true;
     }
@@ -280,7 +280,7 @@ public class Undoer extends PropObject {
      */
     public boolean hasRedos()
     {
-        return getRedoSetLast() != null;
+        return getLastRedoSet() != null;
     }
 
     /**
