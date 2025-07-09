@@ -90,7 +90,7 @@ public class FormBuilder extends ViewOwner {
         textArea.setWrapLines(true);
         textArea.setMaxWidth(400);
         if (_font != null)
-            textArea.getTextBlock().setDefaultFont(_font);
+            textArea.getTextModel().setDefaultFont(_font);
         textArea.setText(aTitle);
         return addView(textArea);
     }

@@ -5,7 +5,7 @@ package snap.viewx;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Image;
-import snap.text.TextBlock;
+import snap.text.TextModel;
 import snap.util.Convert;
 import snap.view.*;
 import java.lang.reflect.Array;
@@ -60,40 +60,40 @@ class DefaultConsoleUtils {
         if (value instanceof Image)
             return createContentViewForImage((Image) value);
 
-        // Handle TextBlock
-        if (value instanceof TextBlock)
-            return createContentViewForTextBlock((TextBlock) value);
+        // Handle TextModel
+        if (value instanceof TextModel)
+            return createContentViewForTextModel((TextModel) value);
 
         // Do normal version
         String responseText = getStringForValue(value);
-        TextBlock textBlock = createTextBlockForString(responseText);
-        return createContentViewForTextBlock(textBlock);
+        TextModel textModel = createTextModelForString(responseText);
+        return createContentViewForTextModel(textModel);
     }
 
     /**
-     * Creates TextBlock for String.
+     * Creates TextModel for String.
      */
-    private static TextBlock createTextBlockForString(String aString)
+    private static TextModel createTextModelForString(String aString)
     {
-        // Create TextBlock and configure Style
-        TextBlock textBlock = new TextBlock();
-        textBlock.setDefaultFont(DEFAULT_FONT);
-        textBlock.setDefaultTextColor(DEFAULT_TEXTAREA_TEXTCOLOR);
+        // Create TextModel and configure Style
+        TextModel textModel = new TextModel();
+        textModel.setDefaultFont(DEFAULT_FONT);
+        textModel.setDefaultTextColor(DEFAULT_TEXTAREA_TEXTCOLOR);
 
         // Set string
-        textBlock.setString(aString);
+        textModel.setString(aString);
 
         // Return
-        return textBlock;
+        return textModel;
     }
 
     /**
-     * Creates content view for TextBlock.
+     * Creates content view for TextModel.
      */
-    private static View createContentViewForTextBlock(TextBlock textBlock)
+    private static View createContentViewForTextModel(TextModel textModel)
     {
         // Create and configure TextArea
-        TextArea textArea = new TextArea(textBlock);
+        TextArea textArea = new TextArea(textModel);
         textArea.setBorderRadius(4);
         textArea.setFill(DEFAULT_TEXTAREA_FILL);
         textArea.setEditable(true);

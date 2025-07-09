@@ -14,40 +14,40 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Utility methods to support TextBlock.
+ * Utility methods to support TextModel.
  */
-public class TextBlockUtils {
+public class TextModelUtils {
 
     /**
      * Returns a path for two char indexes - it will be a simple box with extensions for first/last lines.
      */
-    public static Shape getPathForCharRange(TextBlock textBlock, int aStartCharIndex, int aEndCharIndex)
+    public static Shape getPathForCharRange(TextModel textModel, int aStartCharIndex, int aEndCharIndex)
     {
         // Create new path for return
         Path2D path = new Path2D();
 
         // If invalid range, just return
-        if (aStartCharIndex > textBlock.getEndCharIndex()) // || aEndCharIndex < textBlock.getStartCharIndex())
+        if (aStartCharIndex > textModel.getEndCharIndex()) // || aEndCharIndex < textModel.getStartCharIndex())
             return path;
-        if (aEndCharIndex > textBlock.getEndCharIndex())
-            aEndCharIndex = textBlock.getEndCharIndex();
+        if (aEndCharIndex > textModel.getEndCharIndex())
+            aEndCharIndex = textModel.getEndCharIndex();
 
         // Get StartLine for start char index (maybe adjust if at ambiguous start/end of lines and mouse Y available)
-        TextLine startLine = textBlock.getLineForCharIndex(aStartCharIndex);
-        if (aStartCharIndex == aEndCharIndex && aStartCharIndex == startLine.getStartCharIndex() && textBlock._mouseY > 0) {
-            TextLine altStartLine = textBlock.getLineForY(textBlock._mouseY);
+        TextLine startLine = textModel.getLineForCharIndex(aStartCharIndex);
+        if (aStartCharIndex == aEndCharIndex && aStartCharIndex == startLine.getStartCharIndex() && textModel._mouseY > 0) {
+            TextLine altStartLine = textModel.getLineForY(textModel._mouseY);
             if (altStartLine == startLine.getPrevious())
                 startLine = altStartLine;
         }
 
         // Get end line
-        TextLine endLine = aStartCharIndex == aEndCharIndex ? startLine : textBlock.getLineForCharIndex(aEndCharIndex);
+        TextLine endLine = aStartCharIndex == aEndCharIndex ? startLine : textModel.getLineForCharIndex(aEndCharIndex);
         double startX = startLine.getTextXForCharIndex(aStartCharIndex - startLine.getStartCharIndex());
         double startY = startLine.getTextBaseline();
         double endX = endLine.getTextXForCharIndex(aEndCharIndex - endLine.getStartCharIndex());
         double endY = endLine.getTextBaseline();
-        startX = Math.min(startX, textBlock.getMaxX());
-        endX = Math.min(endX, textBlock.getMaxX());
+        startX = Math.min(startX, textModel.getMaxX());
+        endX = Math.min(endX, textModel.getMaxX());
 
         // Get start top/height
         double startTop = startLine.getTextY() - 1;
@@ -63,12 +63,12 @@ public class TextBlockUtils {
         if (startY != endY) {  //!SnapMath.equals(startY, endY)
             double endTop = endLine.getTextY() - 1;
             double endHeight = endLine.getHeight() + 2;
-            path.lineTo(textBlock.getWidth(), startTop);
-            path.lineTo(textBlock.getWidth(), endTop);
+            path.lineTo(textModel.getWidth(), startTop);
+            path.lineTo(textModel.getWidth(), endTop);
             path.lineTo(endX, endTop);
             path.lineTo(endX, endTop + endHeight);
-            path.lineTo(textBlock.getX(), endTop + endHeight);
-            path.lineTo(textBlock.getX(), startTop + startHeight);
+            path.lineTo(textModel.getX(), endTop + endHeight);
+            path.lineTo(textModel.getX(), startTop + startHeight);
         }
 
         // If selection spans only one line, add path components for upper-right, lower-right
@@ -85,10 +85,10 @@ public class TextBlockUtils {
     /**
      * Returns underlined runs for text box.
      */
-    public static TextRun[] getUnderlineRuns(TextBlock textBlock, Rect aRect)
+    public static TextRun[] getUnderlineRuns(TextModel textModel, Rect aRect)
     {
         // Get lines
-        List<TextLine> textLines = textBlock.getLines();
+        List<TextLine> textLines = textModel.getLines();
         List<TextRun> underlineRuns = new ArrayList<>();
 
         // Iterate over lines to add underline runs to list
@@ -114,9 +114,9 @@ public class TextBlockUtils {
     /**
      * Paint TextBox to given painter.
      */
-    public static void paintTextBlockUnderlines(Painter aPntr, TextBlock textBlock, Rect clipRect)
+    public static void paintTextModelUnderlines(Painter aPntr, TextModel textModel, Rect clipRect)
     {
-        TextRun[] underlineRuns = getUnderlineRuns(textBlock, clipRect);
+        TextRun[] underlineRuns = getUnderlineRuns(textModel, clipRect);
 
         for (TextRun run : underlineRuns) {
 
@@ -183,14 +183,14 @@ public class TextBlockUtils {
     /**
      * Sets the Mouse Y for given text block to assist in caret placement (can be ambiguous for start/end of line).
      */
-    public static void setMouseY(TextBlock textBlock, double aY)  { textBlock._mouseY = aY; }
+    public static void setMouseY(TextModel textModel, double aY)  { textModel._mouseY = aY; }
 
     /**
      * This method returns the range of the @-sign delinated key closest to the current selection (or null if not found).
      */
-    public static TextSel smartFindFormatRange(TextBlock textBlock, int selStart, int selEnd)
+    public static TextSel smartFindFormatRange(TextModel textModel, int selStart, int selEnd)
     {
-        String string = textBlock.getString();
+        String string = textModel.getString();
         int prevAtSignIndex = -1;
         int nextAtSignIndex = -1;
 
@@ -220,7 +220,7 @@ public class TextBlockUtils {
         if (prevAtSignIndex >= 0 && nextAtSignIndex >= 0 && prevAtSignIndex != nextAtSignIndex) {
             int start = Math.min(prevAtSignIndex, nextAtSignIndex);
             int end = Math.max(prevAtSignIndex, nextAtSignIndex);
-            return new TextSel(textBlock, start, end + 1);
+            return new TextSel(textModel, start, end + 1);
         }
 
         // Return null since range not found
@@ -230,14 +230,14 @@ public class TextBlockUtils {
     /**
      * XML archival.
      */
-    public static XMLElement toXML(TextBlock textBlock, XMLArchiver anArchiver)
+    public static XMLElement toXML(TextModel textModel, XMLArchiver anArchiver)
     {
         // Get new element named xstring
         XMLElement xml = new XMLElement("xstring");
 
         // Declare loop variables for text attributes: TextTyle, LineStyle, Font, Color, Format, Outline, Underline, Scripting, CS
-        TextStyle textStyle = textBlock.getDefaultTextStyle();
-        TextLineStyle lineStyle = textBlock.getDefaultLineStyle();
+        TextStyle textStyle = textModel.getDefaultTextStyle();
+        TextLineStyle lineStyle = textModel.getDefaultLineStyle();
         Font font = textStyle.getFont();
         Color color = textStyle.getColor();
         TextFormat format = textStyle.getFormat();
@@ -247,7 +247,7 @@ public class TextBlockUtils {
         boolean underline = false;
 
         // Iterate over runs
-        for (TextLine line : textBlock.getLines()) {
+        for (TextLine line : textModel.getLines()) {
             for (TextRun run : line.getRuns()) {
 
                 // If font changed for run, write font element
@@ -322,10 +322,10 @@ public class TextBlockUtils {
     /**
      * XML unarchival.
      */
-    public static void fromXML(TextBlock textBlock, XMLArchiver anArchiver, XMLElement anElement)
+    public static void fromXML(TextModel textModel, XMLArchiver anArchiver, XMLElement anElement)
     {
         // Get map for run attributes
-        TextStyle style = textBlock.getDefaultTextStyle();
+        TextStyle style = textModel.getDefaultTextStyle();
         TextLineStyle lineStyle = null;
 
         // Iterate over child elements to snag common attributes
@@ -336,10 +336,10 @@ public class TextBlockUtils {
             if (e.getName().equals("string")) {
                 String str = e.getValue();
                 if (str == null || str.isEmpty()) continue;
-                int len = textBlock.length();
-                textBlock.addCharsWithStyle(str, style);
+                int len = textModel.length();
+                textModel.addCharsWithStyle(str, style);
                 if (lineStyle != null) {
-                    textBlock.setLineStyle(lineStyle, len, len + str.length());
+                    textModel.setLineStyle(lineStyle, len, len + str.length());
                     lineStyle = null;
                 }
             }
@@ -410,8 +410,8 @@ public class TextBlockUtils {
         }
 
         // If no string was read, apply attributes anyway
-        if (textBlock.length() == 0)
-            textBlock.getLine(0).getRun(0).setTextStyle(style);
+        if (textModel.length() == 0)
+            textModel.getLine(0).getRun(0).setTextStyle(style);
     }
 
     /**
@@ -420,9 +420,9 @@ public class TextBlockUtils {
     public static class CharsChange extends PropChange {
 
         /** Constructor. */
-        public CharsChange(TextBlock aTextBlock, Object oldV, Object newV, int anInd)
+        public CharsChange(TextModel textModel, Object oldV, Object newV, int anInd)
         {
-            super(aTextBlock, TextBlock.Chars_Prop, oldV, newV, anInd);
+            super(textModel, TextModel.Chars_Prop, oldV, newV, anInd);
         }
 
         public CharSequence getOldValue()  { return (CharSequence) super.getOldValue(); }
@@ -431,30 +431,30 @@ public class TextBlockUtils {
 
         public void doChange(Object oldValue, Object newValue)
         {
-            TextBlock textBlock = (TextBlock) getSource();
+            TextModel textModel = (TextModel) getSource();
             int index = getIndex();
 
             if (oldValue != null)
-                textBlock.removeChars(index, index + ((CharSequence) oldValue).length());
-            else textBlock.addChars((CharSequence) newValue, index);
+                textModel.removeChars(index, index + ((CharSequence) oldValue).length());
+            else textModel.addChars((CharSequence) newValue, index);
         }
 
         public PropChange merge(PropChange anEvent)
         {
-            TextBlock textBlock = (TextBlock) getSource();
+            TextModel textModel = (TextModel) getSource();
             CharsChange event = (CharsChange) anEvent;
             CharSequence newVal = getNewValue();
             CharSequence eventNewVal = event.getNewValue();
             int index = getIndex();
 
             if (newVal != null && eventNewVal != null && newVal.length() + index == event.getIndex())
-                return new CharsChange(textBlock,null, newVal.toString() + eventNewVal, index);
+                return new CharsChange(textModel,null, newVal.toString() + eventNewVal, index);
             return null;
         }
     }
 
     /**
-     * A property change event for TextBlock.Style change.
+     * A property change event for TextModel.Style change.
      */
     public static class StyleChange extends PropChange {
 
@@ -462,9 +462,9 @@ public class TextBlockUtils {
         int _start, _end;
 
         /** Constructor. */
-        public StyleChange(TextBlock aTextBlock, Object oV, Object nV, int aStart, int anEnd)
+        public StyleChange(TextModel textModel, Object oV, Object nV, int aStart, int anEnd)
         {
-            super(aTextBlock, TextBlock.Style_Prop, oV, nV, -1);
+            super(textModel, TextModel.Style_Prop, oV, nV, -1);
             _start = aStart;
             _end = anEnd;
         }
@@ -475,27 +475,27 @@ public class TextBlockUtils {
 
         public void doChange(Object oldVal, Object newVal)
         {
-            TextBlock textBlock = (TextBlock) getSource();
-            textBlock.setTextStyle((TextStyle) newVal, _start, _end);
+            TextModel textModel = (TextModel) getSource();
+            textModel.setTextStyle((TextStyle) newVal, _start, _end);
         }
     }
 
     /**
-     * A property change event for TextBlock.Style change.
+     * A property change event for TextModel.Style change.
      */
     public static class LineStyleChange extends PropChange {
 
         /** Constructor. */
-        public LineStyleChange(TextBlock aTextBlock, Object oV, Object nV, int anIndex)
+        public LineStyleChange(TextModel textModel, Object oV, Object nV, int anIndex)
         {
-            super(aTextBlock, TextBlock.LineStyle_Prop, oV, nV, anIndex);
+            super(textModel, TextModel.LineStyle_Prop, oV, nV, anIndex);
         }
 
         public void doChange(Object oval, Object nval)
         {
-            TextBlock textBlock = (TextBlock) getSource();
-            TextLine line = textBlock.getLine(getIndex());
-            textBlock.setLineStyle((TextLineStyle) nval, line.getStartCharIndex(), line.getStartCharIndex());
+            TextModel textModel = (TextModel) getSource();
+            TextLine line = textModel.getLine(getIndex());
+            textModel.setLineStyle((TextLineStyle) nval, line.getStartCharIndex(), line.getStartCharIndex());
         }
     }
 }

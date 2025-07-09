@@ -6,9 +6,10 @@ import snap.geom.Rect;
 import snap.geom.Shape;
 
 /**
- * This TextBlock subclass adds support for text wrapping and syncs to a source TextBlock.
+ * This TextModel subclass adds support for advanced features like text wrapping, font scaling, linking multiple
+ * text models and more.
  */
-public class TextBox extends TextBlock {
+public class TextModelX extends TextModel {
 
     // Whether to wrap lines that overrun bounds
     private boolean _wrapLines;
@@ -19,7 +20,7 @@ public class TextBox extends TextBlock {
     // Whether text is linked to another text
     private boolean _linked;
 
-    // The start char index of this box in TextBlock
+    // The start char index of this text in source text
     private int _startCharIndex;
 
     // The font scale for this box
@@ -34,7 +35,7 @@ public class TextBox extends TextBlock {
     /**
      * Constructor.
      */
-    public TextBox()
+    public TextModelX()
     {
         this(false);
     }
@@ -42,29 +43,29 @@ public class TextBox extends TextBlock {
     /**
      * Constructor with option for rich text.
      */
-    public TextBox(boolean isRichText)
+    public TextModelX(boolean isRichText)
     {
         super(isRichText);
-        TextBlock textBlock = new TextBlock(isRichText);
-        setSourceText(textBlock);
+        TextModel textModel = new TextModel(isRichText);
+        setSourceText(textModel);
     }
 
     /**
      * Constructor for source text block.
      */
-    public TextBox(TextBlock sourceText)
+    public TextModelX(TextModel sourceText)
     {
         super(sourceText.isRichText());
         setSourceText(sourceText);
     }
 
     /**
-     * Sets the source TextBlock.
+     * Sets the source TextModel.
      */
-    public void setSourceText(TextBlock aTextBlock)
+    public void setSourceText(TextModel textModel)
     {
 //        updateTextAll();
-        setNextText(aTextBlock);
+        setNextText(textModel);
     }
 
     /**
@@ -222,12 +223,12 @@ public class TextBox extends TextBlock {
     }
 
     /**
-     * Returns the start char in source TextBlock.
+     * Returns the start char in source text.
      */
     public int getStartCharIndex()  { return _startCharIndex; }
 
     /**
-     * Sets the start char in source TextBlock.
+     * Sets the start char in source text.
      */
     public void setStartCharIndex(int charIndex)
     {
@@ -283,7 +284,7 @@ public class TextBox extends TextBlock {
         if (length() == 0 && _nextText.isEmpty()) return;
 
         // Cache NextText
-        TextBlock nextText = _nextText;
+        TextModel nextText = _nextText;
         _nextText = null;
 
         // If WrapLines, mark location of first line's first token - if it shrinks, might need to re-wrap previous line

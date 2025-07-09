@@ -54,7 +54,7 @@ public class SpellCheck {
     /**
      * Returns a path for misspelled word underlining.
      */
-    public static Shape getSpellingPath(TextBlock textBox, int selStart)
+    public static Shape getSpellingPath(TextModel textBox, int selStart)
     {
         // Get text box and text string and path object
         String string = textBox.getString();

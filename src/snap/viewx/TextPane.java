@@ -8,7 +8,7 @@ import snap.gfx.Font;
 import snap.gfx.Image;
 import snap.props.PropChange;
 import snap.props.Undoer;
-import snap.text.TextBlock;
+import snap.text.TextModel;
 import snap.text.TextDoc;
 import snap.text.TextLine;
 import snap.text.TextSel;
@@ -245,9 +245,9 @@ public class TextPane extends ViewOwner {
     protected void saveChangesImpl()
     {
         TextArea textArea = getTextArea();
-        TextBlock textBlock = textArea.getTextBlock().getSourceText();
+        TextModel textModel = textArea.getTextModel().getSourceText();
 
-        if (textBlock instanceof TextDoc textDoc) {
+        if (textModel instanceof TextDoc textDoc) {
             try { textDoc.writeToSourceFile(); }
             catch (Exception e) { throw new RuntimeException(e); }
         }
@@ -328,7 +328,7 @@ public class TextPane extends ViewOwner {
     protected void handleTextAreaPropChange(PropChange aPC)  { }
 
     /**
-     * Called when TextBlock does prop change.
+     * Called when TextModel does prop change.
      */
     protected void handleSourceTextPropChange(PropChange aPC)
     {

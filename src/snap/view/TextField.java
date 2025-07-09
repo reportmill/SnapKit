@@ -9,7 +9,7 @@ import snap.gfx.*;
 import snap.props.PropChange;
 import snap.props.PropSet;
 import snap.text.TextAdapter;
-import snap.text.TextBlock;
+import snap.text.TextModel;
 import snap.util.*;
 import java.util.Objects;
 
@@ -79,7 +79,7 @@ public class TextField extends ParentView {
         enableEvents(Action);
 
         // Create TextAdapter
-        _textAdapter = new TextAdapter(new TextBlock());
+        _textAdapter = new TextAdapter(new TextModel());
         _textAdapter.setView(this);
         _textAdapter.setEditable(true);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);

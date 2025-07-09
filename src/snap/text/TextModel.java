@@ -20,7 +20,7 @@ import java.util.Objects;
 /**
  * This class is the basic text storage class, holding a list of TextLine.
  */
-public class TextBlock extends PropObject implements CharSequenceX, Cloneable, XMLArchiver.Archivable {
+public class TextModel extends PropObject implements CharSequenceX, Cloneable, XMLArchiver.Archivable {
 
     // Whether text is rich
     private boolean _rich;
@@ -41,7 +41,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     private boolean _textModified;
 
     // The next text model
-    protected TextBlock _nextText;
+    protected TextModel _nextText;
 
     // The X/Y of the text block
     private double _x, _y;
@@ -75,7 +75,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     /**
      * Constructor.
      */
-    public TextBlock()
+    public TextModel()
     {
         this(false);
     }
@@ -83,7 +83,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     /**
      * Constructor with option to make rich text.
      */
-    public TextBlock(boolean isRich)
+    public TextModel(boolean isRich)
     {
         super();
         _rich = isRich;
@@ -124,12 +124,12 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     /**
      * Returns the next text model.
      */
-    public TextBlock getNextText()  { return _nextText; }
+    public TextModel getNextText()  { return _nextText; }
 
     /**
      * Sets the next text model.
      */
-    public void setNextText(TextBlock nextText)
+    public void setNextText(TextModel nextText)
     {
         if (nextText == getNextText()) return;
 
@@ -148,7 +148,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     /**
      * Returns the root text block.
      */
-    public TextBlock getSourceText()  { return _nextText != null ? _nextText.getSourceText() : this; }
+    public TextModel getSourceText()  { return _nextText != null ? _nextText.getSourceText() : this; }
 
     /**
      * Returns the number of characters in the text.
@@ -408,7 +408,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
         // Send PropertyChange
         if (isPropChangeEnabled())
-            firePropChange(new TextBlockUtils.CharsChange(this, null, theChars, anIndex));
+            firePropChange(new TextModelUtils.CharsChange(this, null, theChars, anIndex));
         _prefW = -1;
     }
 
@@ -514,7 +514,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
         // If deleted chars is set, send property change
         if (removedChars != null)
-            firePropChange(new TextBlockUtils.CharsChange(this, removedChars, null, aStartCharIndex));
+            firePropChange(new TextModelUtils.CharsChange(this, removedChars, null, aStartCharIndex));
         _prefW = -1;
     }
 
@@ -609,11 +609,11 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Adds given TextBlock to this text at given index.
+     * Adds given TextModel to this text at given index.
      */
-    public void addTextBlock(TextBlock textBlock, int anIndex)
+    public void addTextModel(TextModel textModel, int anIndex)
     {
-        List<TextLine> textLines = textBlock.getLines();
+        List<TextLine> textLines = textModel.getLines();
         for (TextLine line : textLines) {
             TextRun[] lineRuns = line.getRuns();
             for (TextRun run : lineRuns) {
@@ -654,7 +654,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
                 int lineStartCharIndex = textRun.getLine().getStartCharIndex();
                 int runStart = textRun.getStartCharIndex() + lineStartCharIndex;
                 int runEnd = textRun.getEndCharIndex() + lineStartCharIndex;
-                PropChange pc = new TextBlockUtils.StyleChange(this, oldStyle, textStyle, runStart, runEnd);
+                PropChange pc = new TextModelUtils.StyleChange(this, oldStyle, textStyle, runStart, runEnd);
                 firePropChange(pc);
             }
         }
@@ -720,7 +720,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
         // Fire prop change
         if (isPropChangeEnabled())
-            firePropChange(new TextBlockUtils.LineStyleChange(this, oldStyle, aStyle, 0));
+            firePropChange(new TextModelUtils.LineStyleChange(this, oldStyle, aStyle, 0));
 
         _prefW = -1;
     }
@@ -764,7 +764,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             if (!aStyle.equals(oldStyle)) {
                 line.setLineStyle(aStyle);
                 if (isPropChangeEnabled())
-                    firePropChange(new TextBlockUtils.LineStyleChange(this, oldStyle, aStyle, i));
+                    firePropChange(new TextModelUtils.LineStyleChange(this, oldStyle, aStyle, i));
             }
         }
     }
@@ -790,7 +790,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             if (!newStyle.equals(oldStyle)) {
                 line.setLineStyle(newStyle);
                 if (isPropChangeEnabled())
-                    firePropChange(new TextBlockUtils.LineStyleChange(this, oldStyle, newStyle, i));
+                    firePropChange(new TextModelUtils.LineStyleChange(this, oldStyle, newStyle, i));
             }
         }
     }
@@ -816,7 +816,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     protected void addLine(TextLine aLine, int anIndex)
     {
         _lines.add(anIndex, aLine);
-        aLine._textBlock = this;
+        aLine._textModel = this;
         updateLines(anIndex - 1);
     }
 
@@ -826,7 +826,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     protected void removeLine(int anIndex)
     {
         TextLine line = _lines.remove(anIndex);
-        line._textBlock = null;
+        line._textModel = null;
         updateLines(anIndex - 1);
     }
 
@@ -1108,7 +1108,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     public int getStartCharIndex()  { return 0; }
 
     /**
-     * Returns the end char in source TextBlock.
+     * Returns the end char in source text.
      */
     public int getEndCharIndex()
     {
@@ -1250,7 +1250,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public Shape getPathForCharRange(int aStartCharIndex, int aEndCharIndex)
     {
-        return TextBlockUtils.getPathForCharRange(this, aStartCharIndex, aEndCharIndex);
+        return TextModelUtils.getPathForCharRange(this, aStartCharIndex, aEndCharIndex);
     }
 
     /**
@@ -1304,7 +1304,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
         // Paint underlines
         if (isUnderlined())
-            TextBlockUtils.paintTextBlockUnderlines(aPntr, this, clipBounds);
+            TextModelUtils.paintTextModelUnderlines(aPntr, this, clipBounds);
 
         // Restore state
         aPntr.restore();
@@ -1425,7 +1425,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         if (_nextText != null)
             return _nextText.createTokensForTextLine(aTextLine);
 
-        return TextBlockUtils.createTokensForTextLine(aTextLine);
+        return TextModelUtils.createTokensForTextLine(aTextLine);
     }
 
     /**
@@ -1475,19 +1475,19 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     /**
      * Returns underlined runs for text box.
      */
-    public TextRun[] getUnderlineRuns(Rect aRect)  { return TextBlockUtils.getUnderlineRuns(this, aRect); }
+    public TextRun[] getUnderlineRuns(Rect aRect)  { return TextModelUtils.getUnderlineRuns(this, aRect); }
 
     /**
      * Returns a copy of this text for given char range.
      */
-    public TextBlock copyForRange(int aStart, int aEnd)
+    public TextModel copyForRange(int aStart, int aEnd)
     {
         // Forward to NextText
         if (_nextText != null)
             return _nextText.copyForRange(aStart, aEnd);
 
         // Create new RichText and iterate over lines in range to add copies for subrange
-        TextBlock textCopy = new TextBlock(isRichText());
+        TextModel textCopy = new TextModel(isRichText());
         textCopy._lines.remove(0);
 
         // Get start/end line indexes
@@ -1511,11 +1511,11 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      * Standard clone implementation.
      */
     @Override
-    public TextBlock clone()
+    public TextModel clone()
     {
         // Do normal clone
-        TextBlock clone;
-        try { clone = (TextBlock) super.clone(); }
+        TextModel clone;
+        try { clone = (TextModel) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
 
         // Reset lines array and length
@@ -1562,7 +1562,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         if (_nextText != null)
             return _nextText.toXML(anArchiver);
 
-        return TextBlockUtils.toXML(this, anArchiver);
+        return TextModelUtils.toXML(this, anArchiver);
     }
 
     /**
@@ -1571,7 +1571,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     @Override
     public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
-        TextBlockUtils.fromXML(this, anArchiver, anElement);
+        TextModelUtils.fromXML(this, anArchiver, anElement);
         return this;
     }
 }

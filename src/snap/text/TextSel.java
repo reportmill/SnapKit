@@ -10,8 +10,8 @@ import snap.view.ViewUtils;
  */
 public class TextSel {
 
-    // The TextBlock
-    private TextBlock _textBlock;
+    // The TextModel
+    private TextModel _textModel;
 
     // The selection anchor
     private int  _anchor;
@@ -28,9 +28,9 @@ public class TextSel {
     /**
      * Constructor.
      */
-    public TextSel(TextBlock aTextBox, int aStart, int aEnd)
+    public TextSel(TextModel aTextBox, int aStart, int aEnd)
     {
-        _textBlock = aTextBox;
+        _textModel = aTextBox;
         _anchor = aStart;
         _index = aEnd;
         _start = Math.min(aStart, aEnd);
@@ -40,33 +40,33 @@ public class TextSel {
     /**
      * Constructor for selected range resulting from the given two points.
      */
-    public TextSel(TextBlock aTextBox, double x1, double y1, double x2, double y2, boolean isWordSel, boolean isParaSel)
+    public TextSel(TextModel aTextBox, double x1, double y1, double x2, double y2, boolean isWordSel, boolean isParaSel)
     {
         // Get text
-        _textBlock = aTextBox;
+        _textModel = aTextBox;
 
         // Get character index for point 1 & point 2
-        int p1CharIndex = _textBlock.getCharIndexForXY(x1, y1);
-        int p2CharIndex = _textBlock.getCharIndexForXY(x2, y2);
+        int p1CharIndex = _textModel.getCharIndexForXY(x1, y1);
+        int p2CharIndex = _textModel.getCharIndexForXY(x2, y2);
 
         // Set selection start and end for selected chars
         int selStart = Math.min(p1CharIndex, p2CharIndex);
         int selEnd = Math.max(p1CharIndex, p2CharIndex);
-        int textLength = _textBlock.length();
+        int textLength = _textModel.length();
 
         // If word selecting, expand selection to word boundary
         if (isWordSel) {
-            while (selStart > 0 && isWordChar(_textBlock.charAt(selStart - 1)))
+            while (selStart > 0 && isWordChar(_textModel.charAt(selStart - 1)))
                 selStart--;
-            while (selEnd < textLength && isWordChar(_textBlock.charAt(selEnd)))
+            while (selEnd < textLength && isWordChar(_textModel.charAt(selEnd)))
                 selEnd++;
         }
 
         // If paragraph selecting, expand selection to paragraph boundary
         else if (isParaSel) {
-            while (selStart > 0 && !_textBlock.isLineEndChar(selStart - 1))
+            while (selStart > 0 && !_textModel.isLineEndChar(selStart - 1))
                 selStart--;
-            while (selEnd < textLength && !_textBlock.isLineEndChar(selEnd))
+            while (selEnd < textLength && !_textModel.isLineEndChar(selEnd))
                 selEnd++;
             if (selEnd < textLength)
                 selEnd++;
@@ -82,22 +82,22 @@ public class TextSel {
     /**
      * Returns the selection anchor (initial char of multi-char selection - usually start).
      */
-    public int getAnchor()  { return Math.min(_anchor, _textBlock.length()); }
+    public int getAnchor()  { return Math.min(_anchor, _textModel.length()); }
 
     /**
      * Returns the cursor position (final char of multi-char selection - usually end).
      */
-    public int getIndex()  { return Math.min(_index, _textBlock.length()); }
+    public int getIndex()  { return Math.min(_index, _textModel.length()); }
 
     /**
      * Returns the selection start.
      */
-    public int getStart()  { return Math.min(_start, _textBlock.length()); }
+    public int getStart()  { return Math.min(_start, _textModel.length()); }
 
     /**
      * Returns the selection end.
      */
-    public int getEnd()  { return Math.min(_end, _textBlock.length()); }
+    public int getEnd()  { return Math.min(_end, _textModel.length()); }
 
     /**
      * The length.
@@ -116,7 +116,7 @@ public class TextSel {
     {
         int startCharIndex = getStart();
         int endCharIndex = getEnd();
-        return _textBlock.subSequence(startCharIndex, endCharIndex).toString();
+        return _textModel.subSequence(startCharIndex, endCharIndex).toString();
     }
 
     /**
@@ -126,8 +126,8 @@ public class TextSel {
     {
         // If selection empty but not at end, get next char (or after newline, if at newline)
         int charIndex = getEnd();
-        if ((isEmpty() || ViewUtils.isShiftDown()) && charIndex < _textBlock.length())
-            charIndex = _textBlock.isLineEnd(charIndex) ? _textBlock.indexAfterNewline(charIndex) : (charIndex + 1);
+        if ((isEmpty() || ViewUtils.isShiftDown()) && charIndex < _textModel.length())
+            charIndex = _textModel.isLineEnd(charIndex) ? _textModel.indexAfterNewline(charIndex) : (charIndex + 1);
         return charIndex;
     }
 
@@ -139,7 +139,7 @@ public class TextSel {
         // If selection empty but not at start, get previous char (or before newline if after newline)
         int charIndex = getStart();
         if ((isEmpty() || ViewUtils.isShiftDown()) && charIndex > 0)
-            charIndex = _textBlock.isAfterLineEnd(charIndex) ? _textBlock.lastIndexOfNewline(charIndex) : (charIndex - 1);
+            charIndex = _textModel.isAfterLineEnd(charIndex) ? _textModel.lastIndexOfNewline(charIndex) : (charIndex - 1);
         return charIndex;
     }
 
@@ -149,7 +149,7 @@ public class TextSel {
     public int getCharUp()
     {
         int selIndex = getIndex();
-        TextLine lastColumnLine = _textBlock.getLineForCharIndex(selIndex);
+        TextLine lastColumnLine = _textModel.getLineForCharIndex(selIndex);
         int lastColumn = selIndex - lastColumnLine.getStartCharIndex();
         TextLine thisLine = getStartLine();
         TextLine nextLine = thisLine.getPrevious();
@@ -166,7 +166,7 @@ public class TextSel {
     public int getCharDown()
     {
         int selIndex = getIndex();
-        TextLine lastColumnLine = _textBlock.getLineForCharIndex(selIndex);
+        TextLine lastColumnLine = _textModel.getLineForCharIndex(selIndex);
         int lastColumn = selIndex - lastColumnLine.getStartCharIndex();
         TextLine thisLine = getEndLine();
         TextLine nextLine = thisLine.getNext();
@@ -183,14 +183,14 @@ public class TextSel {
     public int getLineStart()
     {
         // Get index at beginning of current line
-        int index1 = _textBlock.lastIndexAfterNewline(getEnd());
+        int index1 = _textModel.lastIndexAfterNewline(getEnd());
         if (index1 < 0)
             index1 = 0;
 
         // Get index of first non-whitespace char and set selection
         int index2 = index1;
-        int textLength = _textBlock.length();
-        while (index2 < textLength && _textBlock.charAt(index2) == ' ')
+        int textLength = _textModel.length();
+        while (index2 < textLength && _textModel.charAt(index2) == ' ')
             index2++;
 
         return !isEmpty() || index2 != getStart() ? index2 : index1;
@@ -202,8 +202,8 @@ public class TextSel {
     public int getLineEnd()
     {
         // Get index of newline and set selection
-        int index = _textBlock.indexOfNewline(getEnd());
-        return index >= 0 ? index : _textBlock.length();
+        int index = _textModel.indexOfNewline(getEnd());
+        return index >= 0 ? index : _textModel.length();
     }
 
     /**
@@ -211,7 +211,7 @@ public class TextSel {
      */
     public TextLine getStartLine()
     {
-        return _textBlock.getLineForCharIndex(getStart());
+        return _textModel.getLineForCharIndex(getStart());
     }
 
     /**
@@ -221,7 +221,7 @@ public class TextSel {
     {
         // Get line at end char index
         int endCharIndex = getEnd();
-        TextLine endLine = _textBlock.getLineForCharIndex(endCharIndex);
+        TextLine endLine = _textModel.getLineForCharIndex(endCharIndex);
 
         // If end char index is at start of line and sel not empty, back up to previous line
         if (endCharIndex == endLine.getStartCharIndex() && !isEmpty())
@@ -249,7 +249,7 @@ public class TextSel {
      */
     public Shape getPath()
     {
-        return _textBlock.getPathForCharRange(getStart(), getEnd());
+        return _textModel.getPathForCharRange(getStart(), getEnd());
     }
 
     /**

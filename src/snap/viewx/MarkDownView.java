@@ -2,7 +2,7 @@ package snap.viewx;
 import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.*;
-import snap.text.TextBlock;
+import snap.text.TextModel;
 import snap.text.TextLink;
 import snap.text.TextStyle;
 import snap.util.ArrayUtils;
@@ -174,8 +174,8 @@ public class MarkDownView extends ChildView {
 
         // Reset style
         TextStyle textStyle = headerNode.getNodeType() == MDNode.NodeType.Header1 ? MDUtils.getHeader1Style() : MDUtils.getHeader2Style();
-        TextBlock textBlock = textArea.getTextBlock();
-        textBlock.setDefaultTextStyle(textStyle);
+        TextModel textModel = textArea.getTextModel();
+        textModel.setDefaultTextStyle(textStyle);
 
         // Set text
         addNodeTextToTextArea(textArea, headerNode.getText());
@@ -208,8 +208,8 @@ public class MarkDownView extends ChildView {
 
         // Reset style
         TextStyle textStyle = MDUtils.getContentStyle();
-        TextBlock textBlock = textArea.getTextBlock();
-        textBlock.setDefaultTextStyle(textStyle);
+        TextModel textModel = textArea.getTextModel();
+        textModel.setDefaultTextStyle(textStyle);
 
         // Set text
         addNodeTextToTextArea(textArea, contentNode.getText());
@@ -255,8 +255,8 @@ public class MarkDownView extends ChildView {
 
             // Add link
             TextArea textArea = (TextArea) linkNodeView;
-            TextBlock textBlock = textArea.getTextBlock();
-            textBlock.setTextStyle(linkTextStyle, 0, textBlock.length());
+            TextModel textModel = textArea.getTextModel();
+            textModel.setTextStyle(linkTextStyle, 0, textModel.length());
         }
     }
 
@@ -329,7 +329,7 @@ public class MarkDownView extends ChildView {
         // If first child is TextArea, add bullet
         if (mixedNodeView.getChild(0) instanceof TextArea) {
             TextArea textArea = (TextArea) mixedNodeView.getChild(0);
-            textArea.getTextBlock().addChars("• ", 0);
+            textArea.getTextModel().addChars("• ", 0);
         }
 
         // Otherwise create text area and insert
@@ -359,11 +359,11 @@ public class MarkDownView extends ChildView {
 
         // Reset style
         TextStyle textStyle = MDUtils.getCodeStyle();
-        TextBlock textBlock = textView.getTextBlock();
-        textBlock.setDefaultTextStyle(textStyle);
+        TextModel textModel = textView.getTextModel();
+        textModel.setDefaultTextStyle(textStyle);
 
         // Set text
-        textBlock.addChars(codeNode.getText());
+        textModel.addChars(codeNode.getText());
 
         // Add listener to select code block
         textView.addEventFilter(e -> _selCodeBlockNode = codeNode, MousePress);
@@ -537,9 +537,9 @@ public class MarkDownView extends ChildView {
     {
         // If no fontStyle, just add chars with default font
         if (fontStyle == null) {
-            TextBlock textBlock = textArea.getTextBlock();
+            TextModel textModel = textArea.getTextModel();
             TextStyle textStyle = textArea.getDefaultTextStyle();
-            textBlock.addCharsWithStyle(nodeText, textStyle);
+            textModel.addCharsWithStyle(nodeText, textStyle);
             return;
         }
 
@@ -560,8 +560,8 @@ public class MarkDownView extends ChildView {
     private static void addTextAreaTextForFontStyle(TextArea textArea, String theChars, String fontStyle)
     {
         // Get font for given fontStyle
-        TextBlock textBlock = textArea.getTextBlock();
-        Font defaultFont = textBlock.getDefaultFont();
+        TextModel textModel = textArea.getTextModel();
+        Font defaultFont = textModel.getDefaultFont();
         switch (fontStyle) {
             case "Bold": defaultFont = defaultFont.getBold(); break;
             case "Italic": defaultFont = defaultFont.getItalic(); break;
@@ -570,7 +570,7 @@ public class MarkDownView extends ChildView {
 
         // Get text style for font and add chars
         TextStyle textStyle = textArea.getDefaultTextStyle().copyForStyleValue(defaultFont);
-        textBlock.addCharsWithStyle(theChars, textStyle);
+        textModel.addCharsWithStyle(theChars, textStyle);
     }
 
     // Return regex for FontStyle

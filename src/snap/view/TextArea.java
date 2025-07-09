@@ -10,7 +10,7 @@ import snap.util.*;
 import java.util.Objects;
 
 /**
- * A view subclass for displaying and editing a TextBlock.
+ * A view subclass for displaying and editing a TextModel.
  */
 public class TextArea extends ParentView {
 
@@ -18,7 +18,7 @@ public class TextArea extends ParentView {
     private TextAdapter _textAdapter;
 
     // The text being edited
-    private TextBlock _textBlock;
+    private TextModel _textModel;
 
     // Whether to synchronize text area font with text block
     private boolean _syncTextFont = true;
@@ -51,11 +51,11 @@ public class TextArea extends ParentView {
     {
         super();
 
-        // Create/set default TextBlock
-        _textBlock = new TextBox(isRichText);
+        // Create/set default text
+        _textModel = new TextModelX(isRichText);
 
         // Create TextAdapter
-        _textAdapter = createTextAdapter(_textBlock);
+        _textAdapter = createTextAdapter(_textModel);
         _textAdapter.setView(this);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
         _textAdapter.addSourceTextPropChangeListener(this::handleSourceTextPropChange);
@@ -64,16 +64,16 @@ public class TextArea extends ParentView {
     /**
      * Constructor for source text block.
      */
-    public TextArea(TextBlock sourceText)
+    public TextArea(TextModel sourceText)
     {
         super();
         setFocusPainted(false);
 
-        // Set default TextBlock
-        _textBlock = sourceText;
+        // Set text model
+        _textModel = sourceText;
 
         // Create TextAdapter
-        _textAdapter = createTextAdapter(_textBlock);
+        _textAdapter = createTextAdapter(_textModel);
         _textAdapter.setView(this);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
         _textAdapter.addSourceTextPropChangeListener(this::handleSourceTextPropChange);
@@ -87,17 +87,17 @@ public class TextArea extends ParentView {
     /**
      * Override to create TextAreaKeys.
      */
-    protected TextAdapter createTextAdapter(TextBlock textBlock)  { return new TextAdapter(textBlock); }
+    protected TextAdapter createTextAdapter(TextModel textModel)  { return new TextAdapter(textModel); }
 
     /**
-     * Returns the text block that holds the text.
+     * Returns the text model that holds the text.
      */
-    public TextBlock getTextBlock()  { return _textAdapter.getTextBlock(); }
+    public TextModel getTextModel()  { return _textAdapter.getTextModel(); }
 
     /**
-     * Sets the source TextBlock.
+     * Sets the source text.
      */
-    public void setSourceText(TextBlock aTextBlock)  { _textAdapter.setSourceText(aTextBlock); }
+    public void setSourceText(TextModel textModel)  { _textAdapter.setSourceText(textModel); }
 
     /**
      * Returns the plain string of the text being edited.
@@ -353,7 +353,7 @@ public class TextArea extends ParentView {
     public void delete()  { _textAdapter.delete(); }
 
     /**
-     * Replaces the current selection with the given contents (TextBlock or String).
+     * Replaces the current selection with the given contents (TextModel or String).
      */
     public void replaceCharsWithContent(Object theContent)  { _textAdapter.replaceCharsWithContent(theContent); }
 
@@ -556,7 +556,7 @@ public class TextArea extends ParentView {
         if (Objects.equals(aFont, getFont())) return;
         super.setFont(aFont);
 
-        // If SyncTextFont, forward to TextBlock
+        // If SyncTextFont, forward to TextModel
         if (isSyncTextFont())
             setTextFont(getFont());
     }
@@ -573,7 +573,7 @@ public class TextArea extends ParentView {
         // Do normal version
         super.parentFontChanged();
 
-        // If SyncTextFont, forward to TextBlock
+        // If SyncTextFont, forward to TextModel
         if (isSyncTextFont())
             setTextFont(getFont());
     }
@@ -628,8 +628,8 @@ public class TextArea extends ParentView {
     {
         // Handle DefaultTextStyle and SyncTextFont
         String propName = aPC.getPropName();
-        if (propName == TextBlock.DefaultTextStyle_Prop && isSyncTextFont()) {
-            Font font = _textBlock.getDefaultFont();
+        if (propName == TextModel.DefaultTextStyle_Prop && isSyncTextFont()) {
+            Font font = _textModel.getDefaultFont();
             setFont(font);
         }
 

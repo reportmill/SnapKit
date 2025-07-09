@@ -8,7 +8,7 @@ import snap.web.WebURL;
 /**
  * This class is the basic text storage class, holding a list of TextLine.
  */
-public class TextDoc extends TextBlock {
+public class TextDoc extends TextModel {
 
     // The URL of the file that provided the text
     private WebURL  _sourceURL;

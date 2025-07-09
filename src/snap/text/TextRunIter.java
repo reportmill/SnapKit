@@ -4,12 +4,12 @@
 package snap.text;
 
 /**
- * This class iterates over TextBlock TextRuns.
+ * This class iterates over TextModel TextRuns.
  */
 public class TextRunIter {
 
-    // The TextBlock
-    private TextBlock _textBlock;
+    // The TextModel
+    private TextModel _textModel;
 
     // The start char index
     private int _startCharIndex;
@@ -32,15 +32,15 @@ public class TextRunIter {
     /**
      * Constructor.
      */
-    public TextRunIter(TextBlock textBlock, int startCharIndex, int endCharIndex, boolean trimEndRuns)
+    public TextRunIter(TextModel textModel, int startCharIndex, int endCharIndex, boolean trimEndRuns)
     {
-        _textBlock = textBlock;
+        _textModel = textModel;
         _startCharIndex = startCharIndex;
         _endCharIndex = endCharIndex;
         _trimEndRuns = trimEndRuns;
 
         // Get starting line
-        _textLine = textBlock.getLineForCharIndex(startCharIndex);
+        _textLine = textModel.getLineForCharIndex(startCharIndex);
 
         // Get/set starting next run
         int startCharIndexInLine = startCharIndex - _textLine.getStartCharIndex();
@@ -126,7 +126,7 @@ public class TextRunIter {
         }
 
         // If end run ends after end char index, split at end char index
-        TextRun endRun = _textBlock.getRunForCharIndex(_endCharIndex);
+        TextRun endRun = _textModel.getRunForCharIndex(_endCharIndex);
         TextLine endLine = endRun.getLine();
         int endIndexInLine = _endCharIndex - endLine.getStartCharIndex();
         if (endIndexInLine < endRun.getEndCharIndex()) {

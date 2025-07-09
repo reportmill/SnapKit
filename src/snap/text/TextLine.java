@@ -12,8 +12,8 @@ import snap.util.SnapEnv;
  */
 public class TextLine implements CharSequenceX, Cloneable {
 
-    // The TextBlock that contains this line
-    protected TextBlock _textBlock;
+    // The TextModel that contains this line
+    protected TextModel _textModel;
 
     // The StringBuilder that holds line chars
     protected StringBuilder _sb = new StringBuilder();
@@ -54,17 +54,17 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Constructor.
      */
-    public TextLine(TextBlock aTextBlock)
+    public TextLine(TextModel textModel)
     {
-        _textBlock = aTextBlock;
-        _lineStyle = _textBlock.getDefaultLineStyle();
+        _textModel = textModel;
+        _lineStyle = _textModel.getDefaultLineStyle();
         addRun(createRun(), 0);
     }
 
     /**
-     * Returns the TextBlock.
+     * Returns the TextModel.
      */
-    public TextBlock getTextBlock()  { return _textBlock; }
+    public TextModel getTextModel()  { return _textModel; }
 
     /**
      * Returns the length of this text line.
@@ -140,7 +140,7 @@ public class TextLine implements CharSequenceX, Cloneable {
             return run;
 
         // If trying to add new style to plain text, complain
-        if (!_textBlock.isRichText()) {
+        if (!_textModel.isRichText()) {
             System.out.println("TextLine.getRunForCharIndexAndStyle: Trying to add new style to plain text");
             return run;
         }
@@ -182,7 +182,7 @@ public class TextLine implements CharSequenceX, Cloneable {
         if (anEnd == aStart) return;
 
         // Handle plain text: Just remove length from run and chars from string and update text
-        if (!_textBlock.isRichText()) {
+        if (!_textModel.isRichText()) {
             TextRun run = getRun(0);
             run.addLength(aStart - anEnd);
             _sb.delete(aStart, anEnd);
@@ -323,11 +323,11 @@ public class TextLine implements CharSequenceX, Cloneable {
      */
     protected void setTextStyle(TextStyle textStyle, int startCharIndex, int endCharIndex)
     {
-        // Forward to textBlock - though I think it should be the other way around
+        // Forward to textModel - though I think it should be the other way around
         int lineStartCharIndex = getStartCharIndex();
         int startCharIndexInText = lineStartCharIndex + startCharIndex;
         int endCharIndexInText = lineStartCharIndex + endCharIndex;
-        _textBlock.setTextStyle(textStyle, startCharIndexInText, endCharIndexInText);
+        _textModel.setTextStyle(textStyle, startCharIndexInText, endCharIndexInText);
     }
 
     /**
@@ -445,12 +445,12 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Returns the line x in text block coords.
      */
-    public double getTextX()  { return getX() + _textBlock.getX(); }
+    public double getTextX()  { return getX() + _textModel.getX(); }
 
     /**
      * Returns the line y.
      */
-    public double getTextY()  { return getY() + _textBlock.getAlignedY(); }
+    public double getTextY()  { return getY() + _textModel.getAlignedY(); }
 
     /**
      * Returns the y position for this line (in same coords as the layout frame).
@@ -537,11 +537,11 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Creates the tokens (via TextBlock.createTokensForTextLine() to provide another hook).
+     * Creates the tokens (via TextModel.createTokensForTextLine() to provide another hook).
      */
     protected TextToken[] createTokens()
     {
-        return _textBlock.createTokensForTextLine(this);
+        return _textModel.createTokensForTextLine(this);
     }
 
     /**
@@ -706,7 +706,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     public TextLine getNext()
     {
         int nextIndex = _lineIndex + 1;
-        return _textBlock != null && nextIndex < _textBlock.getLineCount() ? _textBlock.getLine(nextIndex) : null;
+        return _textModel != null && nextIndex < _textModel.getLineCount() ? _textModel.getLine(nextIndex) : null;
     }
 
     /**
@@ -715,7 +715,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     public TextLine getPrevious()
     {
         int prevIndex = _lineIndex - 1;
-        return _textBlock != null && prevIndex >= 0 ? _textBlock.getLine(prevIndex) : null;
+        return _textModel != null && prevIndex >= 0 ? _textModel.getLine(prevIndex) : null;
     }
 
     /**
@@ -808,8 +808,8 @@ public class TextLine implements CharSequenceX, Cloneable {
         _textMetrics = null;
 
         // Update Lines
-        if (_textBlock != null)
-            _textBlock.resetLineYForLinesAfterIndex(getLineIndex());
+        if (_textModel != null)
+            _textModel.resetLineYForLinesAfterIndex(getLineIndex());
     }
 
     /**
@@ -823,8 +823,8 @@ public class TextLine implements CharSequenceX, Cloneable {
         _textMetrics = null;
 
         // Update Lines
-        if (_textBlock != null)
-            _textBlock.updateLines(getLineIndex());
+        if (_textModel != null)
+            _textModel.updateLines(getLineIndex());
     }
 
     /**
@@ -838,15 +838,15 @@ public class TextLine implements CharSequenceX, Cloneable {
         // If justify, shift tokens in line (unless line has newline or is last line in RichText)
         if (lineStyle.isJustify()) {
 
-            boolean justifiable = getTokenCount() > 1 && _textBlock.getWidth() < 9999 && !isLastCharNewline() &&
-                    getEndCharIndex() != _textBlock.length();
+            boolean justifiable = getTokenCount() > 1 && _textModel.getWidth() < 9999 && !isLastCharNewline() &&
+                    getEndCharIndex() != _textModel.length();
             if (!justifiable)
                 return;
 
             // Calculate Justify token shift
             TextToken lastToken = getLastToken();
             double lineW = lastToken != null ? lastToken.getMaxX() : getWidth(); // getMaxX()
-            double lineMaxW = _textBlock.getWidth(); //_textBlock.getMaxHitX(getY(), _height);
+            double lineMaxW = _textModel.getWidth(); //_textModel.getMaxHitX(getY(), _height);
             double extraW = lineMaxW - lineW;
             double shiftX = extraW / (getTokenCount() - 1);
             double runningShiftX = 0;
@@ -859,10 +859,10 @@ public class TextLine implements CharSequenceX, Cloneable {
         }
 
         // Calculate X alignment shift
-        else if (lineStyle.getAlign() != HPos.LEFT && _textBlock.getWidth() < 9999) {
+        else if (lineStyle.getAlign() != HPos.LEFT && _textModel.getWidth() < 9999) {
             TextToken lastToken = getLastToken();
             double lineW = lastToken != null ? lastToken.getMaxX() : getWidth(); // getMaxX()
-            double lineMaxW = _textBlock.getWidth(); //_textBlock.getMaxHitX(getY(), _height);
+            double lineMaxW = _textModel.getWidth(); //_textModel.getMaxHitX(getY(), _height);
             double extraW = Math.max(lineMaxW - lineW, 0);
             double alignX = lineStyle.getAlign().doubleValue();
             _x = Math.round(alignX * extraW);
@@ -875,7 +875,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     protected TextRun splitRunForCharIndex(TextRun aRun, int anIndex)
     {
         // Sanity check
-        if (!_textBlock.isRichText())
+        if (!_textModel.isRichText())
             System.err.println("TextLine.splitRunForCharIndex: Should never get called for plain text");
 
         // Clone to get tail and delete chars from each

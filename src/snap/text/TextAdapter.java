@@ -23,7 +23,7 @@ public class TextAdapter extends PropObject {
     protected View _view;
 
     // The text being edited
-    protected TextBlock _textBlock;
+    protected TextModel _textModel;
 
     // Whether text is editable
     private boolean  _editable;
@@ -93,15 +93,13 @@ public class TextAdapter extends PropObject {
     public static final String Selection_Prop = "Selection";
 
     /**
-     * Constructor for source text block.
+     * Constructor for given text.
      */
-    public TextAdapter(TextBlock sourceText)
+    public TextAdapter(TextModel textModel)
     {
         super();
-
-        // Set default TextBlock
-        _textBlock = sourceText;
-        _textBlock.addPropChangeListener(_sourceTextPropLsnr);
+        _textModel = textModel;
+        _textModel.addPropChangeListener(_sourceTextPropLsnr);
     }
 
     /**
@@ -120,27 +118,27 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Returns the text block that holds the text.
+     * Returns the text model.
      */
-    public TextBlock getTextBlock()  { return _textBlock; }
+    public TextModel getTextModel()  { return _textModel; }
 
     /**
-     * Sets the text block that holds the text.
+     * Sets the text model.
      */
-    public void setTextBlock(TextBlock aTextBlock)
+    public void setTextModel(TextModel textModel)
     {
         // If already set, just return
-        if (aTextBlock == _textBlock) return;
+        if (textModel == _textModel) return;
 
         // Remove PropChangeListener
-        if (_textBlock != null)
-            _textBlock.removePropChangeListener(_sourceTextPropLsnr);
+        if (_textModel != null)
+            _textModel.removePropChangeListener(_sourceTextPropLsnr);
 
         // Set new text block
-        _textBlock = aTextBlock;
+        _textModel = textModel;
 
         // Add PropChangeListener
-        _textBlock.addPropChangeListener(_sourceTextPropLsnr);
+        _textModel.addPropChangeListener(_sourceTextPropLsnr);
 
         // Relayout parent, repaint
         if (_view != null) {
@@ -151,38 +149,38 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Returns the root text block.
+     * Returns the root text.
      */
-    public TextBlock getSourceText()  { return _textBlock.getSourceText(); }
+    public TextModel getSourceText()  { return _textModel.getSourceText(); }
 
     /**
-     * Sets the source TextBlock.
+     * Sets the source text.
      */
-    public void setSourceText(TextBlock aTextBlock)
+    public void setSourceText(TextModel aTextModel)
     {
         // If already set, just return
-        TextBlock oldSourceText = getSourceText();
-        if (aTextBlock == oldSourceText) return;
+        TextModel oldSourceText = getSourceText();
+        if (aTextModel == oldSourceText) return;
 
         // Get appropriate text block for source text
-        TextBlock textBlock = aTextBlock;
-        if (isWrapLines() && !(aTextBlock instanceof TextBox)) {
-            TextBox textBox = new TextBox(aTextBlock);
+        TextModel textModel = aTextModel;
+        if (isWrapLines() && !(textModel instanceof TextModelX)) {
+            TextModelX textBox = new TextModelX(textModel);
             textBox.setWrapLines(true);
-            textBlock = textBox;
+            textModel = textBox;
         }
 
         // Set text block
-        setTextBlock(textBlock);
+        setTextModel(textModel);
 
         // FirePropChange
-        firePropChange(SourceText_Prop, oldSourceText, aTextBlock);
+        firePropChange(SourceText_Prop, oldSourceText, textModel);
     }
 
     /**
      * Returns the plain string of the text being edited.
      */
-    public String getText()  { return _textBlock.getString(); }
+    public String getText()  { return _textModel.getString(); }
 
     /**
      * Set text string of text editor.
@@ -194,10 +192,10 @@ public class TextAdapter extends PropObject {
         if (str.length() == length() && (str.isEmpty() || str.equals(getText()))) return;
 
         // Set string
-        _textBlock.setString(aString);
+        _textModel.setString(aString);
 
         // Reset selection (to line end if single-line, otherwise text start)
-        int selIndex = _textBlock.getLineCount() == 1 && length() < 40 ? length() : 0;
+        int selIndex = _textModel.getLineCount() == 1 && length() < 40 ? length() : 0;
         setSel(selIndex);
     }
 
@@ -233,14 +231,14 @@ public class TextAdapter extends PropObject {
         firePropChange(WrapLines_Prop, _wrapLines, _wrapLines = aValue);
 
         // If already TextBox, just forward to TextBox
-        if (_textBlock instanceof TextBox)
-            ((TextBox) _textBlock).setWrapLines(aValue);
+        if (_textModel instanceof TextModelX)
+            ((TextModelX) _textModel).setWrapLines(aValue);
 
         // Otherwise, wrap text in text box and set new text box
         else if (aValue) {
-            TextBox textBox = new TextBox(_textBlock);
-            textBox.setWrapLines(true);
-            setTextBlock(textBox);
+            TextModelX textModel = new TextModelX(_textModel);
+            textModel.setWrapLines(true);
+            setTextModel(textModel);
         }
     }
 
@@ -284,15 +282,15 @@ public class TextAdapter extends PropObject {
 
         // Handle TextModified: Reset undoer if false, then return
         String propName = propChange.getPropName();
-        if (propName == TextBlock.TextModified_Prop) {
-            if (!getTextBlock().isTextModified() && undoer.isUndoAvailable())
+        if (propName == TextModel.TextModified_Prop) {
+            if (!getTextModel().isTextModified() && undoer.isUndoAvailable())
                 undoer.reset();
             return;
         }
 
         // If PlainText Style_Prop or LineStyle_Prop, just return
         if (!isRichText()) {
-            if (propName == TextBlock.Style_Prop || propName == TextBlock.LineStyle_Prop)
+            if (propName == TextModel.Style_Prop || propName == TextModel.LineStyle_Prop)
                 return;
         }
 
@@ -306,7 +304,7 @@ public class TextAdapter extends PropObject {
     private void handleUndoerPropChange()
     {
         boolean hasUndo = _undoer.isUndoAvailable();
-        getTextBlock().setTextModified(hasUndo);
+        getTextModel().setTextModified(hasUndo);
     }
 
     /**
@@ -347,47 +345,47 @@ public class TextAdapter extends PropObject {
     /**
      * Returns whether text supports multiple styles.
      */
-    public boolean isRichText()  { return _textBlock.isRichText(); }
+    public boolean isRichText()  { return _textModel.isRichText(); }
 
     /**
      * Sets whether text supports multiple styles.
      */
-    public void setRichText(boolean aValue)  { _textBlock.setRichText(aValue); }
+    public void setRichText(boolean aValue)  { _textModel.setRichText(aValue); }
 
     /**
      * Returns the default text style for text.
      */
-    public TextStyle getDefaultTextStyle()  { return _textBlock.getDefaultTextStyle(); }
+    public TextStyle getDefaultTextStyle()  { return _textModel.getDefaultTextStyle(); }
 
     /**
      * Sets the default text style for text.
      */
-    public void setDefaultTextStyle(TextStyle textStyle)  { _textBlock.setDefaultTextStyle(textStyle); }
+    public void setDefaultTextStyle(TextStyle textStyle)  { _textModel.setDefaultTextStyle(textStyle); }
 
     /**
      * Sets default text style for given style string.
      */
-    public void setDefaultTextStyleString(String styleString)  { _textBlock.setDefaultTextStyleString(styleString); }
+    public void setDefaultTextStyleString(String styleString)  { _textModel.setDefaultTextStyleString(styleString); }
 
     /**
      * Returns the default line style for text.
      */
-    public TextLineStyle getDefaultLineStyle()  { return _textBlock.getDefaultLineStyle(); }
+    public TextLineStyle getDefaultLineStyle()  { return _textModel.getDefaultLineStyle(); }
 
     /**
      * Sets the default line style.
      */
-    public void setDefaultLineStyle(TextLineStyle aLineStyle)  { _textBlock.setDefaultLineStyle(aLineStyle); }
+    public void setDefaultLineStyle(TextLineStyle aLineStyle)  { _textModel.setDefaultLineStyle(aLineStyle); }
 
     /**
      * Returns the number of characters in the text string.
      */
-    public int length()  { return _textBlock.length(); }
+    public int length()  { return _textModel.length(); }
 
     /**
      * Returns the individual character at given index.
      */
-    public char charAt(int anIndex)  { return _textBlock.charAt(anIndex); }
+    public char charAt(int anIndex)  { return _textModel.charAt(anIndex); }
 
     /**
      * Returns whether the selection is empty.
@@ -420,7 +418,7 @@ public class TextAdapter extends PropObject {
     public TextSel getSel()
     {
         if (_sel != null) return _sel;
-        TextSel sel = new TextSel(_textBlock, _selAnchor, _selIndex);
+        TextSel sel = new TextSel(_textModel, _selAnchor, _selIndex);
         return _sel = sel;
     }
 
@@ -456,7 +454,7 @@ public class TextAdapter extends PropObject {
         _selStyle = null;
 
         // Reset mouse point
-        TextBlockUtils.setMouseY(_textBlock, 0);
+        TextModelUtils.setMouseY(_textModel, 0);
 
         // Repaint selection and scroll to visible (after delay)
         if (_view != null && _view.isShowing()) {
@@ -547,7 +545,7 @@ public class TextAdapter extends PropObject {
             TextStyle selStyle = getSelTextStyle();
             return selStyle.getFont();
         }
-        return _textBlock.getDefaultFont();
+        return _textModel.getDefaultFont();
     }
 
     /**
@@ -557,7 +555,7 @@ public class TextAdapter extends PropObject {
     {
         if (isRichText())
             setSelTextStyleValue(TextStyle.Font_Prop, aFont);
-        else _textBlock.setDefaultFont(aFont);
+        else _textModel.setDefaultFont(aFont);
     }
 
     /**
@@ -576,7 +574,7 @@ public class TextAdapter extends PropObject {
     {
         if (isRichText())
             setSelTextStyleValue(TextStyle.Color_Prop, aColor != null ? aColor : Color.BLACK);
-        else _textBlock.setDefaultTextColor(aColor);
+        else _textModel.setDefaultTextColor(aColor);
     }
 
     /**
@@ -597,7 +595,7 @@ public class TextAdapter extends PropObject {
         // Get format selection range and select it (if non-null)
         int selStart = getSelStart();
         int selEnd = getSelEnd();
-        TextSel sel = TextBlockUtils.smartFindFormatRange(_textBlock, selStart, selEnd);
+        TextSel sel = TextModelUtils.smartFindFormatRange(_textModel, selStart, selEnd);
         if (sel != null)
             setSel(sel.getStart(), sel.getEnd());
 
@@ -685,7 +683,7 @@ public class TextAdapter extends PropObject {
      */
     public TextStyle getTextStyleForCharIndex(int charIndex)
     {
-        return _textBlock.getTextStyleForCharIndex(charIndex);
+        return _textModel.getTextStyleForCharIndex(charIndex);
     }
 
     /**
@@ -699,7 +697,7 @@ public class TextAdapter extends PropObject {
         // Get style for sel range
         int selStart = getSelStart();
         int selEnd = getSelEnd();
-        TextStyle selStyle = _textBlock.getTextStyleForCharRange(selStart, selEnd);
+        TextStyle selStyle = _textModel.getTextStyleForCharRange(selStart, selEnd);
 
         // Set/return
         return _selStyle = selStyle;
@@ -718,7 +716,7 @@ public class TextAdapter extends PropObject {
 
         // If selection is multiple chars, apply attribute to text and reset SelStyle
         else {
-            _textBlock.setTextStyleValue(aKey, aValue, getSelStart(), getSelEnd());
+            _textModel.setTextStyleValue(aKey, aValue, getSelStart(), getSelEnd());
             _selStyle = null;
             if (_view != null)
                 _view.repaint();
@@ -730,7 +728,7 @@ public class TextAdapter extends PropObject {
      */
     public TextLineStyle getSelLineStyle()
     {
-        return _textBlock.getLineStyleForCharIndex(getSelStart());
+        return _textModel.getLineStyleForCharIndex(getSelStart());
     }
 
     /**
@@ -738,7 +736,7 @@ public class TextAdapter extends PropObject {
      */
     public void setSelLineStyleValue(String aKey, Object aValue)
     {
-        _textBlock.setLineStyleValue(aKey, aValue, getSelStart(), getSelEnd());
+        _textModel.setLineStyleValue(aKey, aValue, getSelStart(), getSelEnd());
     }
 
     /**
@@ -765,7 +763,7 @@ public class TextAdapter extends PropObject {
     public void addCharsWithStyle(CharSequence theChars, TextStyle textStyle, int charIndex)
     {
         if (theChars == null) return;
-        _textBlock.addCharsWithStyle(theChars, textStyle, charIndex);
+        _textModel.addCharsWithStyle(theChars, textStyle, charIndex);
         setSel(charIndex + theChars.length());
     }
 
@@ -776,7 +774,7 @@ public class TextAdapter extends PropObject {
     {
         TextStyle textStyle = getDefaultTextStyle();
         TextStyle textStyle2 = textStyle.copyForStyleString(styleString);
-        _textBlock.addCharsWithStyle(theChars, textStyle2);
+        _textModel.addCharsWithStyle(theChars, textStyle2);
     }
 
     /**
@@ -784,7 +782,7 @@ public class TextAdapter extends PropObject {
      */
     public void removeChars(int aStart, int anEnd)
     {
-        _textBlock.removeChars(aStart, anEnd);
+        _textModel.removeChars(aStart, anEnd);
         setSel(aStart, aStart);
     }
 
@@ -820,11 +818,11 @@ public class TextAdapter extends PropObject {
         if (textStyle == null) {
             if (aStart == getSelStart())
                 textStyle = getSelTextStyle();
-            else textStyle = _textBlock.getTextStyleForCharRange(aStart, anEnd);
+            else textStyle = _textModel.getTextStyleForCharRange(aStart, anEnd);
         }
 
-        // Forward to TextBlock replaceChars() and update selection to end of new string
-        _textBlock.replaceCharsWithStyle(theChars, textStyle, aStart, anEnd);
+        // Forward to TextModel replaceChars() and update selection to end of new string
+        _textModel.replaceCharsWithStyle(theChars, textStyle, aStart, anEnd);
         setSel(aStart + strLen);
     }
 
@@ -839,17 +837,17 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Replaces the current selection with the given contents (TextBlock or String).
+     * Replaces the current selection with the given contents (TextModel or String).
      */
     public void replaceCharsWithContent(Object theContent)
     {
-        // If Clipboard has TextBlock, paste it
-        if (theContent instanceof TextBlock textBlock) {
+        // If Clipboard has TextModel, paste it
+        if (theContent instanceof TextModel textModel) {
             int selStart = getSelStart();
             int selEnd = getSelEnd();
-            _textBlock.removeChars(selStart, selEnd);
-            _textBlock.addTextBlock(textBlock, selStart);
-            setSel(selStart + textBlock.length());
+            _textModel.removeChars(selStart, selEnd);
+            _textModel.addTextModel(textModel, selStart);
+            setSel(selStart + textModel.length());
         }
 
         // If Clipboard has String, paste it
@@ -926,8 +924,8 @@ public class TextAdapter extends PropObject {
 
         int deleteEnd = getSelStart(); if (deleteEnd == 0) return;
         int deleteStart = deleteEnd - 1;
-        if (_textBlock.isAfterLineEnd(deleteEnd))
-            deleteStart = _textBlock.lastIndexOfNewline(deleteEnd);
+        if (_textModel.isAfterLineEnd(deleteEnd))
+            deleteStart = _textModel.lastIndexOfNewline(deleteEnd);
 
         removeChars(deleteStart, deleteEnd);
     }
@@ -944,8 +942,8 @@ public class TextAdapter extends PropObject {
 
         int deleteStart = getSelStart(); if (deleteStart >= length()) return;
         int deleteEnd = deleteStart + 1;
-        if (_textBlock.isLineEnd(deleteEnd - 1))
-            deleteEnd = _textBlock.indexAfterNewline(deleteEnd - 1);
+        if (_textModel.isLineEnd(deleteEnd - 1))
+            deleteEnd = _textModel.indexAfterNewline(deleteEnd - 1);
 
         removeChars(deleteStart, deleteEnd);
     }
@@ -960,12 +958,12 @@ public class TextAdapter extends PropObject {
             delete();
 
         // Otherwise, if at line end, delete line end
-        else if (_textBlock.isLineEnd(getSelEnd()))
-            removeChars(getSelStart(), _textBlock.indexAfterNewline(getSelStart()));
+        else if (_textModel.isLineEnd(getSelEnd()))
+            removeChars(getSelStart(), _textModel.indexAfterNewline(getSelStart()));
 
         // Otherwise delete up to next newline or line end
         else {
-            int index = _textBlock.indexOfNewline(getSelStart());
+            int index = _textModel.indexOfNewline(getSelStart());
             removeChars(getSelStart(), index >= 0 ? index : length());
         }
     }
@@ -979,7 +977,7 @@ public class TextAdapter extends PropObject {
         Undoer undoer = getUndoer();
         undoer.disable();
 
-        _textBlock.clear();
+        _textModel.clear();
 
         // Reset undo
         undoer.reset();
@@ -988,27 +986,27 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the number of lines.
      */
-    public int getLineCount()  { return _textBlock.getLineCount(); }
+    public int getLineCount()  { return _textModel.getLineCount(); }
 
     /**
      * Returns the individual line at given index.
      */
-    public TextLine getLine(int anIndex)  { return _textBlock.getLine(anIndex); }
+    public TextLine getLine(int anIndex)  { return _textModel.getLine(anIndex); }
 
     /**
      * Returns the line for the given character index.
      */
-    public TextLine getLineForCharIndex(int anIndex)  { return _textBlock.getLineForCharIndex(anIndex); }
+    public TextLine getLineForCharIndex(int anIndex)  { return _textModel.getLineForCharIndex(anIndex); }
 
     /**
      * Returns the token for given character index.
      */
-    public TextToken getTokenForCharIndex(int anIndex)  { return _textBlock.getTokenForCharIndex(anIndex); }
+    public TextToken getTokenForCharIndex(int anIndex)  { return _textModel.getTokenForCharIndex(anIndex); }
 
     /**
      * Returns the char index for given point in text coordinate space.
      */
-    public int getCharIndexForXY(double anX, double aY)  { return _textBlock.getCharIndexForXY(anX, aY); }
+    public int getCharIndexForXY(double anX, double aY)  { return _textModel.getCharIndexForXY(anX, aY); }
 
     /**
      * Returns the link at given XY.
@@ -1020,7 +1018,7 @@ public class TextAdapter extends PropObject {
 
         // Get TextStyle at XY and return link
         int charIndex = getCharIndexForXY(aX, aY);
-        TextStyle textStyle = _textBlock.getTextStyleForCharIndex(charIndex);
+        TextStyle textStyle = _textModel.getTextStyleForCharIndex(charIndex);
         return textStyle.getLink();
     }
 
@@ -1032,8 +1030,8 @@ public class TextAdapter extends PropObject {
         // Paint selection
         paintSel(aPntr);
 
-        // Paint TextBlock
-        _textBlock.paint(aPntr);
+        // Paint TextModel
+        _textModel.paint(aPntr);
     }
 
     /**
@@ -1069,7 +1067,7 @@ public class TextAdapter extends PropObject {
      */
     public void paintText(Painter aPntr)
     {
-        _textBlock.paint(aPntr);
+        _textModel.paint(aPntr);
     }
 
     /**
@@ -1112,7 +1110,7 @@ public class TextAdapter extends PropObject {
             _pgraphSel = true;
 
         // Get selected range for down point and drag point
-        TextSel sel = new TextSel(_textBlock, _downX, _downY, _downX, _downY, _wordSel, _pgraphSel);
+        TextSel sel = new TextSel(_textModel, _downX, _downY, _downX, _downY, _wordSel, _pgraphSel);
         int anchor = sel.getAnchor();
         int index = sel.getIndex();
 
@@ -1124,7 +1122,7 @@ public class TextAdapter extends PropObject {
 
         // Set selection
         setSel(anchor, index);
-        TextBlockUtils.setMouseY(_textBlock, _downY);
+        TextModelUtils.setMouseY(_textModel, _downY);
     }
 
     /**
@@ -1133,7 +1131,7 @@ public class TextAdapter extends PropObject {
     public void mouseDragged(ViewEvent anEvent)
     {
         // Get selected range for down point and drag point
-        TextSel sel = new TextSel(_textBlock, _downX, _downY, anEvent.getX(), anEvent.getY(), _wordSel, _pgraphSel);
+        TextSel sel = new TextSel(_textModel, _downX, _downY, anEvent.getX(), anEvent.getY(), _wordSel, _pgraphSel);
         int anchor = sel.getAnchor();
         int index = sel.getIndex();
 
@@ -1145,7 +1143,7 @@ public class TextAdapter extends PropObject {
 
         // Set selection
         setSel(anchor, index);
-        TextBlockUtils.setMouseY(_textBlock, anEvent.getY());
+        TextModelUtils.setMouseY(_textModel, anEvent.getY());
     }
 
     /**
@@ -1389,8 +1387,8 @@ public class TextAdapter extends PropObject {
      */
     public double getFontScale()
     {
-        if (_textBlock instanceof TextBox)
-            return ((TextBox) _textBlock).getFontScale();
+        if (_textModel instanceof TextModelX)
+            return ((TextModelX) _textModel).getFontScale();
         return 1;
     }
 
@@ -1399,8 +1397,8 @@ public class TextAdapter extends PropObject {
      */
     public void setFontScale(double aValue)
     {
-        if (_textBlock instanceof TextBox)
-            ((TextBox) _textBlock).setFontScale(aValue);
+        if (_textModel instanceof TextModelX)
+            ((TextModelX) _textModel).setFontScale(aValue);
         else System.out.println("TextAdapter.setFontScale not supported on this text");
         if (_view != null)
             _view.relayoutParent();
@@ -1411,8 +1409,8 @@ public class TextAdapter extends PropObject {
      */
     public void scaleTextToFit()
     {
-        if (_textBlock instanceof TextBox)
-            ((TextBox) _textBlock).scaleTextToFit();
+        if (_textModel instanceof TextModelX)
+            ((TextModelX) _textModel).scaleTextToFit();
         else System.out.println("TextAdapter.scaleTextToFit not supported on this text");
         if (_view != null)
             _view.relayoutParent();
@@ -1443,15 +1441,15 @@ public class TextAdapter extends PropObject {
         int selEnd = getSelEnd();
 
         // Add rich text
-        if (_textBlock.isRichText()) {
-            TextBlock textForRange = _textBlock.copyForRange(selStart, selEnd);
+        if (_textModel.isRichText()) {
+            TextModel textForRange = _textModel.copyForRange(selStart, selEnd);
             XMLElement xml = new XMLArchiver().toXML(textForRange);
             String xmlStr = xml.getString();
             clipboard.addData(SNAP_RICHTEXT_TYPE, xmlStr);
         }
 
         // Add plain text (text/plain)
-        String textString = _textBlock.subSequence(selStart, selEnd).toString();
+        String textString = _textModel.subSequence(selStart, selEnd).toString();
         clipboard.addData(textString);
     }
 
@@ -1481,7 +1479,7 @@ public class TextAdapter extends PropObject {
         if (clipboard.hasData(SNAP_RICHTEXT_TYPE)) {
             byte[] bytes = clipboard.getDataBytes(SNAP_RICHTEXT_TYPE);
             if (bytes != null && bytes.length > 0) {  // Shouldn't need this - Happens when pasting content from prior instance
-                TextBlock richText = new TextBlock(true);
+                TextModel richText = new TextModel(true);
                 XMLArchiver archiver = new XMLArchiver();
                 archiver.setRootObject(richText);
                 archiver.readFromXMLBytes(bytes);
@@ -1539,7 +1537,7 @@ public class TextAdapter extends PropObject {
             String propName = propChange.getPropName();
 
             // Handle Chars prop: Set sel to new add chars
-            if (propName == TextBlock.Chars_Prop) {
+            if (propName == TextModel.Chars_Prop) {
                 CharSequence addString = (CharSequence) (isRedo ? propChange.getNewValue() : propChange.getOldValue());
                 int startIndex = propChange.getIndex();
                 int endIndex = startIndex + (addString != null ? addString.length() : 0);
@@ -1548,8 +1546,8 @@ public class TextAdapter extends PropObject {
             }
 
             // Handle Style prop: Set sel to char range
-            else if (propName == TextBlock.Style_Prop) {
-                TextBlockUtils.StyleChange styleChange = (TextBlockUtils.StyleChange) propChange;
+            else if (propName == TextModel.Style_Prop) {
+                TextModelUtils.StyleChange styleChange = (TextModelUtils.StyleChange) propChange;
                 int startIndex = styleChange.getStart();
                 int endIndex = styleChange.getEnd();
                 setSel(startIndex, endIndex);
@@ -1560,22 +1558,22 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the area bounds for given view.
      */
-    public Rect getTextBounds()  { return _textBlock.getBounds(); }
+    public Rect getTextBounds()  { return _textModel.getBounds(); }
 
     /**
      * Sets the text bounds.
      */
-    public void setTextBounds(Rect boundsRect)  { _textBlock.setBounds(boundsRect); }
+    public void setTextBounds(Rect boundsRect)  { _textModel.setBounds(boundsRect); }
 
     /**
      * Returns the width needed to display all characters.
      */
-    public double getPrefWidth()  { return _textBlock.getPrefWidth(); }
+    public double getPrefWidth()  { return _textModel.getPrefWidth(); }
 
     /**
      * Returns the height needed to display all characters.
      */
-    public double getPrefHeight(double aW)  { return _textBlock.getPrefHeight(aW); }
+    public double getPrefHeight(double aW)  { return _textModel.getPrefHeight(aW); }
 
     /**
      * Called when link is triggered.
@@ -1682,12 +1680,12 @@ public class TextAdapter extends PropObject {
     {
         Pos viewAlign = _view.getAlign();
 
-        // Push align to TextBlock via DefaultLineStyle.Align (X) and TextBlock align Y
+        // Push align to TextModel via DefaultLineStyle.Align (X) and TextModel align Y
         TextLineStyle lineStyle = getDefaultLineStyle().copyForPropKeyValue(TextLineStyle.Align_Prop, viewAlign.getHPos());
         setDefaultLineStyle(lineStyle);
 
         // Forward to text block
-        _textBlock.setAlignY(viewAlign.getVPos());
+        _textModel.setAlignY(viewAlign.getVPos());
         _view.repaint();
     }
 

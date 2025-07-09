@@ -46,7 +46,7 @@ public class DevPaneConsoleTextArea extends TextArea {
     public void setPrompt(String aPrompt)
     {
         _prompt = aPrompt;
-        if (getTextBlock().length() == 0)
+        if (getTextModel().length() == 0)
             append(getPrompt());
     }
 

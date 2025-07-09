@@ -1,7 +1,7 @@
 package snap.viewx;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.text.TextBlock;
+import snap.text.TextModel;
 import snap.text.TextLineStyle;
 import snap.text.TextStyle;
 import snap.util.Convert;
@@ -88,13 +88,13 @@ public class DevPaneConsole extends ViewOwner {
             setPadding(4,4,4,4);
 
             // Change Console Font
-            TextBlock textBlock = getTextBlock();
-            textBlock.setDefaultFont(Font.Arial12);
+            TextModel textModel = getTextModel();
+            textModel.setDefaultFont(Font.Arial12);
 
             // Change line spacing
-            TextLineStyle lineStyle = textBlock.getDefaultLineStyle();
+            TextLineStyle lineStyle = textModel.getDefaultLineStyle();
             TextLineStyle lineStyle2 = lineStyle.copyForPropKeyValue(TextLineStyle.Spacing_Prop, 5);
-            textBlock.setDefaultLineStyle(lineStyle2);
+            textModel.setDefaultLineStyle(lineStyle2);
 
             // Set Prompt
             setPrompt("In[" + _inputIndex + "]:= ");
