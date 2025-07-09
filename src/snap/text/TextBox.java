@@ -75,7 +75,7 @@ public class TextBox extends TextBlock {
     {
         // Get start char index - just return if index before text start
         int startCharIndex = Math.max(anIndex, getStartCharIndex());
-        if (startCharIndex >= _nextText.length())
+        if (_nextText != null && startCharIndex >= _nextText.length())
             return;
 
         // If FontScale is set, replace style with scaled style
