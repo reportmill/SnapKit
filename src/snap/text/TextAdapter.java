@@ -101,7 +101,7 @@ public class TextAdapter extends PropObject {
 
         // Set default TextBlock
         _textBlock = sourceText;
-        _textBlock.getSourceText().addPropChangeListener(_sourceTextPropLsnr);
+        _textBlock.addPropChangeListener(_sourceTextPropLsnr);
     }
 
     /**
@@ -134,13 +134,13 @@ public class TextAdapter extends PropObject {
 
         // Remove PropChangeListener
         if (_textBlock != null)
-            _textBlock.getSourceText().removePropChangeListener(_sourceTextPropLsnr);
+            _textBlock.removePropChangeListener(_sourceTextPropLsnr);
 
         // Set new text block
         _textBlock = aTextBlock;
 
         // Add PropChangeListener
-        _textBlock.getSourceText().addPropChangeListener(_sourceTextPropLsnr);
+        _textBlock.addPropChangeListener(_sourceTextPropLsnr);
 
         // Relayout parent, repaint
         if (_view != null) {

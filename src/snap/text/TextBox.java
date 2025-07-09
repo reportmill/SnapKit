@@ -4,18 +4,11 @@
 package snap.text;
 import snap.geom.Rect;
 import snap.geom.Shape;
-import snap.props.PropChange;
-import snap.props.PropChangeListener;
-import snap.util.XMLArchiver;
-import snap.util.XMLElement;
 
 /**
  * This TextBlock subclass adds support for text wrapping and syncs to a source TextBlock.
  */
 public class TextBox extends TextBlock {
-
-    // The source TextBlock
-    private TextBlock _sourceText;
 
     // Whether to wrap lines that overrun bounds
     private boolean _wrapLines;
@@ -34,9 +27,6 @@ public class TextBox extends TextBlock {
 
     // The bounds path
     private Shape _boundsPath;
-
-    // A Listener to catch TextBlock PropChanges
-    private PropChangeListener _textBlockLsnr = this::handleTextBlockPropChange;
 
     // A temp var to hold TextLineStyle when updating runs from source text
     private TextLineStyle _updateTextLineStyle;
@@ -69,145 +59,23 @@ public class TextBox extends TextBlock {
     }
 
     /**
-     * Returns the source TextBlock.
-     */
-    public TextBlock getSourceText()  { return _sourceText; }
-
-    /**
      * Sets the source TextBlock.
      */
     public void setSourceText(TextBlock aTextBlock)
     {
-        // If already set, just return
-        if (aTextBlock == _sourceText) return;
-
-        // Stop listening to old TextBlock PropChanges, start listening to new
-        if (_sourceText != null)
-            _sourceText.removePropChangeListener(_textBlockLsnr);
-        _sourceText = aTextBlock;
-        _sourceText.addPropChangeListener(_textBlockLsnr);
-
-        // Sync TextStyle/LineStyle
-        super.setDefaultTextStyle(aTextBlock.getDefaultTextStyle());
-        super.setDefaultLineStyle(aTextBlock.getDefaultLineStyle());
-
-        // Update all
-        updateTextAll();
-    }
-
-    /**
-     * Sets whether text supports multiple styles.
-     */
-    public void setRichText(boolean aValue)
-    {
-        // If already set, just return
-        if (aValue == isRichText()) return;
-
-        // Do normal version
-        super.setRichText(aValue);
-
-        // Forward to source text block
-        _sourceText.setRichText(aValue);
-    }
-
-    /**
-     * Override to forward to source text block.
-     */
-    @Override
-    public void addCharsWithStyle(CharSequence theChars, TextStyle theStyle, int anIndex)
-    {
-        _sourceText.addCharsWithStyle(theChars, theStyle, anIndex);
-    }
-
-    /**
-     * Override to forward to source text block.
-     */
-    @Override
-    public void removeChars(int aStartCharIndex, int anEndCharIndex)
-    {
-        _sourceText.removeChars(aStartCharIndex, anEndCharIndex);
-    }
-
-    /**
-     * Override to forward to source text block.
-     */
-    @Override
-    public void replaceCharsWithStyle(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
-    {
-        _sourceText.replaceCharsWithStyle(theChars, theStyle, aStart, anEnd);
-    }
-
-    /**
-     * Override to forward to source text block.
-     */
-    @Override
-    public void setTextStyle(TextStyle textStyle, int aStart, int anEnd)
-    {
-        _sourceText.setTextStyle(textStyle, aStart, anEnd);
-    }
-
-    /**
-     * Override to forward to source text block.
-     */
-    @Override
-    public void setTextStyleValue(String aKey, Object aValue, int aStart, int anEnd)
-    {
-        _sourceText.setTextStyleValue(aKey, aValue, aStart, anEnd);
-    }
-
-    /**
-     * Override to forward to source text block.
-     */
-    @Override
-    public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
-    {
-        _sourceText.setLineStyle(aStyle, aStart, anEnd);
-    }
-
-    /**
-     * Override to forward to source text block.
-     */
-    @Override
-    public void setLineStyleValue(String aKey, Object aValue, int aStart, int anEnd)
-    {
-        _sourceText.setLineStyleValue(aKey, aValue, aStart, anEnd);
-    }
-
-    /**
-     * Override to forward to source text block.
-     */
-    @Override
-    public void setDefaultTextStyle(TextStyle textStyle)
-    {
-        _sourceText.setDefaultTextStyle(textStyle);
-    }
-
-    /**
-     * Override to forward to source text block.
-     */
-    @Override
-    public void setDefaultLineStyle(TextLineStyle lineStyle)
-    {
-        _sourceText.setDefaultLineStyle(lineStyle);
-    }
-
-    /**
-     * Override to forward to source text block.
-     */
-    @Override
-    public TextBlock copyForRange(int aStart, int aEnd)
-    {
-        return _sourceText.copyForRange(aStart, aEnd);
+//        updateTextAll();
+        setNextText(aTextBlock);
     }
 
     /**
      * Used to call super.addCharsWithStyle().
      */
-    private void super_addCharsWithStyle(CharSequence theChars, TextStyle theStyle, int anIndex)
+    @Override
+    protected void addCharsWithStyleImpl(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
         // Get start char index - just return if index before text start
         int startCharIndex = Math.max(anIndex, getStartCharIndex());
-        if (startCharIndex >= _sourceText.length())
+        if (startCharIndex >= _nextText.length())
             return;
 
         // If FontScale is set, replace style with scaled style
@@ -216,7 +84,7 @@ public class TextBox extends TextBlock {
             theStyle = theStyle.copyForStyleValue(theStyle.getFont().copyForScale(fontScale));
 
         // Do normal version
-        super.addCharsWithStyle(theChars, theStyle, anIndex);
+        super.addCharsWithStyleImpl(theChars, theStyle, anIndex);
 
         // If linked, remove any lines below bounds
         if (isLinked())
@@ -397,99 +265,12 @@ public class TextBox extends TextBlock {
     public void setBoundsPath(Shape aPath)  { _boundsPath = aPath; }
 
     /**
-     * Returns the string for the text.
-     */
-    @Override
-    public String getString()
-    {
-        String textStr = _sourceText.getString();
-
-        // If not same size, trim string
-        if (length() < textStr.length()) {
-            int startCharIndex = getStartCharIndex();
-            int endCharIndex = getEndCharIndex();
-            textStr = textStr.substring(startCharIndex, endCharIndex);
-        }
-
-        // Return
-        return textStr;
-    }
-
-    /**
-     * Sets the text to the given string.
-     */
-    @Override
-    public void setString(String aString)
-    {
-        // If already set, just return
-        String str = aString != null ? aString : "";
-        if (str.length() == length() && str.equals(getString())) return;
-
-        // Forward to SourceText and update all
-        _sourceText.setString(str);
-    }
-
-    /**
-     * Called when TextBlock does property change.
-     */
-    protected void handleTextBlockPropChange(PropChange aPC)
-    {
-        // Get PropName
-        String propName = aPC.getPropName();
-
-        // Handle CharsChange: Update lines for old/new range
-        if (aPC instanceof TextBlockUtils.CharsChange) {
-            TextBlockUtils.CharsChange charsChange = (TextBlockUtils.CharsChange) aPC;
-            int index = charsChange.getIndex();
-
-            // Handle add chars
-            CharSequence addChars = charsChange.getNewValue();
-            if (addChars != null)
-                updateTextForCharRange(index, index, index + addChars.length());
-
-            // Handle remove chars
-            CharSequence removeChars = charsChange.getOldValue();
-            if (removeChars != null)
-                updateTextForCharRange(index, index + removeChars.length(), index);
-        }
-
-        // Handle StyleChange
-        else if (aPC instanceof TextBlockUtils.StyleChange) {
-            TextBlockUtils.StyleChange styleChange = (TextBlockUtils.StyleChange) aPC;
-            int startCharIndex = styleChange.getStart();
-            int endCharIndex = styleChange.getEnd();
-            updateTextForCharRange(startCharIndex, endCharIndex, endCharIndex);
-        }
-
-        // Handle LineStyleChange
-        else if (aPC instanceof TextBlockUtils.LineStyleChange) {
-            TextBlockUtils.LineStyleChange lineStyleChange = (TextBlockUtils.LineStyleChange) aPC;
-            TextLine textLine = _sourceText.getLine(lineStyleChange.getIndex());
-            int startCharIndex = textLine.getStartCharIndex();
-            int endCharIndex = textLine.getEndCharIndex();
-            updateTextForCharRange(startCharIndex, endCharIndex, endCharIndex);
-        }
-
-        // Handle DefaultTextStyle
-        else if (propName == TextBlock.DefaultTextStyle_Prop) {
-            TextStyle newStyle = (TextStyle) aPC.getNewValue();
-            super.setDefaultTextStyle(newStyle);
-        }
-
-        // Handle DefaultLineStyle
-        else if (propName == TextBlock.DefaultLineStyle_Prop) {
-            TextLineStyle newStyle = (TextLineStyle) aPC.getNewValue();
-            super.setDefaultLineStyle(newStyle);
-        }
-    }
-
-    /**
      * Updates all lines.
      */
     protected void updateTextAll()
     {
         int endCharIndexBox = length();
-        int endCharIndexBlock = _sourceText.length();
+        int endCharIndexBlock = _nextText.length();
         updateTextForCharRange(0, endCharIndexBox, endCharIndexBlock);
     }
 
@@ -499,7 +280,11 @@ public class TextBox extends TextBlock {
     protected void updateTextForCharRange(int startCharIndex, int endCharIndexBox, int endCharIndexBlock)
     {
         // Skip if no text
-        if (length() == 0 && _sourceText.length() == 0) return;
+        if (length() == 0 && _nextText.isEmpty()) return;
+
+        // Cache NextText
+        TextBlock nextText = _nextText;
+        _nextText = null;
 
         // If WrapLines, mark location of first line's first token - if it shrinks, might need to re-wrap previous line
         boolean wrapLines = isWrapLines();
@@ -512,7 +297,7 @@ public class TextBox extends TextBlock {
         // Get run iterator for range (adjusted if this text is overflow from linked)
         int textStartCharIndex = getStartCharIndex();
         int charIndex = Math.max(textStartCharIndex, startCharIndex);
-        TextRunIter runIter = _sourceText.getRunIterForCharRange(charIndex, endCharIndexBlock);
+        TextRunIter runIter = nextText.getRunIterForCharRange(charIndex, endCharIndexBlock);
 
         // Iterate over source text runs for range and add
         while (runIter.hasNextRun()) {
@@ -523,7 +308,7 @@ public class TextBox extends TextBlock {
             _updateTextLineStyle = textLine.getLineStyle();
 
             // Add run chars
-            super_addCharsWithStyle(nextRun.getString(), nextRun.getTextStyle(), charIndex - textStartCharIndex);
+            addCharsWithStyle(nextRun.getString(), nextRun.getTextStyle(), charIndex - textStartCharIndex); // Was super_
             _updateTextLineStyle = null;
             charIndex += nextRun.length();
         }
@@ -533,6 +318,9 @@ public class TextBox extends TextBlock {
             TextLine previousLine = firstLine.getPrevious();
             joinLineWithNextLine(previousLine);
         }
+
+        // Reset NextText
+        _nextText = nextText;
     }
 
     /**
@@ -611,7 +399,7 @@ public class TextBox extends TextBlock {
     @Override
     public double getPrefWidth()
     {
-        double textPrefW = _sourceText.getPrefWidth();
+        double textPrefW = _nextText.getPrefWidth();
         double fontScale = getFontScale();
         return Math.ceil(textPrefW * fontScale);
     }
@@ -642,7 +430,7 @@ public class TextBox extends TextBlock {
             if (isTextOutOfBounds()) {
                 fsHi = fontScale;
                 if ((fsHi + fsLo) / 2 == 0) {
-                    System.err.println("Error scaling text. Could only fit " + length() + " of " + _sourceText.length());
+                    System.err.println("Error scaling text. Could only fit " + length() + " of " + _nextText.length());
                     break;
                 }
             }
@@ -682,7 +470,7 @@ public class TextBox extends TextBlock {
         int lineCount = getLineCount();
         double lineMaxY = lineCount > 0 ? getLine(lineCount - 1).getMaxY() : 0;
         double tboxMaxY = getMaxY();
-        if (lineMaxY >= tboxMaxY || getEndCharIndex() < _sourceText.length())
+        if (lineMaxY >= tboxMaxY || getEndCharIndex() < _nextText.length())
             return true;
 
         // If not WrapLines, check X
@@ -719,34 +507,6 @@ public class TextBox extends TextBlock {
             removeLine(lineIndex);
             lastLine = getLine(lineIndex - 1);
         }
-    }
-
-    /**
-     * Override to forward to source text.
-     */
-    @Override
-    protected TextToken[] createTokensForTextLine(TextLine aTextLine)
-    {
-        return _sourceText.createTokensForTextLine(aTextLine);
-    }
-
-    /**
-     * Override to use SourceText.
-     */
-    @Override
-    public XMLElement toXML(XMLArchiver anArchiver)  { return _sourceText.toXML(anArchiver); }
-
-    /**
-     * Override to use SourceText.
-     */
-    @Override
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        _sourceText.setPropChangeEnabled(false);
-        _sourceText.fromXML(anArchiver, anElement);
-        _sourceText.setPropChangeEnabled(true);
-        updateTextAll();
-        return this;
     }
 
     /**

@@ -12,7 +12,6 @@ import snap.gfx.Font;
 import snap.gfx.Painter;
 import snap.props.PropChange;
 import snap.props.PropObject;
-import snap.props.Undoer;
 import snap.util.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +39,9 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
     // Whether text is modified
     private boolean _textModified;
+
+    // The next text model
+    protected TextBlock _nextText;
 
     // The X/Y of the text block
     private double _x, _y;
@@ -99,6 +101,10 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void setRichText(boolean aValue)
     {
+        // Forward to NextText
+        if (_nextText != null)
+            _nextText.setRichText(aValue);
+
         // If already set, just return
         if (aValue == isRichText()) return;
 
@@ -116,9 +122,33 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     public boolean isWrapLines()  { return false; }
 
     /**
+     * Returns the next text model.
+     */
+    public TextBlock getNextText()  { return _nextText; }
+
+    /**
+     * Sets the next text model.
+     */
+    public void setNextText(TextBlock nextText)
+    {
+        if (nextText == getNextText()) return;
+
+        // Sync default TextStyle/LineStyle
+        _nextText = null;
+        setDefaultTextStyle(nextText.getDefaultTextStyle());
+        setDefaultLineStyle(nextText.getDefaultLineStyle());
+
+        // Set value
+        _nextText = nextText;
+
+        // Update all
+        //updateTextAll();
+    }
+
+    /**
      * Returns the root text block.
      */
-    public TextBlock getSourceText()  { return this; }
+    public TextBlock getSourceText()  { return _nextText != null ? _nextText.getSourceText() : this; }
 
     /**
      * Returns the number of characters in the text.
@@ -170,6 +200,10 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void setString(String aString)
     {
+        // Forward to NextText
+        if (_nextText != null)
+            _nextText.setString(aString);
+
         replaceChars(aString, 0, length());
     }
 
@@ -183,6 +217,10 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void setDefaultTextStyle(TextStyle textStyle)
     {
+        // Forward to NextText
+        if (_nextText != null)
+            _nextText.setDefaultTextStyle(textStyle);
+
         // If already set, just return
         if (Objects.equals(textStyle, _defaultTextStyle)) return;
 
@@ -221,6 +259,10 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void setDefaultLineStyle(TextLineStyle lineStyle)
     {
+        // Forward to NextText
+        if (_nextText != null)
+            _nextText.setDefaultLineStyle(lineStyle);
+
         // If already set, just return
         if (Objects.equals(lineStyle, _defaultLineStyle)) return;
 
@@ -312,6 +354,19 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      * Adds characters with given style to this text at given index.
      */
     public void addCharsWithStyle(CharSequence theChars, TextStyle theStyle, int anIndex)
+    {
+        // Forward to NextText
+        if (_nextText != null)
+            _nextText.addCharsWithStyle(theChars, theStyle, anIndex);
+
+        // Do local version
+        addCharsWithStyleImpl(theChars, theStyle, anIndex);
+    }
+
+    /**
+     * Adds characters with given style to this text at given index.
+     */
+    protected void addCharsWithStyleImpl(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
         // If no chars, just return
         if (theChars == null) return;
@@ -429,6 +484,10 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void removeChars(int aStartCharIndex, int anEndCharIndex)
     {
+        // Forward to NextText
+        if (_nextText != null)
+            _nextText.removeChars(aStartCharIndex, anEndCharIndex);
+
         // If empty range, just return
         if (anEndCharIndex == aStartCharIndex) return;
 
@@ -570,6 +629,10 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void setTextStyle(TextStyle textStyle, int aStart, int anEnd)
     {
+        // Forward to NextText
+        if (_nextText != null)
+            _nextText.setTextStyle(textStyle, aStart, anEnd);
+
         // If plaint text, just return (can't apply style to range for plain text)
         if (!isRichText()) return;
 
@@ -636,6 +699,10 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
     {
+        // Forward to NextText
+        if (_nextText != null)
+            _nextText.setLineStyle(aStyle, aStart, anEnd);
+
         // Handle Rich
         if (isRichText()) {
             setLineStyleRich(aStyle, aStart, anEnd);
@@ -682,6 +749,10 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     private void setLineStyleRich(TextLineStyle aStyle, int aStart, int anEnd)
     {
+        // Forward to NextText
+        if (_nextText != null)
+            _nextText.setLineStyleRich(aStyle, aStart, anEnd);
+
         // Get start/end line indexes for char range
         int startLineIndex = getLineForCharIndex(aStart).getLineIndex();
         int endLineIndex = getLineForCharIndex(anEnd).getLineIndex();
@@ -703,6 +774,10 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     private void setLineStyleValueRich(String aKey, Object aValue, int aStart, int anEnd)
     {
+        // Forward to NextText
+        if (_nextText != null)
+            _nextText.setLineStyleValueRich(aKey, aValue, aStart, anEnd);
+
         // Get start/end line indexes
         int startLineIndex = getLineForCharIndex(aStart).getLineIndex();
         int endLineIndex = getLineForCharIndex(anEnd).getLineIndex();
@@ -1346,6 +1421,10 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     protected TextToken[] createTokensForTextLine(TextLine aTextLine)
     {
+        // Forward to NextText
+        if (_nextText != null)
+            return _nextText.createTokensForTextLine(aTextLine);
+
         return TextBlockUtils.createTokensForTextLine(aTextLine);
     }
 
@@ -1403,6 +1482,10 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     public TextBlock copyForRange(int aStart, int aEnd)
     {
+        // Forward to NextText
+        if (_nextText != null)
+            return _nextText.copyForRange(aStart, aEnd);
+
         // Create new RichText and iterate over lines in range to add copies for subrange
         TextBlock textCopy = new TextBlock(isRichText());
         textCopy._lines.remove(0);
@@ -1475,6 +1558,10 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     @Override
     public XMLElement toXML(XMLArchiver anArchiver)
     {
+        // Forward to NextText
+        if (_nextText != null)
+            return _nextText.toXML(anArchiver);
+
         return TextBlockUtils.toXML(this, anArchiver);
     }
 
