@@ -28,9 +28,9 @@ public class TextSel {
     /**
      * Constructor.
      */
-    public TextSel(TextModel aTextBox, int aStart, int aEnd)
+    public TextSel(TextModel textModel, int aStart, int aEnd)
     {
-        _textModel = aTextBox;
+        _textModel = textModel;
         _anchor = aStart;
         _index = aEnd;
         _start = Math.min(aStart, aEnd);
@@ -40,10 +40,10 @@ public class TextSel {
     /**
      * Constructor for selected range resulting from the given two points.
      */
-    public TextSel(TextModel aTextBox, double x1, double y1, double x2, double y2, boolean isWordSel, boolean isParaSel)
+    public TextSel(TextModel textModel, double x1, double y1, double x2, double y2, boolean isWordSel, boolean isParaSel)
     {
         // Get text
-        _textModel = aTextBox;
+        _textModel = textModel;
 
         // Get character index for point 1 & point 2
         int p1CharIndex = _textModel.getCharIndexForXY(x1, y1);

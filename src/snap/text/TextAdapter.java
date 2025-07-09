@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 /**
- * This class acts as an intermediary between a 'text view' and a text block, handling selection, editing, cursor
+ * This class acts as an intermediary between a 'text view' and a text model, handling selection, editing, cursor
  * input events, etc.
  */
 public class TextAdapter extends PropObject {
@@ -134,7 +134,7 @@ public class TextAdapter extends PropObject {
         if (_textModel != null)
             _textModel.removePropChangeListener(_sourceTextPropLsnr);
 
-        // Set new text block
+        // Set new text model
         _textModel = textModel;
 
         // Add PropChangeListener
@@ -162,15 +162,15 @@ public class TextAdapter extends PropObject {
         TextModel oldSourceText = getSourceText();
         if (aTextModel == oldSourceText) return;
 
-        // Get appropriate text block for source text
+        // Get appropriate text model for source text
         TextModel textModel = aTextModel;
         if (isWrapLines() && !(textModel instanceof TextModelX)) {
-            TextModelX textBox = new TextModelX(textModel);
-            textBox.setWrapLines(true);
-            textModel = textBox;
+            TextModelX textModelX = new TextModelX(textModel);
+            textModelX.setWrapLines(true);
+            textModel = textModelX;
         }
 
-        // Set text block
+        // Set text model
         setTextModel(textModel);
 
         // FirePropChange
@@ -230,11 +230,11 @@ public class TextAdapter extends PropObject {
         // Set and fire prop change
         firePropChange(WrapLines_Prop, _wrapLines, _wrapLines = aValue);
 
-        // If already TextBox, just forward to TextBox
+        // If already TextModelX, just forward to TextModelX
         if (_textModel instanceof TextModelX)
             ((TextModelX) _textModel).setWrapLines(aValue);
 
-        // Otherwise, wrap text in text box and set new text box
+        // Otherwise, wrap text in TextModelX
         else if (aValue) {
             TextModelX textModel = new TextModelX(_textModel);
             textModel.setWrapLines(true);
@@ -537,7 +537,7 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Returns the font of the text block.
+     * Returns the font of current selection.
      */
     public Font getTextFont()
     {
@@ -549,7 +549,7 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Sets the font of the text block.
+     * Sets the font of current selection.
      */
     public void setTextFont(Font aFont)
     {
@@ -846,7 +846,7 @@ public class TextAdapter extends PropObject {
             int selStart = getSelStart();
             int selEnd = getSelEnd();
             _textModel.removeChars(selStart, selEnd);
-            _textModel.addTextModel(textModel, selStart);
+            _textModel.addCharsForTextModel(textModel, selStart);
             setSel(selStart + textModel.length());
         }
 
@@ -1383,7 +1383,7 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Returns the font scale of the text box.
+     * Returns the font scale of the text.
      */
     public double getFontScale()
     {
@@ -1393,7 +1393,7 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Sets the font scale of the text box.
+     * Sets the font scale of the text.
      */
     public void setFontScale(double aValue)
     {
@@ -1405,7 +1405,7 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Scales font sizes of all text in TextBox to fit in bounds by finding/setting FontScale.
+     * Scales font sizes of all text to fit in bounds by finding/setting FontScale.
      */
     public void scaleTextToFit()
     {
@@ -1674,7 +1674,7 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Override to forward to text box.
+     * Override to forward to text model.
      */
     private void handleViewAlignChanged()
     {
@@ -1684,7 +1684,7 @@ public class TextAdapter extends PropObject {
         TextLineStyle lineStyle = getDefaultLineStyle().copyForPropKeyValue(TextLineStyle.Align_Prop, viewAlign.getHPos());
         setDefaultLineStyle(lineStyle);
 
-        // Forward to text block
+        // Forward to text model
         _textModel.setAlignY(viewAlign.getVPos());
         _view.repaint();
     }

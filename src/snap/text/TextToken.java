@@ -200,17 +200,17 @@ public class TextToken implements ParseToken, Cloneable {
     public double getHeight()  { return _textStyle.getLineHeight(); }
 
     /**
-     * Returns the token X coord in text block.
+     * Returns the token X coord in text model.
      */
     public double getTextX()  { return _textLine.getTextX() + getX() + _justifyShiftX; }
 
     /**
-     * Returns token Y coord in text block.
+     * Returns token Y coord in text model.
      */
     public double getTextY()  { return _textLine.getTextY(); }
 
     /**
-     * Returns the y position for this token in text block.
+     * Returns the y position for this token in text model.
      */
     public double getTextStringY()
     {
@@ -220,12 +220,12 @@ public class TextToken implements ParseToken, Cloneable {
         if (scripting != 0)
             offsetY += getFont().getSize() * (scripting < 0? .4f : -.6f);
 
-        // Return TextBoxY plus offset
+        // Return TextModel Y plus offset
         return getTextY() + offsetY;
     }
 
     /**
-     * Returns the max X in text block.
+     * Returns the max X in text model.
      */
     public double getTextMaxX()
     {
@@ -233,7 +233,7 @@ public class TextToken implements ParseToken, Cloneable {
     }
 
     /**
-     * Returns the max Y in text block.
+     * Returns the max Y in text model.
      */
     public double getTextMaxY()
     {

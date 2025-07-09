@@ -443,7 +443,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     public double getMaxY()  { return getY() + getHeight(); }
 
     /**
-     * Returns the line x in text block coords.
+     * Returns the line x in text model coords.
      */
     public double getTextX()  { return getX() + _textModel.getX(); }
 

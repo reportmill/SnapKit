@@ -51,7 +51,7 @@ public class TextModelX extends TextModel {
     }
 
     /**
-     * Constructor for source text block.
+     * Constructor for source text.
      */
     public TextModelX(TextModel sourceText)
     {
@@ -241,12 +241,12 @@ public class TextModelX extends TextModel {
     }
 
     /**
-     * Returns the font scale of the text box.
+     * Returns the font scale of the text.
      */
     public double getFontScale()  { return _fontScale; }
 
     /**
-     * Sets the font scale of the text box.
+     * Sets the font scale of the text.
      */
     public void setFontScale(double aValue)
     {
@@ -406,7 +406,7 @@ public class TextModelX extends TextModel {
     }
 
     /**
-     * Scales font sizes of all text in TextBox to fit in bounds by finding/setting FontScale.
+     * Scales font sizes of all text to fit in bounds by finding/setting FontScale.
      */
     public void scaleTextToFit()
     {
@@ -445,7 +445,7 @@ public class TextModelX extends TextModel {
                 if (detaFS < .05)
                     break;
 
-                // If no line-wrap and PrefWidth almost TextBox.Width, stop
+                // If no line-wrap and PrefWidth almost TextModel.Width, stop
                 if (!isWrapLines()) {
                     double prefW = getPrefWidth();
                     double diffW = textW - prefW;
@@ -453,7 +453,7 @@ public class TextModelX extends TextModel {
                         break;
                 }
 
-                // If PrefHeight almost TextBox.Height, stop
+                // If PrefHeight almost TextModel.Height, stop
                 double prefH = getPrefHeight(textW);
                 double diffH = textH - prefH;
                 if (diffH < 1)
@@ -463,7 +463,7 @@ public class TextModelX extends TextModel {
     }
 
     /**
-     * Returns whether this text box couldn't fit all text.
+     * Returns whether this text couldn't fit all text.
      */
     public boolean isTextOutOfBounds()
     {

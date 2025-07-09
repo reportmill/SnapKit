@@ -20,7 +20,7 @@ public class TextArea extends ParentView {
     // The text being edited
     private TextModel _textModel;
 
-    // Whether to synchronize text area font with text block
+    // Whether to synchronize text area font with text model
     private boolean _syncTextFont = true;
 
     // Whether as-you-type spell checking is enabled
@@ -62,7 +62,7 @@ public class TextArea extends ParentView {
     }
 
     /**
-     * Constructor for source text block.
+     * Constructor for source text.
      */
     public TextArea(TextModel sourceText)
     {
@@ -140,12 +140,12 @@ public class TextArea extends ParentView {
     public void setUndoActivated(boolean aValue)  { _textAdapter.setUndoActivated(aValue); }
 
     /**
-     * Returns whether to synchronize text area font with text block.
+     * Returns whether to synchronize text area font with text model.
      */
     public boolean isSyncTextFont()  { return _syncTextFont; }
 
     /**
-     * Sets whether to synchronize text area font with text block.
+     * Sets whether to synchronize text area font with text model.
      */
     public void setSyncTextFont(boolean aValue)  { _syncTextFont = aValue; }
 
@@ -240,12 +240,12 @@ public class TextArea extends ParentView {
     public void selectAll()  { _textAdapter.selectAll(); }
 
     /**
-     * Returns the font of the text block.
+     * Returns the font of current selection.
      */
     public Font getTextFont()  { return _textAdapter.getTextFont(); }
 
     /**
-     * Sets the font of the text block.
+     * Sets the font of current selection.
      */
     public void setTextFont(Font aFont)  { _textAdapter.setTextFont(aFont); }
 
@@ -470,17 +470,17 @@ public class TextArea extends ParentView {
     }
 
     /**
-     * Returns the font scale of the text box.
+     * Returns the font scale of the text.
      */
     public double getFontScale()  { return _textAdapter.getFontScale(); }
 
     /**
-     * Sets the font scale of the text box.
+     * Sets the font scale of the text.
      */
     public void setFontScale(double aValue)  { _textAdapter.setFontScale(aValue); }
 
     /**
-     * Scales font sizes of all text in TextBox to fit in bounds by finding/setting FontScale.
+     * Scales font sizes of all text to fit in bounds by finding/setting FontScale.
      */
     public void scaleTextToFit()  { _textAdapter.scaleTextToFit(); }
 

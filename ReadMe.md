@@ -238,8 +238,7 @@ with large source files and providing syntax coloring and symbol highlighting.
 
 - TextRun: Manages a group of characters with a display style
 - TextLine: Manages a paragraph of text (with multiple runs)
-- TextBlock: Manages a block of text lines in a text document
-- TextBox: Manages a text block in a box or path (providing text wrapping)
+- TextModel: Manages lines of styled text
 - TextStyle: Manages a group of text display attributes
 - TextLineStyle: Manages a group of text paragraph attributes (indent, spacing)
 - TextToken: Manages a group of characters in a line that represent a word or code part

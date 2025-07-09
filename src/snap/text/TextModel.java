@@ -43,13 +43,13 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     // The next text model
     protected TextModel _nextText;
 
-    // The X/Y of the text block
+    // The X/Y of the text model
     private double _x, _y;
 
-    // The width/height of the text block
+    // The width/height of the text model
     private double _width = Float.MAX_VALUE, _height;
 
-    // The pref width of the text block
+    // The pref width of the text model
     protected double _prefW = -1;
 
     // They y alignment
@@ -146,7 +146,7 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Returns the root text block.
+     * Returns the root text model.
      */
     public TextModel getSourceText()  { return _nextText != null ? _nextText.getSourceText() : this; }
 
@@ -567,61 +567,6 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
         if (anEnd > aStart)
             removeChars(aStart, anEnd);
         addCharsWithStyle(theChars, style, aStart);
-    }
-
-    /**
-     * Splits given line at given character index and adds remainder to text and returns it.
-     */
-    protected TextLine splitLineAtIndex(TextLine textLine, int anIndex)
-    {
-        // Create remainder from clone and remove respective chars from given line and remainder
-        TextLine remainderLine = textLine.clone();
-        textLine.removeChars(anIndex, length());
-        remainderLine.removeChars(0, anIndex);
-
-        // Add remainder
-        addLine(remainderLine, textLine.getLineIndex() + 1);
-
-        // Return
-        return remainderLine;
-    }
-
-    /**
-     * Joins given line with next line.
-     */
-    protected void joinLineWithNextLine(TextLine textLine)
-    {
-        TextLine nextLine = textLine.getNext();
-        if (nextLine == null)
-            return;
-
-        // Iterate over NextLine runs and add chars for each
-        TextRun[] textRuns = nextLine.getRuns();
-        for (TextRun textRun : textRuns) {
-            CharSequence chars = textRun.getString();
-            TextStyle textStyle = textRun.getTextStyle();
-            int endCharIndex = textLine.getEndCharIndex();
-            addCharsToLine(chars, textStyle, endCharIndex, textLine, false);
-        }
-
-        // Remove NextLine
-        removeLine(nextLine.getLineIndex());
-    }
-
-    /**
-     * Adds given TextModel to this text at given index.
-     */
-    public void addTextModel(TextModel textModel, int anIndex)
-    {
-        List<TextLine> textLines = textModel.getLines();
-        for (TextLine line : textLines) {
-            TextRun[] lineRuns = line.getRuns();
-            for (TextRun run : lineRuns) {
-                int index = anIndex + line.getStartCharIndex() + run.getStartCharIndex();
-                addCharsWithStyle(run.getString(), run.getTextStyle(), index);
-                setLineStyle(line.getLineStyle(), index, index + run.length());
-            }
-        }
     }
 
     /**
@@ -1091,11 +1036,11 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
         // Calculated aligned Y
         _alignedY = 0;
         if (_alignY != VPos.TOP) {
-            double textBoxW = getWidth();
-            double prefH = getPrefHeight(textBoxW);
-            double textBoxH = getHeight();
-            if (textBoxH > prefH)
-                _alignedY = _alignY.doubleValue() * (textBoxH - prefH);
+            double textModelW = getWidth();
+            double prefH = getPrefHeight(textModelW);
+            double textModelH = getHeight();
+            if (textModelH > prefH)
+                _alignedY = _alignY.doubleValue() * (textModelH - prefH);
         }
 
         // Return
@@ -1267,7 +1212,7 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Paint TextBox to given painter.
+     * Paint text to given painter.
      */
     public void paint(Painter aPntr)
     {
@@ -1311,7 +1256,7 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Paint TextBox to given painter.
+     * Paint text line to given painter.
      */
     public void paintLine(Painter aPntr, TextLine textLine, double lineY)
     {
@@ -1417,6 +1362,61 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
+     * Adds characters for given TextModel to this text at given index.
+     */
+    public void addCharsForTextModel(TextModel textModel, int anIndex)
+    {
+        List<TextLine> textLines = textModel.getLines();
+        for (TextLine line : textLines) {
+            TextRun[] lineRuns = line.getRuns();
+            for (TextRun run : lineRuns) {
+                int index = anIndex + line.getStartCharIndex() + run.getStartCharIndex();
+                addCharsWithStyle(run.getString(), run.getTextStyle(), index);
+                setLineStyle(line.getLineStyle(), index, index + run.length());
+            }
+        }
+    }
+
+    /**
+     * Splits given line at given character index and adds remainder to text and returns it.
+     */
+    protected TextLine splitLineAtIndex(TextLine textLine, int anIndex)
+    {
+        // Create remainder from clone and remove respective chars from given line and remainder
+        TextLine remainderLine = textLine.clone();
+        textLine.removeChars(anIndex, length());
+        remainderLine.removeChars(0, anIndex);
+
+        // Add remainder
+        addLine(remainderLine, textLine.getLineIndex() + 1);
+
+        // Return
+        return remainderLine;
+    }
+
+    /**
+     * Joins given line with next line.
+     */
+    protected void joinLineWithNextLine(TextLine textLine)
+    {
+        TextLine nextLine = textLine.getNext();
+        if (nextLine == null)
+            return;
+
+        // Iterate over NextLine runs and add chars for each
+        TextRun[] textRuns = nextLine.getRuns();
+        for (TextRun textRun : textRuns) {
+            CharSequence chars = textRun.getString();
+            TextStyle textStyle = textRun.getTextStyle();
+            int endCharIndex = textLine.getEndCharIndex();
+            addCharsToLine(chars, textStyle, endCharIndex, textLine, false);
+        }
+
+        // Remove NextLine
+        removeLine(nextLine.getLineIndex());
+    }
+
+    /**
      * Creates TextTokens for a TextLine.
      */
     protected TextToken[] createTokensForTextLine(TextLine aTextLine)
@@ -1473,7 +1473,7 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Returns underlined runs for text box.
+     * Returns underlined runs for text.
      */
     public TextRun[] getUnderlineRuns(Rect aRect)  { return TextModelUtils.getUnderlineRuns(this, aRect); }
 

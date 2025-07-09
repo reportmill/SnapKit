@@ -83,7 +83,7 @@ public class TextModelUtils {
     }
 
     /**
-     * Returns underlined runs for text box.
+     * Returns underlined runs for text.
      */
     public static TextRun[] getUnderlineRuns(TextModel textModel, Rect aRect)
     {
@@ -112,7 +112,7 @@ public class TextModelUtils {
     }
 
     /**
-     * Paint TextBox to given painter.
+     * Paints text underlines with given painter.
      */
     public static void paintTextModelUnderlines(Painter aPntr, TextModel textModel, Rect clipRect)
     {
@@ -181,7 +181,7 @@ public class TextModelUtils {
     }
 
     /**
-     * Sets the Mouse Y for given text block to assist in caret placement (can be ambiguous for start/end of line).
+     * Sets the Mouse Y for given text model to assist in caret placement (can be ambiguous for start/end of line).
      */
     public static void setMouseY(TextModel textModel, double aY)  { textModel._mouseY = aY; }
 
