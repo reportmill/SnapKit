@@ -9,7 +9,6 @@ import snap.gfx.Image;
 import snap.props.PropChange;
 import snap.props.Undoer;
 import snap.text.TextModel;
-import snap.text.TextDoc;
 import snap.text.TextLine;
 import snap.text.TextSel;
 import snap.util.Convert;
@@ -245,10 +244,10 @@ public class TextPane extends ViewOwner {
     protected void saveChangesImpl()
     {
         TextArea textArea = getTextArea();
-        TextModel textModel = textArea.getTextModel().getSourceText();
+        TextModel textModel = textArea.getTextModel();
 
-        if (textModel instanceof TextDoc textDoc) {
-            try { textDoc.writeToSourceFile(); }
+        if (textModel.getSourceUrl() != null) {
+            try { textModel.writeToSourceFile(); }
             catch (Exception e) { throw new RuntimeException(e); }
         }
     }

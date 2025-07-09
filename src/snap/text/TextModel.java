@@ -13,6 +13,8 @@ import snap.gfx.Painter;
 import snap.props.PropChange;
 import snap.props.PropObject;
 import snap.util.*;
+import snap.web.WebFile;
+import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,6 +23,9 @@ import java.util.Objects;
  * This class is the basic text storage class, holding a list of TextLine.
  */
 public class TextModel extends PropObject implements CharSequenceX, Cloneable, XMLArchiver.Archivable {
+
+    // The URL of the file that provided the text
+    private WebURL _sourceUrl;
 
     // Whether text is rich
     private boolean _rich;
@@ -1505,6 +1510,61 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
 
         // Return
         return textCopy;
+    }
+
+    /**
+     * Returns the source URL.
+     */
+    public WebURL getSourceUrl()  { return _sourceUrl; }
+
+    /**
+     * Sets the Source URL.
+     */
+    public void setSourceUrl(WebURL aURL)
+    {
+        _sourceUrl = aURL;
+    }
+
+    /**
+     * Returns the source file.
+     */
+    public WebFile getSourceFile()
+    {
+        WebURL sourceURL = getSourceUrl();
+        return sourceURL != null ? sourceURL.createFile(false) : null;
+    }
+
+    /**
+     * Load text from source URL.
+     */
+    public void readFromSourceURL(WebURL aURL)
+    {
+        // Set Source URL
+        setSourceUrl(aURL);
+
+        // Get URL text and set in doc
+        String text = aURL.getText();
+        setString(text);
+    }
+
+    /**
+     * Write text to source file.
+     */
+    public void writeToSourceFile()
+    {
+        // Get SourceFile
+        WebFile sourceFile = getSourceFile();
+        if (sourceFile == null) {
+            System.err.println("TextModel.writeToSourceFile: No source file specified");
+            return;
+        }
+
+        // Get TextDoc string and set in file
+        String fileText = getString();
+        sourceFile.setText(fileText);
+
+        // Save file
+        sourceFile.save();
     }
 
     /**

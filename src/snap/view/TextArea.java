@@ -95,6 +95,11 @@ public class TextArea extends ParentView {
     public TextModel getTextModel()  { return _textAdapter.getTextModel(); }
 
     /**
+     * Returns the text model that holds the text.
+     */
+    public void setTextModel(TextModel textModel)  { _textAdapter.setTextModel(textModel); }
+
+    /**
      * Sets the source text.
      */
     public void setSourceText(TextModel textModel)  { _textAdapter.setSourceText(textModel); }
