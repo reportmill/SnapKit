@@ -8,7 +8,9 @@ import snap.props.PropChangeListener;
 import snap.util.*;
 import snap.view.*;
 import snap.web.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -30,7 +32,7 @@ public class FilePanel extends ViewOwner {
     private EventListener _actionHandler;
 
     // The sites
-    private WebSite[]  _sites;
+    private List<WebSite>  _sites;
 
     // The currently selected site
     private WebSite  _selSite;
@@ -57,7 +59,7 @@ public class FilePanel extends ViewOwner {
     private PropChangeListener _sitePanePropChangeLsnr = pc -> sitePaneDidPropChange();
 
     // The sites
-    private static WebSite[]  _defaultSites;
+    private static List<WebSite>  _defaultSites;
 
     // Constants for properties
     public static final String SelFile_Prop = "SelFile";
@@ -72,7 +74,7 @@ public class FilePanel extends ViewOwner {
 
         // Get sites
         _sites = getDefaultSites();
-        _selSite = _sites.length > 0 ? _sites[0] : null;
+        _selSite = !_sites.isEmpty() ? _sites.get(0) : null;
     }
 
     /**
@@ -142,14 +144,16 @@ public class FilePanel extends ViewOwner {
     /**
      * Return sites available to open/save files.
      */
-    public WebSite[] getSites()  { return _sites; }
+    public List<WebSite> getSites()  { return _sites; }
 
     /**
      * Adds a site available to open/save files.
      */
     public void addSite(WebSite aSite)
     {
-        _sites = ArrayUtils.addId(_sites, aSite);
+        _sites = new ArrayList<>(_sites);
+        if (!_sites.contains(aSite))
+            _sites.add(aSite);
     }
 
     /**
@@ -158,11 +162,12 @@ public class FilePanel extends ViewOwner {
     public void removeSite(WebSite aSite)
     {
         // Remove site
-        _sites = ArrayUtils.remove(_sites, aSite);
+        _sites = new ArrayList<>(_sites);
+        _sites.remove(aSite);
 
         // If SelSite is removed site, reset SelSite
         if (aSite == getSelSite()) {
-            WebSite newSelSite = _sites.length > 0 ? _sites[0] : null;
+            WebSite newSelSite = !_sites.isEmpty() ? _sites.get(0) : null;
             setSelSite(newSelSite);
         }
     }
@@ -322,10 +327,10 @@ public class FilePanel extends ViewOwner {
     protected void initUI()
     {
         // Get file sites
-        WebSite[] sites = getSites();
+        List<WebSite> sites = getSites();
 
         // If more than one, add tabs for sites to SitesTabBar
-        if (sites.length > 1) {
+        if (sites.size() > 1) {
             Tab.Builder tabBuilder = new Tab.Builder(_sitesTabBar);
             for (WebSite site : sites) {
                 String siteName = getNameForSite(site);
@@ -378,8 +383,8 @@ public class FilePanel extends ViewOwner {
 
         // Get site at SitesTabBar.SelIndex and set
         int selIndex = _sitesTabBar.getSelIndex();
-        WebSite[] fileSites = getSites();
-        WebSite newSelSite = fileSites[selIndex];
+        List<WebSite> fileSites = getSites();
+        WebSite newSelSite = fileSites.get(selIndex);
         setSelSite(newSelSite);
 
         // If recent files site had selected file from this site, select in new SitePane
@@ -508,8 +513,8 @@ public class FilePanel extends ViewOwner {
     private TransitionPane.Transition getTransitionForFileBrowsers(WebSitePane webSitePane1, WebSitePane webSitePane2)
     {
         if (webSitePane1 == null) return TransitionPane.Instant;
-        int index1 = ArrayUtils.indexOf(getSites(), webSitePane1.getSite());
-        int index2 = ArrayUtils.indexOf(getSites(), webSitePane2.getSite());
+        int index1 = getSites().indexOf(webSitePane1.getSite());
+        int index2 = getSites().indexOf(webSitePane2.getSite());
         return index1 < index2 ? TransitionPane.MoveRight : TransitionPane.MoveLeft;
     }
 
@@ -557,13 +562,13 @@ public class FilePanel extends ViewOwner {
     /**
      * Returns the sites.
      */
-    public static WebSite[] getDefaultSites()
+    public static List<WebSite> getDefaultSites()
     {
         if (_defaultSites != null) return _defaultSites;
 
         // Init to local site
         WebSite localSite = WebSitePaneUtils.getLocalFileSystemSite();
-        WebSite[] defaultSites = new WebSite[] { localSite };
+        List<WebSite> defaultSites = List.of(localSite);
 
         // Set/return
         return _defaultSites = defaultSites;
@@ -575,8 +580,11 @@ public class FilePanel extends ViewOwner {
     public static void addDefaultSite(WebSite aSite)
     {
         // Add site
-        int index = aSite instanceof RecentFilesSite ? 0 : _defaultSites.length;
-        _defaultSites = ArrayUtils.addId(_defaultSites, aSite, index);
+        List<WebSite> defaultSites = getDefaultSites();
+        int index = aSite instanceof RecentFilesSite ? 0 : defaultSites.size();
+        _defaultSites = new ArrayList<>(defaultSites);
+        if (!_defaultSites.contains(aSite))
+            _defaultSites.add(index, aSite);
     }
 
     /**
@@ -584,8 +592,9 @@ public class FilePanel extends ViewOwner {
      */
     public static void removeDefaultSite(WebSite aSite)
     {
-        getDefaultSites();
-        _defaultSites = ArrayUtils.removeId(_defaultSites, aSite);
+        List<WebSite> defaultSites = getDefaultSites();
+        _defaultSites = new ArrayList<>(defaultSites);
+        _defaultSites.remove(aSite);
     }
 
     /**
