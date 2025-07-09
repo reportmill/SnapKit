@@ -86,11 +86,11 @@ public class TextAdapter extends PropObject {
     private static Color TEXT_SEL_COLOR = new Color(181, 214, 254, 255);
 
     // Constants for properties
-    public static final String RichText_Prop = "RichText";
     public static final String Editable_Prop = "Editable";
-    public static final String WrapLines_Prop = "WrapLines";
-    public static final String SourceText_Prop = "SourceText";
+    public static final String RichText_Prop = "RichText";
     public static final String Selection_Prop = "Selection";
+    public static final String TextModel_Prop = "TextModel";
+    public static final String WrapLines_Prop = "WrapLines";
 
     /**
      * Constructor for given text.
@@ -135,6 +135,7 @@ public class TextAdapter extends PropObject {
             _textModel.removePropChangeListener(_textModelPropChangeLsnr);
 
         // Set new text model
+        TextModel oldModel = _textModel;
         _textModel = textModel;
 
         // Add PropChangeListener
@@ -146,35 +147,9 @@ public class TextAdapter extends PropObject {
             _view.relayout();
             _view.repaint();
         }
-    }
-
-    /**
-     * Returns the root text.
-     */
-    public TextModel getSourceText()  { return _textModel.getSourceText(); }
-
-    /**
-     * Sets the source text.
-     */
-    public void setSourceText(TextModel aTextModel)
-    {
-        // If already set, just return
-        TextModel oldSourceText = getSourceText();
-        if (aTextModel == oldSourceText) return;
-
-        // Get appropriate text model for source text
-        TextModel textModel = aTextModel;
-        if (isWrapLines() && !(textModel instanceof TextModelX)) {
-            TextModelX textModelX = new TextModelX(textModel);
-            textModelX.setWrapLines(true);
-            textModel = textModelX;
-        }
-
-        // Set text model
-        setTextModel(textModel);
 
         // FirePropChange
-        firePropChange(SourceText_Prop, oldSourceText, textModel);
+        firePropChange(TextModel_Prop, oldModel, textModel);
     }
 
     /**

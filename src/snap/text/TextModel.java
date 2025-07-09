@@ -327,6 +327,10 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void setTextModified(boolean aValue)
     {
+        // Forward to NextText
+        if (_nextText != null)
+            _nextText.setTextModified(aValue);
+
         if (aValue == isTextModified()) return;
         firePropChange(TextModified_Prop, _textModified, _textModified = aValue);
     }

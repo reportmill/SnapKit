@@ -64,8 +64,8 @@ public class TextModelX extends TextModel {
      */
     public void setSourceText(TextModel textModel)
     {
-//        updateTextAll();
         setNextText(textModel);
+        updateTextAll();
     }
 
     /**
@@ -266,22 +266,17 @@ public class TextModelX extends TextModel {
     public void setBoundsPath(Shape aPath)  { _boundsPath = aPath; }
 
     /**
-     * Updates all lines.
+     * Reloads text from NextText.
      */
     protected void updateTextAll()
     {
-        int endCharIndexBox = length();
-        int endCharIndexBlock = _nextText.length();
-        updateTextForCharRange(0, endCharIndexBox, endCharIndexBlock);
-    }
-
-    /**
-     * Updates all lines.
-     */
-    protected void updateTextForCharRange(int startCharIndex, int endCharIndexBox, int endCharIndexBlock)
-    {
         // Skip if no text
         if (length() == 0 && _nextText.isEmpty()) return;
+
+        // Update ranges
+        int startCharIndex = 0;
+        int endCharIndexBox = length();
+        int endCharIndexBlock = _nextText.length();
 
         // Cache NextText
         TextModel nextText = _nextText;

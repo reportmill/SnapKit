@@ -33,8 +33,8 @@ public class TextArea extends ParentView {
     public static final String RichText_Prop = TextAdapter.RichText_Prop;
     public static final String Editable_Prop = TextAdapter.Editable_Prop;
     public static final String WrapLines_Prop = TextAdapter.WrapLines_Prop;
-    public static final String SourceText_Prop = TextAdapter.SourceText_Prop;
     public static final String Selection_Prop = TextAdapter.Selection_Prop;
+    public static final String TextModel_Prop = TextAdapter.TextModel_Prop;
 
     /**
      * Constructor.
@@ -98,11 +98,6 @@ public class TextArea extends ParentView {
      * Returns the text model that holds the text.
      */
     public void setTextModel(TextModel textModel)  { _textAdapter.setTextModel(textModel); }
-
-    /**
-     * Sets the source text.
-     */
-    public void setSourceText(TextModel textModel)  { _textAdapter.setSourceText(textModel); }
 
     /**
      * Returns the plain string of the text being edited.
@@ -590,9 +585,9 @@ public class TextArea extends ParentView {
     {
         switch (aPC.getPropName()) {
 
-            // Handle Selection, SourceText, WrapLines: Repost for TextArea
+            // Handle Selection, TextModel, WrapLines: Repost for TextArea
             case TextAdapter.Selection_Prop: firePropChange(Selection_Prop, aPC.getOldValue(), aPC.getNewValue()); break;
-            case TextAdapter.SourceText_Prop: firePropChange(SourceText_Prop, aPC.getOldValue(), aPC.getNewValue()); break;
+            case TextAdapter.TextModel_Prop: firePropChange(TextModel_Prop, aPC.getOldValue(), aPC.getNewValue()); break;
             case TextAdapter.WrapLines_Prop: firePropChange(WrapLines_Prop, aPC.getOldValue(), aPC.getNewValue()); break;
 
             // Handle Editable
