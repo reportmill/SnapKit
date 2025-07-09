@@ -1559,7 +1559,7 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
             return;
         }
 
-        // Get TextDoc string and set in file
+        // Get text string and set in file
         String fileText = getString();
         sourceFile.setText(fileText);
 

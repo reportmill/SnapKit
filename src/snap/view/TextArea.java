@@ -58,7 +58,7 @@ public class TextArea extends ParentView {
         _textAdapter = createTextAdapter(_textModel);
         _textAdapter.setView(this);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
-        _textAdapter.addSourceTextPropChangeListener(this::handleSourceTextPropChange);
+        _textAdapter.addTextModelPropChangeListener(this::handleSourceTextPropChange);
     }
 
     /**
@@ -76,7 +76,7 @@ public class TextArea extends ParentView {
         _textAdapter = createTextAdapter(_textModel);
         _textAdapter.setView(this);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
-        _textAdapter.addSourceTextPropChangeListener(this::handleSourceTextPropChange);
+        _textAdapter.addTextModelPropChangeListener(this::handleSourceTextPropChange);
     }
 
     /**

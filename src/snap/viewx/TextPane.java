@@ -113,7 +113,7 @@ public class TextPane extends ViewOwner {
         // Get text area and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
         _textArea = getView("TextArea", TextArea.class);
         _textArea.addPropChangeListener(this::handleTextAreaPropChange);
-        _textArea.getTextAdapter().addSourceTextPropChangeListener(this::handleSourceTextPropChange);
+        _textArea.getTextAdapter().addTextModelPropChangeListener(this::handleSourceTextPropChange);
         setFirstFocus(_textArea);
 
         // Configure FindText

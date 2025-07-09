@@ -83,7 +83,7 @@ public class TextField extends ParentView {
         _textAdapter.setView(this);
         _textAdapter.setEditable(true);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
-        _textAdapter.addSourceTextPropChangeListener(this::handleSourceTextPropChange);
+        _textAdapter.addTextModelPropChangeListener(this::handleSourceTextPropChange);
 
         // Configure label and set
         _promptLabel = new Label();

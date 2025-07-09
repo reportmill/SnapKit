@@ -34,8 +34,8 @@ public class TextAdapter extends PropObject {
     // The text undoer
     private Undoer _undoer = Undoer.DISABLED_UNDOER;
 
-    // A PropChangeListener to send SourceText PropChanges to adapter client.
-    private PropChangeListener[] _sourceTextPropChangeLsnrs = new PropChangeListener[0];
+    // A PropChangeListener to send TextModel PropChanges to adapter client.
+    private PropChangeListener[] _textModelPropChangeLsnrs = new PropChangeListener[0];
 
     // A consumer to handle link clicks
     private BiConsumer<ViewEvent,String> _linkHandler;
@@ -68,7 +68,7 @@ public class TextAdapter extends PropObject {
     private boolean  _showCaret;
 
     // The PropChangeListener to catch SourceText PropChanges.
-    private PropChangeListener _sourceTextPropLsnr = this::handleSourceTextPropChange;
+    private PropChangeListener _textModelPropChangeLsnr = this::handleTextModelPropChange;
 
     // A PropChangeListener to enable/disable caret when window loses focus
     private PropChangeListener  _windowFocusedChangedLsnr;
@@ -99,7 +99,7 @@ public class TextAdapter extends PropObject {
     {
         super();
         _textModel = textModel;
-        _textModel.addPropChangeListener(_sourceTextPropLsnr);
+        _textModel.addPropChangeListener(_textModelPropChangeLsnr);
     }
 
     /**
@@ -132,13 +132,13 @@ public class TextAdapter extends PropObject {
 
         // Remove PropChangeListener
         if (_textModel != null)
-            _textModel.removePropChangeListener(_sourceTextPropLsnr);
+            _textModel.removePropChangeListener(_textModelPropChangeLsnr);
 
         // Set new text model
         _textModel = textModel;
 
         // Add PropChangeListener
-        _textModel.addPropChangeListener(_sourceTextPropLsnr);
+        _textModel.addPropChangeListener(_textModelPropChangeLsnr);
 
         // Relayout parent, repaint
         if (_view != null) {
@@ -308,19 +308,19 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Adds a prop change listener to SourceText.
+     * Adds a prop change listener for TextModel prop changes.
      */
-    public void addSourceTextPropChangeListener(PropChangeListener propChangeListener)
+    public void addTextModelPropChangeListener(PropChangeListener propChangeListener)
     {
-        _sourceTextPropChangeLsnrs = ArrayUtils.add(_sourceTextPropChangeLsnrs, propChangeListener);
+        _textModelPropChangeLsnrs = ArrayUtils.add(_textModelPropChangeLsnrs, propChangeListener);
     }
 
     /**
-     * Removes a prop change listener to SourceText.
+     * Removes a prop change listener for TextModel prop changes.
      */
-    public void removeSourceTextPropChangeListener(PropChangeListener propChangeListener)
+    public void removeTextModelPropChangeListener(PropChangeListener propChangeListener)
     {
-        _sourceTextPropChangeLsnrs = ArrayUtils.remove(_sourceTextPropChangeLsnrs, propChangeListener);
+        _textModelPropChangeLsnrs = ArrayUtils.remove(_textModelPropChangeLsnrs, propChangeListener);
     }
 
     /**
@@ -1588,13 +1588,13 @@ public class TextAdapter extends PropObject {
     /**
      * Called when SourceText changes (chars added, updated or deleted).
      */
-    protected void handleSourceTextPropChange(PropChange propChange)
+    protected void handleTextModelPropChange(PropChange propChange)
     {
         // Add prop change to undoer
         addSourceTextPropChangeToUndoer(propChange);
 
         // Forward on to listeners
-        for (PropChangeListener propChangeLsnr : _sourceTextPropChangeLsnrs)
+        for (PropChangeListener propChangeLsnr : _textModelPropChangeLsnrs)
             propChangeLsnr.propertyChange(propChange);
 
         // Relayout and repaint
