@@ -245,10 +245,9 @@ public class TextPane extends ViewOwner {
     protected void saveChangesImpl()
     {
         TextArea textArea = getTextArea();
-        TextBlock textBlock = textArea.getSourceText();
+        TextBlock textBlock = textArea.getTextBlock().getSourceText();
 
-        if (textBlock instanceof TextDoc) {
-            TextDoc textDoc = (TextDoc) textBlock;
+        if (textBlock instanceof TextDoc textDoc) {
             try { textDoc.writeToSourceFile(); }
             catch (Exception e) { throw new RuntimeException(e); }
         }

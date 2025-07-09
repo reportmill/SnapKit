@@ -95,11 +95,6 @@ public class TextArea extends ParentView {
     public TextBlock getTextBlock()  { return _textAdapter.getTextBlock(); }
 
     /**
-     * Returns the root text block.
-     */
-    public TextBlock getSourceText()  { return _textAdapter.getSourceText(); }
-
-    /**
      * Sets the source TextBlock.
      */
     public void setSourceText(TextBlock aTextBlock)  { _textAdapter.setSourceText(aTextBlock); }

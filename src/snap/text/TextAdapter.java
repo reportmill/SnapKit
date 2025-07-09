@@ -285,7 +285,7 @@ public class TextAdapter extends PropObject {
         // Handle TextModified: Reset undoer if false, then return
         String propName = propChange.getPropName();
         if (propName == TextBlock.TextModified_Prop) {
-            if (!getSourceText().isTextModified() && undoer.isUndoAvailable())
+            if (!getTextBlock().isTextModified() && undoer.isUndoAvailable())
                 undoer.reset();
             return;
         }
@@ -306,7 +306,7 @@ public class TextAdapter extends PropObject {
     private void handleUndoerPropChange()
     {
         boolean hasUndo = _undoer.isUndoAvailable();
-        getSourceText().setTextModified(hasUndo);
+        getTextBlock().setTextModified(hasUndo);
     }
 
     /**
