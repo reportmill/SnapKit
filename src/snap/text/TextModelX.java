@@ -4,12 +4,17 @@
 package snap.text;
 import snap.geom.Rect;
 import snap.geom.Shape;
+import snap.util.XMLArchiver;
+import snap.util.XMLElement;
 
 /**
  * This TextModel subclass adds support for advanced features like text wrapping, font scaling, linking multiple
  * text models and more.
  */
 public class TextModelX extends TextModel {
+
+    // The source text model
+    protected TextModel _sourceText;
 
     // Whether to wrap lines that overrun bounds
     private boolean _wrapLines;
@@ -60,23 +65,90 @@ public class TextModelX extends TextModel {
     }
 
     /**
+     * Returns the source text model.
+     */
+    public TextModel getSourceText()  { return _sourceText; }
+
+    /**
      * Sets the source TextModel.
      */
-    public void setSourceText(TextModel textModel)
+    public void setSourceText(TextModel sourceText)
     {
-        setNextText(textModel);
+        if (sourceText == getSourceText()) return;
+
+        // Sync default TextStyle/LineStyle
+        _sourceText = null;
+        setDefaultTextStyle(sourceText.getDefaultTextStyle());
+        setDefaultLineStyle(sourceText.getDefaultLineStyle());
+
+        // Set value
+        _sourceText = sourceText;
         updateTextAll();
+    }
+    /**
+     * Sets whether text supports multiple styles.
+     */
+    @Override
+    public void setRichText(boolean aValue)
+    {
+        if (_sourceText != null)
+            _sourceText.setRichText(aValue);
+        super.setRichText(aValue);
     }
 
     /**
-     * Used to call super.addCharsWithStyle().
+     * Sets the text to the given string.
      */
     @Override
-    protected void addCharsWithStyleImpl(CharSequence theChars, TextStyle theStyle, int anIndex)
+    public void setString(String aString)
+    {
+        if (_sourceText != null)
+            _sourceText.setString(aString);
+        super.setString(aString);
+    }
+
+    /**
+     * Sets the default text style.
+     */
+    @Override
+    public void setDefaultTextStyle(TextStyle textStyle)
+    {
+        if (_sourceText != null)
+            _sourceText.setDefaultTextStyle(textStyle);
+        super.setDefaultTextStyle(textStyle);
+    }
+
+    /**
+     * Sets the default line style.
+     */
+    @Override
+    public void setDefaultLineStyle(TextLineStyle lineStyle)
+    {
+        if (_sourceText != null)
+            _sourceText.setDefaultLineStyle(lineStyle);
+        super.setDefaultLineStyle(lineStyle);
+    }
+
+    /**
+     * Sets whether text is modified.
+     */
+    @Override
+    public void setTextModified(boolean aValue)
+    {
+        if (_sourceText != null)
+            _sourceText.setTextModified(aValue);
+        super.setTextModified(aValue);
+    }
+
+    /**
+     * Adds characters with given style to this text at given index.
+     */
+    @Override
+    public void addCharsWithStyle(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
         // Get start char index - just return if index before text start
         int startCharIndex = Math.max(anIndex, getStartCharIndex());
-        if (_nextText != null && startCharIndex >= _nextText.length())
+        if (_sourceText != null && startCharIndex >= _sourceText.length())
             return;
 
         // If FontScale is set, replace style with scaled style
@@ -84,8 +156,11 @@ public class TextModelX extends TextModel {
         if (fontScale != 1)
             theStyle = theStyle.copyForStyleValue(theStyle.getFont().copyForScale(fontScale));
 
+        if (_sourceText != null)
+            _sourceText.addCharsWithStyle(theChars, theStyle, anIndex);
+
         // Do normal version
-        super.addCharsWithStyleImpl(theChars, theStyle, anIndex);
+        super.addCharsWithStyle(theChars, theStyle, anIndex);
 
         // If linked, remove any lines below bounds
         if (isLinked())
@@ -183,6 +258,94 @@ public class TextModelX extends TextModel {
     }
 
     /**
+     * Removes characters in given range.
+     */
+    @Override
+    public void removeChars(int aStartCharIndex, int anEndCharIndex)
+    {
+        if (_sourceText != null)
+            _sourceText.removeChars(aStartCharIndex, anEndCharIndex);
+        super.removeChars(aStartCharIndex, anEndCharIndex);
+    }
+
+    /**
+     * Sets the given text style for given range.
+     */
+    @Override
+    public void setTextStyle(TextStyle textStyle, int aStart, int anEnd)
+    {
+        if (_sourceText != null)
+            _sourceText.setTextStyle(textStyle, aStart, anEnd);
+        super.setTextStyle(textStyle, aStart, anEnd);
+    }
+
+    /**
+     * Sets a given style to a given range.
+     */
+    @Override
+    public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
+    {
+        if (_sourceText != null)
+            _sourceText.setLineStyle(aStyle, aStart, anEnd);
+        super.setLineStyle(aStyle, aStart, anEnd);
+    }
+
+    /**
+     * Sets a given style to a given range.
+     */
+    @Override
+    protected void setLineStyleRich(TextLineStyle aStyle, int aStart, int anEnd)
+    {
+        if (_sourceText != null)
+            _sourceText.setLineStyleRich(aStyle, aStart, anEnd);
+        super.setLineStyleRich(aStyle, aStart, anEnd);
+    }
+
+    /**
+     * Sets a given style to a given range.
+     */
+    @Override
+    protected void setLineStyleValueRich(String aKey, Object aValue, int aStart, int anEnd)
+    {
+        if (_sourceText != null)
+            _sourceText.setLineStyleValueRich(aKey, aValue, aStart, anEnd);
+        super.setLineStyleValueRich(aKey, aValue, aStart, anEnd);
+    }
+
+    /**
+     * Creates TextTokens for a TextLine.
+     */
+    @Override
+    protected TextToken[] createTokensForTextLine(TextLine aTextLine)
+    {
+        if (_sourceText != null)
+            return _sourceText.createTokensForTextLine(aTextLine);
+        return super.createTokensForTextLine(aTextLine);
+    }
+
+    /**
+     * Returns a copy of this text for given char range.
+     */
+    @Override
+    public TextModel copyForRange(int aStart, int aEnd)
+    {
+        if (_sourceText != null)
+            return _sourceText.copyForRange(aStart, aEnd);
+        return super.copyForRange(aStart, aEnd);
+    }
+
+    /**
+     * XMLArchiver.Archivable archival.
+     */
+    @Override
+    public XMLElement toXML(XMLArchiver anArchiver)
+    {
+        if (_sourceText != null)
+            return _sourceText.toXML(anArchiver);
+        return super.toXML(anArchiver);
+    }
+
+    /**
      * Returns whether to wrap lines that overrun bounds.
      */
     public boolean isWrapLines()  { return _wrapLines; }
@@ -271,16 +434,16 @@ public class TextModelX extends TextModel {
     protected void updateTextAll()
     {
         // Skip if no text
-        if (length() == 0 && _nextText.isEmpty()) return;
+        if (length() == 0 && _sourceText.isEmpty()) return;
 
         // Update ranges
         int startCharIndex = 0;
         int endCharIndexBox = length();
-        int endCharIndexBlock = _nextText.length();
+        int endCharIndexBlock = _sourceText.length();
 
-        // Cache NextText
-        TextModel nextText = _nextText;
-        _nextText = null;
+        // Cache SourceText
+        TextModel sourceText = _sourceText;
+        _sourceText = null;
 
         // If WrapLines, mark location of first line's first token - if it shrinks, might need to re-wrap previous line
         boolean wrapLines = isWrapLines();
@@ -293,7 +456,7 @@ public class TextModelX extends TextModel {
         // Get run iterator for range (adjusted if this text is overflow from linked)
         int textStartCharIndex = getStartCharIndex();
         int charIndex = Math.max(textStartCharIndex, startCharIndex);
-        TextRunIter runIter = nextText.getRunIterForCharRange(charIndex, endCharIndexBlock);
+        TextRunIter runIter = sourceText.getRunIterForCharRange(charIndex, endCharIndexBlock);
 
         // Iterate over source text runs for range and add
         while (runIter.hasNextRun()) {
@@ -316,7 +479,7 @@ public class TextModelX extends TextModel {
         }
 
         // Reset NextText
-        _nextText = nextText;
+        _sourceText = sourceText;
     }
 
     /**
@@ -395,7 +558,7 @@ public class TextModelX extends TextModel {
     @Override
     public double getPrefWidth()
     {
-        double textPrefW = _nextText.getPrefWidth();
+        double textPrefW = _sourceText.getPrefWidth();
         double fontScale = getFontScale();
         return Math.ceil(textPrefW * fontScale);
     }
@@ -426,7 +589,7 @@ public class TextModelX extends TextModel {
             if (isTextOutOfBounds()) {
                 fsHi = fontScale;
                 if ((fsHi + fsLo) / 2 == 0) {
-                    System.err.println("Error scaling text. Could only fit " + length() + " of " + _nextText.length());
+                    System.err.println("Error scaling text. Could only fit " + length() + " of " + _sourceText.length());
                     break;
                 }
             }
@@ -466,7 +629,7 @@ public class TextModelX extends TextModel {
         int lineCount = getLineCount();
         double lineMaxY = lineCount > 0 ? getLine(lineCount - 1).getMaxY() : 0;
         double tboxMaxY = getMaxY();
-        if (lineMaxY >= tboxMaxY || getEndCharIndex() < _nextText.length())
+        if (lineMaxY >= tboxMaxY || getEndCharIndex() < _sourceText.length())
             return true;
 
         // If not WrapLines, check X
