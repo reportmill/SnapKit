@@ -175,7 +175,7 @@ public class TextModelX extends SourceTextModel {
     {
         if (aValue == _hyphenate) return;
         _hyphenate = aValue;
-        updateTextAll();
+        reloadTextFromSourceText();
     }
 
     /**
@@ -190,7 +190,7 @@ public class TextModelX extends SourceTextModel {
     {
         if (aValue == _linked) return;
         _linked = aValue;
-        updateTextAll();
+        reloadTextFromSourceText();
     }
 
     /**
@@ -208,7 +208,7 @@ public class TextModelX extends SourceTextModel {
 
         // Set and update
         _startCharIndex = charIndex;
-        updateTextAll();
+        reloadTextFromSourceText();
     }
 
     /**
@@ -223,7 +223,7 @@ public class TextModelX extends SourceTextModel {
     {
         if (aValue == _fontScale) return;
         _fontScale = aValue;
-        updateTextAll();
+        reloadTextFromSourceText();
     }
 
     /**
@@ -291,7 +291,7 @@ public class TextModelX extends SourceTextModel {
         if (aValue == getWidth()) return;
         super.setWidth(aValue);
         if (isWrapLines())
-            updateTextAll();
+            reloadTextFromSourceText();
     }
 
     /**
@@ -303,7 +303,7 @@ public class TextModelX extends SourceTextModel {
         if (aValue == getHeight()) return;
         super.setHeight(aValue);
         if (isWrapLines())
-            updateTextAll();
+            reloadTextFromSourceText();
     }
 
     /**

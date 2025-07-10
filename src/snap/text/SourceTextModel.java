@@ -59,7 +59,7 @@ public class SourceTextModel extends TextModel {
 
         // Set value
         _sourceText = sourceText;
-        updateTextAll();
+        reloadTextFromSourceText();
     }
 
     /**
@@ -231,9 +231,9 @@ public class SourceTextModel extends TextModel {
     }
 
     /**
-     * Reloads text from NextText.
+     * Reloads text from SourceText.
      */
-    protected void updateTextAll()
+    protected void reloadTextFromSourceText()
     {
         // Skip if no text
         if (length() == 0 && _sourceText.isEmpty()) return;
@@ -246,6 +246,7 @@ public class SourceTextModel extends TextModel {
         // Cache SourceText
         TextModel sourceText = _sourceText;
         _sourceText = null;
+        setPropChangeEnabled(false);
 
         // If WrapLines, mark location of first line's first token - if it shrinks, might need to re-wrap previous line
         boolean wrapLines = isWrapLines();
@@ -280,8 +281,9 @@ public class SourceTextModel extends TextModel {
             joinLineWithNextLine(previousLine);
         }
 
-        // Reset NextText
+        // Reset SourceText
         _sourceText = sourceText;
+        setPropChangeEnabled(true);
     }
 
     /**

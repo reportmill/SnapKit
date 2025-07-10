@@ -67,7 +67,7 @@ public class TextAdapter extends PropObject {
     // Whether to show text insertion point caret
     private boolean  _showCaret;
 
-    // The PropChangeListener to catch SourceText PropChanges.
+    // The PropChangeListener to catch TextModel PropChanges.
     private PropChangeListener _textModelPropChangeLsnr = this::handleTextModelPropChange;
 
     // A PropChangeListener to enable/disable caret when window loses focus
@@ -248,7 +248,7 @@ public class TextAdapter extends PropObject {
     /**
      * Adds a property change to undoer.
      */
-    private void addSourceTextPropChangeToUndoer(PropChange propChange)
+    private void addTextModelPropChangeToUndoer(PropChange propChange)
     {
         // Get undoer (just return if null or disabled)
         Undoer undoer = getUndoer();
@@ -1561,12 +1561,12 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Called when SourceText changes (chars added, updated or deleted).
+     * Called when TextModel changes (chars added, updated or deleted).
      */
     protected void handleTextModelPropChange(PropChange propChange)
     {
         // Add prop change to undoer
-        addSourceTextPropChangeToUndoer(propChange);
+        addTextModelPropChangeToUndoer(propChange);
 
         // Forward on to listeners
         for (PropChangeListener propChangeLsnr : _textModelPropChangeLsnrs)

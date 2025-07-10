@@ -461,7 +461,7 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
         }
 
         // If deleted chars is set, send property change
-        if (removedChars != null)
+        if (removedChars != null && isPropChangeEnabled())
             firePropChange(new TextModelUtils.CharsChange(this, removedChars, null, aStartCharIndex));
         _prefW = -1;
     }
