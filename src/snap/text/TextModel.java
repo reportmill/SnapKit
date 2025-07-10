@@ -312,6 +312,14 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void addCharsWithStyle(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
+        addCharsWithStyleImpl(theChars, theStyle, anIndex);
+    }
+
+    /**
+     * Adds characters with given style to this text at given index.
+     */
+    protected void addCharsWithStyleImpl(CharSequence theChars, TextStyle theStyle, int anIndex)
+    {
         // If no chars, just return
         if (theChars == null) return;
 
