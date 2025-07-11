@@ -123,14 +123,13 @@ public class Undoer extends PropObject {
             _activeUndoSet.addPropChange(propChange);
 
         // If AutoSave, register to call saveChange()
-        if (_autoSave && _autoSaveRun == null) {
-            if (ViewUtils.isMouseDown())
-                ViewUtils.runOnMouseUp(_autoSaveRun = this::saveChangesAndClose);
-            else ViewUtils.runLater(_autoSaveRun = this::saveChanges);
+        if (_autoSave) {
+            if (_autoSaveRun == null) {
+                if (ViewUtils.isMouseDown())
+                    ViewUtils.runOnMouseUp(_autoSaveRun = this::saveChangesAndClose);
+                else ViewUtils.runLater(_autoSaveRun = this::saveChanges);
+            }
         }
-
-        // Reset UndoAvailable
-        resetAtLastSaveState();
     }
 
     /**
