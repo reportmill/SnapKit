@@ -169,7 +169,15 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
      */
     public void setString(String aString)
     {
-        replaceChars(aString, 0, length());
+        String string = aString != null ? aString : "";
+
+        if (!string.contentEquals(this)) {
+            setPropChangeEnabled(false);
+            replaceChars(string, 0, length());
+            setPropChangeEnabled(true);
+        }
+
+        setTextModified(false);
     }
 
     /**
@@ -1464,9 +1472,6 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
         // Get URL text and set in doc
         String text = aURL.getText();
         setString(text);
-
-        // Set TextModified to false since it matches file
-        setTextModified(false);
     }
 
     /**

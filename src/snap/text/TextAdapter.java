@@ -155,23 +155,15 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the plain string of the text being edited.
      */
-    public String getText()  { return _textModel.getString(); }
+    public String getString()  { return _textModel.getString(); }
 
     /**
      * Set text string of text editor.
      */
-    public void setText(String aString)
+    public void setString(String aString)
     {
-        // If string already set, just return
-        String str = aString != null ? aString : "";
-        if (str.length() == length() && (str.isEmpty() || str.equals(getText()))) return;
-
-        // Set string
         _textModel.setString(aString);
-
-        // Reset selection (to line end if single-line, otherwise text start)
-        int selIndex = _textModel.getLineCount() == 1 && length() < 40 ? length() : 0;
-        setSel(selIndex);
+        getUndoer().reset();
     }
 
     /**
@@ -1686,7 +1678,7 @@ public class TextAdapter extends PropObject {
      */
     public String toString()
     {
-        String str = getText();
+        String str = getString();
         if (str.length() > 40) str = str.substring(0, 40) + "...";
         return getClass().getSimpleName() + ": " + str;
     }

@@ -102,12 +102,19 @@ public class TextArea extends ParentView {
     /**
      * Returns the plain string of the text being edited.
      */
-    public String getText()  { return _textAdapter.getText(); }
+    public String getText()  { return _textAdapter.getString(); }
 
     /**
      * Set text string of text editor.
      */
-    public void setText(String aString)  { _textAdapter.setText(aString); }
+    public void setText(String aString)
+    {
+        _textAdapter.setString(aString);
+
+        // Reset selection (to line end if single-line, otherwise text start)
+        int selIndex = _textModel.getLineCount() == 1 && length() < 40 ? length() : 0;
+        setSel(selIndex);
+    }
 
     /**
      * Returns whether Text shape is editable.

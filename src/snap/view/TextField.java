@@ -251,12 +251,16 @@ public class TextField extends ParentView {
     /**
      * Returns the plain string of the text being edited.
      */
-    public String getText()  { return _textAdapter.getText(); }
+    public String getText()  { return _textAdapter.getString(); }
 
     /**
      * Set text string of text editor.
      */
-    public void setText(String aString)  { _textAdapter.setText(aString); }
+    public void setText(String aString)
+    {
+        _textAdapter.setString(aString);
+        setSel(length());
+    }
 
     /**
      * Returns the character index of the start of the text selection.
