@@ -247,7 +247,7 @@ public class TextPane extends ViewOwner {
         TextModel textModel = textArea.getTextModel();
 
         if (textModel.getSourceUrl() != null) {
-            try { textModel.writeToSourceFile(); }
+            try { textModel.writeTextToSourceFile(); }
             catch (Exception e) { throw new RuntimeException(e); }
         }
     }

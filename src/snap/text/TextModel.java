@@ -1464,20 +1464,20 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     /**
      * Load text from source URL.
      */
-    public void readFromSourceURL(WebURL aURL)
+    public void readTextFromSourceFile(WebFile sourceFile)
     {
         // Set Source URL
-        setSourceUrl(aURL);
+        setSourceUrl(sourceFile.getUrl());
 
-        // Get URL text and set in doc
-        String text = aURL.getText();
+        // Get file text and set content
+        String text = sourceFile.getText();
         setString(text);
     }
 
     /**
      * Write text to source file.
      */
-    public void writeToSourceFile()
+    public void writeTextToSourceFile()
     {
         // Get SourceFile
         WebFile sourceFile = getSourceFile();
