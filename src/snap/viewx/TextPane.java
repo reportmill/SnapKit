@@ -235,7 +235,7 @@ public class TextPane extends ViewOwner {
 
         // Reset TextArea.Undoer
         TextArea textArea = getTextArea();
-        textArea.getUndoer().reset();
+        textArea.getTextModel().setTextModified(false);
     }
 
     /**

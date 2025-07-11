@@ -1464,6 +1464,9 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
         // Get URL text and set in doc
         String text = aURL.getText();
         setString(text);
+
+        // Set TextModified to false since it matches file
+        setTextModified(false);
     }
 
     /**
@@ -1484,6 +1487,9 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
 
         // Save file
         sourceFile.save();
+
+        // Set TextModified to false since it matches file
+        setTextModified(false);
     }
 
     /**

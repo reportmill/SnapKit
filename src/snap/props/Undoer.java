@@ -26,14 +26,17 @@ public class Undoer extends PropObject {
     // Whether undoer is disabled
     private int _disabled = 0;
 
-    // Whether an undo is currently available
-    private boolean _undoAvailable;
+    // Whether undoer is at last save state for client
+    private boolean _atLastSaveState;
+
+    // The undo state at last save state for client
+    private List<UndoSet> _lastSaveState;
 
     // The run to auto save
     private Runnable _autoSaveRun;
 
     // Constants for properties
-    public static final String UndoAvailable_Prop = "UndoAvailable";
+    public static final String AtLastSaveState_Prop = "AtLastSaveState";
 
     // A shared instance of an Undoer that is disabled
     public static final Undoer DISABLED_UNDOER = new DisabledUndoer();
@@ -48,6 +51,7 @@ public class Undoer extends PropObject {
         _undoSets = new ArrayList<>();
         _redoSets = new ArrayList<>();
         _activeUndoSet = new UndoSet();
+        markLastSaveState();
     }
 
     /**
@@ -126,7 +130,7 @@ public class Undoer extends PropObject {
         }
 
         // Reset UndoAvailable
-        resetUndoAvailable();
+        resetAtLastSaveState();
     }
 
     /**
@@ -134,6 +138,10 @@ public class Undoer extends PropObject {
      */
     private boolean mergePropChange(PropChange propChange)
     {
+        // If at last save state for client, just return false
+        if (isAtLastSaveState())
+            return false;
+
         // If ActiveUndoSet is not empty, just return false
         if (!_activeUndoSet.isEmpty())
             return false;
@@ -174,7 +182,7 @@ public class Undoer extends PropObject {
         // If no outstanding changes, just reset current undo
         else _activeUndoSet.reset();
 
-        resetUndoAvailable();
+        resetAtLastSaveState();
         _autoSaveRun = null;
     }
 
@@ -211,7 +219,7 @@ public class Undoer extends PropObject {
 
         // Enable undoer and return
         enable();
-        resetUndoAvailable();
+        resetAtLastSaveState();
         return undoSet;
     }
 
@@ -236,7 +244,7 @@ public class Undoer extends PropObject {
 
         // Enable undoer and return UndoSet
         enable();
-        resetUndoAvailable();
+        resetAtLastSaveState();
         return undoSet;
     }
 
@@ -264,7 +272,7 @@ public class Undoer extends PropObject {
         _undoSets.clear();
         _redoSets.clear();
         _disabled = 0;
-        resetUndoAvailable();
+        resetAtLastSaveState();
     }
 
     /**
@@ -284,26 +292,36 @@ public class Undoer extends PropObject {
     }
 
     /**
-     * Returns whether an undo is available.
+     * Returns whether undoer is at last save state for client.
      */
-    public boolean isUndoAvailable()  { return _undoAvailable; }
+    public boolean isAtLastSaveState()  { return _atLastSaveState; }
 
     /**
-     * Sets whether an undo is available.
+     * Sets whether undoer is at last save state for client.
      */
-    private void setUndoAvailable(boolean aValue)
+    private void setAtLastSaveState(boolean aValue)
     {
-        if (aValue == _undoAvailable) return;
-        firePropChange(UndoAvailable_Prop, _undoAvailable, _undoAvailable = aValue);
+        if (aValue == isAtLastSaveState()) return;
+        firePropChange(AtLastSaveState_Prop, _atLastSaveState, _atLastSaveState = aValue);
     }
 
     /**
-     * Resets the UndoAvailable property.
+     * Resets the AtLastSaveState property.
      */
-    private void resetUndoAvailable()
+    private void resetAtLastSaveState()
     {
-        boolean undoAvailable = hasUndos();
-        setUndoAvailable(undoAvailable);
+        boolean atLastSaveState = _lastSaveState.equals(_undoSets);
+        setAtLastSaveState(atLastSaveState);
+    }
+
+    /**
+     * Sets the last save state.
+     */
+    public void markLastSaveState()
+    {
+        if (isAtLastSaveState()) return;
+        _lastSaveState = List.copyOf(_undoSets);
+        setAtLastSaveState(true);
     }
 
     /**
