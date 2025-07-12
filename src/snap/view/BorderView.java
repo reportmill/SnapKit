@@ -12,6 +12,13 @@ public class BorderView extends ParentView {
     // The panes
     private View _top, _center, _bottom, _left, _right;
 
+    // Constants for properties
+    public static final String Center_Prop = "Center";
+    public static final String Top_Prop = "Top";
+    public static final String Bottom_Prop = "Bottom";
+    public static final String Left_Prop = "Left";
+    public static final String Right_Prop = "Right";
+
     /**
      * Constructor.
      */
@@ -31,12 +38,16 @@ public class BorderView extends ParentView {
      */
     public void setCenter(View aView)
     {
-        View old = getCenter();
-        if (aView == old) return;
-        if (old != null) removeChild(old);
-        if (aView != null) addChild(aView);
-        _center = aView;
-        firePropChange("Center", old, aView);
+        if (aView == _center) return;
+
+        batchPropChanges();
+        if (_center != null)
+            removeChild(_center);
+        firePropChange(Center_Prop, _center, _center = aView);
+        if (_center != null)
+            addChild(_center);
+
+        fireBatchPropChanges();
     }
 
     /**
@@ -49,13 +60,16 @@ public class BorderView extends ParentView {
      */
     public void setTop(View aView)
     {
-        View old = getTop(); if (aView == old) return;
-        if (old != null)
-            removeChild(old);
-        if (aView != null)
-            addChild(aView);
-        _top = aView;
-        firePropChange("Top", old, aView);
+        if (aView == _top) return;
+
+        batchPropChanges();
+        if (_top != null)
+            removeChild(_top);
+        firePropChange(Top_Prop, _top, _top = aView);
+        if (_top != null)
+            addChild(_top);
+
+        fireBatchPropChanges();
     }
 
     /**
@@ -68,13 +82,16 @@ public class BorderView extends ParentView {
      */
     public void setBottom(View aView)
     {
-        View old = getBottom(); if (aView == old) return;
-        if (old != null)
-            removeChild(old);
-        if (aView != null)
-            addChild(aView);
-        _bottom = aView;
-        firePropChange("Bottom", old, aView);
+        if (aView == _bottom) return;
+
+        batchPropChanges();
+        if (_bottom != null)
+            removeChild(_bottom);
+        firePropChange(Bottom_Prop, _bottom, _bottom = aView);
+        if (_bottom != null)
+            addChild(_bottom);
+
+        fireBatchPropChanges();
     }
 
     /**
@@ -87,13 +104,16 @@ public class BorderView extends ParentView {
      */
     public void setLeft(View aView)
     {
-        View old = getLeft(); if (aView == old) return;
-        if (old != null)
-            removeChild(old);
-        if (aView != null)
-            addChild(aView);
-        _left = aView;
-        firePropChange("Left", old, aView);
+        if (aView == _left) return;
+
+        batchPropChanges();
+        if (_left != null)
+            removeChild(_left);
+        firePropChange(Left_Prop, _left, _left = aView);
+        if (_left != null)
+            addChild(_left);
+
+        fireBatchPropChanges();
     }
 
     /**
@@ -106,13 +126,16 @@ public class BorderView extends ParentView {
      */
     public void setRight(View aView)
     {
-        View old = getRight(); if (aView == old) return;
-        if (old != null)
-            removeChild(old);
-        if (aView != null)
-            addChild(aView);
-        _right = aView;
-        firePropChange("Right", old, aView);
+        if (aView == _right) return;
+
+        batchPropChanges();
+        if (_right != null)
+            removeChild(_right);
+        firePropChange(Right_Prop, _right, _right = aView);
+        if (_right != null)
+            addChild(_right);
+
+        fireBatchPropChanges();
     }
 
     /**

@@ -439,10 +439,10 @@ public class TextModelUtils {
             else textModel.addChars((CharSequence) newValue, index);
         }
 
-        public PropChange merge(PropChange anEvent)
+        public PropChange merge(PropChange propChange)
         {
             TextModel textModel = (TextModel) getSource();
-            CharsChange event = (CharsChange) anEvent;
+            CharsChange event = (CharsChange) propChange;
             CharSequence newVal = getNewValue();
             CharSequence eventNewVal = event.getNewValue();
             int index = getIndex();

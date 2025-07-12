@@ -14,10 +14,16 @@ public abstract class PropObject implements PropChange.DoChange {
     private PropSet _propSet;
 
     // PropertyChangeSupport
-    protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
+    protected PropChangeSupport _pcs = PropChangeSupport.EMPTY;
+
+    // Head of registered batch prop changes
+    private PropChange _batchPropChange;
 
     // A constant for empty instance
     public static final Object EMPTY_OBJECT = new Object();
+
+    // A placeholder for batch prop changes
+    private static final PropChange BATCH_PROP_CHANGE_PLACEHOLDER = new PropChange(null, null, null, null);
 
     /**
      * Constructor.
@@ -307,9 +313,58 @@ public abstract class PropObject implements PropChange.DoChange {
     /**
      * Fires a given property change.
      */
-    protected void firePropChange(PropChange aPC)
+    protected void firePropChange(PropChange propChange)
     {
-        _pcs.firePropChange(aPC);
+        if (_batchPropChange == null)
+            _pcs.firePropChange(propChange);
+        else batchPropChange(propChange);
+    }
+
+    /**
+     * Registers to send all prop changes in batch.
+     */
+    protected void batchPropChanges()
+    {
+        if (_batchPropChange == null)
+            _batchPropChange = BATCH_PROP_CHANGE_PLACEHOLDER;
+    }
+
+    /**
+     * Registers a batch prop change.
+     */
+    protected void batchPropChange(String aProp, Object oldVal, Object newVal)
+    {
+        if (_pcs == PropChangeSupport.EMPTY) return; // if (!_pcs.hasListener(aProp)) return;
+        PropChange propChange = new PropChange(this, aProp, oldVal, newVal);
+        batchPropChange(propChange);
+    }
+
+    /**
+     * Registers a given batch prop change.
+     */
+    protected void batchPropChange(PropChange propChange)
+    {
+        // If head pointer available, just set
+        if (_batchPropChange == null || _batchPropChange == BATCH_PROP_CHANGE_PLACEHOLDER)
+            _batchPropChange = propChange;
+
+        // Otherwise find tail batch prop change and link given prop change
+        else {
+            PropChange tailPropChange = _batchPropChange;
+            while (tailPropChange._nextBatchPropChange != null)
+                tailPropChange = tailPropChange._nextBatchPropChange;
+            tailPropChange._nextBatchPropChange = propChange;
+        }
+    }
+
+    /**
+     * Fires the batched prop changes.
+     */
+    protected void fireBatchPropChanges()
+    {
+        if (_batchPropChange != null)
+            _pcs.fireBatchPropChange(_batchPropChange);
+        _batchPropChange = null;
     }
 
     /**

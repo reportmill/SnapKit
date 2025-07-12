@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
-
 import snap.util.Key;
 import snap.util.KeyChain;
 
@@ -12,23 +11,29 @@ import snap.util.KeyChain;
 public class PropChange {
     
     // The source
-    private Object  _src;
+    private Object _source;
     
     // The property name
-    private String  _pname;
+    private String _propName;
     
-    // The old/new values
-    private Object  _oval, _nval;
+    // The old value
+    private Object _oldVal;
     
+    // The new value
+    private Object _newVal;
+
     // The index
-    private int  _index = -1;
+    private int _index = -1;
+
+    // The next batch change
+    protected PropChange _nextBatchPropChange;
 
     /**
      * Constructor.
      */
     public PropChange(Object aSource, String aProp, Object oldVal, Object newVal)
     {
-        _src = aSource; _pname = aProp; _oval = oldVal; _nval = newVal;
+        _source = aSource; _propName = aProp; _oldVal = oldVal; _newVal = newVal;
     }
 
     /**
@@ -36,33 +41,33 @@ public class PropChange {
      */
     public PropChange(Object aSource, String aProp, Object oldVal, Object newVal, int anIndex)
     {
-        _src = aSource; _pname = aProp; _oval = oldVal; _nval = newVal; _index = anIndex;
+        _source = aSource; _propName = aProp; _oldVal = oldVal; _newVal = newVal; _index = anIndex;
     }
 
     /**
      * Returns the source.
      */
-    public Object getSource()  { return _src; }
+    public Object getSource()  { return _source; }
 
     /**
      * Returns the Property name.
      */
-    public String getPropName()  { return _pname; }
+    public String getPropName()  { return _propName; }
 
     /**
      * Returns the Property name.
      */
-    public String getPropertyName()  { return _pname; }
+    public String getPropertyName()  { return _propName; }
 
     /**
      * Returns the old value.
      */
-    public Object getOldValue()  { return _oval; }
+    public Object getOldValue()  { return _oldVal; }
 
     /**
      * Returns the new value.
      */
-    public Object getNewValue()  { return _nval; }
+    public Object getNewValue()  { return _newVal; }
 
     /**
      * Returns the index.
@@ -90,40 +95,49 @@ public class PropChange {
      */
     protected void doChange(Object oldVal, Object newVal)
     {
-        Object src = getSource();
-        if (src instanceof DoChange) { DoChange dc = (DoChange) src;
-            dc.processPropChange(this, oldVal, newVal);
-        }
-        else doChange(src, getPropName(), oldVal, newVal, getIndex());
+        Object source = getSource();
+        if (source instanceof DoChange doChange)
+            doChange.processPropChange(this, oldVal, newVal);
+        else doChange(source, getPropName(), oldVal, newVal, getIndex());
     }
 
     /**
      * Attempts to merge the given property change into this property change.
      */
-    public PropChange merge(PropChange anEvent)
+    public PropChange merge(PropChange propChange)
     {
         // If index, return false
-        if (getIndex()>=0 || anEvent.getIndex()>=0)
+        if (getIndex() >= 0 || propChange.getIndex() >= 0)
             return null;
 
         // Create new merged event and return it
-        return new PropChange(getSource(), getPropName(), getOldValue(), anEvent.getNewValue());
+        return new PropChange(getSource(), getPropName(), getOldValue(), propChange.getNewValue());
     }
+
+    /**
+     * Returns the next batch prop change.
+     */
+    public PropChange getNextBatchPropChange()  { return _nextBatchPropChange; }
+
+    /**
+     * Clears the next batch prop change.
+     */
+    public void clearNextBatchPropChange()  { _nextBatchPropChange = null; }
 
     /**
      * Simple to string.
      */
     public String toString()
     {
-        String cname = getSource().getClass().getSimpleName();
-        String pname = getPropName();
-        Object oldV = getOldValue();
-        String oldS = oldV!=null ? oldV.toString().replace("\n", "\\n") : null;
-        Object newV = getNewValue();
-        String newS = newV!=null ? newV.toString().replace("\n", "\\n") : null;
+        String className = _source != null ? _source.getClass().getSimpleName() : "BatchPlaceHolderPropChange";
+        String propName = getPropName();
+        Object oldVal = getOldValue();
+        String oldValStr = oldVal != null ? oldVal.toString().replace("\n", "\\n") : null;
+        Object newVal = getNewValue();
+        String newValStr = newVal != null ? newVal.toString().replace("\n", "\\n") : null;
         int index = getIndex();
-        String istring = index>0 ? (" at " + index) : "";
-        return cname + " " + pname + " (set " + oldS + " to " + newS + ")" + istring;
+        String indexStr = index > 0 ? (" at " + index) : "";
+        return className + " " + propName + " (set " + oldValStr + " to " + newValStr + ")" + indexStr;
     }
 
     /**
@@ -138,16 +152,12 @@ public class PropChange {
         }
 
         // If PropObject, use
-        if (aSource instanceof PropObject) {
-            PropObject propObject = (PropObject) aSource;
+        if (aSource instanceof PropObject propObject)
             propObject.setPropValue(aProp, newVal);
-        }
 
         // If source is GetSet, use GetSet interface
-        else if (aSource instanceof Key.GetSet) {
-            Key.GetSet getSet = (Key.GetSet) aSource;
+        else if (aSource instanceof Key.GetSet getSet)
             getSet.setKeyValue(aProp, newVal);
-        }
 
         // Otherwise, do KeyChain.setValue
         else KeyChain.setValueSafe(aSource, aProp, newVal);

@@ -170,6 +170,37 @@ public class PropChangeSupport {
     }
 
     /**
+     * Sends the batch property change.
+     */
+    public void fireBatchPropChange(PropChange propChange)
+    {
+        for (int i = 0; i < _lsnrs.length; i++) {
+            PropChangeListener propChangeLsnr = _lsnrs[i];
+            String propName = _lsnrProps[i];
+            fireBatchPropChange(propChange, propChangeLsnr, propName);
+        }
+    }
+
+    /**
+     * Sends the property change.
+     */
+    private void fireBatchPropChange(PropChange propChange, PropChangeListener propChangeLsnr, String propName)
+    {
+        PropChange nextBatchPropChange = propChange._nextBatchPropChange;
+
+        // If prop change valid for prop name, fire prop change
+        if (propName == null || propName.equals(propName))
+            propChangeLsnr.propertyChange(propChange);
+
+        // If next batch change available, recurse
+        if (propChange._nextBatchPropChange != null)
+            fireBatchPropChange(nextBatchPropChange, propChangeLsnr, propName);
+
+        // Otherwise restore original next batch change (might have been cleared by listener to short-circuit)
+        else propChange._nextBatchPropChange = nextBatchPropChange;
+    }
+
+    /**
      * Returns whether there is a deep listener.
      */
     public boolean hasDeepListener()
