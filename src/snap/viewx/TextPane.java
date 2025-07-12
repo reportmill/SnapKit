@@ -41,22 +41,33 @@ public class TextPane extends ViewOwner {
     public TextArea getTextArea()
     {
         if (_textArea != null) return _textArea;
-        getUI();
-        return _textArea;
+        getUI(); return _textArea;
     }
 
     /**
      * Creates the TextArea.
      */
-    protected TextArea createTextArea()
-    {
-        return new TextArea(true);
-    }
+    protected TextArea createTextArea()  { return new TextArea(true); }
 
     /**
-     * Returns the toolbar pane.
+     * Load text.
      */
-    public ChildView getToolBarPane()  { return _toolBarPane; }
+    protected void loadTextAreaText()  { }
+
+    /**
+     * Saves text to file.
+     */
+    public void saveTextToFile()
+    {
+        TextArea textArea = getTextArea();
+        TextModel textModel = textArea.getTextModel();
+
+        // Do real version
+        if (textModel.getSourceUrl() != null) {
+            try { textModel.writeTextToSourceFile(); }
+            catch (Exception e) { throw new RuntimeException(e); }
+        }
+    }
 
     /**
      * Create UI.
@@ -116,6 +127,9 @@ public class TextPane extends ViewOwner {
         _textArea.getTextAdapter().addTextModelPropChangeListener(this::handleSourceTextPropChange);
         setFirstFocus(_textArea);
 
+        // Load text area text
+        loadTextAreaText();
+
         // Configure FindText
         TextField findText = getView("FindText", TextField.class);
         findText.setPromptText("Find");
@@ -157,7 +171,7 @@ public class TextPane extends ViewOwner {
 
         // Handle SaveButton
         if (anEvent.equals("SaveButton"))
-            saveChanges();
+            saveTextToFile();
 
         // Handle CutButton, CopyButton, PasteButton, DeleteButton
         if (anEvent.equals("CutButton"))
@@ -222,33 +236,6 @@ public class TextPane extends ViewOwner {
             View t1 = getView("FindText"), t2 = getView("FontSizeText");
             if (t1.isFocused() || t2.isFocused())
                 requestFocus(textArea);
-        }
-    }
-
-    /**
-     * Save file.
-     */
-    public void saveChanges()
-    {
-        // Do real version
-        saveChangesImpl();
-
-        // Reset TextArea.Undoer
-        TextArea textArea = getTextArea();
-        textArea.getTextModel().setTextModified(false);
-    }
-
-    /**
-     * Save file.
-     */
-    protected void saveChangesImpl()
-    {
-        TextArea textArea = getTextArea();
-        TextModel textModel = textArea.getTextModel();
-
-        if (textModel.getSourceUrl() != null) {
-            try { textModel.writeTextToSourceFile(); }
-            catch (Exception e) { throw new RuntimeException(e); }
         }
     }
 
