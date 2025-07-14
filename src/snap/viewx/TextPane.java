@@ -33,16 +33,13 @@ public class TextPane extends ViewOwner {
     public TextPane()
     {
         super();
+        _textArea = createTextArea();
     }
 
     /**
      * Returns the TextArea.
      */
-    public TextArea getTextArea()
-    {
-        if (_textArea != null) return _textArea;
-        getUI(); return _textArea;
-    }
+    public TextArea getTextArea()  { return _textArea; }
 
     /**
      * Creates the TextArea.
@@ -79,8 +76,6 @@ public class TextPane extends ViewOwner {
         _toolBarPane = (ChildView) super.createUI();
 
         // Create/config TextArea
-        _textArea = createTextArea();
-        _textArea.setName("TextArea");
         _textArea.setPadding(new Insets(5));
         _textArea.setFill(Color.WHITE);
         _textArea.setGrowWidth(true);
@@ -122,7 +117,6 @@ public class TextPane extends ViewOwner {
         toolBarButtons.forEach(button -> button.setFocusable(false));
 
         // Get text area and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
-        _textArea = getView("TextArea", TextArea.class);
         _textArea.addPropChangeListener(this::handleTextAreaPropChange);
         _textArea.getTextAdapter().addTextModelPropChangeListener(this::handleSourceTextPropChange);
         setFirstFocus(_textArea);

@@ -9,6 +9,7 @@ import snap.gfx.Painter;
 import snap.props.PropChange;
 import snap.util.XMLArchiver;
 import snap.util.XMLElement;
+import snap.web.WebFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -310,7 +311,7 @@ public class TextModelUtils {
                 }
 
                 // Write run string
-                if (run.length() > 0)
+                if (!run.isEmpty())
                     xml.add(new XMLElement("string", run.getString()));
             }
         }
@@ -410,7 +411,7 @@ public class TextModelUtils {
         }
 
         // If no string was read, apply attributes anyway
-        if (textModel.length() == 0)
+        if (textModel.isEmpty())
             textModel.getLine(0).getRun(0).setTextStyle(style);
     }
 
@@ -496,6 +497,63 @@ public class TextModelUtils {
             TextModel textModel = (TextModel) getSource();
             TextLine line = textModel.getLine(getIndex());
             textModel.setLineStyle((TextLineStyle) nval, line.getStartCharIndex(), line.getStartCharIndex());
+        }
+    }
+
+    /**
+     * This class synchronizes a TextModel with its source file.
+     */
+    protected static class TextModelFileSyncer {
+
+        // The TextModel
+        private TextModel _textModel;
+
+        // The Source file
+        private WebFile _sourceFile;
+
+        // The unmodified string
+        private String _unmodifiedString;
+
+        /**
+         * Constructor.
+         */
+        public TextModelFileSyncer(TextModel textModel)
+        {
+            _textModel = textModel;
+            _sourceFile = textModel.getSourceFile();
+            _unmodifiedString = textModel.getString();
+            if (_sourceFile != null)
+                _textModel.addPropChangeListener(pc -> handleTextModelCharsChange(), TextModel.Chars_Prop);
+            else System.err.println("TextModel.syncTextModelToSourceFile: No source file");
+        }
+
+        /**
+         * Called when TextModel gets chars changes.
+         */
+        private void handleTextModelCharsChange()
+        {
+            boolean textModified = !_unmodifiedString.contentEquals(_textModel);
+            if (textModified == _textModel.isTextModified())
+                return;
+
+            // Update SourceFile.Updater
+            if (textModified && _sourceFile.getUpdater() == null)
+                _sourceFile.setUpdater(file -> updateSourceFileFromTextModel());
+            else if (!textModified && _sourceFile.getUpdater() != null)
+                _sourceFile.setUpdater(null);
+
+            // Update TextModel.TextModified
+            _textModel.setTextModified(textModified);
+        }
+
+        /**
+         * Called when file is saved.
+         */
+        private void updateSourceFileFromTextModel()
+        {
+            _unmodifiedString = _textModel.getString();
+            _sourceFile.setText(_unmodifiedString);
+            _textModel.setTextModified(false);
         }
     }
 }

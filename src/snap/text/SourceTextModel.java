@@ -1,6 +1,7 @@
 package snap.text;
 import snap.util.XMLArchiver;
 import snap.util.XMLElement;
+import snap.web.WebFile;
 
 /**
  * This TextModel subclass embeds a source text to forward all changes and to update from when needed.
@@ -217,6 +218,41 @@ public class SourceTextModel extends TextModel {
         if (_sourceText != null)
             return _sourceText.copyForRange(aStart, aEnd);
         return super.copyForRange(aStart, aEnd);
+    }
+
+    /**
+     * Override to forward to SourceText.
+     */
+    @Override
+    public void readTextFromSourceFile(WebFile sourceFile)
+    {
+        if (_sourceText != null) {
+            _sourceText.readTextFromSourceFile(sourceFile);
+            reloadTextFromSourceText();
+        }
+
+        else super.readTextFromSourceFile(sourceFile);
+    }
+
+    /**
+     * Override to forward to SourceText.
+     */
+    @Override
+    public void writeTextToSourceFile()
+    {
+        if (_sourceText != null && _sourceText.getSourceFile() != null)
+            _sourceText.writeTextToSourceFile();
+        else super.writeTextToSourceFile();
+    }
+
+    /**
+     * Override to forward to SourceText.
+     */
+    public void syncTextModelToSourceFile()
+    {
+        if (_sourceText != null && _sourceText.getSourceFile() != null)
+            _sourceText.syncTextModelToSourceFile();
+        else super.syncTextModelToSourceFile();
     }
 
     /**

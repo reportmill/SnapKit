@@ -1498,6 +1498,11 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
+     * Synchronizes TextModel and SourceFile.
+     */
+    public void syncTextModelToSourceFile()  { new TextModelUtils.TextModelFileSyncer(this); }
+
+    /**
      * Standard clone implementation.
      */
     @Override

@@ -230,7 +230,6 @@ public class TextAdapter extends PropObject {
         if (aValue) {
             _undoer = new Undoer();
             _undoer.setAutoSave(true);
-            _undoer.addPropChangeListener(pc -> handleUndoerPropChange(), Undoer.AtLastSaveState_Prop);
         }
 
         // Otherwise, reset to disabled
@@ -263,15 +262,6 @@ public class TextAdapter extends PropObject {
 
         // Add property
         undoer.addPropChange(propChange);
-    }
-
-    /**
-     * Called when Undoer has prop change.
-     */
-    private void handleUndoerPropChange()
-    {
-        boolean textModified = !_undoer.isAtLastSaveState();
-        getTextModel().setTextModified(textModified);
     }
 
     /**
