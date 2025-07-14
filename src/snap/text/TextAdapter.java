@@ -1552,7 +1552,7 @@ public class TextAdapter extends PropObject {
 
         // Forward on to listeners
         for (PropChangeListener propChangeLsnr : _textModelPropChangeLsnrs)
-            propChangeLsnr.propertyChange(propChange);
+            propChangeLsnr.handlePropChange(propChange);
 
         // Relayout and repaint
         if (_view != null) {

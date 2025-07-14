@@ -9,27 +9,27 @@ package snap.props;
 public interface PropChangeListener {
 
     /** Called when there is a property change. */
-    void propertyChange(PropChange aPC);
+    void handlePropChange(PropChange propChange);
 
     /**
      * A PropChangeListener that removes itself when fired.
      */
-    public static class OneShot implements PropChangeListener {
+    class OneShot implements PropChangeListener {
 
         // The real listener
-        PropChangeListener  _lsnr;
+        private PropChangeListener _lsnr;
 
         /** Creates a OneShot. */
         public OneShot(PropChangeListener aLsnr)  { _lsnr = aLsnr; }
 
         /** Called when there is a property change. */
-        public void propertyChange(PropChange aPC)  { _lsnr.propertyChange(aPC); }
+        public void handlePropChange(PropChange propChange)  { _lsnr.handlePropChange(propChange); }
     }
 
     /**
      * Returns a OneShot.
      */
-    public static OneShot getOneShot(PropChangeListener aLsnr)
+    static OneShot getOneShot(PropChangeListener aLsnr)
     {
         return new OneShot(aLsnr);
     }

@@ -150,7 +150,7 @@ public class PropChangeSupport {
             PropChangeListener lsnr = _lsnrs[i];
             String prop = _lsnrProps[i];
             if (prop == null || prop.equals(propName)) {
-                lsnr.propertyChange(aPC);
+                lsnr.handlePropChange(aPC);
                 hasOneShot |= lsnr instanceof PropChangeListener.OneShot;
             }
         }
@@ -190,7 +190,7 @@ public class PropChangeSupport {
 
         // If prop change valid for prop name, fire prop change
         if (propName == null || propName.equals(propName))
-            propChangeLsnr.propertyChange(propChange);
+            propChangeLsnr.handlePropChange(propChange);
 
         // If next batch change available, recurse
         if (propChange._nextBatchPropChange != null)

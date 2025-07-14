@@ -65,7 +65,6 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     public static final String Size_Prop = "Size";
     public static final String LastModTime_Prop = "LastModTime";
     public static final String Modified_Prop = "Modified";
-    public static final String Updater_Prop = "Updater";
     public static final String Exists_Prop = "Exists";
     public static final String Verified_Prop = "Verified";
 
@@ -561,8 +560,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         // If already set, just return
         if (anUpdater == _updater) return;
 
-        // Set value and fire prop change
-        firePropChange(Updater_Prop, _updater, _updater = anUpdater);
+        // Set value
+        _updater = anUpdater;
 
         // Update modified
         setModified(anUpdater != null);
