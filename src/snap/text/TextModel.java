@@ -172,9 +172,9 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
         String string = aString != null ? aString : "";
 
         if (!string.contentEquals(this)) {
-            setPropChangeEnabled(false);
+            //setPropChangeEnabled(false);
             replaceChars(string, 0, length());
-            setPropChangeEnabled(true);
+            //setPropChangeEnabled(true);
         }
 
         setTextModified(false);

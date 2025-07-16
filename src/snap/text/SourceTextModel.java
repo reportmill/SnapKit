@@ -75,17 +75,6 @@ public class SourceTextModel extends TextModel {
     }
 
     /**
-     * Sets the text to the given string.
-     */
-    @Override
-    public void setString(String aString)
-    {
-        if (_sourceText != null)
-            _sourceText.setString(aString);
-        super.setString(aString);
-    }
-
-    /**
      * Sets the default text style.
      */
     @Override
