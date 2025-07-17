@@ -294,7 +294,7 @@ public class Polygon extends Shape implements Cloneable {
     /**
      * Returns an array of polygons that are convex with max number of vertices.
      */
-    public Polygon[] getConvexPolygonsWithMaxSideCount(int aMax)
+    public List<Polygon> getConvexPolygonsWithMaxSideCount(int aMax)
     {
         // If not simple, get simples
         if (isSelfIntersecting()) {
@@ -310,12 +310,12 @@ public class Polygon extends Shape implements Cloneable {
             // Get convex polygons for simple polygons
             List<Polygon> convexPolygons = new ArrayList<>();
             for (Polygon polygon : simplePolygons) {
-                Polygon[] convexPolygons2 = polygon.getConvexPolygonsWithMaxSideCount(aMax);
-                Collections.addAll(convexPolygons, convexPolygons2);
+                List<Polygon> convexPolygons2 = polygon.getConvexPolygonsWithMaxSideCount(aMax);
+                convexPolygons.addAll(convexPolygons2);
             }
 
             // Return
-            return convexPolygons.toArray(new Polygon[0]);
+            return convexPolygons;
         }
 
         // Create list with clone of first poly
@@ -329,8 +329,8 @@ public class Polygon extends Shape implements Cloneable {
             convexPolygons.add(polygon);
         }
 
-        // Return Polygon array
-        return convexPolygons.toArray(new Polygon[0]);
+        // Return
+        return convexPolygons;
     }
 
     /**
@@ -484,7 +484,7 @@ public class Polygon extends Shape implements Cloneable {
     /**
      * Returns an array of convex polygons for given max side count.
      */
-    public static Polygon[] getConvexPolygonsWithMaxSideCount(Shape aShape, int aMax)
+    public static List<Polygon> getConvexPolygonsWithMaxSideCount(Shape aShape, int aMax)
     {
         // Get simple polygons
         Shape simpleShape = Shape.getNotSelfIntersectingShape(aShape);
@@ -494,12 +494,12 @@ public class Polygon extends Shape implements Cloneable {
         // Get convex polygons
         List<Polygon> convexPolygons = new ArrayList<>();
         for (Polygon simplePolygon : simplePolygons) {
-            Polygon[] convexPolygons2 = simplePolygon.getConvexPolygonsWithMaxSideCount(aMax);
-            Collections.addAll(convexPolygons, convexPolygons2);
+            List<Polygon> convexPolygons2 = simplePolygon.getConvexPolygonsWithMaxSideCount(aMax);
+            convexPolygons.addAll(convexPolygons2);
         }
 
-        // Return convex polygons
-        return convexPolygons.toArray(new Polygon[0]);
+        // Return
+        return convexPolygons;
     }
 
     /**
