@@ -7,6 +7,8 @@ import snap.geom.Shape;
 import snap.gfx.Image;
 import snap.util.MathUtils;
 
+import java.util.List;
+
 /**
  * This Shape3D subclass represents a surface.
  */
@@ -153,7 +155,7 @@ public abstract class FacetShape extends Shape3D {
 
         // Get Path2D, break into triangles
         Shape path2D = pathFacingZ.getShape2D();
-        Polygon[] triangles = Polygon.getConvexPolygonsWithMaxSideCount(path2D, 3);
+        List<Polygon> triangles = Polygon.getConvexPolygonsWithMaxSideCount(path2D, 3);
 
         // Create loop variables
         Point3D p0 = new Point3D(0, 0, 0);
