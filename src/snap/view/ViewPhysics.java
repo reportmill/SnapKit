@@ -13,6 +13,15 @@ public class ViewPhysics <T> {
     
     // The density
     private double  _density = 1;
+
+    // The friction
+    private double  _friction = .3;
+
+    // The restitution
+    private double  _restitution = .5;
+
+    // Whether view is draggable
+    private boolean _draggable;
     
     // A group index
     private int  _groupIndex;
@@ -51,6 +60,26 @@ public class ViewPhysics <T> {
     public void setDensity(double aValue)  { _density = aValue; }
 
     /**
+     * Returns the body friction.
+     */
+    public double getFriction()  { return _friction; }
+
+    /**
+     * Sets the body friction.
+     */
+    public void setFriction(double aValue)  { _friction = aValue; }
+
+    /**
+     * Returns the body restitution.
+     */
+    public double getRestitution()  { return _restitution; }
+
+    /**
+     * Sets the body restitution.
+     */
+    public void setRestitution(double aValue)  { _restitution = aValue; }
+
+    /**
      * Returns the group index.
      */
     public int getGroupIndex()  { return _groupIndex; }
@@ -59,6 +88,16 @@ public class ViewPhysics <T> {
      * Sets the group index.
      */
     public void setGroupIndex(int aValue)  { _groupIndex = aValue; }
+
+    /**
+     * Returns whether view is draggable.
+     */
+    public boolean isDraggable()  { return _draggable; }
+
+    /**
+     * Sets whether view is draggable.
+     */
+    public void setDraggable(boolean aValue)  { _draggable = aValue; }
 
     /**
      * Returns the native object.
