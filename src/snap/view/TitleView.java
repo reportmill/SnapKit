@@ -157,11 +157,11 @@ public class TitleView extends ParentView implements ViewHost {
      */
     private TitleArea createTitleArea()
     {
-        switch (getTitleStyle()) {
-            case EtchBorder: return new TitleAreaEtched();
-            case Button: return new TitleAreaButton();
-            default: return new TitleAreaPlain();
-        }
+        return switch (getTitleStyle()) {
+            case EtchBorder -> new TitleAreaEtched();
+            case Button -> new TitleAreaButton();
+            default -> new TitleAreaPlain();
+        };
     }
 
     /**
@@ -232,8 +232,8 @@ public class TitleView extends ParentView implements ViewHost {
 
         // Reset/get new PrefSize
         setPrefSize(-1,-1);
-        double prefW = getPrefWidth();
-        double prefH = getPrefHeight();
+        double prefW = getBestWidth(-1);
+        double prefH = getBestHeight(prefW);
 
         // Set pref size to current size and expanded to true (for duration of anim)
         setPrefSize(viewW,viewH);
@@ -241,12 +241,15 @@ public class TitleView extends ParentView implements ViewHost {
 
         // Clip content to bounds?
         View content = getContent();
+        Overflow contentOverflow = content != null ? content.getOverflow() : null;
         if (content != null)
             content.setClipToBounds(true);
 
         // Configure anim to new size
         ViewAnim anim = getAnim(0).clear();
-        anim.getAnim(500).setPrefSize(prefW, prefH).setOnFinish(() -> setExpandedAnimDone(aValue)).needsFinish().play();
+        anim.getAnim(500).setPrefSize(prefW, prefH);
+        anim.setOnFinish(() -> handleExpandedAnimDone(aValue, contentOverflow)).needsFinish();
+        anim.play();
 
         // Get graphic and set initial anim rotate
         View graphic = _label.getGraphic();
@@ -264,10 +267,12 @@ public class TitleView extends ParentView implements ViewHost {
     /**
      * Called when setExpanded animation is done.
      */
-    private void setExpandedAnimDone(boolean aValue)
+    private void handleExpandedAnimDone(boolean aValue, Overflow contentOverflow)
     {
         setExpanded(aValue);
         setPrefSize(-1, -1);
+        if (contentOverflow != null)
+            getContent().setOverflow(contentOverflow);
     }
 
     /**
@@ -401,27 +406,27 @@ public class TitleView extends ParentView implements ViewHost {
      * Override to support properties for this class.
      */
     @Override
-    public Object getPropValue(String aPropName)
+    public Object getPropValue(String propName)
     {
-        switch (aPropName) {
+        return switch (propName) {
 
             // Collapsible, Expanded, TitleStyle
-            case Collapsible_Prop: return isCollapsible();
-            case Expanded_Prop: case "Value": return isExpanded();
-            case TitleStyle_Prop: return getTitleStyle();
+            case Collapsible_Prop -> isCollapsible();
+            case Expanded_Prop, "Value" -> isExpanded();
+            case TitleStyle_Prop -> getTitleStyle();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(propName);
+        };
     }
 
     /**
      * Override to support properties for this class.
      */
     @Override
-    public void setPropValue(String aPropName, Object aValue)
+    public void setPropValue(String propName, Object aValue)
     {
-        switch (aPropName) {
+        switch (propName) {
 
             // Collapsible, Expanded, TitleStyle
             case Collapsible_Prop: setCollapsible(Convert.boolValue(aValue)); break;
@@ -429,7 +434,7 @@ public class TitleView extends ParentView implements ViewHost {
             case TitleStyle_Prop: setTitleStyle(titleStyleOf(aValue)); break;
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue); break;
+            default: super.setPropValue(propName, aValue); break;
         }
     }
 
