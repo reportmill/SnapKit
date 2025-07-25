@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SpringView Width="585" Height="475" PrefWidth="585" PrefHeight="475">
-  <Label X="10" Y="10" Width="70" Height="55" />
-  <Label X="90" Y="10" Width="430" Height="20" Font="Arial Bold 14" Text="Warning: An unexpected internal error has occurred!" />
-  <Label X="90" Y="30" Width="430" Height="15" Font="Arial 12" Text="If you continue to notice strange behavior, restart the application." />
-  <Label X="90" Y="40" Width="430" Height="25" Font="Arial 12" Text="Use this form to notify ReportMill of the problem." />
-  <Label X="5" Y="76" Width="35" Height="25" Text="Name:" />
-  <TextField Name="UserText" X="42" Y="75" Width="248" Height="25" Font="Arial 12" />
-  <Label X="293" Y="76" Width="35" Height="25" Text="Email:" />
-  <TextField Name="EmailText" X="330" Y="75" Width="220" Height="25" Font="Arial 12" />
-  <Label X="5" Y="103" Width="420" Height="20" Text="Please describe how to reproduce this exception:" />
-  <TextView Name="ScenarioText" X="5" Y="120" Width="575" Height="100" Font="Arial 12" GrowWidth="true" />
-  <Label X="5" Y="227" Width="575" Height="20" Text="Exception Content:" />
-  <TextView Name="BacktraceText" X="5" Y="245" Width="575" Height="230" Font="Arial 12" GrowWidth="true" GrowHeight="true" />
-</SpringView>
+<ColView PrefWidth="585" PrefHeight="475" GrowHeight="true">
+  <ColView Margin="5" Spacing="5">
+    <Label Font="Arial Bold 14" Text="Warning: An unexpected internal error has occurred!" />
+    <Label Font="Arial 12" Text="If you continue to notice strange behavior, restart the application." />
+    <Label Font="Arial 12" Text="Use this form to notify ReportMill of the problem." />
+  </ColView>
+  <RowView Margin="15,5,5,5" Spacing="5">
+    <Label PrefWidth="35" Text="Name:" />
+    <TextField Name="UserText" PrefWidth="248" Font="Arial 12" />
+    <Label PrefWidth="35" Text="Email:" />
+    <TextField Name="EmailText" PrefWidth="220" Font="Arial 12" />
+  </RowView>
+  <ColView Margin="10,5,5,5" Spacing="5" GrowWidth="true" GrowHeight="true">
+    <Label Text="Please describe how to reproduce this exception:" />
+    <TextView Name="ScenarioText" PrefHeight="100" Font="Arial 12" GrowWidth="true" GrowHeight="true" Border="#C0 1" BorderRadius="3" />
+  </ColView>
+  <ColView Margin="10,5,5,5" Spacing="5" GrowWidth="true" GrowHeight="true">
+    <Label Text="Exception Content:" />
+    <TextView Name="BacktraceText" PrefHeight="230" Font="Arial 12" GrowWidth="true" GrowHeight="true" Border="#C0 1" BorderRadius="3" />
+  </ColView>
+</ColView>

@@ -8,28 +8,14 @@
     </ColView>
     <ColView PrefWidth="400" Margin="8" GrowWidth="true" FillWidth="true">
       <Label Margin="4" Text="Stack Trace:" />
-      <TextView Name="StackTraceText" GrowHeight="true" />
-    </ColView>
-    <ColView PrefWidth="200" Margin="8" GrowWidth="true" FillWidth="true">
-      <Label Margin="4" Text="Description / Steps to reproduce:" />
-      <TextView Name="DescriptionText" GrowHeight="true" />
+      <TextView Name="StackTraceText" GrowHeight="true" Border="#C0 1" BorderRadius="3" />
     </ColView>
     <ColView>
-      <RowView Margin="30,8,8,8" Spacing="4">
-        <Label Text="Name:" />
-        <TextField Name="UserNameText" PrefWidth="200" GrowWidth="true" GrowHeight="true" PromptText="Anonymous" />
-      </RowView>
-      <RowView Margin="8" Spacing="4">
-        <Label Text="Email:" />
-        <TextField Name="UserEmailText" PrefWidth="200" GrowWidth="true" GrowHeight="true" />
-      </RowView>
-      <RowView Margin="8,5,8,5" Padding="10" Spacing="5" Border="#00 1" GrowWidth="true">
-        <Button Name="SendExceptionButton" PrefWidth="100" PrefHeight="24" LeanX="CENTER" Text="Send Exception" />
-        <Label Name="SendStatusLabel" />
-      </RowView>
-      <Button Name="ClearAllButton" PrefWidth="100" PrefHeight="24" Margin="8,20,8,20" Text="Clear All" />
-      <Button Name="TriggerNPEButton" PrefWidth="100" PrefHeight="24" Margin="8,20,8,20" Text="Trigger NPE" />
-      <CheckBox Name="IgnoreSuccessiveCheckBox" PrefWidth="100" PrefHeight="24" Margin="8,20,8,20" Text="Ignore successive exceptions" />
+      <Button Name="SendExceptionButton" PrefWidth="120" PrefHeight="28" Margin="40,8,8,8" Text="Send Exception" Font="Arial 14" />
+      <Button Name="ClearAllButton" PrefWidth="100" PrefHeight="24" Margin="8,8,8,8" Text="Clear All" />
+      <Button Name="TriggerNPEButton" PrefWidth="100" PrefHeight="24" Margin="8,8,8,8" Text="Trigger NPE" />
+      <CheckBox Name="IgnoreSuccessiveCheckBox" PrefWidth="100" PrefHeight="24" Margin="8,8,8,8" Text="Ignore successive exceptions" />
     </ColView>
+    <ColView PrefWidth="300" GrowWidth="true" />
   </RowView>
 </ColView>

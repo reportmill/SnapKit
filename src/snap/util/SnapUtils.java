@@ -286,6 +286,15 @@ public class SnapUtils {
     }
 
     /**
+     * Returns the system info.
+     */
+    public static String getSystemInfo()
+    {
+        return "Java VM: " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")\n" +
+                "OS: " + System.getProperty("os.name") + " (" + System.getProperty("os.version") + ")\n";
+    }
+
+    /**
      * Returns the number of processors on this machine.
      */
     public static int getProcessorCount()

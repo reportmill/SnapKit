@@ -357,20 +357,6 @@ public class WebURL {
     }
 
     /**
-     * Returns bytes for this URL.
-     */
-    public byte[] postBytes(byte[] theBytes)
-    {
-        WebSite site = getSite();
-        WebRequest req = new WebRequest(this);
-        req.setPostBytes(theBytes);
-        WebResponse resp = site.getResponse(req);
-        if (resp.getException() != null)                // If response hit exception, throw it
-            throw new ResponseException(resp);
-        return resp.getBytes();
-    }
-
-    /**
      * Returns the file bytes as a string.
      */
     public String getText()
@@ -417,6 +403,17 @@ public class WebURL {
     {
         WebSite site = getSite();
         WebRequest req = new WebRequest(this);
+        return site.getResponse(req);
+    }
+
+    /**
+     * Returns the response for given post bytes.
+     */
+    public WebResponse getResponseForPostBytes(byte[] theBytes)
+    {
+        WebSite site = getSite();
+        WebRequest req = new WebRequest(this);
+        req.setPostBytes(theBytes);
         return site.getResponse(req);
     }
 

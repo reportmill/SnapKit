@@ -306,6 +306,16 @@ public class WebResponse {
     }
 
     /**
+     * Returns the error string.
+     */
+    public String getErrorString()
+    {
+        if (getException() != null)
+            return getException().getMessage();
+        return getCodeString();
+    }
+
+    /**
      * Returns the JSON.
      */
     public JSValue getJSON()

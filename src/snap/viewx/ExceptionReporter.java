@@ -4,87 +4,75 @@
 package snap.viewx;
 import snap.util.*;
 import snap.view.*;
-import snap.web.WebURL;
 
 /**
  * This class provides a UI panel to inform users that an exception was hit and send info back to developer.
- * 
+ * <br>
  * Activate by setting in thread:
- * 
+ * <br>
  *   ExceptionReporter er = new ExceptionReporter("AppName");
- *   er.setURL("https://www.reportmill.com/cgi-bin/SendMail.py");
+ *   er.setURL(<url_to_some_SendMail.py>);
  *   er.setToAddress("support@domain.com")
  *   er.setInfo("MyApp Version X, Build Date: " + MyUtils.getBuildDate());
  *   Thread.setDefaultUncaughtExceptionHandler(er);
  */
 public class ExceptionReporter extends ViewOwner implements Thread.UncaughtExceptionHandler {
     
-    // The app name
-    private String  _appName = "Application";
-    
-    // The URL to post send mail request to
-    private String  _url = "https://www.reportmill.com/cgi-bin/SendMail.py";
-    
-    // The user to send mail to
-    private String  _toAddr = "support@domain.com";
-    
-    // The subject to send mail with
-    private String  _subject = "Exception Report";
-    
-    // An info string
-    private String  _info = "MyApp Version 1.0, BuildDate: Unknown";
+    // Backtrace text
+    private String _backtraceText;
     
     // Tells whether this exception reporter has been run before
-    private boolean  _done = false;
+    private boolean _done = false;
+
+    // The app name
+    private static String _appName;
+
+    // An info string, for example: "MyApp Version 1.0, BuildDate: Unknown"
+    private static String _appInfo;
 
     /**
-     * Creates a new ExceptionReporter with given app name.
+     * Constructor with given app name.
      */
-    public ExceptionReporter(String aName)  { _appName = aName; }
+    public ExceptionReporter()
+    {
+        super();
+    }
 
     /**
      * Returns the app name.
      */
-    public String getAppName()  { return _appName; }
-
-    /**
-     * Returns the URL.
-     */
-    public String getURL()  { return _url; }
-
-    /**
-     * Sets the URL.
-     */
-    public void setURL(String aURL)  { _url = aURL; }
-
-    /**
-     * Returns the user to send mail to.
-     */
-    public String getToAddress()  { return _toAddr; }
-
-    /**
-     * Sets the user to send mail to.
-     */
-    public void setToAddress(String aStr)  { _toAddr = aStr; }
-
-    /**
-     * Returns the info string.
-     */
-    public String getInfo()  { return _info; }
+    public static String getAppName()  { return _appName; }
 
     /**
      * Sets the info string.
      */
-    public void setInfo(String aStr)  { _info = aStr; }
+    public static void setAppName(String aStr)  { _appName = aStr; }
 
     /**
-     * Shows exception reporter panel for given exception.
+     * Returns the app info string.
      */
+    public static String getAppInfo()  { return _appInfo; }
+
+    /**
+     * Sets the info string.
+     */
+    public static void setAppInfo(String aStr)  { _appInfo = aStr; }
+
+    /**
+     * UncaughtExceptionHandler method: Shows exception reporter panel for given exception.
+     */
+    @Override
     public void uncaughtException(Thread t, Throwable aThrowable)
     {
-        // Go ahead and print stack trace
         aThrowable.printStackTrace();
+        showExceptionPanelForException(aThrowable);
+    }
 
+    /**
+     * Shows exception reporter panel for given exception string.
+     */
+    public void showExceptionPanelForException(Throwable aThrowable)
+    {
         // Get root exception
         Throwable throwable = aThrowable;
         while (throwable.getCause() != null)
@@ -98,44 +86,32 @@ public class ExceptionReporter extends ViewOwner implements Thread.UncaughtExcep
     /**
      * Shows exception reporter panel for given exception string.
      */
-    private void showExceptionPanelForExceptionString(String exceptionString)
+    public void showExceptionPanelForExceptionString(String exceptionString)
     {
         // If exception reporting not enabled, just return (otherwise mark done, because we only offer this once)
-        Prefs prefs = Prefs.getDefaultPrefs();
-        if (_done || !prefs.getBoolean("ExceptionReportingEnabled", true))
+        if (_done || !Prefs.getDefaultPrefs().getBoolean("ExceptionReportingEnabled", true))
             return;
-        else _done = true;
+        _done = true;
+
+        // Get the body text
+        _backtraceText = exceptionString;
 
         // Set preferred size
         getUI().setPrefSize(585, 560);
 
-        // Default user/email values in UI
-        setViewValue("UserText", prefs.getString("ExceptionUserName", ""));
-        setViewValue("EmailText", prefs.getString("ExceptionEmail", ""));
-
-        // Start the exception text with environment info
-        StringBuffer eBuffer = new StringBuffer();
-        eBuffer.append(getInfo() + "\n");
-        eBuffer.append("Java VM: " + System.getProperty("java.version"));
-        eBuffer.append(" (" + System.getProperty("java.vendor") + ")\n");
-        eBuffer.append("OS: " + System.getProperty("os.name") + " (" + System.getProperty("os.version") + ")\n\n");
-
-        // Get the backtrace of the throwable into a string and append it to our exception text
-        eBuffer.append("Backtrace:\n");
-        eBuffer.append(exceptionString);
-
-        // Finally, set the exception text in the UI
-        setViewValue("BacktraceText", eBuffer.toString());
+        // Initialize ScenarioText, BacktraceText
+        setViewText("ScenarioText", "");
+        setViewText("BacktraceText", _backtraceText);
         getView("BacktraceText", TextView.class).setSel(0,0);
 
         // Run panel (just return if cancelled)
-        DialogBox dbox = new DialogBox("ReportMill Exception Reporter");
-        dbox.setContent(getUI()); dbox.setOptions("Submit", "Cancel");
-        if (!dbox.showConfirmDialog(null)) return;
+        DialogBox dialogBox = new DialogBox("ReportMill Exception Reporter");
+        dialogBox.setContent(getUI());
+        dialogBox.setOptions("Submit", "Cancel");
+        if (!dialogBox.showConfirmDialog(null))
+            return;
 
         // Update preferences and send exception
-        prefs.setValue("ExceptionUserName", getViewStringValue("UserText"));
-        prefs.setValue("ExceptionEmail", getViewStringValue("EmailText"));
         sendException();
     }
 
@@ -144,44 +120,50 @@ public class ExceptionReporter extends ViewOwner implements Thread.UncaughtExcep
      */
     public void sendException()
     {
-        // Get to address
-        String toAddr = "support@reportmill.com";
+        // Get from address, subject and scenario text
+        String fromAddr = UserInfo.getFullUserEmail();
+        String subject = getAppName() + " Exception Report";
+        String scenarioText = getViewText("ScenarioText");
 
-        // Get from address
-        String name = getViewStringValue("UserText");
-        int nlen = name!=null ? name.length() : 0;
-        String email = getViewStringValue("EmailText");
-        int elen = email!=null ? email.length() : 0;
-        if (nlen>0 && elen>0) email = name + " <" + email + '>';
-        else if (nlen>0) email = name;
-        else if (elen==0) email = "Anonymous";
-        String fromAddr = email;
+        // Get header: From: Joe, User Scenario: ...
+        String header = "From: " + fromAddr + "\n\n";
+        if (getAppInfo() != null)
+            header += getAppInfo() + "\n\n";
+        if (scenarioText != null && !scenarioText.isEmpty())
+            header += "User Scenario: " + scenarioText + "\n\n";
 
-        // Get subject
-        String subject = _appName + " Exception Report";
-
-        // Get body
-        String scenario = getViewStringValue("ScenarioText");
-        if (scenario==null || scenario.length()==0) scenario = "<Not provided>";
-        String btrace = getViewStringValue("BacktraceText");
-        String body = String.format("%s\n\nFrom:\n%s\n\nUser Scenario:\n%s\n\n%s", subject, fromAddr, scenario, btrace);
+        // Create body from header + backtrace + system info
+        String body = header + "Backtrace:\n" + _backtraceText + "\n\n" + SnapUtils.getSystemInfo();
 
         // Send email in background thread
-        new Thread() { public void run() {
-            String str = sendMail(getToAddress(), fromAddr, subject, body, _url);
+        new Thread(() -> {
+            String str = UserInfo.sendMail("support@reportmill.com", fromAddr, subject, body);
             if (str!=null) System.out.println("ExceptionReporter Response: " + str);
-        }}.start();
+        }).start();
     }
 
     /**
-     * Sends an email with given from, to, subject, body and SendMail url.
+     * Reset UI.
      */
-    public static String sendMail(String toAddr, String fromAddr, String aSubj, String aBody, String aURL)
+    @Override
+    protected void resetUI()
     {
-        // Create full message text, create URL, post text bytes and return response string
-        String text = String.format("To=%s\nFrom=%s\nSubject=%s\n%s", toAddr, fromAddr, aSubj, aBody);
-        WebURL url = WebURL.getUrl(aURL);
-        byte bytes[] = url.postBytes(text.getBytes());
-        return bytes!=null? new String(bytes) : null;
+        // Update UserText, EmailText
+        setViewValue("UserText", UserInfo.getUserName());
+        setViewValue("EmailText", UserInfo.getUserEmail());
+    }
+
+    /**
+     * Respond UI.
+     */
+    @Override
+    protected void respondUI(ViewEvent anEvent)
+    {
+        switch (anEvent.getName()) {
+
+            // Handle UserText, EmailText
+            case "UserText" -> UserInfo.setUserName(anEvent.getStringValue());
+            case "EmailText" -> UserInfo.setUserEmail(anEvent.getStringValue());
+        }
     }
 }
