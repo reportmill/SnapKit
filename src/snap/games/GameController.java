@@ -1,4 +1,4 @@
-package snap.viewx;
+package snap.games;
 import snap.geom.HPos;
 import snap.geom.Pos;
 import snap.gfx.Color;
@@ -11,7 +11,7 @@ import snap.view.*;
 public class GameController extends ViewOwner {
 
     // The GameView
-    private GameView _gameView;
+    protected GameView _gameView;
 
     // The ToolBar controller
     private ToolBar _toolBar = new ToolBar();

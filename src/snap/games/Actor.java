@@ -1,30 +1,25 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.viewx;
-import snap.geom.Point;
+package snap.games;
 import snap.gfx.Image;
 import snap.view.ImageView;
 import snap.view.View;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * This class represents a game character in a GameView.
  */
-public class GameActor extends ImageView {
-
-    // The actor pen
-    private GamePen _pen = new GamePen();
+public class Actor extends ImageView {
 
     /**
      * Constructor.
      */
-    public GameActor()
+    public Actor()
     {
         // Initialize name to class
-        if (getClass() != GameActor.class)
+        if (getClass() != Actor.class)
             setName(getClass().getSimpleName());
 
         // Initialize image
@@ -82,9 +77,6 @@ public class GameActor extends ImageView {
         double newX = getX() + aCount * Math.cos(Math.toRadians(getRotate()));
         double newY = getY() + aCount * Math.sin(Math.toRadians(getRotate()));
         setXY(newX, newY);
-
-        // Update pen
-        _pen.lineTo(getPenPoint());
     }
 
     /**
@@ -133,13 +125,13 @@ public class GameActor extends ImageView {
     /**
      * Returns the actors in range.
      */
-    public <T extends GameActor> List<T> getActorsInRange(double aRadius, Class<T> aClass)
+    public <T extends Actor> List<T> getActorsInRange(double aRadius, Class<T> aClass)
     {
         List<T> actors = new ArrayList<>();
         for (int i = getGameView().getChildCount() - 1; i >= 0; i--) {
             View child = getGameView().getChild(i);
             if (aClass == null || aClass.isInstance(child)) {
-                if (getDistance((GameActor) child) <= aRadius)
+                if (getDistance((Actor) child) <= aRadius)
                     actors.add((T) child);
             }
         }
@@ -180,7 +172,7 @@ public class GameActor extends ImageView {
     /**
      * Returns the distance to the given actor.
      */
-    public double getDistance(GameActor anActor)
+    public double getDistance(Actor anActor)
     {
         return getDistance(anActor.getCenterX(), anActor.getCenterY());
     }
@@ -193,46 +185,6 @@ public class GameActor extends ImageView {
         double x1 = getCenterX(), y1 = getCenterY();
         double dx = x2 - x1, dy = y2 - y1;
         return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    /**
-     * Returns the pen.
-     */
-    public GamePen getPen()  { return _pen; }
-
-    /**
-     * Returns the pen point.
-     */
-    public Point getPenPoint()
-    {
-        return localToParent(getWidth() / 2, getHeight() / 2);
-    }
-
-    /**
-     * Sets the pen color.
-     */
-    public void setPenColor(String aString)
-    {
-        _pen.setColor(aString);
-    }
-
-    /**
-     * Set pen down.
-     */
-    public void penDown()
-    {
-        if (isShowing()) _pen.penDown(getPenPoint());
-        else _pen.setPenDown(true);
-    }
-
-    /**
-     * Override to update pen location.
-     */
-    protected void setShowing(boolean aValue)
-    {
-        if (aValue == isShowing()) return;
-        super.setShowing(aValue);
-        if (_pen.isPenDown()) penDown();
     }
 
     /**

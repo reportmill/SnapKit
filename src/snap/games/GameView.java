@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.viewx;
+package snap.games;
 import snap.geom.Point;
 import snap.geom.Rect;
 import snap.gfx.Color;
@@ -9,14 +9,13 @@ import snap.gfx.Font;
 import snap.gfx.Painter;
 import snap.gfx.Stroke;
 import snap.view.*;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 /**
- * This class is the main view for games and manages GameActors.
+ * This class is the main view for games and manages Actors.
  */
 public class GameView extends ChildView {
 
@@ -97,11 +96,10 @@ public class GameView extends ChildView {
     /**
      * Adds a new actor to game view at given XY point.
      */
-    public void addActorAtXY(GameActor anActor, double anX, double aY)
+    public void addActorAtXY(Actor anActor, double anX, double aY)
     {
         // Update actor location and ensure UI is loaded and updated
         anActor.setXY(anX, aY);
-        if (anActor.getPen().isPenDown()) anActor.getPen().penDown(anActor.getPenPoint());
 
         // Get index (if there is a PaintOrder, index might not be at end)
     /*int index = _actors.size();
@@ -120,19 +118,19 @@ public class GameView extends ChildView {
     /**
      * Returns the actor with given name.
      */
-    public GameActor getActor(String aName)
+    public Actor getActor(String aName)
     {
         View child = getChildForName(aName);
-        return child instanceof GameActor ? (GameActor) child : null;
+        return child instanceof Actor ? (Actor) child : null;
     }
 
     /**
      * Returns the child actor intersecting given point in local coords.
      */
-    public <T extends GameActor> T getActorAt(double aX, double aY, Class<T> aClass)
+    public <T extends Actor> T getActorAt(double aX, double aY, Class<T> aClass)
     {
         for (View child : getChildren()) {
-            if (!(child instanceof GameActor)) continue;
+            if (!(child instanceof Actor)) continue;
             if (aClass == null || aClass.isInstance(child)) {
                 Point point = child.parentToLocal(aX, aY);
                 if (child.contains(point.getX(), point.getY()))
@@ -145,11 +143,11 @@ public class GameView extends ChildView {
     /**
      * Returns the child actor intersecting given point in local coords.
      */
-    public <T extends GameActor> List<T> getActorsAt(double aX, double aY, Class<T> aClass)
+    public <T extends Actor> List<T> getActorsAt(double aX, double aY, Class<T> aClass)
     {
         List<T> actors = new ArrayList<>();
         for (View child : getChildren()) {
-            if (!(child instanceof GameActor)) continue;
+            if (!(child instanceof Actor)) continue;
             if (aClass == null || aClass.isInstance(child)) {
                 Point point = child.parentToLocal(aX, aY);
                 if (child.contains(point.getX(), point.getY()))
@@ -162,15 +160,15 @@ public class GameView extends ChildView {
     /**
      * Removes an actor.
      */
-    public GameActor removeActor(int anIndex)
+    public Actor removeActor(int anIndex)
     {
-        return (GameActor) removeChild(anIndex);
+        return (Actor) removeChild(anIndex);
     }
 
     /**
      * Removes an actor.
      */
-    public int removeActor(GameActor anActor)
+    public int removeActor(Actor anActor)
     {
         int index = indexOfChild(anActor);
         if (index >= 0) removeActor(index);
@@ -231,7 +229,7 @@ public class GameView extends ChildView {
     {
         if (aName.equalsIgnoreCase("mouse"))
             return getMouseX();
-        GameActor actor = getActor(aName);
+        Actor actor = getActor(aName);
         return actor != null ? actor.getX() : 0;
     }
 
@@ -242,7 +240,7 @@ public class GameView extends ChildView {
     {
         if (aName.equalsIgnoreCase("mouse"))
             return getMouseY();
-        GameActor actor = getActor(aName);
+        Actor actor = getActor(aName);
         return actor != null ? actor.getY() : 0;
     }
 
@@ -397,8 +395,8 @@ public class GameView extends ChildView {
         try {
             act();
             for (View child : getChildren())
-                if (child instanceof GameActor)
-                    ((GameActor) child).act();
+                if (child instanceof Actor)
+                    ((Actor) child).act();
             _mouseClicked = null;
             _keyClicks.clear();
         }
@@ -417,7 +415,7 @@ public class GameView extends ChildView {
     /**
      * Starts thread for calling Actors main.
      */
-    void startActor(GameActor anActor)
+    void startActor(Actor anActor)
     {
         new Thread(() -> anActor.main()).start();
     }
@@ -435,19 +433,8 @@ public class GameView extends ChildView {
         // Iterate over children and paint pen paths
         for (View child : getChildren()) {
 
-            if (!(child instanceof GameActor))
-                continue;
-
-            // Get PenPaths
-            GameActor actor = (GameActor) child;
-            List<GamePen.PenPath> penPaths = actor.getPen()._paths;
-
-            // Iterate over pen paths and paint
-            for (GamePen.PenPath pp : penPaths) {
-                aPntr.setColor(pp.getColor());
-                aPntr.setStroke(Stroke.getStrokeRound(pp.getWidth()));
-                aPntr.draw(pp);
-            }
+            if (child instanceof PenActor penActor)
+                penActor.paintPen(aPntr);
 
             // Return stroke
             aPntr.setStroke(Stroke.Stroke1);
