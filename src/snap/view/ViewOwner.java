@@ -6,7 +6,6 @@ import java.util.*;
 import snap.gfx.*;
 import snap.props.PropObject;
 import snap.util.*;
-import snap.web.WebURL;
 
 /**
  * A base controller class that manages a UI View (usually loaded from a snp UI file).
@@ -128,45 +127,9 @@ public class ViewOwner extends PropObject {
     }
 
     /**
-     * Creates the top level view for this class.
+     * Creates the top level view for this owner.
      */
-    protected View createUI()
-    {
-        // Get source
-        Object source = getUISource();
-        if (source == null)
-            throw new RuntimeException("ViewOwner.createUI: Couldn't find source for class: " + getClass().getName());
-
-        // Create archiver and return view
-        ViewArchiver archiver = new ViewArchiver();
-        return archiver.getViewForSourceAndOwner(source, this);
-    }
-
-    /**
-     * Creates the top level view for given class.
-     */
-    protected View createUIForClass(Class<?> aClass)
-    {
-        // Get source url
-        WebURL sourceURL = _env.getUISource(aClass);
-        if (sourceURL == null) {
-            System.err.println("ViewOwner.createUI: Can't load from Null Source!");
-            return null;
-        }
-
-        // Create archiver and return view
-        ViewArchiver archiver = new ViewArchiver();
-        return archiver.getViewForSourceAndOwner(sourceURL, this);
-    }
-
-    /**
-     * Returns the UI source.
-     */
-    protected Object getUISource()
-    {
-        Class<?> cls = getClass();
-        return _env.getUISource(cls);
-    }
+    protected View createUI()  { return UILoader.loadViewForOwner(this); }
 
     /**
      * Initializes the UI panel.

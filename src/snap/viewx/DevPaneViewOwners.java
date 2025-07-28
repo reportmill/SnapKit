@@ -131,9 +131,9 @@ public class DevPaneViewOwners extends ViewOwner {
         ViewOwner owner = getSelViewOwner(); if (owner == null) return "";
 
         // If owner has UI file, get text
-        WebURL url = ViewEnv.getEnv().getUISource(owner.getClass());
-        if (url != null) {
-            String str = url.getText();
+        WebURL snapUrl = UILoader.getSnapUrlForOwner(owner);
+        if (snapUrl != null) {
+            String str = snapUrl.getText();
             return str;
         }
 

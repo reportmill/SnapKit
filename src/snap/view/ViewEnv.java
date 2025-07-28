@@ -2,12 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Consumer;
 import snap.geom.Rect;
 import snap.util.*;
 import snap.web.WebFile;
-import snap.web.WebURL;
 
 /**
  * An interface for platform specific UI functionality.
@@ -38,8 +38,10 @@ public abstract class ViewEnv {
 
         // Create/set GfxEnvClass
         Class<? extends ViewEnv> gfxEnvClass = SnapEnv.getViewEnvClass();
-        try { return _env = gfxEnvClass.newInstance(); }
-        catch (InstantiationException | IllegalAccessException e) { throw new RuntimeException(e); }
+        try { return _env = gfxEnvClass.getConstructor().newInstance(); }
+        catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -135,21 +137,6 @@ public abstract class ViewEnv {
     {
         aRun.run();
         notify();
-    }
-
-    /**
-     * Returns a UI source for given class.
-     */
-    public WebURL getUISource(Class<?> aClass)
-    {
-        // Look for snap file with same name as class
-        String name = aClass.getSimpleName() + ".snp";
-        WebURL url = WebURL.getResourceUrl(aClass, name);
-        if (url!=null)
-            return url;
-
-        // Try again for superclass
-        return aClass!=Object.class ? getUISource(aClass.getSuperclass()) : null;
     }
 
     /**

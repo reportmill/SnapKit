@@ -27,23 +27,6 @@ public class ViewArchiver extends XMLArchiver {
     /**
      * Returns a View for source.
      */
-    public View getViewForSource(Object aSource)
-    {
-        return getViewForSourceAndOwner(aSource, null);
-    }
-
-    /**
-     * Returns a View for source.
-     */
-    public View getViewForSourceAndOwner(Object aSource, Object anOwner)
-    {
-        setOwner(anOwner);
-        return (View) readFromXMLSource(aSource);
-    }
-
-    /**
-     * Returns a View for source.
-     */
     public View getViewForBytes(byte[] theBytes)
     {
         return (View) readFromXMLSource(theBytes);

@@ -103,7 +103,7 @@ public class PenActor extends Actor {
     /**
      * Sets the stroke width.
      */
-    public void setWidth(double aValue)
+    public void setPenWidth(double aValue)
     {
         _penWidth = aValue;
         _path = null;
