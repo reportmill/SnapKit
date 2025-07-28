@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+import snap.web.WebURL;
 import java.util.*;
 
 /**
@@ -520,8 +521,7 @@ public class XMLElement implements Cloneable {
         }
 
         // Handle XMLElement
-        if (aValue instanceof XMLElement) {
-            XMLElement xml = (XMLElement) aValue;
+        if (aValue instanceof XMLElement xml) {
             if (!aName.equals(xml.getName())) {
                 XMLAttribute classNameAttr = new XMLAttribute("ClassName", xml.getName());
                 xml.addAttribute(classNameAttr, 0);
@@ -687,15 +687,6 @@ public class XMLElement implements Cloneable {
     }
 
     /**
-     * Returns a string representation of this element (XML).
-     */
-    public String toString()
-    {
-        System.out.println("XMLElement.toString: Use getString() instead");
-        return getString();
-    }
-
-    /**
      * Returns XML bytes for this element.
      */
     public byte[] getBytes()
@@ -812,32 +803,30 @@ public class XMLElement implements Cloneable {
     }
 
     /**
+     * Returns a string representation of this element (XML).
+     */
+    public String toString()
+    {
+        System.out.println("XMLElement.toString: Use getString() instead");
+        return getString();
+    }
+
+    /**
      * Returns XML loaded from aSource (File, String path, InputStream or whatever).
      */
-    public static synchronized XMLElement readFromXMLSource(Object aSource)
+    public static synchronized XMLElement readXmlFromUrl(WebURL sourceUrl)
     {
-        // If source is xml element, just return it
-        //if (aSource instanceof XMLElement) return (XMLElement) aSource;
-        if (aSource instanceof byte[])
-            return readFromXMLBytes((byte[]) aSource);
-
-        // Create and return new element from source
         if (_xmlParser == null) _xmlParser = new XMLParser();
-
-        // Parse from XML source and return
-        try { return _xmlParser.parseXMLFromSource(aSource); }
+        try { return _xmlParser.parseXMLFromUrl(sourceUrl); }
         catch (Throwable t) { throw new RuntimeException(t); }
     }
 
     /**
      * Returns XML loaded from XML String.
      */
-    public static synchronized XMLElement readFromXMLString(String aString)
+    public static synchronized XMLElement readXmlFromString(String aString)
     {
-        // Create and return new element from source
         if (_xmlParser == null) _xmlParser = new XMLParser();
-
-        // Parse from XML source and return
         try { return _xmlParser.parseXMLFromString(aString); }
         catch (Throwable t) { throw new RuntimeException(t); }
     }
@@ -845,9 +834,9 @@ public class XMLElement implements Cloneable {
     /**
      * Returns XML loaded from XML bytes.
      */
-    public static XMLElement readFromXMLBytes(byte[] theBytes)
+    public static XMLElement readXmlFromBytes(byte[] theBytes)
     {
         String xmlString = new String(theBytes);
-        return readFromXMLString(xmlString);
+        return readXmlFromString(xmlString);
     }
 }

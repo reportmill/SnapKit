@@ -2,9 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
-
 import java.util.*;
-
 import snap.web.WebURL;
 
 /**
@@ -146,46 +144,42 @@ public class XMLArchiver {
     /**
      * Returns a root object unarchived from a generic input source (a File, String path, InputStream, URL, byte[], etc.).
      */
-    public Object readFromXMLSource(Object aSource)
+    public Object readXmlFromUrl(WebURL sourceUrl)
     {
-        // Get bytes from source - if not found or empty, complain
-        byte[] xmlBytes = SnapUtils.getBytes(aSource);
-        if (xmlBytes == null || xmlBytes.length == 0)
-            throw new RuntimeException("XMLArchiver.readObject: Cannot read source: " + aSource);
+        // Set source URL
+        if (getSourceURL() == null)
+            setSourceURL(sourceUrl);
 
-        // Try to get SourceURL from source
-        if (getSourceURL() == null) {
-            WebURL surl = WebURL.getUrl(aSource);
-            setSourceURL(surl);
-        }
-
-        // ReadObject(bytes) and return
-        return readFromXMLBytes(xmlBytes);
+        // Get string and read
+        String xmlStr = sourceUrl.getText();
+        if (xmlStr == null)
+            throw new RuntimeException("XMLArchiver.readXmlFromUrl: Cannot read url: " + sourceUrl);
+        return readXmlFromString(xmlStr);
     }
 
     /**
      * Returns a root object unarchived from a generic XML source (File, String path, InputStream, URL, byte[], etc.).
      */
-    public Object readFromXMLString(String xmlString)
+    public Object readXmlFromString(String xmlString)
     {
-        XMLElement xml = XMLElement.readFromXMLString(xmlString);
-        return readFromXML(xml);
+        XMLElement xml = XMLElement.readXmlFromString(xmlString);
+        return readXml(xml);
     }
 
     /**
      * Returns a root object unarchived from an RMByteSource.
      */
-    public Object readFromXMLBytes(byte[] theBytes)
+    public Object readXmlFromBytes(byte[] theBytes)
     {
-        XMLElement xml = XMLElement.readFromXMLBytes(theBytes);
-        return readFromXML(xml);
+        XMLElement xml = XMLElement.readXmlFromBytes(theBytes);
+        return readXml(xml);
     }
 
     /**
      * Returns a root object unarchived from the XML source (a File, String path, InputStream, URL, byte[], etc.).
      * You can also provide a root object to be read "into", and an owner that the object is being read "for".
      */
-    public Object readFromXML(XMLElement theXML)
+    public Object readXml(XMLElement theXML)
     {
         // Set IgnoreCase property
         if (isIgnoreCase())

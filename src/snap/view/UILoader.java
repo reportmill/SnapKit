@@ -27,7 +27,7 @@ public class UILoader {
     {
         ViewArchiver archiver = new ViewArchiver();
         archiver.setOwner(anOwner);
-        return (ParentView) archiver.readFromXMLSource(snapUrl);
+        return (ParentView) archiver.readXmlFromUrl(snapUrl);
     }
 
     /**
@@ -58,7 +58,7 @@ public class UILoader {
     public static View loadViewForString(String snapString)
     {
         ViewArchiver archiver = new ViewArchiver();
-        return (View) archiver.readFromXMLSource(snapString.getBytes());
+        return (View) archiver.readXmlFromString(snapString);
     }
 
     /**
@@ -67,7 +67,7 @@ public class UILoader {
     public static View loadViewForBytes(byte[] fileBytes)
     {
         ViewArchiver archiver = new ViewArchiver();
-        return (View) archiver.readFromXMLSource(fileBytes);
+        return (View) archiver.readXmlFromBytes(fileBytes);
     }
 
     /**

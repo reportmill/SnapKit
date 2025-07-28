@@ -29,7 +29,7 @@ public class ViewArchiver extends XMLArchiver {
      */
     public View getViewForBytes(byte[] theBytes)
     {
-        return (View) readFromXMLSource(theBytes);
+        return (View) readXmlFromBytes(theBytes);
     }
 
     /**

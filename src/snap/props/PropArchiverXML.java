@@ -73,7 +73,7 @@ public class PropArchiverXML extends PropArchiver {
      */
     public Object readPropObjectFromXMLBytes(byte[] theBytes)
     {
-        XMLElement xml = XMLElement.readFromXMLBytes(theBytes);
+        XMLElement xml = XMLElement.readXmlFromBytes(theBytes);
         return readPropObjectFromXML(xml);
     }
 

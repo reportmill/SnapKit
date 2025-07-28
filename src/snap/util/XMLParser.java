@@ -3,6 +3,7 @@
  */
 package snap.util;
 import snap.parse.*;
+import snap.web.WebURL;
 
 /**
  * A class to load an XMLElement from aSource.
@@ -31,20 +32,19 @@ public class XMLParser extends Parser {
     }
 
     /**
-     * Kicks off xml parsing from given source and builds on this parser's element.
+     * Kicks off xml parsing from given URL and builds on this parser's element.
      */
-    public XMLElement parseXMLFromSource(Object aSource) throws Exception
+    public XMLElement parseXMLFromUrl(WebURL xmlUrl) throws Exception
     {
         // Get XML string from source
-        String xmlString = SnapUtils.getText(aSource);
+        String xmlString = xmlUrl.getText();
         if (xmlString == null) {
-            System.err.println("XMLParser.parseXMLFromSource: Couldn't load text from source: " + aSource);
+            System.err.println("XMLParser.parseXMLFromUrl: Couldn't load text from url: " + xmlUrl);
             return null;
         }
 
         // Parse XML from string and return
-        XMLElement xml = parseXMLFromString(xmlString);
-        return xml;
+        return parseXMLFromString(xmlString);
     }
 
     /**
@@ -53,8 +53,7 @@ public class XMLParser extends Parser {
     public XMLElement parseXMLFromString(String xmlString) throws Exception
     {
         ParseNode node = parse(xmlString);
-        XMLElement xml = (XMLElement) node.getCustomNode();
-        return xml;
+        return (XMLElement) node.getCustomNode();
     }
 
     /**
@@ -238,15 +237,5 @@ public class XMLParser extends Parser {
 
         // Return string
         return aStr;
-    }
-
-    /**
-     * Test.
-     */
-    public static void main(String[] args) throws Exception
-    {
-        XMLParser parser = new XMLParser();
-        XMLElement xml = parser.parseXMLFromSource("/Temp/SnapCode/src/snap/app/AppPane.snp");
-        System.err.println(xml);
     }
 }
