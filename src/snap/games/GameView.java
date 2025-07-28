@@ -52,7 +52,7 @@ public class GameView extends ChildView {
     public GameView()
     {
         super();
-        setPrefSize(720, 405);
+        setPrefSize(800, 600);
         setFill(Color.WHITE);
         setBorder(Color.BLACK, 1);
         enableEvents(MouseEvents);

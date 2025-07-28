@@ -1,8 +1,5 @@
 package snap.games;
-import snap.geom.HPos;
-import snap.geom.Pos;
 import snap.gfx.Color;
-import snap.gfx.Font;
 import snap.view.*;
 
 /**
@@ -25,9 +22,54 @@ public class DevConsole extends ViewOwner {
     /**
      * Returns the game view.
      */
-    public GameView getGameView()
+    public GameView getGameView()  { return _gameController.getGameView(); }
+
+    /**
+     * Starts the game.
+     */
+    public void runGame(ViewEvent anEvent)
     {
-        return _gameController.getGameView();
+        View runBtn = anEvent.getView();
+        runBtn.setText("Pause");
+        runBtn.setName("PauseButton");
+        getView("ActButton").setDisabled(true);
+        getGameView().start();
+    }
+
+    /**
+     * Pauses the game.
+     */
+    public void pauseGame(ViewEvent anEvent)
+    {
+        getGameView().stop();
+        View pauseBtn = anEvent.getView();
+        pauseBtn.setText("Run");
+        pauseBtn.setName("RunButton");
+        getView("ActButton").setDisabled(false);
+    }
+
+    /**
+     * Sets the game speed.
+     */
+    public void setGameSpeed(ViewEvent anEvent)
+    {
+        getGameView().setFrameRate(anEvent.getFloatValue() * 100);
+    }
+
+    /**
+     * Reset GameView.
+     */
+    public void resetGameView()
+    {
+        getGameView().stop();
+        View pauseBtn = getView("PauseButton");
+        if (pauseBtn != null) {
+            pauseBtn.setText("Run");
+            pauseBtn.setName("RunButton");
+            getView("ActButton").setDisabled(false);
+        }
+
+        _gameController.resetGameView();
     }
 
     /**
@@ -44,54 +86,19 @@ public class DevConsole extends ViewOwner {
         scrollView.setBorder(null);
 
         // Create border view and add ScrollView, toolBar
-        BorderView borderView = new BorderView();
-        borderView.setFont(Font.Arial12);
-        borderView.setFill(ViewUtils.getBackFill());
-        borderView.setCenter(scrollView);
-        borderView.setBottom(createToolbar());
-        borderView.setBorder(Color.GRAY, 1);
+        ColView colView = new ColView();
+        colView.addChild(scrollView);
+        colView.addChild(createToolbar());
+        colView.setBorder(Color.GRAY, 1);
 
         // Return
-        return borderView;
+        return colView;
     }
 
     /**
-     * Create UI.
+     * Create Toolbar.
      */
-    protected View createToolbar()
-    {
-        // Create tool bar items
-        Button actBtn = new Button("Act");
-        actBtn.setName("ActButton");
-        actBtn.setPrefSize(70, 20);
-        Button runBtn = new Button("Run");
-        runBtn.setName("RunButton");
-        runBtn.setPrefSize(70, 20);
-        Button resetBtn = new Button("Reset");
-        resetBtn.setName("ResetButton");
-        resetBtn.setPrefSize(70, 20);
-        Separator sep = new Separator();
-        sep.setPrefWidth(40);
-        sep.setVisible(false);
-        Label speedLbl = new Label("Frame Rate:");
-        speedLbl.setLeanX(HPos.CENTER);
-        speedLbl.setFont(Font.Arial14);
-        Slider speedSldr = new Slider();
-        speedSldr.setName("SpeedSlider");
-        speedSldr.setPrefWidth(180);
-        TextField speedText = new TextField();
-        speedText.setName("SpeedText");
-        speedText.setPrefWidth(40);
-        speedText.setAlignX(HPos.CENTER);
-
-        // Create toolbar
-        RowView toolBar = new RowView();
-        toolBar.setAlign(Pos.CENTER);
-        toolBar.setPadding(18, 25, 18, 25);
-        toolBar.setSpacing(15);
-        toolBar.setChildren(actBtn, runBtn, resetBtn, sep, speedLbl, speedSldr, speedText);
-        return toolBar;
-    }
+    protected View createToolbar()  { return UILoader.loadViewForString(TOOL_BAR_UI); }
 
     /**
      * Reset UI.
@@ -107,37 +114,38 @@ public class DevConsole extends ViewOwner {
      */
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle ActButton
-        if (anEvent.equals("ActButton"))
-            getGameView().doAct();
+        switch (anEvent.getName()) {
 
-        // Handle RunButton
-        if (anEvent.equals("RunButton")) {
-            View runBtn = anEvent.getView();
-            runBtn.setText("Pause");
-            runBtn.setName("PauseButton");
-            getView("ActButton").setDisabled(true);
-            getGameView().start();
+            // Handle ActButton
+            case "ActButton" -> _gameController.stepGame();
+
+            // Handle RunButton, PauseButton
+            case "RunButton" -> runGame(anEvent);
+            case "PauseButton" -> pauseGame(anEvent);
+
+            // Handle ResetButton
+            case "ResetButton" -> resetGameView();
+
+            // Handle SpeedSlider
+            case "SpeedSlider" -> setGameSpeed(anEvent);
         }
-
-        // Handle PauseButton
-        if (anEvent.equals("PauseButton")) {
-            getGameView().stop();
-            View pauseBtn = anEvent.getView();
-            pauseBtn.setText("Run");
-            pauseBtn.setName("RunButton");
-            getView("ActButton").setDisabled(false);
-        }
-
-        // Handle ResetButton
-        if (anEvent.equals("ResetButton"))
-            _gameController.resetGameView();
-
-        // Handle SpeedSlider
-        if (anEvent.equals("SpeedSlider"))
-            getGameView().setFrameRate(anEvent.getFloatValue() * 100);
 
         // Shouldn't need this
         getGameView().requestFocus();
     }
+
+    /**
+     * TOOL_BAR_UI.
+     */
+    private static String TOOL_BAR_UI = """
+        <RowView Align="CENTER" Padding="18,25,18,25" Spacing="15">
+          <Button Name="ActButton" PrefWidth="70" Text="Act" />
+          <Button Name="RunButton" PrefWidth="70" Text="Run" />
+          <Button Name="ResetButton" PrefWidth="70" Text="Reset" />
+          <Separator PrefWidth="40" />
+          <Label LeanX="CENTER" Font="Arial 14" Text="Frame Rate:" />
+          <Slider Name="SpeedSlider" PrefWidth="180" Max="1" />
+          <TextField Name="SpeedText" PrefWidth="40" Align="CENTER" />
+        </RowView>
+        """;
 }

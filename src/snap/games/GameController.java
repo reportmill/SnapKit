@@ -18,12 +18,12 @@ public class GameController extends ViewOwner {
     }
 
     /**
-     * Override to add controls.
+     * Constructor for given GameView.
      */
-    protected View createUI()
+    public GameController(GameView gameView)
     {
-        _gameView = new GameView();
-        return _gameView;
+        super();
+        _gameView = gameView;
     }
 
     /**
@@ -36,26 +36,33 @@ public class GameController extends ViewOwner {
     }
 
     /**
+     * Steps the game.
+     */
+    public void stepGame()
+    {
+        getGameView().doAct();
+    }
+
+    /**
      * Reset GameView.
      */
-    protected void resetGameView()
+    public void resetGameView()
     {
         getGameView().stop();
-        View pauseBtn = getView("PauseButton");
-        if (pauseBtn != null) {
-            pauseBtn.setText("Run");
-            pauseBtn.setName("RunButton");
-            getView("ActButton").setDisabled(false);
-        }
 
         GameView gameView = (GameView) super.createUI();
         _gameView.removeChildren();
         for (int i = 0, iMax = gameView.getChildCount(); i < iMax; i++)
             _gameView.addChild(gameView.getChild(0));
+    }
 
-        //World world = null;
-        //try { world = _firstWorld.getClass().newInstance(); }
-        //catch(Exception e) { new RuntimeException(e); }
-        //setWorld(world);
+    /**
+     * Override to add controls.
+     */
+    protected View createUI()
+    {
+        if (_gameView == null)
+            _gameView = new GameView();
+        return _gameView;
     }
 }
