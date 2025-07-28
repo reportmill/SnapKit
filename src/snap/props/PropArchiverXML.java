@@ -3,6 +3,7 @@
  */
 package snap.props;
 import snap.util.*;
+import snap.web.WebURL;
 
 /**
  * A PropArchiver subclass specifically to convert to/from XML.
@@ -20,7 +21,7 @@ public class PropArchiverXML extends PropArchiver {
     /**
      * Converts a PropObject to XML.
      */
-    public XMLElement writePropObjectToXML(PropObject aPropObject)
+    public XMLElement writePropObjectToXml(PropObject aPropObject)
     {
         // Convert native to node
         PropNode propNode = convertNativeToNode(aPropObject, null);
@@ -44,9 +45,9 @@ public class PropArchiverXML extends PropArchiver {
     /**
      * Converts a PropObject to XML.
      */
-    public byte[] writePropObjectToXMLBytes(PropObject aPropObject)
+    public byte[] writePropObjectToXmlBytes(PropObject aPropObject)
     {
-        XMLElement xml = writePropObjectToXML(aPropObject);
+        XMLElement xml = writePropObjectToXml(aPropObject);
         byte[] xmlBytes = xml.getBytes();
         return xmlBytes;
     }
@@ -54,33 +55,25 @@ public class PropArchiverXML extends PropArchiver {
     /**
      * Reads a PropObject from XML source.
      */
-    public Object readPropObjectFromXMLSource(Object aSource)
+    public Object readPropObjectFromXmlUrl(WebURL sourceUrl)
     {
-        // Get bytes from source - if not found or empty, complain
-        byte[] xmlBytes = SnapUtils.getBytes(aSource);
-        if (xmlBytes == null || xmlBytes.length == 0)
-            throw new RuntimeException("XMLArchiver.readObject: Cannot read source: " + aSource);
-
-        // Try to get SourceURL from source
-        //if (getSourceURL() == null) { WebURL surl = WebURL.getURL(aSource); setSourceURL(surl); }
-
-        // Read from bytes and return
-        return readPropObjectFromXMLBytes(xmlBytes);
+        XMLElement xml = XMLElement.readXmlFromUrl(sourceUrl);
+        return readPropObjectFromXml(xml);
     }
 
     /**
      * Reads a PropObject from XML.
      */
-    public Object readPropObjectFromXMLBytes(byte[] theBytes)
+    public Object readPropObjectFromXmlBytes(byte[] theBytes)
     {
         XMLElement xml = XMLElement.readXmlFromBytes(theBytes);
-        return readPropObjectFromXML(xml);
+        return readPropObjectFromXml(xml);
     }
 
     /**
      * Reads a PropObject from XML.
      */
-    public PropObject readPropObjectFromXML(XMLElement anElement)
+    public PropObject readPropObjectFromXml(XMLElement anElement)
     {
         // Probably not helpful
         anElement.setIgnoreCase(true);
