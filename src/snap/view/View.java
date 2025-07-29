@@ -371,42 +371,27 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the mid x.
      */
-    public double getMidX()
-    {
-        return getX() + getWidth() / 2;
-    }
+    public double getMidX()  { return _x + _width / 2; }
 
     /**
      * Returns the mid y.
      */
-    public double getMidY()
-    {
-        return getY() + getHeight() / 2;
-    }
+    public double getMidY()  { return _y + _height / 2; }
 
     /**
      * Returns the max x.
      */
-    public double getMaxX()
-    {
-        return getX() + getWidth();
-    }
+    public double getMaxX()  { return _x + _width; }
 
     /**
      * Returns the max x.
      */
-    public double getMaxY()
-    {
-        return getY() + getHeight();
-    }
+    public double getMaxY()  { return _y + _height; }
 
     /**
      * Returns the view x/y.
      */
-    public Point getXY()
-    {
-        return new Point(getX(), getY());
-    }
+    public Point getXY()  { return new Point(_x, _y); }
 
     /**
      * Sets the view x/y.
@@ -420,10 +405,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view size.
      */
-    public Size getSize()
-    {
-        return new Size(getWidth(), getHeight());
-    }
+    public Size getSize()  { return new Size(_width, _height); }
 
     /**
      * Sets the size.
@@ -445,10 +427,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the bounds.
      */
-    public Rect getBounds()
-    {
-        return new Rect(_x + _transX, _y + _transY, _width, _height);
-    }
+    public Rect getBounds()  { return new Rect(_x + _transX, _y + _transY, _width, _height); }
 
     /**
      * Sets the bounds.

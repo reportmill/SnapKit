@@ -73,12 +73,12 @@ public class Point implements Cloneable {
     /**
      * Returns the rounded x value (as int).
      */
-    public int getRoundX()  { return (int)Math.round(x); }
+    public int getRoundX()  { return (int) Math.round(x); }
 
     /**
      * Returns the rounded y value (as int).
      */
-    public int getRoundY()  { return (int)Math.round(y); }
+    public int getRoundY()  { return (int) Math.round(y); }
 
     /**
      * Adds the given point to this point.
@@ -123,7 +123,7 @@ public class Point implements Cloneable {
      */
     public boolean equals(Object anObj)
     {
-        Point other = anObj instanceof Point ? (Point) anObj : null; if (other==null) return false;
+        Point other = anObj instanceof Point ? (Point) anObj : null; if (other == null) return false;
         return equals(x, y, other.x, other.y);
     }
 
@@ -152,7 +152,7 @@ public class Point implements Cloneable {
     /**
      * Returns the distance from this Point to a specified point.
      */
-    public static final double getDistance(double x0, double y0, double x1, double y1)
+    public static double getDistance(double x0, double y0, double x1, double y1)
     {
         return Math.sqrt(getDistanceSquared(x0,y0,x1,y1));
     }
@@ -160,7 +160,7 @@ public class Point implements Cloneable {
     /**
      * Returns the distance from this Point to a specified point.
      */
-    public static final double getDistanceSquared(double x0, double y0, double x1, double y1)
+    public static double getDistanceSquared(double x0, double y0, double x1, double y1)
     {
         double dx = x1 - x0, dy = y1 - y0; return dx*dx + dy*dy;
     }
@@ -168,14 +168,15 @@ public class Point implements Cloneable {
     /**
      * Returns the angle to the mouse point.
      */
-    public static final double getAngle(double x0, double y0, double x1, double y1)
+    public static double getAngle(double x0, double y0, double x1, double y1)
     {
-        double dx = x1 - x0, dy = y1 - y0;
-        double angle = Math.toDegrees(Math.atan(dy/Math.abs(dx)));
-        if (dx<0)
+        double dx = x1 - x0;
+        double dy = y1 - y0;
+        double angle = Math.toDegrees(Math.atan(dy / Math.abs(dx)));
+        if (dx < 0)
             angle = 180 - angle;
-        else if (dx==0)
-            angle = dy>0 ? -90 : dy<0 ? 90 : 0;
+        else if (dx == 0)
+            angle = dy > 0 ? -90 : dy < 0 ? 90 : 0;
         return angle;
     }
 }

@@ -2,10 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.games;
+import snap.geom.Point;
 import snap.gfx.Image;
+import snap.util.ListUtils;
 import snap.view.ImageView;
-import snap.view.View;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,78 +18,45 @@ public class Actor extends ImageView {
      */
     public Actor()
     {
+        super();
+        addPropChangeListener(pc -> handleImageChange(), Image_Prop);
+
         // Initialize name to class
         if (getClass() != Actor.class)
             setName(getClass().getSimpleName());
 
-        // Initialize image
-        Image defaultImage = Image.getImageForClassResource(getClass(), getName() + ".png");
-        if (defaultImage == null)
-            defaultImage = Image.getImageForClassResource(getClass(), "images/" + getName() + ".png");
-        if (defaultImage != null) {
+        // Get default image and set
+        Image defaultImage = getDefaultImage();
+        if (defaultImage != null)
             setImage(defaultImage);
-            setSize(defaultImage.getWidth(), defaultImage.getHeight());
-        }
     }
 
     /**
-     * Returns the center X.
+     * Returns the GameView.
      */
-    public double getCenterX()
-    {
-        return getX() + getWidth() / 2;
-    }
+    public GameView getGameView()  { return getParent(GameView.class); }
 
     /**
-     * Returns the center Y.
-     */
-    public double getCenterY()
-    {
-        return getY() + getHeight() / 2;
-    }
-
-    /**
-     * Returns the cell X.
-     */
-    public int getCellX()
-    {
-        GameView gameView = getGameView();
-        double cellW = gameView != null ? gameView.getCellWidth() : 1;
-        return (int) Math.floor(getX() / cellW);
-    }
-
-    /**
-     * Returns the cell Y.
-     */
-    public int getCellY()
-    {
-        GameView gameView = getGameView();
-        double cellH = gameView != null ? gameView.getCellHeight() : 1;
-        return (int) Math.floor(getY() / cellH);
-    }
-
-    /**
-     * Move sprite forward.
+     * Move actor forward.
      */
     public void moveBy(double aCount)
     {
-        // Do move
         double newX = getX() + aCount * Math.cos(Math.toRadians(getRotate()));
         double newY = getY() + aCount * Math.sin(Math.toRadians(getRotate()));
         setXY(newX, newY);
     }
 
     /**
-     * Move sprite to a point using setRotation and moveBy (so pen drawing works).
+     * Move actor to a point using setRotation and moveBy (so pen drawing works).
      */
     public void moveTo(double anX, double aY)
     {
-        setRotate(getAngle(anX, aY));
-        moveBy(getDistance(anX, aY));
+        setRotate(getAngleToXY(anX, aY));
+        moveBy(getDistanceToXY(anX, aY));
     }
 
     /**
-     * Turn sprite by given degrees.
+     * Turn actor by given degrees.
      */
     public void turnBy(double theDegrees)
     {
@@ -115,93 +82,82 @@ public class Actor extends ImageView {
         return 0 < maxX && aX < getWidth() && 0 < maxY && aY < getHeight();
     }
 
-    /** Returns the intersecting actors of given class. */
-    /*public <T extends SnapActor> T getIntersectingActor(Class <T> aClass)
-    { return _parent.getIntersectingActor(getBoundsInParent(), aClass); }*/
-    /** Returns the intersecting actors of given class. */
-    /*public <T extends SnapActor> List <T> getIntersectingActors(Class <T> aClass)
-    { return _parent.getIntersectingActors(getBoundsInParent(), aClass); }*/
-
     /**
      * Returns the actors in range.
      */
     public <T extends Actor> List<T> getActorsInRange(double aRadius, Class<T> aClass)
     {
-        List<T> actors = new ArrayList<>();
-        for (int i = getGameView().getChildCount() - 1; i >= 0; i--) {
-            View child = getGameView().getChild(i);
-            if (aClass == null || aClass.isInstance(child)) {
-                if (getDistance((Actor) child) <= aRadius)
-                    actors.add((T) child);
-            }
-        }
-
-        // Return
-        return actors;
+        List<Actor> actorsReversed = getGameView().getActorsReversed();
+        return (List<T>) ListUtils.filter(actorsReversed, actor -> isActorInRange(actor, aRadius, aClass));
     }
 
     /**
-     * Returns the angle to the mouse point.
+     * Returns whether given actor is in range and of matching class.
      */
-    public double getAngle(String aName)
+    private boolean isActorInRange(Actor anActor, double aRadius, Class<?> aClass)
     {
-        return getAngle(getGameView().getX(aName), getGameView().getY(aName));
+        if (aClass != null && !aClass.isInstance(anActor))
+            return false;
+        return getDistanceToActor(anActor) <= aRadius;
     }
 
     /**
-     * Returns the angle to the mouse point.
+     * Returns the angle of the line from this actor center point to given point.
      */
-    public double getAngle(double mx, double my)
+    public double getAngleToXY(double aX, double aY)  { return Point.getAngle(getMidX(), getMidY(), aX, aY); }
+
+    /**
+     * Returns the angle of the line from this actor center point to given point.
+     */
+    public double getAngleToActor(Actor anActor)  { return getAngleToXY(anActor.getMidX(), anActor.getMidY()); }
+
+    /**
+     * Returns the angle of the line from this actor center point to current mouse point.
+     */
+    public double getAngleToMouse()
     {
-        double x = getCenterX(), y = getCenterY();
-        double dx = mx - x, dy = my - y;
-        double angle = Math.toDegrees(Math.atan(dy / Math.abs(dx)));
-        if (dx < 0) angle = 180 - angle;
-        else if (dx == 0) angle = dy > 0 ? -90 : dy < 0 ? 90 : getRotate();
-        return angle;
+        GameView gameView = getGameView();
+        return getAngleToXY(gameView.getMouseX(), gameView.getMouseY());
     }
 
     /**
-     * Returns the distance to the mouse point.
+     * Returns the distance from this actor center point to given point.
      */
-    public double getDistance(String aName)
+    public double getDistanceToXY(double aX, double aY)  { return Point.getDistance(getMidX(), getMidY(), aX, aY); }
+
+    /**
+     * Returns the distance from this actor center point to given actor center point.
+     */
+    public double getDistanceToActor(Actor anActor)  { return getDistanceToXY(anActor.getMidX(), anActor.getMidY()); }
+
+    /**
+     * Returns the default image for this actor.
+     */
+    public Image getDefaultImage()
     {
-        return getDistance(getGameView().getX(aName), getGameView().getY(aName));
+        Image defaultImage = Image.getImageForClassResource(getClass(), getName() + ".png");
+        if (defaultImage == null)
+            defaultImage = Image.getImageForClassResource(getClass(), "images/" + getName() + ".png");
+        if (defaultImage != null && !defaultImage.isLoaded())
+            defaultImage.waitForImageLoad();
+        return defaultImage;
     }
-
-    /**
-     * Returns the distance to the given actor.
-     */
-    public double getDistance(Actor anActor)
-    {
-        return getDistance(anActor.getCenterX(), anActor.getCenterY());
-    }
-
-    /**
-     * Returns the distance to the given point.
-     */
-    public double getDistance(double x2, double y2)
-    {
-        double x1 = getCenterX(), y1 = getCenterY();
-        double dx = x2 - x1, dy = y2 - y1;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    /**
-     * Returns the GameView.
-     */
-    public GameView getGameView()
-    {
-        return getParent(GameView.class);
-    }
-
-    /**
-     * The main execution loop.
-     */
-    protected void main()  { }
 
     /**
      * The act method.
      */
     protected void act()  { }
+
+    /**
+     * Called when image changes.
+     */
+    protected void handleImageChange()
+    {
+        Image image = getImage();
+        if (image != null) {
+            if (!image.isLoaded())
+                image.waitForImageLoad();
+            setSize(image.getWidth(), image.getHeight());
+        }
+    }
 }

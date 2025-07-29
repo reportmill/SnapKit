@@ -40,7 +40,7 @@ public class GameController extends ViewOwner {
      */
     public void stepGame()
     {
-        getGameView().doAct();
+        getGameView().stepGameTime();
     }
 
     /**

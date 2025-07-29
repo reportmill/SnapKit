@@ -34,7 +34,7 @@ public class DevConsole extends ViewOwner {
      */
     public void playGame()
     {
-        getGameView().start();
+        getGameView().play();
     }
 
     /**
@@ -68,7 +68,7 @@ public class DevConsole extends ViewOwner {
     protected View createUI()
     {
         GameView gameView = getGameView();
-        gameView.setAutoStart(false);
+        gameView.setAutoPlay(false);
 
         // Configure ScrollView to hold game view
         ScrollView scrollView = new ScrollView(getGameView());
@@ -133,7 +133,7 @@ public class DevConsole extends ViewOwner {
     }
 
     /**
-     * TOOL_BAR_UI.
+     * Toolbar UI.
      */
     private static String TOOL_BAR_UI = """
         <RowView Align="CENTER" Padding="18,25,18,25" Spacing="15">
@@ -141,7 +141,7 @@ public class DevConsole extends ViewOwner {
           <Button Name="PlayButton" PrefWidth="70" Text="Play" />
           <Button Name="PauseButton" PrefWidth="70" Text="Pause" />
           <Button Name="ResetButton" PrefWidth="70" Text="Reset" />
-          <Separator PrefWidth="40" />
+          <Separator PrefWidth="40" PrefHeight="20" Vertical="true" />
           <Label LeanX="CENTER" Font="Arial 14" Text="Frame Rate:" />
           <Slider Name="SpeedSlider" PrefWidth="180" Max="1" />
           <TextField Name="SpeedText" PrefWidth="40" Align="CENTER" />
