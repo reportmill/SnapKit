@@ -25,35 +25,32 @@ public class DevConsole extends ViewOwner {
     public GameView getGameView()  { return _gameController.getGameView(); }
 
     /**
-     * Starts the game.
+     * Returns whether game is playing.
      */
-    public void runGame(ViewEvent anEvent)
+    public boolean isPlaying()  { return getGameView().isPlaying(); }
+
+    /**
+     * Plays the game.
+     */
+    public void playGame()
     {
-        View runBtn = anEvent.getView();
-        runBtn.setText("Pause");
-        runBtn.setName("PauseButton");
-        getView("ActButton").setDisabled(true);
         getGameView().start();
     }
 
     /**
      * Pauses the game.
      */
-    public void pauseGame(ViewEvent anEvent)
+    public void pauseGame()
     {
         getGameView().stop();
-        View pauseBtn = anEvent.getView();
-        pauseBtn.setText("Run");
-        pauseBtn.setName("RunButton");
-        getView("ActButton").setDisabled(false);
     }
 
     /**
-     * Sets the game speed.
+     * Sets the game frame rate.
      */
-    public void setGameSpeed(ViewEvent anEvent)
+    public void setFrameRate(double aValue)
     {
-        getGameView().setFrameRate(anEvent.getFloatValue() * 100);
+        getGameView().setFrameRate(aValue);
     }
 
     /**
@@ -61,14 +58,6 @@ public class DevConsole extends ViewOwner {
      */
     public void resetGameView()
     {
-        getGameView().stop();
-        View pauseBtn = getView("PauseButton");
-        if (pauseBtn != null) {
-            pauseBtn.setText("Run");
-            pauseBtn.setName("RunButton");
-            getView("ActButton").setDisabled(false);
-        }
-
         _gameController.resetGameView();
     }
 
@@ -105,6 +94,14 @@ public class DevConsole extends ViewOwner {
      */
     protected void resetUI()
     {
+        // Update StepButton enabled
+        setViewEnabled("StepButton", !isPlaying());
+
+        // Update PlayButton, PauseButton visible
+        setViewVisible("PlayButton", !isPlaying());
+        setViewVisible("PauseButton", isPlaying());
+
+        // Update SpeedSlider, SpeedText
         setViewValue("SpeedSlider", getGameView().getFrameRate() / 100);
         setViewValue("SpeedText", Math.round(getGameView().getFrameRate()));
     }
@@ -116,18 +113,19 @@ public class DevConsole extends ViewOwner {
     {
         switch (anEvent.getName()) {
 
-            // Handle ActButton
-            case "ActButton" -> _gameController.stepGame();
+            // Handle StepButton
+            case "StepButton" -> _gameController.stepGame();
 
-            // Handle RunButton, PauseButton
-            case "RunButton" -> runGame(anEvent);
-            case "PauseButton" -> pauseGame(anEvent);
+            // Handle PlayButton, PauseButton
+            case "PlayButton" -> playGame();
+            case "PauseButton" -> pauseGame();
 
             // Handle ResetButton
             case "ResetButton" -> resetGameView();
 
-            // Handle SpeedSlider
-            case "SpeedSlider" -> setGameSpeed(anEvent);
+            // Handle SpeedSlider, SpeedText
+            case "SpeedSlider" -> setFrameRate(anEvent.getFloatValue() * 100);
+            case "SpeedText" -> setFrameRate(anEvent.getFloatValue());
         }
 
         // Shouldn't need this
@@ -139,8 +137,9 @@ public class DevConsole extends ViewOwner {
      */
     private static String TOOL_BAR_UI = """
         <RowView Align="CENTER" Padding="18,25,18,25" Spacing="15">
-          <Button Name="ActButton" PrefWidth="70" Text="Act" />
-          <Button Name="RunButton" PrefWidth="70" Text="Run" />
+          <Button Name="StepButton" PrefWidth="70" Text="Step" />
+          <Button Name="PlayButton" PrefWidth="70" Text="Play" />
+          <Button Name="PauseButton" PrefWidth="70" Text="Pause" />
           <Button Name="ResetButton" PrefWidth="70" Text="Reset" />
           <Separator PrefWidth="40" />
           <Label LeanX="CENTER" Font="Arial 14" Text="Frame Rate:" />
