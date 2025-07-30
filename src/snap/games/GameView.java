@@ -91,8 +91,12 @@ public class GameView extends ChildView {
     public void setImage(Image anImage)
     {
         if (anImage == getImage()) return;
-        ImagePaint imageFill = new ImagePaint(anImage);
-        setFill(imageFill);
+        if (anImage != null) {
+            anImage.waitForImageLoad();
+            ImagePaint imageFill = new ImagePaint(anImage);
+            setFill(imageFill);
+        }
+        else setFill(null);
     }
 
     /**
