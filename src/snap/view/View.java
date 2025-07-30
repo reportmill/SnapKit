@@ -425,6 +425,20 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
+     * Returns the center point.
+     */
+    public Point getMidXY()  { return new Point(getMidX(), getMidY()); }
+
+    /**
+     * Sets the center point.
+     */
+    public void setMidXY(double aX, double aY)
+    {
+        setX(aX - _width / 2);
+        setY(aY - _height / 2);
+    }
+
+    /**
      * Returns the bounds.
      */
     public Rect getBounds()  { return new Rect(_x + _transX, _y + _transY, _width, _height); }

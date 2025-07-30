@@ -18,7 +18,7 @@ public class BoardActor extends Actor {
      */
     public int getCellX()
     {
-        BoardGameView gameView = (BoardGameView) getGameView();
+        BoardGameView gameView = getGameView(BoardGameView.class);
         double cellW = gameView != null ? gameView.getCellWidth() : 1;
         return (int) Math.floor(getX() / cellW);
     }
@@ -28,7 +28,7 @@ public class BoardActor extends Actor {
      */
     public int getCellY()
     {
-        BoardGameView gameView = (BoardGameView) getGameView();
+        BoardGameView gameView = getGameView(BoardGameView.class);
         double cellH = gameView != null ? gameView.getCellHeight() : 1;
         return (int) Math.floor(getY() / cellH);
     }

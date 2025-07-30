@@ -73,6 +73,11 @@ public class Size implements Cloneable {
     public void negate()  { setSize(-getWidth(), -getHeight()); }
 
     /**
+     * Returns whether size is empty.
+     */
+    public boolean isEmpty()  { return MathUtils.equalsZero(width) || MathUtils.equalsZero(height); }
+
+    /**
      * Returns whether size is equal to given width and height.
      */
     public boolean equals(double w, double h)  { return w==getWidth() && h==getHeight(); }

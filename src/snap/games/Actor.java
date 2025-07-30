@@ -3,15 +3,23 @@
  */
 package snap.games;
 import snap.geom.Point;
+import snap.geom.Shape;
 import snap.gfx.Image;
 import snap.util.ListUtils;
 import snap.view.ImageView;
+import snap.view.ParentView;
 import java.util.List;
 
 /**
  * This class represents a game character in a GameView.
  */
-public class Actor extends ImageView {
+public class Actor extends ParentView {
+
+    // The ImageView
+    private ImageView _imageView;
+
+    // Constants for properties
+    public static final String Image_Prop = ImageView.Image_Prop;
 
     /**
      * Constructor.
@@ -19,7 +27,6 @@ public class Actor extends ImageView {
     public Actor()
     {
         super();
-        addPropChangeListener(pc -> handleImageChange(), Image_Prop);
 
         // Initialize name to class
         if (getClass() != Actor.class)
@@ -37,6 +44,59 @@ public class Actor extends ImageView {
     public GameView getGameView()  { return getParent(GameView.class); }
 
     /**
+     * Returns the GameView as given class.
+     */
+    public <T extends GameView> T getGameView(Class<? extends GameView> aClass)  { return (T) getParent(aClass); }
+
+    /**
+     * Returns the image.
+     */
+    public Image getImage()  { return _imageView != null ? _imageView.getImage() : null; }
+
+    /**
+     * Sets the image.
+     */
+    public void setImage(Image anImage)
+    {
+        if (anImage == getImage()) return;
+
+        // Set image
+        batchPropChange(Image_Prop, getImage(), anImage);
+        getImageView().setImage(anImage);
+
+        // Update size
+        if (anImage != null) {
+            if (!anImage.isLoaded())
+                anImage.waitForImageLoad();
+            if (getSize().isEmpty())
+                setSize(anImage.getWidth(), anImage.getHeight());
+        }
+
+        // Fire prop change
+        fireBatchPropChanges();
+    }
+
+    /**
+     * Sets the image for given name.
+     */
+    public void setImageForName(String imageName)
+    {
+        Image image = Game.getImageForClassResource(getClass(), imageName);
+        setImage(image);
+    }
+
+    /**
+     * Returns the image view.
+     */
+    private ImageView getImageView()
+    {
+        if (_imageView != null) return _imageView;
+        _imageView = new ImageView();
+        addChild(_imageView);
+        return _imageView;
+    }
+
+    /**
      * Move actor forward.
      */
     public void moveBy(double aCount)
@@ -49,7 +109,7 @@ public class Actor extends ImageView {
     /**
      * Move actor to a point using setRotation and moveBy (so pen drawing works).
      */
-    public void moveTo(double anX, double aY)
+    public void moveToXY(double anX, double aY)
     {
         setRotate(getAngleToXY(anX, aY));
         moveBy(getDistanceToXY(anX, aY));
@@ -64,22 +124,32 @@ public class Actor extends ImageView {
     }
 
     /**
+     * Turn actor to given point X/Y.
+     */
+    public void turnToXY(double aX, double aY)
+    {
+        double angle = getAngleToXY(aX, aY);
+        turnBy(angle - getRotate());
+    }
+
+    /**
+     * Turn actor to given point X/Y.
+     */
+    public void turnToActor(Actor anActor)
+    {
+        GameView gameView = getGameView();
+        Point otherCenterInParent = anActor.localToParent(anActor.getMidX(), anActor.getMidY(), gameView);
+        Point otherCenterInLocal = parentToLocal(otherCenterInParent.x, otherCenterInParent.y, gameView);
+        turnToXY(otherCenterInLocal.x, otherCenterInLocal.y);
+    }
+
+    /**
      * Scale actor by given amount.
      */
     public void scaleBy(double aScale)
     {
         setScaleX(getScaleX() + aScale);
         setScaleY(getScaleY() + aScale);
-    }
-
-    /**
-     * Returns whether actor intersects given rect in local coords.
-     */
-    public boolean intersects(double aX, double aY, double aW, double aH)
-    {
-        double maxX = aX + aW;
-        double maxY = aY + aH;
-        return 0 < maxX && aX < getWidth() && 0 < maxY && aY < getHeight();
     }
 
     /**
@@ -144,20 +214,41 @@ public class Actor extends ImageView {
     }
 
     /**
+     * Returns whether actor intersects given actor.
+     */
+    public boolean intersectsActor(Actor anActor)
+    {
+        if (!getBounds().intersectsShape(anActor.getBounds()))
+            return false;
+        Shape thisBoundsInParent = localToParent(getBoundsShape());
+        Shape otherBoundsInParent = anActor.localToParent(anActor.getBoundsShape());
+        return thisBoundsInParent.intersectsShape(otherBoundsInParent);
+    }
+
+    /**
      * The act method.
      */
     protected void act()  { }
 
     /**
-     * Called when image changes.
+     * Layout.
      */
-    protected void handleImageChange()
+    @Override
+    protected void layoutImpl()
     {
-        Image image = getImage();
-        if (image != null) {
-            if (!image.isLoaded())
-                image.waitForImageLoad();
-            setSize(image.getWidth(), image.getHeight());
-        }
+        if (_imageView != null)
+            _imageView.setSize(getWidth(), getHeight());
     }
+
+    /**
+     * Pref width.
+     */
+    @Override
+    protected double getPrefWidthImpl(double aH)  { return _imageView != null ? _imageView.getPrefWidth(aH) : 0; }
+
+    /**
+     * Pref height.
+     */
+    @Override
+    protected double getPrefHeightImpl(double aW)  { return _imageView != null ? _imageView.getPrefHeight(aW) : 0; }
 }
