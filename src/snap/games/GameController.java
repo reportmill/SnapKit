@@ -1,10 +1,14 @@
 package snap.games;
+import snap.util.ClassUtils;
 import snap.view.*;
 
 /**
  * The controller class for a GameView.
  */
 public class GameController extends ViewOwner {
+
+    // The GameView box
+    private BoxView _gameBox;
 
     // The GameView
     protected GameView _gameView;
@@ -49,20 +53,19 @@ public class GameController extends ViewOwner {
     public void resetGameView()
     {
         getGameView().stop();
-
-        GameView gameView = (GameView) super.createUI();
-        _gameView.removeChildren();
-        for (int i = 0, iMax = gameView.getChildCount(); i < iMax; i++)
-            _gameView.addChild(gameView.getChild(0));
+        _gameView = ClassUtils.newInstance(_gameView.getClass());
+        _gameView.setAutoPlay(false);
+        _gameBox.setContent(_gameView);
     }
 
     /**
      * Override to add controls.
      */
+    @Override
     protected View createUI()
     {
         if (_gameView == null)
             _gameView = new GameView();
-        return _gameView;
+        return _gameBox = new BoxView(_gameView, true, true);
     }
 }

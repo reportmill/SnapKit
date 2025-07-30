@@ -1,5 +1,7 @@
 package snap.games;
 import snap.gfx.Color;
+import snap.util.SnapEnv;
+import snap.util.SnapUtils;
 import snap.view.*;
 
 /**
@@ -71,12 +73,18 @@ public class DevConsole extends ViewOwner {
         gameView.setAutoPlay(false);
 
         // Configure ScrollView to hold game view
-        ScrollView scrollView = new ScrollView(getGameView());
+        View gameControllerUI = _gameController.getUI();
+        ScrollView scrollView = new ScrollView(gameControllerUI);
         scrollView.setBorder(null);
+
+        // Get content
+        View contentView = SnapEnv.isWebVM ? gameControllerUI : scrollView;
+        contentView.setGrowWidth(true);
+        contentView.setGrowHeight(true);
 
         // Create border view and add ScrollView, toolBar
         ColView colView = new ColView();
-        colView.addChild(scrollView);
+        colView.addChild(contentView);
         colView.addChild(createToolbar());
         colView.setBorder(Color.GRAY, 1);
 
@@ -88,6 +96,13 @@ public class DevConsole extends ViewOwner {
      * Create Toolbar.
      */
     protected View createToolbar()  { return UILoader.loadViewForString(TOOL_BAR_UI); }
+
+    @Override
+    protected void initWindow(WindowView aWindow)
+    {
+        if (SnapUtils.isWebVM)
+            aWindow.setMaximized(true);
+    }
 
     /**
      * Reset UI.
@@ -143,7 +158,7 @@ public class DevConsole extends ViewOwner {
           <Button Name="ResetButton" PrefWidth="70" Text="Reset" />
           <Separator PrefWidth="40" PrefHeight="20" Vertical="true" />
           <Label LeanX="CENTER" Font="Arial 14" Text="Frame Rate:" />
-          <Slider Name="SpeedSlider" PrefWidth="180" Max="1" />
+          <Slider Name="SpeedSlider" PrefWidth="180" GrowWidth="true" Max="1" />
           <TextField Name="SpeedText" PrefWidth="40" Align="CENTER" />
         </RowView>
         """;

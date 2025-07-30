@@ -18,7 +18,7 @@ import java.util.Set;
 public class GameView extends ChildView {
 
     // The frame rate
-    private double _frameRate = 24;
+    private double _frameRate = 40;
 
     // Whether to draw the grid
     private boolean _showCoords;
@@ -64,6 +64,7 @@ public class GameView extends ChildView {
         setPrefSize(width, height);
         setFill(Color.WHITE);
         setBorder(Color.BLACK, 1);
+        setClipToBounds(true);
         enableEvents(MouseEvents);
         enableEvents(KeyEvents);
         setFocusable(true);
