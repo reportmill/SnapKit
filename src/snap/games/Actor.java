@@ -3,11 +3,13 @@
  */
 package snap.games;
 import snap.geom.Point;
+import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.gfx.Image;
 import snap.util.ListUtils;
 import snap.view.ImageView;
 import snap.view.ParentView;
+import snap.view.StackView;
 import java.util.List;
 
 /**
@@ -153,22 +155,86 @@ public class Actor extends ParentView {
     }
 
     /**
-     * Returns the actors in range.
+     * Returns the actors intersecting this actor that match given class (class can be null).
      */
-    public <T extends Actor> List<T> getActorsInRange(double aRadius, Class<T> aClass)
+    public boolean isIntersectingActor(Class<?> aClass)  { return getIntersectingActor(aClass) != null; }
+
+    /**
+     * Returns the actors intersecting this actor that match given class (class can be null).
+     */
+    public <T> T getIntersectingActor(Class<T> aClass)
     {
-        List<Actor> actorsReversed = getGameView().getActorsReversed();
-        return (List<T>) ListUtils.filter(actorsReversed, actor -> isActorInRange(actor, aRadius, aClass));
+        List<Actor> actors = getGameView().getActors();
+        return (T) ListUtils.findMatch(actors, actor -> isIntersectingActor(actor, aClass));
     }
 
     /**
-     * Returns whether given actor is in range and of matching class.
+     * Returns the actors intersecting this actor that match given class (class can be null).
      */
-    private boolean isActorInRange(Actor anActor, double aRadius, Class<?> aClass)
+    public <T> List<T> getIntersectingActors(Class<T> aClass)
+    {
+        List<Actor> actors = getGameView().getActors();
+        return (List<T>) ListUtils.filter(actors, actor -> isIntersectingActor(actor, aClass));
+    }
+
+    /**
+     * Returns whether given actor is intersecting and of matching class (class can be null).
+     */
+    protected boolean isIntersectingActor(Actor anActor, Class<?> aClass)
+    {
+        if (aClass != null && !aClass.isInstance(anActor))
+            return false;
+        return intersectsActor(anActor);
+    }
+
+    /**
+     * Returns the first actor in given range radius that match given class (class can be null).
+     */
+    public <T> T getActorInRange(double aRadius, Class<T> aClass)
+    {
+        List<Actor> actors = getGameView().getActors();
+        return (T) ListUtils.findMatch(actors, actor -> isActorInRange(actor, aRadius, aClass));
+    }
+
+    /**
+     * Returns the actors in given range radius that match given class (class can be null).
+     */
+    public <T> List<T> getActorsInRange(double aRadius, Class<T> aClass)
+    {
+        List<Actor> actors = getGameView().getActors();
+        return (List<T>) ListUtils.filter(actors, actor -> isActorInRange(actor, aRadius, aClass));
+    }
+
+    /**
+     * Returns whether given actor is in range and of matching class (class can be null).
+     */
+    protected boolean isActorInRange(Actor anActor, double aRadius, Class<?> aClass)
     {
         if (aClass != null && !aClass.isInstance(anActor))
             return false;
         return getDistanceToActor(anActor) <= aRadius;
+    }
+
+    /**
+     * Returns the first actor hit by given point that match given class (class can be null).
+     */
+    public <T> T getActorAtXY(double aX, double aY, Class<T> aClass)
+    {
+        GameView gameView = getGameView();
+        Point gameXY = localToParent(aX, aY, gameView);
+        List<Actor> actors = getGameView().getActors();
+        return (T) ListUtils.findMatch(actors, actor -> actor != this && gameView.isActorAtXY(actor, gameXY.x, gameXY.y, aClass));
+    }
+
+    /**
+     * Returns the actors hit by given point that match given class (class can be null).
+     */
+    public <T> List<T> getActorsAtXY(double aX, double aY, Class<T> aClass)
+    {
+        GameView gameView = getGameView();
+        Point gameXY = localToParent(aX, aY, gameView);
+        List<Actor> actors = getGameView().getActors();
+        return (List<T>) ListUtils.filter(actors, actor -> actor != this && gameView.isActorAtXY(actor, gameXY.x, gameXY.y, aClass));
     }
 
     /**
@@ -226,6 +292,16 @@ public class Actor extends ParentView {
     }
 
     /**
+     * Returns whether at edge.
+     */
+    public boolean isAtGameViewEdge()
+    {
+        Rect actorBounds = localToParent(getBoundsShape(), getGameView()).getBounds();
+        return actorBounds.x <= 0 || actorBounds.y <= 0 ||
+            actorBounds.getMaxX() >= getWidth() || actorBounds.getMaxY() >= getHeight();
+    }
+
+    /**
      * The act method.
      */
     protected void act()  { }
@@ -234,21 +310,17 @@ public class Actor extends ParentView {
      * Layout.
      */
     @Override
-    protected void layoutImpl()
-    {
-        if (_imageView != null)
-            _imageView.setSize(getWidth(), getHeight());
-    }
+    protected void layoutImpl()  { StackView.layout(this); }
 
     /**
      * Pref width.
      */
     @Override
-    protected double getPrefWidthImpl(double aH)  { return _imageView != null ? _imageView.getPrefWidth(aH) : 0; }
+    protected double getPrefWidthImpl(double aH)  { return StackView.getPrefWidth(this, aH); }
 
     /**
      * Pref height.
      */
     @Override
-    protected double getPrefHeightImpl(double aW)  { return _imageView != null ? _imageView.getPrefHeight(aW) : 0; }
+    protected double getPrefHeightImpl(double aW)  { return StackView.getPrefHeight(this, aW); }
 }

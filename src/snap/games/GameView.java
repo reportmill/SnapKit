@@ -141,7 +141,7 @@ public class GameView extends ChildView {
     }
 
     /**
-     * Returns the child actor intersecting given point in local coords.
+     * Returns the first actor hit by given point in local coords.
      */
     public <T extends Actor> T getActorAtXY(double aX, double aY, Class<T> aClass)
     {
@@ -149,7 +149,7 @@ public class GameView extends ChildView {
     }
 
     /**
-     * Returns the child actor intersecting given point in local coords.
+     * Returns the actors hit by given point in local coords.
      */
     public <T extends Actor> List<T> getActorsAtXY(double aX, double aY, Class<T> aClass)
     {
@@ -159,11 +159,11 @@ public class GameView extends ChildView {
     /**
      * Returns whether given actor is at given XY and of matching class.
      */
-    private boolean isActorAtXY(Actor anActor, double aX, double aY, Class<?> aClass)
+    protected boolean isActorAtXY(Actor anActor, double aX, double aY, Class<?> aClass)
     {
         if (aClass != null && !aClass.isInstance(anActor))
             return false;
-        Point point = anActor.parentToLocal(aX, aY);
+        Point point = anActor.parentToLocal(aX, aY, this);
         return anActor.contains(point.x, point.y);
     }
 
