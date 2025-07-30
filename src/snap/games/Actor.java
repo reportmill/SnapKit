@@ -31,11 +31,10 @@ public class Actor extends ParentView {
         super();
 
         // Initialize name to class
-        if (getClass() != Actor.class)
-            setName(getClass().getSimpleName());
+        setName(getClass().getSimpleName());
 
-        // Get default image and set
-        Image defaultImage = getDefaultImage();
+        // Get default image for class and set
+        Image defaultImage = Game.getImageForClass(getClass());
         if (defaultImage != null)
             setImage(defaultImage);
     }
@@ -265,19 +264,6 @@ public class Actor extends ParentView {
      * Returns the distance from this actor center point to given actor center point.
      */
     public double getDistanceToActor(Actor anActor)  { return getDistanceToXY(anActor.getMidX(), anActor.getMidY()); }
-
-    /**
-     * Returns the default image for this actor.
-     */
-    public Image getDefaultImage()
-    {
-        Image defaultImage = Image.getImageForClassResource(getClass(), getName() + ".png");
-        if (defaultImage == null)
-            defaultImage = Image.getImageForClassResource(getClass(), "images/" + getName() + ".png");
-        if (defaultImage != null && !defaultImage.isLoaded())
-            defaultImage.waitForImageLoad();
-        return defaultImage;
-    }
 
     /**
      * Returns whether actor intersects given actor.

@@ -3,6 +3,7 @@ import snap.gfx.Image;
 import snap.util.ClassUtils;
 import snap.view.ViewUtils;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * A starter class.
@@ -11,6 +12,9 @@ public class Game {
 
     // A cache of game images
     private static HashMap<String,Image> _images = new HashMap<>();
+
+    // Constant for no image
+    private static Image NULL_IMAGE = Image.getImageForSize(1, 1, true);
 
     /**
      * Shows a game in window for given GameView or GameController class.
@@ -73,9 +77,9 @@ public class Game {
      */
     public static Image getImageForName(String imageName)
     {
-        return _images.get(imageName);
+        Image image = _images.get(imageName);
+        return image != NULL_IMAGE ? image : null;
     }
-
 
     /**
      * Returns an image for given name.
@@ -98,5 +102,35 @@ public class Game {
         if (image != null)
             setImageForName(imageName, image);
         return image;
+    }
+
+    /**
+     * Returns the default image for given class.
+     */
+    public static Image getImageForClass(Class<?> aClass)
+    {
+        Image image = _images.get(aClass.getName());
+        if (image != null)
+            return image != NULL_IMAGE ? image : null;
+
+        // Get list of all possible image names
+        String className = aClass.getSimpleName();
+        List<String> imageNames = List.of(className + ".png", "images/" + className + ".png",
+                className + ".jpg", "images/" + className + ".jpg",
+                className + ".jpeg", "images/" + className + ".jpeg",
+                className + ".gif", "images/" + className + ".gif");
+
+        // Look for all possible image names and return if found
+        for (String imageName : imageNames) {
+            image = getImageForClassResource(aClass, imageName);
+            if (image != null) {
+                setImageForName(aClass.getName(), image);
+                return image;
+            }
+        }
+
+        // Put null image in cache and return not found
+        setImageForName(aClass.getName(), NULL_IMAGE);
+        return null;
     }
 }

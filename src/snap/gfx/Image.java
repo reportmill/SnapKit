@@ -380,6 +380,51 @@ public abstract class Image implements Loadable {
     }
 
     /**
+     * Returns a copy of this image flipped horizontally.
+     */
+    public Image copyflippedX()
+    {
+        if (!isLoaded()) waitForImageLoad();
+        double imageW = getWidth();
+        double imageH = getHeight();
+        Image flippedImage = Image.getImageForSize(imageW, imageH, true);
+        Painter pntr = flippedImage.getPainter();
+        pntr.scaleAround(-1, 1, imageW / 2, imageH / 2);
+        pntr.drawImage(this, 0, 0);
+        return flippedImage;
+    }
+
+    /**
+     * Returns a copy of this image flipped vertically.
+     */
+    public Image copyflippedY()
+    {
+        if (!isLoaded()) waitForImageLoad();
+        double imageW = getWidth();
+        double imageH = getHeight();
+        Image flippedImage = Image.getImageForSize(imageW, imageH, true);
+        Painter pntr = flippedImage.getPainter();
+        pntr.scaleAround(1, -1, imageW / 2, imageH / 2);
+        pntr.drawImage(this, 0, 0);
+        return flippedImage;
+    }
+
+    /**
+     * Returns a copy of this image rotated by given degrees.
+     */
+    public Image copyRotatedBy(int theDeg)
+    {
+        if (!isLoaded()) waitForImageLoad();
+        double imageW = getWidth();
+        double imageH = getHeight();
+        Image rotatedImage = Image.getImageForSize(imageW, imageH, true);
+        Painter pntr = rotatedImage.getPainter();
+        pntr.rotateAround(theDeg, imageW / 2, imageH / 2);
+        pntr.drawImage(this, 0, 0);
+        return rotatedImage;
+    }
+
+    /**
      * Returns an image inside a larger image.
      */
     public Image getFramedImage(int newW, int newH, double imageX, double imageY)

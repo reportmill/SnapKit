@@ -286,7 +286,7 @@ public abstract class Painter {
     }
 
     /**
-     * Rotate by angle in degrees.
+     * Rotate by angle in degrees around given point.
      */
     public void rotateAround(double theDegrees, double aX, double aY)
     {
@@ -299,6 +299,16 @@ public abstract class Painter {
     public void scale(double sx, double sy)
     {
         transform(Transform.getScale(sx, sy));
+    }
+
+    /**
+     * Scale by sx, sy around given point.
+     */
+    public void scaleAround(double sx, double sy, double aX, double aY)
+    {
+        translate(aX, aY);
+        scale(sx, sy);
+        translate(-aX, -aY);
     }
 
     /**
