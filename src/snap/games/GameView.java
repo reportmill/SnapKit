@@ -4,10 +4,7 @@
 package snap.games;
 import snap.geom.Point;
 import snap.geom.Rect;
-import snap.gfx.Color;
-import snap.gfx.Font;
-import snap.gfx.Painter;
-import snap.gfx.Stroke;
+import snap.gfx.*;
 import snap.util.ListUtils;
 import snap.view.*;
 
@@ -72,6 +69,39 @@ public class GameView extends ChildView {
         setFocusable(true);
         setFocusWhenPressed(true);
         addPropChangeListener(pc -> handleShowingChange(), Showing_Prop);
+
+        // Get default image for class and set
+        Image defaultClassImage = Game.getImageForClass(getClass());
+        if (defaultClassImage != null)
+            setImage(defaultClassImage);
+    }
+
+    /**
+     * Returns the background image.
+     */
+    public Image getImage()
+    {
+        Paint fill = getFill();
+        return fill instanceof ImagePaint imageFill ? imageFill.getImage() : null;
+    }
+
+    /**
+     * Sets the background image.
+     */
+    public void setImage(Image anImage)
+    {
+        if (anImage == getImage()) return;
+        ImagePaint imageFill = new ImagePaint(anImage);
+        setFill(imageFill);
+    }
+
+    /**
+     * Sets the image for given name.
+     */
+    public void setImageForName(String imageName)
+    {
+        Image image = Game.getImageForClassResource(getClass(), imageName);
+        setImage(image);
     }
 
     /**

@@ -30,13 +30,13 @@ public class Actor extends ParentView {
     {
         super();
 
-        // Initialize name to class
+        // Initialize name to simple class name
         setName(getClass().getSimpleName());
 
         // Get default image for class and set
-        Image defaultImage = Game.getImageForClass(getClass());
-        if (defaultImage != null)
-            setImage(defaultImage);
+        Image defaultClassImage = Game.getImageForClass(getClass());
+        if (defaultClassImage != null)
+            setImage(defaultClassImage);
     }
 
     /**

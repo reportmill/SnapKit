@@ -16,6 +16,9 @@ public class Game {
     // Constant for no image
     private static Image NULL_IMAGE = Image.getImageForSize(1, 1, true);
 
+    // Constant for image file types
+    private static final List<String> IMAGE_FILE_TYPES = List.of(".png", ".jpg", ".jpeg", ".gif");
+
     /**
      * Shows a game in window for given GameView or GameController class.
      */
@@ -99,6 +102,8 @@ public class Game {
             return image;
 
         image = Image.getImageForClassResource(aClass, imageName);
+        if (image == null)
+            image = Image.getImageForClassResource(aClass, "images/" + imageName);
         if (image != null)
             setImageForName(imageName, image);
         return image;
@@ -113,15 +118,9 @@ public class Game {
         if (image != null)
             return image != NULL_IMAGE ? image : null;
 
-        // Get list of all possible image names
-        String className = aClass.getSimpleName();
-        List<String> imageNames = List.of(className + ".png", "images/" + className + ".png",
-                className + ".jpg", "images/" + className + ".jpg",
-                className + ".jpeg", "images/" + className + ".jpeg",
-                className + ".gif", "images/" + className + ".gif");
-
         // Look for all possible image names and return if found
-        for (String imageName : imageNames) {
+        for (String fileType : IMAGE_FILE_TYPES) {
+            String imageName = aClass.getSimpleName() + fileType;
             image = getImageForClassResource(aClass, imageName);
             if (image != null) {
                 setImageForName(aClass.getName(), image);
