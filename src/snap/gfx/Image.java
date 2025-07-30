@@ -254,6 +254,16 @@ public abstract class Image implements Loadable {
     }
 
     /**
+     * Returns the color at given X/Y.
+     */
+    public Color getColorAtXY(int aX, int aY)  { return new Color(getRGB(aX, aY)); }
+
+    /**
+     * Sets the color at given X/Y.
+     */
+    public void setColorAtXY(int aX, int aY, Color aColor)  { setRGB(aX, aY, aColor.getRGB()); }
+
+    /**
      * Returns an RGB integer for given x, y.
      */
     public abstract int getRGB(int aX, int aY);
