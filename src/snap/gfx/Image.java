@@ -330,36 +330,36 @@ public abstract class Image implements Loadable {
     /**
      * Returns a copy of this image scaled by given percent.
      */
-    public Image cloneForScale(double aRatio)
+    public Image copyForScale(double aRatio)
     {
         int newW = (int) Math.round(getPixWidth() * aRatio);
         int newH = (int) Math.round(getPixHeight() * aRatio);
-        return cloneForSize(newW, newH);
+        return copyForSize(newW, newH);
     }
 
     /**
      * Returns a copy of this image at new size.
      */
-    public Image cloneForSize(double newW, double newH)
+    public Image copyForSize(double newW, double newH)
     {
         double dpiScale = getDpiScale();
-        return cloneForSizeAndDpiScale(newW, newH, dpiScale);
+        return copyForSizeAndDpiScale(newW, newH, dpiScale);
     }
 
     /**
      * Returns a copy of this image at new dpi scale.
      */
-    public Image cloneForDpiScale(double dpiScale)
+    public Image copyForDpiScale(double dpiScale)
     {
         double imageW = getWidth();
         double imageH = getHeight();
-        return cloneForSizeAndDpiScale(imageW, imageH, dpiScale);
+        return copyForSizeAndDpiScale(imageW, imageH, dpiScale);
     }
 
     /**
      * Returns a copy of this image at new size and dpi scale.
      */
-    public Image cloneForSizeAndDpiScale(double newW, double newH, double dpiScale)
+    public Image copyForSizeAndDpiScale(double newW, double newH, double dpiScale)
     {
         Image cloneImage = Image.getImageForSizeAndDpiScale(newW, newH, hasAlpha(), dpiScale);
         Painter pntr = cloneImage.getPainter();
@@ -371,7 +371,7 @@ public abstract class Image implements Loadable {
     /**
      * Returns a subimage from rectangle.
      */
-    public Image cloneForCropRect(double aX, double aY, double newW, double newH)
+    public Image copyForCropRect(double aX, double aY, double newW, double newH)
     {
         Image cloneImage = Image.getImageForSize(Math.round(newW), Math.round(newH), hasAlpha());
         Painter pntr = cloneImage.getPainter();
@@ -382,11 +382,11 @@ public abstract class Image implements Loadable {
     /**
      * Returns an image inside a larger image.
      */
-    public Image getFramedImage(int aW, int aH, double aX, double aY)
+    public Image getFramedImage(int newW, int newH, double imageX, double imageY)
     {
-        Image cloneImage = Image.getImageForSize(aW, aH, hasAlpha());
+        Image cloneImage = Image.getImageForSize(newW, newH, hasAlpha());
         Painter pntr = cloneImage.getPainter();
-        pntr.drawImage(this, aX, aY);
+        pntr.drawImage(this, imageX, imageY);
         return cloneImage;
     }
 
@@ -398,7 +398,7 @@ public abstract class Image implements Loadable {
         List<Image> images = new ArrayList<>(aCount);
         int w = getPixWidth() / aCount;
         for (int i = 0; i < aCount; i++) {
-            Image img = cloneForCropRect(i * w, 0, w, getPixHeight());
+            Image img = copyForCropRect(i * w, 0, w, getPixHeight());
             images.add(img);
         }
         ImageSet iset = new ImageSet(images);
@@ -563,4 +563,9 @@ public abstract class Image implements Loadable {
     {
         return ImageUtils.getImageType(bytes) != null;
     }
+
+    @Deprecated
+    public Image cloneForSize(double newW, double newH) { return copyForSize(newW, newH); }
+    @Deprecated
+    public Image cloneForCropRect(double aX, double aY, double newW, double newH) { return copyForCropRect(aX, aY, newW, newH); }
 }

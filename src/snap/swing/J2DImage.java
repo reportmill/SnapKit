@@ -161,7 +161,7 @@ public class J2DImage extends Image {
         // If HiDPI, get 72 dpi image and return that instead
         if (getDpiScale() != 1) {
             System.out.println("J2DImage.getBytesJPEG: Downsampling to 72 dpi since other dpi not supported");
-            Image downSampledImage = cloneForDpiScale(1);
+            Image downSampledImage = copyForDpiScale(1);
             return downSampledImage.getBytesJPEG();
         }
 
@@ -177,7 +177,7 @@ public class J2DImage extends Image {
         // If HiDPI, get 72 dpi image and return that instead
         if (getDpiScale() != 1) {
             System.out.println("J2DImage.getBytesPNG: Downsampling to 72 dpi since other dpi not supported");
-            Image downSampledImage = cloneForDpiScale(1);
+            Image downSampledImage = copyForDpiScale(1);
             return downSampledImage.getBytesPNG();
         }
 

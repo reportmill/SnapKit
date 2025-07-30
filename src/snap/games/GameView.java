@@ -56,10 +56,15 @@ public class GameView extends ChildView {
     /**
      * Constructor.
      */
-    public GameView()
+    public GameView()  { this(800, 600); }
+
+    /**
+     * Constructor.
+     */
+    public GameView(double width, double height)
     {
         super();
-        setPrefSize(800, 600);
+        setPrefSize(width, height);
         setFill(Color.WHITE);
         setBorder(Color.BLACK, 1);
         enableEvents(MouseEvents);

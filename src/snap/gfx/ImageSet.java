@@ -54,7 +54,7 @@ public class ImageSet {
     {
         List<Image> images = new ArrayList<>();
         for(Image img : _images) {
-            img = img.cloneForScale(aRatio);
+            img = img.copyForScale(aRatio);
             images.add(img);
         }
         ImageSet iset = new ImageSet(images);
