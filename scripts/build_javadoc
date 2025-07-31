@@ -11,6 +11,7 @@ javadoc -d /tmp/javadoc -windowtitle 'SnapKit API' \
 -header 'SnapKit API' \
 -footer 'SnapKit API' \
 -overview /Temp/SnapKit/scripts/overview.html \
+snap/games/*.java \
 snap/geom/*.java \
 snap/gfx/*.java \
 snap/gfx3d/*.java \

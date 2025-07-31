@@ -19,6 +19,7 @@ SnapKit is designed to resolve this with no compromises.
 * [The Text Package](#the-text-package)
 * [The Parser Package](#the-parser-package)
 * [The Properties Package](#the-properties-package)
+* [The Games Package](#the-games-package)
 * [The 3D Graphics Package](#the-3d-graphics-package)
 * [The Web Package](#the-web-package)
 * [The SnapBuilder UI Builder](#the-snapbuilder-ui-builder)
@@ -352,6 +353,33 @@ public class MyClass extends PropObject {
     }
 }
 ```
+
+## The Games Package
+
+The package provides fundamental classes for creating many games like Asteroids, Tetris, FlappyBird and more. These
+classes are great for educational and recreational purposes.
+
+- **Actor**
+  - Models individual game entities like a spaceship, asteroid, bullet, etc.
+  - Manages location, size, rotation and movement
+  - Manages painting, user input, frame behavior and collision detection
+- **GameView**
+  - Manages a list of actors
+  - Manages the game timer (play, pause, stop, framerate)
+  - Manages background painting, user input and collision detection
+- **GameController**
+  - Manages top level UI and the current game view
+- **DevConsole**
+  - Shows the game controller with ability to play, pause, step, set frame speed, etc.
+- **PenActor**
+  - Proves functionality for pen graphics
+- **Game**
+  - Manages global state and game resources (images, sounds, etc.)
+
+Check out the **[source code](https://github.com/reportmill/SnapKit/tree/master/src/snap/games)** and
+**[Javadoc](https://reportmill.com/snap1/javadoc/snap/games/package-summary.html)**.
+
+[ ![SnapKit](https://reportmill.com/SnapCode/images/Games.png)](http://www.reportmill.com/snaptea/)
 
 ## The 3D Graphics Package
 
