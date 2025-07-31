@@ -35,7 +35,7 @@ public class Game {
         // Handle GameView
         if (GameView.class.isAssignableFrom(gameClass)) {
             GameView gameView = (GameView) ClassUtils.newInstance(gameClass);
-            GameController gameController = new GameController(gameView);
+            GameController gameController = gameView.getController();
             gameController.setWindowVisible(true);
         }
 
@@ -62,7 +62,7 @@ public class Game {
         // Handle GameView
         if (GameView.class.isAssignableFrom(gameClass)) {
             GameView gameView = (GameView) ClassUtils.newInstance(gameClass);
-            GameController gameController = new GameController(gameView);
+            GameController gameController = gameView.getController();
             DevConsole devConsole = new DevConsole(gameController);
             devConsole.setWindowVisible(true);
         }

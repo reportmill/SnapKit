@@ -19,6 +19,8 @@ public class DevConsole extends ViewOwner {
     {
         super();
         _gameController = gameController;
+        _gameController.setAutoPlay(false);
+        _gameController.addPropChangeListener(pc -> resetLater(), GameController.Playing_Prop);
     }
 
     /**
@@ -29,39 +31,17 @@ public class DevConsole extends ViewOwner {
     /**
      * Returns whether game is playing.
      */
-    public boolean isPlaying()  { return getGameView().isPlaying(); }
+    public boolean isPlaying()  { return _gameController.isPlaying(); }
 
     /**
      * Plays the game.
      */
-    public void playGame()
-    {
-        getGameView().play();
-    }
+    public void playGame()  { _gameController.playGame(); }
 
     /**
      * Pauses the game.
      */
-    public void pauseGame()
-    {
-        getGameView().stop();
-    }
-
-    /**
-     * Sets the game frame rate.
-     */
-    public void setFrameRate(double aValue)
-    {
-        getGameView().setFrameRate(aValue);
-    }
-
-    /**
-     * Reset GameView.
-     */
-    public void resetGameView()
-    {
-        _gameController.resetGameView();
-    }
+    public void pauseGame()  { _gameController.stopGame(); }
 
     /**
      * Create UI.
@@ -69,9 +49,6 @@ public class DevConsole extends ViewOwner {
     @Override
     protected View createUI()
     {
-        GameView gameView = getGameView();
-        gameView.setAutoPlay(false);
-
         // Configure ScrollView to hold game view
         View gameControllerUI = _gameController.getUI();
         ScrollView scrollView = new ScrollView(gameControllerUI);
@@ -97,6 +74,9 @@ public class DevConsole extends ViewOwner {
      */
     protected View createToolbar()  { return UILoader.loadViewForString(TOOL_BAR_UI); }
 
+    /**
+     * Override to maximize window when in browser.
+     */
     @Override
     protected void initWindow(WindowView aWindow)
     {
@@ -117,8 +97,8 @@ public class DevConsole extends ViewOwner {
         setViewVisible("PauseButton", isPlaying());
 
         // Update SpeedSlider, SpeedText
-        setViewValue("SpeedSlider", getGameView().getFrameRate() / 100);
-        setViewValue("SpeedText", Math.round(getGameView().getFrameRate()));
+        setViewValue("SpeedSlider", _gameController.getFrameRate() / 100);
+        setViewValue("SpeedText", Math.round(_gameController.getFrameRate()));
     }
 
     /**
@@ -129,18 +109,18 @@ public class DevConsole extends ViewOwner {
         switch (anEvent.getName()) {
 
             // Handle StepButton
-            case "StepButton" -> _gameController.stepGame();
+            case "StepButton" -> _gameController.stepGameFrame();
 
             // Handle PlayButton, PauseButton
             case "PlayButton" -> playGame();
             case "PauseButton" -> pauseGame();
 
             // Handle ResetButton
-            case "ResetButton" -> resetGameView();
+            case "ResetButton" -> _gameController.resetGameView();
 
             // Handle SpeedSlider, SpeedText
-            case "SpeedSlider" -> setFrameRate(anEvent.getFloatValue() * 100);
-            case "SpeedText" -> setFrameRate(anEvent.getFloatValue());
+            case "SpeedSlider" -> _gameController.setFrameRate(anEvent.getFloatValue() * 100);
+            case "SpeedText" -> _gameController.setFrameRate(anEvent.getFloatValue());
         }
 
         // Shouldn't need this

@@ -17,8 +17,8 @@ import java.util.Set;
  */
 public class GameView extends ChildView {
 
-    // The frame rate
-    private double _frameRate = 40;
+    // The controller
+    protected GameController _controller;
 
     // Whether to draw the grid
     private boolean _showCoords;
@@ -44,12 +44,6 @@ public class GameView extends ChildView {
     // The key typed in current frame
     private Set<Integer> _keyClicks = new HashSet<>();
 
-    // Whether to auto-play game when shown
-    private boolean _autoPlay = true;
-
-    // The animation timer    
-    private ViewTimer _timer = new ViewTimer(this::stepGameTime, getFrameDelay());
-
     /**
      * Constructor.
      */
@@ -69,12 +63,20 @@ public class GameView extends ChildView {
         enableEvents(KeyEvents);
         setFocusable(true);
         setFocusWhenPressed(true);
-        addPropChangeListener(pc -> handleShowingChange(), Showing_Prop);
 
         // Get default image for class and set
         Image defaultClassImage = Game.getImageForClass(getClass());
         if (defaultClassImage != null)
             setImage(defaultClassImage);
+    }
+
+    /**
+     * Returns the game controller.
+     */
+    public GameController getController()
+    {
+        if (_controller != null) return _controller;
+        return _controller = new GameController(this);
     }
 
     /**
@@ -107,28 +109,6 @@ public class GameView extends ChildView {
     {
         Image image = Game.getImageForClassResource(getClass(), imageName);
         setImage(image);
-    }
-
-    /**
-     * Returns the frame rate.
-     */
-    public double getFrameRate()  { return _frameRate; }
-
-    /**
-     * Sets the frame rate.
-     */
-    public void setFrameRate(double aValue)
-    {
-        _frameRate = aValue;
-        _timer.setPeriod(getFrameDelay());
-    }
-
-    /**
-     * Returns the frame delay in milliseconds.
-     */
-    public int getFrameDelay()
-    {
-        return _frameRate <= 0 ? Integer.MAX_VALUE : (int) Math.round(1000 / _frameRate);
     }
 
     /**
@@ -282,41 +262,29 @@ public class GameView extends ChildView {
     /**
      * Returns whether game is playing.
      */
-    public boolean isPlaying()  { return _timer.isRunning(); }
+    public boolean isPlaying()  { return getController().isPlaying(); }
+
+    /**
+     * Sets whether game is playing.
+     */
+    public void setPlaying(boolean aValue)  { getController().setPlaying(aValue); }
 
     /**
      * Starts the game timer.
      */
-    public void play()
-    {
-        _timer.start();
-    }
+    public void play()  { getController().playGame(); }
 
     /**
      * Stops the game timer.
      */
-    public void stop()
-    {
-        _timer.stop();
-    }
+    public void stop()  { getController().stopGame(); }
 
     /**
-     * Returns whether game auto-starts.
+     * Steps the game forward a frame.
      */
-    public boolean isAutoPlay()  { return _autoPlay; }
-
-    /**
-     * Sets whether game auto-starts.
-     */
-    public void setAutoPlay(boolean aValue)  { _autoPlay = aValue; }
-
-    /**
-     * Steps the game play time forward one frame.
-     */
-    protected void stepGameTime()
+    protected void stepGameFrame()
     {
         try {
-            act();
             getActors().forEach(Actor::act);
             _mouseClicked = null;
             _keyClicks.clear();
@@ -327,11 +295,6 @@ public class GameView extends ChildView {
             throw new RuntimeException(e);
         }
     }
-
-    /**
-     * The act method.
-     */
-    protected void act()  { }
 
     /**
      * Paints the game view.
@@ -408,25 +371,6 @@ public class GameView extends ChildView {
             }
             else if (anEvent.isKeyRelease())
                 _keyDowns.remove(keyCode);
-        }
-    }
-
-    /**
-     * Called when game view has showing change.
-     */
-    protected void handleShowingChange()
-    {
-        // If showing, autostart
-        if (isShowing()) {
-            if (_autoPlay)
-                _timer.start(800);
-            _autoPlay = false;
-        }
-
-        // If hiding, stop playing
-        else {
-            _autoPlay = isPlaying();
-            stop();
         }
     }
 
