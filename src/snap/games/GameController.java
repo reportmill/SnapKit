@@ -31,7 +31,7 @@ public class GameController extends ViewOwner {
      */
     public GameController()
     {
-        this(null);
+        this(new GameView());
     }
 
     /**
