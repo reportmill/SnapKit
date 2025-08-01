@@ -1,11 +1,8 @@
 package snap.games;
 import snap.geom.Path2D;
 import snap.geom.Point;
-import snap.gfx.Color;
-import snap.gfx.Painter;
-import snap.gfx.Stroke;
+import snap.gfx.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,13 +20,10 @@ public class PenActor extends Actor {
     private double _penWidth = 5;
 
     // The current path
-    private Path2D _path;
+    private Path2D _penPath;
 
     // The group of paths
-    protected List<PenPath> _penPaths = Collections.EMPTY_LIST;
-
-    // The current coords
-    private double _penX, _penY;
+    protected List<PenPath> _penPaths = new ArrayList<>();
 
     /**
      * Constructor.
@@ -37,14 +31,6 @@ public class PenActor extends Actor {
     public PenActor()
     {
         super();
-    }
-
-    /**
-     * Returns the pen point.
-     */
-    public Point getPenPoint()
-    {
-        return localToParent(getWidth() / 2, getHeight() / 2);
     }
 
     /**
@@ -59,28 +45,13 @@ public class PenActor extends Actor {
     {
         _penDown = aValue;
         if (!aValue)
-            _path = null;
+            _penPath = null;
     }
 
     /**
      * Set pen down.
      */
-    public void penDown()
-    {
-        if (isShowing())
-            penDown(getPenPoint());
-        else setPenDown(true);
-    }
-
-    /**
-     * Sets the pen down at given location.
-     */
-    public void penDown(Point aPnt)
-    {
-        setPenDown(true);
-        _penX = aPnt.x;
-        _penY = aPnt.y;
-    }
+    public void penDown()  { setPenDown(true); }
 
     /**
      * Clears the pen.
@@ -88,17 +59,27 @@ public class PenActor extends Actor {
     public void clearPen()
     {
         _penPaths.clear();
-        _path = null;
+        _penPath = null;
     }
 
     /**
-     * Sets the stroke color.
+     * Returns the pen stroke color.
+     */
+    public Color getPenColor()  { return _penColor; }
+
+    /**
+     * Sets the pen stroke color.
      */
     public void setPenColor(String aString)
     {
         _penColor = Color.get(aString);
-        _path = null;
+        _penPath = null;
     }
+
+    /**
+     * Returns the pen stroke width.
+     */
+    public double getPenWidth()  { return _penWidth; }
 
     /**
      * Sets the stroke width.
@@ -106,47 +87,36 @@ public class PenActor extends Actor {
     public void setPenWidth(double aValue)
     {
         _penWidth = aValue;
-        _path = null;
+        _penPath = null;
     }
 
     /**
-     * Does a move to.
+     * Returns the pen point.
      */
-    public void lineTo(Point aPnt)
+    public Point getPenPoint()
     {
-        // If pen not down, just return
-        if (!_penDown) return;
-
-        // Get path and add line
-        if (_path == null)
-            _path = createPath();
-        _path.lineTo(_penX = aPnt.x, _penY = aPnt.y);
+        return localToParent(getWidth() / 2, getHeight() / 2);
     }
 
     /**
-     * Creates a new path.
-     */
-    protected Path2D createPath()
-    {
-        PenPath path = new PenPath(_penColor, _penWidth);
-        path.moveTo(_penX, _penY);
-        if (_penPaths == Collections.EMPTY_LIST)
-            _penPaths = new ArrayList<>();
-        _penPaths.add(path);
-        return path;
-    }
-
-    /**
-     * Move sprite forward.
+     * Override to update pen path.
      */
     @Override
     public void moveBy(double aCount)
     {
+        // Create new path if needed
+        if (_penPath == null && _penDown)
+            _penPath = createPenPath();
+
         // Do normal version
         super.moveBy(aCount);
 
-        // Update pen
-        lineTo(getPenPoint());
+        // If pen not down, just return
+        if (!_penDown) return;
+
+        // Add line to point
+        Point penPoint = getPenPoint();
+        _penPath.lineTo(penPoint.x, penPoint.y);
     }
 
     /**
@@ -159,6 +129,18 @@ public class PenActor extends Actor {
         super.setShowing(aValue);
         if (isPenDown())
             penDown();
+    }
+
+    /**
+     * Creates a new path.
+     */
+    private Path2D createPenPath()
+    {
+        PenPath path = new PenPath(_penColor, _penWidth);
+        Point penPoint = getPenPoint();
+        path.moveTo(penPoint.x, penPoint.y);
+        _penPaths.add(path);
+        return path;
     }
 
     /**
