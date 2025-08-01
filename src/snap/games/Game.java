@@ -2,6 +2,7 @@ package snap.games;
 import snap.gfx.Image;
 import snap.util.ClassUtils;
 import snap.view.ViewUtils;
+import snap.web.WebURL;
 import java.util.HashMap;
 import java.util.List;
 
@@ -128,8 +129,50 @@ public class Game {
             }
         }
 
+        // Look for library image for class name
+        Image commonImage = getLibraryImageForName(aClass.getSimpleName());
+        if (commonImage != null) {
+            setImageForName(aClass.getName(), commonImage);
+            return commonImage;
+        }
+
         // Put null image in cache and return not found
         setImageForName(aClass.getName(), NULL_IMAGE);
         return null;
+    }
+
+    /**
+     * Returns images from games library.
+     */
+    public static Image getLibraryImageForName(String aName)
+    {
+        Image image = _images.get(aName);
+        if (image != null)
+            return image != NULL_IMAGE ? image : null;
+
+        String urlAddr = getImageUrlAddressForName(aName);
+        if (urlAddr == null)
+            return null;
+
+        WebURL imageUrl = WebURL.getUrl(urlAddr);
+        image = Image.getImageForUrl(imageUrl);
+        if (image == null) image = NULL_IMAGE;
+        setImageForName(aName, image);
+        return image;
+    }
+
+    /**
+     * Returns images for common actor names.
+     */
+    private static String getImageUrlAddressForName(String aName)
+    {
+        return switch (aName.toLowerCase()) {
+            case "car" -> "https://reportmill.com/images/snap/Car.png";
+            case "cat" -> "https://reportmill.com/images/snap/Cat.png";
+            case "dog" -> "https://reportmill.com/images/snap/Dog.png";
+            case "duke" -> "https://reportmill.com/images/snap/Duke.png";
+            case "snake" -> "https://reportmill.com/images/greenfoot/animals/snake.png";
+            default -> null;
+        };
     }
 }

@@ -69,8 +69,9 @@ public class Actor extends ParentView {
         if (anImage != null) {
             if (!anImage.isLoaded())
                 anImage.waitForImageLoad();
-            if (getSize().isEmpty())
-                setSize(anImage.getWidth(), anImage.getHeight());
+            Point centerPoint = localToParent(getMidX(), getMidY());
+            setSize(anImage.getWidth(), anImage.getHeight());
+            setMidXY(centerPoint.x, centerPoint.y);
         }
 
         // Fire prop change

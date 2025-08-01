@@ -59,6 +59,9 @@ public class GameController extends ViewOwner {
         _gameView._controller = this;
         if (_gameBox != null)
             _gameBox.setContent(_gameView);
+        if (isShowing())
+            _gameView.requestFocus();
+        setFirstFocus(_gameView);
         fireBatchPropChanges();
     }
 
