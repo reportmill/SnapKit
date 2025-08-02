@@ -341,7 +341,7 @@ public class Menu extends MenuItem {
         // Iterate over child elements and unarchive MenuItems
         for (int i = 0, iMax = anElement.size(); i < iMax; i++) {
             XMLElement childXML = anElement.get(i);
-            Class<?> cls = anArchiver.getClass(childXML.getName());
+            Class<?> cls = anArchiver.getClassForName(childXML.getName());
             if (cls != null && MenuItem.class.isAssignableFrom(cls)) {
                 MenuItem mi = (MenuItem) anArchiver.fromXML(childXML, this);
                 addItem(mi);

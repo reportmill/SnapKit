@@ -209,7 +209,7 @@ public class MenuBar extends ParentView {
     {
         // Iterate over child elements and unarchive MenuItems
         for (int i = 0, iMax = anElement.size(); i < iMax; i++) { XMLElement childXML = anElement.get(i);
-            Class<?> cls = anArchiver.getClass(childXML.getName());
+            Class<?> cls = anArchiver.getClassForName(childXML.getName());
             if (cls != null && Menu.class.isAssignableFrom(cls)) {
                 Menu menu = (Menu)anArchiver.fromXML(childXML, this);
                 addMenu(menu);

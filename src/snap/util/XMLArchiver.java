@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import snap.web.WebURL;
 
@@ -194,13 +195,6 @@ public class XMLArchiver {
         // Unarchive from xml and return
         Object object = fromXML(_root, null);
 
-        // Add runOnFinished() instead of this! Old: Send fromXMLFinish to objects
-        /*for (XMLElement element : (List <XMLElement>)_references) {
-            Object obj = fromXML(element, (Class)null, null); if (obj==null) continue;
-            Method meth = ClassUtils.getMethod(obj, "fromXMLFinish", XMLArchiver.class, XMLElement.class);
-            meth.invoke(obj, this, element);
-        }*/
-
         // Return object
         return object;
     }
@@ -250,7 +244,7 @@ public class XMLArchiver {
     {
         // Handle Lists Special
         if (anElement.getName().equals("alist")) {
-            List list = new ArrayList();
+            List<Object> list = new ArrayList<>();
             for (int i = 0, iMax = anElement.size(); i < iMax; i++)
                 list.add(fromXML(anElement.get(i), anOwner));
             return (T) list;
@@ -269,7 +263,7 @@ public class XMLArchiver {
         else {
 
             // Get class
-            Class cls = aClass;
+            Class<?> cls = aClass;
             if (cls == null)
                 cls = getClassForXML(anElement);
 
@@ -329,12 +323,10 @@ public class XMLArchiver {
     public XMLElement toXML(Object anObj, Object anOwner)
     {
         // Handle Lists Special
-        if (anObj instanceof List) {
-            List list = (List) anObj;
-            XMLElement e = new XMLElement("alist");
-            for (int i = 0, iMax = list.size(); i < iMax; i++)
-                e.add(toXML(list.get(i)));
-            return e;
+        if (anObj instanceof List<?> list) {
+            XMLElement listXml = new XMLElement("alist");
+            list.forEach(item -> listXml.add(toXML(item)));
+            return listXml;
         }
 
         // Unarchive given object (with given Owner on top of ParentStack)
@@ -345,33 +337,6 @@ public class XMLArchiver {
     }
 
     /**
-     * Returns the class for a given element name.
-     */
-    public Class getClass(String aName)
-    {
-        // Get class from map (if found, just return)
-        Object clss = getClassMap().get(aName);
-        if (clss instanceof Class)
-            return (Class) clss;
-
-        // Load class from string
-        if (clss != null) try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            Class c2 = Class.forName(clss.toString(), true, classLoader);
-            getClassMap().put(aName, c2);
-            return c2;
-        }
-
-        // Catch exceptions - print stack and return null
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // Return null since class not found
-        return null;
-    }
-
-    /**
      * Returns the class for a given element.
      */
     protected Class<?> getClassForXML(XMLElement anElement)
@@ -379,38 +344,31 @@ public class XMLArchiver {
         // If ClassName attribute is present, try that
         String className = anElement.getAttributeValue("ClassName");
         if (className != null) {
-            Class cls = getClass(className);
+            Class<?> cls = getClassForName(className);
             if (cls != null)
                 return cls;
         }
 
         // Get class for element name
-        String name = anElement.getName();
-        Class cls = getClass(name);
+        String xmlName = anElement.getName();
+        Class<?> classForXml = getClassForName(xmlName);
 
         // If element has type, see if there is class for type-name
-        String type = anElement.getAttributeValue("type");
-        if (type != null) {
-            Class c2 = getClass(type + "-" + name);
-            if (c2 != null)
-                cls = c2;
+        String typeName = anElement.getAttributeValue("type");
+        if (typeName != null) {
+            Class<?> typeClass = getClassForName(typeName + "-" + xmlName);
+            if (typeClass != null)
+                classForXml = typeClass;
         }
 
-        // Return class
-        return cls;
+        // Return
+        return classForXml;
     }
 
     /**
-     * Returns a new instance of an object given a class.
+     * Returns the class for a given element name.
      */
-    protected Object newInstance(Class aClass)
-    {
-        try {
-            return aClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    public Class<?> getClassForName(String aName)  { return getClassMap().get(aName); }
 
     /**
      * Returns a reference id for the given object (used in archival).
@@ -470,7 +428,7 @@ public class XMLArchiver {
     /**
      * Returns the index of the first child element with the given name.
      */
-    public int indexOf(XMLElement anElement, Class aClass)
+    public int indexOf(XMLElement anElement, Class<?> aClass)
     {
         return indexOf(anElement, aClass, 0);
     }
@@ -478,12 +436,12 @@ public class XMLArchiver {
     /**
      * Returns the index of the first child element with the given name at or beyond the given index.
      */
-    public int indexOf(XMLElement anElement, Class aClass, int startIndex)
+    public int indexOf(XMLElement anElement, Class<?> aClass, int startIndex)
     {
         // Iterate over element children from start index, and if child has matching class, return its index
         for (int i = startIndex, iMax = anElement.size(); i < iMax; i++) {
             XMLElement childXML = anElement.get(i);
-            Class childClass = getClassForXML(childXML);
+            Class<?> childClass = getClassForXML(childXML);
             if (childClass != null && aClass.isAssignableFrom(childClass))
                 return i;
         }
@@ -493,10 +451,10 @@ public class XMLArchiver {
     /**
      * Returns the list of objects of the given name and/or class (either can be null) unarchived from the given element.
      */
-    public List fromXMLList(XMLElement anElement, String aName, Class aClass, Object anOwner)
+    public List fromXMLList(XMLElement anElement, String aName, Class<?> aClass, Object anOwner)
     {
         // Declare variable for list
-        List list = new Vector();
+        List<Object> list = new ArrayList<>();
 
         // If name is provided, iterate over elements, unarchive and add to list
         if (aName != null) {
@@ -532,10 +490,7 @@ public class XMLArchiver {
     /**
      * Returns the top parent from the parent stack.
      */
-    public Object getParent()
-    {
-        return _parentStack.peekFirst();
-    }
+    public Object getParent()  { return _parentStack.peekFirst(); }
 
     /**
      * Returns the first parent from the parent stack of given class.
@@ -551,34 +506,22 @@ public class XMLArchiver {
     /**
      * Pushes a parent on the parent stack.
      */
-    protected void pushParent(Object anObj)
-    {
-        _parentStack.addFirst(anObj);
-    }
+    protected void pushParent(Object anObj)  { _parentStack.addFirst(anObj); }
 
     /**
      * Pops a parent from the parent stack.
      */
-    protected Object popParent()
-    {
-        return _parentStack.removeFirst();
-    }
+    protected void popParent()  { _parentStack.removeFirst(); }
 
     /**
      * Returns the list of optional resources associated with this archiver.
      */
-    public List<Resource> getResources()
-    {
-        return _resources;
-    }
+    public List<Resource> getResources()  { return _resources; }
 
     /**
      * Returns an individual resource associated with this archiver, by index.
      */
-    public Resource getResource(int anIndex)
-    {
-        return _resources.get(anIndex);
-    }
+    public Resource getResource(int anIndex)  { return _resources.get(anIndex); }
 
     /**
      * Returns an individual resource associated with this archiver, by name.
@@ -594,7 +537,7 @@ public class XMLArchiver {
     /**
      * Adds a byte array resource to this archiver (only if absent).
      */
-    public String addResource(byte bytes[], String aName)
+    public String addResource(byte[] bytes, String aName)
     {
         // If resource has already been added, just return it's name
         for (int i = 0, iMax = _resources.size(); i < iMax; i++)
@@ -622,10 +565,21 @@ public class XMLArchiver {
 
             // Get resource name and bytes
             String name = e.getAttributeValue("name");
-            byte bytes[] = e.getValueBytes();
+            byte[] bytes = e.getValueBytes();
 
             // Add resource bytes for name
             addResource(bytes, name);
+        }
+    }
+
+    /**
+     * Returns a new instance of an object given a class.
+     */
+    private static Object newInstance(Class<?> aClass)
+    {
+        try { return aClass.getConstructor().newInstance(); }
+        catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -656,33 +610,20 @@ public class XMLArchiver {
         // The resource name
         String _name;
 
-        // Returns resource bytes
-        public byte[] getBytes()
-        {
-            return _bytes;
-        }
-
-        // Returns resource name
-        public String getName()
-        {
-            return _name;
-        }
-
-        // Creates new resource for given bytes and name
+        /** Constructor. */
         public Resource(byte[] bytes, String aName)
         {
             _bytes = bytes;
             _name = aName;
         }
 
+        // Returns resource bytes
+        public byte[] getBytes()  { return _bytes; }
+
+        // Returns resource name
+        public String getName()  { return _name; }
+
         // Standard equals implementation
-        public boolean equals(byte[] bytes)
-        {
-            if (bytes.length != _bytes.length) return false;
-            for (int i = 0, iMax = bytes.length; i < iMax; i++)
-                if (bytes[i] != _bytes[i])
-                    return false;
-            return true;
-        }
+        public boolean equals(byte[] bytes)  { return Arrays.equals(bytes, _bytes); }
     }
 }

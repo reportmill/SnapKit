@@ -526,7 +526,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
         for (int i = 0, iMax = anElement.size(); i < iMax; i++) {
 
             XMLElement cxml = anElement.get(i);
-            Class<?> childClass = anArchiver.getClass(cxml.getName());
+            Class<?> childClass = anArchiver.getClassForName(cxml.getName());
 
             // If child class is View, unarchive and add
             if (childClass != null && View.class.isAssignableFrom(childClass)) {

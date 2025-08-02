@@ -39,13 +39,13 @@ public class ViewArchiver extends XMLArchiver {
     protected Class<?> getClassForXML(XMLElement anElement)
     {
         Class<?> classForXML = super.getClassForXML(anElement);
-        String className = anElement.getAttributeValue("class");
 
-        if (className != null && isUseRealClass()) {
-            Class<?> cls = getClassForName(className);
-            if (cls != null && View.class.isAssignableFrom(cls)) {
-                classForXML = cls;
-            }
+        // If real class name is present, try to evaluate it
+        String realClassName = anElement.getAttributeValue("Class");
+        if (realClassName != null && isUseRealClass()) {
+            Class<?> realClass = getRealClassForName(realClassName);
+            if (realClass != null && View.class.isAssignableFrom(realClass))
+                classForXML = realClass;
         }
 
         // Return
@@ -55,9 +55,10 @@ public class ViewArchiver extends XMLArchiver {
     /**
      * Returns a class for name.
      */
-    private static Class<?> getClassForName(String aClassName)
+    private Class<?> getRealClassForName(String aClassName)
     {
-        ClassLoader classLoader = ViewArchiver.class.getClassLoader();
+        Class<?> ownerClass = getOwnerClass();
+        ClassLoader classLoader = ownerClass != null ? ownerClass.getClassLoader() : ViewArchiver.class.getClassLoader();
         try { return Class.forName(aClassName, false, classLoader); }
         catch (ClassNotFoundException e) { return null; }
         catch (NoClassDefFoundError t) { System.err.println("ViewArchiver.getClassForName: " + t); return null; }

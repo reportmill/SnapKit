@@ -118,7 +118,7 @@ public interface ViewHost {
         // Iterate over child elements and unarchive as child views
         for (int i=0, iMax=anElement.size(); i<iMax; i++) {
             XMLElement childXML = anElement.get(i);
-            Class cls = anArchiver.getClass(childXML.getName());
+            Class cls = anArchiver.getClassForName(childXML.getName());
             if (cls != null && View.class.isAssignableFrom(cls)) {
                 View view = (View) anArchiver.fromXML(childXML, aHost);
                 aHost.addGuest(view);

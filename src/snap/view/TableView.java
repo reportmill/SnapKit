@@ -1043,7 +1043,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     {
         // Iterate over child elements and unarchive as child views
         for (int i = 0, iMax = anElement.size(); i < iMax; i++) { XMLElement childXML = anElement.get(i);
-            Class<?> cls = anArchiver.getClass(childXML.getName());
+            Class<?> cls = anArchiver.getClassForName(childXML.getName());
             if (cls != null && TableCol.class.isAssignableFrom(cls)) {
                 TableCol<T> col = (TableCol<T>) anArchiver.fromXML(childXML, this);
                 addCol(col);

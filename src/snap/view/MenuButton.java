@@ -340,7 +340,7 @@ public class MenuButton extends ButtonBase {
             XMLElement childXML = anElement.get(i);
 
             // Get child class - if MenuItem, unarchive and add
-            Class<?> childClass = anArchiver.getClass(childXML.getName());
+            Class<?> childClass = anArchiver.getClassForName(childXML.getName());
             if (childClass != null && MenuItem.class.isAssignableFrom(childClass)) {
                 MenuItem mitem = (MenuItem) anArchiver.fromXML(childXML, this);
                 addMenuItem(mitem);

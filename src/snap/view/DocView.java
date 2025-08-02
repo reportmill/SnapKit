@@ -196,7 +196,7 @@ public class DocView extends ParentView {
     {
         // Iterate over child elements and unarchive shapes
         for(int i=0, iMax=anElement.size(); i<iMax; i++) { XMLElement childXML = anElement.get(i);
-            Class childClass = anArchiver.getClass(childXML.getName());
+            Class childClass = anArchiver.getClassForName(childXML.getName());
             if(childClass!=null && PageView.class.isAssignableFrom(childClass)) {
                 PageView child = (PageView)anArchiver.fromXML(childXML, this);
                 addPage(child);
