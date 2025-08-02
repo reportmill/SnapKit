@@ -1,6 +1,7 @@
 package snap.games;
 import snap.util.ClassUtils;
 import snap.view.*;
+import snap.web.WebURL;
 
 /**
  * The controller class for a GameView.
@@ -167,6 +168,12 @@ public class GameController extends ViewOwner {
     @Override
     protected View createUI()
     {
+        if (_gameView == null || _gameView.getClass() == GameView.class) {
+            WebURL snapFileUrl = UILoader.getSnapUrlForClass(getClass());
+            if (snapFileUrl != null && snapFileUrl.getFile().getExists())
+                _gameView = (GameView) UILoader.loadViewForOwnerAndUrl(this, snapFileUrl);
+        }
+
         _gameBox = new BoxView(_gameView, true, true);
         return _gameBox;
     }

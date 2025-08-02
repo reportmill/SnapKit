@@ -7,6 +7,8 @@ import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.gfx.Image;
 import snap.util.ListUtils;
+import snap.util.XMLArchiver;
+import snap.util.XMLElement;
 import snap.view.ImageView;
 import snap.view.ParentView;
 import snap.view.StackView;
@@ -310,4 +312,17 @@ public class Actor extends ParentView {
      */
     @Override
     protected double getPrefHeightImpl(double aW)  { return StackView.getPrefHeight(this, aW); }
+
+    /**
+     * Override to support image name.
+     */
+    @Override
+    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        super.fromXMLView(anArchiver, anElement);
+        if (anElement.hasAttribute("ImageName")) {
+            String imageName = anElement.getAttributeValue("ImageName");
+            setImage(Game.getLibraryImageForName(imageName));
+        }
+    }
 }
