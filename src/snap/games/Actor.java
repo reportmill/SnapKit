@@ -69,11 +69,28 @@ public class Actor extends ParentView {
 
         // Update size
         if (anImage != null) {
+
+            // If not loaded, wait for load
             if (!anImage.isLoaded())
                 anImage.waitForImageLoad();
-            Point centerPoint = localToParent(getMidX(), getMidY());
-            setSize(anImage.getWidth(), anImage.getHeight());
-            setMidXY(centerPoint.x, centerPoint.y);
+
+            // If no actor size, set to image size
+            if (getSize().isEmpty())
+                setSize(anImage.getWidth(), anImage.getHeight());
+
+            // If pref width not set, set width to image width maintaining center x
+            if (!isPrefWidthSet() && getWidth() != anImage.getWidth()) {
+                double dx = (anImage.getWidth() - getWidth()) / 2;
+                setWidth(anImage.getWidth());
+                setX(getX() + dx);
+            }
+
+            // If pref height not set, set height to image height maintaining center y
+            if (!isPrefHeightSet() && getHeight() != anImage.getHeight()) {
+                double dy = (anImage.getHeight() - getHeight()) / 2;
+                setHeight(anImage.getHeight());
+                setY(getY() + dy);
+            }
         }
 
         // Fire prop change
@@ -96,6 +113,7 @@ public class Actor extends ParentView {
     {
         if (_imageView != null) return _imageView;
         _imageView = new ImageView();
+        _imageView.setPickable(false);
         addChild(_imageView);
         return _imageView;
     }

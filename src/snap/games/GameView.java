@@ -57,7 +57,6 @@ public class GameView extends ChildView {
         super();
         setPrefSize(width, height);
         setFill(Color.WHITE);
-        setBorder(Color.BLACK, 1);
         setClipToBounds(true);
         enableEvents(MouseEvents);
         enableEvents(KeyEvents);

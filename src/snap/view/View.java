@@ -3266,10 +3266,16 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             setMinWidth(anElement.getAttributeFloatValue(MinWidth_Prop));
         if (anElement.hasAttribute(MinHeight_Prop))
             setMinHeight(anElement.getAttributeFloatValue(MinHeight_Prop));
-        if (anElement.hasAttribute(PrefWidth_Prop))
+        if (anElement.hasAttribute(PrefWidth_Prop)) {
             setPrefWidth(anElement.getAttributeFloatValue(PrefWidth_Prop));
-        if (anElement.hasAttribute(PrefHeight_Prop))
+            if (getWidth() == 0)
+                setWidth(getPrefWidth());
+        }
+        if (anElement.hasAttribute(PrefHeight_Prop)) {
             setPrefHeight(anElement.getAttributeFloatValue(PrefHeight_Prop));
+            if (getHeight() == 0)
+                setHeight(getPrefHeight());
+        }
 
         // Unarchive Vertical
         if (anElement.hasAttribute(Vertical_Prop))
