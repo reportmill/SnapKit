@@ -8,6 +8,7 @@ import snap.geom.Shape;
 import snap.gfx.Image;
 import snap.util.ListUtils;
 import snap.util.XMLArchiver;
+import snap.util.XMLAttribute;
 import snap.util.XMLElement;
 import snap.view.ImageView;
 import snap.view.ParentView;
@@ -21,6 +22,9 @@ public class Actor extends ParentView {
 
     // The ImageView
     private ImageView _imageView;
+
+    // Image name set in archival
+    private String _imageName;
 
     // Constants for properties
     public static final String Image_Prop = ImageView.Image_Prop;
@@ -98,12 +102,24 @@ public class Actor extends ParentView {
     }
 
     /**
+     * Returns the image for given name.
+     */
+    private Image getImageForName(String imageName)
+    {
+        if (imageName.contains("."))
+            return Game.getImageForClassResource(getClass(), imageName);
+        return Game.getLibraryImageForName(imageName);
+    }
+
+    /**
      * Sets the image for given name.
      */
     public void setImageForName(String imageName)
     {
-        Image image = Game.getImageForClassResource(getClass(), imageName);
-        setImage(image);
+        _imageName = imageName;
+        Image image = getImageForName(imageName);
+        if (image != null)
+            setImage(image);
     }
 
     /**
@@ -332,6 +348,26 @@ public class Actor extends ParentView {
     protected double getPrefHeightImpl(double aW)  { return StackView.getPrefHeight(this, aW); }
 
     /**
+     * Override to archive X/Y and ImageName.
+     */
+    @Override
+    protected XMLElement toXMLView(XMLArchiver anArchiver)
+    {
+        XMLElement xml = super.toXMLView(anArchiver);
+
+        // Archive X,Y
+        if (getY() != 0) xml.addAttribute(new XMLAttribute(Y_Prop, getY()), 1);
+        if (getX() != 0) xml.addAttribute(new XMLAttribute(X_Prop, getX()), 1);
+
+        // Archive ImageName
+        if (_imageName != null && !_imageName.isEmpty())
+            xml.add("ImageName", _imageName);
+
+        // Return
+        return xml;
+    }
+
+    /**
      * Override to support image name.
      */
     @Override
@@ -340,7 +376,7 @@ public class Actor extends ParentView {
         super.fromXMLView(anArchiver, anElement);
         if (anElement.hasAttribute("ImageName")) {
             String imageName = anElement.getAttributeValue("ImageName");
-            setImage(Game.getLibraryImageForName(imageName));
+            setImageForName(imageName);
         }
     }
 }
