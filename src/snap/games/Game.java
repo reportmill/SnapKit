@@ -171,6 +171,9 @@ public class Game {
             case "cat" -> "https://reportmill.com/images/snap/Cat.png";
             case "dog" -> "https://reportmill.com/images/snap/Dog.png";
             case "duke" -> "https://reportmill.com/images/snap/Duke.png";
+            case "robot" -> "https://reportmill.com/images/snap/DukeRobot.png";
+            case "chess", "chessboard" -> "https://reportmill.com/images/snap/Backgrounds/ChessBoard.png";
+            case "chesslight", "chessboardlight" -> "https://reportmill.com/images/snap/Backgrounds/ChessBoardLight.png";
             case "snake" -> "https://reportmill.com/images/greenfoot/animals/snake.png";
             default -> null;
         };

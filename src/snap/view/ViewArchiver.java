@@ -3,7 +3,6 @@
  */
 package snap.view;
 import java.util.*;
-
 import snap.gfx.*;
 import snap.util.*;
 import snap.web.WebURL;
@@ -95,6 +94,7 @@ public class ViewArchiver extends XMLArchiver {
         cmap.put("MenuButton", MenuButton.class);
         cmap.put("MenuItem", MenuItem.class);
         cmap.put("PathView", PathView.class);
+        cmap.put("PenActor", snap.games.PenActor.class);
         cmap.put("ProgressBar", ProgressBar.class);
         cmap.put("RadioButton", RadioButton.class);
         cmap.put("RectView", RectView.class);

@@ -6,6 +6,9 @@ import snap.geom.Point;
 import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.ListUtils;
+import snap.util.XMLArchiver;
+import snap.util.XMLAttribute;
+import snap.util.XMLElement;
 import snap.view.*;
 
 import java.util.HashSet;
@@ -22,6 +25,9 @@ public class GameView extends ChildView {
 
     // Whether to draw the grid
     private boolean _showCoords;
+
+    // Image name set in archival
+    private String _imageName;
 
     // The current list of actors
     private List<Actor> _actors;
@@ -102,12 +108,24 @@ public class GameView extends ChildView {
     }
 
     /**
+     * Returns the image for given name.
+     */
+    private Image getImageForName(String imageName)
+    {
+        if (imageName.contains("."))
+            return Game.getImageForClassResource(getClass(), imageName);
+        return Game.getLibraryImageForName(imageName);
+    }
+
+    /**
      * Sets the image for given name.
      */
     public void setImageForName(String imageName)
     {
-        Image image = Game.getImageForClassResource(getClass(), imageName);
-        setImage(image);
+        _imageName = imageName;
+        Image image = getImageForName(imageName);
+        if (image != null)
+            setImage(image);
     }
 
     /**
@@ -392,5 +410,34 @@ public class GameView extends ChildView {
         View child = super.removeChild(anIndex);
         _actors = null;
         return child;
+    }
+
+    /**
+     * Override to archive ImageName.
+     */
+    @Override
+    protected XMLElement toXMLView(XMLArchiver anArchiver)
+    {
+        XMLElement xml = super.toXMLView(anArchiver);
+
+        // Archive ImageName
+        if (_imageName != null && !_imageName.isEmpty())
+            xml.add("ImageName", _imageName);
+
+        // Return
+        return xml;
+    }
+
+    /**
+     * Override to support image name.
+     */
+    @Override
+    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        super.fromXMLView(anArchiver, anElement);
+        if (anElement.hasAttribute("ImageName")) {
+            String imageName = anElement.getAttributeValue("ImageName");
+            setImageForName(imageName);
+        }
     }
 }
