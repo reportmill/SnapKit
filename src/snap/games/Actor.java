@@ -102,6 +102,11 @@ public class Actor extends ParentView {
     }
 
     /**
+     * Returns the image name.
+     */
+    public String getImageName()  { return _imageName; }
+
+    /**
      * Returns the image for given name.
      */
     private Image getImageForName(String imageName)
@@ -129,6 +134,10 @@ public class Actor extends ParentView {
     {
         if (_imageView != null) return _imageView;
         _imageView = new ImageView();
+        _imageView.setFillWidth(true);
+        _imageView.setFillHeight(true);
+        _imageView.setGrowWidth(true);
+        _imageView.setGrowHeight(true);
         _imageView.setPickable(false);
         addChild(_imageView);
         return _imageView;
