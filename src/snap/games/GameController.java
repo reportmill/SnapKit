@@ -1,5 +1,7 @@
 package snap.games;
 import snap.util.ClassUtils;
+import snap.util.SnapEnv;
+import snap.util.SnapUtils;
 import snap.view.*;
 import snap.web.WebURL;
 
@@ -174,7 +176,27 @@ public class GameController extends ViewOwner {
                 _gameView = (GameView) UILoader.loadViewForOwnerAndUrl(this, snapFileUrl);
         }
 
+        // Create BoxView to hold game view
         _gameBox = new BoxView(_gameView, true, true);
+
+        // If browser, wrap in ScaleBox to fit smaller spaces
+        if (SnapEnv.isWebVM) {
+            ScaleBox scaleBox = new ScaleBox(_gameBox);
+            scaleBox.setPadding(5, 5, 5, 5);
+            return scaleBox;
+        }
+
+        // Return
         return _gameBox;
+    }
+
+    /**
+     * Override to maximize window when in browser.
+     */
+    @Override
+    protected void initWindow(WindowView aWindow)
+    {
+        if (SnapUtils.isWebVM)
+            aWindow.setMaximized(true);
     }
 }

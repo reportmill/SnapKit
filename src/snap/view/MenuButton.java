@@ -71,6 +71,14 @@ public class MenuButton extends ButtonBase {
     }
 
     /**
+     * Returns the menu item with given name.
+     */
+    public MenuItem getMenuItemForName(String aName)
+    {
+        return ArrayUtils.findMatch(getMenuItems(), menuItem -> Objects.equals(menuItem.getName(), aName));
+    }
+
+    /**
      * Returns whether button should show arrow.
      */
     public boolean isShowArrow()  { return _showArrow; }

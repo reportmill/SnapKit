@@ -1,6 +1,5 @@
 package snap.games;
 import snap.gfx.Color;
-import snap.util.SnapEnv;
 import snap.util.SnapUtils;
 import snap.view.*;
 
@@ -49,19 +48,14 @@ public class DevConsole extends ViewOwner {
     @Override
     protected View createUI()
     {
-        // Configure ScrollView to hold game view
+        // Get game controller UI view and set to grow
         View gameControllerUI = _gameController.getUI();
-        ScrollView scrollView = new ScrollView(gameControllerUI);
-        scrollView.setBorder(null);
-
-        // Get content
-        View contentView = SnapEnv.isWebVM ? gameControllerUI : scrollView;
-        contentView.setGrowWidth(true);
-        contentView.setGrowHeight(true);
+        gameControllerUI.setGrowWidth(true);
+        gameControllerUI.setGrowHeight(true);
 
         // Create border view and add ScrollView, toolBar
         ColView colView = new ColView();
-        colView.addChild(contentView);
+        colView.addChild(gameControllerUI);
         colView.addChild(createToolbar());
         colView.setBorder(Color.GRAY, 1);
 
