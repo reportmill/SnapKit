@@ -217,10 +217,9 @@ public class ViewOwner extends PropObject {
             return (View) anObj;
 
         // If object is String, try to find in UI hierarchy as name
-        if (anObj instanceof String) {
+        if (anObj instanceof String name) {
 
             // If given name is UI name, return UI
-            String name = (String) anObj;
             View uiView = getUI();
             if (name.equals(uiView.getName()))
                 return uiView;
@@ -579,8 +578,7 @@ public class ViewOwner extends PropObject {
         }
 
         // Otherwise, if object is string, create event for UI and fire
-        if (anObj instanceof String) {
-            String name = (String) anObj;
+        if (anObj instanceof String name) {
             ViewEvent event = ViewEvent.createEvent(getUI(), null, View.Action, name);
             if (parentEvent != null)
                 event.setParentEvent(parentEvent);

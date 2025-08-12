@@ -24,7 +24,7 @@ public class MenuButton extends ButtonBase {
     private Size  _popSize;
 
     // The menu items
-    private ObjectArray<MenuItem> _menuItems = new ObjectArray<>(MenuItem.class);
+    private List<MenuItem> _menuItems = new ArrayList<>();
 
     // The menu
     private Menu _menu;
