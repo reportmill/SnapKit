@@ -45,14 +45,14 @@ public class MenuButton extends ButtonBase {
     /**
      * Returns the menu items.
      */
-    public MenuItem[] getMenuItems()  { return _menuItems.getArray(); }
+    public List<MenuItem> getMenuItems()  { return _menuItems; }
 
     /**
      * Sets the menu items.
      */
-    public void setMenuItems(MenuItem[] theItems)
+    public void setMenuItems(List<MenuItem> theItems)
     {
-        MenuItem[] oldItems = _menuItems.getArray();
+        List<MenuItem> oldItems = List.copyOf(_menuItems);
         _menuItems.clear();
         if (theItems != null)
             for (MenuItem mi : theItems)
@@ -75,7 +75,7 @@ public class MenuButton extends ButtonBase {
      */
     public MenuItem getMenuItemForName(String aName)
     {
-        return ArrayUtils.findMatch(getMenuItems(), menuItem -> Objects.equals(menuItem.getName(), aName));
+        return ListUtils.findMatch(getMenuItems(), menuItem -> Objects.equals(menuItem.getName(), aName));
     }
 
     /**
@@ -164,7 +164,7 @@ public class MenuButton extends ButtonBase {
 
         // Create menu with items
         Menu menu = new Menu();
-        MenuItem[] menuItems = getMenuItems();
+        List<MenuItem> menuItems = getMenuItems();
         menu.setMenuItems(menuItems);
 
         // Return
@@ -239,7 +239,7 @@ public class MenuButton extends ButtonBase {
      */
     public MenuItem getItemForName(String aName)
     {
-        return ArrayUtils.findMatch(getMenuItems(), menuItem -> Objects.equals(menuItem.getName(), aName));
+        return ListUtils.findMatch(getMenuItems(), menuItem -> Objects.equals(menuItem.getName(), aName));
     }
 
     /**
@@ -263,7 +263,7 @@ public class MenuButton extends ButtonBase {
         super.initProps(aPropSet);
 
         // MenuItems, ShowArrow
-        aPropSet.addPropNamed(MenuItems_Prop, MenuItem[].class, EMPTY_OBJECT);
+        aPropSet.addPropNamed(MenuItems_Prop, List.class);
         aPropSet.addPropNamed(ShowArrow_Prop, boolean.class, true);
     }
 
@@ -273,15 +273,15 @@ public class MenuButton extends ButtonBase {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // MenuItems, ShowArrow
-            case MenuItems_Prop: return getMenuItems();
-            case ShowArrow_Prop: return isShowArrow();
+            case MenuItems_Prop -> getMenuItems();
+            case ShowArrow_Prop -> isShowArrow();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -293,11 +293,11 @@ public class MenuButton extends ButtonBase {
         switch (aPropName) {
 
             // MenuItems, ShowArrow
-            case MenuItems_Prop: setMenuItems((MenuItem[]) aValue); break;
-            case ShowArrow_Prop: setShowArrow(Convert.boolValue(aValue)); break;
+            case MenuItems_Prop -> setMenuItems((List<MenuItem>) aValue);
+            case ShowArrow_Prop -> setShowArrow(Convert.boolValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 

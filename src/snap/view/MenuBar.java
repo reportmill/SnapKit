@@ -6,6 +6,8 @@ import snap.gfx.*;
 import snap.props.PropSet;
 import snap.util.*;
 
+import java.util.List;
+
 /**
  * A View to display menus in a menu bar.
  */
@@ -29,21 +31,20 @@ public class MenuBar extends ParentView {
     /**
      * Returns the child menus.
      */
-    public Menu[] getMenus()
+    public List<Menu> getMenus()
     {
-        View[] children = getChildrenArray();
-        return ArrayUtils.filterByClass(children, Menu.class);
+        ViewList children = getChildren();
+        return ListUtils.filterByClass(children, Menu.class);
     }
 
     /**
      * Sets the child menus.
      */
-    public void setMenus(Menu[] theMenus)
+    public void setMenus(List<Menu> theMenus)
     {
         while (getChildCount() > 0)
             removeChild(0);
-        for (Menu menu : theMenus)
-            addMenu(menu);
+        theMenus.forEach(this::addChild);
     }
 
     /**
@@ -66,10 +67,7 @@ public class MenuBar extends ParentView {
      */
     public Menu getMenuShowing()
     {
-        for (Menu m : getMenus())
-            if (m.isPopupShowing())
-                return m;
-        return null;
+        return ListUtils.findMatch(getMenus(), menu -> menu.isPopupShowing());
     }
 
     /**
@@ -92,8 +90,7 @@ public class MenuBar extends ParentView {
     public MenuItem getMatchingMenuItem(MenuItem aMenuItem, ViewEvent anEvent)
     {
         // Handle Menu
-        if (aMenuItem instanceof Menu) {
-            Menu menu = (Menu) aMenuItem;
+        if (aMenuItem instanceof Menu menu) {
             for (MenuItem item : menu.getMenuItems()) {
                 MenuItem match = getMatchingMenuItem(item, anEvent);
                 if(match != null)
@@ -130,18 +127,12 @@ public class MenuBar extends ParentView {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)
-    {
-        return RowView.getPrefWidth(this, aH);
-    }
+    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, aH); }
 
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)
-    {
-        return RowView.getPrefHeight(this, aW);
-    }
+    protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(this, aW); }
 
     /**
      * Layout children.
@@ -158,7 +149,7 @@ public class MenuBar extends ParentView {
         super.initProps(aPropSet);
 
         // Menus
-        aPropSet.addPropNamed(Menus_Prop, Menu[].class, EMPTY_OBJECT);
+        aPropSet.addPropNamed(Menus_Prop, List.class);
 
         // Reset defaults
         aPropSet.getPropForName(Font_Prop).setDefaultValue(DEFAULT_MENU_BAR_FONT);
@@ -186,7 +177,7 @@ public class MenuBar extends ParentView {
     {
         // Menus
         if (aPropName.equals(Menus_Prop))
-            setMenus((Menu[]) aValue);
+            setMenus((List<Menu>) aValue);
 
             // Do normal version
         else super.setPropValue(aPropName, aValue);

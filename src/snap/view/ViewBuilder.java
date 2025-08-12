@@ -3,7 +3,7 @@
  */
 package snap.view;
 import snap.gfx.Font;
-import java.lang.reflect.Array;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,7 +110,7 @@ public class ViewBuilder<T extends View> {
         // Create View
         T view;
         Class<? extends View>  cls = _class != null ? _class : _defaultClass;
-        try { view = (T) cls.newInstance(); }
+        try { view = (T) cls.getConstructor().newInstance(); }
         catch (Exception e) { throw new RuntimeException(e); }
 
         // Configure props
@@ -131,11 +131,7 @@ public class ViewBuilder<T extends View> {
     /**
      * Returns all views.
      */
-    public T[] buildAll()
-    {
-        T[] array = (T[]) Array.newInstance(_defaultClass, _viewsList.size());
-        return _viewsList.toArray(array);
-    }
+    public List<T> buildAll()  { return _viewsList; }
 
     /**
      * Returns menu with all menu items.
@@ -145,7 +141,7 @@ public class ViewBuilder<T extends View> {
         Menu menu = new Menu();
         menu.setName(aName);
         menu.setText(aText);
-        T[] menuItems = buildAll();
+        List<T> menuItems = buildAll();
         for (T menuItem : menuItems)
             menu.addItem((MenuItem) menuItem);
         return menu;

@@ -15,7 +15,7 @@ import snap.util.*;
 public class Menu extends MenuItem {
 
     // MenuItems
-    private ObjectArray<MenuItem> _items = new ObjectArray<>(MenuItem.class);
+    private List<MenuItem> _items = new ArrayList<>();
 
     // The Arrow graphic
     private static Polygon _arrow = new Polygon(0, 0, 9, 5, 0, 10);
@@ -75,16 +75,15 @@ public class Menu extends MenuItem {
     /**
      * Returns the child menu items.
      */
-    public MenuItem[] getMenuItems()  { return _items.getArray(); }
+    public List<MenuItem> getMenuItems()  { return _items; }
 
     /**
      * Sets the child menu items.
      */
-    public void setMenuItems(MenuItem[] theItems)
+    public void setMenuItems(List<MenuItem> theItems)
     {
         _items.clear();
-        for (MenuItem item : theItems)
-            addItem(item);
+        theItems.forEach(this::addItem);
     }
 
     /**
@@ -129,8 +128,7 @@ public class Menu extends MenuItem {
         itemColView.setPadding(4, 1, 4, 1);
 
         // Add MenuItems to ItemColView
-        for (MenuItem menuItem : getMenuItems())
-            itemColView.addChild(menuItem);
+        getMenuItems().forEach(itemColView::addChild);
 
         // Set PopupWindow.Content to ItemColView and return
         _popupWindow.setContent(itemColView);
@@ -234,8 +232,7 @@ public class Menu extends MenuItem {
 
             // Handle when in MenuBar
             ParentView parentView = getParent();
-            if (parentView instanceof MenuBar) {
-                MenuBar menuBar = (MenuBar) parentView;
+            if (parentView instanceof MenuBar menuBar) {
                 Menu menuShowing = menuBar.getMenuShowing();
                 if (menuShowing == null)
                     return;
@@ -261,7 +258,7 @@ public class Menu extends MenuItem {
             return child;
 
         // Search MenuItems for name, return if found
-        child = ArrayUtils.findMatch(getMenuItems(), item -> Objects.equals(aName, item.getName()));
+        child = ListUtils.findMatch(getMenuItems(), item -> Objects.equals(aName, item.getName()));
         if (child != null)
             return child;
 
@@ -290,7 +287,7 @@ public class Menu extends MenuItem {
         super.initProps(aPropSet);
 
         // MenuItems
-        aPropSet.addPropNamed(MenuItems_Prop, MenuItem[].class, EMPTY_OBJECT);
+        aPropSet.addPropNamed(MenuItems_Prop, List.class);
 
         // Reset defaults
         aPropSet.getPropForName(Font_Prop).setDefaultValue(DEFAULT_MENU_FONT);
@@ -318,7 +315,7 @@ public class Menu extends MenuItem {
     {
         // MenuItems
         if (aPropName.equals(MenuItems_Prop))
-            setMenuItems((MenuItem[]) aValue);
+            setMenuItems((List<MenuItem>) aValue);
 
         // Do normal version
         else super.setPropValue(aPropName, aValue);
@@ -348,5 +345,4 @@ public class Menu extends MenuItem {
             }
         }
     }
-
 }

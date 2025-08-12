@@ -6,6 +6,7 @@ import snap.geom.HPos;
 import snap.gfx.*;
 import snap.props.PropSet;
 import snap.util.*;
+import java.util.List;
 
 /**
  * A ButtonBaseNode for MenuItem.
@@ -195,8 +196,8 @@ public class MenuItem extends ButtonBase implements Cloneable {
         MenuItem clone;
         if (this instanceof Menu) {
             clone = new Menu();
-            MenuItem[] menuItems = ((Menu) this).getMenuItems();
-            MenuItem[] menuItemsCopy = ArrayUtils.map(menuItems, item -> item.clone(), MenuItem.class);
+            List<MenuItem> menuItems = ((Menu) this).getMenuItems();
+            List<MenuItem> menuItemsCopy = ListUtils.map(menuItems, item -> item.clone());
             ((Menu) clone).setMenuItems(menuItemsCopy);
         }
         else if (this instanceof CheckBoxMenuItem)
@@ -232,15 +233,15 @@ public class MenuItem extends ButtonBase implements Cloneable {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Selected, Shortcut
-            case Selected_Prop: case "Value": return isSelected();
-            case Shortcut_Prop: return getShortcut();
+            case Selected_Prop, "Value" -> isSelected();
+            case Shortcut_Prop -> getShortcut();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -252,11 +253,11 @@ public class MenuItem extends ButtonBase implements Cloneable {
         switch (aPropName) {
 
             // Selected, Shortcut
-            case Selected_Prop: case "Value": setSelected(Convert.boolValue(aValue));
-            case Shortcut_Prop: setShortcut(Convert.stringValue(aValue)); break;
+            case Selected_Prop, "Value" -> setSelected(Convert.boolValue(aValue));
+            case Shortcut_Prop -> setShortcut(Convert.stringValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 
