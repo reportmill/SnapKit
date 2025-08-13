@@ -89,7 +89,7 @@ public class TableCol <T> extends ListView <T> {
     /**
      * Returns the column index.
      */
-    public int getColIndex()  { return ArrayUtils.indexOfId(getTable().getCols(), this); }
+    public int getColIndex()  { return ListUtils.indexOfId(getTable().getCols(), this); }
 
     /**
      * Override to return table cell configure if one isn't set for col.

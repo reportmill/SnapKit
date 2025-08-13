@@ -330,16 +330,12 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the column at given index.
      */
-    public TableCol<T>[] getCols()
-    {
-        List<TableCol<?>> splitViewItems = (List<TableCol<?>>) (List<?>) _splitView.getItems();
-        return splitViewItems.toArray(new TableCol[0]);
-    }
+    public List<TableCol<T>> getCols()  { return (List<TableCol<T>>) (List<?>) _splitView.getItems(); }
 
     /**
      * Sets the columns.
      */
-    protected void setTableCols(TableCol<T>[] tableCols)
+    protected void setTableCols(List<TableCol<T>> tableCols)
     {
         for (TableCol<T> tableCol : tableCols)
             addCol(tableCol);
@@ -590,18 +586,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public int getColIndexForX(double aX)
     {
-        Point pointInSplit = _splitView.parentToLocal(aX, 0, this);
-
-        // Iterate over cols
-        TableCol<T>[] cols = getCols();
-        for (int i=0; i<cols.length; i++) {
-            TableCol<T> col = cols[i];
-            if (pointInSplit.x >= col.getX() && pointInSplit.x <= col.getMaxX())
-                return i;
-        }
-
-        // Return not found
-        return -1;
+        double splitViewX = _splitView.parentToLocal(aX, 0, this).x;
+        return ListUtils.findMatchIndex(getCols(), col -> splitViewX >= col.getX() && splitViewX <= col.getMaxX());
     }
 
     /**
@@ -934,7 +920,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
 
         // ShowHeader, TableCols, RowHeight
         aPropSet.addPropNamed(ShowHeader_Prop, boolean.class, false);
-        aPropSet.addPropNamed(TableCols_Prop, TableCol[].class, null);
+        aPropSet.addPropNamed(TableCols_Prop, List.class);
         aPropSet.addPropNamed(RowHeight_Prop, double.class, 0);
     }
 
@@ -966,7 +952,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
 
             // ShowHeader, TableCols, RowHeight
             case ShowHeader_Prop -> setShowHeader(Convert.boolValue(aValue));
-            case TableCols_Prop -> setTableCols((TableCol<T>[]) aValue);
+            case TableCols_Prop -> setTableCols((List<TableCol<T>>) aValue);
             case RowHeight_Prop -> setRowHeight(Convert.doubleValue(aValue));
 
             // Do normal version
