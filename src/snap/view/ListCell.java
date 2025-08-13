@@ -108,7 +108,7 @@ public class ListCell <T> extends Label {
 
         // Nofity ListView
         if (_listView != null)
-            _listView.cellEditingChanged(this);
+            _listView.handleCellEditingChange(this);
     }
 
     /**

@@ -159,7 +159,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         if (aSel.equals(getSel())) return;
 
         // Stop cell editing
-        editCellStop();
+        stopCellEditing();
 
         // Set selection
         _items.setSel(aSel);
@@ -185,7 +185,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         if (aSel.equals(getSel2D())) return;
 
         // Stop cell editing
-        editCellStop();
+        stopCellEditing();
 
         // If Empty, set ListSel.Empty
         if (aSel.isEmpty())
@@ -308,8 +308,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public void updateItems()
     {
-        for (TableCol<T> tableCol : getCols())
-            tableCol.updateItems();
+        getCols().forEach(TableCol::updateItems);
     }
 
     /**
@@ -811,7 +810,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Called to stop editing a cell.
      */
-    public void editCellStop()
+    public void stopCellEditing()
     {
         if (!isEditable()) return;
         ListCell<T> cell = getSelCell();
@@ -822,7 +821,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Called when cell editing starts.
      */
-    protected void cellEditingChanged(ListCell<T> aCell)
+    protected void handleCellEditingChange(ListCell<T> aCell)
     {
         // Update EditingCell
         ListCell<T> cell = aCell.isEditing() ? aCell : null;
@@ -866,8 +865,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         super.setHeight(aValue);
 
         // Tell cols to relayout
-        for (TableCol<T> tableCol : getCols())
-            tableCol.relayout();
+        getCols().forEach(TableCol::relayout);
     }
 
     /**
@@ -1006,9 +1004,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     {
-        // Archive children
-        for (int i = 0, iMax = getColCount(); i < iMax; i++) { TableCol<T> child = getCol(i);
-            anElement.add(anArchiver.toXML(child, this)); }
+        for (TableCol<T> tableCol : getCols())
+            anElement.add(anArchiver.toXML(tableCol, this));
     }
 
     /**

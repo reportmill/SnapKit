@@ -864,7 +864,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Called when cell editing starts.
      */
-    protected void cellEditingChanged(ListCell<T> aCell)
+    protected void handleCellEditingChange(ListCell<T> aCell)
     {
         // Update EditingCell
         ListCell<T> cell = aCell.isEditing() ? aCell : null;

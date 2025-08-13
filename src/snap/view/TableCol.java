@@ -128,11 +128,11 @@ public class TableCol <T> extends ListView <T> {
      * Override to forward to TableView.
      */
     @Override
-    protected void cellEditingChanged(ListCell<T> aCell)
+    protected void handleCellEditingChange(ListCell<T> aCell)
     {
-        super.cellEditingChanged(aCell);
+        super.handleCellEditingChange(aCell);
         TableView<T> table = getTable(); if (table == null) return;
-        table.cellEditingChanged(aCell);
+        table.handleCellEditingChange(aCell);
     }
 
     /**
