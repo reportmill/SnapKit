@@ -19,61 +19,61 @@ import snap.util.*;
 public class ListView <T> extends ParentView implements Selectable<T> {
 
     // The items
-    protected PickList <T>  _items;
+    protected PickList <T> _items;
 
     // The row height
-    private double  _rowHeight;
+    private double _rowHeight;
 
     // The cell padding
-    private Insets  _cellPad = getCellPaddingDefault();
+    private Insets _cellPad = getCellPaddingDefault();
 
     // The function to format text
-    private Function <T,String>  _itemTextFunc;
+    private Function <T,String> _itemTextFunc;
 
     // The Cell Configure method
-    private Consumer <ListCell<T>>  _cellConf;
+    private Consumer <ListCell<T>> _cellConf;
 
     // A simple alternate way to set item text using Key
-    private String  _itemKey;
+    private String _itemKey;
 
     // The background color for alternating rows
     private Color _altRowColor;
 
     // Whether list distinguishes item under the mouse
-    private boolean  _targeting;
+    private boolean _targeting;
 
     // The index of the item currently being targeted
-    private int  _targetedIndex = -1;
+    private int _targetedIndex = -1;
 
     // Whether list is editable
-    private boolean  _editable;
+    private boolean _editable;
 
     // The list cell that is currently being edited
-    private ListCell<T>  _editingCell;
+    private ListCell<T> _editingCell;
 
     // The index of first visible cell
-    private int  _cellStart = -1;
+    private int _cellStart = -1;
 
     // The index of last visible cell
     private int _cellEnd;
 
     // Set of items that need to be updated
-    private final Set <T>  _updateItems = new HashSet<>();
+    private final Set <T> _updateItems = new HashSet<>();
 
     // Value of cell width/height
-    private double  _sampleWidth = -1, _sampleHeight = -1;
+    private double _sampleWidth = -1, _sampleHeight = -1;
 
     // The PropChangeListener to handle PickList selection change
-    private PropChangeListener _itemsLsnr = pc -> pickListPropChange(pc);
+    private PropChangeListener _pickListPropChangeLsnr;
 
     // A helper object to handle list selection
-    private ListViewSelector _selector = new ListViewSelector(this);
+    private ListViewSelector _selector;
 
     // Whether list needs to scroll selection to visible after next layout or show
     private boolean _needsScrollSelToVisible;
 
     // Shared CellPadding default
-    public static final Insets  CELL_PAD_DEFAULT = new Insets(2);
+    public static final Insets CELL_PAD_DEFAULT = new Insets(2);
 
     // Constants for properties
     public static final String RowHeight_Prop = "RowHeight";
@@ -90,6 +90,8 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     {
         super();
         _altRowColor = ViewTheme.get().getContentAltColor();
+        _pickListPropChangeLsnr = this::handlePickListPropChange;
+        _selector = new ListViewSelector(this);
 
         // Events
         setActionable(true);
@@ -122,7 +124,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      * Sets the items.
      */
     @Override
-    public void setItems(List <T> theItems)
+    public void setItems(List<T> theItems)
     {
         if (equalsItems(theItems)) return;
         _items.setAll(theItems);
@@ -131,17 +133,17 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Sets the underlying picklist.
      */
-    protected void setPickList(PickList <T> aPL)
+    protected void setPickList(PickList<T> pickList)
     {
         // Remove old PickList
         if (_items != null)
-            _items.removePropChangeListener(_itemsLsnr);
+            _items.removePropChangeListener(_pickListPropChangeLsnr);
 
         // Set New one
-        _items = aPL;
+        _items = pickList;
 
         // Configure for new PickList
-        _items.addPropChangeListener(_itemsLsnr);
+        _items.addPropChangeListener(_pickListPropChangeLsnr);
     }
 
     /**
@@ -210,19 +212,14 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     public void setSelItem(T anItem)  { _items.setSelItem(anItem); }
 
     /**
-     * Returns the selected itemes.
+     * Returns the selected items.
      */
-    public Object[] getSelItems()  { return _items.getSelItems(); }
-
-    /**
-     * Returns the selected itemes.
-     */
-    public <T> T[] getSelItems(Class <T> aClass)  { return _items.getSelItems(aClass); }
+    public List<T> getSelItems()  { return _items.getSelItems(); }
 
     /**
      * Sets the selected items.
      */
-    public void setSelItems(T[] theItems)  { _items.setSelItems(theItems); }
+    public void setSelItems(List<T> theItems)  { _items.setSelItems(theItems); }
 
     /**
      * Selects up in the list.
@@ -243,37 +240,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
             return;
         fireActionEvent(anEvent);
         anEvent.consume();
-    }
-
-    /**
-     * Called when PickList changes selection.
-     */
-    protected void pickListPropChange(PropChange aPC)
-    {
-        String propName = aPC.getPropName();
-
-        // Handle Sel_Prop: Get array of changed indexes and update
-        if (propName == PickList.Sel_Prop) {
-            ListSel sel1 = (ListSel) aPC.getOldValue();
-            ListSel sel2 = (ListSel) aPC.getNewValue();
-            int[] changed = ListSel.getChangedIndexes(sel1, sel2);
-            for (int i : changed)
-                updateIndex(i);
-
-            // Repackage and forward
-            firePropChange(Sel_Prop, aPC.getOldValue(), aPC.getNewValue());
-
-            // Scroll selection to visible
-            scrollSelToVisible();
-        }
-
-        // Handle Items_Prop
-        else if (propName == PickList.Item_Prop) {
-            relayout();
-            relayoutParent();
-            repaint();
-            _sampleWidth = _sampleHeight = -1;
-        }
     }
 
     /**
@@ -342,7 +308,11 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Sets function for determining text for an item.
      */
-    public void setItemTextFunction(Function <T,String> aFunc)  { _itemTextFunc = aFunc; }
+    public void setItemTextFunction(Function <T,String> aFunc)
+    {
+        if (aFunc == getItemTextFunction()) return;
+        _itemTextFunc = aFunc;
+    }
 
     /**
      * Returns method to configure list cells.
@@ -377,7 +347,11 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Sets the background color for alternating rows.
      */
-    public void setAltRowColor(Color aColor)  { _altRowColor = aColor; }
+    public void setAltRowColor(Color aColor)
+    {
+        if (Objects.equals(aColor, getAltRowColor())) return;
+        _altRowColor = aColor;
+    }
 
     /**
      * Returns whether list shows visual cue for item under the mouse.
@@ -796,44 +770,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     protected int getColIndex()  { return 0; }
 
     /**
-     * Override to reset cells.
-     */
-    public void setY(double aValue)
-    {
-        if (aValue == getY()) return;
-        super.setY(aValue);
-        relayout();
-    }
-
-    /**
-     * Override to reset cells.
-     */
-    public void setHeight(double aValue)
-    {
-        if (aValue == getHeight()) return;
-        super.setHeight(aValue);
-        relayout();
-    }
-
-    /**
-     * Override to see if paint exposes missing cells. If so, request layout.
-     * Should only happen under rare circumstances, like when a parent Scroller grows.
-     */
-    public void paintAll(Painter aPntr)
-    {
-        // Do normal version
-        super.paintAll(aPntr);
-
-        // If paint bounds larger visible cell bounds, register for layout (delayed)
-        Rect clipBounds = aPntr.getClipBounds();
-        double rowH = getRowHeight();
-        int cellStart = (int) Math.max(clipBounds.y / rowH, 0);
-        int cellEnd = (int) (clipBounds.getMaxY() / rowH);
-        if (cellStart < _cellStart || cellEnd > _cellEnd)
-            getEnv().runLater(() -> relayout());
-    }
-
-    /**
      * Calculates sample width and height from items.
      */
     protected void calcSampleSize()
@@ -941,6 +877,78 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     protected void processEvent(ViewEvent anEvent)
     {
         _selector.processEvent(anEvent);
+    }
+
+    /**
+     * Called when PickList fires prop change.
+     */
+    private void handlePickListPropChange(PropChange aPC)
+    {
+        String propName = aPC.getPropName();
+
+        // Handle Sel_Prop: Get array of changed indexes and update
+        if (propName == PickList.Sel_Prop) {
+            ListSel sel1 = (ListSel) aPC.getOldValue();
+            ListSel sel2 = (ListSel) aPC.getNewValue();
+            int[] changed = ListSel.getChangedIndexes(sel1, sel2);
+            for (int i : changed)
+                updateIndex(i);
+
+            // Repackage and forward
+            firePropChange(Sel_Prop, aPC.getOldValue(), aPC.getNewValue());
+
+            // Scroll selection to visible
+            scrollSelToVisible();
+        }
+
+        // Handle Items_Prop
+        else if (propName == PickList.Item_Prop) {
+            relayout();
+            relayoutParent();
+            repaint();
+            _sampleWidth = _sampleHeight = -1;
+        }
+    }
+
+    /**
+     * Override to reset cells.
+     */
+    @Override
+    public void setY(double aValue)
+    {
+        if (aValue == getY()) return;
+        super.setY(aValue);
+        relayout();
+    }
+
+    /**
+     * Override to reset cells.
+     */
+    @Override
+    public void setHeight(double aValue)
+    {
+        if (aValue == getHeight()) return;
+        super.setHeight(aValue);
+        relayout();
+    }
+
+    /**
+     * Override to see if paint exposes missing cells. If so, request layout.
+     * Should only happen under rare circumstances, like when a parent Scroller grows.
+     */
+    @Override
+    public void paintAll(Painter aPntr)
+    {
+        // Do normal version
+        super.paintAll(aPntr);
+
+        // If paint bounds larger visible cell bounds, register for layout (delayed)
+        Rect clipBounds = aPntr.getClipBounds();
+        double rowH = getRowHeight();
+        int cellStart = (int) Math.max(clipBounds.y / rowH, 0);
+        int cellEnd = (int) (clipBounds.getMaxY() / rowH);
+        if (cellStart < _cellStart || cellEnd > _cellEnd)
+            getEnv().runLater(() -> relayout());
     }
 
     /**
@@ -1058,15 +1066,15 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // RowHeight, ItemKey
-            case RowHeight_Prop: return getRowHeight();
-            case ItemKey_Prop: return getItemKey();
+            case RowHeight_Prop -> getRowHeight();
+            case ItemKey_Prop -> getItemKey();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -1078,11 +1086,11 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         switch (aPropName) {
 
             // RowHeight, ItemKey
-            case RowHeight_Prop: setRowHeight(Convert.doubleValue(aValue)); break;
-            case ItemKey_Prop: setItemKey(Convert.stringValue(aValue)); break;
+            case RowHeight_Prop -> setRowHeight(Convert.doubleValue(aValue));
+            case ItemKey_Prop -> setItemKey(Convert.stringValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 

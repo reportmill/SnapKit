@@ -2,8 +2,6 @@ package snap.util;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
-
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -12,16 +10,16 @@ import java.util.*;
 public class PickList<E> extends AbstractList<E> implements Cloneable {
     
     // The real list
-    private List<E>  _list;
+    private List<E> _list;
 
     // Whether list supports multiple selection
-    private boolean  _multiSel;
+    private boolean _multiSel;
 
     // The selection
-    private ListSel  _sel;
+    private ListSel _sel;
 
     // The PropChangeSupport
-    protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
+    protected PropChangeSupport _pcs = PropChangeSupport.EMPTY;
 
     // Constants for properties
     public static final String Item_Prop = "Item";
@@ -72,7 +70,7 @@ public class PickList<E> extends AbstractList<E> implements Cloneable {
      */
     public void setAll(Collection<? extends E> aCollection)
     {
-        E[] selItems = (E[]) getSelItems();
+        List<E> selItems = getSelItems();
         clear();
         if (aCollection != null)
             addAll(aCollection);
@@ -84,7 +82,7 @@ public class PickList<E> extends AbstractList<E> implements Cloneable {
      */
     public void clear()
     {
-        while (_list.size() > 0)
+        while (!_list.isEmpty())
             remove(0);
     }
 
@@ -193,24 +191,18 @@ public class PickList<E> extends AbstractList<E> implements Cloneable {
     /**
      * Returns the selected item.
      */
-    public Object[] getSelItems()  { return getSelItems(Object.class); }
-
-    /**
-     * Returns the selected item.
-     */
-    public <T> T[] getSelItems(Class <T> aClass)
+    public List<E> getSelItems()
     {
         int[] selIndexes = getSelIndexes();
-        T[] selItems = (T[]) Array.newInstance(aClass, selIndexes.length);
-        for (int i = 0; i < selIndexes.length; i++)
-            selItems[i] = (T) get(selIndexes[i]);
+        List<E> selItems = new ArrayList<>(selIndexes.length);
+        for (int selIndex : selIndexes) selItems.add(get(selIndex));
         return selItems;
     }
 
     /**
      * Sets the selected index.
      */
-    public void setSelItems(E[] theItems)
+    public void setSelItems(List<E> theItems)
     {
         int[] selIndexes = getIndexesForItems(theItems);
         setSelIndexes(selIndexes);
@@ -219,10 +211,11 @@ public class PickList<E> extends AbstractList<E> implements Cloneable {
     /**
      * Returns indexes for items.
      */
-    public int[] getIndexesForItems(E[] theItems)
+    public int[] getIndexesForItems(List<E> theItems)
     {
         // Iterate over items and return array of indexes
-        int len = theItems.length, len2 = 0;
+        int len = theItems.size();
+        int len2 = 0;
         int[] indexes = new int[len];
         for (E item : theItems) {
             int itemIndex = indexOf(item);

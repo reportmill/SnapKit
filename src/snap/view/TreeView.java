@@ -241,23 +241,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     public void setSelItem(T anItem)  { _items.setSelItem(anItem); }
 
     /**
-     * Called when PickList changes selection.
-     */
-    protected void handlePickListSelChange(PropChange aPC)
-    {
-        // Handle Sel_Prop: Get array of changed indexes and update
-        if (aPC.getPropName() == PickList.Sel_Prop) {
-            ListSel sel1 = (ListSel) aPC.getOldValue();
-            ListSel sel2 = (ListSel) aPC.getNewValue();
-            int[] changed = ListSel.getChangedIndexes(sel1, sel2);
-
-            int oldInd = changed.length > 1 ? changed[0] : -1;
-            int newInd = changed.length > 1 ? changed[changed.length-1] : -1;
-            firePropChange(SelIndex_Prop, oldInd, newInd);
-        }
-    }
-
-    /**
      * Returns the list of expanded items for given items.
      */
     public List <T> getExpandedItems(List <T> theItems)
@@ -502,6 +485,23 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
 
         // Return not found
         return null;
+    }
+
+    /**
+     * Called when PickList changes selection.
+     */
+    private void handlePickListSelChange(PropChange propChange)
+    {
+        // Handle Sel_Prop: Get array of changed indexes and update
+        if (propChange.getPropName() == PickList.Sel_Prop) {
+            ListSel sel1 = (ListSel) propChange.getOldValue();
+            ListSel sel2 = (ListSel) propChange.getNewValue();
+            int[] changed = ListSel.getChangedIndexes(sel1, sel2);
+
+            int oldInd = changed.length > 1 ? changed[0] : -1;
+            int newInd = changed.length > 1 ? changed[changed.length-1] : -1;
+            firePropChange(SelIndex_Prop, oldInd, newInd);
+        }
     }
 
     /**

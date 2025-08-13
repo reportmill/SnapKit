@@ -94,8 +94,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         _scrollGroup.setBorder(null);
         addChild(_scrollGroup);
 
-        // Register PickList to notify when prop changes
-        _items.addPropChangeListener(pc -> pickListPropChange(pc));
+        // Listen for PickList prop changes
+        _items.addPropChangeListener(this::handlePickListPropChange);
     }
 
     /**
@@ -295,33 +295,6 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Called when PickList changes selection.
-     */
-    protected void pickListPropChange(PropChange aPC)
-    {
-        // Handle Sel_Prop: Get array of changed indexes and update
-        String propName = aPC.getPropName();
-        if (propName == PickList.Sel_Prop) {
-            ListSel sel1 = (ListSel) aPC.getOldValue();
-            ListSel sel2 = (ListSel) aPC.getNewValue();
-            int[] changed = ListSel.getChangedIndexes(sel1, sel2);
-
-            int oldInd = changed.length > 1 ? changed[0] : -1;
-            int newInd = changed.length > 1 ? changed[changed.length-1] : -1;
-            firePropChange(SelIndex_Prop, oldInd, newInd);
-        }
-
-        // Handle Items_Prop: Reset RowHeightCached
-        else if (propName == PickList.Item_Prop) {
-            _rowHeightCached = -1;
-        }
-
-        // Scroll selection to visible
-        //if (isShowing()) scrollSelToVisible();
-        repaint();
-    }
-
-    /**
      * Tell table to update given item.
      */
     public void updateItem(T anItem)
@@ -337,15 +310,6 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     {
         for (TableCol<T> tableCol : getCols())
             tableCol.updateItems();
-    }
-
-    /**
-     * Tell table to update given items.
-     */
-    public void updateItems(T[] theItems)
-    {
-        for (TableCol<T> tableCol : getCols())
-            tableCol.updateItems(theItems);
     }
 
     /**
@@ -451,8 +415,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public void setShowHeader(boolean aValue)
     {
-        // If already set, just return
-        if (aValue==isShowHeader()) return;
+        if (aValue == isShowHeader()) return;
 
         // Set value, fire prop change
         firePropChange(ShowHeader_Prop, _showHeader, _showHeader = aValue);
@@ -466,8 +429,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public SplitView getHeaderView()
     {
-        // If already set, just return
-        if (_header!=null) return _header;
+        if (_header != null) return _header;
 
         // Create/configure Header SplitView
         SplitView splitView = new SplitView();
@@ -882,6 +844,33 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
+     * Called when PickList changes selection.
+     */
+    private void handlePickListPropChange(PropChange propChange)
+    {
+        String propName = propChange.getPropName();
+
+        // Handle Sel_Prop: Get array of changed indexes and update
+        if (propName == PickList.Sel_Prop) {
+            ListSel sel1 = (ListSel) propChange.getOldValue();
+            ListSel sel2 = (ListSel) propChange.getNewValue();
+            int[] changed = ListSel.getChangedIndexes(sel1, sel2);
+
+            int oldInd = changed.length > 1 ? changed[0] : -1;
+            int newInd = changed.length > 1 ? changed[changed.length-1] : -1;
+            firePropChange(SelIndex_Prop, oldInd, newInd);
+        }
+
+        // Handle Items_Prop: Reset RowHeightCached
+        else if (propName == PickList.Item_Prop) {
+            _rowHeightCached = -1;
+        }
+
+        // Repaint
+        repaint();
+    }
+
+    /**
      * Override to reset cells.
      */
     public void setHeight(double aValue)
@@ -955,16 +944,16 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // ShowHeader, TableCols, RowHeight
-            case ShowHeader_Prop: return isShowHeader();
-            case TableCols_Prop: return getCols();
-            case RowHeight_Prop: return getRowHeight();
+            case ShowHeader_Prop -> isShowHeader();
+            case TableCols_Prop -> getCols();
+            case RowHeight_Prop -> getRowHeight();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -976,12 +965,12 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         switch (aPropName) {
 
             // ShowHeader, TableCols, RowHeight
-            case ShowHeader_Prop: setShowHeader(Convert.boolValue(aValue)); break;
-            case TableCols_Prop: setTableCols((TableCol<T>[]) aValue); break;
-            case RowHeight_Prop: setRowHeight(Convert.doubleValue(aValue)); break;
+            case ShowHeader_Prop -> setShowHeader(Convert.boolValue(aValue));
+            case TableCols_Prop -> setTableCols((TableCol<T>[]) aValue);
+            case RowHeight_Prop -> setRowHeight(Convert.doubleValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 
