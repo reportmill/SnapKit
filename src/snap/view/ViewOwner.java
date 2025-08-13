@@ -121,10 +121,7 @@ public class ViewOwner extends PropObject {
     /**
      * Returns top level view as given class.
      */
-    public <T extends View> T getUI(Class <T> aClass)
-    {
-        return (T) getUI();
-    }
+    public <T extends View> T getUI(Class <T> aClass)  { return aClass.cast(getUI()); }
 
     /**
      * Creates the top level view for this owner.
