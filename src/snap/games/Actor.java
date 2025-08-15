@@ -5,11 +5,9 @@ package snap.games;
 import snap.geom.Point;
 import snap.geom.Rect;
 import snap.geom.Shape;
+import snap.geom.Vector;
 import snap.gfx.Image;
-import snap.util.ListUtils;
-import snap.util.XMLArchiver;
-import snap.util.XMLAttribute;
-import snap.util.XMLElement;
+import snap.util.*;
 import snap.view.ImageView;
 import snap.view.ParentView;
 import snap.view.StackView;
@@ -26,6 +24,12 @@ public class Actor extends ParentView {
     // Image name set in archival
     private String _imageName;
 
+    // The velocity vector
+    private Vector _velocity;
+
+    // Whether this actor wraps at game view edges
+    protected boolean _wrapAtEdges;
+
     // Constants for properties
     public static final String Image_Prop = ImageView.Image_Prop;
 
@@ -35,6 +39,7 @@ public class Actor extends ParentView {
     public Actor()
     {
         super();
+        _velocity = new Vector();
 
         // Initialize name to simple class name
         setName(getClass().getSimpleName());
@@ -200,6 +205,37 @@ public class Actor extends ParentView {
     }
 
     /**
+     * Returns the velocity vector.
+     */
+    public Vector getVelocity()  { return _velocity; }
+
+    /**
+     * Sets the velocity vector.
+     */
+    public void setVelocity(Vector aVector)
+    {
+        _velocity.setXY(aVector);
+    }
+
+    /**
+     * Adds the given velocity vector to this actor's velocity.
+     */
+    public void addVelocityVector(Vector velocityVector)
+    {
+        _velocity.add(velocityVector);
+    }
+
+    /**
+     * Returns whether actor wraps at game view edges.
+     */
+    public boolean isWrapAtEdges()  { return _wrapAtEdges; }
+
+    /**
+     * Sets whether actor wraps at game view edges.
+     */
+    public void setWrapAtEdges(boolean aValue)  { _wrapAtEdges = aValue; }
+
+    /**
      * Returns the actors intersecting this actor that match given class (class can be null).
      */
     public boolean isIntersectingActor(Class<?> aClass)  { return getIntersectingActor(aClass) != null; }
@@ -336,7 +372,34 @@ public class Actor extends ParentView {
     /**
      * The act method.
      */
-    protected void act()  { }
+    protected void act()
+    {
+        actImpl();
+    }
+
+    /**
+     * Move actor for current velocity. If moved out of scene, wrap to opposite edge.
+     */
+    private void actImpl()
+    {
+        // Get new XY for velocity
+        double newX = getX() + _velocity.x;
+        double newY = getY() + _velocity.y;
+
+        // Wrap to opposite edge if out of bounds
+        if (_wrapAtEdges) {
+            GameView gameView = getGameView();
+            double gameW = gameView.getWidth();
+            double gameH = gameView.getHeight();
+            if (newX >= gameW) newX = 0;
+            if (newX < 0) newX = gameW - 1;
+            if (newY >= gameH) newY = 0;
+            if (newY < 0) newY = gameH - 1;
+        }
+
+        // Set XY
+        setXY(newX, newY);
+    }
 
     /**
      * Layout.

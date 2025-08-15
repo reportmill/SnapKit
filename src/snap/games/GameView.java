@@ -7,10 +7,8 @@ import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.ListUtils;
 import snap.util.XMLArchiver;
-import snap.util.XMLAttribute;
 import snap.util.XMLElement;
 import snap.view.*;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -178,6 +176,14 @@ public class GameView extends ChildView {
     }
 
     /**
+     * Returns the actors for given class.
+     */
+    public <T> List<T> getActorsForClass(Class<T> aClass)
+    {
+        return ListUtils.filterByClass(getActors(), aClass);
+    }
+
+    /**
      * Returns the first actor hit by given point in local coords.
      */
     public <T extends Actor> T getActorAtXY(double aX, double aY, Class<T> aClass)
@@ -302,7 +308,10 @@ public class GameView extends ChildView {
     protected void stepGameFrame()
     {
         try {
-            getActors().forEach(Actor::act);
+            List<Actor> actors = getActors();
+            for (Actor actor : actors)
+                if (actor.getParent() != null)
+                    actor.act();
             _mouseClicked = null;
             _keyClicks.clear();
         }
