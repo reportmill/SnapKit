@@ -131,11 +131,11 @@ public class HTTPRequest {
         // Get start time
         resp._time = System.currentTimeMillis();
 
-        // Get connection
+        // Get URL
         URL url = getURL();
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-        // Add User-Agent header because some servers need it (desktop only, browsers add automatically)
+        // Get connection (if desktop add User-Agent header because some servers need it)
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         if (SnapEnv.isDesktop)
             connection.addRequestProperty("User-Agent", "Mozilla/5.0 (SnapKit)");
 

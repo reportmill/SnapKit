@@ -52,22 +52,13 @@ public class URLUtils {
             return FileUtils.getBytesOrThrow(file);
         }
 
-        // Get URL connection and lastModified time
+        // Get connection (if desktop add User-Agent header because some servers need it)
         URLConnection urlConnection = aURL.openConnection();
+        if (SnapEnv.isDesktop)
+            urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (SnapKit)");
 
-        // Some servers require a User-Agent header
-        urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (SnapKit)");
-
-        // Get last mod time
-        return getBytes(urlConnection);
-    }
-
-    /**
-     * Returns bytes for connection.
-     */
-    private static byte[] getBytes(URLConnection aConnection) throws IOException
-    {
-        try (InputStream inputStream = aConnection.getInputStream()) {
+        // Return bytes
+        try (InputStream inputStream = urlConnection.getInputStream()) {
             return inputStream.readAllBytes();
         }
     }
@@ -78,11 +69,11 @@ public class URLUtils {
     public static long getLastModTime(URL aURL)
     {
         try {
-            // Get URL connection and lastModified time
-            URLConnection urlConnection = aURL.openConnection();
 
-            // Some servers require a User-Agent header
-            urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (SnapKit)");
+            // Get connection (if desktop add User-Agent header because some servers need it)
+            URLConnection urlConnection = aURL.openConnection();
+            if (SnapEnv.isDesktop)
+                urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (SnapKit)");
 
             // Return last mod time
             return urlConnection.getLastModified();
@@ -147,18 +138,19 @@ public class URLUtils {
         // Create directories for this file
         localFile.getParentFile().mkdirs();
 
-        // Get URL connection and lastModified time
+        // Get connection (if desktop add User-Agent header because some servers need it)
         URLConnection urlConnection = aURL.openConnection();
+        if (SnapEnv.isDesktop)
+            urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (SnapKit)");
 
-        // Some servers require a User-Agent header
-        urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (SnapKit)");
-
-        // Get last mod time
+        // Get last mod time - just return if local file exists and is newer than remote
         long lastModTime = urlConnection.getLastModified();
+        if (localFile.exists() && lastModTime < localFile.lastModified())
+            return localFile;
 
-        // If local file doesn't exist or is older than URL, rewrite it
-        if (!localFile.exists() || (lastModTime > 0 && localFile.lastModified() < lastModTime)) {
-            byte[] bytes = getBytes(urlConnection);
+        // Get bytes and write to file
+        try (InputStream inputStream = urlConnection.getInputStream()) {
+            byte[] bytes = inputStream.readAllBytes();
             FileUtils.writeBytes(localFile, bytes);
         }
 
@@ -173,7 +165,7 @@ public class URLUtils {
     {
         // If file is null, create from URL path in temp directory
         File file = aFile;
-        if (file==null)
+        if (file == null)
             file = new File(FileUtils.getTempDir(), aURL.getPath());
 
         // If file is directory, create from URL path file name in directory
