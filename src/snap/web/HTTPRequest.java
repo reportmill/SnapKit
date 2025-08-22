@@ -4,7 +4,6 @@
 package snap.web;
 import snap.util.ListUtils;
 import snap.util.SnapEnv;
-import snap.util.SnapUtils;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -195,8 +194,9 @@ public class HTTPRequest {
 
         // Get response bytes
         if (!method.equals("HEAD")) {
-            InputStream inputStream = connection.getInputStream();
-            resp._bytes = SnapUtils.getInputStreamBytes(inputStream);
+            try (InputStream inputStream = connection.getInputStream()) {
+                resp._bytes = inputStream.readAllBytes();
+            }
         }
 
         // Return response

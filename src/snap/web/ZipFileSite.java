@@ -7,7 +7,6 @@ import java.util.*;
 import java.util.jar.JarFile;
 import java.util.zip.*;
 import snap.util.FilePathUtils;
-import snap.util.SnapUtils;
 
 /**
  * A WebSite subclass for Zip and Jar files.
@@ -178,10 +177,9 @@ public class ZipFileSite extends WebSite {
 
         // If file, get/set file bytes
         if (fileHeader.isFile()) {
-            try {
-                ZipEntry zipEntry = getEntries().get(filePath);
-                InputStream inputStream = _javaZipFile.getInputStream(zipEntry);
-                byte[] bytes = SnapUtils.getInputStreamBytes(inputStream);
+            ZipEntry zipEntry = getEntries().get(filePath);
+            try (InputStream inputStream = _javaZipFile.getInputStream(zipEntry)) {
+                byte[] bytes = inputStream.readAllBytes();
                 aResp.setBytes(bytes);
             }
             catch (IOException e) { aResp.setException(e); }

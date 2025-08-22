@@ -164,7 +164,7 @@ public class SwingSoundClip extends SoundClip {
         _channelCount = audioFormat.getChannels();
 
         // Get SampleBytes and SampleCount
-        try { _sampleBytes = SnapUtils.getInputStreamBytes(audioStream);  }
+        try { _sampleBytes = audioStream.readAllBytes();  }
         catch (IOException e) { throw new RuntimeException(e); }
         _sampleCount = _sampleBytes.length / audioFormat.getFrameSize();
     }

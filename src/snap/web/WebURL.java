@@ -2,10 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
-import snap.util.FilePathUtils;
-import snap.util.SnapEnv;
-import snap.util.SnapUtils;
-import snap.util.URLUtils;
+import snap.util.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -345,8 +342,12 @@ public class WebURL {
     public byte[] getBytesOrThrow() throws IOException
     {
         // Handle File or URL
-        if (!SnapEnv.isTeaVM && (_src instanceof File || _src instanceof URL))
-            return SnapUtils.getBytesOrThrow(_src);
+        if (_src instanceof File file && !SnapEnv.isTeaVM)
+            return FileUtils.getBytesOrThrow(file);
+
+        // Handle File or URL
+        if (_src instanceof URL url && !SnapEnv.isTeaVM)
+            return URLUtils.getBytes(url);
 
         // Otherwise get response and return bytes
         WebResponse resp = getResponse();

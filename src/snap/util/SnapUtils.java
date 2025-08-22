@@ -131,11 +131,9 @@ public class SnapUtils {
      */
     public static byte[] getBytesOrThrow(Object aSource) throws IOException
     {
-        // Handle byte array and InputStream
+        // Handle byte array
         if (aSource instanceof byte[])
             return (byte[]) aSource;
-        if (aSource instanceof InputStream)
-            return getInputStreamBytes((InputStream) aSource);
 
         // Handle File
         if (aSource instanceof File)
@@ -144,6 +142,10 @@ public class SnapUtils {
         // Handle URL
         if (aSource instanceof URL)
             return URLUtils.getBytes((URL) aSource);
+
+        // Handle InputStream
+        if (aSource instanceof InputStream inputStream)
+            return inputStream.readAllBytes();
 
         // Handle WebFile
         if (aSource instanceof WebFile)
@@ -156,18 +158,6 @@ public class SnapUtils {
 
         // Return null since bytes not found
         return null;
-    }
-
-    /**
-     * Returns bytes for an input stream.
-     */
-    public static byte[] getInputStreamBytes(InputStream aStream) throws IOException
-    {
-        ByteArrayOutputStream bs = new ByteArrayOutputStream();
-        byte[] chunk = new byte[8192];
-        for (int len = aStream.read(chunk, 0, chunk.length); len > 0; len = aStream.read(chunk, 0, chunk.length))
-            bs.write(chunk, 0, len);
-        return bs.toByteArray();
     }
 
     /**

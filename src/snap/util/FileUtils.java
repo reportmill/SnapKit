@@ -105,12 +105,9 @@ public class FileUtils {
      */
     public static byte[] getBytesOrThrow(File aFile) throws IOException
     {
-        int length = (int) aFile.length();
-        byte[] bytes = new byte[length];
-        InputStream stream = new FileInputStream(aFile);
-        stream.read(bytes, 0, length);
-        stream.close();
-        return bytes;
+        try (InputStream inputStream = new FileInputStream(aFile)) {
+            return inputStream.readAllBytes();
+        }
     }
 
     /**

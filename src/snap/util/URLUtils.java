@@ -48,8 +48,7 @@ public class URLUtils {
     {
         // If url is file, return bytes for file
         if (aURL.getProtocol().equals("file")) {
-            File file = getFile(aURL);
-            assert (file != null);
+            File file = getFile(aURL); assert file != null;
             return FileUtils.getBytesOrThrow(file);
         }
 
@@ -68,10 +67,9 @@ public class URLUtils {
      */
     private static byte[] getBytes(URLConnection aConnection) throws IOException
     {
-        InputStream stream = aConnection.getInputStream();  // Get stream for URL
-        byte[] bytes = SnapUtils.getInputStreamBytes(stream);  // Get bytes for stream, close and return bytes
-        stream.close();
-        return bytes;
+        try (InputStream inputStream = aConnection.getInputStream()) {
+            return inputStream.readAllBytes();
+        }
     }
 
     /**
