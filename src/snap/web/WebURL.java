@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.function.Consumer;
 
 /**
  * A class to represent a URL for a WebSite and WebFile (it can be both for nested sources).
@@ -415,19 +414,6 @@ public class WebURL {
         WebRequest req = new WebRequest(this);
         req.setPostBytes(theBytes);
         return site.getResponse(req);
-    }
-
-    /**
-     * Returns bytes for this URL.
-     */
-    public void getResponseAndCall(Consumer<WebResponse> aCallback)
-    {
-        //CompletableFuture<WebResponse> getResponseAsync = CompletableFuture.supplyAsync(() -> getResponse());
-        //getResponseAsync.thenAccept(aCallback);
-
-        // Create Thread and runnable to fetch response and call callback
-        Runnable run = () -> aCallback.accept(getResponse());
-        new Thread(run).start();
     }
 
     /**
