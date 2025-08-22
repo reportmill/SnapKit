@@ -4,21 +4,12 @@
 package snap.util;
 import java.io.*;
 import java.net.*;
-import java.util.concurrent.CompletableFuture;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Utilities for URL.
  */
 public class URLUtils {
-
-    /**
-     * Returns a URL for given string.
-     */
-    public static URI getURI(URL aURL)
-    {
-        try { return aURL.toURI(); }
-        catch(URISyntaxException e) { throw new RuntimeException(e); }
-    }
 
     /**
      * Returns the URL string for given object.
@@ -38,13 +29,9 @@ public class URLUtils {
         return urls;
     }
 
-    /**
-     * Returns a redirect string.
-     */
-    public static String getRedirectString(String aURLString)
-    {
-        return "<meta http-equiv=\"refresh\" content=\"0; url=" + aURLString + "\">";
-    }
+    /** Returns a redirect string. */
+    //public static String getRedirectString(String aURLString)
+    //{ return "<meta http-equiv=\"refresh\" content=\"0; url=" + aURLString + "\">"; }
 
     /**
      * Tries to open the given URL with the platform reader.
@@ -130,7 +117,7 @@ public class URLUtils {
 
         // Return file for URL
         String path = aURL.getPath();
-        try { path = URLDecoder.decode(path, "UTF-8"); }
+        try { path = URLDecoder.decode(path, StandardCharsets.UTF_8); }
         catch(Exception e) { throw new RuntimeException(e); }
         return isLocal(aURL) ? new File(path) : null;
     }
@@ -197,27 +184,5 @@ public class URLUtils {
 
         // Return file
         return file;
-    }
-
-    /**
-     * Prime network connections: Java desktop seems to take a second+ to do first URL fetch.
-     */
-    public static void primeNetworkConnection()
-    {
-        if (SnapEnv.isWebVM) return;
-        CompletableFuture.runAsync(URLUtils::primeNetworkConnectionImpl);
-    }
-
-    /**
-     * Prime network connections: Java desktop seems to take a second+ to do first URL fetch.
-     */
-    private static void primeNetworkConnectionImpl()
-    {
-        try {
-            URL url = new URL("https://www.cloudflare.com");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.getResponseCode();
-        }
-        catch (Exception e) { System.err.println(e.getMessage()); }
     }
 }
