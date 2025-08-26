@@ -133,25 +133,26 @@ public abstract class Segment extends Shape {
     public double getPointAndAngle(double t, Point aPoint)
     {
         Point[] cpts = getPoints();
-        Size tangent = new Size();
-
-        evaluateBezierAndTangent(cpts.length - 1, t, cpts, aPoint, tangent);
+        Size tangent = evaluateBezierAndTangent(cpts.length - 1, t, cpts, aPoint);
         return Math.atan2(tangent.height, tangent.width) * 180 / Math.PI;
     }
 
     /**
      * Simultaneously find point on curve, as well as the tangent at that point.
      */
-    private static void evaluateBezierAndTangent(int degree, double t, Point[] cpts, Point tpoint, Size tan)
+    private static Size evaluateBezierAndTangent(int degree, double t, Point[] cpts, Point tpoint)
     {
+        double tanW = 0;
+        double tanH = 0;
+
         // Special case for endpoints.  If one (or more) of the control points is the same as an endpoint, the tangent calculation
         // in the de Casteljau algorithm will return a point instead of the real tangent.
         if (t == 0) {
             tpoint.setPoint(cpts[0]);
             for (int i = 1; i <= degree; ++i)
                 if (!cpts[i].equals(cpts[0])) {
-                    tan.width = cpts[i].x - cpts[0].x;
-                    tan.height = cpts[i].y - cpts[0].y;
+                    tanW = cpts[i].x - cpts[0].x;
+                    tanH = cpts[i].y - cpts[0].y;
                     break;
                 }
         }
@@ -160,8 +161,8 @@ public abstract class Segment extends Shape {
             tpoint.setPoint(cpts[degree]);
             for (int i = degree-1; i >= 0; --i)
                 if (!cpts[i].equals(cpts[degree])) {
-                    tan.width = cpts[degree].x - cpts[i].x;
-                    tan.height = cpts[degree].y - cpts[i].y;
+                    tanW = cpts[degree].x - cpts[i].x;
+                    tanH = cpts[degree].y - cpts[i].y;
                     break;
                 }
         }
@@ -179,8 +180,8 @@ public abstract class Segment extends Shape {
             // Triangle computation
             for (i = 1; i <= degree; i++) {
                 if (i == degree) {
-                    tan.width = points[2] - points[0];
-                    tan.height = points[3] - points[1];
+                    tanW = points[2] - points[0];
+                    tanH = points[3] - points[1];
                 }
                 for (j = 0; j <= 2 * (degree - i) + 1; j++) {
                     points[j] = (1 - t) * points[j] + t * points[j+2];
@@ -190,7 +191,9 @@ public abstract class Segment extends Shape {
             tpoint.y = points[1];
         }
 
-        tan.normalize();
+        // Return normalized tangent
+        double magnitude = Math.sqrt(tanW * tanW + tanH * tanH);
+        return new Size(tanW / magnitude, tanH / magnitude);
     }
 
     /**

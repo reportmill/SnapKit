@@ -373,8 +373,8 @@ public class ScrollView extends ParentView implements ViewHost {
 
         // Get child size
         Size contentSize = _scroller.getContentPrefSize();
-        double contentW = contentSize.getWidth();
-        double contentH = contentSize.getHeight();
+        double contentW = contentSize.width;
+        double contentH = contentSize.height;
 
         // Get whether to show scroll bars
         boolean alwaysH = _showHBar == Boolean.TRUE;

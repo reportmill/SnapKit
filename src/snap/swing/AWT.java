@@ -35,7 +35,7 @@ public class AWT {
      */
     public static java.awt.Dimension snapToAwtSize(Size s)
     {
-        return new java.awt.Dimension((int) s.getWidth(), (int) s.getHeight());
+        return new java.awt.Dimension((int) s.width, (int) s.height);
     }
 
     /**

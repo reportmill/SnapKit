@@ -1581,10 +1581,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view minimum width.
      */
-    public double getMinWidth()
-    {
-        return _minWidth >= 0 ? _minWidth : getMinWidthImpl();
-    }
+    public double getMinWidth()  { return _minWidth >= 0 ? _minWidth : getMinWidthImpl(); }
 
     /**
      * Sets the view minimum width.
@@ -1604,10 +1601,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view minimum height.
      */
-    public double getMinHeight()
-    {
-        return _minHeight >= 0 ? _minHeight : getMinHeightImpl();
-    }
+    public double getMinHeight()  { return _minHeight >= 0 ? _minHeight : getMinHeightImpl(); }
 
     /**
      * Sets the view minimum height.
@@ -1632,18 +1626,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view minimum size.
      */
-    public Size getMinSize()
-    {
-        return new Size(getMinWidth(), getMinHeight());
-    }
+    public Size getMinSize()  { return new Size(getMinWidth(), getMinHeight()); }
 
     /**
      * Sets the view minimum size.
      */
-    public void setMinSize(Size aSize)
-    {
-        setMinSize(aSize.getWidth(), aSize.getHeight());
-    }
+    public void setMinSize(Size aSize)  { setMinSize(aSize.width, aSize.height); }
 
     /**
      * Sets the view minimum size.
@@ -1662,10 +1650,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view maximum width.
      */
-    public double getMaxWidth()
-    {
-        return _maxWidth >= 0 ? _maxWidth : Float.MAX_VALUE;
-    }
+    public double getMaxWidth()  { return _maxWidth >= 0 ? _maxWidth : Float.MAX_VALUE; }
 
     /**
      * Sets the view maximum width.
@@ -1685,10 +1670,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view maximum height.
      */
-    public double getMaxHeight()
-    {
-        return _maxHeight >= 0 ? _maxHeight : Float.MAX_VALUE;
-    }
+    public double getMaxHeight()  { return _maxHeight >= 0 ? _maxHeight : Float.MAX_VALUE; }
 
     /**
      * Sets the view maximum height.
@@ -1703,18 +1685,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view maximum size.
      */
-    public Size getMaxSize()
-    {
-        return new Size(getMaxWidth(), getMaxHeight());
-    }
+    public Size getMaxSize()  { return new Size(getMaxWidth(), getMaxHeight()); }
 
     /**
      * Sets the view maximum size.
      */
-    public void setMaxSize(Size aSize)
-    {
-        setMaxSize(aSize.getWidth(), aSize.getHeight());
-    }
+    public void setMaxSize(Size aSize)  { setMaxSize(aSize.width, aSize.height); }
 
     /**
      * Sets the view maximum size.

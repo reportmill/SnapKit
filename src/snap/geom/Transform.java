@@ -3,7 +3,6 @@
  */
 package snap.geom;
 import snap.util.MathUtils;
-import snap.util.StringUtils;
 
 /**
  * A class to represent a mathematical linear transforms.
@@ -399,18 +398,6 @@ public class Transform implements Cloneable {
     }
 
     /**
-     * Transforms the given size.
-     */
-    public final void transformSize(Size aSize)
-    {
-        double w = aSize.width;
-        double h = aSize.height;
-        double w2 = Math.abs(w * _a) + Math.abs(h * _c);
-        double h2 = Math.abs(w * _b) + Math.abs(h * _d);
-        aSize.setSize(w2, h2);
-    }
-
-    /**
      * Transforms the given rect.
      */
     public final void transformRect(Rect aRect)
@@ -419,7 +406,7 @@ public class Transform implements Cloneable {
         double y1 = aRect.y;
         double x2 = aRect.getMaxX();
         double y2 = aRect.getMaxY();
-        double pts[] = new double[] { x1, y1, x2, y1, x2, y2, x1, y2 };
+        double[] pts = new double[] { x1, y1, x2, y1, x2, y2, x1, y2 };
         transformXYArray(pts, 4);
         x1 = x2 = pts[0]; for(int i = 1; i < 4; i++) { double x = pts[i*2]; x1 = Math.min(x1,x); x2 = Math.max(x2,x); }
         y1 = y2 = pts[1]; for(int i = 1; i < 4; i++) { double y = pts[i*2+1]; y1 = Math.min(y1,y); y2 = Math.max(y2,y); }
@@ -429,13 +416,11 @@ public class Transform implements Cloneable {
     /**
      * Transforms the given size as a vector (preserves negative values).
      */
-    public void transformVector(Size aSize)
+    public Size transformVector(double vectorW, double vectorH)
     {
-        double w = aSize.width;
-        double h = aSize.height;
-        double w2 = w * _a + h * _c;
-        double h2 = w * _b + h * _d;
-        aSize.setSize(w2, h2);
+        double w2 = vectorW * _a + vectorH * _c;
+        double h2 = vectorW * _b + vectorH * _d;
+        return new Size(w2, h2);
     }
 
     /**

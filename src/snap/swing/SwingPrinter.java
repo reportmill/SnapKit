@@ -98,12 +98,12 @@ public class SwingPrinter extends Printer {
 
             // Get doc width, height and orientation
             Size psize = _printable.getPageSize(this, i);
-            double width = psize.getWidth(), height = psize.getHeight();
+            double width = psize.width, height = psize.height;
             int orientation = PageFormat.PORTRAIT;
             if (width > height) {
                 orientation = PageFormat.LANDSCAPE;
                 width = height;
-                height = psize.getWidth();
+                height = psize.width;
             }
 
             // Get paper and configure with appropriate paper size and imageable area

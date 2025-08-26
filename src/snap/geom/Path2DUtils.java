@@ -111,15 +111,17 @@ public class Path2DUtils {
             // If point index is control point 1, and previous seg is a curveto, bring control point 2 of previous curveto in line
             if (index - pointIndexForSeg == 0) {
                 if (segIndex - 1 > 0 && newPath.getSeg(segIndex - 1) == Seg.CubicTo) {
-                    Point endPoint = newPath.getPoint(index - 1), cntrlPnt2 = newPath.getPoint(index - 2);
+                    Point endPoint = newPath.getPoint(index - 1);
+                    Point cntrlPnt2 = newPath.getPoint(index - 2);
                     // endpoint == point winds up putting a NaN in the path
                     if (!endPoint.equals(point)) {
-                        Size size = new Size(point.x - endPoint.x, point.y - endPoint.y);
-                        size.normalize();
-                        size.negate();
+                        double sizeW = point.x - endPoint.x;
+                        double sizeH = point.y - endPoint.y;
+                        double magnitude = Math.sqrt(sizeW * sizeW + sizeH * sizeH);
+                        Size size = new Size(-sizeW / magnitude, -sizeH / magnitude);
                         Size size2 = new Size(cntrlPnt2.x - endPoint.x, cntrlPnt2.y - endPoint.y);
                         double mag = size2.getMagnitude();
-                        newPath.setPoint(index - 2, endPoint.x + size.getWidth() * mag, endPoint.y + size.getHeight() * mag);
+                        newPath.setPoint(index - 2, endPoint.x + size.width * mag, endPoint.y + size.height * mag);
                     }
                 }
             }
@@ -127,12 +129,14 @@ public class Path2DUtils {
             // If point index is control point 2, and next seg is a curveto, bring control point 1 of next curveto in line
             else if (index - pointIndexForSeg == 1) {
                 if (segIndex + 1 < newPath.getSegCount() && newPath.getSeg(segIndex + 1) == Seg.CubicTo) {
-                    Point endPoint = newPath.getPoint(index + 1), otherControlPoint = newPath.getPoint(index + 2);
+                    Point endPoint = newPath.getPoint(index + 1);
+                    Point otherControlPoint = newPath.getPoint(index + 2);
                     // don't normalize a point
                     if (!endPoint.equals(point)) {
-                        Size size = new Size(point.x - endPoint.x, point.y - endPoint.y);
-                        size.normalize();
-                        size.negate();
+                        double sizeW = point.x - endPoint.x;
+                        double sizeH = point.y - endPoint.y;
+                        double magnitude = Math.sqrt(sizeW * sizeW + sizeH * sizeH);
+                        Size size = new Size(-sizeW / magnitude, -sizeH / magnitude);
                         Size size2 = new Size(otherControlPoint.x - endPoint.x, otherControlPoint.y - endPoint.y);
                         double mag = size2.getMagnitude();
                         newPath.setPoint(index + 2, endPoint.x + size.width * mag, endPoint.y + size.height * mag);
