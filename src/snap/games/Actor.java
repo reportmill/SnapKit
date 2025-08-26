@@ -39,7 +39,7 @@ public class Actor extends ParentView {
     public Actor()
     {
         super();
-        _velocity = new Vector();
+        _velocity = Vector.ZERO;
 
         // Initialize name to simple class name
         setName(getClass().getSimpleName());
@@ -214,7 +214,7 @@ public class Actor extends ParentView {
      */
     public void setVelocity(Vector aVector)
     {
-        _velocity.setXY(aVector);
+        _velocity = aVector;
     }
 
     /**
@@ -222,7 +222,7 @@ public class Actor extends ParentView {
      */
     public void addVelocityVector(Vector velocityVector)
     {
-        _velocity.add(velocityVector);
+        setVelocity(_velocity.add(velocityVector));
     }
 
     /**

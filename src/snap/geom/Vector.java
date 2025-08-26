@@ -8,15 +8,16 @@ import snap.util.StringUtils;
 /**
  * This class represents a vector.
  */
-public class Vector implements Cloneable {
+public class Vector implements Cloneable{
     
-    // X Y components
-    public double x, y;
+    // X component
+    public final double x;
     
-    /**
-     * Constructor.
-     */
-    public Vector()  { }
+    // Y component
+    public final double y;
+
+    // A shared instance for Zero vector
+    public static final Vector ZERO = new Vector(0, 0);
 
     /**
      * Constructor for given XY coords.
@@ -38,23 +39,20 @@ public class Vector implements Cloneable {
     public double getLength()  { return getLength(x, y); }
 
     /**
-     * Makes the vector unit length.
+     * Returns the version of this vector where length is 1.
      */
-    public void normalize()
+    public Vector normalized()
     {
         double length = getLength();
-        x /= length;
-        y /= length;
+        if (length == 1)
+            return this;
+        return new Vector(x / length, y / length);
     }
 
     /**
      * Add the given vector to this.
      */
-    public void add(Vector aVector)
-    {
-        x += aVector.x;
-        y += aVector.y;
-    }
+    public Vector add(Vector aVector)  { return new Vector(x + aVector.x, y + aVector.y); }
 
     /**
      * Returns the dot product of the receiver and the given vector.
@@ -75,11 +73,10 @@ public class Vector implements Cloneable {
     public boolean isAway(Vector aVector, boolean includePerpendiculars)
     {
         // Get normalized version of this vector
-        Vector v1 = getLength() == 1 ? this : clone(); v1.normalize();
+        Vector v1 = normalized();
 
         // Get normalized version of given vector
-        Vector v2 = aVector.getLength() == 1 ? aVector : aVector.clone();
-        v2.normalize();
+        Vector v2 = aVector.normalized();
 
         // Dot of normalized vectors GT 0: angle<90deg, EQ 0: angle==90deg, LT 0: angle>90deg
         double dot = v1.getDotProduct(v2);
@@ -99,44 +96,32 @@ public class Vector implements Cloneable {
     /**
      * Makes this receiver point in the opposite direction.
      */
-    public void negate()  { x = -x; y = -y; }
+    public Vector negated()  { return new Vector(-x, -y); }
 
     /**
      * Transforms this vector by the given transform.
      */
-    public void transform(Transform aTrans)
+    public Vector transformed(Transform aTrans)
     {
         Point p1 = aTrans.transformXY(0, 0);
         Point p2 = aTrans.transformXY(x, y);
-        x = p2.x - p1.x;
-        y = p2.y - p1.y;
+        return new Vector(p2.x - p1.x, p2.y - p1.y);
     }
 
     /**
-     * Sets the X/Y values.
+     * Returns a copy of this vector with new X.
      */
-    public void setXY(Vector aVector)
-    {
-        x = aVector.x;
-        y = aVector.y;
-    }
+    public Vector withX(double aX)  { return new Vector(aX, y); }
 
     /**
-     * Sets the X/Y values.
+     * Returns a copy of this vector with new Y.
      */
-    public void setXY(double aX, double aY)
-    {
-        x = aX;
-        y = aY;
-    }
+    public Vector withY(double aY)  { return new Vector(x, aY); }
 
     /**
-     * Standard clone implementation.
+     * Delete soon! Vector is immutable so makes no sense.
      */
-    public Vector clone()
-    {
-        return new Vector(x,y);
-    }
+    public Vector clone()  { return this; }
 
     /**
      * Returns a string representation of the vector.
