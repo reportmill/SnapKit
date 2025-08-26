@@ -6,20 +6,18 @@ import snap.util.MathUtils;
 import snap.util.StringUtils;
 
 /**
- * A class to represent a simple geometric size.
+ * A class to represent a simple geometric size (width + height).
  */
-public class Size implements Cloneable {
+public class Size {
     
-    // Ivars
-    public double width;
+    // The size width
+    public final double width;
     
-    // Ivars
-    public double height;
+    // The size height
+    public final double height;
 
-    /**
-     * Constructor.
-     */
-    public Size()  { width = 0; height = 0; }
+    // A shared instance for Zero point
+    public static final Size ZERO = new Size(0, 0);
 
     /**
      * Constructor.
@@ -56,20 +54,21 @@ public class Size implements Cloneable {
     public boolean equals(double w, double h)  { return w == width && h == height; }
 
     /**
-     * Standard clone implementation.
+     * Returns size with given width.
      */
-    public Size clone()
-    {
-        try { return (Size) super.clone(); }
-        catch(Exception e) { throw new RuntimeException(e); }
-    }
+    public Size withWidth(double newWidth)  { return new Size(newWidth, height); }
+
+    /**
+     * Returns size with given height.
+     */
+    public Size withHeight(double newHeight)  { return new Size(width, newHeight); }
 
     /**
      * Standard equals implementation.
      */
     public boolean equals(Object anObj)
     {
-        if (anObj==this) return true;
+        if (anObj == this) return true;
         Size other = anObj instanceof Size ? (Size) anObj : null; if (other == null) return false;
         return other.width == width && other.height == height;
     }
@@ -94,6 +93,6 @@ public class Size implements Cloneable {
     {
         double w = StringUtils.floatValue(aString);
         double h = StringUtils.doubleValue(aString, aString.indexOf(",") + 1);
-        return new Size(w,h);
+        return new Size(w, h);
     }
 }

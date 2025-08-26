@@ -239,9 +239,9 @@ public class DrawerView extends ParentView {
 
         // Resize to view
         Size size = getPrefSize();
-        size.width = Math.max(size.width, getWidth());
-        size.height = Math.max(size.height, getHeight());
-        setSize(size);
+        double drawerW = Math.max(size.width, getWidth());
+        double drawerH = Math.max(size.height, getHeight());
+        setSize(drawerW, drawerH);
         setOpacity(1);
 
         // Get attach view and add this DrawerView
