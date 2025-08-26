@@ -674,7 +674,8 @@ public class ThumbWheel extends View {
         setAbsoluteMin(anElement.getAttributeDoubleValue("AbsMin", getAbsoluteMin()));
         setAbsoluteMax(anElement.getAttributeDoubleValue("AbsMax", getAbsoluteMax()));
         setRound(anElement.getAttributeDoubleValue("Round"));
-        if (getHeight()>getWidth()) setVertical(true);
+
+        // Return
         return this;
     }
 }
