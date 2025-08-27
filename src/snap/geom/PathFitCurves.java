@@ -215,7 +215,7 @@ public class PathFitCurves {
     private static double NewtonRaphsonRootFind(Point[] bc, Point P, double u)
     {
         // Compute Q(u) and generate control vertices for Q' & Q''
-        Point Q_u = Bezier(3, bc, u);
+        Point Q_u = getPointAtLocation(bc, 3, u);
         Point[] Q1 = new Point[3];
         Point[] Q2 = new Point[2];
         for (int i = 0; i <= 2; i++)
@@ -224,8 +224,8 @@ public class PathFitCurves {
             Q2[i] = new Point((Q1[i + 1].x - Q1[i].x) * 2f, (Q1[i + 1].y - Q1[i].y) * 2f);
 
         // Compute Q'(u) and Q''(u)
-        Point Q1_u = Bezier(2, Q1, u);
-        Point Q2_u = Bezier(1, Q2, u);
+        Point Q1_u = getPointAtLocation(Q1, 2, u);
+        Point Q2_u = getPointAtLocation(Q2, 1, u);
 
         // Compute f(u)/f'(u) and return improved U: u = u - f(u)/f'(u)
         double numerator = (Q_u.x - P.x) * (Q1_u.x) + (Q_u.y - P.y) * (Q1_u.y);
@@ -234,18 +234,19 @@ public class PathFitCurves {
     }
 
     // Evaluate a Bezier curve at a particular parameter value using triangle computation
-    private static Point Bezier(int degree, Point[] V, double t)
+    private static Point getPointAtLocation(Point[] segPoints, int degree, double aLoc)
     {
-        Point[] vtmp = new Point[4];
-        for (int i = 0; i <= degree; i++)
-            vtmp[i] = V[i].copy();
+        segPoints = segPoints.clone();
+
         for (int i = 1; i <= degree; i++) {
             for (int j = 0; j <= degree - i; j++) {
-                vtmp[j].x = (1 - t) * vtmp[j].x + t * vtmp[j + 1].x;
-                vtmp[j].y = (1 - t) * vtmp[j].y + t * vtmp[j + 1].y;
+                double newX = (1 - aLoc) * segPoints[j].x + aLoc * segPoints[j + 1].x;
+                double newY = (1 - aLoc) * segPoints[j].y + aLoc * segPoints[j + 1].y;
+                segPoints[j] = new Point(newX, newY);
             }
         }
-        return vtmp[0];
+
+        return segPoints[0];
     }
 
     // Approximate unit tangents at center of digitized curve
@@ -279,7 +280,7 @@ public class PathFitCurves {
         for (int i = first + 1; i < last; i++) {
 
             // Get point on curve and vector from point to curve
-            Point p = Bezier(3, bezCurve, u[i - first]);
+            Point p = getPointAtLocation(bezCurve, 3, u[i - first]);
             Point v = V2Sub(p, d[i]);
             double dist = V2SquaredLength(v);
             if (dist >= maxDist) {
@@ -320,27 +321,12 @@ public class PathFitCurves {
 
     private static Point V2Normalize(Point aVector)
     {
-        double length = V2Len(aVector);
-        if (length == 0 || length == 1)
-            return aVector.copy();
-        return new Point(aVector.x / length, aVector.y / length);
+        double length = Math.sqrt(V2SquaredLength(aVector));
+        return aVector.divide(length);
     }
 
-    // Vector length, squared length, normalized vector and vector dot product
-    private static double V2Len(Point a)
-    {
-        return Math.sqrt(V2SquaredLength(a));
-    }
-
-    private static double V2SquaredLength(Point a)
-    {
-        return (a.x * a.x) + (a.y * a.y);
-    }
-
-    private static double V2Dot(Point a, Point b)
-    {
-        return (a.x * b.x) + (a.y * b.y);
-    }
+    private static double V2SquaredLength(Point a)  { return (a.x * a.x) + (a.y * a.y); }
+    private static double V2Dot(Point a, Point b)  { return (a.x * b.x) + (a.y * b.y); }
 
     // Add Bezier curve points to list.
     private static void ConcatBezierCurve(List<Point> beziers, Point[] bezCurve)

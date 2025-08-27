@@ -218,11 +218,13 @@ public class SWWindowHpr extends WindowView.WindowHpr {
 
         // Get point in RootView
         Point point = aView.localToParent(aX, aY, _rview);
+        double pointX = point.x;
+        double pointY = point.y;
 
         // Iterate up to screen, adding offsets
         for (java.awt.Component comp = _rviewNtv; comp != null; comp = comp.getParent()) {
-            point.x += comp.getX();
-            point.y += comp.getY();
+            pointX += comp.getX();
+            pointY += comp.getY();
 
             // If Window, go ahead and bail, in case this is dialog of parent window
             if (comp instanceof java.awt.Window)
@@ -230,7 +232,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         }
 
         // Return point
-        return point;
+        return new Point(pointX, pointY);
     }
 
     /**

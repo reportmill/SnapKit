@@ -127,17 +127,13 @@ public class SwingViewEnv extends ViewEnv {
 
         // Get screen point to click on
         aWin.setAlwaysOnTop(true);
-        snap.geom.Point point2 = aWin.localToScreen(2, 2);
-        point2.x += 100; // bogus
+        snap.geom.Point point2 = aWin.localToScreen(2, 2).addXY(100, 0); // Bogus: shift right some
         java.awt.Point point1 = java.awt.MouseInfo.getPointerInfo().getLocation();
 
         // Get robot and perform mouse press
         java.awt.Robot robot;
-        try {
-            robot = new java.awt.Robot();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        try { robot = new java.awt.Robot(); }
+        catch (Exception e) { throw new RuntimeException(e); }
         robot.mouseMove((int) point2.getX(), (int) point2.getY());
         robot.mousePress(java.awt.event.InputEvent.BUTTON1_MASK);
         robot.delay(20);

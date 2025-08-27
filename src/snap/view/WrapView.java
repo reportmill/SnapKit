@@ -187,9 +187,9 @@ public class WrapView extends ParentView {
 
         // Get center point in content coords, translate to content origin and set content XY local
         Point childXY = _content.parentToLocal(childX, childY);
-        childXY.x += _content.getTransX() - childW / 2;
-        childXY.y += _content.getTransY() - childH / 2;
-        setViewXYLocal(_content, childXY.x, childXY.y);
+        double newX = childXY.x + _content.getTransX() - childW / 2;
+        double newY = childXY.y + _content.getTransY() - childH / 2;
+        setViewXYLocal(_content, newX, newY);
     }
 
     /**

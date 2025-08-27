@@ -14,7 +14,6 @@ public class Path2DUtils {
     // Constants
     private static float HANDLE_WIDTH = 6;
     private static float HALF_HANDLE_WIDTH = HANDLE_WIDTH / 2;
-    private static Point ZERO_POINT = new Point();
 
     /**
      * Handles painting a path showing control point handles.
@@ -37,9 +36,9 @@ public class Path2DUtils {
 
             // Get points
             int pointIndex = aPath.getSegPointIndex(i);
-            points[0] = pointIndex < pointCount ? aPath.getPoint(pointIndex) : ZERO_POINT;
-            points[1] = pointIndex + 1 < pointCount ? aPath.getPoint(pointIndex + 1) : ZERO_POINT;
-            points[2] = pointIndex + 2 < pointCount ? aPath.getPoint(pointIndex + 2) : ZERO_POINT;
+            points[0] = pointIndex < pointCount ? aPath.getPoint(pointIndex) : Point.ZERO;
+            points[1] = pointIndex + 1 < pointCount ? aPath.getPoint(pointIndex + 1) : Point.ZERO;
+            points[2] = pointIndex + 2 < pointCount ? aPath.getPoint(pointIndex + 2) : Point.ZERO;
 
             // Set color black for control lines and so alpha is correct for buttons
             aPntr.setColor(Color.BLACK);
@@ -344,7 +343,7 @@ public class Path2DUtils {
             mouseDownIndex--;
 
         // Declare loop vars
-        Point p0 = aPath.getPointCount() > 0 ? aPath.getPoint(0) : ZERO_POINT;
+        Point p0 = aPath.getPointCount() > 0 ? aPath.getPoint(0) : Point.ZERO;
         double p1x = p0.x, p1y = p0.y;
         double p2x = p1x, p2y = p1y;
         PathIter pathIter = aPath.getPathIter(null);

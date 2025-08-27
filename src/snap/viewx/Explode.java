@@ -28,7 +28,7 @@ public class Explode extends View {
     private Image _image;
 
     // The width/height of grid
-    private int _gridW = 10, _gridH = 10;
+    private int _gridW, _gridH;
 
     // The run time of the explosion in millis
     private int _runTime = 1000;
@@ -112,11 +112,9 @@ public class Explode extends View {
         _host = aView;
 
         // Calculate offset from host view to victim view
-        _offset = new Point(0, 0);
-        for (View v = _view; v != _host; v = v.getParent()) {
-            _offset.x += v.getX();
-            _offset.y += v.getY();
-        }
+        _offset = Point.ZERO;
+        for (View v = _view; v != _host; v = v.getParent())
+            _offset = _offset.addXY(v.getX(), v.getY());
         for (View v = _view; v != _host; v = v.getParent())
             _scale *= v.getScaleX();
 

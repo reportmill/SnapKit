@@ -10,15 +10,13 @@ import snap.util.*;
 public class Point {
 
     // The x component of point
-    public double x;
+    public final double x;
     
     // The y component of point
-    public double y;
+    public final double y;
 
-    /**
-     * Constructor.
-     */
-    public Point()  { x = y = 0; }
+    // A shared instance for Zero point
+    public static final Point ZERO = new Point(0, 0);
 
     /**
      * Constructor.
@@ -36,21 +34,6 @@ public class Point {
     public final double getY()  { return y; }
 
     /**
-     * Sets the x/y.
-     */
-    public void setXY(double aX, double aY)  { x = aX; y = aY; }
-
-    /**
-     * Sets the x/y.
-     */
-    public void setPoint(Point aPoint)  { x = aPoint.x; y = aPoint.y; }
-
-    /**
-     * Offsets the receiver by the given x and y.
-     */
-    public Point offsetted(double dx, double dy)  { return new Point(x + dx, y + dy); }
-
-    /**
      * Returns the rounded x value (as int).
      */
     public int getRoundX()  { return (int) Math.round(x); }
@@ -61,14 +44,34 @@ public class Point {
     public int getRoundY()  { return (int) Math.round(y); }
 
     /**
-     * Adds the given point to this point.
+     * Returns the point resulting from this point adding given point.
      */
     public Point add(Point aPoint)  { return new Point(x + aPoint.x, y + aPoint.y); }
 
     /**
-     * Subtracts the given point from this point.
+     * Returns the point resulting from this point adding given X/Y.
+     */
+    public Point addXY(double dx, double dy)  { return new Point(x + dx, y + dy); }
+
+    /**
+     * Returns the point resulting from this point subtracting given point.
      */
     public Point subtract(Point aPoint)  { return new Point(x - aPoint.x, y - aPoint.y); }
+
+    /**
+     * Returns the point resulting from this point multiplied by a value.
+     */
+    public Point multiply(double aValue)  { return new Point(x * aValue, y * aValue); }
+
+    /**
+     * Returns the point resulting from this point divided by a value.
+     */
+    public Point divide(double aValue)
+    {
+        if (aValue == 0 || aValue == 1)
+            return this;
+        return new Point(x / aValue, y / aValue);
+    }
 
     /**
      * Returns transformed point for this point and given Transform.
@@ -116,11 +119,6 @@ public class Point {
      * Returns a copy of this point with new Y.
      */
     public Point withY(double aY)  { return new Point(x, aY); }
-
-    /**
-     * Returns a copy.
-     */
-    public Point copy()  { return new Point(x, y); }
 
     /**
      * Standard equals implementation.

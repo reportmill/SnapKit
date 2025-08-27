@@ -307,7 +307,7 @@ public class Rect extends RectBase {
         double a = width / 2;
         double b = height / 2;
         if (a == 0 || b == 0)
-            return new Point();
+            return Point.ZERO;
 
         // If not elliptical, change a & b to min length so we use normal circle instead of elliptical radians
         if (!doEllipse)
@@ -374,18 +374,17 @@ public class Rect extends RectBase {
      */
     public static Point getPointForPosition(double aX, double aY, double aW, double aH, Pos aPos)
     {
-        switch(aPos) {
-            case TOP_LEFT: return new Point(aX, aY);
-            case TOP_CENTER: return new Point(aX + aW / 2, aY);
-            case TOP_RIGHT: return new Point(aX + aW, aY);
-            case CENTER_LEFT: return new Point(aX, aY + aH / 2);
-            case CENTER: return new Point(aX + aW / 2, aY + aH / 2);
-            case CENTER_RIGHT: return new Point(aX + aW, aY + aH / 2);
-            case BOTTOM_LEFT: return new Point(aX, aY + aH);
-            case BOTTOM_CENTER: return new Point(aX + aW / 2, aY + aH);
-            case BOTTOM_RIGHT: return new Point(aX + aW, aY + aH);
-            default: return null;
-        }
+        return switch (aPos) {
+            case TOP_LEFT -> new Point(aX, aY);
+            case TOP_CENTER -> new Point(aX + aW / 2, aY);
+            case TOP_RIGHT -> new Point(aX + aW, aY);
+            case CENTER_LEFT -> new Point(aX, aY + aH / 2);
+            case CENTER -> new Point(aX + aW / 2, aY + aH / 2);
+            case CENTER_RIGHT -> new Point(aX + aW, aY + aH / 2);
+            case BOTTOM_LEFT -> new Point(aX, aY + aH);
+            case BOTTOM_CENTER -> new Point(aX + aW / 2, aY + aH);
+            case BOTTOM_RIGHT -> new Point(aX + aW, aY + aH);
+        };
     }
 
     /**
@@ -402,9 +401,9 @@ public class Rect extends RectBase {
     public static Point getPointForPositionAndSize(double aX, double aY, double aW, double aH, Pos aPos, double aW2, double aH2)
     {
         Point point = getPointForPosition(aX, aY, aW, aH, aPos);
-        point.x -= aW2 * aPos.getHPos().doubleValue();
-        point.y -= aH2 * aPos.getVPos().doubleValue();
-        return point;
+        double pointX = point.x - aW2 * aPos.getHPos().doubleValue();
+        double pointY = point.y - aH2 * aPos.getVPos().doubleValue();
+        return new Point(pointX, pointY);
     }
 
     /**
@@ -438,7 +437,7 @@ public class Rect extends RectBase {
     public static Rect getRectForString(String aString)
     {
         double x = StringUtils.doubleValue(aString);
-        int start = aString.indexOf(' ', 0);
+        int start = aString.indexOf(' ');
         double y = StringUtils.doubleValue(aString, start + 1);
         start = aString.indexOf(' ', start + 1);
         double w = StringUtils.doubleValue(aString, start + 1);
@@ -475,14 +474,14 @@ public class Rect extends RectBase {
         /** Returns the coordinates and type of the current path segment in the iteration. */
         public Seg getNext(double[] coords)
         {
-            switch(index++) {
-                case 0: return moveTo(x, y, coords);
-                case 1: return lineTo(x+w, y, coords);
-                case 2: return lineTo(x+w, y+h, coords);
-                case 3: return lineTo(x, y+h, coords);
-                case 4: return close();
-                default: throw new RuntimeException("Rect path iterator out of bounds " + index);
-            }
+            return switch (index++) {
+                case 0 -> moveTo(x, y, coords);
+                case 1 -> lineTo(x + w, y, coords);
+                case 2 -> lineTo(x + w, y + h, coords);
+                case 3 -> lineTo(x, y + h, coords);
+                case 4 -> close();
+                default -> throw new RuntimeException("Rect path iterator out of bounds " + index);
+            };
         }
     }
 }

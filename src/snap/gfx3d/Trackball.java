@@ -219,7 +219,7 @@ public class Trackball extends ParentView {
     protected void mousePressed(ViewEvent anEvent)
     {
         double scale = 1; //getZoomFactor(); ???
-        Point point = anEvent.getPoint(); point.x /= scale; point.y /= scale;
+        Point point = anEvent.getPoint().divide(scale);
         double distance = point.getDistance(CENTER_X,CENTER_Y);
 
         // If inside trackball, replace image with lit version

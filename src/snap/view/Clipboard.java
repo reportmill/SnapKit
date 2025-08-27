@@ -19,7 +19,7 @@ public abstract class Clipboard implements Loadable {
     private Image _dragImage;
     
     // The point that the drag image should be dragged by
-    private Point _dragImageOffset = new Point();
+    private Point _dragImageOffset = Point.ZERO;
     
     // The ClipboardData objects
     private Map <String,ClipboardData> _clipboardDatas = new TreeMap<>();
@@ -32,6 +32,14 @@ public abstract class Clipboard implements Loadable {
 
     // Constant for Image MimeTypes
     private static final String[] IMAGE_MIME_TYPES = { MIMEType.PNG, MIMEType.JPEG, MIMEType.GIF };
+
+    /**
+     * Constructor.
+     */
+    public Clipboard()
+    {
+        super();
+    }
 
     /**
      * Returns the clipboard content.

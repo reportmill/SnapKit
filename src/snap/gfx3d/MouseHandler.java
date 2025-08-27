@@ -94,15 +94,15 @@ public class MouseHandler {
 
                 // If Pitch constrained
                 if (_dragConstraint == CONSTRAIN_PITCH)
-                    point.x = _pointLast.x;
+                    point = point.withX(_pointLast.x);
 
-                    // If Yaw constrained
-                else point.y = _pointLast.y;
+                // If Yaw constrained
+                else point = point.withY(_pointLast.y);
             }
 
             // Set pitch & yaw
-            _camera.setPitch(_camera.getPitch() + (point.y - _pointLast.y)/1.5f);
-            _camera.setYaw(_camera.getYaw() + (point.x - _pointLast.x)/1.5f);
+            _camera.setPitch(_camera.getPitch() + (point.y - _pointLast.y) / 1.5);
+            _camera.setYaw(_camera.getYaw() + (point.x - _pointLast.x) / 1.5);
         }
 
         // Set last point

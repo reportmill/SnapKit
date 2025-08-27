@@ -488,6 +488,6 @@ public class J2DImage extends Image {
                 return new Point(dx,dy);
             }
         }
-        return new Point();
+        return Point.ZERO;
     }
 }

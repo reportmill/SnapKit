@@ -15,7 +15,7 @@ public class SplicerShape extends Shape {
     private double  _end;
 
     // The tail point
-    private Point  _tailPoint = new Point();
+    private Point  _tailPoint = Point.ZERO;
 
     // The tail angle
     private double  _tailAngle = Double.NaN;
@@ -128,9 +128,9 @@ public class SplicerShape extends Shape {
             segment.getEndCoords(coords);
 
             // Get Tail angle
-            _tailAngle = segment.getPointAndAngle(1, _tailPoint);
-            if (_trans != null)
-                _tailPoint = _tailPoint.transformedBy(_trans.getInverse());
+            Segment.PointAndAngle pointAndAngle = segment.getPointAndAngle(1);
+            _tailPoint = _trans == null ? pointAndAngle.point() : _trans.transformXY(pointAndAngle.x(), pointAndAngle.y());
+            _tailAngle = pointAndAngle.angle();
 
             // Set finished and return
             _lenRun = _lenMax;

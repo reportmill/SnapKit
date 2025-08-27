@@ -128,27 +128,20 @@ public abstract class Segment extends Shape {
 
     /**
      * Like getPoint(), but also returns angle of tangent at point t (in degrees).
-     *   calculated point along curve is stored in aPoint
      */
-    public double getPointAndAngle(double t, Point aPoint)
+    public PointAndAngle getPointAndAngle(double aLoc)
     {
         Point[] cpts = getPoints();
-        Size tangent = evaluateBezierAndTangent(cpts.length - 1, t, cpts, aPoint);
-        return Math.atan2(tangent.height, tangent.width) * 180 / Math.PI;
-    }
-
-    /**
-     * Simultaneously find point on curve, as well as the tangent at that point.
-     */
-    private static Size evaluateBezierAndTangent(int degree, double t, Point[] cpts, Point tpoint)
-    {
+        int degree = cpts.length - 1;
+        double pointX, pointY;
         double tanW = 0;
         double tanH = 0;
 
         // Special case for endpoints.  If one (or more) of the control points is the same as an endpoint, the tangent calculation
         // in the de Casteljau algorithm will return a point instead of the real tangent.
-        if (t == 0) {
-            tpoint.setPoint(cpts[0]);
+        if (aLoc == 0) {
+            pointX = cpts[0].x;
+            pointY = cpts[0].y;
             for (int i = 1; i <= degree; ++i)
                 if (!cpts[i].equals(cpts[0])) {
                     tanW = cpts[i].x - cpts[0].x;
@@ -157,8 +150,9 @@ public abstract class Segment extends Shape {
                 }
         }
 
-        else if (t == 1) {
-            tpoint.setPoint(cpts[degree]);
+        else if (aLoc == 1) {
+            pointX = cpts[degree].x;
+            pointY = cpts[degree].y;
             for (int i = degree-1; i >= 0; --i)
                 if (!cpts[i].equals(cpts[degree])) {
                     tanW = cpts[degree].x - cpts[i].x;
@@ -184,16 +178,27 @@ public abstract class Segment extends Shape {
                     tanH = points[3] - points[1];
                 }
                 for (j = 0; j <= 2 * (degree - i) + 1; j++) {
-                    points[j] = (1 - t) * points[j] + t * points[j+2];
+                    points[j] = (1 - aLoc) * points[j] + aLoc * points[j+2];
                 }
             }
-            tpoint.x = points[0];
-            tpoint.y = points[1];
+            pointX = points[0];
+            pointY = points[1];
         }
 
-        // Return normalized tangent
+        // Get angle at location
         double magnitude = Math.sqrt(tanW * tanW + tanH * tanH);
-        return new Size(tanW / magnitude, tanH / magnitude);
+        tanW /= magnitude; tanH /= magnitude;
+        double tanAngle = Math.atan2(tanW, tanH) * 180 / Math.PI;
+
+        // Return point and angle
+        return new PointAndAngle(pointX, pointY, tanAngle);
+    }
+
+    /**
+     * Holds a point and angle.
+     */
+    public record PointAndAngle(double x, double y, double angle) {
+        public Point point() { return new Point(x,y); }
     }
 
     /**

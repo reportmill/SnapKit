@@ -8,7 +8,7 @@ import snap.util.StringUtils;
 /**
  * This class represents a vector.
  */
-public class Vector implements Cloneable{
+public class Vector {
     
     // X component
     public final double x;
@@ -117,11 +117,6 @@ public class Vector implements Cloneable{
      * Returns a copy of this vector with new Y.
      */
     public Vector withY(double aY)  { return new Vector(x, aY); }
-
-    /**
-     * Delete soon! Vector is immutable so makes no sense.
-     */
-    public Vector clone()  { return this; }
 
     /**
      * Returns a string representation of the vector.
