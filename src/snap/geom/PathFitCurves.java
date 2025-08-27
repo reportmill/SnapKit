@@ -237,7 +237,7 @@ public class PathFitCurves {
     {
         Point[] vtmp = new Point[4];
         for (int i = 0; i <= degree; i++)
-            vtmp[i] = new Point(V[i]);
+            vtmp[i] = V[i].clone();
         for (int i = 1; i <= degree; i++) {
             for (int j = 0; j <= degree - i; j++) {
                 vtmp[j].x = (1 - t) * vtmp[j].x + t * vtmp[j + 1].x;

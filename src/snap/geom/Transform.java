@@ -376,9 +376,7 @@ public class Transform implements Cloneable {
      */
     public final void transformPoint(Point aPoint)
     {
-        double x2 = aPoint.x * _a + aPoint.y * _c + _tx;
-        double y2 = aPoint.x * _b + aPoint.y * _d + _ty;
-        aPoint.setXY(x2, y2);
+        aPoint.transformBy(this);
     }
 
     /**

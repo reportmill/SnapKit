@@ -9,23 +9,21 @@ import snap.util.*;
  */
 public class Point implements Cloneable {
 
-    // Ivars
-    public double x, y;
+    // The x component of point
+    public double x;
     
-    /**
-     * Create new point.
-     */
-    public Point()  { }
+    // The y component of point
+    public double y;
 
     /**
-     * Create new point.
+     * Constructor.
+     */
+    public Point()  { x = y = 0; }
+
+    /**
+     * Constructor.
      */
     public Point(double aX, double aY)  { x = aX; y = aY; }
-
-    /**
-     * Create new point.
-     */
-    public Point(Point aPoint)  { x = aPoint.getX(); y = aPoint.getY(); }
 
     /**
      * Return point x.
@@ -33,42 +31,28 @@ public class Point implements Cloneable {
     public final double getX()  { return x; }
 
     /**
-     * Set point x.
-     */
-    public final void setX(double aValue)  { x = aValue; }
-
-    /**
      * Return point y.
      */
     public final double getY()  { return y; }
 
     /**
-     * Set point y.
+     * Sets the x/y.
      */
-    public final void setY(double aValue)  { y = aValue; }
+    public void setXY(double aX, double aY)  { x = aX; y = aY; }
 
     /**
      * Sets the x/y.
      */
-    public final void setXY(double aX, double aY)
-    {
-        setX(aX);
-        setY(aY);
-    }
-
-    /**
-     * Sets the x/y.
-     */
-    public final void setPoint(Point aPoint)
-    {
-        setX(aPoint.getX());
-        setY(aPoint.getY());
-    }
+    public void setPoint(Point aPoint)  { x = aPoint.x; y = aPoint.y; }
 
     /**
      * Offsets the receiver by the given x and y.
      */
-    public void offset(double dx, double dy)  { setXY(getX() + dx, getY() + dy); }
+    public void offset(double dx, double dy)
+    {
+        x = x + dx;
+        y = y + dy;
+    }
 
     /**
      * Returns the rounded x value (as int).
@@ -83,40 +67,74 @@ public class Point implements Cloneable {
     /**
      * Adds the given point to this point.
      */
-    public void add(Point aPoint)  { setXY(x + aPoint.getX(), y + aPoint.getY()); }
+    public void add(Point aPoint)
+    {
+        x = x + aPoint.x;
+        y = y + aPoint.y;
+    }
 
     /**
      * Subtracts the given point from this point.
      */
-    public void subtract(Point aPoint)  { setXY(x - aPoint.getX(), y - aPoint.getY()); }
+    public void subtract(Point aPoint)
+    {
+        x = x - aPoint.x;
+        y = y - aPoint.y;
+    }
 
     /**
      * Multiplies this point by the given sx and sy.
      */
-    public void multiply(double sx, double sy)  { setXY(x*sx, y*sy); }
+    public void multiply(double sx, double sy)
+    {
+        x = x * sx;
+        y = y * sy;
+    }
 
     /**
      * Transforms this point by the given Transform.
      */
-    public void transformBy(Transform aTrans)  { aTrans.transformPoint(this); }
+    public void transformBy(Transform aTrans)
+    {
+        double x2 = x * aTrans._a + y * aTrans._c + aTrans._tx;
+        double y2 = x * aTrans._b + y * aTrans._d + aTrans._ty;
+        x = x2;
+        y = y2;
+    }
 
     /**
      * Returns the distance from this Point to a specified point.
      */
-    public double getDistance(Point aPoint)  { return getDistance(aPoint.getX(), aPoint.getY()); }
+    public double getDistance(Point aPoint)  { return getDistance(aPoint.x, aPoint.y); }
 
     /**
      * Returns the distance from this Point to a specified point.
      */
-    public double getDistance(double px, double py)  { px -= getX(); py -= getY(); return Math.sqrt(px*px + py*py); }
+    public double getDistance(double px, double py)
+    {
+        px -= x;
+        py -= y;
+        return Math.sqrt(px * px + py * py);
+    }
 
     /**
      * Rounds a point to neared integers.
      */
     public void snap()
     {
-        setXY(Math.round(getX()), Math.round(getY()));
+        x = Math.round(x);
+        y = Math.round(y);
     }
+
+    /**
+     * Returns a copy of this point with new X.
+     */
+    public Point withX(double aX)  { return new Point(aX, y); }
+
+    /**
+     * Returns a copy of this point with new Y.
+     */
+    public Point withY(double aY)  { return new Point(x, aY); }
 
     /**
      * Standard equals implementation.
