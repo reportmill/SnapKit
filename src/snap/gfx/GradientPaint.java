@@ -160,20 +160,23 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
         }
 
         // Do arbitrary version
-        Transform t = new Transform(aRect.getMidX(), aRect.getMidY());   // Get transform of reverse rotation
-        t.rotate(-_roll);
-        t.translate(-aRect.getMidX(), -aRect.getMidY());
+        Transform t = new Transform();   // Get transform of reverse rotation
+        t.rotateAround(-_roll, aRect.getMidX(), aRect.getMidY());
 
         // Get bounds of transformed rect
         Rect r2 = aRect.copyFor(t).getBounds();
-        Point p1 = new Point(r2.getX(), r2.getMidY()), p2 = new Point(r2.getMaxX(), r2.getMidY());
+        Point p1 = new Point(r2.getX(), r2.getMidY());
+        Point p2 = new Point(r2.getMaxX(), r2.getMidY());
 
         //
-        t = new Transform(r2.getMidX(), r2.getMidY());
-        t.rotate(_roll);
-        t.translate(-r2.getMidX(), -r2.getMidY());
-        p1.transformBy(t); p2.transformBy(t);
-        _sx = p1.x; _sy = p1.y; _ex = p2.x; _ey = p2.y;
+        t = new Transform();
+        t.rotateAround(_roll, r2.getMidX(), r2.getMidY());
+        p1 = p1.transformedBy(t);
+        p2 = p2.transformedBy(t);
+
+        // Set new start/end points
+        _sx = p1.x; _sy = p1.y;
+        _ex = p2.x; _ey = p2.y;
     }
 
     /**

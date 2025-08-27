@@ -146,16 +146,12 @@ public class Path2DUtils {
 
             // If point index is curve end point, move the second control point by the same amount as main point move
             else if (index - pointIndexForSeg == 2) {
-                Point p1 = point.clone();
-                p1.subtract(newPath.getPoint(index));
-                Point p2 = newPath.getPoint(index - 1).clone();
-                p2.add(p1);
+                Point p1 = point.subtract(newPath.getPoint(index));
+                Point p2 = newPath.getPoint(index - 1).add(p1);
                 newPath.setPoint(index - 1, p2.x, p2.y);
                 if (segIndex + 1 < newPath.getSegCount() && newPath.getSeg(segIndex + 1) == Seg.CubicTo) {
-                    p1 = point.clone();
-                    p1.subtract(newPath.getPoint(index));
-                    p2 = newPath.getPoint(index + 1).clone();
-                    p2.add(p1);
+                    p1 = point.subtract(newPath.getPoint(index));
+                    p2 = newPath.getPoint(index + 1).add(p1);
                     newPath.setPoint(index + 1, p2.x, p2.y);
                 }
             }
@@ -163,10 +159,8 @@ public class Path2DUtils {
 
         // If there is a next seg and it is curveto, move its first control point by the same amount as main point move
         else if (segIndex + 1 < newPath.getSegCount() && newPath.getSeg(segIndex + 1) == Seg.CubicTo) {
-            Point p1 = point.clone();
-            p1.subtract(newPath.getPoint(index));
-            Point p2 = newPath.getPoint(index + 1).clone();
-            p2.add(p1);
+            Point p1 = point.subtract(newPath.getPoint(index));
+            Point p2 = newPath.getPoint(index + 1).add(p1);
             newPath.setPoint(index + 1, p2.x, p2.y);
         }
 
@@ -350,7 +344,7 @@ public class Path2DUtils {
             mouseDownIndex--;
 
         // Declare loop vars
-        Point p0 = aPath.getPointCount() > 0 ? aPath.getPoint(0).clone() : ZERO_POINT;
+        Point p0 = aPath.getPointCount() > 0 ? aPath.getPoint(0) : ZERO_POINT;
         double p1x = p0.x, p1y = p0.y;
         double p2x = p1x, p2y = p1y;
         PathIter pathIter = aPath.getPathIter(null);

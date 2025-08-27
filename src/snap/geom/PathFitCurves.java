@@ -74,7 +74,8 @@ public class PathFitCurves {
     private static List<Point> FitCurve(Point[] d, int nPts, double error)
     {
         // Approximate unit tangents at endpoints of digitized curve
-        Point tHat1 = V2Normalize(V2Sub(d[1], d[0])), tHat2 = V2Normalize(V2Sub(d[nPts - 2], d[nPts - 1]));
+        Point tHat1 = V2Normalize(V2Sub(d[1], d[0]));
+        Point tHat2 = V2Normalize(V2Sub(d[nPts - 2], d[nPts - 1]));
 
         // Call FitCubic on the whole range of points (recursively) and add bezier points to list
         List<Point> beziers = new ArrayList<>();
@@ -237,7 +238,7 @@ public class PathFitCurves {
     {
         Point[] vtmp = new Point[4];
         for (int i = 0; i <= degree; i++)
-            vtmp[i] = V[i].clone();
+            vtmp[i] = V[i].copy();
         for (int i = 1; i <= degree; i++) {
             for (int j = 0; j <= degree - i; j++) {
                 vtmp[j].x = (1 - t) * vtmp[j].x + t * vtmp[j + 1].x;
@@ -319,13 +320,10 @@ public class PathFitCurves {
 
     private static Point V2Normalize(Point aVector)
     {
-        Point normVector = aVector.clone();
-        double length = V2Len(normVector);
-        if (length != 0) {
-            normVector.x /= length;
-            normVector.y /= length;
-        }
-        return normVector;
+        double length = V2Len(aVector);
+        if (length == 0 || length == 1)
+            return aVector.copy();
+        return new Point(aVector.x / length, aVector.y / length);
     }
 
     // Vector length, squared length, normalized vector and vector dot product
@@ -347,7 +345,7 @@ public class PathFitCurves {
     // Add Bezier curve points to list.
     private static void ConcatBezierCurve(List<Point> beziers, Point[] bezCurve)
     {
-        if (beziers.size() == 0)
+        if (beziers.isEmpty())
             beziers.add(bezCurve[0]);
         beziers.add(bezCurve[1]);
         beziers.add(bezCurve[2]);

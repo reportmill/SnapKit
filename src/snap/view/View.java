@@ -1047,11 +1047,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         Point point = new Point(aX, aY);
 
         // Iterate up parents to given parent (or null) and transform point for each
-        for (View view = this; view != aPar && view != null; view = view.getParent()) {
-            if (view.isLocalToParentSimple())
-                point.offset(view._x + view._transX, view._y + view._transY);
-            else point = view.localToParent(point.x, point.y);
-        }
+        for (View view = this; view != aPar && view != null; view = view.getParent())
+            point = view.localToParent(point.x, point.y);
 
         // Return
         return point;

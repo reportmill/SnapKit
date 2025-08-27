@@ -358,25 +358,16 @@ public class Transform implements Cloneable {
 
     /**
      * Transforms the given XY values and return as point.
-     */
-    public final Point transformXY(double aX, double aY)
-    {
-        Point point = new Point(aX, aY);
-        transformPoint(point);
-        return point;
-    }
-
-    /**
-     * Transforms the given point.
-     *
+     * <br>
      *                     [  _a  _b  0 ]
      * P' = [ tx ty  1 ] x [  _c  _d  0 ] = [ tx * _a + ty * _c + _tx  tx * _b + ty * _d + ty   1  ]
      *                     [ _tx _ty  1 ]
-     *
      */
-    public final void transformPoint(Point aPoint)
+    public final Point transformXY(double aX, double aY)
     {
-        aPoint.transformBy(this);
+        double x2 = aX * _a + aY * _c + _tx;
+        double y2 = aX * _b + aY * _d + _ty;
+        return new Point(x2, y2);
     }
 
     /**

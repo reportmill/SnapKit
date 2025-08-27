@@ -7,7 +7,7 @@ import snap.util.*;
 /**
  * A class to represent a simple geometric point.
  */
-public class Point implements Cloneable {
+public class Point {
 
     // The x component of point
     public double x;
@@ -48,11 +48,7 @@ public class Point implements Cloneable {
     /**
      * Offsets the receiver by the given x and y.
      */
-    public void offset(double dx, double dy)
-    {
-        x = x + dx;
-        y = y + dy;
-    }
+    public Point offsetted(double dx, double dy)  { return new Point(x + dx, y + dy); }
 
     /**
      * Returns the rounded x value (as int).
@@ -67,39 +63,21 @@ public class Point implements Cloneable {
     /**
      * Adds the given point to this point.
      */
-    public void add(Point aPoint)
-    {
-        x = x + aPoint.x;
-        y = y + aPoint.y;
-    }
+    public Point add(Point aPoint)  { return new Point(x + aPoint.x, y + aPoint.y); }
 
     /**
      * Subtracts the given point from this point.
      */
-    public void subtract(Point aPoint)
-    {
-        x = x - aPoint.x;
-        y = y - aPoint.y;
-    }
+    public Point subtract(Point aPoint)  { return new Point(x - aPoint.x, y - aPoint.y); }
 
     /**
-     * Multiplies this point by the given sx and sy.
+     * Returns transformed point for this point and given Transform.
      */
-    public void multiply(double sx, double sy)
-    {
-        x = x * sx;
-        y = y * sy;
-    }
-
-    /**
-     * Transforms this point by the given Transform.
-     */
-    public void transformBy(Transform aTrans)
+    public Point transformedBy(Transform aTrans)
     {
         double x2 = x * aTrans._a + y * aTrans._c + aTrans._tx;
         double y2 = x * aTrans._b + y * aTrans._d + aTrans._ty;
-        x = x2;
-        y = y2;
+        return new Point(x2, y2);
     }
 
     /**
@@ -120,10 +98,13 @@ public class Point implements Cloneable {
     /**
      * Rounds a point to neared integers.
      */
-    public void snap()
+    public Point round()
     {
-        x = Math.round(x);
-        y = Math.round(y);
+        double roundX = Math.round(x);
+        double roundY = Math.round(y);
+        if (roundX == x && roundY == y)
+            return this;
+        return new Point(roundX, roundY);
     }
 
     /**
@@ -137,21 +118,17 @@ public class Point implements Cloneable {
     public Point withY(double aY)  { return new Point(x, aY); }
 
     /**
+     * Returns a copy.
+     */
+    public Point copy()  { return new Point(x, y); }
+
+    /**
      * Standard equals implementation.
      */
     public boolean equals(Object anObj)
     {
         Point other = anObj instanceof Point ? (Point) anObj : null; if (other == null) return false;
         return equals(x, y, other.x, other.y);
-    }
-
-    /**
-     * Standard clone implementation.
-     */
-    public Point clone()
-    {
-        try { return (Point) super.clone(); }
-        catch(Exception e) { throw new RuntimeException(e); }
     }
 
     /**
