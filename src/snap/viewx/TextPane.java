@@ -52,6 +52,30 @@ public class TextPane extends ViewOwner {
     protected void loadTextAreaText()  { }
 
     /**
+     * Shows the find panel.
+     */
+    public void showFindPanel()
+    {
+        TextArea textArea = getTextArea();
+
+       if (!textArea.getSel().isEmpty())
+            setViewValue("FindText", textArea.getSel().getString());
+        getView("FindText", TextField.class).selectAll();
+        requestFocus("FindText");
+    }
+
+    /**
+     * Hides the find panel.
+     */
+    public void hideFindPanel()
+    {
+        TextArea textArea = getTextArea();
+        View t1 = getView("FindText"), t2 = getView("FontSizeText");
+        if (t1.isFocused() || t2.isFocused())
+            requestFocus(textArea);
+    }
+
+    /**
      * Saves text to file.
      */
     public void saveTextToFile()
@@ -64,6 +88,41 @@ public class TextPane extends ViewOwner {
             try { textModel.writeTextToSourceFile(); }
             catch (Exception e) { throw new RuntimeException(e); }
         }
+    }
+
+    /**
+     * Sets font size.
+     */
+    public void setFontSize(double fontSize)
+    {
+        if (fontSize < 1) return;
+        TextArea textArea = getTextArea();
+        Font font = textArea.getTextFont();
+        Font font2 = new Font(font.getName(), fontSize);
+        textArea.setTextFont(font2);
+        requestFocus(textArea);
+    }
+
+    /**
+     * Increase font size.
+     */
+    public void increaseFontSize()
+    {
+        TextArea textArea = getTextArea();
+        Font font = textArea.getTextFont();
+        Font font2 = new Font(font.getName(), font.getSize() + 1);
+        textArea.setTextFont(font2);
+    }
+
+    /**
+     * Decrease font size.
+     */
+    public void decreaseFontSize()
+    {
+        TextArea textArea = getTextArea();
+        Font font = textArea.getTextFont();
+        Font font2 = new Font(font.getName(), font.getSize() - 1);
+        textArea.setTextFont(font2);
     }
 
     /**
@@ -160,76 +219,43 @@ public class TextPane extends ViewOwner {
      */
     protected void respondUI(ViewEvent anEvent)
     {
-        // Get TextArea
         TextArea textArea = getTextArea();
 
-        // Handle SaveButton
-        if (anEvent.equals("SaveButton"))
-            saveTextToFile();
+        switch (anEvent.getName()) {
 
-        // Handle CutButton, CopyButton, PasteButton, DeleteButton
-        if (anEvent.equals("CutButton"))
-            textArea.cut();
-        if (anEvent.equals("CopyButton"))
-            textArea.copy();
-        if (anEvent.equals("PasteButton"))
-            textArea.paste();
+            // Handle SaveButton
+            case "SaveButton" -> saveTextToFile();
 
-        // Handle UndoButton, RedoButton
-        if (anEvent.equals("UndoButton"))
-            textArea.undo();
-        if (anEvent.equals("RedoButton"))
-            textArea.redo();
+            // Handle CutButton, CopyButton, PasteButton, DeleteButton
+            case "CutButton" -> textArea.cut();
+            case "CopyButton" -> textArea.copy();
+            case "PasteButton" -> textArea.paste();
 
-        // Handle FontSizeText
-        if (anEvent.equals("FontSizeText")) {
-            float size = anEvent.getFloatValue();
-            if (size < 1) return;
-            Font font = textArea.getTextFont();
-            Font font2 = new Font(font.getName(), size);
-            textArea.setTextFont(font2);
-            requestFocus(textArea);
-        }
+            // Handle UndoButton, RedoButton
+            case "UndoButton" -> textArea.undo();
+            case "RedoButton" -> textArea.redo();
 
-        // Handle IncreaseFontButton
-        if (anEvent.equals("IncreaseFontButton")) {
-            Font font = textArea.getTextFont();
-            Font font2 = new Font(font.getName(), font.getSize() + 1);
-            textArea.setTextFont(font2);
-        }
+            // Handle FontSizeText,
+            case "FontSizeText" -> setFontSize(anEvent.getFloatValue());
+            case "IncreaseFontButton" -> increaseFontSize();
+            case "DecreaseFontButton" -> decreaseFontSize();
 
-        // Handle DecreaseFontButton
-        if (anEvent.equals("DecreaseFontButton")) {
-            Font font = textArea.getTextFont();
-            Font font2 = new Font(font.getName(), font.getSize() - 1);
-            textArea.setTextFont(font2);
-        }
+            // Handle FindButton
+            case "FindButton" -> showFindPanel();
 
-        // Handle FindButton
-        if (anEvent.equals("FindButton")) {
-            if (!textArea.getSel().isEmpty())
-                setViewValue("FindText", textArea.getSel().getString());
-            getView("FindText", TextField.class).selectAll();
-            requestFocus("FindText");
-        }
+            // Handle FindText, FindTextPrevious
+            case "FindText", "FindTextPrevious" -> {
+                String findString = getViewStringValue("FindText");
+                boolean ignoreCase = getViewBoolValue("IgnoreCaseCheckBox");
+                boolean findNext = anEvent.equals("FindText");
+                find(findString, ignoreCase, findNext);
+            }
 
-        // Handle FindText
-        if (anEvent.equals("FindText") || anEvent.equals("FindTextPrevious")) {
-            String string = getViewStringValue("FindText");
-            boolean ignoreCase = getViewBoolValue("IgnoreCaseCheckBox");
-            boolean findNext = anEvent.equals("FindText");
-            find(string, ignoreCase, findNext);
-        }
+            // Handle LineNumberPanelAction (Without RunLater, modal DialogBox seems to cause event resend)
+            case "LineNumberPanelAction" -> runLater(() -> showLineNumberPanel());
 
-        // Handle LineNumberPanelAction (Without RunLater, modal DialogBox seems to cause event resend)
-        if (anEvent.equals("LineNumberPanelAction"))
-            runLater(() -> showLineNumberPanel());
-
-        // Handle EscapeAction
-        if (anEvent.equals("EscapeAction")) {
-            View t1 = getView("FindText"), t2 = getView("FontSizeText");
-            if (t1.isFocused() || t2.isFocused())
-                requestFocus(textArea);
+            // Handle EscapeAction
+            case "EscapeAction" -> hideFindPanel();
         }
     }
 
