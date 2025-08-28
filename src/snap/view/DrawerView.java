@@ -12,6 +12,12 @@ import snap.viewx.Explode;
  */
 public class DrawerView extends ParentView {
 
+    // The animation time
+    private int _animTime = 1000;
+
+    // The View to attach to
+    private ParentView _attachView;
+
     // The view that holds the content
     private BoxView _contentBox;
 
@@ -58,32 +64,15 @@ public class DrawerView extends ParentView {
     public DrawerView()
     {
         super();
-
-        // Configure basic attributes
-        setPadding(24, 8, 8, 8);
-        setFill(ViewUtils.getBackFill());
-        setBorder(Color.GRAY, 1);
-        setBorderRadius(BORDER_RADIUS);
         setLean(Pos.TOP_RIGHT);
-        setEffect(SHADOW_EFFECT);
         setManaged(false);
-
-        // Configure action
-        enableEvents(MousePress, MouseDrag, MouseRelease, MouseEnter, MouseExit, MouseMove);
-
-        // Create/add DrawerLabel
-        Label drawerLabel = getDrawerLabel();
-        addChild(drawerLabel);
-
-        // Create/add Close box
-        View closedBox = getCloseBox();
-        addChild(closedBox);
 
         // Create add content box
         _contentBox = new BoxView(null, true, true);
-        _contentBox.setPadding(1, 1, 1, 1);
-        _contentBox.setBorder(Border.createLoweredBevelBorder());
         addChild(_contentBox);
+
+        // Make decorated by default
+        setDecorated(true);
     }
 
     /**
@@ -106,6 +95,73 @@ public class DrawerView extends ParentView {
     public void setContent(View aView)
     {
         _contentBox.setContent(aView);
+    }
+
+    /**
+     * Returns the animation time.
+     */
+    public int getAnimTime()  { return _animTime; }
+
+    /**
+     * Sets the animation time.
+     */
+    public void setAnimTime(int aValue)
+    {
+        if (aValue == getAnimTime()) return;
+        _animTime = aValue;
+    }
+
+    /**
+     * Returns whether decorated.
+     */
+    public boolean isDecorated()  { return getCloseBox().getParent() != null; }
+
+    /**
+     * Sets whether decorated.
+     */
+    public void setDecorated(boolean aValue)
+    {
+        if (aValue == isDecorated()) return;
+
+        // Configure decorated
+        if (aValue) {
+
+            // Basic attributes
+            setPadding(24, 8, 8, 8);
+            setFill(ViewUtils.getBackFill());
+            setBorder(Color.GRAY, 1);
+            setBorderRadius(BORDER_RADIUS);
+            setEffect(SHADOW_EFFECT);
+
+            // Create/add DrawerLabel
+            Label drawerLabel = getDrawerLabel();
+            addChild(drawerLabel);
+
+            // Create/add Close box
+            View closedBox = getCloseBox();
+            addChild(closedBox);
+
+            // Configure content box
+            _contentBox.setPadding(1, 1, 1, 1);
+            _contentBox.setBorder(Border.createLoweredBevelBorder());
+
+            // Enable events
+            enableEvents(MousePress, MouseDrag, MouseRelease, MouseEnter, MouseExit, MouseMove);
+        }
+
+        // Configure plain
+        else {
+            setPadding(Insets.EMPTY);
+            setFill(null);
+            setBorder(null);
+            setBorderRadius(0);
+            setEffect(null);
+            removeChild(getDrawerLabel());
+            removeChild(getCloseBox());
+            _contentBox.setPadding(Insets.EMPTY);
+            _contentBox.setBorder(null);
+            disableEvents(MousePress, MouseDrag, MouseRelease, MouseEnter, MouseExit, MouseMove);
+        }
     }
 
     /**
@@ -219,23 +275,37 @@ public class DrawerView extends ParentView {
     {
         View btn = getTabButton();
         ViewUtils.addChild(aView, btn);
+        _attachView = aView;
     }
 
     /**
      * Returns the view to attach to.
      */
-    public ParentView getAttachView()
+    public ParentView getAttachView()  { return _attachView; }
+
+    /**
+     * Sets the view to attach to.
+     */
+    public void setAttachView(ParentView aView)
     {
-        return getTabButton().getParent();
+        _attachView = aView;
     }
 
     /**
      * Shows the drawer.
      */
-    public void show()
+    public void show()  { showDrawer(_attachView); }
+
+    /**
+     * Shows the drawer.
+     */
+    public void showDrawer(ParentView parentView)
     {
         // If already showing, just return
         if (isShowing()) return;
+
+        // Reset attach view
+        setAttachView(parentView);
 
         // Resize to view
         Size size = getPrefSize();
@@ -245,22 +315,15 @@ public class DrawerView extends ParentView {
         setOpacity(1);
 
         // Get attach view and add this DrawerView
-        ParentView parView = getAttachView();
-        parView.setClipToBounds(true);
-        ViewUtils.addChild(parView, this);
+        parentView.setClipToBounds(true);
+        ViewUtils.addChild(parentView, this);
 
         // Adjust DrawerY if needed
-        if (getMargin().top == 0 || getMargin().top + getHeight() / 2 > parView.getHeight())
+        if (getLean() == Pos.TOP_RIGHT && (getMargin().top == 0 || getMargin().top + getHeight() / 2 > parentView.getHeight()))
             setDrawerY(-1);
 
-        // Create SlideAnim if not yet set
-        if (_slideAnim == null)
-            _slideAnim = new ViewAnim(this);
-
-        // Start animate in
-        setTransX(size.width);
-        _slideAnim.clear().getAnim(800).setTransX(BORDER_RADIUS);
-        _slideAnim.play();
+        // Animate drawer in
+        animateShowDrawer();
 
         // Hide the TabButton
         getTabButton().setVisible(false);
@@ -276,9 +339,58 @@ public class DrawerView extends ParentView {
 
         // Animate out
         _hiding = true;
-        _slideAnim.clear().getAnim(800).setTransX(getWidth());
-        _slideAnim.setOnFinish(() -> hideDrawerDone());
+        animateHideDrawer();
+
+        // Show the TabButton
+        getTabButton().setVisible(true);
+    }
+
+    /**
+     * Animates show drawer (move in).
+     */
+    private void animateShowDrawer()
+    {
+        // Create SlideAnim if not yet set
+        if (_slideAnim == null)
+            _slideAnim = new ViewAnim(this);
+
+        // Start animate in
+        switch (getLeanX()) {
+            case RIGHT -> {
+                setTransX(getWidth());
+                _slideAnim.clear().getAnim(getAnimTime()).setTransX(getBorderRadius());
+            }
+            case CENTER -> {
+                setTransY(-getHeight());
+                _slideAnim.clear().getAnim(getAnimTime()).setTransY(-getBorderRadius());
+            }
+        }
         _slideAnim.play();
+    }
+
+    /**
+     * Animates hide drawer (move out).
+     */
+    private void animateHideDrawer()
+    {
+        switch (getLeanX()) {
+            case RIGHT -> _slideAnim.clear().getAnim(getAnimTime()).setTransX(getWidth());
+            case CENTER -> _slideAnim.clear().getAnim(getAnimTime()).setTransY(-getHeight());
+        }
+        _slideAnim.setOnFinish(this::handleAnimateHideDrawerFinished);
+        _slideAnim.play();
+    }
+
+    /**
+     * Cleanup when hideDrawer animation done.
+     */
+    protected void handleAnimateHideDrawerFinished()
+    {
+        _hiding = false;
+        ParentView parView = getAttachView();
+        ViewUtils.removeChild(parView, this);
+        setOpacity(1);
+        setMaximized(false);
 
         // Show the TabButton
         getTabButton().setVisible(true);
@@ -294,25 +406,10 @@ public class DrawerView extends ParentView {
 
         // Animate out
         _hiding = true;
-        Explode exp = new Explode(this, 25, 25, () -> hideDrawerDone());
+        Explode exp = new Explode(this, 25, 25, this::handleAnimateHideDrawerFinished);
         exp.setHostView(getParent().getParent());
         exp.setRunTime(1400);
         exp.play();
-    }
-
-    /**
-     * Cleanup when hideDrawer animation done.
-     */
-    protected void hideDrawerDone()
-    {
-        _hiding = false;
-        ParentView parView = getAttachView();
-        ViewUtils.removeChild(parView, this);
-        setOpacity(1);
-        setMaximized(false);
-
-        // Show the TabButton
-        getTabButton().setVisible(true);
     }
 
     /**

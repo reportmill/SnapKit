@@ -12,7 +12,4 @@
   <TextField Name="FontSizeText" PrefWidth="32" PrefHeight="22" Align="CENTER" Margin="3" />
   <Button Name="IncreaseFontButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Increase Font Size" ImageName="Font_Increase.png" ShowArea="false" />
   <Button Name="DecreaseFontButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Decrease Font Size" ImageName="Font_Decrease.png" ShowArea="false" />
-  <Separator PrefHeight="18" Vertical="true" />
-  <TextField Name="FindText" PrefWidth="180" PrefHeight="22" Margin="3" BorderRadius="4" GrowWidth="true" Font="Arial 12" />
-  <CheckBox Name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" Text="IC" Selected="true" />
 </RowView>

@@ -3,6 +3,7 @@
  */
 package snap.viewx;
 import snap.geom.Insets;
+import snap.geom.Pos;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Image;
@@ -26,6 +27,12 @@ public class TextPane extends ViewOwner {
 
     // The ToolBarPane
     private ChildView  _toolBarPane;
+
+    // The find panel
+    private DrawerView _findPanel;
+
+    // The find text field
+    private TextField _findTextField;
 
     /**
      * Constructor.
@@ -56,12 +63,13 @@ public class TextPane extends ViewOwner {
      */
     public void showFindPanel()
     {
-        TextArea textArea = getTextArea();
+        getFindPanel().showDrawer(getTextArea().getParent());
 
-       if (!textArea.getSel().isEmpty())
-            setViewValue("FindText", textArea.getSel().getString());
-        getView("FindText", TextField.class).selectAll();
-        requestFocus("FindText");
+        TextArea textArea = getTextArea();
+        if (!textArea.getSel().isEmpty())
+            _findTextField.setText(textArea.getSel().getString());
+        _findTextField.selectAll();
+        requestFocus(_findTextField);
     }
 
     /**
@@ -69,10 +77,49 @@ public class TextPane extends ViewOwner {
      */
     public void hideFindPanel()
     {
+        getFindPanel().hide();
+
         TextArea textArea = getTextArea();
-        View t1 = getView("FindText"), t2 = getView("FontSizeText");
-        if (t1.isFocused() || t2.isFocused())
+        requestFocus(textArea);
+    }
+
+    /**
+     * Returns the find panel.
+     */
+    protected DrawerView getFindPanel()
+    {
+        if (_findPanel != null) return _findPanel;
+
+        // Load UI and set
+        ParentView findPanelUI = (ParentView) UILoader.loadViewForString(FIND_PANEL_UI);
+        _findTextField = (TextField) findPanelUI.getChildForName("FindText");
+        _findTextField.getLabel().setImage(Image.getImageForClassResource(TextPane.class, "Find.png"));
+
+        findPanelUI.addPropChangeListener(pc -> handleFindPanelShowingChange(), Showing_Prop);
+
+        // Create find panel
+        _findPanel = new DrawerView();
+        _findPanel.setDecorated(false);
+        _findPanel.setLean(Pos.TOP_CENTER);
+        _findPanel.setGrowWidth(true);
+        _findPanel.setAnimTime(200);
+        _findPanel.setContent(findPanelUI);
+
+        // Return
+        return _findPanel;
+    }
+
+    private void handleFindPanelShowingChange()
+    {
+        if (_findPanel == null) return;
+
+        if (_findPanel.isShowing()) {
+            requestFocus(_findTextField);
+        }
+        else {
+            TextArea textArea = getTextArea();
             requestFocus(textArea);
+        }
     }
 
     /**
@@ -183,11 +230,6 @@ public class TextPane extends ViewOwner {
         // Load text area text
         loadTextAreaText();
 
-        // Configure FindText
-        TextField findText = getView("FindText", TextField.class);
-        findText.setPromptText("Find");
-        findText.getLabel().setImage(Image.getImageForClassResource(TextPane.class, "Find.png"));
-
         // Register command-s for save, command-f for find, command-l for line number and escape
         addKeyActionHandler("SaveButton", "Shortcut+S");
         addKeyActionHandler("FindButton", "Shortcut+F");
@@ -277,7 +319,8 @@ public class TextPane extends ViewOwner {
     public void find(String aString, boolean ignoreCase, boolean isNext)
     {
         // Set String Value in FindText (if needed)
-        setViewValue("FindText", aString);
+        if (_findTextField != null)
+            _findTextField.setText(aString);
 
         // Get search string and find in text
         TextArea tarea = getTextArea();
@@ -352,4 +395,17 @@ public class TextPane extends ViewOwner {
         //String text = WebURL.getURL(TextPane.class, "TextPane.snp").getText(); textArea.setText(text);
         textPane.setWindowVisible(true);
     }
+
+    /**
+     * THe Find panel UI.
+     */
+    private static final String FIND_PANEL_UI = """
+        <ColView>
+          <RowView Margin="3" GrowWidth="true">
+            <TextField Name="FindText" PrefWidth="180" PrefHeight="22" Margin="3" BorderRadius="4" GrowWidth="true" Font="Arial 12" PromptText="Find" />
+            <CheckBox Name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" Text="IC" Selected="true" />
+          </RowView>
+          <RectView PrefHeight="1" Fill="#C0" GrowWidth="true" />
+        </ColView>
+        """;
 }
