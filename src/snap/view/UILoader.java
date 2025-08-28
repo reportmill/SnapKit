@@ -21,7 +21,7 @@ public class UILoader {
     }
 
     /**
-     * Loads the snap UI file for given class and returns root view.
+     * Loads the snap UI file for given view owner and URL and returns root view.
      */
     public static ParentView loadViewForOwnerAndUrl(ViewOwner anOwner, WebURL snapUrl)
     {
@@ -53,11 +53,20 @@ public class UILoader {
     }
 
     /**
-     * Loads the sanp UI file for given snap UI string and returns root view.
+     * Loads the snap UI file for given snap UI string and returns root view.
      */
     public static View loadViewForString(String snapString)
     {
+        return loadViewForOwnerAndString(null, snapString);
+    }
+
+    /**
+     * Loads the snap UI file for given owner and snap UI string and returns root view.
+     */
+    public static View loadViewForOwnerAndString(ViewOwner anOwner, String snapString)
+    {
         ViewArchiver archiver = new ViewArchiver();
+        archiver.setOwner(anOwner);
         return (View) archiver.readXmlFromString(snapString);
     }
 

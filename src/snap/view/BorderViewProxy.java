@@ -2,7 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A ViewProxy subclass to layout views along edges (top, bottom, left, right) and center.
@@ -10,55 +11,54 @@ import java.util.Arrays;
 public class BorderViewProxy extends ColViewProxy<View> {
 
     // The row proxy
-    public RowViewProxy<?>  _rowProxy;
+    public RowViewProxy<?> _rowProxy;
 
     /**
      * Constructor for given parent view and border views.
      */
-    public BorderViewProxy(ParentView aPar, View aCtr, View aTop, View aRgt, View aBtm, View aLft)
+    public BorderViewProxy(ParentView aPar, View centerView, View topView, View rightView, View bottomView, View leftView)
     {
         super(aPar);
         setFillWidth(true);
 
         // Create RowProxy
-        _rowProxy = getRowViewProxy(aCtr, aLft, aRgt);
+        _rowProxy = getRowViewProxy(centerView, leftView, rightView);
 
-        // Create proxy child array and create/add proxies
-        ViewProxy<?>[] colKids = new ViewProxy[3];
-        int colKidCount = 0;
-        if (aTop != null)
-            colKids[colKidCount++] = new ViewProxy<>(aTop);
-        colKids[colKidCount++] = _rowProxy;
-        if (aBtm != null)
-            colKids[colKidCount++] = new ViewProxy<>(aBtm);
+        // Create and add proxies for top/bottom views
+        List<ViewProxy<?>> childProxies = new ArrayList<>(3);
+        if (topView != null && topView.isVisible())
+            childProxies.add(new ViewProxy<>(topView));
+        childProxies.add(_rowProxy);
+        if (bottomView != null && bottomView.isVisible())
+            childProxies.add(new ViewProxy<>(bottomView));
 
         // Set trimmed children
-        setChildren(Arrays.copyOf(colKids, colKidCount));
+        setChildren(childProxies.toArray(new ViewProxy[0]));
     }
 
     /**
      * Constructor for BorderView Center, Right, Left.
      */
-    private static RowViewProxy<?> getRowViewProxy(View aCtr, View aLft, View aRgt)
+    private static RowViewProxy<?> getRowViewProxy(View centerView, View leftView, View rightView)
     {
         RowViewProxy<?> viewProxy = new RowViewProxy<>(null);
         viewProxy.setFillHeight(true);
 
-        // Create proxy child array and create/add proxies
-        ViewProxy<?>[] children = new ViewProxy[3];
-        int count = 0;
-        if (aLft != null)
-            children[count++] = new ViewProxy<>(aLft);
-        if (aCtr != null) {
-            ViewProxy<?> ctrProxy = children[count++] = new ViewProxy<>(aCtr);
-            ctrProxy.setGrowWidth(true);
-            ctrProxy.setGrowHeight(true);
+        // Create and add proxies for left/center/right views
+        List<ViewProxy<?>> childProxies = new ArrayList<>(3);
+        if (leftView != null && leftView.isVisible())
+            childProxies.add(new ViewProxy<>(leftView));
+        if (centerView != null && centerView.isVisible()) {
+            ViewProxy<?> centerProxy = new ViewProxy<>(centerView);
+            centerProxy.setGrowWidth(true);
+            centerProxy.setGrowHeight(true);
+            childProxies.add(centerProxy);
         }
-        if (aRgt != null)
-            children[count++] = new ViewProxy<>(aRgt);
+        if (rightView != null && rightView.isVisible())
+            childProxies.add(new ViewProxy<>(rightView));
 
         // Set trimmed children and GrowHeight
-        viewProxy.setChildren(Arrays.copyOf(children, count));
+        viewProxy.setChildren(childProxies.toArray(new ViewProxy[0]));
         viewProxy.setGrowHeight(true);
         return viewProxy;
     }

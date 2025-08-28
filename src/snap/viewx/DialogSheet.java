@@ -14,6 +14,9 @@ import snap.view.*;
  */
 public class DialogSheet extends DialogBox {
 
+    // The animation time
+    private int _animTime = 1000;
+
     // The parent view hosting the SheetDialogBox
     private ParentView  _hostView;
 
@@ -26,6 +29,28 @@ public class DialogSheet extends DialogBox {
     // Constants
     private static final Effect SHADOW_EFFECT = new ShadowEffect(10, Color.GRAY, 0, 0);
     private static final int BORDER_RADIUS = 5;
+
+    /**
+     * Constructor.
+     */
+    public DialogSheet()
+    {
+        super();
+    }
+
+    /**
+     * Returns the animation time.
+     */
+    public int getAnimTime()  { return _animTime; }
+
+    /**
+     * Sets the animation time.
+     */
+    public void setAnimTime(int aValue)
+    {
+        if (aValue == getAnimTime()) return;
+        _animTime = aValue;
+    }
 
     /**
      * Show Dialog in sheet.
@@ -51,7 +76,7 @@ public class DialogSheet extends DialogBox {
         // Configure UI to animate in and start
         double transY = sheetView.getHeight();
         sheetView.setTransY(-transY);
-        sheetView.getAnim(1000).setTransY(-BORDER_RADIUS).play();
+        sheetView.getAnim(getAnimTime()).setTransY(-BORDER_RADIUS).play();
 
         // Make sure stage and Builder.FirstFocus are focused
         runLater(() -> notifyDidShow());
@@ -67,7 +92,7 @@ public class DialogSheet extends DialogBox {
     {
         // Configure UI to animate out and start
         View ui = getUI();
-        ViewAnim anim = ui.getAnimCleared(1000);
+        ViewAnim anim = ui.getAnimCleared(getAnimTime());
         anim.setTransY(-ui.getHeight());
         anim.setOnFinish(() -> hideAnimDone()).needsFinish().play();
     }
