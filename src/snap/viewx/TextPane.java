@@ -158,6 +158,20 @@ public class TextPane extends ViewOwner {
     }
 
     /**
+     * Returns whether status bar is showing (line/col numbers at bottom).
+     */
+    public boolean isStatusBarShowing()  { return getView("BottomBox").isVisible(); }
+
+    /**
+     * Sets whether status bar is showing (line/col numbers at bottom).
+     */
+    public void setStatusBarShowing(boolean aValue)
+    {
+        if (aValue == isStatusBarShowing()) return;
+        getView("BottomBox").setVisible(aValue);
+    }
+
+    /**
      * Saves text to file.
      */
     public void saveTextToFile()
@@ -366,6 +380,9 @@ public class TextPane extends ViewOwner {
             case "ShowToolBarButton" -> showToolBar();
             case "HideToolBarButton" -> hideToolBar();
             case "ToggleToolBarMenuItem" -> toggleToolBar();
+
+            // Handle ToggleStatusBarMenuItem
+            case "ToggleStatusBarMenuItem" -> setStatusBarShowing(!isStatusBarShowing());
 
             // Handle LineNumberPanelAction (Without RunLater, modal DialogBox seems to cause event resend)
             case "LineNumberPanelAction" -> runLater(() -> showLineNumberPanel());
@@ -578,6 +595,8 @@ public class TextPane extends ViewOwner {
         viewBuilder.name("ToggleToolBarMenuItem").text(toolBarMenuText).save();
         String findPanelMenuText = (_findPanel.isShowing() ? "Hide" : "Show") + " Find Panel";
         viewBuilder.name("ToggleFindPanelMenuItem").text(findPanelMenuText).save();
+        String statusBarMenuText = (isStatusBarShowing() ? "Hide" : "Show") + " StatusBar";
+        viewBuilder.name("ToggleStatusBarMenuItem").text(statusBarMenuText).save();
 
         // Create and return menu
         return viewBuilder.buildMenu("ContextMenu", null);
