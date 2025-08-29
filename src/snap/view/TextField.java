@@ -471,7 +471,7 @@ public class TextField extends ParentView {
         if (!isFocused()) return;
 
         // If value has changed since focus gained, reset to original value
-        if (isEdited()) {
+        if (isEdited() && isFireActionOnFocusLost()) {
             setText(_focusGainedText);
             setEdited(false);
             selectAll();
@@ -614,16 +614,16 @@ public class TextField extends ParentView {
     public Object getPropValue(String aPropName)
     {
         // Handle properties
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // ColCount, PromptText, Multiline
-            case ColCount_Prop: return getColCount();
-            case PromptText_Prop: return getPromptText();
-            case Multiline_Prop: return isMultiline();
+            case ColCount_Prop -> getColCount();
+            case PromptText_Prop -> getPromptText();
+            case Multiline_Prop -> isMultiline();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -636,12 +636,12 @@ public class TextField extends ParentView {
         switch (aPropName) {
 
             // ColCount, PromptText, Multiline
-            case ColCount_Prop: setColCount(Convert.intValue(aValue)); break;
-            case PromptText_Prop: setPromptText(Convert.stringValue(aValue)); break;
-            case Multiline_Prop: setMultiline(Convert.boolValue(aValue)); break;
+            case ColCount_Prop -> setColCount(Convert.intValue(aValue));
+            case PromptText_Prop -> setPromptText(Convert.stringValue(aValue));
+            case Multiline_Prop -> setMultiline(Convert.boolValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 

@@ -19,6 +19,7 @@
   <RowView Name="FindPanel" Margin="3" GrowWidth="true">
     <TextField Name="FindText" PrefWidth="180" PrefHeight="26" Margin="3" BorderRadius="4" GrowWidth="true" Font="Arial 14" PromptText="Find" />
     <ToggleButton Name="MatchCaseButton" PrefWidth="21" PrefHeight="21" Text="Cc" Font="Arial 12" TextColor="#A0" ToolTip="Match case" ShowArea="false" />
+    <Label Name="MatchInfoText" Margin="0,10,0,10" Font="Arial 12" TextColor="#90" />
     <Button Name="ShowToolBarButton" PrefWidth="21" PrefHeight="21" Text="T" Font="Arial 12" TextColor="#A0" ToolTip="Show toolbar" ShowArea="false" />
     <Button Name="HideFindPanelButton" PrefWidth="22" PrefHeight="22" LeanX="RIGHT" Text="x" Font="Arial 12" TextColor="#A0" ToolTip="Hide find panel" ShowArea="false" />
   </RowView>

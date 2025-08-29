@@ -15,7 +15,10 @@ import snap.text.TextSel;
 import snap.util.Convert;
 import snap.util.ListUtils;
 import snap.view.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A panel for editing text files.
@@ -39,6 +42,12 @@ public class TextPane extends ViewOwner {
 
     // The separator view
     private View _separatorView;
+
+    // The current string matches
+    private List<StringMatch> _stringMatches;
+
+    // The current match index
+    private int _matchIndex;
 
     /**
      * Constructor.
@@ -239,10 +248,15 @@ public class TextPane extends ViewOwner {
 
         // Configure FindText textfield
         _findTextField = (TextField) _findPanel.getChildForName("FindText");
+        _findTextField.setFireActionOnFocusLost(false);
         _findTextField.getLabel().setImage(Image.getImageForClassResource(TextPane.class, "Find.png"));
-        _findTextField.getLabel().setGraphicAfter(getView("MatchCaseButton"));
-        getView("MatchCaseButton").setLeanX(HPos.RIGHT);
-        getView("MatchCaseButton").getParent().setPickable(true);
+        _findTextField.addEventFilter(e -> runLater(() -> handleFindTextFieldKeyPressEvent()), KeyPress);
+
+        // Move MatchCaseButton to textfield
+        View matchCaseButton = getView("MatchCaseButton");
+        _findTextField.getLabel().setGraphicAfter(matchCaseButton);
+        _findTextField.getLabel().setPickable(true);
+        matchCaseButton.setLeanX(HPos.RIGHT);
 
         // Get text area and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
         _textArea.addPropChangeListener(this::handleTextAreaPropChange);
@@ -282,6 +296,12 @@ public class TextPane extends ViewOwner {
 
         // Update SelectionText
         setViewText("SelectionText", getSelectionInfo());
+
+        // Update MatchInfoText
+        String matchInfo = "0 results";
+        if (_stringMatches != null && !_stringMatches.isEmpty())
+            matchInfo = (_matchIndex + 1) + " of " + _stringMatches.size();
+        setViewText("MatchInfoText", matchInfo);
     }
 
     /**
@@ -314,12 +334,8 @@ public class TextPane extends ViewOwner {
             case "FindButton" -> showFindPanel();
 
             // Handle FindText, FindTextPrevious
-            case "FindText", "FindTextPrevious" -> {
-                String findString = getViewStringValue("FindText");
-                boolean matchCase = getViewBoolValue("MatchCaseCheckBox");
-                boolean findNext = anEvent.equals("FindText");
-                find(findString, !matchCase, findNext);
-            }
+            case "FindText" -> selectNextMatch(true);
+            case "FindTextPrevious" -> selectPreviousMatch();
 
             // Handle HideFindPanelButton
             case "HideFindPanelButton" -> hideFindPanel();
@@ -349,33 +365,118 @@ public class TextPane extends ViewOwner {
     }
 
     /**
-     * Finds the given string.
+     * Finds matches for given string and selects the first.
      */
-    public void find(String aString, boolean ignoreCase, boolean isNext)
+    public void findMatchesAndSelectFirst(String findString, boolean matchCase)
     {
-        // Set String Value in FindText (if needed)
-        if (_findTextField != null)
-            _findTextField.setText(aString);
+        // Get new string matches
+        _stringMatches = getMatchesForString(findString, matchCase);
 
-        // Get search string and find in text
-        TextArea tarea = getTextArea();
-        String string = aString;
-        if (ignoreCase) string = string.toLowerCase();
-        String text = tarea.getText();
-        if (ignoreCase) text = text.toLowerCase();
+        // Select next match
+        _textArea.setSel(0);
+        selectNextMatch(false);
+        resetLater();
+    }
 
-        // Get index of search
-        int sstart = tarea.getSelStart(), send = tarea.getSelEnd();
-        int index = isNext ? text.indexOf(string, send) : text.lastIndexOf(string, Math.max(sstart - 1, 0));
+    /**
+     * Finds matches for given string and selects the next.
+     */
+    public void findMatchesAndSelectNext(String findString, boolean matchCase)
+    {
+        // Get new string matches
+        _stringMatches = getMatchesForString(findString, matchCase);
 
-        // If index not found, beep and try again from start
-        if (index < 0) {
-            beep();
-            index = isNext ? text.indexOf(string) : text.lastIndexOf(string);
+        // Select next match
+        _textArea.setSel(_textArea.getSelStart());
+        selectNextMatch(false);
+        resetLater();
+    }
+
+    /**
+     * Returns matches for given string.
+     */
+    public List<StringMatch> getMatchesForString(String findString, boolean matchCase)
+    {
+        // Compile pattern
+        Pattern pattern = Pattern.compile(Pattern.quote(findString), matchCase ? 0 : Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(_textArea.getText());
+        List<StringMatch> stringMatches = new ArrayList<>();
+
+        // Iterate over matches
+        while (matcher.find()) {
+            int start = matcher.start();
+            int end = matcher.end();
+            stringMatches.add(new StringMatch(start, end));
         }
 
-        // If index found, select text and focus
-        if (index >= 0) tarea.setSel(index, index + string.length());
+        // Return
+        return stringMatches;
+    }
+
+    // A record for string matches
+    public record StringMatch(int start, int end) { }
+
+    /**
+     * Selects the next match.
+     */
+    public void selectNextMatch(boolean wrapWithBeep)
+    {
+        if (_stringMatches == null || _stringMatches.isEmpty())
+            return;
+
+        // Find next match
+        StringMatch nextMatch = getNextMatch();
+
+        // If none left, beep and set first
+        if (nextMatch == null) {
+            if (wrapWithBeep)
+                beep();
+            nextMatch = _stringMatches.get(0);
+        }
+
+        // Set selection
+        _textArea.setSel(nextMatch.start, nextMatch.end);
+        _matchIndex = _stringMatches.indexOf(nextMatch);
+    }
+
+    /**
+     * Selects the previous match.
+     */
+    public void selectPreviousMatch()
+    {
+        if (_stringMatches == null || _stringMatches.isEmpty())
+            return;
+
+        // Find previous match
+        StringMatch previousMatch = getPreviousMatch();
+
+        // If none left, beep and set last
+        if (previousMatch == null) {
+            beep();
+            previousMatch = _stringMatches.get(_stringMatches.size() - 1);
+        }
+
+        // Set selection
+        _textArea.setSel(previousMatch.start, previousMatch.end);
+        _matchIndex = _stringMatches.indexOf(previousMatch);
+    }
+
+    /**
+     * Returns the next match.
+     */
+    public StringMatch getNextMatch()
+    {
+        int selEnd = _textArea.getSelEnd();
+        return _stringMatches != null ? ListUtils.findMatch(_stringMatches, match -> match.start >= selEnd) : null;
+    }
+
+    /**
+     * Returns the prvious match.
+     */
+    public StringMatch getPreviousMatch()
+    {
+        int selStart = _textArea.getSelStart();
+        return _stringMatches != null ? ListUtils.findMatch(_stringMatches, match -> match.end <= selStart) : null;
     }
 
     /**
@@ -417,6 +518,17 @@ public class TextPane extends ViewOwner {
     protected void handleSourceTextPropChange(PropChange aPC)
     {
         resetLater();
+    }
+
+    /**
+     * Called when FindTextField gets KeyPress event.
+     */
+    private void handleFindTextFieldKeyPressEvent()
+    {
+        String findString = getViewStringValue("FindText");
+        if (findString != null && !findString.isEmpty())
+            findMatchesAndSelectNext(findString, getViewBoolValue("MatchCaseButton"));
+        else _stringMatches = null;
     }
 
     /**
