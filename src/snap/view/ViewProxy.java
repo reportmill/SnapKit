@@ -2,6 +2,8 @@ package snap.view;
 import snap.geom.*;
 import snap.gfx.Border;
 import snap.util.ArrayUtils;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This class represents a view for the purpose of layout.
@@ -128,8 +130,7 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public void setContent(ViewProxy<?> aViewProxy)
     {
-        ViewProxy<?>[] children = aViewProxy != null ? new ViewProxy[] { aViewProxy } : new ViewProxy[0];
-        setChildren(children);
+        setChildren(aViewProxy != null ? List.of(aViewProxy) : Collections.emptyList());
     }
 
     /**
@@ -154,6 +155,14 @@ public class ViewProxy<T extends View> extends Rect {
     public void setChildren(ViewProxy<?>[] theProxies)
     {
         _children = theProxies;
+    }
+
+    /**
+     * Returns the children.
+     */
+    public void setChildren(List<ViewProxy<?>> theProxies)
+    {
+        _children = theProxies.toArray(new ViewProxy[0]);
     }
 
     /**

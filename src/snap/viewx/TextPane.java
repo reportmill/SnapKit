@@ -2,8 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
+import snap.geom.HPos;
 import snap.geom.Insets;
-import snap.geom.Pos;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Image;
@@ -28,11 +28,17 @@ public class TextPane extends ViewOwner {
     // The ToolBarPane
     private ChildView  _toolBarPane;
 
-    // The find panel
-    private DrawerView _findPanel;
+    // The ToolBar
+    private RowView _toolBar;
+
+    // The FindPanelRowView
+    private RowView _findPanel;
 
     // The find text field
     private TextField _findTextField;
+
+    // The separator view
+    private View _separatorView;
 
     /**
      * Constructor.
@@ -59,17 +65,52 @@ public class TextPane extends ViewOwner {
     protected void loadTextAreaText()  { }
 
     /**
+     * Shows the toolbar.
+     */
+    public void showToolBar()
+    {
+        if (_toolBar.isShowing()) return;
+        _toolBar.setVisible(true);
+
+        // Animate open
+        _toolBar.setPrefHeight(-1);
+        double prefHeight = _toolBar.getPrefHeight();
+        _toolBar.setPrefHeight(0);
+        _toolBar.getAnim(200).clear().setPrefHeight(prefHeight).play();
+    }
+
+    /**
+     * Hides the toolbar.
+     */
+    public void hideToolBar()
+    {
+        // Animate close
+        _toolBar.setPrefHeight(_toolBar.getPrefHeight());
+        _toolBar.getAnim(200).clear().setPrefHeight(0).play();
+        _toolBar.getAnim(0).setOnFinish(() -> { _toolBar.setVisible(false); resetLater(); });
+    }
+
+    /**
      * Shows the find panel.
      */
     public void showFindPanel()
     {
-        getFindPanel().showDrawer(getTextArea().getParent());
-
+        // Update FindText, select all and focus
         TextArea textArea = getTextArea();
         if (!textArea.getSel().isEmpty())
             _findTextField.setText(textArea.getSel().getString());
         _findTextField.selectAll();
         requestFocus(_findTextField);
+
+        // Make visible
+        if (_findPanel.isShowing()) return;
+        _findPanel.setVisible(true);
+
+        // Animate open
+        _findPanel.setPrefHeight(-1);
+        double prefHeight = _findPanel.getPrefHeight();
+        _findPanel.setPrefHeight(0);
+        _findPanel.getAnim(200).clear().setPrefHeight(prefHeight).play();
     }
 
     /**
@@ -77,49 +118,14 @@ public class TextPane extends ViewOwner {
      */
     public void hideFindPanel()
     {
-        getFindPanel().hide();
-
+        // Focus textarea
         TextArea textArea = getTextArea();
         requestFocus(textArea);
-    }
 
-    /**
-     * Returns the find panel.
-     */
-    protected DrawerView getFindPanel()
-    {
-        if (_findPanel != null) return _findPanel;
-
-        // Load UI and set
-        ParentView findPanelUI = (ParentView) UILoader.loadViewForString(FIND_PANEL_UI);
-        _findTextField = (TextField) findPanelUI.getChildForName("FindText");
-        _findTextField.getLabel().setImage(Image.getImageForClassResource(TextPane.class, "Find.png"));
-
-        findPanelUI.addPropChangeListener(pc -> handleFindPanelShowingChange(), Showing_Prop);
-
-        // Create find panel
-        _findPanel = new DrawerView();
-        _findPanel.setDecorated(false);
-        _findPanel.setLean(Pos.TOP_CENTER);
-        _findPanel.setGrowWidth(true);
-        _findPanel.setAnimTime(200);
-        _findPanel.setContent(findPanelUI);
-
-        // Return
-        return _findPanel;
-    }
-
-    private void handleFindPanelShowingChange()
-    {
-        if (_findPanel == null) return;
-
-        if (_findPanel.isShowing()) {
-            requestFocus(_findTextField);
-        }
-        else {
-            TextArea textArea = getTextArea();
-            requestFocus(textArea);
-        }
+        // Animate close
+        _findPanel.setPrefHeight(_findPanel.getPrefHeight());
+        _findPanel.getAnim(200).clear().setPrefHeight(0).play();
+        _findPanel.getAnim(0).setOnFinish(() -> _findPanel.setVisible(false));
     }
 
     /**
@@ -181,6 +187,15 @@ public class TextPane extends ViewOwner {
         // Create ToolBar
         _toolBarPane = (ChildView) super.createUI();
 
+        // ToolBar
+        _toolBar = (RowView) _toolBarPane.getChildForName("ToolBar");
+        _toolBar.setVisible(false);
+        _separatorView = _toolBarPane.getChildForName("Separator");
+
+        // FindPanel
+        _findPanel = (RowView) _toolBarPane.getChildForName("FindPanel");
+        _findPanel.setVisible(false);
+
         // Create/config TextArea
         _textArea.setPadding(new Insets(5));
         _textArea.setFill(Color.WHITE);
@@ -219,8 +234,15 @@ public class TextPane extends ViewOwner {
     protected void initUI()
     {
         // Disable all toolbar button focus
-        List<ButtonBase> toolBarButtons = ListUtils.filterByClass(_toolBarPane.getChildren(), ButtonBase.class);
+        List<ButtonBase> toolBarButtons = ListUtils.filterByClass(_toolBar.getChildren(), ButtonBase.class);
         toolBarButtons.forEach(button -> button.setFocusable(false));
+
+        // Configure FindText textfield
+        _findTextField = (TextField) _findPanel.getChildForName("FindText");
+        _findTextField.getLabel().setImage(Image.getImageForClassResource(TextPane.class, "Find.png"));
+        _findTextField.getLabel().setGraphicAfter(getView("MatchCaseButton"));
+        getView("MatchCaseButton").setLeanX(HPos.RIGHT);
+        getView("MatchCaseButton").getParent().setPickable(true);
 
         // Get text area and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
         _textArea.addPropChangeListener(this::handleTextAreaPropChange);
@@ -244,6 +266,9 @@ public class TextPane extends ViewOwner {
      */
     protected void resetUI()
     {
+        // Update toolbar separator
+        _separatorView.setVisible(_toolBar.isVisible() && _findPanel.isVisible());
+
         // Reset FontSizeText
         setViewValue("FontSizeText", _textArea.getTextFont().getSize());
 
@@ -251,6 +276,9 @@ public class TextPane extends ViewOwner {
         Undoer undoer = _textArea.getUndoer();
         setViewEnabled("UndoButton", undoer.hasUndos());
         setViewEnabled("RedoButton", undoer.hasRedos());
+
+        // Update ShowToolBarButton
+        setViewVisible("ShowToolBarButton", !_toolBar.isVisible());
 
         // Update SelectionText
         setViewText("SelectionText", getSelectionInfo());
@@ -288,10 +316,17 @@ public class TextPane extends ViewOwner {
             // Handle FindText, FindTextPrevious
             case "FindText", "FindTextPrevious" -> {
                 String findString = getViewStringValue("FindText");
-                boolean ignoreCase = getViewBoolValue("IgnoreCaseCheckBox");
+                boolean matchCase = getViewBoolValue("MatchCaseCheckBox");
                 boolean findNext = anEvent.equals("FindText");
-                find(findString, ignoreCase, findNext);
+                find(findString, !matchCase, findNext);
             }
+
+            // Handle HideFindPanelButton
+            case "HideFindPanelButton" -> hideFindPanel();
+
+            // Handle ShowToolBarButton, HideToolBarButton
+            case "ShowToolBarButton" -> showToolBar();
+            case "HideToolBarButton" -> hideToolBar();
 
             // Handle LineNumberPanelAction (Without RunLater, modal DialogBox seems to cause event resend)
             case "LineNumberPanelAction" -> runLater(() -> showLineNumberPanel());
@@ -395,17 +430,4 @@ public class TextPane extends ViewOwner {
         //String text = WebURL.getURL(TextPane.class, "TextPane.snp").getText(); textArea.setText(text);
         textPane.setWindowVisible(true);
     }
-
-    /**
-     * THe Find panel UI.
-     */
-    private static final String FIND_PANEL_UI = """
-        <ColView>
-          <RowView Margin="3" GrowWidth="true">
-            <TextField Name="FindText" PrefWidth="180" PrefHeight="22" Margin="3" BorderRadius="4" GrowWidth="true" Font="Arial 12" PromptText="Find" />
-            <CheckBox Name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" Text="IC" Selected="true" />
-          </RowView>
-          <RectView PrefHeight="1" Fill="#C0" GrowWidth="true" />
-        </ColView>
-        """;
 }

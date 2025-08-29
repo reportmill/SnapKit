@@ -7,6 +7,7 @@ import snap.gfx.*;
 import snap.props.PropSet;
 import snap.text.TextStyle;
 import snap.util.*;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -268,11 +269,11 @@ public class Label extends ParentView {
         // Layout children and return text bounds
         int textIndex = _stringView.indexInParent();
         ParentViewProxy<?> viewProxy = isHorizontal() ? new RowViewProxy<>(this) : new ColViewProxy<>(this);
-        View[] children = _graphic != null && _graphic.isShowing() ? new View[] { _graphic, _stringView } : new View[] { _stringView };
-        ViewProxy<?>[] childProxies = ArrayUtils.map(children, child -> ViewProxy.getProxy(child), ViewProxy.class);
+        List<View> children = _graphic != null ? List.of(_graphic, _stringView) : List.of(_stringView);
+        List<ViewProxy<?>> childProxies = ListUtils.map(children, child -> ViewProxy.getProxy(child));
         viewProxy.setChildren(childProxies);
         viewProxy.layoutProxy();
-        ViewProxy<?> textProxy = childProxies[textIndex];
+        ViewProxy<?> textProxy = childProxies.get(textIndex);
         return textProxy;
     }
 
@@ -343,16 +344,16 @@ public class Label extends ParentView {
     public Object getPropValue(String aPropName)
     {
         // Handle properties
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // ImageName, Graphic, GraphicAfter
-            case ImageName_Prop: return getImageName();
-            case Graphic_Prop: return getGraphic();
-            case GraphicAfter_Prop: return getGraphicAfter();
+            case ImageName_Prop -> getImageName();
+            case Graphic_Prop -> getGraphic();
+            case GraphicAfter_Prop -> getGraphicAfter();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**

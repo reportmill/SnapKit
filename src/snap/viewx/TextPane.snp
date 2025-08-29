@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RowView Padding="3" Spacing="2">
-  <Button Name="SaveButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Save" ImageName="File_Save.png" ShowArea="false" />
-  <Separator PrefHeight="18" Vertical="true" />
-  <Button Name="CutButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Cut" ImageName="Edit_Cut.png" ShowArea="false" />
-  <Button Name="CopyButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Copy" ImageName="Edit_Copy.png" ShowArea="false" />
-  <Button Name="PasteButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Paste" ImageName="Edit_Paste.png" ShowArea="false" />
-  <Separator PrefHeight="18" Vertical="true" />
-  <Button Name="UndoButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Undo" ImageName="Edit_Undo.png" ShowArea="false" />
-  <Button Name="RedoButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Redo" ImageName="Edit_Redo.png" ShowArea="false" />
-  <Separator PrefHeight="18" Vertical="true" />
-  <TextField Name="FontSizeText" PrefWidth="32" PrefHeight="22" Align="CENTER" Margin="3" />
-  <Button Name="IncreaseFontButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Increase Font Size" ImageName="Font_Increase.png" ShowArea="false" />
-  <Button Name="DecreaseFontButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Decrease Font Size" ImageName="Font_Decrease.png" ShowArea="false" />
-</RowView>
+<ColView FillWidth="true">
+  <RowView Name="ToolBar" Padding="3" Spacing="2">
+    <Button Name="SaveButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Save" ImageName="File_Save.png" ShowArea="false" />
+    <Separator PrefHeight="18" Vertical="true" />
+    <Button Name="CutButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Cut" ImageName="Edit_Cut.png" ShowArea="false" />
+    <Button Name="CopyButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Copy" ImageName="Edit_Copy.png" ShowArea="false" />
+    <Button Name="PasteButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Paste" ImageName="Edit_Paste.png" ShowArea="false" />
+    <Separator PrefHeight="18" Vertical="true" />
+    <Button Name="UndoButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Undo" ImageName="Edit_Undo.png" ShowArea="false" />
+    <Button Name="RedoButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Redo" ImageName="Edit_Redo.png" ShowArea="false" />
+    <Separator PrefHeight="18" Vertical="true" />
+    <TextField Name="FontSizeText" PrefWidth="32" PrefHeight="22" Align="CENTER" Margin="3" />
+    <Button Name="IncreaseFontButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Increase Font Size" ImageName="Font_Increase.png" ShowArea="false" />
+    <Button Name="DecreaseFontButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Decrease Font Size" ImageName="Font_Decrease.png" ShowArea="false" />
+    <Button Name="HideToolBarButton" PrefWidth="22" PrefHeight="22" LeanX="RIGHT" Text="x" Font="Arial 12" TextColor="#A0" ToolTip="Hide toolbar" ShowArea="false" />
+  </RowView>
+  <RectView Name="Separator" PrefHeight="1" Fill="#C0" GrowWidth="true" />
+  <RowView Name="FindPanel" Margin="3" GrowWidth="true">
+    <TextField Name="FindText" PrefWidth="180" PrefHeight="26" Margin="3" BorderRadius="4" GrowWidth="true" Font="Arial 14" PromptText="Find" />
+    <ToggleButton Name="MatchCaseButton" PrefWidth="21" PrefHeight="21" Text="Cc" Font="Arial 12" TextColor="#A0" ToolTip="Match case" ShowArea="false" />
+    <Button Name="ShowToolBarButton" PrefWidth="21" PrefHeight="21" Text="T" Font="Arial 12" TextColor="#A0" ToolTip="Show toolbar" ShowArea="false" />
+    <Button Name="HideFindPanelButton" PrefWidth="22" PrefHeight="22" LeanX="RIGHT" Text="x" Font="Arial 12" TextColor="#A0" ToolTip="Hide find panel" ShowArea="false" />
+  </RowView>
+</ColView>
