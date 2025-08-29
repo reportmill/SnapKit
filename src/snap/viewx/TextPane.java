@@ -100,6 +100,16 @@ public class TextPane extends ViewOwner {
     }
 
     /**
+     * Toggles the toolbar.
+     */
+    private void toggleToolBar()
+    {
+        if (_toolBar.isShowing())
+            hideToolBar();
+        else showToolBar();
+    }
+
+    /**
      * Shows the find panel.
      */
     public void showFindPanel()
@@ -135,6 +145,16 @@ public class TextPane extends ViewOwner {
         _findPanel.setPrefHeight(_findPanel.getPrefHeight());
         _findPanel.getAnim(200).clear().setPrefHeight(0).play();
         _findPanel.getAnim(0).setOnFinish(() -> _findPanel.setVisible(false));
+    }
+
+    /**
+     * Toggles the find panel.
+     */
+    private void toggleFindPanel()
+    {
+        if (_findPanel.isShowing())
+            hideFindPanel();
+        else showFindPanel();
     }
 
     /**
@@ -260,7 +280,8 @@ public class TextPane extends ViewOwner {
 
         // Get text area and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
         _textArea.addPropChangeListener(this::handleTextAreaPropChange);
-        _textArea.getTextAdapter().addTextModelPropChangeListener(this::handleSourceTextPropChange);
+        _textArea.addEventHandler(this::handleTextAreaMouseEvent, MousePress, MouseRelease);
+        _textArea.getTextAdapter().addTextModelPropChangeListener(this::handleTextModelPropChange);
         setFirstFocus(_textArea);
 
         // Load text area text
@@ -337,12 +358,14 @@ public class TextPane extends ViewOwner {
             case "FindText" -> selectNextMatch(true);
             case "FindTextPrevious" -> selectPreviousMatch();
 
-            // Handle HideFindPanelButton
+            // Handle HideFindPanelButton, ToggleFindPanelMenuItem
             case "HideFindPanelButton" -> hideFindPanel();
+            case "ToggleFindPanelMenuItem" -> toggleFindPanel();
 
-            // Handle ShowToolBarButton, HideToolBarButton
+            // Handle ShowToolBarButton, HideToolBarButton, ToggleToolBarMenuItem
             case "ShowToolBarButton" -> showToolBar();
             case "HideToolBarButton" -> hideToolBar();
+            case "ToggleToolBarMenuItem" -> toggleToolBar();
 
             // Handle LineNumberPanelAction (Without RunLater, modal DialogBox seems to cause event resend)
             case "LineNumberPanelAction" -> runLater(() -> showLineNumberPanel());
@@ -513,9 +536,22 @@ public class TextPane extends ViewOwner {
     protected void handleTextAreaPropChange(PropChange aPC)  { }
 
     /**
+     * Called when TextArea gets MouseEvent.
+     */
+    private void handleTextAreaMouseEvent(ViewEvent anEvent)
+    {
+        // Handle PopupTrigger
+        if (anEvent.isPopupTrigger()) { //anEvent.consume();
+            Menu contextMenu = createContextMenu();
+            contextMenu.setOwner(this);
+            contextMenu.showMenuAtXY(_textArea, anEvent.getX(), anEvent.getY());
+        }
+    }
+
+    /**
      * Called when TextModel does prop change.
      */
-    protected void handleSourceTextPropChange(PropChange aPC)
+    protected void handleTextModelPropChange(PropChange aPC)
     {
         resetLater();
     }
@@ -529,6 +565,22 @@ public class TextPane extends ViewOwner {
         if (findString != null && !findString.isEmpty())
             findMatchesAndSelectNext(findString, getViewBoolValue("MatchCaseButton"));
         else _stringMatches = null;
+    }
+
+    /**
+     * Creates the ContextMenu.
+     */
+    protected Menu createContextMenu()
+    {
+        // Create MenuItems
+        ViewBuilder<MenuItem> viewBuilder = new ViewBuilder<>(MenuItem.class);
+        String toolBarMenuText = (_toolBar.isShowing() ? "Hide" : "Show") + " ToolBar";
+        viewBuilder.name("ToggleToolBarMenuItem").text(toolBarMenuText).save();
+        String findPanelMenuText = (_findPanel.isShowing() ? "Hide" : "Show") + " Find Panel";
+        viewBuilder.name("ToggleFindPanelMenuItem").text(findPanelMenuText).save();
+
+        // Create and return menu
+        return viewBuilder.buildMenu("ContextMenu", null);
     }
 
     /**
