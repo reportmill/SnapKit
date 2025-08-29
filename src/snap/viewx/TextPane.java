@@ -516,7 +516,8 @@ public class TextPane extends ViewOwner {
     public StringMatch getPreviousMatch()
     {
         int selStart = _textArea.getSelStart();
-        return _stringMatches != null ? ListUtils.findMatch(_stringMatches, match -> match.end <= selStart) : null;
+        List<StringMatch> reversedMatches = _stringMatches != null ? ListUtils.getReverse(_stringMatches) : null;
+        return _stringMatches != null ? ListUtils.findMatch(reversedMatches, match -> match.end <= selStart) : null;
     }
 
     /**
