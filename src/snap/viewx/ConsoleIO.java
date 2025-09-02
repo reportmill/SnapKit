@@ -12,17 +12,29 @@ public class ConsoleIO {
     /**
      * Maps to System.out.print.
      */
-    public static void print(Object anObj)  { System.out.print(anObj); }
+    public static void print(Object anObj)
+    {
+        System.out.print(anObj);
+        System.out.flush();
+    }
 
     /**
      * Maps to System.out.println.
      */
-    public static void println()  { System.out.println(); }
+    public static void println()
+    {
+        System.out.println();
+        System.out.flush();
+    }
 
     /**
      * Maps to System.out.println.
      */
-    public static void println(Object anObj)  { System.out.println(anObj); }
+    public static void println(Object anObj)
+    {
+        System.out.println(anObj);
+        System.out.flush();
+    }
 
     /**
      * Maps to System.err.println.
@@ -34,7 +46,8 @@ public class ConsoleIO {
      */
     public static String readln(String prompt)
     {
-        print(prompt);
+        if (prompt != null && !prompt.isEmpty())
+            print(prompt);
         if (prompt != null && !prompt.isEmpty() && !Character.isWhitespace(prompt.charAt(prompt.length()-1)))
             print(' ');
         String value = new Scanner(System.in).nextLine();
@@ -90,5 +103,35 @@ public class ConsoleIO {
     {
         Console console = Console.getShared();
         console.show(anObj);
+    }
+
+    /**
+     * IO class like Java 24+.
+     */
+    public static class IO {
+        /**
+         * Writes a string representation of the specified object to the system console and then flushes that console.
+         */
+        public static void print(Object obj)  { ConsoleIO.print(obj); }
+
+        /**
+         * Terminates the current line on the system console and then flushes that console..
+         */
+        public static void println()  { ConsoleIO.println(); }
+
+        /**
+         * Writes a string representation of the specified object to the system console, terminates the line and then flushes that console.
+         */
+        public static void println(Object obj)  { ConsoleIO.println(obj); }
+
+        /**
+         * Reads a single line of text from the system console.
+         */
+        public static String readln()  { return ConsoleIO.readln(null); }
+
+        /**
+         * Writes a prompt as if by calling print, then reads a single line of text from the system console.
+         */
+        public static String readln(String prompt)  { return ConsoleIO.readln(prompt); }
     }
 }
