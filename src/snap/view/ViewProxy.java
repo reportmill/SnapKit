@@ -166,6 +166,11 @@ public class ViewProxy<T extends View> extends Rect {
     }
 
     /**
+     * Clears the children.
+     */
+    public void clearChildren()  { _children = null; }
+
+    /**
      * Returns the last child.
      */
     public ViewProxy<?> getLastChild()
