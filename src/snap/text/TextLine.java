@@ -146,7 +146,7 @@ public class TextLine implements CharSequenceX, Cloneable {
         }
 
         // If empty, just set style and return
-        if (run.length() == 0) {
+        if (run.isEmpty()) {
             run.setTextStyle(aStyle);
             return run;
         }
@@ -588,6 +588,20 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Returns the token at or after given char index.
+     */
+    public TextToken getNextTokenForCharIndex(int charIndex)
+    {
+        // Check bounds
+        if (charIndex < 0 || charIndex > length())
+            throw new IndexOutOfBoundsException("TextLine.getNextTokenForCharIndex: Index " + charIndex + " beyond " + length());
+
+        // Get tokens
+        TextToken[] tokens = getTokens();
+        return ArrayUtils.findMatch(tokens, token -> charIndex < token.getEndCharIndexInLine());
+    }
+
+    /**
      * Returns the token at or before given char index.
      */
     public TextToken getLastTokenForCharIndex(int charIndex)
@@ -739,7 +753,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     {
         TextRun[] runs = getRuns();
         for (TextRun run : runs)
-            if (run.isUnderlined() && run.length() > 0)
+            if (run.isUnderlined() && !run.isEmpty())
                 return true;
         return false;
     }
