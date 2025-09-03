@@ -598,7 +598,7 @@ public class TextLine implements CharSequenceX, Cloneable {
 
         // Get tokens
         TextToken[] tokens = getTokens();
-        return ArrayUtils.findMatch(tokens, token -> charIndex < token.getEndCharIndexInLine());
+        return ArrayUtils.findMatch(tokens, token -> charIndex <= token.getStartCharIndexInLine());
     }
 
     /**
