@@ -97,7 +97,7 @@ public class WrapView extends ParentView {
     protected double getPrefWidthImpl(double aH)
     {
         Insets ins = getInsetsAll();
-        if (_content == null)
+        if (_content == null || !_content.isVisible())
             return ins.getWidth();
 
         // Simple case of 90 degrees
@@ -122,7 +122,7 @@ public class WrapView extends ParentView {
     protected double getPrefHeightImpl(double aW)
     {
         Insets ins = getInsetsAll();
-        if (_content == null)
+        if (_content == null || !_content.isVisible())
             return ins.getHeight();
 
         // Simple case of 90 degrees
@@ -147,7 +147,7 @@ public class WrapView extends ParentView {
     protected void layoutImpl()
     {
         // If no content, just return
-        if (_content == null) return;
+        if (_content == null || !_content.isVisible()) return;
 
         // Get size of parent and content and set
         Insets ins = getInsetsAll();
