@@ -123,6 +123,7 @@ public class Explode extends View {
         setPickable(false);
         setScale(_scale);
         setSize(_host.getWidth(), _host.getHeight());
+        setPrefSize(_host.getWidth(), _host.getHeight());
         return this;
     }
 

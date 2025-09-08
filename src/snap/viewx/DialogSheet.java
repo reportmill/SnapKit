@@ -3,7 +3,6 @@
  */
 package snap.viewx;
 import snap.geom.HPos;
-import snap.geom.Size;
 import snap.gfx.Color;
 import snap.gfx.Effect;
 import snap.gfx.ShadowEffect;
@@ -131,8 +130,7 @@ public class DialogSheet extends DialogBox {
         _sheetView.setManaged(false);
 
         // Set size
-        Size prefSize = _sheetView.getPrefSize();
-        _sheetView.setSize(prefSize);
+        _sheetView.setSizeToBestSize();
 
         // Return
         return _sheetView;

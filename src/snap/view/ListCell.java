@@ -89,6 +89,7 @@ public class ListCell <T> extends Label {
             Rect textBounds = getTextBounds();
             textBounds.inset(-2);
             editor.setBounds(textBounds);
+            editor.setPrefSize(textBounds.width, textBounds.height);
 
             // Add editor
             addChild(editor);

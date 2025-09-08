@@ -174,7 +174,7 @@ public class DrawerView extends ParentView {
 
         // Create/configure TabButton
         Button tabButton = new Button();
-        tabButton.setSize(22, 88);
+        tabButton.setPrefSize(22, 88);
         tabButton.setManaged(false);
         tabButton.setLean(Pos.CENTER_RIGHT);
         tabButton.setPosition(Pos.CENTER_LEFT);
@@ -207,9 +207,6 @@ public class DrawerView extends ParentView {
         label.setLean(Pos.CENTER);
         label.setRotate(-90);
 
-        // Add prop change listener to explicitly set size on any change
-        label.addPropChangeListener(pc -> label.setSize(label.getPrefSize()));
-
         // Set, return
         return _tabLabel = label;
     }
@@ -229,9 +226,6 @@ public class DrawerView extends ParentView {
         drawerLabel.setTextColor(Color.GRAY);
         drawerLabel.setManaged(false);
         drawerLabel.setLean(Pos.TOP_CENTER);
-
-        // Add prop change listener to explicitly set size on any change
-        drawerLabel.addPropChangeListener(pc -> drawerLabel.setSize(drawerLabel.getPrefSize()));
 
         // Set, return
         return _drawerLabel = drawerLabel;

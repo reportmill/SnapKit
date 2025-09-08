@@ -520,8 +520,9 @@ public class ParentView extends View {
             boolean growY = child.isGrowHeight();
             double childX = child.getX();
             double childY = child.getY();
-            double childW = child.getWidth();
-            double childH = child.getHeight();
+            Size prefSize = child.getBestSize();
+            double childW = prefSize.width;
+            double childH = prefSize.height;
 
             // Handle LeanX: If grow, make width fill parent (minus margin). Set X for lean, width, margin.
             if (leanX != null) {
