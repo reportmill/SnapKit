@@ -502,8 +502,9 @@ public class ParentView extends View {
      */
     protected void layoutFloatingViews()
     {
-        // If no floating, just return
         if (getChildrenManaged().length == getChildCount()) return;
+
+        // Get view bounds
         double viewW = getWidth();
         double viewH = getHeight();
 
@@ -512,31 +513,33 @@ public class ParentView extends View {
 
             if (child.isManaged()) continue;
 
-            // Get child lean, grow, margin and current bounds
-            HPos leanX = child.getLeanX();
-            VPos leanY = child.getLeanY(); if (leanX == null && leanY == null) continue;
-            Insets marg = child.getMargin();
-            boolean growX = child.isGrowWidth();
-            boolean growY = child.isGrowHeight();
+            // Get child info
+            Insets childMargin = child.getMargin();
             double childX = child.getX();
             double childY = child.getY();
             Size prefSize = child.getBestSize();
             double childW = prefSize.width;
             double childH = prefSize.height;
 
-            // Handle LeanX: If grow, make width fill parent (minus margin). Set X for lean, width, margin.
-            if (leanX != null) {
-                if (growX)
-                    childW = viewW - marg.getWidth();
-                childX = marg.left + (viewW - marg.getWidth() - childW) * ViewUtils.getAlignX(leanX);
+            // Handle grow width
+            if (child.isGrowWidth()) {
+                childX = childMargin.left;
+                childW = viewW - childMargin.getWidth();
             }
 
-            // Handle LeanY: If grow, make height fill parent (minus margin). Set Y for lean, height, margin.
-            if (leanY != null) {
-                if (growY)
-                    childH = viewH - marg.getHeight();
-                childY = marg.top + (viewH - marg.getHeight() - childH) * ViewUtils.getAlignY(leanY);
+            // Handle LeanX: Set X for lean, width, margin.
+            else if (child.getLeanX() != null)
+                childX = childMargin.left + (viewW - childMargin.getWidth() - childW) * child.getLeanX().doubleValue();
+
+            // Handle grow height
+            if (child.isGrowHeight()) {
+                childY = childMargin.top;
+                childH = viewH - childMargin.getHeight();
             }
+
+            // Handle LeanY: Set Y for lean, height, margin.
+            if (child.getLeanY() != null)
+                childY = childMargin.top + (viewH - childMargin.getHeight() - childH) * child.getLeanY().doubleValue();
 
             // Set bounds
             child.setBounds(childX, childY, childW, childH);
