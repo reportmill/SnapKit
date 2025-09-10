@@ -9,12 +9,6 @@ import snap.gfx.Color;
  */
 public class PopupWindow extends WindowView {
 
-    // The parent window
-    private WindowView _parentWindow;
-
-    // The view given with last show
-    private View _clientView;
-
     /**
      * Constructor.
      */
@@ -34,42 +28,19 @@ public class PopupWindow extends WindowView {
     }
 
     /**
-     * Returns the parent window.
-     */
-    public WindowView getParentWindow()  { return _parentWindow; }
-
-    /**
-     * Returns the view last used for show.
-     */
-    public View getClientView()  { return _clientView; }
-
-    /**
      * Shows this popup window at point XY in given view coords.
      */
     @Override
     public void show(View aView, double aX, double aY)
     {
-        _clientView = aView;
-
         // Show node
         super.show(aView, aX, aY);
 
         // Set this popup as aView.Window.Popup
-        _parentWindow = aView != null ? aView.getWindow() : null;
-        if (_parentWindow != null)
-            _parentWindow.setPopup(this);
+        WindowView parentWindow = aView != null ? aView.getWindow() : null;
+        if (parentWindow != null)
+            parentWindow.setPopup(this);
         else System.err.println("PopupWindow.show: No Window found");
-    }
-
-    /**
-     * Override to clear parent window.
-     */
-    @Override
-    public void hide()
-    {
-        super.hide();
-        _parentWindow = null;
-        _clientView = null;
     }
 
     /**

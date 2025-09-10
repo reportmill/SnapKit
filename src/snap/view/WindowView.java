@@ -548,6 +548,9 @@ public class WindowView extends ParentView {
             getPopup().hide();
         if (isShowing())
             getHelper().hide();
+
+        if (this instanceof PopupWindow)
+            _clientView = null;
     }
 
     /**
