@@ -363,10 +363,6 @@ public class WindowView extends ParentView {
         if (_focusedView != null)
             _focusedView.setFocused(true);
 
-        // Tell WindowHpr
-        WindowHpr helper = getHelper();
-        helper.focusDidChange(_focusedView);
-
         // Fire prop change
         firePropChange(FocusView_Prop, _focusedView, _lastFocusedView);
     }
@@ -879,8 +875,5 @@ public class WindowView extends ParentView {
 
         /** Window/Popup method: Sets the document file url for the window title bar proxy icon. */
         public void setDocURL(WebURL aURL)  { }
-
-        /** Notifies that focus changed. */
-        public void focusDidChange(View aView) { }
     }
 }
