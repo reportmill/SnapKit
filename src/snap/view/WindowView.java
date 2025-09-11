@@ -593,8 +593,13 @@ public class WindowView extends ParentView {
         Rect rect2 = aView.localToParent(rect1, null).getBounds();
 
         // Return location for rect, position and offset
-        Point point = getRectLocation(rect2, aPos, aDX, aDY);
-        return point;
+        return getRectLocation(rect2, aPos, aDX, aDY);
+    }
+
+    /** Convert given point x/y from given view to screen. */
+    public Point convertViewPointToScreen(View aView, double aX, double aY)
+    {
+        return getHelper().convertViewPointToScreen(aView, aX, aY);
     }
 
     /**
@@ -765,6 +770,11 @@ public class WindowView extends ParentView {
     }
 
     /**
+     * Returns the native.
+     */
+    public Object getNative()  { return getHelper().getNative(); }
+
+    /**
      * Returns an array of all open windows.
      */
     public static WindowView[] getOpenWindows()  { return _openWins.toArray(new WindowView[0]); }
@@ -806,24 +816,25 @@ public class WindowView extends ParentView {
     private Point getRectLocation(Rect aRect, Pos aPos, double aDX, double aDY)
     {
         // Get rect for given node and point for given offsets
-        double x = aDX, y = aDY;
+        double rectX = aDX;
+        double rectY = aDY;
 
         // Modify x for given HPos
-        switch(aPos.getHPos()) {
-            case LEFT: x += aRect.x; break;
-            case CENTER: x += Math.round(aRect.x + (aRect.width - getWidth()) / 2); break;
-            case RIGHT: x += aRect.getMaxX() - getWidth(); break;
+        switch (aPos.getHPos()) {
+            case LEFT -> rectX += aRect.x;
+            case CENTER -> rectX += Math.round(aRect.x + (aRect.width - getWidth()) / 2);
+            case RIGHT -> rectX += aRect.getMaxX() - getWidth();
         }
 
         // Modify y for given VPos
-        switch(aPos.getVPos()) {
-            case TOP: y += aRect.y; break;
-            case CENTER: y += Math.round(aRect.y + (aRect.height - getHeight()) / 2); break;
-            case BOTTOM: y += aRect.getMaxY() - getHeight(); break;
+        switch (aPos.getVPos()) {
+            case TOP -> rectY += aRect.y;
+            case CENTER -> rectY += Math.round(aRect.y + (aRect.height - getHeight()) / 2);
+            case BOTTOM -> rectY += aRect.getMaxY() - getHeight();
         }
 
         // Return point
-        return new Point(x,y);
+        return new Point(rectX, rectY);
     }
 
     /**

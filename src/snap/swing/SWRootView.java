@@ -17,7 +17,7 @@ public class SWRootView extends JComponent implements DragGestureListener {
     private WindowView _win;
 
     // The RootView
-    private RootView _rview;
+    private RootView _rootView;
 
     // The DragSource
     private DragSource _dragSource;
@@ -32,7 +32,7 @@ public class SWRootView extends JComponent implements DragGestureListener {
     {
         // RootView only beyond this point
         _win = aWin;
-        _rview = aRootView;
+        _rootView = aRootView;
 
         // Suppress Tab key handling
         setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, java.util.Collections.EMPTY_SET);
@@ -99,7 +99,7 @@ public class SWRootView extends JComponent implements DragGestureListener {
         }
 
         // Set new bounds
-        _rview.setBounds(aX, aY, aW, aH);
+        _rootView.setBounds(aX, aY, aW, aH);
     }
 
     /**
@@ -145,45 +145,42 @@ public class SWRootView extends JComponent implements DragGestureListener {
             return;
 
         // Handle MouseEvents
-        if (anEvent instanceof MouseEvent) {
-            MouseEvent me = (MouseEvent) anEvent;
-            int id = me.getID();
+        if (anEvent instanceof MouseEvent mouseEvent) {
+            int id = mouseEvent.getID();
 
             // MousePress: Store location for potential MouseDrag suppression
             if (id == MouseEvent.MOUSE_PRESSED) {
-                _lx = me.getX();
-                _ly = me.getY();
+                _lx = mouseEvent.getX();
+                _ly = mouseEvent.getY();
             }
 
             // MouseDrag: If matches last location, skip (these can show up on HiDPI Mac and can cause problems)
             else if (id == MouseEvent.MOUSE_DRAGGED) {
-                if (me.getX() == _lx && me.getY() == _ly) {
-                    me.consume();
+                if (mouseEvent.getX() == _lx && mouseEvent.getY() == _ly) {
+                    mouseEvent.consume();
                     return;
                 }
-                _lx = me.getX();
-                _ly = me.getY();
+                _lx = mouseEvent.getX();
+                _ly = mouseEvent.getY();
             }
 
             // Handle MouseClick: Just skip
             if (id == MouseEvent.MOUSE_CLICKED) return;
 
             // Create new event and dispatch
-            ViewEvent event = ViewEvent.createEvent(_rview, me, null, null);
+            ViewEvent event = ViewEvent.createEvent(_rootView, mouseEvent, null, null);
             _win.dispatchEventToWindow(event);
 
             // Bogus! (not sure why this is here)
             if (!isFocusOwner()) requestFocusInWindow(true);
 
             // This stops scroll events from closing popup window
-            me.consume();
+            mouseEvent.consume();
         }
 
         // Handle KeyEvents
         else if (anEvent instanceof KeyEvent) {
-            KeyEvent ke = (KeyEvent) anEvent;
-            int id = ke.getID();
-            ViewEvent event = ViewEvent.createEvent(_rview, anEvent, null, null);
+            ViewEvent event = ViewEvent.createEvent(_rootView, anEvent, null, null);
             _win.dispatchEventToWindow(event);
         }
     }
@@ -193,8 +190,8 @@ public class SWRootView extends JComponent implements DragGestureListener {
      */
     public Dimension getMinimumSize()
     {
-        if (_rview == null || isMinimumSizeSet()) return super.getMinimumSize();
-        double mw = _rview.getMinWidth(), mh = _rview.getMinHeight();
+        if (_rootView == null || isMinimumSizeSet()) return super.getMinimumSize();
+        double mw = _rootView.getMinWidth(), mh = _rootView.getMinHeight();
         return new Dimension((int) Math.round(mw), (int) Math.round(mh));
     }
 
@@ -203,8 +200,8 @@ public class SWRootView extends JComponent implements DragGestureListener {
      */
     public Dimension getPreferredSize()
     {
-        if (_rview == null || isPreferredSizeSet()) return super.getPreferredSize();
-        double pw = _rview.getPrefWidth(), ph = _rview.getPrefHeight();
+        if (_rootView == null || isPreferredSizeSet()) return super.getPreferredSize();
+        double pw = _rootView.getPrefWidth(), ph = _rootView.getPrefHeight();
         return new Dimension((int) Math.round(pw), (int) Math.round(ph));
     }
 
@@ -213,8 +210,8 @@ public class SWRootView extends JComponent implements DragGestureListener {
      */
     public String getToolTipText(MouseEvent anEvent)
     {
-        if (_rview == null) return null;
-        ViewEvent event = ViewEvent.createEvent(_rview, anEvent, null, null);
+        if (_rootView == null) return null;
+        ViewEvent event = ViewEvent.createEvent(_rootView, anEvent, null, null);
         return _win.getToolTip(event);
     }
 
@@ -223,7 +220,7 @@ public class SWRootView extends JComponent implements DragGestureListener {
      */
     public void dragGestureRecognized(DragGestureEvent anEvent)
     {
-        ViewEvent event = ViewEvent.createEvent(_rview, anEvent, ViewEvent.Type.DragGesture, null);
+        ViewEvent event = ViewEvent.createEvent(_rootView, anEvent, ViewEvent.Type.DragGesture, null);
         _win.dispatchEventToWindow(event);
     }
 
@@ -232,7 +229,7 @@ public class SWRootView extends JComponent implements DragGestureListener {
      */
     public void sendDropTargetEvent(DropTargetEvent anEvent, ViewEvent.Type aType)
     {
-        ViewEvent event = ViewEvent.createEvent(_rview, anEvent, aType, null);
+        ViewEvent event = ViewEvent.createEvent(_rootView, anEvent, aType, null);
         _win.dispatchEventToWindow(event);
     }
 
@@ -244,11 +241,11 @@ public class SWRootView extends JComponent implements DragGestureListener {
     {
         // Get native window and just return if it is Snap Window native
         Window winNtv = SwingUtils.getParent(this, Window.class);
-        if (winNtv == _win.getHelper().getNative())
+        if (winNtv == _win.getNative())
             return;
 
         // Update Snap RootView Showing
-        ViewUtils.setShowing(_rview, isShowing());
+        ViewUtils.setShowing(_rootView, isShowing());
 
         // If not showing and Window.Popup.Showing, hide Popup.
         if (!isShowing() && _win.getPopup() != null)

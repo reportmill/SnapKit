@@ -21,22 +21,27 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     private WindowView _win;
 
     // The Swing Window
-    private Window _winNtv;
+    private Window _swingWindow;
 
     // The snap RootView
-    private RootView _rview;
+    private RootView _rootView;
 
     // The native RootView
-    private SWRootView _rviewNtv;
-
-    // The listener for catching Swing window bounds changes
-    private ComponentAdapter _ntvWinBndsLsnr;
+    private SWRootView _rootViewNative;
 
     // The current cursor
     private snap.view.Cursor _cursor;
 
     // Runnable to update cursor
     private Runnable _setRootViewNativeCursorRun;
+
+    /**
+     * Constructor.
+     */
+    public SWWindowHpr()
+    {
+        super();
+    }
 
     /**
      * Returns the snap Window.
@@ -54,30 +59,31 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         _win = aWin;
 
         // Create native
-        _winNtv = getNative();
+        _swingWindow = createSwingWindow();
 
         // Set RootView var and create native RootView
-        _rview = aWin.getRootView();
-        _rviewNtv = new SWRootView(_win, _rview);
+        _rootView = aWin.getRootView();
+        _rootViewNative = new SWRootView(_win, _rootView);
 
         // Add listener to handle window prop changes
-        _win.addPropChangeListener(this::handleSnapWindowPropertyChange);
+        _win.addPropChangeListener(this::handleSnapWindowPropChange);
     }
 
     /**
      * Returns the native being helped.
      */
     @Override
-    public Window getNative()
+    public Window getNative()  { return _swingWindow; }
+
+    /**
+     * Returns the native being helped.
+     */
+    private Window createSwingWindow()
     {
-        // If already set, just return
-        if (_winNtv != null) return _winNtv;
+        String windowType = _win.getType();
 
-        // Get Window type
-        String type = _win.getType();
-
-        // If standard TYPE_MAIN window, just return new JFrame
-        if (type == WindowView.TYPE_MAIN)
+        // If standard TYPE_MAIN window, return new JFrame
+        if (windowType == WindowView.TYPE_MAIN)
             return new JFrame();
 
         // Get window client/owner (if requested by/for view in another window)
@@ -89,7 +95,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
      * Returns the native for the window content.
      */
     @Override
-    public JComponent getContentNative()  { return _rviewNtv; }
+    public JComponent getContentNative()  { return _rootViewNative; }
 
     /**
      * Initialize native window.
@@ -97,51 +103,45 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     @Override
     public void initWindow()
     {
-        // Get native, window view and root view
-        WindowView win = _win;
-        Window winNtv = _winNtv;
-
-        // Configure JFrame: Title, Resizable
-        if (winNtv instanceof JFrame) {
-            JFrame frame = (JFrame) winNtv;
-            frame.setTitle(win.getTitle());
-            frame.setResizable(win.isResizable());
-        }
+        // Set title, resizeable
+        setTitle(_win.getTitle());
+        setResizable(_win.isResizable());
 
         // Configure JDialog: Title, Resizable, Modal
-        else if (winNtv instanceof JDialog) {
-            JDialog frame = (JDialog) winNtv;
-            frame.setTitle(win.getTitle());
-            frame.setModal(win.isModal());
-            frame.setResizable(win.isResizable());
-            if (win.getType() == WindowView.TYPE_UTILITY)
-                frame.getRootPane().putClientProperty("Window.style", "small");
-            else if (win.getType() == WindowView.TYPE_PLAIN)
-                frame.setUndecorated(true);
+        if (_swingWindow instanceof JDialog jdialog) {
+            jdialog.setModal(_win.isModal());
+            switch (_win.getType()) {
+                case WindowView.TYPE_UTILITY -> jdialog.getRootPane().putClientProperty("Window.style", "small");
+                case WindowView.TYPE_PLAIN -> jdialog.setUndecorated(true);
+            }
         }
 
         // Set common attributes
-        winNtv.setFocusableWindowState(win.isFocusable());
-        winNtv.setAlwaysOnTop(win.isAlwaysOnTop());
-        winNtv.setOpacity((float) win.getOpacity());
+        _swingWindow.setFocusableWindowState(_win.isFocusable());
+        _swingWindow.setAlwaysOnTop(_win.isAlwaysOnTop());
+        _swingWindow.setOpacity((float) _win.getOpacity());
 
         // Install RootView Native as ContentPane
-        RootPaneContainer rpc = (RootPaneContainer) winNtv;
-        rpc.setContentPane(_rviewNtv);
+        RootPaneContainer rootPaneContainer = (RootPaneContainer) _swingWindow;
+        rootPaneContainer.setContentPane(_rootViewNative);
 
         // Size window to root view
-        winNtv.pack(); //winNtv.setLocation((int)win.getX(),(int)win.getY());
+        _swingWindow.pack();
 
         // Set WindowView insets
-        java.awt.Insets insAWT = winNtv.getInsets();
-        Insets ins = new Insets(insAWT.top, insAWT.right, insAWT.bottom, insAWT.left);
-        win.setPadding(ins);
+        java.awt.Insets insAWT = _swingWindow.getInsets();
+        _win.setPadding(new Insets(insAWT.top, insAWT.right, insAWT.bottom, insAWT.left));
 
         // Add component listener to sync win bounds changes with WindowView/RootView
-        winNtv.addComponentListener(getNativeWindowBoundsListener());
+        _swingWindow.addComponentListener(new ComponentAdapter() {
+            public void componentMoved(ComponentEvent e)  { handleSwingWindowBoundsChange(); }
+            public void componentResized(ComponentEvent e)  { handleSwingWindowBoundsChange(); }
+            public void componentShown(ComponentEvent e)  { handleSwingWindowShowingChange(); }
+            public void componentHidden(ComponentEvent e)  { handleSwingWindowShowingChange(); }
+        });
 
         // Add WindowListener to dispatch window events
-        winNtv.addWindowListener(new WindowAdapter() {
+        _swingWindow.addWindowListener(new WindowAdapter() {
             public void windowActivated(WindowEvent anEvent)  { handleSwingWindowActiveChange(anEvent); }
             public void windowDeactivated(WindowEvent anEvent)  { handleSwingWindowActiveChange(anEvent); }
             public void windowOpened(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinOpen); }
@@ -150,7 +150,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         });
 
         // Sync Window bounds to WindowView
-        handleSwingWindowBoundsChanged();
+        handleSwingWindowBoundsChange();
     }
 
     /**
@@ -159,32 +159,25 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     @Override
     public void show()
     {
-        // If always-on-top, turn this on (since this is can be turned off in setWindowVisible(false))
-        //if (wview.isAlwaysOnTop()) win.setAlwaysOnTop(true);
-
         // Set native window location, make visible and notify ShowingChanged (so change is reflected immediately)
-        int x = (int) Math.round(_win.getX());
-        int y = (int) Math.round(_win.getY());
+        int winX = (int) Math.round(_win.getX());
+        int winY = (int) Math.round(_win.getY());
 
         // Set WinNtv location and make visible
-        _winNtv.setLocation(x, y);
-        _winNtv.setVisible(true);
+        _swingWindow.setLocation(winX, winY);
+        _swingWindow.setVisible(true);
         handleSwingWindowShowingChange();
 
         // If window is modal, just return
-        if (_win.isModal()) return;
+        if (_win.isModal())
+            return;
 
         // If window has frame save name, set listener
         if (_win.getSaveName() != null && _win.getProp("FrameSaveListener") == null) {
             FrameSaveListener fsl = new FrameSaveListener(_win);
             _win.setProp("FrameSaveListener", fsl);
-            _winNtv.addComponentListener(fsl);
+            _swingWindow.addComponentListener(fsl);
         }
-
-        // If window is always-on-top or does hide-on-deactivate, add listener to handle app deactivate stuff
-        //if (wview.isAlwaysOnTop() || wview.isHideOnDeactivate()) {
-        //if (_actvAdptr==null) _actvAdptr = new ActivationAdapter(win,wview.isHideOnDeactivate()));
-        //_actvAdptr.setEnabled(true); }
     }
 
     /**
@@ -193,7 +186,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     @Override
     public void hide()
     {
-        _winNtv.setVisible(false);
+        _swingWindow.setVisible(false);
         handleSwingWindowShowingChange(); // So change is reflected immediately
     }
 
@@ -201,7 +194,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
      * Order window to front.
      */
     @Override
-    public void toFront()  { _winNtv.toFront(); }
+    public void toFront()  { _swingWindow.toFront(); }
 
     /**
      * Override to correct for case of RootView not in Swing Window.
@@ -209,22 +202,15 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     @Override
     public Point convertViewPointToScreen(View aView, double aX, double aY)
     {
-        // Make sure we have right window
-        WindowView win = aView.getWindow();
-        if (win != _win) {
-            WindowView.WindowHpr hpr = win.getHelper();
-            return hpr.convertViewPointToScreen(aView, aX, aY);
-        }
-
         // Get point in RootView
-        Point point = aView.localToParent(aX, aY, _rview);
-        double pointX = point.x;
-        double pointY = point.y;
+        Point screenXY = aView.localToParent(aX, aY, _rootView);
+        double screenX = screenXY.x;
+        double screenY = screenXY.y;
 
         // Iterate up to screen, adding offsets
-        for (java.awt.Component comp = _rviewNtv; comp != null; comp = comp.getParent()) {
-            pointX += comp.getX();
-            pointY += comp.getY();
+        for (java.awt.Component comp = _rootViewNative; comp != null; comp = comp.getParent()) {
+            screenX += comp.getX();
+            screenY += comp.getY();
 
             // If Window, go ahead and bail, in case this is dialog of parent window
             if (comp instanceof java.awt.Window)
@@ -232,7 +218,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         }
 
         // Return point
-        return new Point(pointX, pointY);
+        return new Point(screenX, screenY);
     }
 
     /**
@@ -240,11 +226,10 @@ public class SWWindowHpr extends WindowView.WindowHpr {
      */
     public void setTitle(String aTitle)
     {
-        if (_winNtv instanceof JFrame)
-            ((JFrame) _winNtv).setTitle(aTitle);
-        else if (_winNtv instanceof JDialog)
-            ((JDialog) _winNtv).setTitle(aTitle);
-        else System.err.println("WindowHpr.setTitle: Not supported " + _winNtv);
+        if (_swingWindow instanceof JFrame jframe)
+            jframe.setTitle(aTitle);
+        else if (_swingWindow instanceof JDialog jdialog)
+            jdialog.setTitle(aTitle);
     }
 
     /**
@@ -252,11 +237,10 @@ public class SWWindowHpr extends WindowView.WindowHpr {
      */
     public void setResizable(boolean aValue)
     {
-        if (_winNtv instanceof JFrame)
-            ((JFrame) _winNtv).setResizable(aValue);
-        else if (_winNtv instanceof JDialog)
-            ((JDialog) _winNtv).setResizable(aValue);
-        else System.err.println("WindowHpr.setTitle: Not supported " + _winNtv);
+        if (_swingWindow instanceof JFrame jframe)
+            jframe.setResizable(aValue);
+        else if (_swingWindow instanceof JDialog jdialog)
+            jdialog.setResizable(aValue);
     }
 
     /**
@@ -273,8 +257,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         File file = aURL.getJavaFile();
 
         // Install in RootPane
-        if (_winNtv instanceof RootPaneContainer) {
-            RootPaneContainer rootPaneContainer = (RootPaneContainer) _winNtv;
+        if (_swingWindow instanceof RootPaneContainer rootPaneContainer) {
             JRootPane rootPane = rootPaneContainer.getRootPane();
             if (rootPane == null)
                 return;
@@ -287,7 +270,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
      */
     public void setImage(Image anImage)
     {
-        _winNtv.setIconImage(AWT.snapToAwtImage(anImage));
+        _swingWindow.setIconImage(AWT.snapToAwtImage(anImage));
     }
 
     /**
@@ -296,26 +279,28 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     @Override
     public void requestPaint(Rect aRect)
     {
-        _rviewNtv.repaint(aRect);
+        _rootViewNative.repaint(aRect);
     }
 
     /**
      * Called when window is shown/hidden.
      */
-    protected void handleSwingWindowShowingChange()
+    private void handleSwingWindowShowingChange()
     {
-        boolean showing = _winNtv.isShowing();
+        boolean showing = _swingWindow.isShowing();
         ViewUtils.setShowing(_win, showing);
     }
 
     /**
-     * Handles when Swing window bounds changed.
+     * Called when Swing window bounds changes.
      */
-    protected void handleSwingWindowBoundsChanged()
+    private void handleSwingWindowBoundsChange()
     {
-        int x = _winNtv.getX(), y = _winNtv.getY();
-        int w = _winNtv.getWidth(), h = _winNtv.getHeight();
-        _win.setBounds(x, y, w, h);
+        int swingX = _swingWindow.getX();
+        int swingY = _swingWindow.getY();
+        int swingW = _swingWindow.getWidth();
+        int swingH = _swingWindow.getHeight();
+        _win.setBounds(swingX, swingY, swingW, swingH);
 
         // If window deactivated and it has Popup, hide popup
         if (_win.getPopup() != null)
@@ -325,17 +310,17 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     /**
      * Handles active changed.
      */
-    protected void handleSwingWindowActiveChange(WindowEvent anEvent)
+    private void handleSwingWindowActiveChange(WindowEvent anEvent)
     {
         // Update Window.Focused from SwingWindow.Active
-        boolean active = _winNtv.isActive();
+        boolean active = _swingWindow.isActive();
         if (_win.isFocusable())
             ViewUtils.setFocused(_win, active);
 
         // If window deactivated and it has Popup and popup isn't new active window, hide popup
         if (!active && _win.getPopup() != null) {
             PopupWindow popupWindow = _win.getPopup();
-            if (popupWindow.getHelper().getNative() != anEvent.getOppositeWindow())
+            if (popupWindow.getNative() != anEvent.getOppositeWindow())
                 _win.getPopup().hide();
         }
     }
@@ -343,28 +328,26 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     /**
      * Called when WindowView changes to update native.
      */
-    protected void handleSnapWindowPropertyChange(PropChange aPC)
+    private void handleSnapWindowPropChange(PropChange propChange)
     {
-        switch (aPC.getPropName()) {
+        switch (propChange.getPropName()) {
 
             // Handle bounds changes
-            case View.X_Prop: setX((Double) aPC.getNewValue()); break;
-            case View.Y_Prop: setY((Double) aPC.getNewValue()); break;
-            case View.Width_Prop: setWidth((Double) aPC.getNewValue()); break;
-            case View.Height_Prop: setHeight((Double) aPC.getNewValue()); break;
+            case View.X_Prop -> setX(Convert.doubleValue(propChange.getNewValue()));
+            case View.Y_Prop -> setY(Convert.doubleValue(propChange.getNewValue()));
+            case View.Width_Prop -> setWidth((Convert.doubleValue(propChange.getNewValue())));
+            case View.Height_Prop -> setHeight(Convert.doubleValue(propChange.getNewValue()));
 
             // Handle AlwaysOnTop
-            case WindowView.AlwaysOnTop_Prop:
-                _winNtv.setAlwaysOnTop(Convert.booleanValue(aPC.getNewValue()));
-                break;
+            case WindowView.AlwaysOnTop_Prop -> _swingWindow.setAlwaysOnTop(Convert.boolValue(propChange.getNewValue()));
 
             // Handle Image, Title, Resizble
-            case WindowView.Image_Prop: setImage((Image) aPC.getNewValue()); break;
-            case WindowView.Title_Prop: setTitle((String) aPC.getNewValue()); break;
-            case WindowView.Resizable_Prop: setResizable(Convert.booleanValue(aPC.getNewValue())); break;
+            case WindowView.Image_Prop -> setImage((Image) propChange.getNewValue());
+            case WindowView.Title_Prop -> setTitle((String) propChange.getNewValue());
+            case WindowView.Resizable_Prop -> setResizable(Convert.boolValue(propChange.getNewValue()));
 
             // Handle Cursor
-            case WindowView.ActiveCursor_Prop: handleSnapWindowActiveCursorChange(); break;
+            case WindowView.ActiveCursor_Prop -> handleSnapWindowActiveCursorChange();
         }
     }
 
@@ -384,57 +367,22 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     private void setRootViewNativeCursor()
     {
         java.awt.Cursor cursor = AWT.get(_cursor);
-        _rviewNtv.setCursor(cursor);
+        _rootViewNative.setCursor(cursor);
         _setRootViewNativeCursorRun = null;
     }
 
     /**
      * Sets bounds values.
      */
-    private void setX(double aValue)
-    {
-        _winNtv.setLocation((int) aValue, _winNtv.getY());
-    }
-
-    private void setY(double aValue)
-    {
-        _winNtv.setLocation(_winNtv.getX(), (int) aValue);
-    }
-
-    private void setWidth(double aValue)
-    {
-        _winNtv.setSize((int) aValue, _winNtv.getHeight());
-    }
-
-    private void setHeight(double aValue)
-    {
-        _winNtv.setSize(_winNtv.getWidth(), (int) aValue);
-    }
-
-    /**
-     * Returns the listener that listens to Swing window move/resize/show/hide.
-     */
-    protected ComponentAdapter getNativeWindowBoundsListener()
-    {
-        // If already set, just return
-        if (_ntvWinBndsLsnr != null) return _ntvWinBndsLsnr;
-
-        // Create listener
-        ComponentAdapter lsnr = new ComponentAdapter() {
-            public void componentMoved(ComponentEvent e)  { handleSwingWindowBoundsChanged(); }
-            public void componentResized(ComponentEvent e)  { handleSwingWindowBoundsChanged(); }
-            public void componentShown(ComponentEvent e)  { handleSwingWindowShowingChange(); }
-            public void componentHidden(ComponentEvent e)  { handleSwingWindowShowingChange(); }
-        };
-
-        // Set and return
-        return _ntvWinBndsLsnr = lsnr;
-    }
+    private void setX(double aValue)  { _swingWindow.setLocation((int) aValue, _swingWindow.getY()); }
+    private void setY(double aValue)  { _swingWindow.setLocation(_swingWindow.getX(), (int) aValue); }
+    private void setWidth(double aValue)  { _swingWindow.setSize((int) aValue, _swingWindow.getHeight()); }
+    private void setHeight(double aValue)  { _swingWindow.setSize(_swingWindow.getWidth(), (int) aValue); }
 
     /**
      * Sends the given event.
      */
-    protected void sendWinEvent(WindowEvent anEvent, ViewEvent.Type aType)
+    private void sendWinEvent(WindowEvent anEvent, ViewEvent.Type aType)
     {
         // If event type not used, just return
         if (!_win.getEventAdapter().isEnabled(aType)) return;
@@ -444,45 +392,37 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         _win.dispatchEventToWindow(event);
 
         // If Window Close, update JFrame.DefaultCloseOperation
-        if (aType == ViewEvent.Type.WinClose && _winNtv instanceof JFrame && event.isConsumed())
-            ((JFrame) _winNtv).setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        if (aType == ViewEvent.Type.WinClose && _swingWindow instanceof JFrame jframe && event.isConsumed())
+            jframe.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     }
 
     /**
-     * Returns the ClientView.Window.Native. If ClientView (or parent) is not in Snap created window (installed
-     * manually in JComponent hierarchy), try ClientView.RootView.Native.Window instead.
+     * Returns the ClientView.Window.Native.
      */
     private Window getClientWindow()
     {
         // Get window ClientView.Window.Helper.Native (just return if ClientView is null)
-        View cview = _win.getClientView();
-        if (cview == null) return null;
-        WindowView cwin = cview.getWindow();
-        if (cwin == null) return null; // Shouldn't be possible
-        SWWindowHpr cwinHpr = (SWWindowHpr) cwin.getHelper();
-        Window cwinNtv = cwinHpr._winNtv;
+        View clientView = _win.getClientView(); if (clientView == null) return null;
+        WindowView clientWindow = clientView.getWindow(); if (clientWindow == null) return null; // Shouldn't be possible
 
         // If ClientView in window that's not showing, get win from RootView.Native instead
-        if (!cwin.isShowing())
-            cwinNtv = SwingUtils.getParent(cwinHpr._rviewNtv, Window.class);
+        // Might have been installed manually in JComponent hierarchy
+        if (!clientWindow.isShowing()) {
+            SWWindowHpr clientWindowHpr = (SWWindowHpr) clientWindow.getHelper();
+            return SwingUtils.getParent(clientWindowHpr._rootViewNative, Window.class);
+        }
 
-        // Return window
-        return cwinNtv;
+        // Return
+        return (Window) clientWindow.getNative();
     }
 
     /**
      * A component listener to save frame to preferences on move.
      */
     private static class FrameSaveListener extends ComponentAdapter {
-        public FrameSaveListener(WindowView aWN)
-        {
-            _wview = aWN;
-        }
-
-        WindowView _wview;
-
-        public void componentMoved(ComponentEvent e)  { setFrameString(e); }
-        public void componentResized(ComponentEvent e)  { setFrameString(e); }
-        private void setFrameString(ComponentEvent e)  { _wview.saveFrame(); }
+        private WindowView _windowView;
+        public FrameSaveListener(WindowView windowView)  { _windowView = windowView; }
+        public void componentMoved(ComponentEvent e)  { _windowView.saveFrame(); }
+        public void componentResized(ComponentEvent e)  { _windowView.saveFrame(); }
     }
 }
