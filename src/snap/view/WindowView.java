@@ -411,28 +411,24 @@ public class WindowView extends ParentView {
     {
         if (_helper != null) return _helper;
         _helper = getEnv().createHelper(this);
-        _helper.setWindow(this);
+        _helper.initForWindow(this);
         _updater = new ViewUpdater(this); repaint();
         return _helper;
     }
 
     /**
-     * Initializes the native window.
+     * Initializes the native window once.
      */
-    protected void initNativeWindow()
+    private void initNativeWindowOnce()
     {
-        getHelper().initWindow();
+        if (_isNativeWindowInitialized) return;
+        _isNativeWindowInitialized = true;
+        getHelper().initializeNativeWindow();
         pack();
     }
 
-    /** Initializes the native window once. */
-    void initNativeWindowOnce()
-    {
-        if (_initWin) return;
-        _initWin = true;
-        initNativeWindow();
-    }
-    boolean _initWin;
+    // Whether native window is initialized
+    private boolean _isNativeWindowInitialized;
 
     /**
      * Shows window in center of given view.
@@ -843,17 +839,11 @@ public class WindowView extends ParentView {
      */
     public abstract static class WindowHpr {
 
-        /** Returns the snap Window. */
-        public abstract WindowView getWindow();
+        /** Initializes helper for given window. */
+        public abstract void initForWindow(WindowView aWin);
 
-        /** Sets the snap Window. */
-        public abstract void setWindow(WindowView aWin);
-
-        /** Registers a view for repaint. */
-        public abstract void requestPaint(Rect aRect);
-
-        /** Window method: initializes native window. */
-        public abstract void initWindow();
+        /** Initializes native window. */
+        public abstract void initializeNativeWindow();
 
         /** Window/Popup method: Shows the window. */
         public abstract void show();
@@ -863,6 +853,9 @@ public class WindowView extends ParentView {
 
         /** Window/Popup method: Order window to front. */
         public abstract void toFront();
+
+        /** Registers a view for repaint. */
+        public abstract void requestPaint(Rect aRect);
 
         /** Convert given point x/y from given view to screen. */
         public Point convertViewPointToScreen(View aView, double aX, double aY)

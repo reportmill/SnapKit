@@ -44,16 +44,10 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     }
 
     /**
-     * Returns the snap Window.
+     * Initializes helper for given window.
      */
     @Override
-    public WindowView getWindow()  { return _win; }
-
-    /**
-     * Sets the snap Window Swing.
-     */
-    @Override
-    public void setWindow(WindowView aWin)
+    public void initForWindow(WindowView aWin)
     {
         // Set window
         _win = aWin;
@@ -91,7 +85,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
      * Initialize native window.
      */
     @Override
-    public void initWindow()
+    public void initializeNativeWindow()
     {
         // Set title, resizeable
         setTitle(_win.getTitle());
@@ -187,6 +181,15 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     public void toFront()  { _swingWindow.toFront(); }
 
     /**
+     * Registers a view for repaint.
+     */
+    @Override
+    public void requestPaint(Rect aRect)
+    {
+        _rootViewNative.repaint(aRect);
+    }
+
+    /**
      * Override to correct for case of RootView not in Swing Window.
      */
     @Override
@@ -231,15 +234,6 @@ public class SWWindowHpr extends WindowView.WindowHpr {
             jframe.setResizable(aValue);
         else if (_swingWindow instanceof JDialog jdialog)
             jdialog.setResizable(aValue);
-    }
-
-    /**
-     * Registers a view for repaint.
-     */
-    @Override
-    public void requestPaint(Rect aRect)
-    {
-        _rootViewNative.repaint(aRect);
     }
 
     /**
