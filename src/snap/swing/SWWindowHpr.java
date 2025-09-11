@@ -65,6 +65,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         // Set RootView var and create native RootView
         _rootView = aWin.getRootView();
         _rootViewNative = new SWRootView(_win, _rootView);
+        ViewUtils.setNative(_rootView, _rootViewNative);
 
         // Add listener to handle window prop changes
         _win.addPropChangeListener(this::handleSnapWindowPropChange);
@@ -85,12 +86,6 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         Window owner = getClientWindow();
         return new JDialog(owner);
     }
-
-    /**
-     * Returns the native for the window content.
-     */
-    @Override
-    public JComponent getContentNative()  { return _rootViewNative; }
 
     /**
      * Initialize native window.
@@ -168,9 +163,9 @@ public class SWWindowHpr extends WindowView.WindowHpr {
             return;
 
         // If window has frame save name, set listener
-        if (_win.getSaveName() != null && _win.getProp("FrameSaveListener") == null) {
+        if (_win.getSaveName() != null && _win.getMetadataForKey("FrameSaveListener") == null) {
             FrameSaveListener fsl = new FrameSaveListener(_win);
-            _win.setProp("FrameSaveListener", fsl);
+            _win.setMetadataForKey("FrameSaveListener", fsl);
             _swingWindow.addComponentListener(fsl);
         }
     }

@@ -266,14 +266,6 @@ public class WindowView extends ParentView {
     }
 
     /**
-     * Returns the native for the window content.
-     */
-    public Object getContentNative()
-    {
-        return getHelper().getContentNative();
-    }
-
-    /**
      * Returns whether the window is always on top.
      */
     public boolean isAlwaysOnTop()  { return _alwaysOnTop; }
@@ -856,9 +848,6 @@ public class WindowView extends ParentView {
 
         /** Sets the snap Window. */
         public abstract void setWindow(WindowView aWin);
-
-        /** Returns the native for the window content. */
-        public Object getContentNative()  { return null; }
 
         /** Registers a view for repaint. */
         public abstract void requestPaint(Rect aRect);

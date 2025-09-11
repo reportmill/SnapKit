@@ -23,7 +23,7 @@ public class SWRootView extends JComponent implements DragGestureListener {
     private DragSource _dragSource;
 
     // Last mouse location (to suppress faux MouseDrags due to HiDPI)
-    private int _lx, _ly;
+    private int _lastMouseX, _lastMouseY;
 
     /**
      * Constructor.
@@ -51,35 +51,20 @@ public class SWRootView extends JComponent implements DragGestureListener {
         _dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY_OR_MOVE, this);
 
         // Create DropTargetListener
-        DropTargetListener dtl = new DropTargetAdapter() {
-            public void dragEnter(DropTargetDragEvent anEvent)
-            {
-                sendDropTargetEvent(anEvent, ViewEvent.Type.DragEnter);
-            }
-
-            public void dragOver(DropTargetDragEvent anEvent)
-            {
-                sendDropTargetEvent(anEvent, ViewEvent.Type.DragOver);
-            }
-
-            public void dragExit(DropTargetEvent anEvent)
-            {
-                sendDropTargetEvent(anEvent, ViewEvent.Type.DragExit);
-            }
-
-            public void drop(DropTargetDropEvent anEvent)
-            {
-                sendDropTargetEvent(anEvent, ViewEvent.Type.DragDrop);
-            }
+        DropTargetListener dropTargetListener = new DropTargetAdapter() {
+            public void dragEnter(DropTargetDragEvent anEvent)  { handleDropTargetEvent(anEvent, ViewEvent.Type.DragEnter); }
+            public void dragOver(DropTargetDragEvent anEvent)  { handleDropTargetEvent(anEvent, ViewEvent.Type.DragOver); }
+            public void dragExit(DropTargetEvent anEvent)  { handleDropTargetEvent(anEvent, ViewEvent.Type.DragExit); }
+            public void drop(DropTargetDropEvent anEvent)  { handleDropTargetEvent(anEvent, ViewEvent.Type.DragDrop); }
         };
 
         // Enable DropTarget for RootView
-        new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, dtl);
+        new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetListener);
 
         // Add component listener to check for rare case of Snap RootView manually installed in JComponent hierarchy
         addComponentListener(new ComponentAdapter() {
-            public void componentShown(ComponentEvent e)  { swingShowingChanged(); }
-            public void componentHidden(ComponentEvent e)  { swingShowingChanged(); }
+            public void componentShown(ComponentEvent e)  { handleSwingRootViewShowingChange(); }
+            public void componentHidden(ComponentEvent e)  { handleSwingRootViewShowingChange(); }
         });
     }
 
@@ -93,9 +78,9 @@ public class SWRootView extends JComponent implements DragGestureListener {
 
         // Correct X/Y for RootView in Window
         Window winNtv = SwingUtils.getParent(this, Window.class);
-        for (Component c = getParent(); c != winNtv; c = c.getParent()) {
-            aX += c.getX();
-            aY += c.getY();
+        for (Component parentComp = getParent(); parentComp != winNtv; parentComp = parentComp.getParent()) {
+            aX += parentComp.getX();
+            aY += parentComp.getY();
         }
 
         // Set new bounds
@@ -107,16 +92,17 @@ public class SWRootView extends JComponent implements DragGestureListener {
      */
     public void repaint(Rect aRect)
     {
-        int x = (int) aRect.x, y = (int) aRect.y, w = (int) aRect.width, h = (int) aRect.height;
-        paintImmediately(x, y, w, h); //super.repaint(0,x,y,w,h);
+        int paintX = (int) aRect.x;
+        int paintY = (int) aRect.y;
+        int paintW = (int) aRect.width;
+        int paintH = (int) aRect.height;
+        paintImmediately(paintX, paintY, paintW, paintH); //super.repaint(0,x,y,w,h);
     }
 
     /**
      * Override to suppress normal repaints.
      */
-    public void repaint(long aTM, int aX, int aY, int aW, int aH)
-    {
-    }
+    public void repaint(long aTM, int aX, int aY, int aW, int aH)  { }
 
     /**
      * Override to wrap in Painter and forward.
@@ -124,8 +110,8 @@ public class SWRootView extends JComponent implements DragGestureListener {
     protected void paintComponent(Graphics aGr)
     {
         Painter pntr = new J2DPainter(aGr);
-        java.awt.Rectangle crect = aGr.getClipBounds();
-        _win.getUpdater().paintViews(pntr, new Rect(crect.x, crect.y, crect.width, crect.height));
+        java.awt.Rectangle clipBounds = aGr.getClipBounds();
+        _win.getUpdater().paintViews(pntr, new Rect(clipBounds.x, clipBounds.y, clipBounds.width, clipBounds.height));
         pntr.flush();
     }
 
@@ -150,18 +136,18 @@ public class SWRootView extends JComponent implements DragGestureListener {
 
             // MousePress: Store location for potential MouseDrag suppression
             if (id == MouseEvent.MOUSE_PRESSED) {
-                _lx = mouseEvent.getX();
-                _ly = mouseEvent.getY();
+                _lastMouseX = mouseEvent.getX();
+                _lastMouseY = mouseEvent.getY();
             }
 
             // MouseDrag: If matches last location, skip (these can show up on HiDPI Mac and can cause problems)
             else if (id == MouseEvent.MOUSE_DRAGGED) {
-                if (mouseEvent.getX() == _lx && mouseEvent.getY() == _ly) {
+                if (mouseEvent.getX() == _lastMouseX && mouseEvent.getY() == _lastMouseY) {
                     mouseEvent.consume();
                     return;
                 }
-                _lx = mouseEvent.getX();
-                _ly = mouseEvent.getY();
+                _lastMouseX = mouseEvent.getX();
+                _lastMouseY = mouseEvent.getY();
             }
 
             // Handle MouseClick: Just skip
@@ -225,9 +211,9 @@ public class SWRootView extends JComponent implements DragGestureListener {
     }
 
     /**
-     * Sends DropTargetEvent to RootView.
+     * Called when this RootView gets DropTargetEvent.
      */
-    public void sendDropTargetEvent(DropTargetEvent anEvent, ViewEvent.Type aType)
+    private void handleDropTargetEvent(DropTargetEvent anEvent, ViewEvent.Type aType)
     {
         ViewEvent event = ViewEvent.createEvent(_rootView, anEvent, aType, null);
         _win.dispatchEventToWindow(event);
@@ -237,11 +223,11 @@ public class SWRootView extends JComponent implements DragGestureListener {
      * Called when Showing attribute changes for this SWRootView.
      * Only needed for rare case of Snap RootView manually installed in JComponent hierarchy.
      */
-    void swingShowingChanged()
+    private void handleSwingRootViewShowingChange()
     {
         // Get native window and just return if it is Snap Window native
-        Window winNtv = SwingUtils.getParent(this, Window.class);
-        if (winNtv == _win.getNative())
+        Window swingWindow = SwingUtils.getParent(this, Window.class);
+        if (swingWindow == _win.getNative())
             return;
 
         // Update Snap RootView Showing

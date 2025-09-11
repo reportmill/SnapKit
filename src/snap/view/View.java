@@ -134,8 +134,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // How to handle content out of bounds
     private Overflow _overflow;
 
-    // Client properties
-    private Map<String,Object>  _props = Collections.EMPTY_MAP;
+    // A map to hold additional data about this view
+    private Map<String,Object> _metadata = Collections.EMPTY_MAP;
 
     // The view best width and height
     private double  _bestWidth = -1, _bestHeight = -1, _bestWidthParam, _bestHeightParam;
@@ -1541,26 +1541,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
-     * Returns the property map.
+     * Returns a metadata value for given key.
      */
-    public Map<String,Object> getProps()  { return _props; }
+    public Object getMetadataForKey(String aName)  { return _metadata.get(aName); }
 
     /**
-     * Returns a named client property.
+     * Sets a metadata value for given key.
      */
-    public Object getProp(String aName)
+    public void setMetadataForKey(String aName, Object aValue)
     {
-        return _props.get(aName);
-    }
-
-    /**
-     * Puts a named client property.
-     */
-    public Object setProp(String aName, Object aValue)
-    {
-        if (_props == Collections.EMPTY_MAP) _props = new HashMap<>();
-        Object val = _props.put(aName, aValue); //firePropChange(aName, val, aValue);
-        return val;
+        if (_metadata == Collections.EMPTY_MAP) _metadata = new HashMap<>();
+        _metadata.put(aName, aValue); //firePropChange(aName, val, aValue);
     }
 
     /**

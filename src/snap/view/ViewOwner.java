@@ -196,15 +196,6 @@ public class ViewOwner extends PropObject {
     protected void initShowing()  { }
 
     /**
-     * Returns the native object for the UI (JComponent).
-     */
-    public Object getNative()
-    {
-        WindowView win = getWindow();
-        return win.getContentNative();
-    }
-
-    /**
      * Returns the specific child view for given object (name, event or view).
      */
     public View getView(Object anObj)

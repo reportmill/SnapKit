@@ -784,12 +784,23 @@ public class ViewUtils {
     }
 
     /**
-     * Backdoor for setting View natives.
+     * Returns the native version of given view.
+     */
+    public static Object getNative(View aView)
+    {
+        if (aView instanceof WindowView windowView)
+            return windowView._native;
+        return aView.getMetadataForKey("Native");
+    }
+
+    /**
+     * Sets the native version of given view.
      */
     public static void setNative(View aView, Object nativeObj)
     {
         if (aView instanceof WindowView windowView)
             windowView._native = nativeObj;
+        else aView.setMetadataForKey("Native", nativeObj);
     }
 
     /**
