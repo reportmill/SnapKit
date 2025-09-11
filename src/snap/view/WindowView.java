@@ -77,6 +77,9 @@ public class WindowView extends ParentView {
     
     // The View that referenced on last show
     private View  _clientView;
+
+    // The native window object
+    protected Object _native;
     
     // A list of all open windows
     private static List <WindowView>  _openWins = new ArrayList<>();
@@ -769,7 +772,7 @@ public class WindowView extends ParentView {
     /**
      * Returns the native.
      */
-    public Object getNative()  { return getHelper().getNative(); }
+    public Object getNative()  { return _native; }
 
     /**
      * Returns an array of all open windows.
@@ -853,9 +856,6 @@ public class WindowView extends ParentView {
 
         /** Sets the snap Window. */
         public abstract void setWindow(WindowView aWin);
-
-        /** Returns the native being helped. */
-        public abstract Object getNative();
 
         /** Returns the native for the window content. */
         public Object getContentNative()  { return null; }

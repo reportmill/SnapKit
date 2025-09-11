@@ -60,6 +60,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
 
         // Create native
         _swingWindow = createSwingWindow();
+        ViewUtils.setNative(_win, _swingWindow);
 
         // Set RootView var and create native RootView
         _rootView = aWin.getRootView();
@@ -68,12 +69,6 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         // Add listener to handle window prop changes
         _win.addPropChangeListener(this::handleSnapWindowPropChange);
     }
-
-    /**
-     * Returns the native being helped.
-     */
-    @Override
-    public Window getNative()  { return _swingWindow; }
 
     /**
      * Returns the native being helped.

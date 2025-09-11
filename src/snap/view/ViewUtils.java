@@ -784,6 +784,15 @@ public class ViewUtils {
     }
 
     /**
+     * Backdoor for setting View natives.
+     */
+    public static void setNative(View aView, Object nativeObj)
+    {
+        if (aView instanceof WindowView windowView)
+            windowView._native = nativeObj;
+    }
+
+    /**
      * Backdoor for protected View method.
      */
     public static void processEvent(View aView, ViewEvent anEvent)
