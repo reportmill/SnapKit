@@ -244,36 +244,6 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     }
 
     /**
-     * Sets the document file for the window title bar proxy icon.
-     */
-    @Override
-    public void setDocURL(WebURL aURL)
-    {
-        // If not local, just bail
-        if (aURL == null || !aURL.getScheme().equalsIgnoreCase("file"))
-            return;
-
-        // Get Java file
-        File file = aURL.getJavaFile();
-
-        // Install in RootPane
-        if (_swingWindow instanceof RootPaneContainer rootPaneContainer) {
-            JRootPane rootPane = rootPaneContainer.getRootPane();
-            if (rootPane == null)
-                return;
-            rootPane.putClientProperty("Window.documentFile", file);
-        }
-    }
-
-    /**
-     * Sets the image property of given object to given string.
-     */
-    public void setImage(Image anImage)
-    {
-        _swingWindow.setIconImage(AWT.snapToAwtImage(anImage));
-    }
-
-    /**
      * Registers a view for repaint.
      */
     @Override
@@ -341,13 +311,41 @@ public class SWWindowHpr extends WindowView.WindowHpr {
             // Handle AlwaysOnTop
             case WindowView.AlwaysOnTop_Prop -> _swingWindow.setAlwaysOnTop(Convert.boolValue(propChange.getNewValue()));
 
-            // Handle Image, Title, Resizble
-            case WindowView.Image_Prop -> setImage((Image) propChange.getNewValue());
-            case WindowView.Title_Prop -> setTitle((String) propChange.getNewValue());
+            // Handle Title, Resizable, Image, DocumentUrl
+            case WindowView.Title_Prop -> setTitle(Convert.stringValue(propChange.getNewValue()));
             case WindowView.Resizable_Prop -> setResizable(Convert.boolValue(propChange.getNewValue()));
+            case WindowView.Image_Prop -> handleSnapWindowImageChange();
+            case WindowView.DocumentUrl_Prop -> handleSnapWindowDocumentUrlChange();
 
             // Handle Cursor
             case WindowView.ActiveCursor_Prop -> handleSnapWindowActiveCursorChange();
+        }
+    }
+
+    /**
+     * Called when Window.Image property changes.
+     */
+    private void handleSnapWindowImageChange()
+    {
+        Image windowImage = _win.getImage();
+        _swingWindow.setIconImage(AWT.snapToAwtImage(windowImage));
+    }
+
+    /**
+     * Called when Window.DocumentUrl property changes.
+     */
+    private void handleSnapWindowDocumentUrlChange()
+    {
+        // Get Java file
+        WebURL documentUrl = _win.getDocumentUrl();
+        File documentFile = documentUrl != null ? documentUrl.getJavaFile() : null;
+
+        // Install in RootPane
+        if (_swingWindow instanceof RootPaneContainer rootPaneContainer) {
+            JRootPane rootPane = rootPaneContainer.getRootPane();
+            if (rootPane == null)
+                return;
+            rootPane.putClientProperty("Window.documentFile", documentFile);
         }
     }
 

@@ -97,6 +97,7 @@ public class WindowView extends ParentView {
     public static final String Resizable_Prop = "Resizable";
     public static final String Title_Prop = "Title";
     public static final String FocusView_Prop = "FocusView";
+    public static final String DocumentUrl_Prop = "DocumentUrl";
 
     /**
      * Constructor.
@@ -286,19 +287,15 @@ public class WindowView extends ParentView {
     /**
      * Returns the document file URL for the window title bar proxy icon.
      */
-    public WebURL getDocURL()  { return _docURL; }
+    public WebURL getDocumentUrl()  { return _docURL; }
 
     /**
      * Returns the document file URL for the window title bar proxy icon.
      */
-    public void setDocURL(WebURL aURL)
+    public void setDocumentUrl(WebURL aURL)
     {
-        // If already set, just return
-        if (Objects.equals(aURL, getDocURL())) return;
-
-        // Set
-        _docURL = aURL;
-        getHelper().setDocURL(aURL);
+        if (Objects.equals(aURL, getDocumentUrl())) return;
+        firePropChange(DocumentUrl_Prop, _docURL, _docURL = aURL);
     }
 
     /**
@@ -883,8 +880,5 @@ public class WindowView extends ParentView {
         {
             return aView.localToParent(aX, aY, null);
         }
-
-        /** Window/Popup method: Sets the document file url for the window title bar proxy icon. */
-        public void setDocURL(WebURL aURL)  { }
     }
 }
