@@ -81,7 +81,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     protected double  _borderRadius;
 
     // The ViewEffect to manage effect rendering for this view and current effect
-    protected ViewEffect  _effect;
+    private ViewEffect _effect;
 
     // The opacity
     private double  _opacity;
@@ -153,7 +153,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     protected Rect  _repaintRect;
 
     // Provides information for physics simulations
-    private ViewPhysics<?>  _physics;
+    private ViewPhysics _physics;
 
     // The view owner of this view
     private ViewOwner  _owner;
@@ -2761,6 +2761,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Return
         return clone;
     }
+
+    /**
+     * Sets style properties for given string, e.g., "Margin:20; Fill:Red; Border:#00 1;".
+     */
+    public void setStyleString(String styleString)  { setPropsString(styleString); }
 
     /**
      * Returns a mapped property name.

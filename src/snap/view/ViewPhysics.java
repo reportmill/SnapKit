@@ -3,7 +3,7 @@ package snap.view;
 /**
  * A class to represents physical attributes of a view for the purpose of physics simulation.
  */
-public class ViewPhysics <T> {
+public class ViewPhysics {
 
     // Whether view is subject to forces in simulation
     private boolean  _dynamic;
@@ -27,7 +27,7 @@ public class ViewPhysics <T> {
     private int  _groupIndex;
     
     // An ivar to hold a native object for simulation library (Body for Box2D)
-    private T  _native;
+    private Object _native;
 
     /**
      * Returns whether view is subject to forces in simulation.
@@ -102,10 +102,10 @@ public class ViewPhysics <T> {
     /**
      * Returns the native object.
      */
-    public T getNative()  { return _native; }
+    public Object getNative()  { return _native; }
 
     /**
      * Sets the native object.
      */
-    public void setNative(T anObj)  { _native = anObj; }
+    public void setNative(Object anObj)  { _native = anObj; }
 }
