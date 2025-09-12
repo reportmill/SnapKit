@@ -16,7 +16,7 @@ public class PopupWindow extends WindowView {
     {
         super();
         setFocusable(false);
-        setType(TYPE_PLAIN);
+        setType(Type.PLAIN);
         setAlwaysOnTop(true);
         //setOpacity(.9);
 

@@ -382,7 +382,7 @@ public class DialogBox extends FormBuilder {
         // Configure window
         WindowView window = getWindow();
         window.setTitle(getTitle());
-        window.setType(WindowView.TYPE_UTILITY);
+        window.setType(WindowView.Type.UTILITY);
         window.setModal(true);
 
         // Make sure UI fits

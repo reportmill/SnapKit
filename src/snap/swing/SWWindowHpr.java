@@ -70,10 +70,8 @@ public class SWWindowHpr extends WindowView.WindowHpr {
      */
     private Window createSwingWindow()
     {
-        String windowType = _win.getType();
-
         // If standard TYPE_MAIN window, return new JFrame
-        if (windowType == WindowView.TYPE_MAIN)
+        if (_win.getType() == WindowView.Type.MAIN)
             return new JFrame();
 
         // Get window client/owner (if requested by/for view in another window)
@@ -95,8 +93,8 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         if (_swingWindow instanceof JDialog jdialog) {
             jdialog.setModal(_win.isModal());
             switch (_win.getType()) {
-                case WindowView.TYPE_UTILITY -> jdialog.getRootPane().putClientProperty("Window.style", "small");
-                case WindowView.TYPE_PLAIN -> jdialog.setUndecorated(true);
+                case UTILITY -> jdialog.getRootPane().putClientProperty("Window.style", "small");
+                case PLAIN -> jdialog.setUndecorated(true);
             }
         }
 

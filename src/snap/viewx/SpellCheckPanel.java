@@ -30,7 +30,7 @@ public abstract class SpellCheckPanel extends ViewOwner {
         WindowView window = getWindow();
         window.setAlwaysOnTop(true);
         window.setSaveName("SpellCheck");
-        window.setType(WindowView.TYPE_UTILITY);
+        window.setType(WindowView.Type.UTILITY);
         window.setVisible(true);
 
         // Find next misspelling

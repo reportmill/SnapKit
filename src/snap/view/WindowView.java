@@ -22,7 +22,7 @@ public class WindowView extends ParentView {
     private String  _title;
     
     // The type
-    private String  _type = TYPE_MAIN;
+    private Type _type = Type.MAIN;
     
     // The root view
     private RootView  _rootView;
@@ -47,6 +47,12 @@ public class WindowView extends ParentView {
     
     // Whether window is resizable
     private boolean  _resizable = true;
+
+    // Whether to show window bar on top of window
+    private boolean _showWindowBar;
+
+    // The window bar
+    private WindowBar _windowBar;
     
     // Whether window is sized to maximum screen size
     private boolean  _maximized;
@@ -84,10 +90,8 @@ public class WindowView extends ParentView {
     // A list of all open windows
     private static List <WindowView>  _openWins = new ArrayList<>();
     
-    // Constants for Type
-    public static final String TYPE_MAIN = "MAIN";
-    public static final String TYPE_UTILITY = "UTILITY";
-    public static final String TYPE_PLAIN = "PLAIN";
+    // Constants for window type
+    public enum Type { PLAIN, MAIN, UTILITY }
     
     // Constants for style
     public enum Style { Small }
@@ -101,6 +105,7 @@ public class WindowView extends ParentView {
     public static final String Title_Prop = "Title";
     public static final String FocusView_Prop = "FocusView";
     public static final String DocumentUrl_Prop = "DocumentUrl";
+    public static final String ShowWindowBar_Prop = "ShowWindowBar";
 
     /**
      * Constructor.
@@ -132,12 +137,12 @@ public class WindowView extends ParentView {
     /**
      * Returns the window type.
      */
-    public String getType()  { return _type; }
+    public Type getType()  { return _type; }
 
     /**
      * Sets the window type.
      */
-    public void setType(String aType)  { _type = aType; }
+    public void setType(Type aType)  { _type = aType; }
 
     /**
      * Returns whether the window is resizable.
@@ -151,6 +156,34 @@ public class WindowView extends ParentView {
     {
         if (aValue == _resizable) return;
         firePropChange(Resizable_Prop, _resizable, _resizable = aValue);
+    }
+
+    /**
+     * Returns whether to show the window bar.
+     */
+    public boolean isShowWindowBar()  { return _showWindowBar; }
+
+    /**
+     * Sets whether to show the window bar.
+     */
+    public void setShowWindowBar(boolean aValue)
+    {
+        if (aValue == isShowWindowBar()) return;
+        batchPropChange(ShowWindowBar_Prop, _showWindowBar, _showWindowBar = aValue);
+
+        if (aValue)
+            WindowBar.attachWindowBar(this);
+        else WindowBar.detachWindowBar(this);
+        fireBatchPropChanges();
+    }
+
+    /**
+     * Returns the window bar.
+     */
+    public WindowBar getWindowBar()
+    {
+        if (_windowBar != null) return _windowBar;
+        return _windowBar = new WindowBar(this);
     }
 
     /**
@@ -410,9 +443,20 @@ public class WindowView extends ParentView {
     public WindowHpr getHelper()
     {
         if (_helper != null) return _helper;
+
+        // If in browser and not plain, install window bar
+        if (SnapEnv.isWebVM && getType() != Type.PLAIN)
+            setShowWindowBar(true);
+
+        // Create helper
         _helper = getEnv().createHelper(this);
         _helper.initForWindow(this);
-        _updater = new ViewUpdater(this); repaint();
+
+        // Create updater
+        _updater = new ViewUpdater(this);
+        repaint();
+
+        // Return
         return _helper;
     }
 
