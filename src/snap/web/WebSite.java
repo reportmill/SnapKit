@@ -31,8 +31,8 @@ public abstract class WebSite {
     // A directory that can be used for writing persistent support files
     private WebFile _sandboxDir;
 
-    // A map of properties associated with file
-    private Map<String,Object> _props = new HashMap<>();
+    // A map to hold additional data about this site
+    private Map<String,Object> _metadata = new HashMap<>();
 
     // PropChangeListener for file changes
     private PropChangeListener _filePropChangeLsnr = pc -> handleFilePropChange(pc);
@@ -463,20 +463,14 @@ public abstract class WebSite {
     }
 
     /**
-     * Returns a file property for key.
+     * Returns a metadata value for given key.
      */
-    public Object getProp(String aKey)
-    {
-        return _props.get(aKey);
-    }
+    public Object getMetadataForKey(String aKey)  { return _metadata.get(aKey); }
 
     /**
-     * Sets a property for a key.
+     * Sets a metadata value for given key.
      */
-    public void setProp(String aKey, Object aValue)
-    {
-        _props.put(aKey, aValue);
-    }
+    public void setMetadataForKey(String aKey, Object aValue)  { _metadata.put(aKey, aValue); }
 
     /**
      * Returns a WebSite that can be used for storing persistent support files.

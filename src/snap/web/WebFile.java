@@ -45,8 +45,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     // The MIME type
     private String  _mimeType;
 
-    // A map of properties associated with file
-    private Map<String,Object>  _props = new HashMap<>();
+    // A map to hold additional data about this file
+    private Map<String,Object> _metadata = new HashMap<>();
 
     // The URL for this file
     protected WebURL  _url;
@@ -519,14 +519,14 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     protected void setMimeType(String aMIMEType)  { _mimeType = aMIMEType; }
 
     /**
-     * Returns a file property for key.
+     * Returns a metadata value for given key.
      */
-    public Object getProp(String aKey)  { return _props.get(aKey); }
+    public Object getMetadataForKey(String aKey)  { return _metadata.get(aKey); }
 
     /**
-     * Sets a property for a key.
+     * Sets a metadata value for given key.
      */
-    public void setProp(String aKey, Object aValue)  { _props.put(aKey, aValue); }
+    public void setMetadataForKey(String aKey, Object aValue)  { _metadata.put(aKey, aValue); }
 
     /**
      * Returns whether this file has been modified locally.
