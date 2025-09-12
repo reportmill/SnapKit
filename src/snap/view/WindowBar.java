@@ -34,15 +34,13 @@ public class WindowBar extends ParentView {
     private static final Color MAX_COLOR2 = MAX_COLOR.blend(Color.BLACK,.2);
     
     /**
-     * Creates a WindowBar.
+     * Constructor.
      */
-    public WindowBar(View aView)
+    public WindowBar(WindowView window)
     {
-        WindowView win = aView.getWindow();
-        double titleBarH = win.getType() == WindowView.Type.MAIN ? 24 : 18;
+        double titleBarH = window.getType() == WindowView.Type.MAIN ? 24 : 18;
         setTitlebarHeight(titleBarH);
         enableEvents(MousePress, MouseDrag, MouseRelease);
-        setContent(aView);
     }
 
     /**
@@ -228,6 +226,7 @@ public class WindowBar extends ParentView {
 
         // Install window bar
         WindowBar windowBar = window.getWindowBar();
+        windowBar.setContent(rootView.getContent());
         rootView.setContent(windowBar);
 
         // If needs resize, resize
