@@ -34,11 +34,14 @@ public class SnapEnv {
     // Whether is WebVM iOS
     public static boolean isWebVM_iOS;
 
+    // Whether is JxBrowser
+    public static boolean isJxBrowser = platform == Platform.JxBrowser;
+
     // Whether app is currently running on desktop
     public static boolean isDesktop = !isWebVM && !isTeaVM;
 
     // Constants for platform
-    public enum Platform { WINDOWS, MAC, CHEERP, TEAVM, UNKNOWN }
+    public enum Platform { WINDOWS, MAC, CHEERP, TEAVM, JxBrowser, UNKNOWN }
 
     /**
      * Returns the GFXEnv class.
@@ -69,7 +72,7 @@ public class SnapEnv {
     {
         // Get class name for platform GFXEnv
         String className = isTeaVM ? "snaptea.TV" : "snap.swing.SwingViewEnv";
-        if (isWebVM)
+        if (isWebVM || isJxBrowser)
             className = "snapcj.CJViewEnv";
 
         // Return GFXEnv class
@@ -90,6 +93,13 @@ public class SnapEnv {
         if (osName == null) osName = "TeaVM";
         String javaVendor = System.getProperty("java.vendor");
         if (javaVendor == null) javaVendor = "TeaVM";
+
+        // JxBrowser
+        try {
+            Class.forName("com.teamdev.jxbrowser.js.JsObject");
+            return Platform.JxBrowser;
+        }
+        catch (ClassNotFoundException ignore) { }
 
         // Windows
         if (osName.contains("Windows"))
