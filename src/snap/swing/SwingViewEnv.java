@@ -151,14 +151,4 @@ public class SwingViewEnv extends ViewEnv {
         if (_shared != null) return _shared;
         return new SwingViewEnv();
     }
-
-    /**
-     * Sets the Swing Node Env.
-     */
-    public static void set()
-    {
-        AWTEnv.get();
-        get();
-    }
-
 }

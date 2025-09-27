@@ -240,6 +240,12 @@ public class AWTEnv extends GFXEnv {
     }
 
     /**
+     * Returns new SwingViewEnv.
+     */
+    @Override
+    protected snap.view.ViewEnv createViewEnv()  { return new SwingViewEnv(); }
+
+    /**
      * Returns a shared instance.
      */
     public static AWTEnv get()

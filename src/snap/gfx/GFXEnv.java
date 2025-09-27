@@ -17,9 +17,6 @@ public abstract class GFXEnv {
     // The node environment
     protected static GFXEnv  _env;
 
-    // Whether is WebVM Swing
-    public static boolean isWebVMSwing;
-
     /**
      * Returns the Graphics environment.
      */
@@ -127,24 +124,6 @@ public abstract class GFXEnv {
     public Prefs getPrefs(String aName)  { return Prefs.getFake(); }
 
     /**
-     * Returns the root URL string of classes.
-     */
-    public String getClassRoot()
-    {
-        Class<?> thisClass = getClass();
-        String className = thisClass.getName();
-        String simpleName = thisClass.getSimpleName();
-
-        // Get URL
-        URL classFileUrl = thisClass.getResource(simpleName + ".class");
-        String classFilePath = classFileUrl.toString();
-        String classRootPath = classFilePath.substring(0, classFilePath.length() - className.length() - 1);
-
-        // Return
-        return classRootPath;
-    }
-
-    /**
      * This is really just here to help with TeaVM.
      */
     public abstract Method getMethod(Class<?> aClass, String aName, Class<?>... theClasses) throws NoSuchMethodException;
@@ -180,4 +159,19 @@ public abstract class GFXEnv {
      * Executes a process.
      */
     public Object execProcess(String[] args)  { return null; }
+
+    /**
+     * Returns the ViewEnv.
+     */
+    public snap.view.ViewEnv getViewEnv()
+    {
+        if (_viewEnv != null) return _viewEnv;
+        return _viewEnv = createViewEnv();
+    }
+    private snap.view.ViewEnv _viewEnv;
+
+    /**
+     * Creates the ViewEnv.
+     */
+    protected abstract snap.view.ViewEnv createViewEnv();
 }

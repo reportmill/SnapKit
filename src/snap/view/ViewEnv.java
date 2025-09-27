@@ -2,11 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Consumer;
 import snap.geom.Rect;
-import snap.util.*;
+import snap.gfx.GFXEnv;
 import snap.web.WebFile;
 
 /**
@@ -35,13 +34,7 @@ public abstract class ViewEnv {
     public static ViewEnv getEnv()
     {
         if (_env != null) return _env;
-
-        // Create/set GfxEnvClass
-        Class<? extends ViewEnv> gfxEnvClass = SnapEnv.getViewEnvClass();
-        try { return _env = gfxEnvClass.getConstructor().newInstance(); }
-        catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
+        return _env = GFXEnv.getEnv().getViewEnv();
     }
 
     /**

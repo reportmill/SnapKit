@@ -1,6 +1,5 @@
 package snap.util;
 import snap.gfx.GFXEnv;
-import snap.view.ViewEnv;
 
 /**
  * This class manages information about the SnapKit environment.
@@ -66,25 +65,6 @@ public class SnapEnv {
     }
 
     /**
-     * Returns the ViewEnv class.
-     */
-    public static Class<? extends ViewEnv> getViewEnvClass()
-    {
-        // Get class name for platform GFXEnv
-        String className = isTeaVM ? "snaptea.TV" : "snap.swing.SwingViewEnv";
-        if (isWebVM || isJxBrowser)
-            className = "snapcj.CJViewEnv";
-
-        // Return GFXEnv class
-        try { return (Class<? extends ViewEnv>) Class.forName(className); }
-        catch(ClassNotFoundException ignored) { }
-
-        // Fall back on swing (but so teavm doesn't try to include swing classes)
-        try { return (Class<? extends ViewEnv>) Class.forName(!"fool-teavm".isEmpty() ? "snap.swing.SwingViewEnv" : ""); }
-        catch(ClassNotFoundException e) { throw new RuntimeException(e); }
-    }
-
-    /**
      * Returns the current platform.
      */
     private static Platform getPlatform()
@@ -95,11 +75,8 @@ public class SnapEnv {
         if (javaVendor == null) javaVendor = "TeaVM";
 
         // JxBrowser
-        try {
-            Class.forName("com.teamdev.jxbrowser.js.JsObject");
-            return Platform.JxBrowser;
-        }
-        catch (ClassNotFoundException ignore) { }
+        //try { Class.forName("com.teamdev.jxbrowser.js.JsObject"); return Platform.JxBrowser; }
+        //catch (ClassNotFoundException ignore) { }
 
         // Windows
         if (osName.contains("Windows"))
