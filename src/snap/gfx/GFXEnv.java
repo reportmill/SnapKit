@@ -5,7 +5,6 @@ package snap.gfx;
 import java.lang.reflect.Method;
 import java.net.URL;
 import snap.geom.Rect;
-import snap.web.JRTSite;
 import snap.util.*;
 import snap.web.*;
 
@@ -127,20 +126,6 @@ public abstract class GFXEnv {
      * This is really just here to help with TeaVM.
      */
     public abstract Method getMethod(Class<?> aClass, String aName, Class<?>... theClasses) throws NoSuchMethodException;
-
-    /**
-     * Creates a site for a URL.
-     */
-    public WebSite createSiteForURL(WebURL siteURL)
-    {
-        // Handle JRT - Java runtime modules URLs
-        String scheme = siteURL.getScheme();
-        if (scheme.equals("jrt"))
-            return new JRTSite();
-
-        // Return not found
-        return null;
-    }
 
     /**
      * This is really just here to help with TeaVM.

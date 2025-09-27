@@ -32,8 +32,7 @@ public class WebGetter {
             return getJavaUrlForString((String) anObj);
 
         // Handle File: Convert to Canonical URL to normalize path
-        if (anObj instanceof File) {
-            File file = (File) anObj;
+        if (anObj instanceof File file) {
             try { return file.getCanonicalFile().toURI().toURL(); }
             catch (IOException ignore) { }
         }
@@ -156,10 +155,9 @@ public class WebGetter {
         String sitePath = aSiteURL.getPath();
         String fileType = FilePathUtils.getExtension(sitePath).toLowerCase();
 
-        // Try platform env
-        WebSite site = GFXEnv.getEnv().createSiteForURL(aSiteURL);
-        if (site != null)
-            return site;
+        // Handle JRT - Java runtime modules URLs
+        if (scheme.equals("jrt"))
+            return new JRTSite();
 
         // Handle ZipSite and JarSite
         if (fileType.equals("zip") || fileType.equals("jar") || fileType.equals("gfar"))
