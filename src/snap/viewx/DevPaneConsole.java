@@ -18,7 +18,7 @@ import java.io.PrintStream;
 public class DevPaneConsole extends ViewOwner {
 
     // The ConsoleView
-    private static DevPaneConsoleTextArea _consoleTextArea;
+    private static ConsoleTextArea _consoleTextArea;
 
     // A counter of current input
     private int  _inputIndex = 1;
@@ -78,7 +78,7 @@ public class DevPaneConsole extends ViewOwner {
     /**
      * A ConsoleView subclass that works with scanner.
      */
-    private class DevConsoleView extends DevPaneConsoleTextArea {
+    private class DevConsoleView extends ConsoleTextArea {
 
         /**
          * Constructor.

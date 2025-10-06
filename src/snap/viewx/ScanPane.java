@@ -65,7 +65,7 @@ public class ScanPane extends ViewOwner {
     /**
      * A ConsoleView subclass that works with scanner.
      */
-    public static class ScanView extends DevPaneConsoleTextArea {
+    public static class ScanView extends ConsoleTextArea {
 
         /** Creates a new ScanView. */
         public ScanView()
@@ -75,7 +75,7 @@ public class ScanPane extends ViewOwner {
         }
 
         /** Override to send to process. */
-        protected void processEnterAction()
+        protected void handleEnterAction()
         {
             String str = getInput();
             _in.add(str);

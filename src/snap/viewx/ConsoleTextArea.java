@@ -9,26 +9,26 @@ import snap.util.*;
 import snap.view.*;
 
 /**
- * A TextView subclass with methods to act like a terminal/console.
+ * This TextArea subclass has methods to act like a terminal/console.
  */
-public class DevPaneConsoleTextArea extends TextArea {
+public class ConsoleTextArea extends TextArea {
 
     // The location of the start of next input
-    private int  _inputLoc;
+    private int _inputCharIndex;
     
     // List of previous commands
-    private List <String>  _cmdHistory = new ArrayList<>();
+    private List <String> _cmdHistory = new ArrayList<>();
     
     // Index of command
-    private int  _cmdHistoryIndex;
+    private int _cmdHistoryIndex;
     
     // The prompt
-    private String  _prompt;
+    private String _prompt;
 
     /**
-     * Creates new ConsoleView.
+     * Constructor.
      */
-    public DevPaneConsoleTextArea()
+    public ConsoleTextArea()
     {
         super(true);
         setFill(Color.WHITE);
@@ -46,72 +46,73 @@ public class DevPaneConsoleTextArea extends TextArea {
     public void setPrompt(String aPrompt)
     {
         _prompt = aPrompt;
-        if (getTextModel().length() == 0)
+        if (getTextModel().isEmpty())
             append(getPrompt());
     }
 
     /**
      * Returns the location of the end of the last text appended to console.
      */
-    public int getInputLocation()  { return _inputLoc; }
+    public int getInputCharIndex()  { return _inputCharIndex; }
 
     /**
      * Handles key events.
      */
+    @Override
     protected void keyPressed(ViewEvent anEvent)
     {
         // Get key info
         int keyCode = anEvent.getKeyCode();
-        int inputLoc = getInputLocation();
+        int inputLoc = getInputCharIndex();
 
         // Handle delete at or before input location
-        if ((keyCode==KeyCode.BACK_SPACE || keyCode==KeyCode.DELETE) && getSelStart()<=inputLoc) {
+        if ((keyCode == KeyCode.BACK_SPACE || keyCode == KeyCode.DELETE) && getSelStart() <= inputLoc) {
             ViewUtils.beep();
             return;
         }
 
         // Handle command-k
-        if (keyCode==KeyCode.K && anEvent.isShortcutDown()) {
+        if (keyCode == KeyCode.K && anEvent.isShortcutDown()) {
             clearConsole();
             return;
         }
 
         // Handle special keys
         else switch (keyCode) {
-            case KeyCode.UP: setCommandHistoryPrevious(); anEvent.consume(); break;
-            case KeyCode.DOWN: setCommandHistoryNext(); anEvent.consume(); break;
-            default: super.keyPressed(anEvent);
+            case KeyCode.UP -> { setCommandHistoryPrevious(); anEvent.consume(); }
+            case KeyCode.DOWN -> { setCommandHistoryNext(); anEvent.consume(); }
+            default -> super.keyPressed(anEvent);
         }
 
         // Reset input location
-        _inputLoc = inputLoc;
+        _inputCharIndex = inputLoc;
 
         // Handle Enter action
-        if (keyCode==KeyCode.ENTER)
-            processEnterAction();
+        if (keyCode == KeyCode.ENTER)
+            handleEnterAction();
     }
 
     /**
      * Called when a key is typed.
      */
+    @Override
     protected void keyTyped(ViewEvent anEvent)
     {
         // Get keyCode and input location
-        int keyCode = anEvent.getKeyCode();
-        int inputLoc = getInputLocation();
+        int inputLoc = getInputCharIndex();
 
         // Handle cursor out of range
-        if (getSelStart()<inputLoc)
+        if (getSelStart() < inputLoc)
             setSel(length());
 
         super.keyTyped(anEvent);
-        _inputLoc = inputLoc;
+        _inputCharIndex = inputLoc;
     }
 
     /**
      * Called when enter is hit.
      */
-    protected void processEnterAction()
+    protected void handleEnterAction()
     {
         // Get command string
         String cmd = getInput().trim();
@@ -138,7 +139,7 @@ public class DevPaneConsoleTextArea extends TextArea {
     public void addCharsWithStyle(CharSequence theChars, TextStyle textStyle, int charIndex)
     {
         super.addCharsWithStyle(theChars, textStyle, charIndex);
-        _inputLoc = length();
+        _inputCharIndex = length();
     }
 
     /**
@@ -148,7 +149,7 @@ public class DevPaneConsoleTextArea extends TextArea {
     public void replaceCharsWithStyle(CharSequence theChars, TextStyle textStyle, int aStart, int anEnd)
     {
         super.replaceCharsWithStyle(theChars, textStyle, aStart, anEnd);
-        _inputLoc = length();
+        _inputCharIndex = length();
     }
 
     /**
@@ -156,8 +157,8 @@ public class DevPaneConsoleTextArea extends TextArea {
      */
     public String getInput()
     {
-        String input = getText().subSequence(getInputLocation(), length()).toString();
-        _inputLoc = length();
+        String input = getText().subSequence(getInputCharIndex(), length()).toString();
+        _inputCharIndex = length();
         return input;
     }
 
@@ -231,7 +232,7 @@ public class DevPaneConsoleTextArea extends TextArea {
      */
     public void clearConsole()
     {
-        clear(); _inputLoc = 0;
+        clear(); _inputCharIndex = 0;
         append(_prompt);
     }
 
@@ -242,7 +243,7 @@ public class DevPaneConsoleTextArea extends TextArea {
     {
         _cmdHistoryIndex = MathUtils.clamp(_cmdHistoryIndex-1, 0, _cmdHistory.size());
         String command = _cmdHistoryIndex<_cmdHistory.size() ? _cmdHistory.get(_cmdHistoryIndex) : "";
-        replaceCharsWithStyle(command, null, getInputLocation(), length());
+        replaceCharsWithStyle(command, null, getInputCharIndex(), length());
     }
 
     /**
@@ -252,6 +253,6 @@ public class DevPaneConsoleTextArea extends TextArea {
     {
         _cmdHistoryIndex = MathUtils.clamp(_cmdHistoryIndex+1, 0, _cmdHistory.size());
         String command = _cmdHistoryIndex<_cmdHistory.size() ? _cmdHistory.get(_cmdHistoryIndex) : "";
-        replaceCharsWithStyle(command, null, getInputLocation(), length());
+        replaceCharsWithStyle(command, null, getInputCharIndex(), length());
     }
 }
