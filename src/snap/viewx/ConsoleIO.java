@@ -50,9 +50,7 @@ public class ConsoleIO {
             print(prompt);
         if (prompt != null && !prompt.isEmpty() && !Character.isWhitespace(prompt.charAt(prompt.length()-1)))
             print(' ');
-        String value = new Scanner(System.in).nextLine();
-        println(value);
-        return value;
+        return new Scanner(System.in).nextLine();
     }
 
     /**
@@ -63,9 +61,7 @@ public class ConsoleIO {
         print(prompt);
         if (prompt != null && !prompt.isEmpty() && !Character.isWhitespace(prompt.charAt(prompt.length()-1)))
             print(' ');
-        int value = new Scanner(System.in).nextInt();
-        println(value);
-        return value;
+        return new Scanner(System.in).nextInt();
     }
 
     /**
@@ -76,9 +72,7 @@ public class ConsoleIO {
         print(prompt);
         if (prompt != null && !prompt.isEmpty() && !Character.isWhitespace(prompt.charAt(prompt.length()-1)))
             print(' ');
-        double value = new Scanner(System.in).nextDouble();
-        println(value);
-        return value;
+        return new Scanner(System.in).nextDouble();
     }
 
     /**
