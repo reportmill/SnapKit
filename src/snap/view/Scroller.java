@@ -70,6 +70,9 @@ public class Scroller extends ParentView implements ViewHost {
         if (_content != null)
             addChild(aView);
 
+        // Reset scroll
+        _scrollX = _scrollY = 0;
+
         // If content is overflow scroll, update border radius to match
         if (_content != null && _content.getOverflow() == Overflow.Scroll)
             setBorderRadius(_content.getBorderRadius());
@@ -278,6 +281,11 @@ public class Scroller extends ParentView implements ViewHost {
      */
     public void scrollToVisible(Shape aShape)
     {
+        // If animating, just skip
+        ViewUpdater viewUpdater = getUpdater();
+        if (viewUpdater != null && viewUpdater.isViewAnimating(this))
+            return;
+
         // Get Scroller scroll and size
         double scrollX = getScrollX();
         double scrollY = getScrollY();
