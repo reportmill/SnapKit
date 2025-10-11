@@ -133,10 +133,12 @@ public class SegmentPathCAG {
      */
     public static Shape intersectShapes(Shape aShape1, Shape aShape2)
     {
-        // Simple cases
-        if (aShape1 instanceof Rect && aShape2 instanceof Rect)
-            return ((Rect) aShape1).getIntersectRect((Rect)aShape2);
-        if (!aShape1.intersectsShape(aShape2))
+        // Simple cases: Empty shapes, both shapes are rect, no intersection
+        if (isEmpty(aShape1) || isEmpty(aShape2)) // Empty shapes
+            return aShape1.getBounds();
+        if (aShape1 instanceof Rect && aShape2 instanceof Rect) // Both shape are rect
+            return ((Rect) aShape1).getIntersectRect((Rect) aShape2);
+        if (!aShape1.intersectsShape(aShape2)) // No intersection
             return new Rect();
         if (aShape1.contains(aShape2))
             return aShape2;
@@ -162,8 +164,12 @@ public class SegmentPathCAG {
         // Iterate over segments to find those with endpoints in opposing shape and add to new shape
         while (loopSeg != null) {
 
-            // Add segment to new path - stop if things are going wrong
-            newPath.addSeg(loopSeg);
+            // If segment has non-zero length, add
+            if (!Point.equals(loopSeg.x0, loopSeg.y0, loopSeg.x1, loopSeg.y1))
+                newPath.addSeg(loopSeg);
+            //else System.out.println("SegmentPathCAG.intersectShapes: Ignoring empty seg");
+
+            // Stop if things are obviously going wrong
             if (newPath.getSegCount() > maxSegments) {
                 System.err.println("SegmentPathCAG: too many segs"); break; }
 
@@ -226,5 +232,14 @@ public class SegmentPathCAG {
     {
         boolean outside = !segmentPath.containsSegMid(seg) || segmentPath.hasSeg(seg);
         return outside && !newPath.hasSeg(seg);
+    }
+
+    /**
+     * Returns whether given shape is effectively empty.
+     */
+    private static boolean isEmpty(Shape aShape)
+    {
+        Rect shapeBounds = aShape.getBounds();
+        return shapeBounds.width < .0001 || shapeBounds.height < .0001;
     }
 }

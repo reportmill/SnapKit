@@ -189,7 +189,7 @@ public class Path2D extends ShapeBuilder implements Cloneable {
         // If last seg has no points, just return - don't close empty path
         Seg lastSeg = getLastSeg();
         if (lastSeg == Seg.MoveTo || lastSeg == Seg.Close || lastSeg == null) {
-            System.err.println("Path2D.close: Attempting to close empty path");
+            System.err.println("Path2D.close: Attempting to close empty path with prior seg: " + lastSeg);
             return;
         }
 
