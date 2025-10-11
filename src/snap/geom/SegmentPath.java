@@ -371,8 +371,8 @@ public class SegmentPath extends Shape {
         // Ivars
         private Segment[] _segs;
         private int _segIndex;
+        private boolean _newCycle = true;
         private double _moveX, _moveY;
-        private double _lineX, _lineY;
 
         /** Constructor. */
         SegmentPathIter(SegmentPath aSL, Transform aTrans)
@@ -387,38 +387,32 @@ public class SegmentPath extends Shape {
         /** Returns the next segment. */
         public Seg getNext(double[] coords)
         {
-            Segment seg = _segs[_segIndex];
+            Segment seg = _segs[_segIndex++];
 
-            // If last end point was last move point, add moveTo
-            if (_lineX == _moveX && _lineY == _moveY) {
-                _lineX += .001;
+            // If starting new cycle, add moveTo
+            if (_newCycle) {
+                _newCycle = false; _segIndex--;
                 return moveTo(_moveX = seg.x0, _moveY = seg.y0, coords);
             }
-            _segIndex++;
 
-            // Make sure last segment closes path
-            if (_segIndex == _segs.length) {
-                seg.x1 = _moveX;
-                seg.y1 = _moveY;
-            }
+            // Handle Line segment
+            if (seg instanceof Line line) {
 
-            // Handle Seg Line
-            if (seg instanceof Line) {
-                Line line = (Line) seg;
-                if (Point.equals(_moveX, _moveY, line.x1, line.y1))
+                // If last segment and at moveto point, just close path
+                if (_segIndex == _segs.length && Point.equals(_moveX, _moveY, line.x1, line.y1))
                     return close();
-                return lineTo(_lineX = line.x1, _lineY = line.y1, coords);
+
+                // Return lineto
+                return lineTo(line.x1, line.y1, coords);
             }
 
-            // Handle Seg Quad
-            if (seg instanceof Quad) {
-                Quad quad = (Quad) seg;
-                return quadTo(quad.cpx, quad.cpy, _lineX = quad.x1, _lineY = quad.y1, coords);
-            }
+            // Handle Quad segment
+            if (seg instanceof Quad quad)
+                return quadTo(quad.cpx, quad.cpy, quad.x1, quad.y1, coords);
 
-            // Handle Seg Cubic)
+            // Handle Cubic segment
             Cubic cubic = (Cubic) seg;
-            return cubicTo(cubic.cp0x, cubic.cp0y, cubic.cp1x, cubic.cp1y, _lineX = cubic.x1, _lineY = cubic.y1, coords);
+            return cubicTo(cubic.cp0x, cubic.cp0y, cubic.cp1x, cubic.cp1y, cubic.x1, cubic.y1, coords);
         }
     }
 }

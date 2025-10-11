@@ -16,115 +16,82 @@ public class MathUtils {
     /**
      * Returns whether two real numbers are equal within a small tolerance.
      */
-    public static boolean equals(double a, double b)
-    {
-        return Math.abs(a - b) < 0.0001;
-    }
+    public static boolean equals(double a, double b)  { return Math.abs(a - b) < 0.00001; }
 
     /**
      * Returns whether two real numbers are equal within given tolerance (e.g., 1e-12)
      */
-    public static boolean equals(double a, double b, double aTolerance)
-    {
-        return Math.abs(a - b) < aTolerance;
-    }
+    public static boolean equals(double a, double b, double aTolerance)  { return Math.abs(a - b) < aTolerance; }
 
     /**
      * Returns whether a real number is practically zero.
      */
-    public static boolean equalsZero(double a)
-    {
-        return equals(a, 0);
-    }
+    public static boolean equalsZero(double a)  { return equals(a, 0); }
 
     /**
      * Returns whether a real number is practically zero.
      */
-    public static boolean equalsZero(double a, double aTolerance)
-    {
-        return Math.abs(a) < aTolerance;
-    }
+    public static boolean equalsZero(double a, double aTolerance)  { return Math.abs(a) < aTolerance; }
 
     /**
      * Returns whether a real number is practically greater than another.
      */
-    public static boolean gt(double a, double b)
-    {
-        return (a>b) && !equals(a,b);
-    }
+    public static boolean gt(double a, double b)  { return (a > b) && !equals(a, b); }
 
     /**
      * Returns whether a real number is practically greater than or equal another.
      */
-    public static boolean gte(double a, double b)
-    {
-        return (a>b) || equals(a,b);
-    }
+    public static boolean gte(double a, double b)  { return (a > b) || equals(a, b); }
 
     /**
      * Returns whether a real number is practically less than another.
      */
-    public static boolean lt(double a, double b)
-    {
-        return (a<b) && !equals(a,b);
-    }
+    public static boolean lt(double a, double b)  { return (a < b) && !equals(a, b); }
 
     /**
      * Returns whether a real number is practically less than or equal another.
      */
-    public static boolean lte(double a, double b)
-    {
-        return (a<b) || equals(a,b);
-    }
+    public static boolean lte(double a, double b)  { return (a < b) || equals(a, b); }
 
     /**
      * Returns whether a real number is between two other numbers.
      */
-    public static boolean between(double a, double x, double y)  { return ((a>=x) && (a<=y)); }
+    public static boolean between(double a, double x, double y)  { return ((a >= x) && (a <= y)); }
 
     /**
      * Returns the sign of a given number (as -1 or 1).
      */
-    public static int sign(double f)  { return f<0 ? -1 : 1; }
+    public static int sign(double f)  { return f < 0 ? -1 : 1; }
 
     /**
      * Returns the given number modulo the second number (mod for floats).
      */
-    public static double mod(double x, double y)  { return x - y*Math.floor(x/y); }
+    public static double mod(double x, double y)  { return x - y * Math.floor(x / y); }
 
     /**
      * Returns the given number rounded to the second number (rounding to arbitrary floating values).
      */
-    public static float round(float x, float y)  { return y*(int)((x + sign(x)*y/2)/y); }
+    public static float round(float x, float y)  { return y * (int) ((x + sign(x) * y / 2) / y); }
 
     /**
      * Returns the given number rounded to the second number (rounding to arbitrary double values).
      */
-    public static double round(double x, double y)  { return y*(int)((x + sign(x)*y/2)/y); }
+    public static double round(double x, double y)  { return y * (int) ((x + sign(x) * y / 2) / y); }
 
     /**
      * Truncate x down to the nearest y.
      */
-    public static double trunc(double x, double y)
-    {
-        return y*Math.floor((x+.00001)/y);
-    }
+    public static double trunc(double x, double y)  { return  y * Math.floor((x + .00001) / y); }
 
     /**
      * Truncate x down to the nearest y.
      */
-    public static double floor(double x, double y)
-    {
-        return y*Math.floor((x+.00001)/y);
-    }
+    public static double floor(double x, double y)  { return y * Math.floor((x + .00001) / y); }
 
     /**
      * Truncate x up to the nearest y.
      */
-    public static double ceil(double x, double y)
-    {
-        return y*Math.ceil((x+.00001)/y);
-    }
+    public static double ceil(double x, double y)  { return y * Math.ceil((x + .00001) / y); }
 
     /**
      * Returns the given float clamped to 1/1000th precision.
