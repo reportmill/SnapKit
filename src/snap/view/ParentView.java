@@ -671,11 +671,11 @@ public class ParentView extends View {
      * Called when ViewTheme changes.
      */
     @Override
-    protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
+    protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
     {
-        super.themeChanged(oldTheme, newTheme);
+        super.handleThemeChange(oldTheme, newTheme);
         for (View child : getChildren())
-            child.themeChanged(oldTheme, newTheme);
+            child.handleThemeChange(oldTheme, newTheme);
     }
 
     /**

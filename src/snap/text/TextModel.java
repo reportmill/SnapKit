@@ -1161,25 +1161,27 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
         if (lineCount == 0)
             return;
 
-        // Save painter state
-        aPntr.save();
-
-        // Get text bounds and clip
+        // Get text clip bounds and clip
         Rect textBounds = getBounds();
-        Rect clipBounds = aPntr.getClipBounds();
-        clipBounds = clipBounds != null ? clipBounds.getIntersectRect(textBounds) : textBounds;
-        aPntr.clip(clipBounds);
+        Rect pntrClipBounds = aPntr.getClipBounds();
+        Rect textClipBounds = pntrClipBounds != null ? pntrClipBounds.getIntersectRect(textBounds) : textBounds;
+        if (textClipBounds.isEmpty())
+            return;
+
+        // Save painter state and clip
+        aPntr.save();
+        aPntr.clip(textClipBounds);
 
         // Iterate over lines
         for (int i = 0; i < lineCount; i++) {
 
             // If line not yet visible, skip
             TextLine textLine = getLine(i);
-            if (textLine.getTextMaxY() < clipBounds.y)
+            if (textLine.getTextMaxY() < textClipBounds.y)
                 continue;
 
             // If line no longer visible, break
-            if (textLine.getTextY() >= clipBounds.getMaxY())
+            if (textLine.getTextY() >= textClipBounds.getMaxY())
                 break;
 
             // Paint line
@@ -1189,7 +1191,7 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
 
         // Paint underlines
         if (isUnderlined())
-            TextModelUtils.paintTextModelUnderlines(aPntr, this, clipBounds);
+            TextModelUtils.paintTextModelUnderlines(aPntr, this, textClipBounds);
 
         // Restore state
         aPntr.restore();

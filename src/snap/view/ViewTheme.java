@@ -332,7 +332,7 @@ public class ViewTheme {
         WindowView[] openWindows = WindowView.getOpenWindows();
         for (WindowView openWindow : openWindows) {
             RootView rootView = openWindow.getRootView();
-            rootView.themeChanged(oldTheme, newTheme);
+            rootView.handleThemeChange(oldTheme, newTheme);
             rootView.setFill(_theme.getBackFill());
             rootView.repaint();
         }

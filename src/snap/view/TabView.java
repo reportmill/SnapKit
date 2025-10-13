@@ -61,8 +61,8 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
         _tabBar = new TabBar();
         _tabBar.setPadding(CLASSIC_TAB_BAR_INSETS);
         _tabBar.getTabsBox().setSpacing(CLASSIC_TAB_BAR_SPACING);
-        _tabBar.addPropChangeListener(pc -> tabBarDidPropChange(pc));
-        _tabBar.addEventHandler(e -> tabBarDidFireAction(e), Action);
+        _tabBar.addPropChangeListener(this::handleTabBarPropChange);
+        _tabBar.addEventHandler(this::handleTabBarActionEvent, Action);
 
         // Create separator
         _separator = new RectView();
@@ -75,7 +75,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
         _contentBox.setFill(ViewUtils.getBackFill());
         _contentBox.setGrowWidth(true);
         _contentBox.setGrowHeight(true);
-        _contentBox.addPropChangeListener(pc -> contentBoxDidContentChange(), BoxView.Content_Prop);
+        _contentBox.addPropChangeListener(pc -> handleContentBoxContentChange(), BoxView.Content_Prop);
 
         // Add shelf and content cradle, enable action event
         setChildren(_tabBar, _separator, _contentBox);
@@ -323,7 +323,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     /**
      * Called when TabBar does prop change.
      */
-    private void tabBarDidPropChange(PropChange aPC)
+    private void handleTabBarPropChange(PropChange aPC)
     {
         String propName = aPC.getPropName();
 
@@ -339,7 +339,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     /**
      * Called when ContentBox does content change.
      */
-    private void contentBoxDidContentChange()
+    private void handleContentBoxContentChange()
     {
         // Get Visible/Vertical
         boolean isVertical = getTabSide().isTopOrBottom();
@@ -359,23 +359,23 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     }
 
     /**
-     * Override to trigger content contentBoxDidContentChange() when first showing.
+     * Override to trigger handleContentBoxContentChange() when first showing.
      */
     @Override
     protected void setShowing(boolean aValue)
     {
         super.setShowing(aValue);
         if (aValue)
-            contentBoxDidContentChange();
+            handleContentBoxContentChange();
     }
 
     /**
      * Called when Theme changes.
      */
     @Override
-    protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
+    protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
     {
-        super.themeChanged(oldTheme, newTheme);
+        super.handleThemeChange(oldTheme, newTheme);
         _contentBox.setFill(ViewUtils.getBackFill());
 
         _tabBar.setFill(null);
@@ -391,7 +391,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     /**
      * Called when TabBar does fireAction
      */
-    protected void tabBarDidFireAction(ViewEvent anEvent)
+    protected void handleTabBarActionEvent(ViewEvent anEvent)
     {
         fireActionEvent(anEvent);
     }

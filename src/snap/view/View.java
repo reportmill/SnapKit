@@ -2660,7 +2660,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Called when ViewTheme changes.
      */
-    protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
+    protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
     {
         newTheme.setThemeStyleDefaultsForViewAndOldTheme(this, oldTheme);
     }

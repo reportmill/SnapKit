@@ -1022,9 +1022,9 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      * Override to reset AltRowColor
      */
     @Override
-    protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
+    protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
     {
-        super.themeChanged(oldTheme, newTheme);
+        super.handleThemeChange(oldTheme, newTheme);
         if (Objects.equals(_altRowColor, oldTheme.getContentAltColor()))
             _altRowColor = newTheme.getContentAltColor();
         removeChildren();

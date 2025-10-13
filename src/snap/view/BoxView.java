@@ -65,18 +65,13 @@ public class BoxView extends ParentView implements ViewHost {
         // If already set, just return
         if (aView == getContent()) return;
 
-        // Cache and remove old content
-        View oldContent = _content;
-        if (oldContent != null)
+        // Remove old content and set/add new with prop change
+        if (_content != null)
             removeChild(_content);
-
-        // Set/add new
-        _content = aView;
+        batchPropChange(Content_Prop, _content, _content = aView);
         if (_content != null)
             addChild(_content);
-
-        // Fire prop change
-        firePropChange(Content_Prop, oldContent, _content);
+        fireBatchPropChanges();
     }
 
     /**
@@ -200,7 +195,7 @@ public class BoxView extends ParentView implements ViewHost {
 
         // Get anim - finished/cleared in case it was running
         ViewAnim anim = getAnim(0).finish().clear();
-        anim.setOnFinish(() -> setContentAnimDone(aView));
+        anim.setOnFinish(() -> handleContentAnimDone(aView));
 
         // Get end anim
         ViewAnim anim500 = anim.getAnim(500);
@@ -225,7 +220,7 @@ public class BoxView extends ParentView implements ViewHost {
     /**
      * Called when setContentWithAnim() is done.
      */
-    private void setContentAnimDone(View aView)
+    private void handleContentAnimDone(View aView)
     {
         if (aView == null)
             setContent(null);
@@ -252,15 +247,15 @@ public class BoxView extends ParentView implements ViewHost {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // FillWidth, FillHeight
-            case FillWidth_Prop: return isFillWidth();
-            case FillHeight_Prop: return isFillHeight();
+            case FillWidth_Prop -> isFillWidth();
+            case FillHeight_Prop -> isFillHeight();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -272,11 +267,11 @@ public class BoxView extends ParentView implements ViewHost {
         switch (aPropName) {
 
             // FillWidth, FillHeight
-            case FillWidth_Prop: setFillWidth(Convert.boolValue(aValue)); break;
-            case FillHeight_Prop: setFillHeight(Convert.boolValue(aValue)); break;
+            case FillWidth_Prop -> setFillWidth(Convert.boolValue(aValue));
+            case FillHeight_Prop -> setFillHeight(Convert.boolValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 
