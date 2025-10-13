@@ -325,9 +325,9 @@ public class ScrollView extends ParentView implements ViewHost {
         boolean isHBarShowing = isHBarShowing();
         int barSize = getBarSize();
         if (isVBarShowing)
-            areaW -= barSize;
+            areaW = Math.max(areaW - barSize, 0);
         if (isHBarShowing)
-            areaH -= barSize;
+            areaH = Math.max(areaH - barSize, 0);
 
         // Set Scroller bounds
         _scroller.setBounds(areaX, areaY, areaW, areaH);

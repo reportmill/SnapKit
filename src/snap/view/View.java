@@ -336,6 +336,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setWidth(double aValue)
     {
         if (aValue == _width) return;
+        if (aValue < 0)
+            System.err.println("View.setWidth: negative value not allowed: " + aValue);
 
         // Repaint max of new and old
         repaint(0, 0, Math.max(_width, aValue), getHeight());
@@ -356,6 +358,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setHeight(double aValue)
     {
         if (aValue == _height) return;
+        if (aValue < 0)
+            System.err.println("View.setHeight: negative value not allowed: " + aValue);
 
         // Repaint max of new and old
         repaint(0, 0, getWidth(), Math.max(_height, aValue));
@@ -2211,6 +2215,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void repaint(double aX, double aY, double aW, double aH)
     {
+        // If empty rect, just return
+        if (aW < .001 || aH < .001)
+            return;
+
         // If RepaintRect already set, just union with given bounds and return
         if (_repaintRect != null) {
             _repaintRect.union(aX, aY, aW, aH);

@@ -167,11 +167,14 @@ public class SegmentPathCAG {
             // If segment has non-zero length, add
             if (!Point.equals(loopSeg.x0, loopSeg.y0, loopSeg.x1, loopSeg.y1))
                 newPath.addSeg(loopSeg);
-            //else System.out.println("SegmentPathCAG.intersectShapes: Ignoring empty seg");
+            else maxSegments--; //System.out.println("SegmentPathCAG.intersectShapes: Ignoring empty seg");
 
             // Stop if things are obviously going wrong
             if (newPath.getSegCount() > maxSegments) {
-                System.err.println("SegmentPathCAG: too many segs"); break; }
+                System.err.println("SegmentPathCAG: too many segs");
+                //System.err.println("  Shape1: " + aShape1); System.err.println("  Shape2: " + aShape2);
+                return aShape1;
+            }
 
             // Get the next segment inside other path
             Segment nextSeg = getNextSegInside(mainPath, loopSeg, otherPath, newPath);
