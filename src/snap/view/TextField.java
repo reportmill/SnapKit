@@ -382,8 +382,8 @@ public class TextField extends ParentView {
         Insets ins = getInsetsAll();
         double areaX = ins.left;
         double areaY = ins.top;
-        double areaW = getWidth() - ins.getWidth();
-        double areaH = getHeight() - ins.getHeight();
+        double areaW = Math.max(getWidth() - ins.getWidth(), 0);
+        double areaH = Math.max(getHeight() - ins.getHeight(), 0);
         _promptLabel.setBounds(areaX, areaY, areaW, areaH);
 
         // Reset text bounds
