@@ -226,6 +226,27 @@ public class ViewUtils {
     }
 
     /**
+     * Runs the given runnable for name once.
+     */
+    public static void runLaterOnceForName(String aName, Runnable aRun)
+    {
+        // If runnable already queued, just return
+        if (hasRunForName(aName)) return;
+
+        // Queue name and runnable
+        _runOnceNames.add(aName);
+        runLater(() -> { _runOnceNames.remove(aName); aRun.run(); });
+    }
+
+    /**
+     * Runs the given runnable for name once.
+     */
+    public static boolean hasRunForName(String aName)  { return _runOnceNames.contains(aName); }
+
+    // Map of Run-Once names
+    private static Set <String> _runOnceNames = Collections.synchronizedSet(new HashSet<>());
+
+    /**
      * Runs a runnable on next mouse release (assumes mouse is down).
      */
     public static void runOnMouseUp(Runnable aRun)

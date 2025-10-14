@@ -13,12 +13,6 @@ import snap.web.WebFile;
  */
 public abstract class ViewEnv {
 
-    // Map of Run-Once runnables
-    private Set <Runnable>  _runOnceRuns = Collections.synchronizedSet(new HashSet<>());
-    
-    // Map of Run-Once names
-    private Set <String>  _runOnceNames = Collections.synchronizedSet(new HashSet<>());
-    
     // The timer for runIntervals and runDelayed
     private java.util.Timer  _timer = new java.util.Timer();
     
@@ -46,32 +40,6 @@ public abstract class ViewEnv {
      * Run given runnable on event thread.
      */
     public abstract void runLater(Runnable aRun);
-
-    /**
-     * Runs the given runnable once.
-     */
-    public void runLaterOnce(Runnable aRun)
-    {
-        // If runnable already queued, just return
-        if (_runOnceRuns.contains(aRun)) return;
-
-        // Queue runnable
-        _runOnceRuns.add(aRun);
-        runLater(() -> { aRun.run(); _runOnceRuns.remove(aRun); });
-    }
-
-    /**
-     * Runs the given runnable for name once.
-     */
-    public void runLaterOnce(String aName, Runnable aRun)
-    {
-        // If runnable already queued, just return
-        if (_runOnceNames.contains(aName)) return;
-
-        // Queue name and runnable
-        _runOnceNames.add(aName);
-        runLater(() -> { aRun.run(); _runOnceNames.remove(aName); });
-    }
 
     /**
      * Runs given runnable after delay.
@@ -107,29 +75,6 @@ public abstract class ViewEnv {
         TimerTask task = _timerTasks.get(aRun);
         if (task != null)
             task.cancel();
-    }
-
-    /**
-     * Runs a runnable later and waits for it to finish.
-     */
-    public synchronized void runLaterAndWait(Runnable aRun)
-    {
-        // If isEventThread, just run and return
-        if (isEventThread()) { aRun.run(); return; }
-
-        // Register for runLater() to run and notify
-        runLater(() -> runAndNotify(aRun));
-
-        // Wait for runAndNotify
-        try { wait(); }
-        catch(Exception e) { throw new RuntimeException(e); }
-    }
-
-    /** Run and notify - used to resume thread that called runLaterAndWait. */
-    private synchronized void runAndNotify(Runnable aRun)
-    {
-        aRun.run();
-        notify();
     }
 
     /**
