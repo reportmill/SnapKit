@@ -30,6 +30,9 @@ public class TaskMonitor extends PropObject {
     // The current task title
     private String _taskTitle = "First Task";
 
+    // Whether task count and run time is indeterminate
+    private boolean _indeterminate;
+
     // Whether monitor has been cancelled
     private boolean _cancelled;
 
@@ -52,6 +55,7 @@ public class TaskMonitor extends PropObject {
     public static final String TaskTitle_Prop = "TaskTitle";
     public static final String TaskWorkUnitCount_Prop = "TaskWorkUnitCount";
     public static final String TaskWorkUnitIndex_Prop = "TaskWorkUnitIndex";
+    public static final String Indeterminate_Prop = "Indeterminate";
     public static final String Cancelled_Prop = "Cancelled";
     public static final String Finished_Prop = "Finished";
 
@@ -181,6 +185,7 @@ public class TaskMonitor extends PropObject {
      */
     public void beginTask(String taskTitle, int workUnitCount)
     {
+        setIndeterminate(false);
         setTaskTitle(taskTitle);
         setTaskWorkUnitCount(workUnitCount);
         setTaskWorkUnitIndex(0);
@@ -212,7 +217,21 @@ public class TaskMonitor extends PropObject {
         if (_writer != null)
             println("EndTask " + _taskIndex);
     }
-    
+
+    /**
+     * Returns whether task timing is indeterminate.
+     */
+    public boolean isIndeterminate()  { return _indeterminate; }
+
+    /**
+     * Sets whether task timing is indeterminate.
+     */
+    public void setIndeterminate(boolean aValue)
+    {
+        if (aValue == isIndeterminate()) return;
+        firePropChange(Indeterminate_Prop, _indeterminate, _indeterminate = aValue);
+    }
+
     /**
      * Returns whether the user asked the process to stop working.
      */
