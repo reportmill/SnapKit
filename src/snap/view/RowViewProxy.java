@@ -17,29 +17,21 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
     {
         super(aParent);
 
-        if (aParent instanceof RowView) {
-            RowView colView = (RowView) aParent;
+        if (aParent instanceof RowView colView)
             setFillHeight(colView.isFillHeight());
-        }
     }
 
     /**
      * Returns preferred width of given parent proxy using RowView layout.
      */
     @Override
-    protected double getPrefWidthImpl(double aH)
-    {
-        return getLastChildMaxXWithInsets();
-    }
+    protected double getPrefWidthImpl(double aH)  { return getLastChildMaxXWithInsets(); }
 
     /**
      * Returns preferred height of given parent proxy using RowView layout.
      */
     @Override
-    protected double getPrefHeightImpl(double aW)
-    {
-        return getChildrenMaxYWithInsets();
-    }
+    protected double getPrefHeightImpl(double aW)  { return getChildrenMaxYWithInsets(); }
 
     /**
      * Performs layout for given ViewProxy.
@@ -214,7 +206,8 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
                 child.setX(child.getX() + shiftX);
             if (child.isGrowWidth()) {
                 int each3 = j < count2 ? eachP1 : each;
-                child.setWidth(child.getWidth() + each3);
+                double childW = Math.max(child.width + each3, 0);
+                child.setWidth(childW);
                 shiftX += each3; j++;
             }
         }

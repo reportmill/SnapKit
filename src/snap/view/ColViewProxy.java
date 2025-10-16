@@ -16,32 +16,21 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     public ColViewProxy(View aParent)
     {
         super(aParent);
-
-        if (aParent instanceof ColView) {
-            ColView colView = (ColView) aParent;
+        if (aParent instanceof ColView colView)
             setFillWidth(colView.isFillWidth());
-        }
     }
 
     /**
      * Returns preferred width of given parent proxy using ColView layout.
      */
     @Override
-    protected double getPrefWidthImpl(double aH)
-    {
-        double prefW = getChildrenMaxXWithInsets();
-        return prefW;
-    }
+    protected double getPrefWidthImpl(double aH)  { return getChildrenMaxXWithInsets(); }
 
     /**
      * Returns preferred height of given parent proxy using ColView layout.
      */
     @Override
-    protected double getPrefHeightImpl(double aW)
-    {
-        double prefH = getLastChildMaxYWithInsets();
-        return prefH;
-    }
+    protected double getPrefHeightImpl(double aW)  { return getLastChildMaxYWithInsets(); }
 
     /**
      * Performs layout for given ViewProxy.
@@ -217,7 +206,8 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
                 child.setY(child.getY() + shiftY);
             if (child.isGrowHeight()) {
                 int each3 = j < count2 ? eachP1 : each;
-                child.setHeight(child.getHeight() + each3);
+                double childH = Math.max(child.height + each3, 0);
+                child.setHeight(childH);
                 shiftY += each3; j++;
             }
         }
