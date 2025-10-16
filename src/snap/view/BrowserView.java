@@ -426,9 +426,9 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         // Reset NeedsScrollSelToVisible
         _needsScrollSelToVisible = false;
 
-        // Scroll ColLast to visible
-        BrowserCol<?> lastCol = getLastCol();
-        lastCol.scrollToVisible(lastCol.getBoundsLocal());
+        // Scroll last column to visible
+        ScrollView lastColScroll = getLastCol().getParent(ScrollView.class);
+        scrollToVisible(lastColScroll.getBounds());
     }
 
     /**
@@ -484,11 +484,10 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
                 return;
 
             // Handle keys
-            int keyCode = anEvent.getKeyCode();
-            switch (keyCode) {
-                case KeyCode.UP: selCol.selectUp(); anEvent.consume(); break;
-                case KeyCode.DOWN: selCol.selectDown(); anEvent.consume(); break;
-                case KeyCode.ENTER: selCol.processEnterAction(anEvent); break;
+            switch (anEvent.getKeyCode()) {
+                case KeyCode.UP -> { selCol.selectUp(); anEvent.consume(); }
+                case KeyCode.DOWN -> { selCol.selectDown(); anEvent.consume(); }
+                case KeyCode.ENTER -> selCol.processEnterAction(anEvent);
             }
         }
     }
@@ -641,33 +640,33 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
      * Override to support props for this class.
      */
     @Override
-    public Object getPropValue(String aPropName)
+    public Object getPropValue(String propName)
     {
-        switch (aPropName) {
+        return switch (propName) {
 
             // PrefColCount, PrefColWidth
-            case PrefColCount_Prop: return getPrefColCount();
-            case PrefColWidth_Prop: return getPrefColWidth();
+            case PrefColCount_Prop -> getPrefColCount();
+            case PrefColWidth_Prop -> getPrefColWidth();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(propName);
+        };
     }
 
     /**
      * Override to support props for this class.
      */
     @Override
-    public void setPropValue(String aPropName, Object aValue)
+    public void setPropValue(String propName, Object aValue)
     {
-        switch (aPropName) {
+        switch (propName) {
 
             // PrefColCount, PrefColWidth
-            case PrefColCount_Prop: setPrefColCount(Convert.intValue(aValue)); break;
-            case PrefColWidth_Prop: setPrefColWidth(Convert.intValue(aValue)); break;
+            case PrefColCount_Prop -> setPrefColCount(Convert.intValue(aValue));
+            case PrefColWidth_Prop -> setPrefColWidth(Convert.intValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(propName, aValue);
         }
     }
 
