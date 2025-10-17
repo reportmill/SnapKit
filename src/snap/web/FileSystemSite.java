@@ -35,7 +35,8 @@ public class FileSystemSite extends WebSite {
     public void setURL(WebURL aURL)
     {
         super.setURL(aURL);
-        _fileSystem = FileSystems.getDefault();
+        configS3();
+        aURL = WebURL.createUrl("s3://snapcode");
 
         // If Windows, get drive letter path
         try { _fileSystem = FileSystems.getFileSystem(aURL.getJavaUrl().toURI()); }
@@ -54,8 +55,11 @@ public class FileSystemSite extends WebSite {
         // Get Java file - if file doesn't exist or is not readable, return NOT_FOUND response
         Path javaPath = getJavaPathForLocalPath(filePath);
         if (!Files.exists(javaPath) || !Files.isReadable(javaPath)) {
-            aResp.setCode(WebResponse.NOT_FOUND);
-            return;
+            Path dirPath = _fileSystem.getPath(javaPath.toString() + '/');
+            if (!Files.exists(dirPath)) {
+                aResp.setCode(WebResponse.NOT_FOUND);
+                return;
+            }
         }
 
         // If case doesn't match, return not found - case-insensitive file systems could be supported, but it could get tricky
@@ -90,9 +94,15 @@ public class FileSystemSite extends WebSite {
      */
     protected FileHeader getFileHeaderForJavaPath(Path javaPath)
     {
+        boolean isDir = false;
+
         // If file doesn't exist or is not readable, return null
-        if (!Files.exists(javaPath) || !Files.isReadable(javaPath))
-            return null;
+        if (!Files.exists(javaPath) || !Files.isReadable(javaPath)) {
+            Path dirPath = _fileSystem.getPath(javaPath.toString() + '/');
+            if (!Files.exists(dirPath))
+                return null;
+            isDir = true;
+        }
 
         // Get file path
         String filePath = javaPath.toAbsolutePath().toString();
@@ -100,12 +110,14 @@ public class FileSystemSite extends WebSite {
             filePath = "/" + filePath;
 
         // Create and initialize FileHeader and return
-        FileHeader fileHeader = new FileHeader(filePath, Files.isDirectory(javaPath));
-        try {
-            fileHeader.setLastModTime(Files.getLastModifiedTime(javaPath).toMillis());
-            fileHeader.setSize(Files.size(javaPath));
+        FileHeader fileHeader = new FileHeader(filePath, isDir || Files.isDirectory(javaPath));
+        if (!isDir) {
+            try {
+                fileHeader.setLastModTime(Files.getLastModifiedTime(javaPath).toMillis());
+                fileHeader.setSize(Files.size(javaPath));
+            }
+            catch (IOException e) { throw new RuntimeException(e); }
         }
-        catch (IOException e) { throw new RuntimeException(e); }
 
         // Return
         return fileHeader;
@@ -137,14 +149,16 @@ public class FileSystemSite extends WebSite {
         // Get java file
         String filePath = aReq.getFilePath();
         Path javaPath = getJavaPathForLocalPath(filePath);
-        boolean fileExists = Files.exists(javaPath);
 
         // If directory and missing, create directory
-        if (aReq.isFileDir() && !fileExists) {
-            try { Files.createDirectory(javaPath); }
-            catch (IOException e) {
-                aResp.setException(new RuntimeException("FileSite.doPut: Error creating dir: " + javaPath, e));
-                return;
+        if (aReq.isFileDir()) {
+            Path dirPath = _fileSystem.getPath(javaPath.toString() + '/');
+            if (!Files.exists(dirPath)) {
+//                try { Files.createDirectory(dirPath); }
+//                catch (IOException e) {
+//                    aResp.setException(new RuntimeException("FileSystemSite.doPut: Error creating dir: " + javaPath, e));
+//                    return;
+//                }
             }
         }
 
@@ -226,10 +240,16 @@ public class FileSystemSite extends WebSite {
 
     public static void main(String[] args) throws Exception
     {
+        configS3();
+        testSite();
+    }
+
+    public static void configS3()
+    {
         //var uri = URI.create("s3://my-bucket/");
-        String endPoint = "https://b76fa57c136c414d75b22f6582b5b6c9.r2.cloudflarestorage.com";
-        String accessKey = "6d8b952eefb4cc210e4d90d3656f5d4a";
-        String secretKey = "c7472994293330c4244ef128b8387328a30d4ffbc97652481a1c7aa241b153e9";
+        String endPoint = "";
+        String accessKey = "";
+        String secretKey = "";
 
         // Set the system properties for the AWS SDK client that the NIO provider uses
         System.setProperty("aws.accessKeyId", accessKey);
@@ -237,9 +257,6 @@ public class FileSystemSite extends WebSite {
         System.setProperty("aws.endpointUrl", endPoint);
         System.setProperty("aws.s3.endpoint", endPoint); // Older property, but good for compatibility
         System.setProperty("aws.region", "auto");
-
-        // Test
-        testSite();
     }
 
     private static void testSite()
