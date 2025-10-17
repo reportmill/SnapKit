@@ -163,6 +163,10 @@ public class WebGetter {
         if (fileType.equals("zip") || fileType.equals("jar") || fileType.equals("gfar"))
             return new ZipFileSite();
 
+        // Handle S3
+        if (scheme.equals("s3"))
+            return new FileSystemSite();
+
         // Handle DirSite
         WebURL parentSiteURL = aSiteURL.getSiteUrl();
         String parentSitePath = parentSiteURL != null ? parentSiteURL.getPath() : "";
