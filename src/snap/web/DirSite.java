@@ -155,9 +155,8 @@ public class DirSite extends WebSite {
     protected void resetFile(WebFile aFile)
     {
         super.resetFile(aFile);
-        WebFile dirFile = getDirFileForPath(aFile.getPath());
-        if (dirFile != null)
-            dirFile.reset();
+        WebFile dirFile = createDirFileForPath(aFile.getPath(), aFile.isDir());
+        dirFile.reset();
     }
 
     /**
@@ -202,12 +201,8 @@ public class DirSite extends WebSite {
      */
     private WebFile getDirFileForPath(String aPath)
     {
-        // Get dir file
-        WebFile dir = getDir();
-        if (dir == null || !dir.isDir())
-            return null;
-
         // Get file path for dir file and fetch
+        WebFile dir = getDir();
         WebSite dirSite = dir.getSite();
         String dirFilePath = dir.getPath() + aPath;
         return dirSite.getFileForPath(dirFilePath);
@@ -218,12 +213,8 @@ public class DirSite extends WebSite {
      */
     private WebFile createDirFileForPath(String aPath, boolean isDir)
     {
-        // Get dir file
-        WebFile dir = getDir();
-        if (dir == null || !dir.isDir())
-            return null;
-
         // Get file path for dir file and create
+        WebFile dir = getDir();
         WebSite dirSite = dir.getSite();
         String dirFilePath = dir.getPath() + aPath;
         return dirSite.createFileForPath(dirFilePath, isDir);

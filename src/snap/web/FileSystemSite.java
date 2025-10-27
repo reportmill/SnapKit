@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
@@ -47,17 +48,23 @@ public class FileSystemSite extends WebSite {
     @Override
     protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
     {
-        // Get request file path
-        String filePath = aReq.getFilePath();
+        if (isHead)
+            doHead(aReq, aResp);
+        else doGet(aReq, aResp);
+    }
 
-        // Get Java file - if file doesn't exist or is not readable, return NOT_FOUND response
+    /**
+     * Handle a head request.
+     */
+    private void doHead(WebRequest aReq, WebResponse aResp)
+    {
+        // Get file header
+        String filePath = aReq.getFilePath();
         Path javaPath = getJavaPathForLocalPath(filePath);
-        if (!Files.exists(javaPath) || !Files.isReadable(javaPath)) {
-            Path dirPath = _fileSystem.getPath(javaPath.toString() + '/');
-            if (!Files.exists(dirPath)) {
-                aResp.setCode(WebResponse.NOT_FOUND);
-                return;
-            }
+        FileHeader fileHeader = getFileHeaderForJavaPath(javaPath);
+        if (fileHeader == null) {
+            aResp.setCode(WebResponse.NOT_FOUND);
+            return;
         }
 
         // If case doesn't match, return not found - case-insensitive file systems could be supported, but it could get tricky
@@ -66,13 +73,20 @@ public class FileSystemSite extends WebSite {
 
         // Configure response info (just return if isHead). Need to pre-create FileHeader to fix capitalization.
         aResp.setCode(WebResponse.OK);
-        FileHeader fileHeader = getFileHeaderForJavaPath(javaPath);
         aResp.setFileHeader(fileHeader);
-        if (isHead)
-            return;
+    }
+
+    /**
+     * Handle a get request.
+     */
+    private void doGet(WebRequest aReq, WebResponse aResp)
+    {
+        String filePath = aReq.getFilePath();
+        Path javaPath = getJavaPathForLocalPath(filePath);
+        boolean isFile = aReq.getFile().isFile();
 
         // If file, just set bytes
-        if (aResp.isFile()) {
+        if (isFile) {
             try {
                 byte[] bytes = Files.readAllBytes(javaPath);
                 aResp.setBytes(bytes);
@@ -92,15 +106,10 @@ public class FileSystemSite extends WebSite {
      */
     protected FileHeader getFileHeaderForJavaPath(Path javaPath)
     {
-        boolean isDir = false;
-
-        // If file doesn't exist or is not readable, return null
-        if (!Files.exists(javaPath) || !Files.isReadable(javaPath)) {
-            Path dirPath = _fileSystem.getPath(javaPath.toString() + '/');
-            if (!Files.exists(dirPath))
-                return null;
-            isDir = true;
-        }
+        // Get file attributes
+        BasicFileAttributes fileAttrs = getFileAttributesForJavaPath(javaPath);
+        if (fileAttrs == null)
+            return null;
 
         // Get file path
         String filePath = javaPath.toAbsolutePath().toString();
@@ -108,17 +117,36 @@ public class FileSystemSite extends WebSite {
             filePath = "/" + filePath;
 
         // Create and initialize FileHeader and return
-        FileHeader fileHeader = new FileHeader(filePath, isDir || Files.isDirectory(javaPath));
+        boolean isDir = fileAttrs.isDirectory();
+        FileHeader fileHeader = new FileHeader(filePath, isDir);
         if (!isDir) {
-            try {
-                fileHeader.setLastModTime(Files.getLastModifiedTime(javaPath).toMillis());
-                fileHeader.setSize(Files.size(javaPath));
-            }
-            catch (IOException e) { throw new RuntimeException(e); }
+            fileHeader.setLastModTime(fileAttrs.lastModifiedTime().toMillis());
+            fileHeader.setSize(fileAttrs.size());
         }
 
         // Return
         return fileHeader;
+    }
+
+    /**
+     * Returns the file attributes for given path.
+     */
+    private BasicFileAttributes getFileAttributesForJavaPath(Path javaPath)
+    {
+        if (javaPath.toString().startsWith("/"))
+            javaPath = _fileSystem.getPath(javaPath.toString().substring(1));
+
+        // Try the plain file
+        try { return Files.readAttributes(javaPath, BasicFileAttributes.class); }
+        catch (NoSuchFileException ignored) { }
+        catch (Exception e) { e.printStackTrace(); }
+
+        // Try as directory
+        Path dirPath = _fileSystem.getPath(javaPath.toString() + '/');
+        try { return Files.readAttributes(dirPath, BasicFileAttributes.class); }
+        catch (NoSuchFileException ignored) { }
+        catch (Exception e) { e.printStackTrace(); }
+        return null;
     }
 
     /**
@@ -215,27 +243,18 @@ public class FileSystemSite extends WebSite {
     protected File getJavaFileForUrl(WebURL aURL)
     {
         String filePath = aURL.getPath();
-        if (filePath.isEmpty())
-            filePath = "/";
-        return getJavaFileForLocalPath(filePath);
+        if (filePath.isEmpty()) filePath = "/";
+        return _fileSystem.getPath(filePath).toFile();
     }
 
     /**
      * Returns the Java path for given local file path.
      */
-    protected Path getJavaPathForLocalPath(String filePath)
-    {
-        return _fileSystem.getPath(filePath);
-    }
+    private Path getJavaPathForLocalPath(String filePath)  { return _fileSystem.getPath(filePath); }
 
     /**
-     * Returns the Java file for given local file path.
+     * Test.
      */
-    protected File getJavaFileForLocalPath(String filePath)
-    {
-        return _fileSystem.getPath(filePath).toFile();
-    }
-
     public static void main(String[] args) throws Exception
     {
         configS3();

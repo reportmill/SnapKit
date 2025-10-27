@@ -309,8 +309,9 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         if (_bytes != null) return _bytes;
 
         // Get URL response
-        WebURL url = getUrl();
-        WebResponse resp = url.getResponse();
+        WebSite site = getSite();
+        WebRequest req = new WebRequest(this);
+        WebResponse resp = site.getResponse(req);
 
         // Handle error response
         int respCode = resp.getCode();
@@ -367,8 +368,9 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         if (_files != null) return _files;
 
         // Get URL response
-        WebURL url = getUrl();
-        WebResponse resp = url.getResponse();
+        WebSite site = getSite();
+        WebRequest req = new WebRequest(this);
+        WebResponse resp = site.getResponse(req);
 
         // Handle error response
         int respCode = resp.getCode();
@@ -389,9 +391,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
             fileHeaders = Collections.emptyList();
 
         // Get files sorted
-        WebSite site = getSite();
-        List<WebFile> files = fileHeaders.stream().map(fhdr -> site.getFileForFileHeader(fhdr))
-                .sorted().collect(Collectors.toList());
+        List<WebFile> files = fileHeaders.stream().map(fhdr -> site.getFileForFileHeader(fhdr)).sorted().toList();
 
         // Return
         return _files = files;
