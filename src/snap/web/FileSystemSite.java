@@ -35,8 +35,6 @@ public class FileSystemSite extends WebSite {
     public void setURL(WebURL aURL)
     {
         super.setURL(aURL);
-        configS3();
-        aURL = WebURL.createUrl("s3://snapcode");
 
         // If Windows, get drive letter path
         try { _fileSystem = FileSystems.getFileSystem(aURL.getJavaUrl().toURI()); }
@@ -244,25 +242,20 @@ public class FileSystemSite extends WebSite {
         testSite();
     }
 
+    /**
+     * Configures system properties for the AWS SDK client that the NIO provider uses.
+     */
     public static void configS3()
     {
-        //var uri = URI.create("s3://my-bucket/");
-        String endPoint = "";
-        String accessKey = "";
-        String secretKey = "";
-
-        // Set the system properties for the AWS SDK client that the NIO provider uses
-        System.setProperty("aws.accessKeyId", accessKey);
-        System.setProperty("aws.secretAccessKey", secretKey);
-        System.setProperty("aws.endpointUrl", endPoint);
-        System.setProperty("aws.s3.endpoint", endPoint); // Older property, but good for compatibility
+        System.setProperty("aws.endpointUrl", "");
+        System.setProperty("aws.accessKeyId", "");
+        System.setProperty("aws.secretAccessKey", "");
         System.setProperty("aws.region", "auto");
     }
 
     private static void testSite()
     {
         WebURL siteUrl = WebURL.createUrl("s3://snapcode");
-        //FileSystemSite site = new FileSystemSite(); site.setURL(siteUrl);
         WebSite site = siteUrl.getAsSite();
 
         // Get file system

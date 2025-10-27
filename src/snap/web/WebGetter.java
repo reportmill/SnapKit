@@ -164,7 +164,7 @@ public class WebGetter {
             return new ZipFileSite();
 
         // Handle S3
-        if (scheme.equals("s3"))
+        if (scheme.equals("s3") && sitePath.isEmpty())
             return new FileSystemSite();
 
         // Handle DirSite
