@@ -35,7 +35,7 @@ public abstract class WebSite {
     private Map<String,Object> _metadata = new HashMap<>();
 
     // PropChangeListener for file changes
-    private PropChangeListener _filePropChangeLsnr = pc -> handleFilePropChange(pc);
+    private PropChangeListener _filePropChangeLsnr = this::handleFilePropChange;
 
     // The PropChangeSupport for site file listeners
     private PropChangeSupport _filePCS = PropChangeSupport.EMPTY;
@@ -145,13 +145,8 @@ public abstract class WebSite {
         if (file != null && file.isVerified() && file.getExists())
             return file;
 
-        // Get file
-        file = getFileForPathImpl(filePath);
-        if (file != null)
-            file.setExists(true);
-
-        // Return
-        return file;
+        // Get file and return
+        return getFileForPathImpl(filePath);
     }
 
     /**
@@ -196,21 +191,22 @@ public abstract class WebSite {
         boolean isDir = fileHeader.isDir();
         WebFile file = createFileForPath(filePath, isDir);
 
-        // Update properties file
+        // Update file properties
         file._lastModTime = fileHeader.getLastModTime();
         if (file._lastModTime == 0) {
             file._lastModTime = System.currentTimeMillis();
             //System.out.println("WebSite.createFileForFileHeader: Zero LastModTime provided for file: " + filePath);
         }
         file._size = fileHeader.getSize();
-        file.setMimeType(fileHeader.getMimeType());
+        file._mimeType = fileHeader.getMimeType();
 
         // Set link
         WebURL linkUrl = fileHeader.getLinkUrl();
-        if (linkUrl != null) {
-            WebFile linkFile = linkUrl.createFile(isDir);
-            file.setLinkFile(linkFile);
-        }
+        if (linkUrl != null)
+            file._linkFile = linkUrl.createFile(isDir);
+
+        // Set exists
+        file.setExists(true);
 
         // Return
         return file;

@@ -8,7 +8,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Represents a file from a WebSite.
@@ -43,7 +42,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     private List<WebFile> _files;
 
     // The MIME type
-    private String  _mimeType;
+    protected String _mimeType;
 
     // A map to hold additional data about this file
     private Map<String,Object> _metadata = new HashMap<>();
@@ -58,7 +57,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     private Updater  _updater;
 
     // The link, if this file really points to another
-    private WebFile  _linkFile;
+    protected WebFile _linkFile;
 
     // Constants for properties
     public static final String Bytes_Prop = "Bytes";
@@ -514,11 +513,6 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     public String getMimeType()  { return _mimeType; }
 
     /**
-     * Sets the MIME type for the file.
-     */
-    protected void setMimeType(String aMIMEType)  { _mimeType = aMIMEType; }
-
-    /**
      * Returns a metadata value for given key.
      */
     public Object getMetadataForKey(String aKey)  { return _metadata.get(aKey); }
@@ -571,14 +565,6 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      * Returns the link file, if this file really points to another.
      */
     public WebFile getLinkFile()  { return _linkFile; }
-
-    /**
-     * Sets the link file, if this file really points to another.
-     */
-    protected void setLinkFile(WebFile aFile)
-    {
-        _linkFile = aFile;
-    }
 
     /**
      * Returns the real file.
