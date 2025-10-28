@@ -4,6 +4,7 @@
 package snap.web;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import snap.util.*;
@@ -38,10 +39,10 @@ public class FileSite extends WebSite {
     }
 
     /**
-     * Handle a get or head request.
+     * Handle a head request.
      */
     @Override
-    protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
+    protected void doHead(WebRequest aReq, WebResponse aResp)
     {
         // Get request file path
         String filePath = aReq.getFilePath();
@@ -64,23 +65,51 @@ public class FileSite extends WebSite {
         aResp.setCode(WebResponse.OK);
         FileHeader fileHeader = getFileHeaderForJavaFile(javaFile);
         aResp.setFileHeader(fileHeader);
-        if (isHead)
-            return;
+    }
 
-        // If file, just set bytes
-        if (aResp.isFile()) {
+    /**
+     * Handle a get request.
+     */
+    @Override
+    protected void doGet(WebRequest aReq, WebResponse aResp)
+    {
+        // Get Java file - if file doesn't exist or is not readable, return NOT_FOUND response
+        String filePath = aReq.getFilePath();
+        File javaFile = getJavaFileForLocalPath(filePath);
+        if (!javaFile.exists() || !javaFile.canRead()) {
+            aResp.setCode(WebResponse.NOT_FOUND);
+            return;
+        }
+
+        // If regular file, just set bytes
+        if (!aReq.isFileDir()) {
             try {
-                byte[] bytes = FileUtils.getBytesOrThrow(javaFile);
+                byte[] bytes = Files.readAllBytes(javaFile.toPath());
                 aResp.setBytes(bytes);
             }
             catch(IOException e) { aResp.setException(e); }
         }
 
         // If directory, configure directory info and return
-        else {
-            List<FileHeader> fileHeaders = getFileHeadersForJavaFile(javaFile);
-            aResp.setFileHeaders(fileHeaders);
+        else doGetDir(aReq, aResp, javaFile);
+    }
+
+    /**
+     * Handle a get directory request.
+     */
+    private void doGetDir(WebRequest aReq, WebResponse aResp, File parentFile)
+    {
+        // Get java file children (if null, just return)
+        File[] dirFiles = parentFile.listFiles();
+        if (dirFiles == null) {
+            System.err.println("FileSite.doGetDir: error from list files for file: " + aReq.getFilePath());
+            aResp.setFileHeaders(Collections.emptyList());
+            return;
         }
+
+        // Return file headers for files
+        List<FileHeader> fileHeaders = ArrayUtils.mapNonNullToList(dirFiles, file -> getFileHeaderForJavaFile(file));
+        aResp.setFileHeaders(fileHeaders);
     }
 
     /**
@@ -88,10 +117,6 @@ public class FileSite extends WebSite {
      */
     protected FileHeader getFileHeaderForJavaFile(File javaFile)
     {
-        // If file doesn't exist or is not readable, return null
-        if (!javaFile.exists() || !javaFile.canRead())
-            return null;
-
         // Get file path
         String filePath = getLocalPathForJavaFile(javaFile);
 
@@ -102,22 +127,6 @@ public class FileSite extends WebSite {
 
         // Return
         return fileHeader;
-    }
-
-    /**
-     * Returns the child file headers at given path.
-     */
-    protected List<FileHeader> getFileHeadersForJavaFile(File parentFile)
-    {
-        // Get java file children (if null, just return)
-        File[] dirFiles = parentFile.listFiles();
-        if (dirFiles == null) {
-            System.err.println("FileSite.getFileHeaders: error from list files for file: " + parentFile.getPath());
-            return Collections.emptyList();
-        }
-
-        // Return file headers for files
-        return ArrayUtils.mapNonNullToList(dirFiles, file -> getFileHeaderForJavaFile(file));
     }
 
     /**

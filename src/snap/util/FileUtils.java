@@ -4,6 +4,7 @@
 package snap.util;
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.zip.*;
 
 /**
@@ -105,9 +106,7 @@ public class FileUtils {
      */
     public static byte[] getBytesOrThrow(File aFile) throws IOException
     {
-        try (InputStream inputStream = new FileInputStream(aFile)) {
-            return inputStream.readAllBytes();
-        }
+        return Files.readAllBytes(aFile.toPath());
     }
 
     /**
