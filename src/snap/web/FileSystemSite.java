@@ -43,20 +43,10 @@ public class FileSystemSite extends WebSite {
     }
 
     /**
-     * Handle a get or head request.
-     */
-    @Override
-    protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
-    {
-        if (isHead)
-            doHead(aReq, aResp);
-        else doGet(aReq, aResp);
-    }
-
-    /**
      * Handle a head request.
      */
-    private void doHead(WebRequest aReq, WebResponse aResp)
+    @Override
+    protected void doHead(WebRequest aReq, WebResponse aResp)
     {
         // Get file header
         String filePath = aReq.getFilePath();
@@ -79,7 +69,8 @@ public class FileSystemSite extends WebSite {
     /**
      * Handle a get request.
      */
-    private void doGet(WebRequest aReq, WebResponse aResp)
+    @Override
+    protected void doGet(WebRequest aReq, WebResponse aResp)
     {
         String filePath = aReq.getFilePath();
         Path javaPath = getJavaPathForLocalPath(filePath);

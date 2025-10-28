@@ -36,32 +36,9 @@ public class DropboxSite extends WebSite {
     }
 
     /**
-     * Handles getting file info, contents or directory files.
-     */
-    @Override
-    protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
-    {
-        // Always do Head
-        doHead(aReq, aResp);
-        if (isHead)
-            return;
-
-        // If error, just return
-        if (aResp.getCode() != WebResponse.OK)
-            return;
-
-        // If directory, get files
-        FileHeader fhdr = aResp.getFileHeader();
-        if (fhdr.isDir())
-            doGetDir(aReq, aResp);
-
-        // Otherwise, get contents
-        else doGetFileContents(aReq, aResp);
-    }
-
-    /**
      * Get Head for request.
      */
+    @Override
     protected void doHead(WebRequest aReq, WebResponse aResp)
     {
         // Create http request
@@ -79,9 +56,34 @@ public class DropboxSite extends WebSite {
     }
 
     /**
+     * Handles getting file info, contents or directory files.
+     */
+    @Override
+    protected void doGet(WebRequest aReq, WebResponse aResp)
+    {
+        if (!aReq.isFileDir())
+            doGetFileContents(aReq, aResp);
+        else doGetDir(aReq, aResp);
+    }
+
+    /**
+     * Get file request.
+     */
+    private void doGetFileContents(WebRequest aReq, WebResponse aResp)
+    {
+        // Create http request
+        HTTPRequest httpReq = new HTTPRequest(GET_CONTENT);
+        httpReq.addHeader("Authorization", "Bearer " + getAccess());
+        addParamsToRequestAsJsonHeader(httpReq, "path", aReq.getFilePath());
+
+        // Get response
+        getHttpResponse(httpReq, aResp);
+    }
+
+    /**
      * Get Directory listing for request.
      */
-    protected void doGetDir(WebRequest aReq, WebResponse aResp)
+    private void doGetDir(WebRequest aReq, WebResponse aResp)
     {
         // Create http request
         HTTPRequest httpReq = createHttpRequestForEndpoint(LIST_FOLDER);
@@ -106,20 +108,6 @@ public class DropboxSite extends WebSite {
         // Get file headers for JSON file entries and set in response
         List<FileHeader> fileHeaders = ListUtils.map(fileEntries, e -> createFileHeaderForJSON((JSObject) e));
         aResp.setFileHeaders(fileHeaders);
-    }
-
-    /**
-     * Get file request.
-     */
-    protected void doGetFileContents(WebRequest aReq, WebResponse aResp)
-    {
-        // Create http request
-        HTTPRequest httpReq = new HTTPRequest(GET_CONTENT);
-        httpReq.addHeader("Authorization", "Bearer " + getAccess());
-        addParamsToRequestAsJsonHeader(httpReq, "path", aReq.getFilePath());
-
-        // Get response
-        getHttpResponse(httpReq, aResp);
     }
 
     /**

@@ -100,7 +100,7 @@ public abstract class WebSite {
     public void setUserName(String aName)
     {
         if (Objects.equals(aName, _userName)) return;
-        firePropChange("UserName", _userName, _userName = aName);
+        _userName = aName;
     }
 
     /**
@@ -114,7 +114,7 @@ public abstract class WebSite {
     public void setPassword(String aPassword)
     {
         if (Objects.equals(aPassword, _password)) return;
-        firePropChange("Password", _password, _password = aPassword);
+        _password = aPassword;
     }
 
     /**
@@ -357,12 +357,12 @@ public abstract class WebSite {
         WebResponse resp = new WebResponse(aReq);
 
         // Send to property method
-        switch (aReq.getType())  {
-            case HEAD: doGetOrHead(aReq, resp, true); break;
-            case GET: doGetOrHead(aReq, resp, false); break;
-            case POST: doPost(aReq, resp); break;
-            case PUT: doPut(aReq, resp); break;
-            case DELETE: doDelete(aReq, resp); break;
+        switch (aReq.getType()) {
+            case HEAD -> doGetOrHead(aReq, resp, true);
+            case GET -> doGetOrHead(aReq, resp, false);
+            case POST -> doPost(aReq, resp);
+            case PUT -> doPut(aReq, resp);
+            case DELETE -> doDelete(aReq, resp);
         }
 
         // Return response
@@ -372,7 +372,22 @@ public abstract class WebSite {
     /**
      * Handles a get or head request.
      */
-    protected abstract void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead);
+    protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
+    {
+        if (isHead)
+            doHead(aReq, aResp);
+        else doGet(aReq, aResp);
+    }
+
+    /**
+     * Handles a head request.
+     */
+    protected void doHead(WebRequest aReq, WebResponse aResp)  { }
+
+    /**
+     * Handles a get request.
+     */
+    protected void doGet(WebRequest aReq, WebResponse aResp)  { }
 
     /**
      * Handle a get request.
@@ -455,7 +470,7 @@ public abstract class WebSite {
     /**
      * Deletes this data site, assuming it corresponds to something that can be deleted, like a database.
      */
-    public void deleteSite() throws Exception
+    public void deleteSite()
     {
         WebFile rootDir = getFileForPath("/");
         if (rootDir != null)
@@ -545,11 +560,6 @@ public abstract class WebSite {
     protected void resetFile(WebFile aFile)  { aFile.resetImpl(); }
 
     /**
-     * Fires a property change for given property name, old value, new value and index.
-     */
-    protected void firePropChange(String aProp, Object oldVal, Object newVal)  { }
-
-    /**
      * Adds a PropChangeListener to listen for any site file PropChange.
      */
     public void addFileChangeListener(PropChangeListener aLsnr)
@@ -582,6 +592,7 @@ public abstract class WebSite {
     public String toString()
     {
         String className = getClass().getSimpleName();
-        return className + ": " + getUrlAddress();
+        String urlAddr = _url != null ? _url.getString() : "No site URL";
+        return className + ": " + urlAddr;
     }
 }
