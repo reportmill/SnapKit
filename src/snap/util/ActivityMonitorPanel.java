@@ -7,12 +7,15 @@ import snap.view.*;
 import snap.viewx.DialogBox;
 
 /**
- * A ActivityMonitor implementation that shows activity updates in a panel after a short delay.
+ * This class shows activity monitor activity updates in a panel after a short delay.
  */
-public class ActivityMonitorPanel extends ActivityMonitor {
+class ActivityMonitorPanel {
 
     // The view for progress pane to center on
     protected View _view;
+
+    // The activity monitor
+    private ActivityMonitor _activityMonitor;
 
     // The delay before task progress panel appears in milliseconds
     private int _delay = 200;
@@ -24,22 +27,16 @@ public class ActivityMonitorPanel extends ActivityMonitor {
     private ActivityMonitorPanelViewOwner _viewOwner;
 
     /**
-     * Constructor.
-     */
-    public ActivityMonitorPanel()
-    {
-        super();
-        _viewOwner = new ActivityMonitorPanelViewOwner();
-    }
-
-    /**
      * Constructor for view and title.
      */
-    public ActivityMonitorPanel(View aView, String aTitle)
+    public ActivityMonitorPanel(View aView, ActivityMonitor activityMonitor)
     {
-        this();
+        super();
         _view = aView;
-        setTitle(aTitle);
+        _activityMonitor = activityMonitor;
+        _viewOwner = new ActivityMonitorPanelViewOwner();
+        activityMonitor.addPropChangeListener(this::handleMonitorPropChange);
+        ViewUtils.runDelayed(this::checkForShowPanel, _delay);
     }
 
     /**
@@ -63,7 +60,7 @@ public class ActivityMonitorPanel extends ActivityMonitor {
      */
     protected void checkForShowPanel()
     {
-        if (!isFinished() && !isCancelled())
+        if (!_activityMonitor.isFinished() && !_activityMonitor.isCancelled())
             showPanel();
     }
 
@@ -72,63 +69,19 @@ public class ActivityMonitorPanel extends ActivityMonitor {
      */
     private void checkForHidePanel()
     {
-        if (isFinished() || isCancelled())
+        if (_activityMonitor.isFinished() || _activityMonitor.isCancelled())
             hide();
     }
 
     /**
-     * Override to register for showPanel check.
+     * Called when monitor has prop change.
      */
-    @Override
-    public void setMonitor(ActivityMonitor sourceMonitor)
+    protected void handleMonitorPropChange(PropChange propChange)
     {
-        super.setMonitor(sourceMonitor);
-        ViewUtils.runDelayed(this::checkForShowPanel, _delay);
-    }
-
-    /**
-     * Override to register for showPanel check.
-     */
-    @Override
-    protected void setTaskCount(int aValue)
-    {
-        // If going from zero to non-zero, trigger showPanel after delay
-        if (getTaskCount() == 0 && aValue != 0)
-            ViewUtils.runDelayed(this::checkForShowPanel, _delay);
-
-        // Do normal version
-        super.setTaskCount(aValue);
-    }
-
-    /**
-     * Override to hide panel.
-     */
-    @Override
-    public void setCancelled(boolean aValue)
-    {
-        super.setCancelled(aValue);
-        if (aValue)
-            ViewUtils.runLater(this::hide);
-    }
-
-    /**
-     * Override to hide panel.
-     */
-    @Override
-    public void setFinished(boolean aValue)
-    {
-        super.setFinished(aValue);
-        if (aValue)
-            ViewUtils.runDelayed(this::hide, 500);
-    }
-
-    /**
-     * Override to reset UI if needed.
-     */
-    @Override
-    protected void handleMonitorPropChange(PropChange aPC)
-    {
-        super.handleMonitorPropChange(aPC);
+        switch (propChange.getPropName()) {
+            case Activity.Finished_Prop -> ViewUtils.runDelayed(this::hide, 500);
+            case Activity.Cancelled_Prop -> ViewUtils.runLater(this::hide);
+        }
         _viewOwner.resetLater();
     }
 
@@ -160,14 +113,14 @@ public class ActivityMonitorPanel extends ActivityMonitor {
         protected void showDialogBox()
         {
             _dialogBox = new DialogBox();
-            _dialogBox.setTitle(getTitle());
+            _dialogBox.setTitle(_activityMonitor.getTitle());
             _dialogBox.setContent(getUI());
             _dialogBox.setOptions("Cancel");
 
             // Show dialog box
             boolean confirmed = _dialogBox.showConfirmDialog(_view);
             if (!confirmed)
-                setCancelled(true);
+                _activityMonitor.setCancelled(true);
         }
 
         /**
@@ -187,7 +140,7 @@ public class ActivityMonitorPanel extends ActivityMonitor {
         {
             // Create UI
             Label titleLabel = new Label();
-            titleLabel.setText(getTitle());
+            titleLabel.setText(_activityMonitor.getTitle());
             _activityLabel = new Label();
             _progressBar = new ProgressBar();
             _progressBar.setPrefSize(360, 16);
@@ -208,14 +161,14 @@ public class ActivityMonitorPanel extends ActivityMonitor {
         protected void resetUI()
         {
             // Update ActivityLabel
-            String taskTitle = getTaskTitle();
-            int taskNumber = getTaskIndex() + 1;
-            int taskCount = getTaskCount();
+            String taskTitle = _activityMonitor.getTaskTitle();
+            int taskNumber = _activityMonitor.getTaskIndex() + 1;
+            int taskCount = _activityMonitor.getTaskCount();
             String activityText = String.format("%s (%d of %d)", taskTitle, taskNumber, taskCount);
             setViewValue(_activityLabel, activityText);
 
             // Update ProgressBar
-            double taskProgress = getTaskProgress();
+            double taskProgress = _activityMonitor.getTaskProgress();
             if (taskProgress > 0)
                 _progressBar.getAnimCleared(500).setValue(ProgressBar.Progress_Prop, taskProgress).play();
             else _progressBar.setProgress(0);

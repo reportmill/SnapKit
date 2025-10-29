@@ -14,6 +14,12 @@ public class Activity extends PropObject {
     // Whether task count and run time is indeterminate
     private boolean _indeterminate;
 
+    // The total number of tasks
+    protected int _taskCount;
+
+    // The current of task index
+    protected int _taskIndex;
+
     // Whether monitor has been cancelled
     private boolean _cancelled;
 
@@ -23,6 +29,8 @@ public class Activity extends PropObject {
     // Constants for properties
     public static final String Title_Prop = "Title";
     public static final String Indeterminate_Prop = "Indeterminate";
+    public static final String TaskCount_Prop = "TaskCount";
+    public static final String TaskIndex_Prop = "TaskIndex";
     public static final String Cancelled_Prop = "Cancelled";
     public static final String Finished_Prop = "Finished";
 
@@ -32,15 +40,6 @@ public class Activity extends PropObject {
     public Activity()
     {
         super();
-    }
-
-    /**
-     * Constructor for given title.
-     */
-    public Activity(String aTitle)
-    {
-        super();
-        setTitle(aTitle);
     }
 
     /**
@@ -69,6 +68,34 @@ public class Activity extends PropObject {
     {
         if (aValue == isIndeterminate()) return;
         firePropChange(Indeterminate_Prop, _indeterminate, _indeterminate = aValue);
+    }
+
+    /**
+     * Returns the total number of tasks.
+     */
+    public int getTaskCount()  { return _taskCount; }
+
+    /**
+     * Sets the total number of tasks.
+     */
+    protected void setTaskCount(int aValue)
+    {
+        if (aValue == _taskCount) return;
+        firePropChange(TaskCount_Prop, _taskCount, _taskCount = aValue);
+    }
+
+    /**
+     * Returns the current task index.
+     */
+    public int getTaskIndex()  { return _taskIndex; }
+
+    /**
+     * Sets the current task index.
+     */
+    protected void setTaskIndex(int aValue)
+    {
+        if (aValue == _taskIndex) return;
+        firePropChange(TaskIndex_Prop, _taskIndex, _taskIndex = aValue);
     }
 
     /**
