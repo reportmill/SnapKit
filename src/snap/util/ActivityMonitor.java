@@ -3,7 +3,6 @@
  */
 package snap.util;
 import snap.view.View;
-import java.io.*;
 import java.util.Objects;
 
 /**
@@ -19,9 +18,6 @@ public class ActivityMonitor extends Activity {
 
     // The current task work unit index
     private int _taskWorkUnitIndex;
-
-    // An optional writer to output progress
-    private Writer _writer;
 
     // Constants for properties
     public static final String TaskTitle_Prop = "TaskTitle";
@@ -46,22 +42,11 @@ public class ActivityMonitor extends Activity {
     }
 
     /**
-     * Constructor for given writer.
-     */
-    public ActivityMonitor(PrintStream aPrintStream)
-    {
-        super();
-        _writer = new PrintWriter(aPrintStream);
-    }
-
-    /**
      * Advise the monitor of the total number of subtasks (invoke only once).
      */
     public void startForTaskCount(int taskCount)
     {
         setTaskCount(taskCount);
-        if (_writer != null)
-            println("StartTasks: " + taskCount);
     }
 
     /**
@@ -73,10 +58,6 @@ public class ActivityMonitor extends Activity {
         setTaskTitle(taskTitle);
         setTaskWorkUnitCount(workUnitCount);
         setTaskWorkUnitIndex(0);
-        if (_writer != null) {
-            String msg = String.format("Begin task %d of %d: %s (%d parts)", _taskIndex + 1, _taskCount, taskTitle, workUnitCount);
-            println(msg);
-        }
     }
 
     /**
@@ -85,8 +66,18 @@ public class ActivityMonitor extends Activity {
     public void updateTask(int workUnitsDone)
     {
         setTaskWorkUnitIndex(_taskWorkUnitIndex + workUnitsDone);
-        if (_writer != null)
-            println("UpdateTask " + (_taskIndex + 1) + ": " + workUnitsDone);
+    }
+
+    /**
+     * Finish the current task, so the next can begin.
+     */
+    public void endTask()
+    {
+        _taskWorkUnitCount = 0;
+        _taskWorkUnitIndex = 0;
+        setTaskIndex(_taskIndex + 1);
+        if (_taskIndex >= _taskCount)
+            setFinished(true);
     }
 
     /**
@@ -132,20 +123,6 @@ public class ActivityMonitor extends Activity {
     }
 
     /**
-     * Finish the current task, so the next can begin.
-     */
-    public void endTask()
-    {
-        _taskWorkUnitCount = 0;
-        _taskWorkUnitIndex = 0;
-        setTaskIndex(_taskIndex + 1);
-        if (_taskIndex >= _taskCount)
-            setFinished(true);
-        if (_writer != null)
-            println("EndTask " + _taskIndex);
-    }
-
-    /**
      * Returns the task progress.
      */
     public double getTaskProgress()
@@ -172,11 +149,45 @@ public class ActivityMonitor extends Activity {
     }
 
     /**
-     * Print string to output.
+     * Returns an ActivityMonitor that prints to system out.
      */
-    private void println(String aStr)
+    public static ActivityMonitor getSystemOutActivityMonitor()
     {
-        try { _writer.write(aStr); _writer.write('\n'); _writer.flush(); }
-        catch (IOException e) { throw new RuntimeException(e); }
+        return new SystemOutActivityMonitor();
+    }
+
+    /**
+     * A System.out activity monitor.
+     */
+    private static class SystemOutActivityMonitor extends ActivityMonitor {
+
+        @Override
+        public void startForTaskCount(int taskCount)
+        {
+            super.startForTaskCount(taskCount);
+            System.out.println("StartTasks: " + taskCount);
+        }
+
+        @Override
+        public void beginTask(String taskTitle, int workUnitCount)
+        {
+            super.beginTask(taskTitle, workUnitCount);
+            String msg = String.format("Begin task %d of %d: %s (%d parts)", _taskIndex + 1, _taskCount, taskTitle, workUnitCount);
+            System.out.println(msg);
+        }
+
+        @Override
+        public void updateTask(int workUnitsDone)
+        {
+            super.updateTask(workUnitsDone);
+            System.out.println("UpdateTask " + (_taskIndex + 1) + ": " + workUnitsDone);
+        }
+
+        @Override
+        public void endTask()
+        {
+            super.endTask();
+            System.out.println("EndTask " + _taskIndex);
+        }
     }
 }
