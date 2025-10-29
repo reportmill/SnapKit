@@ -7,9 +7,9 @@ import snap.view.*;
 import snap.viewx.DialogBox;
 
 /**
- * A TaskMonitor implementation that shows task updates in a panel after a short delay.
+ * A ActivityMonitor implementation that shows activity updates in a panel after a short delay.
  */
-public class TaskMonitorPanel extends TaskMonitor {
+public class ActivityMonitorPanel extends ActivityMonitor {
 
     // The view for progress pane to center on
     protected View _view;
@@ -21,21 +21,21 @@ public class TaskMonitorPanel extends TaskMonitor {
     private boolean _didShow;
 
     // The ViewOwner for UI
-    private TaskMonitorPanelViewOwner _viewOwner;
+    private ActivityMonitorPanelViewOwner _viewOwner;
 
     /**
      * Constructor.
      */
-    public TaskMonitorPanel()
+    public ActivityMonitorPanel()
     {
         super();
-        _viewOwner = new TaskMonitorPanelViewOwner();
+        _viewOwner = new ActivityMonitorPanelViewOwner();
     }
 
     /**
      * Constructor for view and title.
      */
-    public TaskMonitorPanel(View aView, String aTitle)
+    public ActivityMonitorPanel(View aView, String aTitle)
     {
         this();
         _view = aView;
@@ -80,7 +80,7 @@ public class TaskMonitorPanel extends TaskMonitor {
      * Override to register for showPanel check.
      */
     @Override
-    public void setMonitor(TaskMonitor sourceMonitor)
+    public void setMonitor(ActivityMonitor sourceMonitor)
     {
         super.setMonitor(sourceMonitor);
         ViewUtils.runDelayed(this::checkForShowPanel, _delay);
@@ -133,9 +133,9 @@ public class TaskMonitorPanel extends TaskMonitor {
     }
 
     /**
-     * This ViewOwner class shows UI for TaskMonitorPanel.
+     * This ViewOwner class shows UI for ActivityMonitorPanel.
      */
-    private class TaskMonitorPanelViewOwner extends ViewOwner {
+    private class ActivityMonitorPanelViewOwner extends ViewOwner {
 
         // The dialog box
         private DialogBox _dialogBox;
@@ -149,7 +149,7 @@ public class TaskMonitorPanel extends TaskMonitor {
         /**
          * Constructor.
          */
-        public TaskMonitorPanelViewOwner()
+        public ActivityMonitorPanelViewOwner()
         {
             super();
         }

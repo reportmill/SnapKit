@@ -21,8 +21,8 @@ public class TaskRunner<T> extends PropObject {
     // The runner status
     private Status _status = Status.Idle;
 
-    // The TaskMonitor
-    private TaskMonitor _monitor;
+    // The ActivityMonitor
+    private ActivityMonitor _monitor;
 
     // The runner thread
     private Thread _thread;
@@ -105,12 +105,12 @@ public class TaskRunner<T> extends PropObject {
     /**
      * Returns the monitor.
      */
-    public TaskMonitor getMonitor()  { return _monitor; }
+    public ActivityMonitor getMonitor()  { return _monitor; }
 
     /**
      * Sets the monitor.
      */
-    public void setMonitor(TaskMonitor aMonitor)  { _monitor = aMonitor; }
+    public void setMonitor(ActivityMonitor aMonitor)  { _monitor = aMonitor; }
 
     /**
      * Returns the thread.

@@ -10,10 +10,7 @@ import java.util.Objects;
 /**
  * Interface for tracking the progress of arbitrary tasks.
  */
-public class TaskMonitor extends PropObject {
-
-    // A string to describe task
-    private String _title;
+public class ActivityMonitor extends Activity {
 
     // The total number of tasks
     private int _taskCount;
@@ -30,39 +27,26 @@ public class TaskMonitor extends PropObject {
     // The current task title
     private String _taskTitle = "First Task";
 
-    // Whether task count and run time is indeterminate
-    private boolean _indeterminate;
-
-    // Whether monitor has been cancelled
-    private boolean _cancelled;
-
-    // Whether monitor has finished
-    private boolean _finished;
-
     // An optional writer to output progress
     private Writer _writer;
 
     // Another monitor if this monitor is linked
-    private TaskMonitor _monitor;
+    private ActivityMonitor _monitor;
 
     // A prop change listener
     private PropChangeListener _monitorLsnr;
 
     // Constants for properties
-    public static final String Title_Prop = "Title";
     public static final String TaskCount_Prop = "TaskCount";
     public static final String TaskIndex_Prop = "TaskIndex";
     public static final String TaskTitle_Prop = "TaskTitle";
     public static final String TaskWorkUnitCount_Prop = "TaskWorkUnitCount";
     public static final String TaskWorkUnitIndex_Prop = "TaskWorkUnitIndex";
-    public static final String Indeterminate_Prop = "Indeterminate";
-    public static final String Cancelled_Prop = "Cancelled";
-    public static final String Finished_Prop = "Finished";
 
     /**
      * Constructor.
      */
-    public TaskMonitor()
+    public ActivityMonitor()
     {
         super();
     }
@@ -70,7 +54,7 @@ public class TaskMonitor extends PropObject {
     /**
      * Constructor for given title.
      */
-    public TaskMonitor(String aTitle)
+    public ActivityMonitor(String aTitle)
     {
         super();
         setTitle(aTitle);
@@ -79,24 +63,10 @@ public class TaskMonitor extends PropObject {
     /**
      * Constructor for given writer.
      */
-    public TaskMonitor(PrintStream aPrintStream)
+    public ActivityMonitor(PrintStream aPrintStream)
     {
         super();
         _writer = new PrintWriter(aPrintStream);
-    }
-
-    /**
-     * Returns a string to describe task.
-     */
-    public String getTitle()  { return _title; }
-
-    /**
-     * Sets a string to describe task.
-     */
-    public void setTitle(String aValue)
-    {
-        if (Objects.equals(aValue, _taskTitle)) return;
-        firePropChange(Title_Prop, _title, _title = aValue);
     }
 
     /**
@@ -219,56 +189,14 @@ public class TaskMonitor extends PropObject {
     }
 
     /**
-     * Returns whether task timing is indeterminate.
-     */
-    public boolean isIndeterminate()  { return _indeterminate; }
-
-    /**
-     * Sets whether task timing is indeterminate.
-     */
-    public void setIndeterminate(boolean aValue)
-    {
-        if (aValue == isIndeterminate()) return;
-        firePropChange(Indeterminate_Prop, _indeterminate, _indeterminate = aValue);
-    }
-
-    /**
-     * Returns whether the user asked the process to stop working.
-     */
-    public boolean isCancelled()  { return _cancelled; }
-
-    /**
-     * Sets whether the user asked the process to stop working.
-     */
-    public void setCancelled(boolean aValue)
-    {
-        if (aValue == _cancelled) return;
-        firePropChange(Cancelled_Prop, _cancelled, _cancelled = aValue);
-    }
-
-    /**
-     * Returns whether monitor has finished.
-     */
-    public boolean isFinished()  { return _finished; }
-
-    /**
-     * Sets whether monitor has finished.
-     */
-    public void setFinished(boolean aValue)
-    {
-        if (aValue == _finished) return;
-        firePropChange(Finished_Prop, _finished, _finished = aValue);
-    }
-
-    /**
      * Returns the next monitor in chain (if this monitor is linked to another).
      */
-    public TaskMonitor getMonitor()  { return _monitor; }
+    public ActivityMonitor getMonitor()  { return _monitor; }
 
     /**
      * Sets the next monitor in chain (if this monitor is linked to another).
      */
-    public void setMonitor(TaskMonitor sourceMonitor)
+    public void setMonitor(ActivityMonitor sourceMonitor)
     {
         // If already set, just return
         if (sourceMonitor == _monitor) return;
@@ -314,11 +242,10 @@ public class TaskMonitor extends PropObject {
     /**
      * Creates a monitor panel to show progress.
      */
-    public TaskMonitorPanel showProgressPanel(View aView)
+    public void showProgressPanel(View aView)
     {
-        TaskMonitorPanel taskMonitorPanel = new TaskMonitorPanel(aView, null);
-        taskMonitorPanel.setMonitor(this);
-        return taskMonitorPanel;
+        ActivityMonitorPanel monitorPanel = new ActivityMonitorPanel(aView, null);
+        monitorPanel.setMonitor(this);
     }
 
     /**
@@ -348,15 +275,12 @@ public class TaskMonitor extends PropObject {
     {
         super.initProps(aPropSet);
 
-        // Title, TasksTotal, TasksDone, TaskTotal, TaskDone, TaskTitle, Cancelled, Finished
-        aPropSet.addPropNamed(Title_Prop, String.class, null);
+        // TasksTotal, TasksDone, TaskTotal, TaskDone, TaskTitle
         aPropSet.addPropNamed(TaskCount_Prop, int.class, 0);
         aPropSet.addPropNamed(TaskIndex_Prop, int.class, 0);
         aPropSet.addPropNamed(TaskWorkUnitCount_Prop, int.class, 0);
         aPropSet.addPropNamed(TaskWorkUnitIndex_Prop, int.class, 0);
         aPropSet.addPropNamed(TaskTitle_Prop, String.class, null);
-        aPropSet.addPropNamed(Cancelled_Prop, boolean.class, false);
-        aPropSet.addPropNamed(Finished_Prop, boolean.class, false);
     }
 
     /**
@@ -365,21 +289,18 @@ public class TaskMonitor extends PropObject {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
-            // Title, TasksTotal, TasksDone, TaskTotal, TaskDone, TaskTitle, Cancelled, Finished
-            case Title_Prop: return getTitle();
-            case TaskCount_Prop: return getTaskCount();
-            case TaskIndex_Prop: return getTaskIndex();
-            case TaskWorkUnitCount_Prop: return getTaskWorkUnitCount();
-            case TaskWorkUnitIndex_Prop: return getTaskWorkUnitIndex();
-            case TaskTitle_Prop: return getTaskTitle();
-            case Cancelled_Prop: return isCancelled();
-            case Finished_Prop: return isFinished();
+            // TasksTotal, TasksDone, TaskTotal, TaskDone, TaskTitle
+            case TaskCount_Prop -> getTaskCount();
+            case TaskIndex_Prop -> getTaskIndex();
+            case TaskWorkUnitCount_Prop -> getTaskWorkUnitCount();
+            case TaskWorkUnitIndex_Prop -> getTaskWorkUnitIndex();
+            case TaskTitle_Prop -> getTaskTitle();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -390,18 +311,15 @@ public class TaskMonitor extends PropObject {
     {
         switch (aPropName) {
 
-            // Title, TasksTotal, TasksDone, TaskTotal, TaskDone, TaskTitle, Cancelled, Finished
-            case Title_Prop: setTitle(Convert.stringValue(aValue)); break;
-            case TaskCount_Prop: setTaskCount(Convert.intValue(aValue)); break;
-            case TaskIndex_Prop: setTaskIndex(Convert.intValue(aValue)); break;
-            case TaskWorkUnitCount_Prop: setTaskWorkUnitCount(Convert.intValue(aValue)); break;
-            case TaskWorkUnitIndex_Prop: setTaskWorkUnitIndex(Convert.intValue(aValue)); break;
-            case TaskTitle_Prop: setTaskTitle(Convert.stringValue(aValue)); break;
-            case Cancelled_Prop: setCancelled(Convert.boolValue(aValue)); break;
-            case Finished_Prop: setFinished(Convert.boolValue(aValue)); break;
+            // TasksTotal, TasksDone, TaskTotal, TaskDone, TaskTitle
+            case TaskCount_Prop -> setTaskCount(Convert.intValue(aValue));
+            case TaskIndex_Prop -> setTaskIndex(Convert.intValue(aValue));
+            case TaskWorkUnitCount_Prop -> setTaskWorkUnitCount(Convert.intValue(aValue));
+            case TaskWorkUnitIndex_Prop -> setTaskWorkUnitIndex(Convert.intValue(aValue));
+            case TaskTitle_Prop -> setTaskTitle(Convert.stringValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue); break;
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 }
