@@ -105,7 +105,11 @@ public class TaskRunner<T> extends PropObject {
     /**
      * Returns the monitor.
      */
-    public ActivityMonitor getMonitor()  { return _monitor; }
+    public ActivityMonitor getMonitor()
+    {
+        if (_monitor != null) return _monitor;
+        return _monitor = new ActivityMonitor();
+    }
 
     /**
      * Sets the monitor.
@@ -133,7 +137,7 @@ public class TaskRunner<T> extends PropObject {
     /**
      * Starts the runner.
      */
-    public TaskRunner<T> start()
+    public void start()
     {
         // Create new thread to run task
         _thread = new Thread(this::runTask);
@@ -142,9 +146,6 @@ public class TaskRunner<T> extends PropObject {
         if (!SnapEnv.isTeaVM)
             _thread.setName(getName());
         _thread.start();
-
-        // Return this runner
-        return this;
     }
 
     /**
