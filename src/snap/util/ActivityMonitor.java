@@ -21,8 +21,7 @@ public class ActivityMonitor extends Activity {
 
     // Constants for properties
     public static final String TaskTitle_Prop = "TaskTitle";
-    public static final String TaskWorkUnitCount_Prop = "TaskWorkUnitCount";
-    public static final String TaskWorkUnitIndex_Prop = "TaskWorkUnitIndex";
+    public static final String Progress_Prop = "Progress";
 
     /**
      * Constructor.
@@ -56,8 +55,8 @@ public class ActivityMonitor extends Activity {
     {
         setIndeterminate(false);
         setTaskTitle(taskTitle);
-        setTaskWorkUnitCount(workUnitCount);
-        setTaskWorkUnitIndex(0);
+        _taskWorkUnitCount = workUnitCount;
+        _taskWorkUnitIndex = 0;
     }
 
     /**
@@ -65,7 +64,8 @@ public class ActivityMonitor extends Activity {
      */
     public void updateTask(int workUnitsDone)
     {
-        setTaskWorkUnitIndex(_taskWorkUnitIndex + workUnitsDone);
+        _taskWorkUnitIndex = _taskWorkUnitIndex + workUnitsDone;
+        firePropChange(Progress_Prop, _taskWorkUnitIndex, _taskWorkUnitIndex);
     }
 
     /**
@@ -92,34 +92,6 @@ public class ActivityMonitor extends Activity {
     {
         if (Objects.equals(aString, _taskTitle)) return;
         firePropChange(TaskTitle_Prop, _taskTitle, _taskTitle = aString);
-    }
-
-    /**
-     * Returns the total number of task work units.
-     */
-    public int getTaskWorkUnitCount()  { return _taskWorkUnitCount; }
-
-    /**
-     * Sets the total number of task work units.
-     */
-    protected void setTaskWorkUnitCount(int aValue)
-    {
-        if (aValue == _taskWorkUnitCount) return;
-        firePropChange(TaskWorkUnitCount_Prop, _taskWorkUnitCount, _taskWorkUnitCount = aValue);
-    }
-
-    /**
-     * Returns the number of task work units completed.
-     */
-    public int getTaskWorkUnitIndex()  { return _taskWorkUnitIndex; }
-
-    /**
-     * Sets the number of task work units completed.
-     */
-    protected void setTaskWorkUnitIndex(int aValue)
-    {
-        if (aValue == _taskWorkUnitIndex) return;
-        firePropChange(TaskWorkUnitIndex_Prop, _taskWorkUnitIndex, _taskWorkUnitIndex = aValue);
     }
 
     /**
@@ -172,8 +144,7 @@ public class ActivityMonitor extends Activity {
         public void beginTask(String taskTitle, int workUnitCount)
         {
             super.beginTask(taskTitle, workUnitCount);
-            String msg = String.format("Begin task %d of %d: %s (%d parts)", _taskIndex + 1, _taskCount, taskTitle, workUnitCount);
-            System.out.println(msg);
+            System.out.printf("Begin task %d of %d: %s (%d parts)", _taskIndex + 1, _taskCount, taskTitle, workUnitCount);
         }
 
         @Override
