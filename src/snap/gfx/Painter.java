@@ -2,10 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
-import snap.geom.Line;
-import snap.geom.Rect;
-import snap.geom.Shape;
-import snap.geom.Transform;
+import snap.geom.*;
 
 import java.util.*;
 
@@ -516,8 +513,32 @@ public abstract class Painter {
         public Object setProp(String aKey, Object aVal)  { return _map.put(aKey, aVal); }
     }
 
-//public void draw/fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight);
-//public void draw/fillOval(int x, int y, int width, int height);
+    /**
+     * Draws an oval.
+     */
+    public void drawOval(double x, double y, double width, double height)  { draw(new Ellipse(x, y, width, height)); }
+
+    /**
+     * Fills an oval.
+     */
+    public void fillOval(double x, double y, double width, double height)  { fill(new Ellipse(x, y, width, height)); }
+
+    /**
+     * Draws a round rect.
+     */
+    public void drawRoundRect(double x, double y, double width, double height, double roundRadius)
+    {
+        draw(new RoundRect(x, y, width, height, roundRadius));
+    }
+
+    /**
+     * Fills a round rect.
+     */
+    public void fillRoundRect(double x, double y, double width, double height, double roundRadius)
+    {
+        fill(new RoundRect(x, y, width, height, roundRadius));
+    }
+
 //public void draw/fillArc(int x, int y, int width, int height, int startAngle, int arcAngle);
 //public void drawPolyline(int xPoints[], int yPoints[], int nPoints);
 //public void draw/fillPolygon(int xPoints[], int yPoints[], int nPoints);
