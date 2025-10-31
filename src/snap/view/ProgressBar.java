@@ -13,10 +13,13 @@ import snap.util.*;
 public class ProgressBar extends View {
 
     // The progress
-    private double  _prog;
+    private double _prog;
+
+    // Whether progress is indeterminate
+    private boolean _indeterminate;
 
     // The animator
-    private ViewAnim  _anim;
+    private ViewAnim _anim;
 
     // Constants for properties
     public static final String Progress_Prop = "Progress";
@@ -60,34 +63,28 @@ public class ProgressBar extends View {
      */
     public void setProgress(double aValue)
     {
-        if (aValue > 1) aValue = 1;
+        aValue = MathUtils.clamp(aValue, 0, 1);
         if (aValue == _prog) return;
         firePropChange(Progress_Prop, _prog, _prog = aValue);
 
         // Reset animator
-        setAnimating(isAnimNeeded());
+        updateAnimating();
         repaint();
     }
 
     /**
      * Returns whether progress bar is indeterminate.
      */
-    public boolean isIndeterminate()  { return _prog < 0; }
+    public boolean isIndeterminate()  { return _indeterminate; }
 
     /**
      * Sets whether progress bar is indeterminate.
      */
     public void setIndeterminate(boolean aValue)
     {
-        setProgress(aValue ? -1 : 0);
-    }
-
-    /**
-     * Returns whether anim is needed.
-     */
-    private boolean isAnimNeeded()
-    {
-        return _prog < 0 && isShowing();
+        if (aValue == _indeterminate) return;
+        firePropChange(Indeterminate_Prop, _indeterminate, _indeterminate = aValue);
+        updateAnimating();
     }
 
     /**
@@ -100,7 +97,6 @@ public class ProgressBar extends View {
      */
     private void setAnimating(boolean aValue)
     {
-        // If already set, just return
         if (aValue == isAnimating()) return;
 
         // If starting, create/configure/play anim
@@ -117,21 +113,25 @@ public class ProgressBar extends View {
     }
 
     /**
+     * Updates animating.
+     */
+    private void updateAnimating()  { setAnimating(isIndeterminate() && isShowing()); }
+
+    /**
      * Override to paint.
      */
     protected void paintFront(Painter aPntr)
     {
         // Paint ProgressBar background as button using ButtonArea
-        double viewW = getWidth();
-        double viewH = getHeight();
+        int areaX = 3;
+        int areaY = 3;
+        int areaW = (int) getWidth() - 6;
+        int areaH = (int) getHeight() - 6;
 
         // Paint normal bar
-        if (_prog >= 0) {
-            double areaX = 3;
-            double areaY = 3;
-            double areaW = Math.round(areaX + _prog * (viewW - 6));
-            double areaH = viewH - 6;
-            RoundRect areaRect = new RoundRect(areaX, areaY, areaW, areaH, 3);
+        if (!isIndeterminate()) {
+            double pbarW = Math.round(_prog * areaW);
+            RoundRect areaRect = new RoundRect(areaX, areaY, pbarW, areaH, 3);
             aPntr.fillWithPaint(areaRect, INNER_FILL);
         }
 
@@ -139,28 +139,22 @@ public class ProgressBar extends View {
         else {
 
             // Get bounds of indeterminate bar
-            int areaX = 3;
-            int areaY = 3;
-            int areaW = (int) viewW - 6;
-            int areaH = (int) viewH - 6;
-            int aw = 50;
-            int ix2 = areaX - aw;
-            int iw2 = areaW + aw * 2;
-            int imax2 = ix2 + iw2;
-            int etime = _anim != null ? _anim.getTime() : 0;
-            int imax3 = ix2 + (aw + etime / 10) % (iw2 * 2);
-            int ix3 = imax3 - aw;
-            boolean back = false;
-            if (imax3 > imax2) {
-                ix3 = imax2 - (imax3 - imax2);
-                back = true;
-            }
+            int pbarW = 50;
+            int pbarAreaX = areaX - pbarW;
+            int pbarAreaW = areaW + pbarW * 2;
+            int pbarAreaMaxW = areaX + areaW + pbarW;
+            int elapsedTime = _anim != null ? _anim.getTime() : 0;
+            int pbarMaxX = pbarAreaX + (pbarW + elapsedTime / 10) % (pbarAreaW * 2);
+            int pbarX = pbarMaxX - pbarW;
+            boolean animatingBack = pbarMaxX > pbarAreaMaxW;
+            if (animatingBack)
+                pbarX = pbarAreaMaxW - (pbarMaxX - pbarAreaMaxW);
 
             // Create rect for anim and paint
-            RoundRect rrect = new RoundRect(ix3, areaY, aw, areaH, 3);
+            RoundRect pbarBounds = new RoundRect(pbarX, areaY, pbarW, areaH, 3);
             aPntr.save();
             aPntr.clip(new RoundRect(areaX, areaY, areaW, areaH, 3));
-            aPntr.fillWithPaint(rrect, back ? INDET_BACK_FILL : INDET_FILL);
+            aPntr.fillWithPaint(pbarBounds, animatingBack ? INDET_BACK_FILL : INDET_FILL);
             aPntr.restore();
         }
     }
@@ -216,13 +210,9 @@ public class ProgressBar extends View {
     @Override
     protected void setShowing(boolean aValue)
     {
-        // Do normal version
         if (aValue == isShowing()) return;
         super.setShowing(aValue);
-
-        // If indeterminate, update Animating
-        if (isIndeterminate())
-            setAnimating(isAnimNeeded());
+        updateAnimating();
     }
 
     /**
@@ -252,15 +242,15 @@ public class ProgressBar extends View {
      */
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Progress, Indeterminate
-            case Progress_Prop: return getProgress();
-            case Indeterminate_Prop: return isIndeterminate();
+            case Progress_Prop -> getProgress();
+            case Indeterminate_Prop -> isIndeterminate();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -271,11 +261,11 @@ public class ProgressBar extends View {
         switch (aPropName) {
 
             // Progress, Indeterminate
-            case Progress_Prop: case "Value": setProgress(Convert.doubleValue(aValue)); break;
-            case Indeterminate_Prop: setIndeterminate(Convert.boolValue(aValue)); break;
+            case Progress_Prop, "Value" -> setProgress(Convert.doubleValue(aValue));
+            case Indeterminate_Prop -> setIndeterminate(Convert.boolValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 
