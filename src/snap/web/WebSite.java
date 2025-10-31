@@ -471,6 +471,7 @@ public abstract class WebSite {
         WebFile rootDir = getFileForPath("/");
         if (rootDir != null)
             rootDir.delete();
+        _files.clear();
     }
 
     /**
