@@ -1,5 +1,6 @@
 package snap.viewx;
 import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.view.EventListener;
 import snap.view.ViewEvent;
 import snap.view.ViewOwner;
@@ -7,6 +8,7 @@ import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -241,8 +243,8 @@ public class WebSitePane extends ViewOwner {
     protected WebFile getDefaultSelFile()
     {
         // Get recent file
-        WebURL[] recentUrls = getRecentUrlsForSiteAndFileValidator();
-        WebURL recentURL = recentUrls.length > 0 ? recentUrls[0] : null;
+        List<WebURL> recentUrls = getRecentUrlsForSiteAndFileValidator();
+        WebURL recentURL = !recentUrls.isEmpty() ? recentUrls.get(0) : null;
         WebFile defaultSelFile = recentURL != null ? recentURL.getFile() : null;
 
         // If null, just root dir
@@ -256,19 +258,17 @@ public class WebSitePane extends ViewOwner {
     /**
      * Returns valid recent URLs.
      */
-    private WebURL[] getRecentUrlsForSiteAndFileValidator()
+    private List<WebURL> getRecentUrlsForSiteAndFileValidator()
     {
         // Get recent URLs for site
-        WebURL[] recentURLs = RecentFiles.getURLs();
+        List<WebURL> recentURLs = RecentFiles.getUrls();
         WebSite site = getSite();
-        WebURL[] recentUrlsForSite = ArrayUtils.filter(recentURLs, url -> url.getSite() == site);
+        List<WebURL> recentUrlsForSite = ListUtils.filter(recentURLs, url -> url.getSite() == site);
 
         // If Types set, do simple version on URLs to avoid resolving files
         String[] types = getTypes();
-        if (types != null) {
-            WebURL[] validUrlsForSite = ArrayUtils.filter(recentUrlsForSite, url -> ArrayUtils.contains(types, url.getFileType()));
-            return validUrlsForSite;
-        }
+        if (types != null)
+            return ListUtils.filter(recentUrlsForSite, url -> ArrayUtils.contains(types, url.getFileType()));
 
         // Get RecentURLs for site
         Predicate<WebFile> fileValidator = getFileValidator();
@@ -276,10 +276,9 @@ public class WebSitePane extends ViewOwner {
             return recentURLs;
 
         // Get valid URLs
-        WebFile[] recentFilesForSite = ArrayUtils.mapNonNull(recentUrlsForSite, url -> url.getFile(), WebFile.class);
-        WebFile[] validRecentFiles = ArrayUtils.filter(recentFilesForSite, fileValidator);
-        WebURL[] validRecentURLs = ArrayUtils.map(validRecentFiles, file -> file.getUrl(), WebURL.class);
-        return validRecentURLs;
+        List<WebFile> recentFilesForSite = ListUtils.mapNonNull(recentUrlsForSite, url -> url.getFile());
+        List<WebFile> validRecentFiles = ListUtils.filter(recentFilesForSite, fileValidator);
+        return ListUtils.map(validRecentFiles, file -> file.getUrl());
     }
 
     /**

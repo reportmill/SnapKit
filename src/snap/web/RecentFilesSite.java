@@ -49,12 +49,12 @@ public class RecentFilesSite extends WebSite {
             return;
 
         // Get recent files
-        WebFile[] recentFiles = RecentFiles.getFiles();
-        List<FileHeader> fileHeaders = new ArrayList<>(recentFiles.length);
+        List<WebFile> recentFiles = RecentFiles.getFiles();
+        List<FileHeader> fileHeaders = new ArrayList<>(recentFiles.size());
 
         // Iterate over rootDir files and recent files and set each as link
-        for (int i = 0; i < recentFiles.length; i++) {
-            WebFile recentFile = recentFiles[i];
+        for (int i = 0; i < recentFiles.size(); i++) {
+            WebFile recentFile = recentFiles.get(i);
             WebURL recentFileURL = recentFile.getUrl();
             String recentFilePath = "/RecentFile-" + i + "-" + recentFileURL.getFilename();
             FileHeader fileHdr = new FileHeader(recentFilePath, recentFile.isDir());

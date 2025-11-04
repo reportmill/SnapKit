@@ -48,9 +48,9 @@ public class RecentFilesSitePane extends WebSitePane {
         pathCol.setCellConfigure(cell -> configureFilesTablePathColCell(cell));
 
         // Init SelFile
-        WebFile[] recentFiles = RecentFiles.getFiles();
-        if (recentFiles.length > 0)
-            setSelFile(recentFiles[0]);
+        List<WebFile> recentFiles = RecentFiles.getFiles();
+        if (!recentFiles.isEmpty())
+            setSelFile(recentFiles.get(0));
     }
 
     /**

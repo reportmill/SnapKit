@@ -3,18 +3,16 @@
  */
 package snap.web;
 import java.util.*;
-import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.util.Prefs;
-import snap.view.*;
 
 /**
  * A class to manage UI for recent files (can show a panel or a menu).
  */
-public class RecentFiles extends ViewOwner {
+public class RecentFiles {
 
     // The key used in preferences to store recent file urls
-    private static String  _prefsKey = "RecentDocuments";
+    private static String _prefsKey = "RecentDocuments";
 
     // Constants
     private static int MAX_FILES = 20;
@@ -22,19 +20,19 @@ public class RecentFiles extends ViewOwner {
     /**
      * Returns the array of recent files.
      */
-    public static WebFile[] getFiles()
+    public static List<WebFile> getFiles()
     {
-        WebURL[] urls = getURLs();
-        return ArrayUtils.mapNonNull(urls, url -> createFileForURL(url), WebFile.class);
+        List<WebURL> urls = getUrls();
+        return ListUtils.mapNonNull(urls, url -> createFileForURL(url));
     }
 
     /**
      * Returns the array of recent file URLs.
      */
-    public static WebURL[] getURLs()
+    public static List<WebURL> getUrls()
     {
         List<String> urlStrings = getUrlStrings();
-        return ListUtils.mapNonNullToArray(urlStrings, urlStr -> WebURL.getUrl(urlStr), WebURL.class);
+        return ListUtils.mapNonNull(urlStrings, urlStr -> WebURL.getUrl(urlStr));
     }
 
     /**
