@@ -38,6 +38,7 @@ public class ActivityMonitor extends Activity {
     {
         super();
         setTitle(aTitle);
+        setTaskTitle(aTitle);
     }
 
     /**

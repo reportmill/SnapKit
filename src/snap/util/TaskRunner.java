@@ -69,6 +69,15 @@ public class TaskRunner<T> extends PropObject {
     }
 
     /**
+     * Constructor for given name.
+     */
+    public TaskRunner(String aName)
+    {
+        super();
+        setName(aName);
+    }
+
+    /**
      * Returns the name of runner (and thread).
      */
     public String getName()  { return _name; }
@@ -105,10 +114,10 @@ public class TaskRunner<T> extends PropObject {
     /**
      * Returns the monitor.
      */
-    public ActivityMonitor getMonitor()
+    public synchronized ActivityMonitor getMonitor()
     {
         if (_monitor != null) return _monitor;
-        return _monitor = new ActivityMonitor();
+        return _monitor = new ActivityMonitor(getName());
     }
 
     /**
