@@ -192,8 +192,14 @@ public class FileSite extends WebSite {
         if (!javaFile.setLastModified(aTime))
             System.err.println("FileSite.setModTimeForFile: Error setting mod time for file: " + javaFile.getPath());
 
+        // If CheerpJ, call native method - warning, this currently saves to the second instead of millis
+        if (SnapEnv.isWebVM && !aFile.isDir()) {
+            String filePath = aFile.getPath().substring("/files".length());
+            setLastModified(filePath, aTime);
+        }
+
         // Do normal version
-        super.saveLastModTimeForFile(aFile, aTime);
+        else super.saveLastModTimeForFile(aFile, aTime);
     }
 
     /**
@@ -259,4 +265,7 @@ public class FileSite extends WebSite {
         // Return normalized path
         return FilePathUtils.getNormalizedPath(filePath);
     }
+
+    // Saves modified time to CheerpJ files IndexDB
+    private static native void setLastModified(String filePath, long modTime);
 }
