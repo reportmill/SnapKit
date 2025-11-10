@@ -213,18 +213,15 @@ public class FileSystemSite extends WebSite {
      * Saves the modified time for a file to underlying file system.
      */
     @Override
-    protected void saveLastModTimeForFile(WebFile aFile, long aTime) throws Exception
+    protected void setLastModTimeForFileImpl(WebFile aFile, long aTime) throws Exception
     {
-        // Set in file
-        aFile.setLastModTime(aTime);
-
         // Get java file and set last modified time
         Path javaPath = getJavaPathForLocalPath(aFile.getPath());
         try { Files.setLastModifiedTime(javaPath, FileTime.fromMillis(aTime)); }
         catch (IOException e) { System.err.println("FileSite.setModTimeForFile: Error setting mod time for file: " + javaPath); }
 
         // Do normal version
-        super.saveLastModTimeForFile(aFile, aTime);
+        super.setLastModTimeForFileImpl(aFile, aTime);
     }
 
     /**

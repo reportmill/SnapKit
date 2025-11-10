@@ -256,28 +256,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     protected void setLastModTime(long aValue)
     {
-        // If already set, just return
         if (aValue == _lastModTime) return;
-
-        // Set value and fire prop change
         firePropChange(LastModTime_Prop, _lastModTime, _lastModTime = aValue);
-    }
-
-    /**
-     * Sets the file modification time in file and in site internal storage.
-     */
-    public void saveLastModTime(long aValue)
-    {
-        // Save LastModTime in site and set in file
-        try {
-            WebSite site = getSite();
-            site.saveLastModTimeForFile(this, aValue);
-            setLastModTime(aValue);
-        }
-        catch (Exception e) { System.err.println("WebFile.setModTimeSaved: " + e); }
-
-        // Set ModTime in file
-        setLastModTime(aValue);
     }
 
     /**
@@ -336,17 +316,13 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public void setBytes(byte[] theBytes)
     {
-        // If already set, just return
         if (ArrayUtils.equals(theBytes, _bytes)) return;
 
-        // Set bytes and fire PropChange
-        firePropChange(Bytes_Prop, _bytes, _bytes = theBytes);
-
-        // Update Size
+        // Update Bytes, Size, Modified and fire prop changes
+        batchPropChange(Bytes_Prop, _bytes, _bytes = theBytes);
         setSize(theBytes != null ? theBytes.length : 0);
-
-        // Update Modified
         setModified(true);
+        fireBatchPropChanges();
     }
 
     /**

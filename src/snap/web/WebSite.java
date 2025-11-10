@@ -412,7 +412,16 @@ public abstract class WebSite {
     /**
      * Saves the modified time for a file to underlying file system.
      */
-    protected void saveLastModTimeForFile(WebFile aFile, long aTime) throws Exception
+    public static void setLastModTimeForFile(WebFile aFile, long aTime) throws Exception
+    {
+        WebSite site = aFile.getSite();
+        site.setLastModTimeForFileImpl(aFile, aTime);
+    }
+
+    /**
+     * Sets the modified time for a file to underlying file system.
+     */
+    protected void setLastModTimeForFileImpl(WebFile aFile, long aTime) throws Exception
     {
         // Set in file - subclasses should save to real file
         aFile.setLastModTime(aTime);

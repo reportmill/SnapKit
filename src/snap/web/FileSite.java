@@ -5,6 +5,9 @@ package snap.web;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.util.Collections;
 import java.util.List;
 import snap.util.*;
@@ -179,27 +182,27 @@ public class FileSite extends WebSite {
     }
 
     /**
-     * Saves the modified time for a file to underlying file system.
+     * Sets the modified time for a file to underlying file system.
      */
     @Override
-    protected void saveLastModTimeForFile(WebFile aFile, long aTime) throws Exception
+    protected void setLastModTimeForFileImpl(WebFile aFile, long aTime) throws Exception
     {
-        // Set in file
-        aFile.setLastModTime(aTime);
-
-        // Get java file and set last modified time
-        File javaFile = aFile.getJavaFile();
-        if (!javaFile.setLastModified(aTime))
-            System.err.println("FileSite.setModTimeForFile: Error setting mod time for file: " + javaFile.getPath());
-
         // If CheerpJ, call native method - warning, this currently saves to the second instead of millis
         if (SnapEnv.isWebVM && !aFile.isDir()) {
             String filePath = aFile.getPath().substring("/files".length());
             setLastModified(filePath, aTime);
+            snap.view.ViewUtils.runDelayed(() -> setLastModified(filePath, aTime), 200);
+            aFile.setLastModTime(aTime / 1000 * 1000);
+            return;
         }
 
+        // Get java file and set last modified time
+        Path javaPath = getJavaPathForLocalPath(aFile.getPath());
+        try { Files.setLastModifiedTime(javaPath, FileTime.fromMillis(aTime)); }
+        catch (IOException e) { System.err.println("FileSite.setLastModTimeForFileImpl: Error setting mod time for file: " + javaPath); }
+
         // Do normal version
-        else super.saveLastModTimeForFile(aFile, aTime);
+        super.setLastModTimeForFileImpl(aFile, aTime);
     }
 
     /**
@@ -213,6 +216,11 @@ public class FileSite extends WebSite {
             filePath = "/";
         return getJavaFileForLocalPath(filePath);
     }
+
+    /**
+     * Returns the Java path for given local file path.
+     */
+    private Path getJavaPathForLocalPath(String filePath)  { return Paths.get(filePath); }
 
     /**
      * Returns the Java file for given local file path.
