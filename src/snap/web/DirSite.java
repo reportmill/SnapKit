@@ -14,7 +14,7 @@ import java.util.List;
 public class DirSite extends WebSite {
 
     // The directory WebFile
-    private WebFile  _dir;
+    private WebFile _dir;
 
     /**
      * Constructor.
@@ -44,15 +44,13 @@ public class DirSite extends WebSite {
     }
 
     /**
-     * Handles a get or head request.
+     * Handles a head request.
      */
     @Override
-    protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
+    protected void doHead(WebRequest aReq, WebResponse aResp)
     {
-        // Get request file path
-        String filePath = aReq.getFilePath();
-
         // Get WebFile from Dir site
+        String filePath = aReq.getFilePath();
         WebFile dirFile = getDirFileForPath(filePath);
 
         // If not found, set Response.Code to NOT_FOUND and return
@@ -66,10 +64,22 @@ public class DirSite extends WebSite {
         aResp.setDir(dirFile.isDir());
         aResp.setLastModTime(dirFile.getLastModTime());
         aResp.setSize(dirFile.getSize());
+    }
 
-        // If Head, just return
-        if (isHead)
+    /**
+     * Handles a get request.
+     */
+    @Override
+    protected void doGet(WebRequest aReq, WebResponse aResp)
+    {
+        // Get file header
+        doHead(aReq, aResp);
+        if (aResp.getCode() != WebResponse.NOT_FOUND)
             return;
+
+        // Get WebFile from Dir site
+        String filePath = aReq.getFilePath();
+        WebFile dirFile = getDirFileForPath(filePath);
 
         // If file, get/set file bytes
         if (dirFile.isFile()) {
@@ -90,13 +100,11 @@ public class DirSite extends WebSite {
     @Override
     protected void doPut(WebRequest aReq, WebResponse aResp)
     {
-        // Get file we're trying to save
-        WebFile localFile = aReq.getFile(); //getFileForPath(fileURL.getPath());
-
         // Get remote file
+        WebFile localFile = aReq.getFile();
         WebFile dirFile = createDirFileForPath(localFile.getPath(), localFile.isDir());
-        if (dirFile == null)
-            return;
+
+        // Update bytes and save
         if (localFile.isFile())
             dirFile.setBytes(localFile.getBytes());
         dirFile.save();
@@ -112,10 +120,7 @@ public class DirSite extends WebSite {
     @Override
     protected void doDelete(WebRequest aReq, WebResponse aResp)
     {
-        // Get request file path
         String filePath = aReq.getFilePath();
-
-        // Do Delete
         WebFile dirFile = getDirFileForPath(filePath);
         if (dirFile != null)
             dirFile.delete();
@@ -127,12 +132,9 @@ public class DirSite extends WebSite {
     @Override
     protected void setLastModTimeForFileImpl(WebFile aFile, long aTime) throws Exception
     {
-        // Forward to dir site file
         WebFile dirFile = getDirFileForPath(aFile.getPath());
         WebSite.setLastModTimeForFile(dirFile, aTime);
-
-        // Do normal version
-        super.setLastModTimeForFileImpl(aFile, dirFile.getLastModTime());
+        aFile.setLastModTime(dirFile.getLastModTime());
     }
 
     /**
@@ -184,17 +186,6 @@ public class DirSite extends WebSite {
     }
 
     /**
-     * Returns a new FileHeader for given file.
-     */
-    private FileHeader createFileHeaderForFile(String parentFilePath, WebFile aFile)
-    {
-        FileHeader fileHeader = new FileHeader(aFile);
-        String filePath = FilePathUtils.getChildPath(parentFilePath, aFile.getName());
-        fileHeader.setPath(filePath);
-        return fileHeader;
-    }
-
-    /**
      * Returns the foreign file for a path from foreign site.
      */
     private WebFile getDirFileForPath(String aPath)
@@ -216,5 +207,16 @@ public class DirSite extends WebSite {
         WebSite dirSite = dir.getSite();
         String dirFilePath = dir.getPath() + aPath;
         return dirSite.createFileForPath(dirFilePath, isDir);
+    }
+
+    /**
+     * Returns a new FileHeader for given file.
+     */
+    private static FileHeader createFileHeaderForFile(String parentFilePath, WebFile aFile)
+    {
+        String filePath = FilePathUtils.getChildPath(parentFilePath, aFile.getName());
+        FileHeader fileHeader = new FileHeader(aFile);
+        fileHeader.setPath(filePath);
+        return fileHeader;
     }
 }
