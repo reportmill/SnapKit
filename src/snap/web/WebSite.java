@@ -264,11 +264,11 @@ public abstract class WebSite {
         }
 
         // Create PUT request for file
-        WebRequest putRequest = new WebRequest(aFile);
+        WebRequest putRequest = new WebRequest(aFile).setType(WebRequest.Type.PUT);
         byte[] fileBytes = aFile.isFile() ? aFile.getBytes() : null;
         if (fileBytes == null)
             fileBytes = new byte[0];
-        putRequest.setPutBytes(fileBytes);
+        putRequest.setSendBytes(fileBytes);
 
         // Send request and get response
         WebResponse putResponse = getResponse(putRequest);
@@ -320,8 +320,7 @@ public abstract class WebSite {
         }
 
         // Create web request
-        WebRequest req = new WebRequest(aFile);
-        req.setType(WebRequest.Type.DELETE);
+        WebRequest req = new WebRequest(aFile).setType(WebRequest.Type.DELETE);
 
         // Get response
         WebResponse resp = getResponse(req);

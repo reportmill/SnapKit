@@ -382,8 +382,7 @@ public class WebURL {
     public WebResponse getHead()
     {
         WebSite site = getSite();
-        WebRequest req = new WebRequest(this);
-        req.setType(WebRequest.Type.HEAD);
+        WebRequest req = new WebRequest(this).setType(WebRequest.Type.HEAD);
         return site.getResponse(req);
     }
 
@@ -412,8 +411,8 @@ public class WebURL {
     public WebResponse getResponseForPostBytes(byte[] theBytes)
     {
         WebSite site = getSite();
-        WebRequest req = new WebRequest(this);
-        req.setPostBytes(theBytes);
+        WebRequest req = new WebRequest(this).setType(WebRequest.Type.POST);
+        req.setSendBytes(theBytes);
         return site.getResponse(req);
     }
 

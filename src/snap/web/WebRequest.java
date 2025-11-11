@@ -95,7 +95,7 @@ public class WebRequest {
     /**
      * Sets the type of request.
      */
-    public void setType(Type aType)  { _type = aType; }
+    public WebRequest setType(Type aType)  { _type = aType; return this;}
 
     /**
      * Returns the post bytes.
@@ -108,24 +108,6 @@ public class WebRequest {
     public void setSendBytes(byte[] theBytes)
     {
         _sendBytes = theBytes;
-    }
-
-    /**
-     * Sets the bytes to POST.
-     */
-    public void setPostBytes(byte[] theBytes)
-    {
-        setSendBytes(theBytes);
-        _type = Type.POST;
-    }
-
-    /**
-     * Sets the bytes to PUT.
-     */
-    public void setPutBytes(byte[] theBytes)
-    {
-        setSendBytes(theBytes);
-        _type = Type.PUT;
     }
 
     /**
