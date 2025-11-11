@@ -1,6 +1,6 @@
 package snap.games;
 import snap.gfx.Color;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import snap.view.*;
 
 /**
@@ -74,7 +74,7 @@ public class DevConsole extends ViewOwner {
     @Override
     protected void initWindow(WindowView aWindow)
     {
-        if (SnapUtils.isWebVM)
+        if (SnapEnv.isWebVM)
             aWindow.setMaximized(true);
     }
 

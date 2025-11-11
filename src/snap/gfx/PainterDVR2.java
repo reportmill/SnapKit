@@ -3,7 +3,7 @@
  */
 package snap.gfx;
 import snap.geom.*;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import java.util.Arrays;
 
 /**
@@ -272,7 +272,7 @@ public class PainterDVR2 extends PainterImpl {
     public void drawImage(Image image, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh)
     {
         // Correct source width/height for image dpi
-        if (SnapUtils.isWebVM) {
+        if (SnapEnv.isWebVM) {
             double scaleX = image.getDpiX() / 72;
             double scaleY = image.getDpiY() / 72;
             if (scaleX != 1 || scaleY != 1) {

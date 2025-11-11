@@ -1,7 +1,6 @@
 package snap.games;
 import snap.util.ClassUtils;
 import snap.util.SnapEnv;
-import snap.util.SnapUtils;
 import snap.view.*;
 import snap.web.WebURL;
 
@@ -196,7 +195,7 @@ public class GameController extends ViewOwner {
     @Override
     protected void initWindow(WindowView aWindow)
     {
-        if (SnapUtils.isWebVM)
+        if (SnapEnv.isWebVM)
             aWindow.setMaximized(true);
     }
 }

@@ -22,15 +22,13 @@ public class FileUtils {
             return (File)aSource;
 
         // for a file URL, pull out the path and fall through to the string case
-        if (aSource instanceof URL) {
-            URL url = (URL) aSource;
+        if (aSource instanceof URL url) {
             if (url.getProtocol().equals("file"))
                 return new File(url.getPath());
         }
 
         // If source is string, see if it represents a file
-        if (aSource instanceof String) {
-            String string = (String) aSource;
+        if (aSource instanceof String string) {
             string = string.trim();
 
             // If starts with a common file separator try file
@@ -114,16 +112,7 @@ public class FileUtils {
      */
     public static void writeBytes(File aFile, byte[] theBytes) throws IOException
     {
-        // If null bytes, delete file
-        if (theBytes == null) {
-            aFile.delete();
-            return;
-        }
-
-        // Write bytes
-        FileOutputStream fileStream = new FileOutputStream(aFile);
-        fileStream.write(theBytes);
-        fileStream.close();
+        Files.write(aFile.toPath(), theBytes);
     }
 
     /**
@@ -131,12 +120,6 @@ public class FileUtils {
      */
     public static void writeBytesSafely(File aFile, byte[] theBytes) throws IOException
     {
-        // If null bytes, delete file
-        if (theBytes == null) {
-            aFile.delete();
-            return;
-        }
-
         // If file doesn't exist, just write bytes
         if (!aFile.exists()) {
             writeBytes(aFile, theBytes);
@@ -147,7 +130,7 @@ public class FileUtils {
         File backupfile = new File(aFile.getPath() + ".rmbak");
         copyFile(aFile, backupfile);
         writeBytes(aFile, theBytes);
-        backupfile.delete();
+        Files.delete(backupfile.toPath());
     }
 
     /**
@@ -237,15 +220,6 @@ public class FileUtils {
         fis.close();
         fos.close();
         return out;
-    }
-
-    /**
-     * Copies a file from one location to another with exception suppression.
-     */
-    public static File copyFileSafe(File in, File out)
-    {
-        try { return copyFile(in, out); }
-        catch(IOException e) { System.err.println("Couldn't copy " + in + " to " + out + " (" + e + ")"); return null; }
     }
 
     /**

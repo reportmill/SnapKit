@@ -14,9 +14,6 @@ import java.util.*;
  */
 public class SnapUtils {
 
-    // Legacy
-    public static boolean isWebVM = SnapEnv.isWebVM;
-
     // The build info string from "BuildInfo.txt" (eg, "Aug-31-04")
     private static String _buildInfo;
 
@@ -223,19 +220,13 @@ public class SnapUtils {
     }
 
     /**
-     * Writes the given bytes to the given output object (string path or file).
+     * Writes the given bytes to the given output file path.
      */
-    public static void writeBytes(byte[] bytes, Object aDest)
+    public static void writeBytes(byte[] bytes, String filePath)
     {
-        // Get file for dest
-        File file = FileUtils.getFile(aDest);
-
-        // Write bytes
-        try {
-            FileUtils.writeBytes(file, bytes);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        File file = FileUtils.getFile(filePath);
+        try { FileUtils.writeBytes(file, bytes); }
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**
