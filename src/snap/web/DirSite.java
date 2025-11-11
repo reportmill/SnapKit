@@ -74,7 +74,7 @@ public class DirSite extends WebSite {
     {
         // Get file header
         doHead(aReq, aResp);
-        if (aResp.getCode() != WebResponse.NOT_FOUND)
+        if (aResp.getCode() != WebResponse.OK)
             return;
 
         // Get WebFile from Dir site
