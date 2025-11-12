@@ -1,5 +1,6 @@
 package snap.text;
 import snap.props.PropChange;
+import snap.props.Undoer;
 import snap.util.ListUtils;
 import snap.web.WebFile;
 import java.util.ArrayList;
@@ -17,6 +18,9 @@ public class TextAgent {
 
     // The TextModel for text file
     private TextModel _textModel;
+
+    // The shared undoer for the text model
+    private Undoer _textUndoer;
 
     // File sync support
     private String _unmodifiedString;
@@ -90,6 +94,15 @@ public class TextAgent {
     public void setTextModelSupplier(Supplier<TextModel> supplier)  { _textModelSupplier = supplier; }
 
     /**
+     * Returns the text undoer.
+     */
+    public Undoer getTextUndoer()
+    {
+        if (_textUndoer != null) return _textUndoer;
+        return _textUndoer = new Undoer();
+    }
+
+    /**
      * Reloads agent from file.
      */
     public void reloadFile()
@@ -113,6 +126,10 @@ public class TextAgent {
         // Reload TextModel from File string
         _unmodifiedString = _textFile.getText();
         _textModel.setString(_unmodifiedString);
+
+        // Reset undoer
+        if (_textUndoer != null)
+            _textUndoer.reset();
     }
 
     /**

@@ -87,6 +87,7 @@ public class TextPane extends ViewOwner {
         // Set text model for text file in text area
         TextAgent textAgent = TextAgent.getAgentForFile(_textFile);
         _textArea.setTextModel(textAgent.getTextModel());
+        _textArea.getTextAdapter().setUndoer(textAgent.getTextUndoer());
     }
 
     /**

@@ -215,6 +215,11 @@ public class TextAdapter extends PropObject {
     public Undoer getUndoer()  { return _undoer; }
 
     /**
+     * Sets the text undoer.
+     */
+    public void setUndoer(Undoer anUndoer)  { _undoer = anUndoer; }
+
+    /**
      * Returns whether undo is activated.
      */
     public boolean isUndoActivated()  { return _undoer != Undoer.DISABLED_UNDOER; }
