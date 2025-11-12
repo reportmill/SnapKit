@@ -1465,47 +1465,35 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Load text from source URL.
-     */
-    public void readTextFromSourceFile(WebFile sourceFile)
-    {
-        // Set Source URL
-        setSourceUrl(sourceFile.getUrl());
-
-        // Get file text and set content
-        String text = sourceFile.getText();
-        setString(text);
-    }
-
-    /**
      * Write text to source file.
      */
     public void writeTextToSourceFile()
     {
-        // Get SourceFile
+        // Get source file and update from this text model
         WebFile sourceFile = getSourceFile();
-        if (sourceFile == null) {
-            System.err.println("TextModel.writeToSourceFile: No source file specified");
-            return;
+        if (sourceFile.getUpdater() == null) {
+            String fileText = getString();
+            sourceFile.setText(fileText);
+            setTextModified(false);
         }
-
-        // Get text string and set in file
-        String fileText = getString();
-        sourceFile.setText(fileText);
 
         // Save file
         sourceFile.save();
-
-        // Set TextModified to false since it matches file
-        setTextModified(false);
     }
 
     /**
      * Synchronizes TextModel and SourceFile.
      */
-    public void syncTextModelToSourceFile()
+    public void syncTextModelToSourceFile(WebFile sourceFile)
     {
-        _unmodifiedString = getString();
+        // Set model source
+        setSourceUrl(sourceFile.getUrl());
+
+        // Reload TextModel from File string
+        _unmodifiedString = sourceFile.getText();
+        setString(_unmodifiedString);
+
+        // Add listener to set file updater when text model text is changed
         if (_fileSyncLsnr == null)
             addPropChangeListener(_fileSyncLsnr = pc -> handleTextModelCharsChange(), TextModel.Chars_Prop);
     }
