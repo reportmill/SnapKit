@@ -9,7 +9,6 @@ import snap.gfx.Painter;
 import snap.props.PropChange;
 import snap.util.XMLArchiver;
 import snap.util.XMLElement;
-import snap.web.WebFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -330,83 +329,84 @@ public class TextModelUtils {
         TextLineStyle lineStyle = null;
 
         // Iterate over child elements to snag common attributes
-        for (int i = 0, iMax = anElement.size(); i < iMax; i++) {
-            XMLElement e = anElement.get(i);
+        for (XMLElement e : anElement.getElements()) {
 
-            // Unarchive string
-            if (e.getName().equals("string")) {
-                String str = e.getValue();
-                if (str == null || str.isEmpty()) continue;
-                int len = textModel.length();
-                textModel.addCharsWithStyle(str, style);
-                if (lineStyle != null) {
-                    textModel.setLineStyle(lineStyle, len, len + str.length());
-                    lineStyle = null;
+            switch (e.getName()) {
+
+                // Unarchive string
+                case "string" -> {
+                    String str = e.getValue();
+                    if (str == null || str.isEmpty()) continue;
+                    int len = textModel.length();
+                    textModel.addCharsWithStyle(str, style);
+                    if (lineStyle != null) {
+                        textModel.setLineStyle(lineStyle, len, len + str.length());
+                        lineStyle = null;
+                    }
                 }
-            }
 
-            // Unarchive font element
-            else if (e.getName().equals("font")) {
-                Font font = anArchiver.fromXML(e, Font.class, null);
-                style = style.copyForStyleValue(font);
-            }
+                // Unarchive font element
+                case "font" -> {
+                    Font font = anArchiver.fromXML(e, Font.class, null);
+                    style = style.copyForStyleValue(font);
+                }
 
-            // Unarchive color element
-            else if (e.getName().equals("color")) {
-                Color color = anArchiver.fromXML(e, Color.class, null);
-                style = style.copyForStyleValue(color);
-            }
-
-            // If format changed for segment, write format
-            else if (e.getName().equals("format")) {
-                Object fmt = anArchiver.fromXML(e, null);
-                style = style.copyForStyleKeyValue(TextStyle.Format_Prop, fmt);
-            }
-
-            // Unarchive pgraph element
-            else if (e.getName().equals("pgraph"))
-                lineStyle = anArchiver.fromXML(e, TextLineStyle.class, null);
-
-                // Unarchive underline element
-            else if (e.getName().equals("underline")) {
-                if (e.getAttributeIntValue("style") < 0)
-                    style = style.copyForStyleKeyValue(TextStyle.Underline_Prop, null);
-                else style = style.copyForStyleKeyValue(TextStyle.Underline_Prop, 1);
-            }
-
-            // Unarchive outline element
-            else if (e.getName().equals("outline")) {
-                if (e.getAttributeBoolValue("off"))
-                    style = style.copyForStyleKeyValue(TextStyle.Border_Prop, null);
-                else {
-                    double swidth = e.getAttributeFloatValue("stroke", 1);
-                    String cstr = e.getAttributeValue("color");
-                    Color color = Color.get(cstr);
-                    Border border = Border.createLineBorder(style.getColor(), swidth);
-                    style = style.copyForStyleValue(border);
+                // Unarchive color element
+                case "color" -> {
+                    Color color = anArchiver.fromXML(e, Color.class, null);
                     style = style.copyForStyleValue(color);
                 }
-            }
 
-            // Unarchive outline element
-            else if (e.getName().equals("TextBorder")) {
-                double stroke = e.getAttributeFloatValue("stroke", 1);
-                String cstr = e.getAttributeValue("color");
-                Color color = Color.get(cstr);
-                Border border = Border.createLineBorder(color, stroke);
-                style = style.copyForStyleValue(border);
-            }
+                // If format changed for segment, write format
+                case "format" -> {
+                    Object fmt = anArchiver.fromXML(e, null);
+                    style = style.copyForStyleKeyValue(TextStyle.Format_Prop, fmt);
+                }
 
-            // Unarchive scripting
-            else if (e.getName().equals("scripting")) {
-                int scripting = e.getAttributeIntValue("val");
-                style = style.copyForStyleKeyValue(TextStyle.Scripting_Prop, scripting);
-            }
+                // Unarchive pgraph element
+                case "pgraph" -> lineStyle = anArchiver.fromXML(e, TextLineStyle.class, null);
 
-            // Unarchive char spacing
-            else if (e.getName().equals("char-spacing")) {
-                double cspace = e.getAttributeFloatValue("value");
-                style = style.copyForStyleKeyValue(TextStyle.CharSpacing_Prop, cspace);
+                // Unarchive underline element
+                case "underline" -> {
+                    if (e.getAttributeIntValue("style") < 0)
+                        style = style.copyForStyleKeyValue(TextStyle.Underline_Prop, null);
+                    else style = style.copyForStyleKeyValue(TextStyle.Underline_Prop, 1);
+                }
+
+                // Unarchive outline element
+                case "outline" -> {
+                    if (e.getAttributeBoolValue("off"))
+                        style = style.copyForStyleKeyValue(TextStyle.Border_Prop, null);
+                    else {
+                        double swidth = e.getAttributeFloatValue("stroke", 1);
+                        String cstr = e.getAttributeValue("color");
+                        Color color = Color.get(cstr);
+                        Border border = Border.createLineBorder(style.getColor(), swidth);
+                        style = style.copyForStyleValue(border);
+                        style = style.copyForStyleValue(color);
+                    }
+                }
+
+                // Unarchive outline element
+                case "TextBorder" -> {
+                    double stroke = e.getAttributeFloatValue("stroke", 1);
+                    String cstr = e.getAttributeValue("color");
+                    Color color = Color.get(cstr);
+                    Border border = Border.createLineBorder(color, stroke);
+                    style = style.copyForStyleValue(border);
+                }
+
+                // Unarchive scripting
+                case "scripting" -> {
+                    int scripting = e.getAttributeIntValue("val");
+                    style = style.copyForStyleKeyValue(TextStyle.Scripting_Prop, scripting);
+                }
+
+                // Unarchive char spacing
+                case "char-spacing" -> {
+                    double cspace = e.getAttributeFloatValue("value");
+                    style = style.copyForStyleKeyValue(TextStyle.CharSpacing_Prop, cspace);
+                }
             }
         }
 
@@ -497,63 +497,6 @@ public class TextModelUtils {
             TextModel textModel = (TextModel) getSource();
             TextLine line = textModel.getLine(getIndex());
             textModel.setLineStyle((TextLineStyle) nval, line.getStartCharIndex(), line.getStartCharIndex());
-        }
-    }
-
-    /**
-     * This class synchronizes a TextModel with its source file.
-     */
-    protected static class TextModelFileSyncer {
-
-        // The TextModel
-        private TextModel _textModel;
-
-        // The Source file
-        private WebFile _sourceFile;
-
-        // The unmodified string
-        private String _unmodifiedString;
-
-        /**
-         * Constructor.
-         */
-        public TextModelFileSyncer(TextModel textModel)
-        {
-            _textModel = textModel;
-            _sourceFile = textModel.getSourceFile();
-            _unmodifiedString = textModel.getString();
-            if (_sourceFile != null)
-                _textModel.addPropChangeListener(pc -> handleTextModelCharsChange(), TextModel.Chars_Prop);
-            else System.err.println("TextModel.syncTextModelToSourceFile: No source file");
-        }
-
-        /**
-         * Called when TextModel gets chars changes.
-         */
-        private void handleTextModelCharsChange()
-        {
-            boolean textModified = !_unmodifiedString.contentEquals(_textModel);
-            if (textModified == _textModel.isTextModified())
-                return;
-
-            // Update SourceFile.Updater
-            if (textModified && _sourceFile.getUpdater() == null)
-                _sourceFile.setUpdater(file -> updateSourceFileFromTextModel());
-            else if (!textModified && _sourceFile.getUpdater() != null)
-                _sourceFile.setUpdater(null);
-
-            // Update TextModel.TextModified
-            _textModel.setTextModified(textModified);
-        }
-
-        /**
-         * Called when file is saved.
-         */
-        private void updateSourceFileFromTextModel()
-        {
-            _unmodifiedString = _textModel.getString();
-            _sourceFile.setText(_unmodifiedString);
-            _textModel.setTextModified(false);
         }
     }
 }
