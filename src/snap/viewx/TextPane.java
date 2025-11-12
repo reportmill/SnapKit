@@ -9,12 +9,13 @@ import snap.gfx.Font;
 import snap.gfx.Image;
 import snap.props.PropChange;
 import snap.props.Undoer;
-import snap.text.TextModel;
+import snap.text.TextAgent;
 import snap.text.TextLine;
 import snap.text.TextSel;
 import snap.util.Convert;
 import snap.util.ListUtils;
 import snap.view.*;
+import snap.web.WebFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -24,6 +25,9 @@ import java.util.regex.Pattern;
  * A panel for editing text files.
  */
 public class TextPane extends ViewOwner {
+
+    // The text file being edited
+    private WebFile _textFile;
 
     // The TextArea
     private TextArea  _textArea;
@@ -59,6 +63,33 @@ public class TextPane extends ViewOwner {
     }
 
     /**
+     * Constructor.
+     */
+    public TextPane(TextArea textArea)
+    {
+        super();
+        _textArea = textArea;
+    }
+
+    /**
+     * Returns the text file being editing.
+     */
+    public WebFile getTextFile()  { return _textFile; }
+
+    /**
+     * Sets the text file being editing.
+     */
+    public void setTextFile(WebFile textFile)
+    {
+        if (textFile == getTextFile()) return;
+        _textFile = textFile;
+
+        // Set text model for text file in text area
+        TextAgent textAgent = TextAgent.getAgentForFile(_textFile);
+        _textArea.setTextModel(textAgent.getTextModel());
+    }
+
+    /**
      * Returns the TextArea.
      */
     public TextArea getTextArea()  { return _textArea; }
@@ -67,11 +98,6 @@ public class TextPane extends ViewOwner {
      * Creates the TextArea.
      */
     protected TextArea createTextArea()  { return new TextArea(true); }
-
-    /**
-     * Load text.
-     */
-    protected void loadTextAreaText()  { }
 
     /**
      * Shows the toolbar.
@@ -176,14 +202,9 @@ public class TextPane extends ViewOwner {
      */
     public void saveTextToFile()
     {
-        TextArea textArea = getTextArea();
-        TextModel textModel = textArea.getTextModel();
-
-        // Do real version
-        if (textModel.getSourceUrl() != null) {
-            try { textModel.writeTextToSourceFile(); }
-            catch (Exception e) { throw new RuntimeException(e); }
-        }
+        // Save text file
+        if (_textFile != null)
+            _textFile.save();
     }
 
     /**
@@ -297,9 +318,6 @@ public class TextPane extends ViewOwner {
         _textArea.addEventHandler(this::handleTextAreaMouseEvent, MousePress, MouseRelease);
         _textArea.getTextAdapter().addTextModelPropChangeListener(this::handleTextModelPropChange);
         setFirstFocus(_textArea);
-
-        // Load text area text
-        loadTextAreaText();
 
         // Register command-s for save, command-f for find, command-l for line number and escape
         addKeyActionHandler("SaveButton", "Shortcut+S");
