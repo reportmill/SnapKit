@@ -11,7 +11,6 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Painter;
 import snap.props.PropChange;
-import snap.props.PropChangeListener;
 import snap.props.PropObject;
 import snap.util.*;
 import snap.web.WebFile;
@@ -1462,58 +1461,6 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     {
         WebURL sourceURL = getSourceUrl();
         return sourceURL != null ? sourceURL.createFile(false) : null;
-    }
-
-    /**
-     * Synchronizes TextModel and SourceFile.
-     */
-    public void syncTextModelToSourceFile(WebFile sourceFile)
-    {
-        // Set model source
-        setSourceUrl(sourceFile.getUrl());
-
-        // Reload TextModel from File string
-        _unmodifiedString = sourceFile.getText();
-        setString(_unmodifiedString);
-
-        // Add listener to set file updater when text model text is changed
-        if (_fileSyncLsnr == null)
-            addPropChangeListener(_fileSyncLsnr = pc -> handleTextModelCharsChange(), TextModel.Chars_Prop);
-    }
-
-    // File sync support
-    private String _unmodifiedString;
-    private PropChangeListener _fileSyncLsnr;
-
-    /**
-     * Called when TextModel gets chars changes.
-     */
-    private void handleTextModelCharsChange()
-    {
-        boolean textModified = !_unmodifiedString.contentEquals(this);
-        if (textModified == isTextModified())
-            return;
-
-        // Update SourceFile.Updater
-        WebFile sourceFile = getSourceFile();
-        if (textModified && sourceFile.getUpdater() == null)
-            sourceFile.setUpdater(file -> updateSourceFileFromTextModel());
-        else if (!textModified && sourceFile.getUpdater() != null)
-            sourceFile.setUpdater(null);
-
-        // Update TextModified
-        setTextModified(textModified);
-    }
-
-    /**
-     * Called when file is saved.
-     */
-    private void updateSourceFileFromTextModel()
-    {
-        _unmodifiedString = getString();
-        WebFile sourceFile = getSourceFile();
-        sourceFile.setText(_unmodifiedString);
-        setTextModified(false);
     }
 
     /**

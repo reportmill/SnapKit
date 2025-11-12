@@ -1,5 +1,10 @@
 package snap.text;
+import snap.props.PropChange;
+import snap.util.ListUtils;
 import snap.web.WebFile;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -19,10 +24,13 @@ public class TextAgent {
     // An optional supplier to create TextModel
     private Supplier<TextModel> _textModelSupplier;
 
+    // List of agent providers registered with addAgentProvider()
+    private static List<Function<WebFile,TextAgent>> _agentProviders = new ArrayList<>();
+
     /**
      * Constructor for given file.
      */
-    private TextAgent(WebFile aFile)
+    protected TextAgent(WebFile aFile)
     {
         _textFile = aFile;
 
@@ -60,7 +68,7 @@ public class TextAgent {
         syncTextModelToSourceFile();
 
         // Listen for changes
-        _textModel.addPropChangeListener(pc -> handleTextModelCharsChange(), TextModel.Chars_Prop);
+        _textModel.addPropChangeListener(this::handleTextModelCharsChange, TextModel.Chars_Prop);
 
         // Set, return
         return _textModel;
@@ -99,6 +107,9 @@ public class TextAgent {
      */
     public void syncTextModelToSourceFile()
     {
+        // Set text model source
+        _textModel.setSourceUrl(_textFile.getUrl());
+
         // Reload TextModel from File string
         _unmodifiedString = _textFile.getText();
         _textModel.setString(_unmodifiedString);
@@ -107,7 +118,7 @@ public class TextAgent {
     /**
      * Called when TextModel gets chars changes.
      */
-    private void handleTextModelCharsChange()
+    protected void handleTextModelCharsChange(PropChange propChange)
     {
         boolean textModified = !_unmodifiedString.contentEquals(_textModel);
         if (textModified == _textModel.isTextModified())
@@ -143,7 +154,17 @@ public class TextAgent {
         if (textAgent != null)
             return textAgent;
 
-        // Return not found
+        // If providers can create agent, return it
+        TextAgent newAgent = ListUtils.findNonNull(_agentProviders, prov -> prov.apply(aFile));
+        if (newAgent != null)
+            return newAgent;
+
+        // Return new text agent
         return new TextAgent(aFile);
     }
+
+    /**
+     * Adds a provider to create agent subclasses for specific files.
+     */
+    public static void addAgentProvider(Function<WebFile,TextAgent> agentProvider)  { _agentProviders.add(agentProvider); }
 }
