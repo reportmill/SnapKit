@@ -25,6 +25,9 @@ public class TextAdapter extends PropObject {
     // The text being edited
     protected TextModel _textModel;
 
+    // The text being displayed
+    protected TextLayout _textLayout;
+
     // Whether text is editable
     private boolean  _editable;
 
@@ -90,16 +93,16 @@ public class TextAdapter extends PropObject {
     public static final String RichText_Prop = "RichText";
     public static final String Selection_Prop = "Selection";
     public static final String TextModel_Prop = "TextModel";
+    public static final String TextLayout_Prop = "TextLayout";
     public static final String WrapLines_Prop = "WrapLines";
 
     /**
      * Constructor for given text.
      */
-    public TextAdapter(TextModel textModel)
+    public TextAdapter(TextLayout textLayout)
     {
         super();
-        _textModel = textModel;
-        _textModel.addPropChangeListener(_textModelPropChangeLsnr);
+        setTextLayout(textLayout);
     }
 
     /**
@@ -135,8 +138,7 @@ public class TextAdapter extends PropObject {
             _textModel.removePropChangeListener(_textModelPropChangeLsnr);
 
         // Set new text model
-        TextModel oldModel = _textModel;
-        _textModel = textModel;
+        batchPropChange(TextModel_Prop, _textModel, _textModel = textModel);
 
         // Add PropChangeListener
         _textModel.addPropChangeListener(_textModelPropChangeLsnr);
@@ -148,8 +150,41 @@ public class TextAdapter extends PropObject {
             _view.repaint();
         }
 
+        // Make sure text layout matches text model
+        if (_textLayout == null || _textLayout.getTextModel() != _textModel)
+            setTextLayout(_textModel);
+
         // FirePropChange
-        firePropChange(TextModel_Prop, oldModel, textModel);
+        fireBatchPropChanges();
+    }
+
+    /**
+     * Returns the text layout.
+     */
+    public TextLayout getTextLayout()  { return _textLayout; }
+
+    /**
+     * Sets the text layout.
+     */
+    public void setTextLayout(TextLayout textLayout)
+    {
+        if (textLayout == _textLayout) return;
+
+        // Set new text layout
+        batchPropChange(TextLayout_Prop, _textLayout, _textLayout = textLayout);
+
+        // Relayout parent, repaint
+        if (_view != null) {
+            _view.relayoutParent();
+            _view.relayout();
+            _view.repaint();
+        }
+
+        // Make sure text model matches layout text model
+        setTextModel(_textLayout.getTextModel());
+
+        // FirePropChange
+        fireBatchPropChanges();
     }
 
     /**
@@ -203,9 +238,9 @@ public class TextAdapter extends PropObject {
 
         // Otherwise, wrap text in TextModelX
         else if (aValue) {
-            TextModelX textModel = new TextModelX(_textModel);
-            textModel.setWrapLines(true);
-            setTextModel(textModel);
+            TextModelX wrappedTextLayout = new TextModelX(_textModel);
+            wrappedTextLayout.setWrapLines(true);
+            setTextLayout(wrappedTextLayout);
         }
     }
 
@@ -380,7 +415,7 @@ public class TextAdapter extends PropObject {
     public TextSel getSel()
     {
         if (_sel != null) return _sel;
-        TextSel sel = new TextSel(_textModel, _selAnchor, _selIndex);
+        TextSel sel = new TextSel(_textLayout, _selAnchor, _selIndex);
         return _sel = sel;
     }
 
@@ -948,27 +983,27 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the number of lines.
      */
-    public int getLineCount()  { return _textModel.getLineCount(); }
+    public int getLineCount()  { return _textLayout.getLineCount(); }
 
     /**
      * Returns the individual line at given index.
      */
-    public TextLine getLine(int anIndex)  { return _textModel.getLine(anIndex); }
+    public TextLine getLine(int anIndex)  { return _textLayout.getLine(anIndex); }
 
     /**
      * Returns the line for the given character index.
      */
-    public TextLine getLineForCharIndex(int anIndex)  { return _textModel.getLineForCharIndex(anIndex); }
+    public TextLine getLineForCharIndex(int anIndex)  { return _textLayout.getLineForCharIndex(anIndex); }
 
     /**
      * Returns the token for given character index.
      */
-    public TextToken getTokenForCharIndex(int anIndex)  { return _textModel.getTokenForCharIndex(anIndex); }
+    public TextToken getTokenForCharIndex(int anIndex)  { return _textLayout.getTokenForCharIndex(anIndex); }
 
     /**
      * Returns the char index for given point in text coordinate space.
      */
-    public int getCharIndexForXY(double anX, double aY)  { return _textModel.getCharIndexForXY(anX, aY); }
+    public int getCharIndexForXY(double anX, double aY)  { return _textLayout.getCharIndexForXY(anX, aY); }
 
     /**
      * Returns the link at given XY.
@@ -980,7 +1015,7 @@ public class TextAdapter extends PropObject {
 
         // Get TextStyle at XY and return link
         int charIndex = getCharIndexForXY(aX, aY);
-        TextStyle textStyle = _textModel.getTextStyleForCharIndex(charIndex);
+        TextStyle textStyle = _textLayout.getTextStyleForCharIndex(charIndex);
         return textStyle.getLink();
     }
 
@@ -993,7 +1028,7 @@ public class TextAdapter extends PropObject {
         paintSel(aPntr);
 
         // Paint TextModel
-        _textModel.paint(aPntr);
+        _textLayout.paint(aPntr);
     }
 
     /**
@@ -1029,7 +1064,7 @@ public class TextAdapter extends PropObject {
      */
     public void paintText(Painter aPntr)
     {
-        _textModel.paint(aPntr);
+        _textLayout.paint(aPntr);
     }
 
     /**
@@ -1072,7 +1107,7 @@ public class TextAdapter extends PropObject {
             _pgraphSel = true;
 
         // Get selected range for down point and drag point
-        TextSel sel = new TextSel(_textModel, _downX, _downY, _downX, _downY, _wordSel, _pgraphSel);
+        TextSel sel = new TextSel(_textLayout, _downX, _downY, _downX, _downY, _wordSel, _pgraphSel);
         int anchor = sel.getAnchor();
         int index = sel.getIndex();
 
@@ -1084,7 +1119,7 @@ public class TextAdapter extends PropObject {
 
         // Set selection
         setSel(anchor, index);
-        TextModelUtils.setMouseY(_textModel, _downY);
+        TextModelUtils.setMouseY(_textLayout, _downY);
     }
 
     /**
@@ -1093,7 +1128,7 @@ public class TextAdapter extends PropObject {
     public void mouseDragged(ViewEvent anEvent)
     {
         // Get selected range for down point and drag point
-        TextSel sel = new TextSel(_textModel, _downX, _downY, anEvent.getX(), anEvent.getY(), _wordSel, _pgraphSel);
+        TextSel sel = new TextSel(_textLayout, _downX, _downY, anEvent.getX(), anEvent.getY(), _wordSel, _pgraphSel);
         int anchor = sel.getAnchor();
         int index = sel.getIndex();
 
@@ -1105,7 +1140,7 @@ public class TextAdapter extends PropObject {
 
         // Set selection
         setSel(anchor, index);
-        TextModelUtils.setMouseY(_textModel, anEvent.getY());
+        TextModelUtils.setMouseY(_textLayout, anEvent.getY());
     }
 
     /**
@@ -1349,8 +1384,8 @@ public class TextAdapter extends PropObject {
      */
     public double getFontScale()
     {
-        if (_textModel instanceof TextModelX)
-            return ((TextModelX) _textModel).getFontScale();
+        if (_textLayout instanceof TextModelX)
+            return ((TextModelX) _textLayout).getFontScale();
         return 1;
     }
 
@@ -1359,8 +1394,8 @@ public class TextAdapter extends PropObject {
      */
     public void setFontScale(double aValue)
     {
-        if (_textModel instanceof TextModelX)
-            ((TextModelX) _textModel).setFontScale(aValue);
+        if (_textLayout instanceof TextModelX)
+            ((TextModelX) _textLayout).setFontScale(aValue);
         else System.out.println("TextAdapter.setFontScale not supported on this text");
         if (_view != null)
             _view.relayoutParent();
@@ -1371,8 +1406,8 @@ public class TextAdapter extends PropObject {
      */
     public void scaleTextToFit()
     {
-        if (_textModel instanceof TextModelX)
-            ((TextModelX) _textModel).scaleTextToFit();
+        if (_textLayout instanceof TextModelX)
+            ((TextModelX) _textLayout).scaleTextToFit();
         else System.out.println("TextAdapter.scaleTextToFit not supported on this text");
         if (_view != null)
             _view.relayoutParent();
@@ -1520,22 +1555,26 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the area bounds for given view.
      */
-    public Rect getTextBounds()  { return _textModel.getBounds(); }
+    public Rect getTextBounds()  { return _textLayout.getBounds(); }
 
     /**
      * Sets the text bounds.
      */
-    public void setTextBounds(Rect boundsRect)  { _textModel.setBounds(boundsRect); }
+    public void setTextBounds(Rect boundsRect)
+    {
+        TextModel textModel = _textLayout instanceof TextModel ? (TextModel) _textLayout : _textModel;
+        textModel.setBounds(boundsRect);
+    }
 
     /**
      * Returns the width needed to display all characters.
      */
-    public double getPrefWidth()  { return _textModel.getPrefWidth(); }
+    public double getPrefWidth()  { return _textLayout.getPrefWidth(); }
 
     /**
      * Returns the height needed to display all characters.
      */
-    public double getPrefHeight(double aW)  { return _textModel.getPrefHeight(aW); }
+    public double getPrefHeight(double aW)  { return _textLayout.getPrefHeight(aW); }
 
     /**
      * Called when link is triggered.
@@ -1647,7 +1686,8 @@ public class TextAdapter extends PropObject {
         setDefaultLineStyle(lineStyle);
 
         // Forward to text model
-        _textModel.setAlignY(viewAlign.getVPos());
+        if (_textLayout instanceof TextModelX textModelX)
+            textModelX.setAlignY(viewAlign.getVPos());
         _view.repaint();
     }
 

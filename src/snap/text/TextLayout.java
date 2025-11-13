@@ -1,6 +1,7 @@
 package snap.text;
 import snap.geom.HPos;
 import snap.geom.Rect;
+import snap.geom.Shape;
 import snap.geom.VPos;
 import snap.gfx.Border;
 import snap.gfx.Font;
@@ -12,6 +13,11 @@ import java.util.List;
  * This interface provides the functionality to describe the layout of text.
  */
 public interface TextLayout extends CharSequenceX {
+
+    /**
+     * Returns the text model that is being displayed.
+     */
+    default TextModel getTextModel()  { return (TextModel) this; }
 
     /**
      * Whether this text supports multiple styles (font, color, etc.).
@@ -487,4 +493,12 @@ public interface TextLayout extends CharSequenceX {
      * Returns the preferred height.
      */
     double getPrefHeight(double aW);
+
+    /**
+     * Returns a path for two char indexes - it will be a simple box with extensions for first/last lines.
+     */
+    default Shape getPathForCharRange(int aStartCharIndex, int aEndCharIndex)
+    {
+        return TextModelUtils.getPathForCharRange(this, aStartCharIndex, aEndCharIndex);
+    }
 }

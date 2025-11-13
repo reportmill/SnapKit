@@ -21,33 +21,33 @@ public class TextModelUtils {
     /**
      * Returns a path for two char indexes - it will be a simple box with extensions for first/last lines.
      */
-    public static Shape getPathForCharRange(TextModel textModel, int aStartCharIndex, int aEndCharIndex)
+    public static Shape getPathForCharRange(TextLayout textLayout, int aStartCharIndex, int aEndCharIndex)
     {
         // Create new path for return
         Path2D path = new Path2D();
 
         // If invalid range, just return
-        if (aStartCharIndex > textModel.getEndCharIndex()) // || aEndCharIndex < textModel.getStartCharIndex())
+        if (aStartCharIndex > textLayout.getEndCharIndex()) // || aEndCharIndex < textModel.getStartCharIndex())
             return path;
-        if (aEndCharIndex > textModel.getEndCharIndex())
-            aEndCharIndex = textModel.getEndCharIndex();
+        if (aEndCharIndex > textLayout.getEndCharIndex())
+            aEndCharIndex = textLayout.getEndCharIndex();
 
         // Get StartLine for start char index (maybe adjust if at ambiguous start/end of lines and mouse Y available)
-        TextLine startLine = textModel.getLineForCharIndex(aStartCharIndex);
-        if (aStartCharIndex == aEndCharIndex && aStartCharIndex == startLine.getStartCharIndex() && textModel._mouseY > 0) {
-            TextLine altStartLine = textModel.getLineForY(textModel._mouseY);
+        TextLine startLine = textLayout.getLineForCharIndex(aStartCharIndex);
+        if (aStartCharIndex == aEndCharIndex && aStartCharIndex == startLine.getStartCharIndex() && textLayout.getTextModel()._mouseY > 0) {
+            TextLine altStartLine = textLayout.getLineForY(textLayout.getTextModel()._mouseY);
             if (altStartLine == startLine.getPrevious())
                 startLine = altStartLine;
         }
 
         // Get end line
-        TextLine endLine = aStartCharIndex == aEndCharIndex ? startLine : textModel.getLineForCharIndex(aEndCharIndex);
+        TextLine endLine = aStartCharIndex == aEndCharIndex ? startLine : textLayout.getLineForCharIndex(aEndCharIndex);
         double startX = startLine.getTextXForCharIndex(aStartCharIndex - startLine.getStartCharIndex());
         double startY = startLine.getTextBaseline();
         double endX = endLine.getTextXForCharIndex(aEndCharIndex - endLine.getStartCharIndex());
         double endY = endLine.getTextBaseline();
-        startX = Math.min(startX, textModel.getMaxX());
-        endX = Math.min(endX, textModel.getMaxX());
+        startX = Math.min(startX, textLayout.getMaxX());
+        endX = Math.min(endX, textLayout.getMaxX());
 
         // Get start top/height
         double startTop = startLine.getTextY() - 1;
@@ -63,12 +63,12 @@ public class TextModelUtils {
         if (startY != endY) {  //!SnapMath.equals(startY, endY)
             double endTop = endLine.getTextY() - 1;
             double endHeight = endLine.getHeight() + 2;
-            path.lineTo(textModel.getWidth(), startTop);
-            path.lineTo(textModel.getWidth(), endTop);
+            path.lineTo(textLayout.getWidth(), startTop);
+            path.lineTo(textLayout.getWidth(), endTop);
             path.lineTo(endX, endTop);
             path.lineTo(endX, endTop + endHeight);
-            path.lineTo(textModel.getX(), endTop + endHeight);
-            path.lineTo(textModel.getX(), startTop + startHeight);
+            path.lineTo(textLayout.getX(), endTop + endHeight);
+            path.lineTo(textLayout.getX(), startTop + startHeight);
         }
 
         // If selection spans only one line, add path components for upper-right, lower-right
@@ -85,10 +85,10 @@ public class TextModelUtils {
     /**
      * Returns underlined runs for text.
      */
-    public static TextRun[] getUnderlineRuns(TextModel textModel, Rect aRect)
+    public static TextRun[] getUnderlineRuns(TextLayout textLayout, Rect aRect)
     {
         // Get lines
-        List<TextLine> textLines = textModel.getLines();
+        List<TextLine> textLines = textLayout.getLines();
         List<TextRun> underlineRuns = new ArrayList<>();
 
         // Iterate over lines to add underline runs to list
@@ -114,9 +114,9 @@ public class TextModelUtils {
     /**
      * Paints text underlines with given painter.
      */
-    public static void paintTextModelUnderlines(Painter aPntr, TextModel textModel, Rect clipRect)
+    public static void paintTextModelUnderlines(Painter aPntr, TextLayout textLayout, Rect clipRect)
     {
-        TextRun[] underlineRuns = getUnderlineRuns(textModel, clipRect);
+        TextRun[] underlineRuns = getUnderlineRuns(textLayout, clipRect);
 
         for (TextRun run : underlineRuns) {
 
@@ -183,14 +183,18 @@ public class TextModelUtils {
     /**
      * Sets the Mouse Y for given text model to assist in caret placement (can be ambiguous for start/end of line).
      */
-    public static void setMouseY(TextModel textModel, double aY)  { textModel._mouseY = aY; }
+    public static void setMouseY(TextLayout textLayout, double aY)
+    {
+        TextModel textModel = textLayout.getTextModel();
+        textModel._mouseY = aY;
+    }
 
     /**
      * This method returns the range of the @-sign delinated key closest to the current selection (or null if not found).
      */
-    public static TextSel smartFindFormatRange(TextModel textModel, int selStart, int selEnd)
+    public static TextSel smartFindFormatRange(TextLayout textLayout, int selStart, int selEnd)
     {
-        String string = textModel.getString();
+        String string = textLayout.getString();
         int prevAtSignIndex = -1;
         int nextAtSignIndex = -1;
 
@@ -220,7 +224,7 @@ public class TextModelUtils {
         if (prevAtSignIndex >= 0 && nextAtSignIndex >= 0 && prevAtSignIndex != nextAtSignIndex) {
             int start = Math.min(prevAtSignIndex, nextAtSignIndex);
             int end = Math.max(prevAtSignIndex, nextAtSignIndex);
-            return new TextSel(textModel, start, end + 1);
+            return new TextSel(textLayout, start, end + 1);
         }
 
         // Return null since range not found

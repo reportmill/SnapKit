@@ -100,6 +100,16 @@ public class TextArea extends ParentView {
     public void setTextModel(TextModel textModel)  { _textAdapter.setTextModel(textModel); }
 
     /**
+     * Returns the text layout that displays the text.
+     */
+    public TextLayout getTextLayout()  { return _textAdapter.getTextLayout(); }
+
+    /**
+     * Returns the text layout that displays the text.
+     */
+    public void setTextLayout(TextLayout textLayout)  { _textAdapter.setTextLayout(textLayout); }
+
+    /**
      * Returns the plain string of the text being edited.
      */
     public String getText()  { return _textAdapter.getString(); }

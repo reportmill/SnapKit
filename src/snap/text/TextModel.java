@@ -671,14 +671,6 @@ public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiv
     }
 
     /**
-     * Returns a path for two char indexes - it will be a simple box with extensions for first/last lines.
-     */
-    public Shape getPathForCharRange(int aStartCharIndex, int aEndCharIndex)
-    {
-        return TextModelUtils.getPathForCharRange(this, aStartCharIndex, aEndCharIndex);
-    }
-
-    /**
      * Returns whether property change is enabled.
      */
     public boolean isPropChangeEnabled()  { return _propChangeEnabled; }

@@ -10,6 +10,9 @@ import snap.view.ViewUtils;
  */
 public class TextSel {
 
+    // The TextLayout
+    private TextLayout _textLayout;
+
     // The TextModel
     private TextModel _textModel;
 
@@ -28,9 +31,10 @@ public class TextSel {
     /**
      * Constructor.
      */
-    public TextSel(TextModel textModel, int aStart, int aEnd)
+    public TextSel(TextLayout textLayout, int aStart, int aEnd)
     {
-        _textModel = textModel;
+        _textLayout = textLayout;
+        _textModel = textLayout.getTextModel();
         _anchor = aStart;
         _index = aEnd;
         _start = Math.min(aStart, aEnd);
@@ -40,19 +44,20 @@ public class TextSel {
     /**
      * Constructor for selected range resulting from the given two points.
      */
-    public TextSel(TextModel textModel, double x1, double y1, double x2, double y2, boolean isWordSel, boolean isParaSel)
+    public TextSel(TextLayout textLayout, double x1, double y1, double x2, double y2, boolean isWordSel, boolean isParaSel)
     {
         // Get text
-        _textModel = textModel;
+        _textLayout = textLayout;
+        _textModel = textLayout.getTextModel();
 
         // Get character index for point 1 & point 2
-        int p1CharIndex = _textModel.getCharIndexForXY(x1, y1);
-        int p2CharIndex = _textModel.getCharIndexForXY(x2, y2);
+        int p1CharIndex = _textLayout.getCharIndexForXY(x1, y1);
+        int p2CharIndex = _textLayout.getCharIndexForXY(x2, y2);
 
         // Set selection start and end for selected chars
         int selStart = Math.min(p1CharIndex, p2CharIndex);
         int selEnd = Math.max(p1CharIndex, p2CharIndex);
-        int textLength = _textModel.length();
+        int textLength = _textLayout.length();
 
         // If word selecting, expand selection to word boundary
         if (isWordSel) {
@@ -126,8 +131,8 @@ public class TextSel {
     {
         // If selection empty but not at end, get next char (or after newline, if at newline)
         int charIndex = getEnd();
-        if ((isEmpty() || ViewUtils.isShiftDown()) && charIndex < _textModel.length())
-            charIndex = _textModel.isLineEnd(charIndex) ? _textModel.indexAfterNewline(charIndex) : (charIndex + 1);
+        if ((isEmpty() || ViewUtils.isShiftDown()) && charIndex < _textLayout.length())
+            charIndex = _textLayout.isLineEnd(charIndex) ? _textLayout.indexAfterNewline(charIndex) : (charIndex + 1);
         return charIndex;
     }
 
@@ -139,7 +144,7 @@ public class TextSel {
         // If selection empty but not at start, get previous char (or before newline if after newline)
         int charIndex = getStart();
         if ((isEmpty() || ViewUtils.isShiftDown()) && charIndex > 0)
-            charIndex = _textModel.isAfterLineEnd(charIndex) ? _textModel.lastIndexOfNewline(charIndex) : (charIndex - 1);
+            charIndex = _textLayout.isAfterLineEnd(charIndex) ? _textLayout.lastIndexOfNewline(charIndex) : (charIndex - 1);
         return charIndex;
     }
 
@@ -149,7 +154,7 @@ public class TextSel {
     public int getCharUp()
     {
         int selIndex = getIndex();
-        TextLine lastColumnLine = _textModel.getLineForCharIndex(selIndex);
+        TextLine lastColumnLine = _textLayout.getLineForCharIndex(selIndex);
         int lastColumn = selIndex - lastColumnLine.getStartCharIndex();
         TextLine thisLine = getStartLine();
         TextLine nextLine = thisLine.getPrevious();
@@ -166,7 +171,7 @@ public class TextSel {
     public int getCharDown()
     {
         int selIndex = getIndex();
-        TextLine lastColumnLine = _textModel.getLineForCharIndex(selIndex);
+        TextLine lastColumnLine = _textLayout.getLineForCharIndex(selIndex);
         int lastColumn = selIndex - lastColumnLine.getStartCharIndex();
         TextLine thisLine = getEndLine();
         TextLine nextLine = thisLine.getNext();
@@ -183,14 +188,14 @@ public class TextSel {
     public int getLineStart()
     {
         // Get index at beginning of current line
-        int index1 = _textModel.lastIndexAfterNewline(getEnd());
+        int index1 = _textLayout.lastIndexAfterNewline(getEnd());
         if (index1 < 0)
             index1 = 0;
 
         // Get index of first non-whitespace char and set selection
         int index2 = index1;
-        int textLength = _textModel.length();
-        while (index2 < textLength && _textModel.charAt(index2) == ' ')
+        int textLength = _textLayout.length();
+        while (index2 < textLength && _textLayout.charAt(index2) == ' ')
             index2++;
 
         return !isEmpty() || index2 != getStart() ? index2 : index1;
@@ -202,8 +207,8 @@ public class TextSel {
     public int getLineEnd()
     {
         // Get index of newline and set selection
-        int index = _textModel.indexOfNewline(getEnd());
-        return index >= 0 ? index : _textModel.length();
+        int index = _textLayout.indexOfNewline(getEnd());
+        return index >= 0 ? index : _textLayout.length();
     }
 
     /**
@@ -211,7 +216,7 @@ public class TextSel {
      */
     public TextLine getStartLine()
     {
-        return _textModel.getLineForCharIndex(getStart());
+        return _textLayout.getLineForCharIndex(getStart());
     }
 
     /**
@@ -221,7 +226,7 @@ public class TextSel {
     {
         // Get line at end char index
         int endCharIndex = getEnd();
-        TextLine endLine = _textModel.getLineForCharIndex(endCharIndex);
+        TextLine endLine = _textLayout.getLineForCharIndex(endCharIndex);
 
         // If end char index is at start of line and sel not empty, back up to previous line
         if (endCharIndex == endLine.getStartCharIndex() && !isEmpty())
@@ -247,24 +252,15 @@ public class TextSel {
     /**
      * Returns a path for two char indexes - it will be a a simple box with extensions for first/last lines.
      */
-    public Shape getPath()
-    {
-        return _textModel.getPathForCharRange(getStart(), getEnd());
-    }
+    public Shape getPath()  { return _textLayout.getPathForCharRange(getStart(), getEnd()); }
 
     /**
      * Returns whether a character should be considered is part of a word when WordSelecting.
      */
-    protected boolean isWordChar(char c)
-    {
-        return Character.isLetterOrDigit(c) || c == '_';
-    }
+    protected boolean isWordChar(char c)  { return Character.isLetterOrDigit(c) || c == '_'; }
 
     /**
      * Standard toString implementation.
      */
-    public String toString()
-    {
-        return getClass().getSimpleName() + " { " + getStart() + ", " + getEnd() + " }";
-    }
+    public String toString()  { return getClass().getSimpleName() + " { " + getStart() + ", " + getEnd() + " }"; }
 }

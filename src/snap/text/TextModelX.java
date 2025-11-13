@@ -54,6 +54,12 @@ public class TextModelX extends SourceTextModel {
     }
 
     /**
+     * Returns the text model that is being displayed.
+     */
+    @Override
+    public TextModel getTextModel()  { return _sourceText; }
+
+    /**
      * Adds characters with given style to this text at given index.
      */
     @Override
