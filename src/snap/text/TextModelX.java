@@ -98,7 +98,7 @@ public class TextModelX extends TextModel {
     {
         // Get start char index - just return if index before text start
         int startCharIndex = Math.max(anIndex, getStartCharIndex());
-        if (_sourceText != null && startCharIndex >= _sourceText.length())
+        if (startCharIndex >= _sourceText.length())
             return;
 
         // If FontScale is set, replace style with scaled style
@@ -339,9 +339,7 @@ public class TextModelX extends TextModel {
     @Override
     protected TextToken[] createTokensForTextLine(TextLine aTextLine)
     {
-        if (_sourceText != null)
-            return _sourceText.createTokensForTextLine(aTextLine);
-        return super.createTokensForTextLine(aTextLine);
+        return _sourceText.createTokensForTextLine(aTextLine);
     }
 
     /**

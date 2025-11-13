@@ -4,7 +4,6 @@
 package snap.text;
 import snap.geom.HPos;
 import snap.geom.Rect;
-import snap.geom.Shape;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.props.PropChange;
@@ -678,10 +677,7 @@ public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiv
     /**
      * Sets whether property change is enabled.
      */
-    public void setPropChangeEnabled(boolean aValue)
-    {
-        _propChangeEnabled = aValue;
-    }
+    public void setPropChangeEnabled(boolean aValue)  { _propChangeEnabled = aValue; }
 
     /**
      * Adds characters for given TextModel to this text at given index.
