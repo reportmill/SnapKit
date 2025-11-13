@@ -4,12 +4,17 @@
 package snap.text;
 import snap.geom.Rect;
 import snap.geom.Shape;
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
 
 /**
  * This TextModel subclass adds support for advanced features like text wrapping, font scaling, linking multiple
  * text models and more.
  */
-public class TextModelX extends SourceTextModel {
+public class TextModelX extends TextModel {
+
+    // The source text model
+    protected TextModel _sourceText;
 
     // Whether to wrap lines that overrun bounds
     private boolean _wrapLines;
@@ -29,13 +34,11 @@ public class TextModelX extends SourceTextModel {
     // The bounds path
     private Shape _boundsPath;
 
-    /**
-     * Constructor.
-     */
-    public TextModelX()
-    {
-        super();
-    }
+    // Source text prop change listener
+    private PropChangeListener _sourceTextModelPropChangeLsnr = this::handleSourceTextPropChange;
+
+    // A temp var to hold TextLineStyle when updating runs from source text
+    private TextLineStyle _updateTextLineStyle;
 
     /**
      * Constructor with option for rich text.
@@ -43,6 +46,8 @@ public class TextModelX extends SourceTextModel {
     public TextModelX(boolean isRichText)
     {
         super(isRichText);
+        TextModel textModel = new TextModel(isRichText);
+        setSourceText(textModel);
     }
 
     /**
@@ -50,7 +55,8 @@ public class TextModelX extends SourceTextModel {
      */
     public TextModelX(TextModel sourceText)
     {
-        super(sourceText);
+        super(sourceText.isRichText());
+        setSourceText(sourceText);
     }
 
     /**
@@ -58,6 +64,31 @@ public class TextModelX extends SourceTextModel {
      */
     @Override
     public TextModel getTextModel()  { return _sourceText; }
+
+    /**
+     * Sets the source text model.
+     */
+    public void setSourceText(TextModel sourceText)
+    {
+        if (sourceText == getTextModel()) return;
+
+        // Stop listening to changes
+        if (_sourceText != null)
+            _sourceText.removePropChangeListener(_sourceTextModelPropChangeLsnr);
+
+        // Sync default TextStyle/LineStyle
+        setDefaultTextStyle(sourceText.getDefaultTextStyle());
+        setDefaultLineStyle(sourceText.getDefaultLineStyle());
+
+        // Set value
+        _sourceText = sourceText;
+
+        // Listen for prop changes
+        _sourceText.addPropChangeListener(_sourceTextModelPropChangeLsnr);
+
+        // Reload text
+        reloadTextFromSourceText();
+    }
 
     /**
      * Adds characters with given style to this text at given index.
@@ -81,6 +112,20 @@ public class TextModelX extends SourceTextModel {
         // If linked, remove any lines below bounds
         if (isLinked())
             removeOutOfBoundsLines();
+    }
+
+    /**
+     * Override to do wrapping.
+     */
+    @Override
+    protected void addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, boolean charsHaveNewline)
+    {
+        // If updating text from source text, update line style
+        if (_updateTextLineStyle != null)
+            textLine.setLineStyle(_updateTextLineStyle);
+
+        // Do normal version
+        super.addCharsToLine(theChars, theStyle, charIndex, textLine, charsHaveNewline);
     }
 
     /**
@@ -289,6 +334,17 @@ public class TextModelX extends SourceTextModel {
     }
 
     /**
+     * Creates TextTokens for a TextLine.
+     */
+    @Override
+    protected TextToken[] createTokensForTextLine(TextLine aTextLine)
+    {
+        if (_sourceText != null)
+            return _sourceText.createTokensForTextLine(aTextLine);
+        return super.createTokensForTextLine(aTextLine);
+    }
+
+    /**
      * Override to update layout.
      */
     @Override
@@ -426,5 +482,101 @@ public class TextModelX extends SourceTextModel {
             removeLine(lineIndex);
             lastLine = getLine(lineIndex - 1);
         }
+    }
+
+    /**
+     * Called when source text has prop change.
+     */
+    private void handleSourceTextPropChange(PropChange propChange)
+    {
+        String propName = propChange.getPropName();
+
+        switch (propName) {
+
+            // Handle Chars_Prop: Call addChars/removeChars
+            case TextModel.Chars_Prop -> {
+
+                // Get CharsChange info
+                TextModelUtils.CharsChange charsChange = (TextModelUtils.CharsChange) propChange;
+                int charIndex = propChange.getIndex();
+                CharSequence addChars = charsChange.getNewValue();
+                CharSequence removeChars = charsChange.getOldValue();
+
+                // Add or remove chars to this model
+                if (addChars != null) {
+                    TextStyle textStyle = _sourceText.getTextStyleForCharIndex(charIndex);
+                    addCharsWithStyle(addChars, textStyle, charIndex);
+                }
+                else removeChars(charIndex, charIndex + removeChars.length());
+            }
+
+            // Handle DefaultTextStyle
+            case TextModel.DefaultTextStyle_Prop -> {
+                TextStyle textStyle = (TextStyle) propChange.getNewValue();
+                setDefaultTextStyle(textStyle);
+            }
+        }
+    }
+
+    /**
+     * Reloads text from SourceText.
+     */
+    protected void reloadTextFromSourceText()
+    {
+        // Skip if no text
+        if (length() == 0 && _sourceText.isEmpty()) return;
+
+        // Update ranges
+        int startCharIndex = 0;
+        int endCharIndexBox = length();
+        int endCharIndexBlock = _sourceText.length();
+
+        // If WrapLines, mark location of first line's first token - if it shrinks, might need to re-wrap previous line
+        boolean wrapLines = isWrapLines();
+        TextLine firstLine = wrapLines ? getLineForCharIndex(startCharIndex) : null;
+        double firstLineTokenMaxX = wrapLines ? getFirstTokenMaxXForLineIfPreviousLineCares(firstLine) : 0;
+
+        // Remove chars in range
+        removeChars(startCharIndex, endCharIndexBox);
+
+        // Get run iterator for range (adjusted if this text is overflow from linked)
+        int textStartCharIndex = getStartCharIndex();
+        int charIndex = Math.max(textStartCharIndex, startCharIndex);
+        TextRunIter runIter = _sourceText.getRunIterForCharRange(charIndex, endCharIndexBlock);
+
+        // Iterate over source text runs for range and add
+        while (runIter.hasNextRun()) {
+
+            // Set temp LineStyle
+            TextRun nextRun = runIter.getNextRun();
+            TextLine textLine = nextRun.getLine();
+            _updateTextLineStyle = textLine.getLineStyle();
+
+            // Add run chars
+            addCharsWithStyle(nextRun.getString(), nextRun.getTextStyle(), charIndex - textStartCharIndex); // Was super_
+            _updateTextLineStyle = null;
+            charIndex += nextRun.length();
+        }
+
+        // If first token shrank, re-wrap previous line
+        if (firstLineTokenMaxX > 0 && firstLineTokenMaxX > getFirstTokenMaxXForLineIfPreviousLineCares(firstLine)) {
+            TextLine previousLine = firstLine.getPrevious();
+            joinLineWithNextLine(previousLine);
+        }
+    }
+
+    /**
+     * Returns the MaxX of first token in given line.
+     * If no first token or there is no way previous line would need to re-wrap if this shrinks, returns 0.
+     */
+    private static double getFirstTokenMaxXForLineIfPreviousLineCares(TextLine textLine)
+    {
+        if (textLine.getTokenCount() == 0)
+            return 0;
+        TextLine previousLine = textLine.getPrevious();
+        if (previousLine == null || previousLine.isLastCharNewline())
+            return 0;
+        TextToken firstToken = textLine.getToken(0);
+        return firstToken.getMaxX();
     }
 }
