@@ -5,13 +5,9 @@ package snap.text;
 import snap.geom.HPos;
 import snap.geom.Rect;
 import snap.geom.Shape;
-import snap.geom.VPos;
-import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.gfx.Painter;
 import snap.props.PropChange;
-import snap.props.PropObject;
 import snap.util.*;
 import snap.web.WebFile;
 import snap.web.WebURL;
@@ -22,19 +18,10 @@ import java.util.Objects;
 /**
  * This class is the basic text storage class, holding a list of TextLine.
  */
-public class TextModel extends PropObject implements CharSequenceX, Cloneable, XMLArchiver.Archivable {
+public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiver.Archivable {
 
     // The URL of the file that provided the text
     private WebURL _sourceUrl;
-
-    // Whether text is rich
-    private boolean _rich;
-
-    // The TextLines in this text
-    protected List<TextLine>  _lines = new ArrayList<>();
-
-    // The length of this text
-    protected int  _length;
 
     // The default text style for this text
     protected TextStyle _defaultTextStyle = TextStyle.DEFAULT;
@@ -44,21 +31,6 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
 
     // Whether text is modified
     private boolean _textModified;
-
-    // The X/Y of the text model
-    private double _x, _y;
-
-    // The width/height of the text model
-    private double _width = Float.MAX_VALUE, _height;
-
-    // The pref width of the text model
-    protected double _prefW = -1;
-
-    // They y alignment
-    private VPos _alignY = VPos.TOP;
-
-    // The y alignment amount
-    private double _alignedY = -1;
 
     // Whether property change is enabled
     protected boolean  _propChangeEnabled = true;
@@ -94,11 +66,6 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Whether this text supports multiple styles (font, color, etc.).
-     */
-    public boolean isRichText()  { return _rich; }
-
-    /**
      * Sets whether text supports multiple styles.
      */
     public void setRichText(boolean aValue)
@@ -112,56 +79,6 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
         // Set DefaultStyle, because RichText never inherits from parent
         if (aValue && _defaultTextStyle == null)
             _defaultTextStyle = TextStyle.DEFAULT;
-    }
-
-    /**
-     * Returns whether to wrap lines that overrun bounds.
-     */
-    public boolean isWrapLines()  { return false; }
-
-    /**
-     * Returns the number of characters in the text.
-     */
-    public int length()  { return _length; }
-
-    /**
-     * Returns the char value at the specified index.
-     */
-    public char charAt(int anIndex)
-    {
-        TextLine line = getLineForCharIndex(anIndex);
-        return line.charAt(anIndex - line.getStartCharIndex());
-    }
-
-    /**
-     * Returns a new char sequence that is a subsequence of this sequence.
-     */
-    public CharSequence subSequence(int aStart, int anEnd)
-    {
-        StringBuffer sb = new StringBuffer(anEnd - aStart);
-        TextLine line = getLineForCharIndex(aStart);
-        while (aStart < anEnd) {
-            int end = Math.min(line.getEndCharIndex(), anEnd);
-            sb.append(line.subSequence(aStart - line.getStartCharIndex(), end - line.getStartCharIndex()));
-            aStart = end;
-            line = line.getNext();
-        }
-
-        // Return
-        return sb;
-    }
-
-    /**
-     * Returns the string for the text.
-     */
-    public String getString()
-    {
-        StringBuilder sb = new StringBuilder(length());
-        for (TextLine line : _lines)
-            sb.append(line._sb);
-
-        // Return
-        return sb.toString();
     }
 
     /**
@@ -681,21 +598,6 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Returns the number of block in this doc.
-     */
-    public int getLineCount()  { return _lines.size(); }
-
-    /**
-     * Returns the individual block in this doc.
-     */
-    public TextLine getLine(int anIndex)  { return _lines.get(anIndex); }
-
-    /**
-     * Returns the list of blocks.
-     */
-    public List<TextLine> getLines()  { return _lines; }
-
-    /**
      * Adds a block at given index.
      */
     protected void addLine(TextLine aLine, int anIndex)
@@ -716,24 +618,6 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Returns the longest line.
-     */
-    public TextLine getLineLongest()
-    {
-        TextLine longLine = null;
-        double longW = 0;
-        for (TextLine line : _lines) {
-            if (line.getWidth() > longW) {
-                longLine = line;
-                longW = line.getWidth();
-            }
-        }
-
-        // Return
-        return longLine;
-    }
-
-    /**
      * Clears the text.
      */
     public void clear()
@@ -745,184 +629,11 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Returns the block at the given char index.
-     */
-    public TextLine getLineForCharIndex(int charIndex)
-    {
-        // Check for index outside bounds or index at end
-        int length = length();
-        if (charIndex < 0 || charIndex >= length) {
-            if (charIndex == length)
-                return getLastLine();
-            throw new IndexOutOfBoundsException("Index " + charIndex + " outside bounds " + length);
-        }
-
-        // Get Low/high indexes
-        int lowIndex = 0;
-        int highIndex = getLineCount() - 1;
-
-        // Iterate over lines until found
-        while (lowIndex <= highIndex) {
-            int midIndex = (lowIndex + highIndex) / 2;
-            TextLine textLine = getLine(midIndex);
-            if (charIndex < textLine.getStartCharIndex())
-                highIndex = midIndex - 1;
-            else if (charIndex >= textLine.getEndCharIndex())
-                lowIndex = midIndex + 1;
-            else return textLine;
-        }
-
-        // Should be impossible - lines would have to be misconfigured
-        throw new IndexOutOfBoundsException("Index not found " + charIndex + " beyond " + length());
-    }
-
-    /**
-     * Returns the last text line (or null if none).
-     */
-    public TextLine getLastLine()
-    {
-        int lineCount = getLineCount();
-        return lineCount > 0 ? getLine(lineCount - 1) : null;
-    }
-
-    /**
-     * Returns the TextRun that contains the given char index.
-     */
-    public TextRun getRunForCharIndex(int charIndex)
-    {
-        // Get line for start char index and convert char index to line
-        TextLine textLine = getLineForCharIndex(charIndex);
-        int lineStart = textLine.getStartCharIndex();
-        int charIndexInLine = charIndex - lineStart;
-
-        // Forward to line
-        return textLine.getRunForCharIndex(charIndexInLine);
-    }
-
-    /**
-     * Returns the TextRun for the given char range (usually just run for start, but can be next run if at boundary).
-     */
-    public TextRun getRunForCharRange(int startIndex, int endIndex)
-    {
-        // Get line for start char index and convert start/end index to line
-        TextLine textLine = getLineForCharIndex(startIndex);
-        int lineStart = textLine.getStartCharIndex();
-        int startIndexInLine = startIndex - lineStart;
-        int endIndexInLine = endIndex - lineStart;
-
-        // Forward to line
-        return textLine.getRunForCharRange(startIndexInLine, endIndexInLine);
-    }
-
-    /**
      * Returns a TextRunIter to easily traverse the runs for a given range of chars.
      */
     public TextRunIter getRunIterForCharRange(int startCharIndex, int endCharIndex)
     {
         return new TextRunIter(this, startCharIndex, endCharIndex, true);
-    }
-
-    /**
-     * Returns the token at given char index.
-     */
-    public TextToken getTokenForCharIndex(int charIndex)
-    {
-        TextLine textLine = getLineForCharIndex(charIndex);
-        int lineStart = textLine.getStartCharIndex();
-        int selStartInLine = charIndex - lineStart;
-        return textLine.getTokenForCharIndex(selStartInLine);
-    }
-
-    /**
-     * Returns the Font for run at given character index.
-     */
-    public Font getFontForCharIndex(int charIndex)
-    {
-        TextRun textRun = getRunForCharIndex(charIndex);
-        return textRun.getFont();
-    }
-
-    /**
-     * Returns the TextStyle for the run at the given character index.
-     */
-    public TextStyle getTextStyleForCharIndex(int charIndex)
-    {
-        TextRun textRun = getRunForCharIndex(charIndex);
-        return textRun.getTextStyle();
-    }
-
-    /**
-     * Returns the TextStyle for the run for given char range.
-     */
-    public TextStyle getTextStyleForCharRange(int startIndex, int endIndex)
-    {
-        TextRun textRun = getRunForCharRange(startIndex, endIndex);
-        return textRun.getTextStyle();
-    }
-
-    /**
-     * Returns the TextLineStyle for the run at the given character index.
-     */
-    public TextLineStyle getLineStyleForCharIndex(int charIndex)
-    {
-        TextLine textLine = getLineForCharIndex(charIndex);
-        return textLine.getLineStyle();
-    }
-
-    /**
-     * Returns the line for the given y value.
-     */
-    public TextLine getLineForY(double aY)
-    {
-        // If y less than zero, return null
-        if (aY < 0) return null;
-
-        // Get Y in text
-        double textY = aY - getAlignedY();
-
-        // Iterate over lines and return one that spans given y
-        for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
-            TextLine line = getLine(i);
-            if (textY < line.getMaxY())
-                return line;
-        }
-
-        // If no line for given y, return last line
-        return getLastLine();
-    }
-
-    /**
-     * Returns the character index for the given x/y point.
-     */
-    public int getCharIndexForXY(double anX, double aY)
-    {
-        // Get text line for y (just return 0 if not found)
-        TextLine textLine = getLineForY(aY);
-        if (textLine == null)
-            return 0;
-
-        // Get x in text
-        double textX = anX - getX();
-
-        // Get char index for x in line and return
-        int charIndex = textLine.getCharIndexForX(textX);
-        return textLine.getStartCharIndex() + charIndex;
-    }
-
-    /**
-     * Returns whether text contains an underlined run.
-     */
-    public boolean isUnderlined()
-    {
-        // Handle Rich
-        if (isRichText()) {
-            for (TextLine line : _lines)
-                if (line.isUnderlined())
-                    return true;
-        }
-
-        TextStyle textStyle = getTextStyleForCharIndex(0);
-        return textStyle.isUnderlined();
     }
 
     /**
@@ -934,73 +645,11 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Returns the horizontal alignment of the first paragraph of the text.
-     */
-    public HPos getAlignX()
-    {
-        TextLineStyle lineStyle = getLineStyleForCharIndex(0);
-        return lineStyle.getAlign();
-    }
-
-    /**
      * Sets the horizontal alignment of the text.
      */
     public void setAlignX(HPos anAlignX)
     {
         setLineStyleValue(TextLineStyle.Align_Prop, anAlignX, 0, length());
-    }
-
-    /**
-     * Returns the Y alignment.
-     */
-    public VPos getAlignY()  { return _alignY; }
-
-    /**
-     * Sets the Y alignment.
-     */
-    public void setAlignY(VPos aPos)
-    {
-        if (aPos == _alignY) return;
-        _alignY = aPos;
-        _alignedY = -1;
-    }
-
-    /**
-     * Returns the y for alignment.
-     */
-    public double getAlignedY()
-    {
-        // If already set, just return
-        if (_alignedY >= 0) return getY() + _alignedY;
-
-        // Calculated aligned Y
-        _alignedY = 0;
-        if (_alignY != VPos.TOP) {
-            double textModelW = getWidth();
-            double prefH = getPrefHeight(textModelW);
-            double textModelH = getHeight();
-            if (textModelH > prefH)
-                _alignedY = _alignY.doubleValue() * (textModelH - prefH);
-        }
-
-        // Return
-        return getY() + _alignedY;
-    }
-
-    /**
-     * Returns the start char index (always 0, unless this is SubText).
-     */
-    public int getStartCharIndex()  { return 0; }
-
-    /**
-     * Returns the end char in source text.
-     */
-    public int getEndCharIndex()
-    {
-        int startCharIndex = getStartCharIndex();
-        TextLine lastLine = getLastLine();
-        int lastLineEnd = lastLine != null ? lastLine.getEndCharIndex() : 0;
-        return startCharIndex + lastLineEnd;
     }
 
     /**
@@ -1022,115 +671,6 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
-     * Returns the index of given string.
-     */
-    public int indexOf(String aStr, int aStart)
-    {
-        // Iterate over lines
-        for (TextLine line : getLines()) {
-
-            // If startIndex beyond line.End, skip
-            if (aStart >= line.getEndCharIndex()) continue;
-
-            // Convert startIndex to line charIndex
-            int lineStart = line.getStartCharIndex();
-            int startIndexInLine = Math.max(aStart - lineStart, 0);
-
-            // Forward to line and return if found
-            int index = line.indexOf(aStr, startIndexInLine);
-            if (index >= 0)
-                return index + lineStart;
-        }
-
-        // Return not found
-        return -1;
-    }
-
-    /**
-     * Returns the X location.
-     */
-    public double getX()  { return _x; }
-
-    /**
-     * Sets the X location.
-     */
-    public void setX(double anX)  { _x = anX; }
-
-    /**
-     * Returns the Y location.
-     */
-    public double getY()  { return _y; }
-
-    /**
-     * Sets the Y location.
-     */
-    public void setY(double aY)  { _y = aY; }
-
-    /**
-     * Returns the width.
-     */
-    public double getWidth()  { return _width; }
-
-    /**
-     * Sets the width.
-     */
-    public void setWidth(double aValue)
-    {
-        if (aValue == _width) return;
-        _width = aValue;
-        _lines.forEach(line -> line.updateAlignmentAndJustify());
-    }
-
-    /**
-     * Returns the height.
-     */
-    public double getHeight()  { return _height; }
-
-    /**
-     * Sets the width.
-     */
-    public void setHeight(double aValue)
-    {
-        if (aValue == _height) return;
-        _height = aValue;
-        _alignedY = -1;
-    }
-
-    /**
-     * Returns the current bounds.
-     */
-    public Rect getBounds()  { return new Rect(_x, _y, _width, _height); }
-
-    /**
-     * Sets the rect location and size.
-     */
-    public void setBounds(Rect aRect)
-    {
-        setBounds(aRect.x, aRect.y, aRect.width, aRect.height);
-    }
-
-    /**
-     * Sets the rect location and size.
-     */
-    public void setBounds(double aX, double aY, double aW, double aH)
-    {
-        setX(aX);
-        setY(aY);
-        setWidth(aW);
-        setHeight(aH);
-    }
-
-    /**
-     * Returns the max X.
-     */
-    public double getMaxX()  { return getX() + getWidth(); }
-
-    /**
-     * Returns the max Y.
-     */
-    public double getMaxY()  { return getY() + getHeight(); }
-
-    /**
      * Returns a path for two char indexes - it will be a simple box with extensions for first/last lines.
      */
     public Shape getPathForCharRange(int aStartCharIndex, int aEndCharIndex)
@@ -1149,158 +689,6 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
     public void setPropChangeEnabled(boolean aValue)
     {
         _propChangeEnabled = aValue;
-    }
-
-    /**
-     * Paint text to given painter.
-     */
-    public void paint(Painter aPntr)
-    {
-        // Just return if no lines
-        int lineCount = getLineCount();
-        if (lineCount == 0)
-            return;
-
-        // Get text clip bounds and clip
-        Rect textBounds = getBounds();
-        Rect pntrClipBounds = aPntr.getClipBounds();
-        Rect textClipBounds = pntrClipBounds != null ? pntrClipBounds.getIntersectRect(textBounds) : textBounds;
-        if (textClipBounds.isEmpty())
-            return;
-
-        // Save painter state and clip
-        aPntr.save();
-        aPntr.clip(textClipBounds);
-
-        // Iterate over lines
-        for (int i = 0; i < lineCount; i++) {
-
-            // If line not yet visible, skip
-            TextLine textLine = getLine(i);
-            if (textLine.getTextMaxY() < textClipBounds.y)
-                continue;
-
-            // If line no longer visible, break
-            if (textLine.getTextY() >= textClipBounds.getMaxY())
-                break;
-
-            // Paint line
-            double lineY = getAlignedY() + textLine.getBaseline();
-            paintLine(aPntr, textLine, lineY);
-        }
-
-        // Paint underlines
-        if (isUnderlined())
-            TextModelUtils.paintTextModelUnderlines(aPntr, this, textClipBounds);
-
-        // Restore state
-        aPntr.restore();
-    }
-
-    /**
-     * Paint text line to given painter.
-     */
-    public void paintLine(Painter aPntr, TextLine textLine, double lineY)
-    {
-        TextToken[] lineTokens = textLine.getTokens();
-
-        // Iterate over line tokens
-        for (TextToken token : lineTokens) {
-
-            // Set token font and color
-            aPntr.setFont(token.getFont());
-            aPntr.setPaint(token.getTextColor());
-
-            // Do normal paint token
-            String tokenStr = token.getString();
-            double tokenX = token.getTextX();
-            double charSpacing = token.getTextStyle().getCharSpacing();
-            aPntr.drawString(tokenStr, tokenX, lineY, charSpacing);
-
-            // Handle TextBorder: Get outline and stroke
-            Border border = token.getTextStyle().getBorder();
-            if (border != null) {
-                aPntr.setPaint(border.getColor());
-                aPntr.setStroke(border.getStroke());
-                aPntr.strokeString(tokenStr, tokenX, lineY, charSpacing);
-            }
-        }
-    }
-
-    /**
-     * Returns the width of text.
-     */
-    public double getPrefWidth()
-    {
-        // If already set, just return
-        if (_prefW >= 0) return _prefW;
-
-        // Calc, set, return
-        TextLine longestLine = getLineLongest();
-        double longestLineW = longestLine != null ? longestLine.getWidth() : 0;
-        double prefW = Math.ceil(longestLineW);
-        return _prefW = prefW;
-    }
-
-    /**
-     * Returns the width of text from given start char index.
-     */
-    public double getPrefWidthForStartCharIndex(int startCharIndex)
-    {
-        // If given char index 0, return cached version
-        if (startCharIndex <= 0)
-            return getPrefWidth();
-
-        // Get line for startCharIndex
-        TextLine textLine = getLineForCharIndex(startCharIndex);
-        int startCharIndexInLine = startCharIndex - textLine.getStartCharIndex();
-        double prefW = textLine.getWidthForStartCharIndex(startCharIndexInLine) - textLine.getTrailingWhitespaceWidth();
-
-        // Iterate till end looking for longer line
-        TextLine nextLine = textLine.getNext();
-        while (nextLine != null) {
-            double lineW = nextLine.getWidth() - nextLine.getTrailingWhitespaceWidth();
-            prefW = Math.max(prefW, lineW);
-            nextLine = nextLine.getNext();
-        }
-
-        // Return
-        return prefW;
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    public double getPrefHeight()
-    {
-        // Return bottom of last line minus box Y
-        TextLine lastLine = getLastLine();
-        if (lastLine == null)
-            return 0;
-        TextLine firstLine = getLine(0);
-        double lastLineMaxY = lastLine.getMaxY();
-        double firstLineY = firstLine.getY();
-        return Math.ceil(lastLineMaxY - firstLineY);
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    public double getPrefHeight(double aW)
-    {
-        // If WrapLines and given Width doesn't match current Width, setWidth
-        if (isWrapLines() && !MathUtils.equals(aW, _width) && aW > 0) {
-            double oldH = _height, oldW = _width;
-            _height = Float.MAX_VALUE;
-            setWidth(aW);
-            double prefH = getPrefHeight();
-            _height = oldH;
-            setWidth(oldW); // Seems like this should be unnecessary, since width is likely to be set to aW
-            return prefH;
-        }
-
-        // Return normal version
-        return getPrefHeight();
     }
 
     /**
@@ -1487,25 +875,6 @@ public class TextModel extends PropObject implements CharSequenceX, Cloneable, X
 
         // Return
         return clone;
-    }
-
-    /**
-     * Standard toStringProps implementation.
-     */
-    @Override
-    public String toStringProps()
-    {
-        // LineCount, Length
-        StringBuilder sb = new StringBuilder();
-        sb.append("Length=").append(length());
-        sb.append(", LineCount=").append(getLineCount());
-
-        // Add String
-        for (int i = 0, iMax = Math.min(getLineCount(), 5); i < iMax; i++)
-            sb.append('\n').append(getLine(i));
-
-        // Return
-        return sb.toString();
     }
 
     /**
