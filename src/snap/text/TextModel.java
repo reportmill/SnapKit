@@ -8,8 +8,6 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.props.PropChange;
 import snap.util.*;
-import snap.web.WebFile;
-import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -19,20 +17,17 @@ import java.util.Objects;
  */
 public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiver.Archivable {
 
-    // The URL of the file that provided the text
-    private WebURL _sourceUrl;
-
     // The default text style for this text
     protected TextStyle _defaultTextStyle = TextStyle.DEFAULT;
 
     // The default line style for this text
-    protected TextLineStyle  _defaultLineStyle = TextLineStyle.DEFAULT;
+    protected TextLineStyle _defaultLineStyle = TextLineStyle.DEFAULT;
 
     // Whether text is modified
     private boolean _textModified;
 
     // Whether property change is enabled
-    protected boolean  _propChangeEnabled = true;
+    protected boolean _propChangeEnabled = true;
 
     // The last mouse Y, to help in caret placement (can be ambiguous for start/end of line)
     protected double _mouseY;
@@ -815,28 +810,6 @@ public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiv
 
         // Return
         return textCopy;
-    }
-
-    /**
-     * Returns the source URL.
-     */
-    public WebURL getSourceUrl()  { return _sourceUrl; }
-
-    /**
-     * Sets the Source URL.
-     */
-    public void setSourceUrl(WebURL aURL)
-    {
-        _sourceUrl = aURL;
-    }
-
-    /**
-     * Returns the source file.
-     */
-    public WebFile getSourceFile()
-    {
-        WebURL sourceURL = getSourceUrl();
-        return sourceURL != null ? sourceURL.createFile(false) : null;
     }
 
     /**

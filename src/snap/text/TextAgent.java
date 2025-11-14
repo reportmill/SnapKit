@@ -120,9 +120,6 @@ public class TextAgent {
      */
     public void syncTextModelToSourceFile()
     {
-        // Set text model source
-        _textModel.setSourceUrl(_textFile.getUrl());
-
         // Reload TextModel from File string
         _unmodifiedString = _textFile.getText();
         _textModel.setString(_unmodifiedString);

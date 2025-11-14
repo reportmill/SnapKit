@@ -513,6 +513,9 @@ public class TextModelX extends TextModel {
                 TextStyle textStyle = (TextStyle) propChange.getNewValue();
                 setDefaultTextStyle(textStyle);
             }
+
+            // Handle anything else
+            default -> System.out.println("TextModelX.handleSourceTextPropChange: Not syncing property: " + propName);
         }
     }
 
