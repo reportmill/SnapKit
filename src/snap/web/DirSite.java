@@ -133,8 +133,13 @@ public class DirSite extends WebSite {
     protected void setLastModTimeForFileImpl(WebFile aFile, long aTime) throws Exception
     {
         WebFile dirFile = getDirFileForPath(aFile.getPath());
-        WebSite.setLastModTimeForFile(dirFile, aTime);
-        aFile.setLastModTime(dirFile.getLastModTime());
+        if (dirFile != null) {
+            WebSite.setLastModTimeForFile(dirFile, aTime);
+            aFile.setLastModTime(dirFile.getLastModTime());
+        }
+
+        // If file not found, complain - should probably throw exception
+        else System.err.println("DirSite.setLastModTimeForFileImpl() can't find dir file: " + aFile.getUrlAddress());
     }
 
     /**

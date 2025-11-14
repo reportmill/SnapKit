@@ -16,7 +16,6 @@ public class DropboxSite extends WebSite {
     private static String _atok;
 
     // Constants
-    //private static final String DROPBOX_ROOT = "dbox://dbox.com";
     private static DateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
 
     // Constants for Dropbox endpoints
@@ -41,6 +40,13 @@ public class DropboxSite extends WebSite {
     @Override
     protected void doHead(WebRequest aReq, WebResponse aResp)
     {
+        // Handle root special because dropbox returns invalid request
+        if (aReq.getFilePath().equals("/")) {
+            FileHeader fileHeader = new FileHeader("/", true);
+            aResp.setFileHeader(fileHeader);
+            return;
+        }
+
         // Create http request
         HTTPRequest httpReq = createHttpRequestForEndpoint(GET_METADATA);
         addParamsToRequestAsJsonBody(httpReq, "path", aReq.getFilePath());

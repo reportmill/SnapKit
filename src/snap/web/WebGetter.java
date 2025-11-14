@@ -184,8 +184,8 @@ public class WebGetter {
         if (scheme.equals("http") || scheme.equals("https"))
             return new HTTPSite();
 
-        // Handle Dropbox
-        if (scheme.equals("dbox") && sitePath.isEmpty())
+        // Handle SnapCloud
+        if ((scheme.equals("snapcloud") || scheme.equals("sc") || scheme.equals("dbox")) && sitePath.isEmpty())
             return new DropboxSite();
 
         // Handle DirSite
