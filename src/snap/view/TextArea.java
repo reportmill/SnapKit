@@ -58,7 +58,7 @@ public class TextArea extends ParentView {
         _textAdapter = createTextAdapter(_textModel);
         _textAdapter.setView(this);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
-        _textAdapter.addTextModelPropChangeListener(this::handleSourceTextPropChange);
+        _textAdapter.addTextModelPropChangeListener(this::handleTextModelPropChange);
     }
 
     /**
@@ -76,7 +76,7 @@ public class TextArea extends ParentView {
         _textAdapter = createTextAdapter(_textModel);
         _textAdapter.setView(this);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
-        _textAdapter.addTextModelPropChangeListener(this::handleSourceTextPropChange);
+        _textAdapter.addTextModelPropChangeListener(this::handleTextModelPropChange);
     }
 
     /**
@@ -639,9 +639,9 @@ public class TextArea extends ParentView {
     }
 
     /**
-     * Called when SourceText changes (chars added, updated or deleted).
+     * Called when text model changes (chars added, updated or deleted).
      */
-    protected void handleSourceTextPropChange(PropChange aPC)
+    protected void handleTextModelPropChange(PropChange aPC)
     {
         // Handle DefaultTextStyle and SyncTextFont
         String propName = aPC.getPropName();

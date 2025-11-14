@@ -83,7 +83,7 @@ public class TextField extends ParentView {
         _textAdapter.setView(this);
         _textAdapter.setEditable(true);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
-        _textAdapter.addTextModelPropChangeListener(this::handleSourceTextPropChange);
+        _textAdapter.addTextModelPropChangeListener(this::handleTextModelPropChange);
 
         // Configure label and set
         _promptLabel = new Label();
@@ -500,9 +500,9 @@ public class TextField extends ParentView {
     }
 
     /**
-     * Called when SourceText changes (chars added, updated or deleted).
+     * Called when text model changes (chars added, updated or deleted).
      */
-    private void handleSourceTextPropChange(PropChange aPC)
+    protected void handleTextModelPropChange(PropChange aPC)
     {
         // If PromptText present, update PromptLabel.Text
         if (_promptText != null)
