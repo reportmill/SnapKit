@@ -286,16 +286,9 @@ public class TextAdapter extends PropObject {
         if (!undoer.isEnabled())
             return;
 
-        // Handle TextModified: Reset undoer if false, then return
-        String propName = propChange.getPropName();
-        if (propName == TextModel.TextModified_Prop) {
-            if (!getTextModel().isTextModified())
-                undoer.markLastSaveState();
-            return;
-        }
-
         // If PlainText Style_Prop or LineStyle_Prop, just return
         if (!isRichText()) {
+            String propName = propChange.getPropName();
             if (propName == TextModel.Style_Prop || propName == TextModel.LineStyle_Prop)
                 return;
         }

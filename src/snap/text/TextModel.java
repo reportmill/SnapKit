@@ -23,9 +23,6 @@ public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiv
     // The default line style for this text
     protected TextLineStyle _defaultLineStyle = TextLineStyle.DEFAULT;
 
-    // Whether text is modified
-    private boolean _textModified;
-
     // Whether property change is enabled
     protected boolean _propChangeEnabled = true;
 
@@ -38,7 +35,6 @@ public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiv
     public static final String LineStyle_Prop = "LineStyle";
     public static final String DefaultTextStyle_Prop = "DefaultTextStyle";
     public static final String DefaultLineStyle_Prop = "DefaultLineStyle";
-    public static final String TextModified_Prop = "TextModified";
 
     /**
      * Constructor.
@@ -87,8 +83,6 @@ public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiv
             replaceChars(string, 0, length());
             //setPropChangeEnabled(true);
         }
-
-        setTextModified(false);
     }
 
     /**
@@ -186,20 +180,6 @@ public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiv
         if (aColor.equals(getDefaultTextColor())) return;
         TextStyle newTextStyle = _defaultTextStyle.copyForStyleValue(aColor);
         setDefaultTextStyle(newTextStyle);
-    }
-
-    /**
-     * Returns whether text is modified.
-     */
-    public boolean isTextModified()  { return _textModified; }
-
-    /**
-     * Sets whether text is modified.
-     */
-    public void setTextModified(boolean aValue)
-    {
-        if (aValue == isTextModified()) return;
-        firePropChange(TextModified_Prop, _textModified, _textModified = aValue);
     }
 
     /**

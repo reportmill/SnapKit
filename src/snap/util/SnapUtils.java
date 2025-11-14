@@ -14,6 +14,9 @@ import java.util.*;
  */
 public class SnapUtils {
 
+    @Deprecated
+    public static boolean isWebVM = SnapEnv.isWebVM;
+
     // The build info string from "BuildInfo.txt" (eg, "Aug-31-04")
     private static String _buildInfo;
 

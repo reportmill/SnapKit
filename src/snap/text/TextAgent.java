@@ -16,6 +16,9 @@ public class TextAgent {
     // The source file
     private WebFile _textFile;
 
+    // Whether text model is modified
+    private boolean _textModified;
+
     // The TextModel for text file
     private TextModel _textModel;
 
@@ -58,6 +61,24 @@ public class TextAgent {
         _textFile.reset();
         _textFile = null;
         _textModel = null;
+    }
+
+    /**
+     * Returns whether text model is modified.
+     */
+    public boolean isTextModified()  { return _textModified; }
+
+    /**
+     * Sets whether text model is modified.
+     */
+    public void setTextModified(boolean aValue)
+    {
+        if (aValue == _textModified) return;
+        _textModified = aValue;
+
+        // If file saved, mark undoer last saved state
+        if (!aValue && _textUndoer != null)
+            _textUndoer.markLastSaveState();
     }
 
     /**
@@ -123,10 +144,7 @@ public class TextAgent {
         // Reload TextModel from File string
         _unmodifiedString = _textFile.getText();
         _textModel.setString(_unmodifiedString);
-
-        // Reset undoer
-        if (_textUndoer != null)
-            _textUndoer.reset();
+        setTextModified(false);
     }
 
     /**
@@ -135,7 +153,7 @@ public class TextAgent {
     protected void handleTextModelCharsChange(PropChange propChange)
     {
         boolean textModified = !_unmodifiedString.contentEquals(_textModel);
-        if (textModified == _textModel.isTextModified())
+        if (textModified == isTextModified())
             return;
 
         // Update SourceFile.Updater
@@ -145,7 +163,7 @@ public class TextAgent {
             _textFile.setUpdater(null);
 
         // Update TextModified
-        _textModel.setTextModified(textModified);
+        setTextModified(textModified);
     }
 
     /**
@@ -155,7 +173,7 @@ public class TextAgent {
     {
         _unmodifiedString = _textModel.getString();
         _textFile.setText(_unmodifiedString);
-        _textModel.setTextModified(false);
+        setTextModified(false);
     }
 
     /**
