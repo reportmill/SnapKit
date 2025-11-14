@@ -514,20 +514,22 @@ public abstract class WebSite {
     /**
      * Returns a unique name for the Sandbox site.
      */
-    protected String getSandboxSiteName()
+    private String getSandboxSiteName()
     {
-        // Get site URL and construct filename string from scheme/host/path
-        String sandboxName = "";
-
-        // Add URL.Scheme
+        // If file site in SnapCode dir, just use name
         WebURL url = getURL();
         String scheme = url.getScheme();
+        if (scheme.equals("file") && url.getPath().contains("/SnapCode/"))
+            return url.getFilename();
+
+        // Add URL.Scheme
+        String sandboxName = "";
         if (!scheme.equals("file"))
             sandboxName += scheme + '/';
 
         // Add URL.Host
         String hostname = url.getHost();
-        if (hostname != null && !hostname.isEmpty())
+        if (hostname != null && !hostname.isBlank())
             sandboxName += hostname + '/';
 
         // Add URL.Path
