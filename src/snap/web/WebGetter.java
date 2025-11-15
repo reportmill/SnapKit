@@ -122,9 +122,8 @@ public class WebGetter {
             return site;
 
         // If File URL and nested (contains '!' path separator), flatten URL and use that to avoid unnecessary dir references
-        if (aSiteURL.getScheme().equals("file") && aSiteURL.getPath().contains("!")) {
-            String flatSiteAddress = aSiteURL.getString().replace("!", "");
-            WebURL flatSiteURL = WebURL.getUrl(flatSiteAddress); assert (flatSiteURL != null);
+        if (aSiteURL.getScheme().equals("file") && !aSiteURL.isFlatUrl()) {
+            WebURL flatSiteURL = aSiteURL.getFlatUrl();
             WebSite flatSite = flatSiteURL.getAsSite();
             setSite(aSiteURL, flatSite);
             return flatSite;

@@ -36,6 +36,9 @@ public class WebURL {
     // The WebSite for the URL
     protected WebSite _asSite;
 
+    // The URL without site nesting (no '!' separator)
+    private WebURL _flatUrl;
+
     /**
      * Constructor for given source.
      */
@@ -445,6 +448,24 @@ public class WebURL {
      * Returns the windows drive letter.
      */
     public String getWindowsDriveLetterPath()  { return _parsedUrl.getWindowsDriveLetterPath(); }
+
+    /**
+     * Returns whether URL is not nested in another site (no '!' separator).
+     */
+    public boolean isFlatUrl()  { return !getString().contains("!"); }
+
+    /**
+     * Returns the URL without site nesting (no '!' separator).
+     */
+    public WebURL getFlatUrl()
+    {
+        if (_flatUrl != null) return _flatUrl;
+        String urlAddr = getString();
+        if (!urlAddr.contains("!"))
+            return _flatUrl = this;
+        String flatSiteAddress = urlAddr.replace("!", "");
+        return _flatUrl = WebURL.createUrl(flatSiteAddress);
+    }
 
     /**
      * Standard equals implementation.
