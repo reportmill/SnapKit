@@ -160,9 +160,9 @@ public class HTTPRequest {
         byte[] putBytes = getBytes();
         if (putBytes != null) {
             connection.setDoOutput(true);
-            OutputStream outStream = connection.getOutputStream();
-            outStream.write(putBytes);
-            outStream.flush();
+            try (OutputStream outStream = connection.getOutputStream()) {
+                outStream.write(putBytes);
+            }
         }
 
         // Get the response code
