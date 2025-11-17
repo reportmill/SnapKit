@@ -120,7 +120,9 @@ public class TextAgent {
     public Undoer getTextUndoer()
     {
         if (_textUndoer != null) return _textUndoer;
-        return _textUndoer = new Undoer();
+        _textUndoer = new Undoer();
+        _textUndoer.setAutoSave(true);
+        return _textUndoer;
     }
 
     /**
