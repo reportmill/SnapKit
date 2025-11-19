@@ -282,9 +282,17 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     /**
      * Returns the file bytes.
      */
-    public synchronized byte[] getBytes()
+    public byte[] getBytes()
     {
-        // If already set, just return
+        if (_bytes != null) return _bytes;
+        return _bytes = getBytesImpl();
+    }
+
+    /**
+     * Returns the file bytes.
+     */
+    private synchronized byte[] getBytesImpl()
+    {
         if (_bytes != null) return _bytes;
 
         // Get URL response
@@ -337,9 +345,17 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     /**
      * Returns the directory files list.
      */
-    public synchronized List<WebFile> getFiles()
+    public List<WebFile> getFiles()
     {
-        // If already set, just return
+        if (_files != null) return _files;
+        return _files = getFilesImpl();
+    }
+
+    /**
+     * Returns the directory files list.
+     */
+    private synchronized List<WebFile> getFilesImpl()
+    {
         if (_files != null) return _files;
 
         // Get URL response
@@ -365,10 +381,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         if (fileHeaders == null)
             fileHeaders = Collections.emptyList();
 
-        // Get files sorted
+        // Return files sorted
         List<WebFile> files = fileHeaders.stream().map(fhdr -> site.getFileForFileHeader(fhdr)).sorted().toList();
-
-        // Return
         return _files = files;
     }
 

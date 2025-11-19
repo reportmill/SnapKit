@@ -49,18 +49,15 @@ public class DirSite extends WebSite {
     @Override
     protected void doHead(WebRequest aReq, WebResponse aResp)
     {
-        // Get WebFile from Dir site
+        // Get source file from Dir site - if not found, set Response.Code to NOT_FOUND and return
         String filePath = aReq.getFilePath();
         WebFile dirFile = getDirFileForPath(filePath);
-
-        // If not found, set Response.Code to NOT_FOUND and return
         if (dirFile == null) {
             aResp.setCode(WebResponse.NOT_FOUND);
             return;
         }
 
-        // If found, set response code to ok
-        aResp.setCode(WebResponse.OK);
+        // Set header info
         aResp.setDir(dirFile.isDir());
         aResp.setLastModTime(dirFile.getLastModTime());
         aResp.setSize(dirFile.getSize());
@@ -72,14 +69,17 @@ public class DirSite extends WebSite {
     @Override
     protected void doGet(WebRequest aReq, WebResponse aResp)
     {
-        // Get file header
-        doHead(aReq, aResp);
-        if (aResp.getCode() != WebResponse.OK)
-            return;
-
-        // Get WebFile from Dir site
+        // Get source file from Dir site - if not found, set Response.Code to NOT_FOUND and return
         String filePath = aReq.getFilePath();
         WebFile dirFile = getDirFileForPath(filePath);
+        if (dirFile == null) {
+            aResp.setCode(WebResponse.NOT_FOUND);
+            return;
+        }
+
+        // Set header info
+        aResp.setDir(dirFile.isDir());
+        aResp.setLastModTime(dirFile.getLastModTime());
 
         // If file, get/set file bytes
         if (dirFile.isFile()) {
@@ -195,7 +195,6 @@ public class DirSite extends WebSite {
      */
     private WebFile getDirFileForPath(String aPath)
     {
-        // Get file path for dir file and fetch
         WebFile dir = getDir();
         WebSite dirSite = dir.getSite();
         String dirFilePath = dir.getPath() + aPath;
@@ -207,7 +206,6 @@ public class DirSite extends WebSite {
      */
     private WebFile createDirFileForPath(String aPath, boolean isDir)
     {
-        // Get file path for dir file and create
         WebFile dir = getDir();
         WebSite dirSite = dir.getSite();
         String dirFilePath = dir.getPath() + aPath;
