@@ -220,13 +220,13 @@ public class DialogBox extends FormBuilder {
         if (getContent() != null) return null;
 
         // Return standard image for message types
-        switch (getMessageType()) {
-            case Question: return questImage;
-            case Information: return infoImage;
-            case Warning: return warnImage;
-            case Error: return errorImage;
-            default: return infoImage;
-        }
+        return switch (getMessageType()) {
+            case Question -> questImage;
+            case Information -> infoImage;
+            case Warning -> warnImage;
+            case Error -> errorImage;
+            default -> infoImage;
+        };
     }
 
     /**
@@ -357,7 +357,7 @@ public class DialogBox extends FormBuilder {
 
         // Add InputText
         TextField textField = addTextField("InputText", aDefault);
-        textField.setMinWidth(150);
+        textField.setMinWidth(300);
         setFirstFocus(textField);
         if (getInputPromptText() != null)
             textField.setPromptText(getInputPromptText());

@@ -109,21 +109,21 @@ public class FormBuilder extends ViewOwner {
      */
     public TextField addTextField(String aName, String aDefault)
     {
-        return addTextField(null, aName, aDefault);
+        return addLabelAndTextField(null, aName, aDefault);
     }
 
     /**
      * Adds a text field.
      */
-    public TextField addTextField(String aLabel, String aName, String aDefault)
+    public TextField addLabelAndTextField(String labelText, String textFieldName, String defaultText)
     {
         // Create RowView for label and text field
         RowView rowView = new RowView();
 
         // If label is provided, create configure and add
-        if (aLabel != null) {
+        if (labelText != null) {
             Label label = new Label();
-            label.setText(aLabel);
+            label.setText(labelText);
             if (_font != null)
                 label.setFont(_font);
             rowView.addChild(label);
@@ -131,11 +131,11 @@ public class FormBuilder extends ViewOwner {
 
         // Create TextField and panel and add
         TextField textField = new TextField();
-        textField.setName(aName);
+        textField.setName(textFieldName);
         if (_font != null)
             textField.setFont(_font);
-        if (aDefault != null)
-            textField.setText(aDefault);
+        if (defaultText != null)
+            textField.setText(defaultText);
         rowView.addChild(textField);
 
         // Add RowView
@@ -304,7 +304,7 @@ public class FormBuilder extends ViewOwner {
     protected ColView createFormView()
     {
         ColView formView = new ColView();
-        formView.setPadding(new Insets(8));
+        formView.setPadding(new Insets(10, 20, 20, 20));
         formView.setSpacing(20);
         formView.setFillWidth(true);
         return formView;
