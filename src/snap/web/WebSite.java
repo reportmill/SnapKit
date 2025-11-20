@@ -507,8 +507,7 @@ public abstract class WebSite {
         File sandboxDir = new File(sandboxesDir, sandboxName);
 
         // Get sandbox dir
-        WebURL sandboxDirUrl = WebURL.getUrl(sandboxDir); assert sandboxDirUrl != null;
-        return _sandboxDir = sandboxDirUrl.createFile(true);
+        return _sandboxDir = WebFile.createFileForPath(sandboxDir.getPath(), true);
     }
 
     /**
