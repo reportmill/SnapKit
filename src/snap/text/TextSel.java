@@ -3,6 +3,7 @@
  */
 package snap.text;
 import snap.geom.Shape;
+import snap.util.CharSequenceX;
 import snap.view.ViewUtils;
 
 /**
@@ -161,7 +162,7 @@ public class TextSel {
         if (nextLine == null)
             return getStart();
 
-        int charIndexInLine = Math.max(Math.min(nextLine.length() - 1, lastColumn), 0);
+        int charIndexInLine = Math.min(nextLine.length() - 1, lastColumn);
         return charIndexInLine + nextLine.getStartCharIndex();
     }
 
@@ -178,7 +179,8 @@ public class TextSel {
         if (nextLine == null)
             return getEnd();
 
-        int charIndexInLine = Math.max(Math.min(nextLine.length() - 1, lastColumn), 0);
+        int nextLineMax = nextLine.length(); if (nextLine.getString().endsWith("\n")) nextLineMax--;
+        int charIndexInLine = Math.min(nextLineMax, lastColumn);
         return charIndexInLine + nextLine.getStartCharIndex();
     }
 
