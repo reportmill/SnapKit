@@ -119,26 +119,28 @@ public class TreeCol <T> extends ListView <T> {
      */
     protected void configureCell(ListCell <T> aCell)
     {
-        // Do normal version
-        super.configureCell(aCell);
-
         // Get tree, column index and cell item
         TreeView <T> tree = getTree();
         int col = getColIndex();
         T item = aCell.getItem();
-        if (item == null)
-            return;
 
         // Configure cell text
-        String itemText = tree.getItemText(item, col);
-        aCell.setText(itemText);
-        if (col > 0)
-            return;
+        TreeResolver<T> treeResolver = tree.getResolver();
+        String itemText = item != null ? treeResolver.getText(item, col) : null;
+        if (itemText != null)
+            aCell.setText(itemText);
 
         // Configure cell graphic
-        View itemGraphic = tree.getItemGraphic(item);
+        View itemGraphic = item != null ? treeResolver.getGraphic(item) : null;
         if (itemGraphic != null)
             aCell.setGraphic(itemGraphic);
+
+        // Do normal version
+        super.configureCell(aCell);
+
+        // If no item or not main column, just return
+        if (item == null || col > 0)
+            return;
 
         // Calculate indent level
         int indentLevel = tree.getItemParentCount(item);
@@ -168,15 +170,16 @@ public class TreeCol <T> extends ListView <T> {
             branchImageView.setPadding(BRANCH_IMAGE_PADDING);
             branchImageView.addEventHandler(e -> handleBranchImageViewMousePress(e, item), MousePress);
 
-            // If no item graphic, just set branch image as cell graphic
-            if (itemGraphic == null)
+            // If no cell graphic, just set branch image as cell graphic
+            View cellGraphic = aCell.getGraphic();
+            if (cellGraphic == null)
                 aCell.setGraphic(branchImageView);
 
-            // If both a branch image and an item graphic, wrap in a label
+            // If both a branch image and an cell graphic, wrap in a label
             else {
-                View branchImageAndItemGraphicLabel = new Label(branchImageView, null, itemGraphic);
-                branchImageAndItemGraphicLabel.setSpacing(0);
-                aCell.setGraphic(branchImageAndItemGraphicLabel);
+                View branchImageAndCellGraphicLabel = new Label(branchImageView, null, cellGraphic);
+                branchImageAndCellGraphicLabel.setSpacing(0);
+                aCell.setGraphic(branchImageAndCellGraphicLabel);
             }
         }
     }

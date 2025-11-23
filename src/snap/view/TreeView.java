@@ -438,21 +438,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     public List<T> getItemChildren(T aParent)  { return _resolver.getChildren(aParent); }
 
     /**
-     * Returns the text to be used for given item.
-     */
-    public String getItemText(T anItem, int aCol)  { return _resolver.getText(anItem, aCol); }
-
-    /**
-     * Return the image to be used for given item.
-     */
-    public Image getItemImage(T anItem)  { return _resolver.getImage(anItem); }
-
-    /**
-     * Return the graphic to be used for given item.
-     */
-    public View getItemGraphic(T anItem)  { return _resolver.getGraphic(anItem); }
-
-    /**
      * Returns whether an item is expanded.
      */
     public boolean isItemExpanded(T anItem)  { return _expanded.contains(anItem); }

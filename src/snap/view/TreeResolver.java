@@ -50,20 +50,6 @@ public abstract class TreeResolver <T> {
     }
 
     /**
-     * Return the image to be used for given item after item text.
-     */
-    public Image getImageAfter(T anItem)  { return null; }
-
-    /**
-     * Return the graphic to be used for given item after text.
-     */
-    public View getGraphicAfter(T anItem)
-    {
-        Image image = getImageAfter(anItem);
-        return image != null ? new ImageView(image) : null;
-    }
-
-    /**
      * The icon of given item.
      */
     public Image getBranchImage(T anItem)  { return null; }

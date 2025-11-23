@@ -665,47 +665,22 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      */
     protected void configureCell(ListCell <T> aCell)
     {
-        // Do basic cell configure
-        cellConfigureBasic(aCell);
+        // Configure basic fills
+        configureCellFills(aCell);
+
+        // If text function set, call text function and set cell text
+        T item = aCell.getItem();
+        if (_itemTextFunc != null && item != null)
+            aCell.setText(_itemTextFunc.apply(item));
 
         // If cell configure set, call it
-        Consumer<ListCell<T>> cconf = getCellConfigure();
-        if (cconf != null)
-            cconf.accept(aCell);
-    }
+        Consumer<ListCell<T>> cellConfigure = getCellConfigure();
+        if (cellConfigure != null)
+            cellConfigure.accept(aCell);
 
-    /**
-     * Called to do standard cell configure.
-     */
-    public void cellConfigureBasic(ListCell<T> aCell)
-    {
-        configureCellText(aCell);
-        configureCellFills(aCell);
-    }
-
-    /**
-     * Called to configure a cell text.
-     */
-    protected void configureCellText(ListCell<T> aCell)
-    {
-        // Get cell item
-        T item = aCell.getItem();
-
-        // Get String for cell item
-        String text = null;
-        if (_itemTextFunc != null)
-            text = item != null ? _itemTextFunc.apply(item) : null;
-        else if (item instanceof String)
-            text = (String) item;
-        else if (item instanceof Enum)
-            text = item.toString();
-        else if (item instanceof Number)
-            text = item.toString();
-        else if (getCellConfigure() == null && item != null)
-            text = item.toString();
-
-        // Set cell text
-        aCell.setText(text);
+        // Otherwise if no text function or cell configure, set cell text to item string
+        if (_itemTextFunc == null && cellConfigure == null && item != null)
+            aCell.setText(item.toString());
     }
 
     /**

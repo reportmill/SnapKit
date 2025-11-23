@@ -507,8 +507,5 @@ public class DevPaneViews extends ViewOwner {
                 str = name;
             return str;
         }
-
-        /** Return the image to be used for given item. */
-        public View getGraphic(View anItem)  { return null; }
     }
 }

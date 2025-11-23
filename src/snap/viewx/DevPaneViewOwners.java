@@ -484,11 +484,7 @@ public class DevPaneViewOwners extends ViewOwner {
         public String getText(View anItem)
         {
             ViewOwner owner = anItem.getOwner();
-            String str = owner != null ? owner.getClass().getSimpleName() : "No Owner";
-            return str;
+            return owner != null ? owner.getClass().getSimpleName() : "No Owner";
         }
-
-        /** Return the image to be used for given item. */
-        public View getGraphic(View anItem)  { return null; }
     }
 }
