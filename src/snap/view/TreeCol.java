@@ -130,10 +130,10 @@ public class TreeCol <T> extends ListView <T> {
         if (itemText != null)
             aCell.setText(itemText);
 
-        // Configure cell graphic
-        View itemGraphic = item != null ? treeResolver.getGraphic(item) : null;
-        if (itemGraphic != null)
-            aCell.setGraphic(itemGraphic);
+        // Configure cell image
+        Image itemImage = item != null ? treeResolver.getImage(item) : null;
+        if (itemImage != null)
+            aCell.setImage(itemImage);
 
         // Do normal version
         super.configureCell(aCell);

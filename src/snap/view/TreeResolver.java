@@ -41,15 +41,6 @@ public abstract class TreeResolver <T> {
     public Image getImage(T anItem)  { return null; }
 
     /**
-     * Return the graphic to be used for given item.
-     */
-    public View getGraphic(T anItem)
-    {
-        Image image = getImage(anItem);
-        return image != null ? new ImageView(image) : null;
-    }
-
-    /**
      * The icon of given item.
      */
     public Image getBranchImage(T anItem)  { return null; }
