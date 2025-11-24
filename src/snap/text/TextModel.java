@@ -15,7 +15,10 @@ import java.util.Objects;
 /**
  * This class is the basic text storage class, holding a list of TextLine.
  */
-public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiver.Archivable {
+public abstract class TextModel extends TextLayout implements Cloneable, XMLArchiver.Archivable {
+
+    // The TextLines in this text
+    protected List<TextLine> _lines = new ArrayList<>();
 
     // The default text style for this text
     protected TextStyle _defaultTextStyle = TextStyle.DEFAULT;
@@ -49,10 +52,7 @@ public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiv
      */
     public void setRichText(boolean aValue)
     {
-        // If already set, just return
         if (aValue == isRichText()) return;
-
-        // Set value
         _rich = aValue;
 
         // Set DefaultStyle, because RichText never inherits from parent
@@ -561,6 +561,34 @@ public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiv
     }
 
     /**
+     * Returns the string for the text.
+     */
+    public String getString()
+    {
+        StringBuilder sb = new StringBuilder(length());
+        for (TextLine line : _lines)
+            sb.append(line._sb);
+
+        // Return
+        return sb.toString();
+    }
+
+    /**
+     * Returns the number of block in this doc.
+     */
+    public int getLineCount()  { return _lines.size(); }
+
+    /**
+     * Returns the individual block in this doc.
+     */
+    public TextLine getLine(int anIndex)  { return _lines.get(anIndex); }
+
+    /**
+     * Returns the list of blocks.
+     */
+    public List<TextLine> getLines()  { return _lines; }
+
+    /**
      * Adds a block at given index.
      */
     protected void addLine(TextLine aLine, int anIndex)
@@ -779,6 +807,17 @@ public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiv
 
         // Return
         return textCopy;
+    }
+
+    /**
+     * Sets the width.
+     */
+    @Override
+    public void setWidth(double aValue)
+    {
+        if (aValue == _width) return;
+        super.setWidth(aValue);
+        _lines.forEach(line -> line.updateAlignmentAndJustify());
     }
 
     /**

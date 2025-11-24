@@ -6,38 +6,78 @@ import snap.geom.VPos;
 import snap.gfx.Border;
 import snap.gfx.Font;
 import snap.gfx.Painter;
+import snap.props.PropObject;
 import snap.util.CharSequenceX;
+import snap.util.MathUtils;
 import java.util.List;
 
 /**
  * This interface provides the functionality to describe the layout of text.
  */
-public interface TextLayout extends CharSequenceX {
+public abstract class TextLayout extends PropObject implements CharSequenceX {
+
+    // Whether text is rich
+    protected boolean _rich;
+
+    // The length of this text
+    protected int  _length;
+
+    // The X/Y of the text model
+    protected double _x, _y;
+
+    // The width/height of the text model
+    protected double _width = Float.MAX_VALUE, _height;
+
+    // The pref width of the text model
+    protected double _prefW = -1;
+
+    // They y alignment
+    protected VPos _alignY = VPos.TOP;
+
+    // The y alignment amount
+    protected double _alignedY = -1;
+
+    /**
+     * Constructor.
+     */
+    public TextLayout()
+    {
+        this(false);
+    }
+
+    /**
+     * Constructor with option to make rich text.
+     */
+    public TextLayout(boolean isRich)
+    {
+        super();
+        _rich = isRich;
+    }
 
     /**
      * Returns the text model that is being displayed.
      */
-    default TextModel getTextModel()  { return (TextModel) this; }
+    public TextModel getTextModel()  { return (TextModel) this; }
 
     /**
      * Whether this text supports multiple styles (font, color, etc.).
      */
-    boolean isRichText();
+    public boolean isRichText()  { return _rich; }
 
     /**
      * Returns whether to wrap lines that overrun bounds.
      */
-    boolean isWrapLines();
+    public boolean isWrapLines()  { return false; }
 
     /**
      * Returns the number of characters in the text.
      */
-    int length();
+    public int length()  { return _length; }
 
     /**
      * Returns the char value at the specified index.
      */
-    default char charAt(int anIndex)
+    public char charAt(int anIndex)
     {
         TextLine line = getLineForCharIndex(anIndex);
         return line.charAt(anIndex - line.getStartCharIndex());
@@ -46,7 +86,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns a new char sequence that is a subsequence of this sequence.
      */
-    default CharSequence subSequence(int aStart, int anEnd)
+    public CharSequence subSequence(int aStart, int anEnd)
     {
         StringBuffer sb = new StringBuffer(anEnd - aStart);
         TextLine line = getLineForCharIndex(aStart);
@@ -64,27 +104,27 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the string for the text.
      */
-    String getString();
+    public abstract String getString();
 
     /**
      * Returns the number of block in this doc.
      */
-    int getLineCount();
+    public abstract int getLineCount();
 
     /**
      * Returns the individual block in this doc.
      */
-    TextLine getLine(int anIndex);
+    public abstract TextLine getLine(int anIndex);
 
     /**
      * Returns the list of blocks.
      */
-    List<TextLine> getLines();
+    public abstract List<TextLine> getLines();
 
     /**
      * Returns the block at the given char index.
      */
-    default TextLine getLineForCharIndex(int charIndex)
+    public TextLine getLineForCharIndex(int charIndex)
     {
         // Check for index outside bounds or index at end
         int length = length();
@@ -116,7 +156,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the last text line (or null if none).
      */
-    default TextLine getLastLine()
+    public TextLine getLastLine()
     {
         int lineCount = getLineCount();
         return lineCount > 0 ? getLine(lineCount - 1) : null;
@@ -125,7 +165,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the longest line.
      */
-    default TextLine getLineLongest()
+    public TextLine getLineLongest()
     {
         TextLine longLine = null;
         double longW = 0;
@@ -143,7 +183,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the TextRun that contains the given char index.
      */
-    default TextRun getRunForCharIndex(int charIndex)
+    public TextRun getRunForCharIndex(int charIndex)
     {
         // Get line for start char index and convert char index to line
         TextLine textLine = getLineForCharIndex(charIndex);
@@ -157,7 +197,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the TextRun for the given char range (usually just run for start, but can be next run if at boundary).
      */
-    default TextRun getRunForCharRange(int startIndex, int endIndex)
+    public TextRun getRunForCharRange(int startIndex, int endIndex)
     {
         // Get line for start char index and convert start/end index to line
         TextLine textLine = getLineForCharIndex(startIndex);
@@ -172,7 +212,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the token at given char index.
      */
-    default TextToken getTokenForCharIndex(int charIndex)
+    public TextToken getTokenForCharIndex(int charIndex)
     {
         TextLine textLine = getLineForCharIndex(charIndex);
         int lineStart = textLine.getStartCharIndex();
@@ -183,7 +223,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the Font for run at given character index.
      */
-    default Font getFontForCharIndex(int charIndex)
+    public Font getFontForCharIndex(int charIndex)
     {
         TextRun textRun = getRunForCharIndex(charIndex);
         return textRun.getFont();
@@ -192,7 +232,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the TextStyle for the run at the given character index.
      */
-    default TextStyle getTextStyleForCharIndex(int charIndex)
+    public TextStyle getTextStyleForCharIndex(int charIndex)
     {
         TextRun textRun = getRunForCharIndex(charIndex);
         return textRun.getTextStyle();
@@ -201,7 +241,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the TextStyle for the run for given char range.
      */
-    default TextStyle getTextStyleForCharRange(int startIndex, int endIndex)
+    public TextStyle getTextStyleForCharRange(int startIndex, int endIndex)
     {
         TextRun textRun = getRunForCharRange(startIndex, endIndex);
         return textRun.getTextStyle();
@@ -210,7 +250,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the TextLineStyle for the run at the given character index.
      */
-    default TextLineStyle getLineStyleForCharIndex(int charIndex)
+    public TextLineStyle getLineStyleForCharIndex(int charIndex)
     {
         TextLine textLine = getLineForCharIndex(charIndex);
         return textLine.getLineStyle();
@@ -219,7 +259,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the line for the given y value.
      */
-    default TextLine getLineForY(double aY)
+    public TextLine getLineForY(double aY)
     {
         // If y less than zero, return null
         if (aY < 0) return null;
@@ -241,7 +281,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the character index for the given x/y point.
      */
-    default int getCharIndexForXY(double anX, double aY)
+    public int getCharIndexForXY(double anX, double aY)
     {
         // Get text line for y (just return 0 if not found)
         TextLine textLine = getLineForY(aY);
@@ -259,7 +299,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns whether text contains an underlined run.
      */
-    default boolean isUnderlined()
+    public boolean isUnderlined()
     {
         // Handle Rich
         if (isRichText()) {
@@ -275,7 +315,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the horizontal alignment of the first paragraph of the text.
      */
-    default HPos getAlignX()
+    public HPos getAlignX()
     {
         TextLineStyle lineStyle = getLineStyleForCharIndex(0);
         return lineStyle.getAlign();
@@ -284,22 +324,49 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the Y alignment.
      */
-    VPos getAlignY();
+    public VPos getAlignY()  { return _alignY; }
+
+    /**
+     * Sets the Y alignment.
+     */
+    public void setAlignY(VPos aPos)
+    {
+        if (aPos == _alignY) return;
+        _alignY = aPos;
+        _alignedY = -1;
+    }
 
     /**
      * Returns the y for alignment.
      */
-    double getAlignedY();
+    public double getAlignedY()
+    {
+        // If already set, just return
+        if (_alignedY >= 0) return getY() + _alignedY;
+
+        // Calculated aligned Y
+        _alignedY = 0;
+        if (_alignY != VPos.TOP) {
+            double textModelW = getWidth();
+            double prefH = getPrefHeight(textModelW);
+            double textModelH = getHeight();
+            if (textModelH > prefH)
+                _alignedY = _alignY.doubleValue() * (textModelH - prefH);
+        }
+
+        // Return
+        return getY() + _alignedY;
+    }
 
     /**
      * Returns the start char index (always 0, unless this is SubText).
      */
-    default int getStartCharIndex()  { return 0; }
+    public int getStartCharIndex()  { return 0; }
 
     /**
      * Returns the end char in source text.
      */
-    default int getEndCharIndex()
+    public int getEndCharIndex()
     {
         int startCharIndex = getStartCharIndex();
         TextLine lastLine = getLastLine();
@@ -310,7 +377,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the index of given string.
      */
-    default int indexOf(String aStr, int aStart)
+    public int indexOf(String aStr, int aStart)
     {
         // Iterate over lines
         for (TextLine line : getLines()) {
@@ -335,42 +402,90 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the X location.
      */
-    double getX();
+    public double getX()  { return _x; }
+
+    /**
+     * Sets the X location.
+     */
+    public void setX(double anX)  { _x = anX; }
 
     /**
      * Returns the Y location.
      */
-    double getY();
+    public double getY()  { return _y; }
+
+    /**
+     * Sets the Y location.
+     */
+    public void setY(double aY)  { _y = aY; }
 
     /**
      * Returns the width.
      */
-    double getWidth();
+    public double getWidth()  { return _width; }
+
+    /**
+     * Sets the width.
+     */
+    public void setWidth(double aValue)
+    {
+        if (aValue == _width) return;
+        _width = aValue;
+    }
 
     /**
      * Returns the height.
      */
-    double getHeight();
+    public double getHeight()  { return _height; }
+
+    /**
+     * Sets the width.
+     */
+    public void setHeight(double aValue)
+    {
+        if (aValue == _height) return;
+        _height = aValue;
+        _alignedY = -1;
+    }
 
     /**
      * Returns the current bounds.
      */
-    Rect getBounds();
+    public Rect getBounds()  { return new Rect(_x, _y, _width, _height); }
+
+    /**
+     * Sets the rect location and size.
+     */
+    public void setBounds(Rect aRect)
+    {
+        setBounds(aRect.x, aRect.y, aRect.width, aRect.height);
+    }
+
+    /**
+     * Sets the rect location and size.
+     */
+    public void setBounds(double aX, double aY, double aW, double aH)
+    {
+        setX(aX);
+        setY(aY);
+        setWidth(aW);
+        setHeight(aH);
+    }
 
     /**
      * Returns the max X.
      */
-    default double getMaxX()  { return getX() + getWidth(); }
+    public double getMaxX()  { return getX() + getWidth(); }
 
     /**
      * Returns the max Y.
      */
-    default double getMaxY()  { return getY() + getHeight(); }
+    public double getMaxY()  { return getY() + getHeight(); }
 
     /**
      * Paint text to given painter.
      */
-    default void paint(Painter aPntr)
+    public void paint(Painter aPntr)
     {
         // Just return if no lines
         int lineCount = getLineCount();
@@ -416,7 +531,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Paint text line to given painter.
      */
-    default void paintLine(Painter aPntr, TextLine textLine, double lineY)
+    public void paintLine(Painter aPntr, TextLine textLine, double lineY)
     {
         TextToken[] lineTokens = textLine.getTokens();
 
@@ -446,12 +561,22 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the width of text.
      */
-    double getPrefWidth();
+    public double getPrefWidth()
+    {
+        // If already set, just return
+        if (_prefW >= 0) return _prefW;
+
+        // Calc, set, return
+        TextLine longestLine = getLineLongest();
+        double longestLineW = longestLine != null ? longestLine.getWidth() : 0;
+        double prefW = Math.ceil(longestLineW);
+        return _prefW = prefW;
+    }
 
     /**
      * Returns the width of text from given start char index.
      */
-    default double getPrefWidthForStartCharIndex(int startCharIndex)
+    public double getPrefWidthForStartCharIndex(int startCharIndex)
     {
         // If given char index 0, return cached version
         if (startCharIndex <= 0)
@@ -477,7 +602,7 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the preferred height.
      */
-    default double getPrefHeight()
+    public double getPrefHeight()
     {
         // Return bottom of last line minus box Y
         TextLine lastLine = getLastLine();
@@ -492,12 +617,27 @@ public interface TextLayout extends CharSequenceX {
     /**
      * Returns the preferred height.
      */
-    double getPrefHeight(double aW);
+    public double getPrefHeight(double aW)
+    {
+        // If WrapLines and given Width doesn't match current Width, setWidth
+        if (isWrapLines() && !MathUtils.equals(aW, _width) && aW > 0) {
+            double oldH = _height, oldW = _width;
+            _height = Float.MAX_VALUE;
+            setWidth(aW);
+            double prefH = getPrefHeight();
+            _height = oldH;
+            setWidth(oldW); // Seems like this should be unnecessary, since width is likely to be set to aW
+            return prefH;
+        }
+
+        // Return normal version
+        return getPrefHeight();
+    }
 
     /**
      * Returns a path for two char indexes - it will be a simple box with extensions for first/last lines.
      */
-    default Shape getPathForCharRange(int aStartCharIndex, int aEndCharIndex)
+    public Shape getPathForCharRange(int aStartCharIndex, int aEndCharIndex)
     {
         return TextModelUtils.getPathForCharRange(this, aStartCharIndex, aEndCharIndex);
     }
