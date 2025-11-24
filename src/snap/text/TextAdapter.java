@@ -1469,7 +1469,7 @@ public class TextAdapter extends PropObject {
         if (clipboard.hasData(SNAP_RICHTEXT_TYPE)) {
             byte[] bytes = clipboard.getDataBytes(SNAP_RICHTEXT_TYPE);
             if (bytes != null && bytes.length > 0) {  // Shouldn't need this - Happens when pasting content from prior instance
-                TextModel richText = new TextModel(true);
+                TextModel richText = TextModel.createDefaultTextModel(true);
                 XMLArchiver archiver = new XMLArchiver();
                 archiver.setRootObject(richText);
                 archiver.readXmlFromBytes(bytes);

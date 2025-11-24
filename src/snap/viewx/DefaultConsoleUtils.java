@@ -76,7 +76,7 @@ class DefaultConsoleUtils {
     private static TextModel createTextModelForString(String aString)
     {
         // Create TextModel and configure Style
-        TextModel textModel = new TextModel();
+        TextModel textModel = TextModel.createDefaultTextModel();
         textModel.setDefaultFont(DEFAULT_FONT);
         textModel.setDefaultTextColor(DEFAULT_TEXTAREA_TEXTCOLOR);
 

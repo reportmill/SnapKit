@@ -41,18 +41,7 @@ public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiv
      */
     public TextModel()
     {
-        this(false);
-    }
-
-    /**
-     * Constructor with option to make rich text.
-     */
-    public TextModel(boolean isRich)
-    {
         super();
-        _rich = isRich;
-        TextLine defaultLine = new TextLine(this);
-        addLine(defaultLine, 0);
     }
 
     /**
@@ -772,7 +761,7 @@ public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiv
     public TextModel copyForRange(int aStart, int aEnd)
     {
         // Create new RichText and iterate over lines in range to add copies for subrange
-        TextModel textCopy = new TextModel(isRichText());
+        TextModel textCopy = TextModel.createDefaultTextModel(isRichText());
         textCopy._lines.remove(0);
 
         // Get start/end line indexes
@@ -833,4 +822,14 @@ public class TextModel extends TextLayoutDefault implements Cloneable, XMLArchiv
         TextModelUtils.fromXML(this, anArchiver, anElement);
         return this;
     }
+
+    /**
+     * Creates a default text model.
+     */
+    public static TextModel createDefaultTextModel()  { return new TextBlock(); }
+
+    /**
+     * Creates a default text model.
+     */
+    public static TextModel createDefaultTextModel(boolean isRich)  { return new TextBlock(isRich); }
 }

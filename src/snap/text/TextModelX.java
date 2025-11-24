@@ -11,7 +11,7 @@ import snap.props.PropChangeListener;
  * This TextModel subclass adds support for advanced features like text wrapping, font scaling, linking multiple
  * text models and more.
  */
-public class TextModelX extends TextModel {
+public class TextModelX extends TextBlock {
 
     // The source text model
     protected TextModel _sourceText;
@@ -46,7 +46,7 @@ public class TextModelX extends TextModel {
     public TextModelX(boolean isRichText)
     {
         super(isRichText);
-        TextModel textModel = new TextModel(isRichText);
+        TextModel textModel = TextModel.createDefaultTextModel(isRichText);
         setSourceText(textModel);
     }
 

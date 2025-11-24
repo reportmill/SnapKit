@@ -106,7 +106,7 @@ public class TextAgent {
     {
         if (_textModelSupplier != null)
             return _textModelSupplier.get();
-        return new TextModel();
+        return TextModel.createDefaultTextModel();
     }
 
     /**

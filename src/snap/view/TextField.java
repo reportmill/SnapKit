@@ -79,7 +79,7 @@ public class TextField extends ParentView {
         enableEvents(Action);
 
         // Create TextAdapter
-        _textAdapter = new TextAdapter(new TextModel());
+        _textAdapter = new TextAdapter(TextModel.createDefaultTextModel());
         _textAdapter.setView(this);
         _textAdapter.setEditable(true);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
