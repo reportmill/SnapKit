@@ -2,11 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
+import java.util.Iterator;
 
 /**
  * This class iterates over TextModel TextRuns.
  */
-public class TextRunIter {
+public class TextRunIter implements Iterable<TextRun>, Iterator<TextRun> {
 
     // The TextModel
     private TextModel _textModel;
@@ -50,11 +51,12 @@ public class TextRunIter {
     /**
      * Returns whether there is another run.
      */
-    public boolean hasNextRun()
+    @Override
+    public boolean hasNext()
     {
         // Get next run
         if (_nextRun == null)
-            _nextRun = getNextRunImpl();
+            _nextRun = nextImpl();
 
         // If next run starts after end char index, clear it
         if (_nextRun != null) {
@@ -70,7 +72,8 @@ public class TextRunIter {
     /**
      * Returns the next run.
      */
-    public TextRun getNextRun()
+    @Override
+    public TextRun next()
     {
         // Set next run
         _textRun = _nextRun;
@@ -87,7 +90,7 @@ public class TextRunIter {
     /**
      * Returns the next run.
      */
-    private TextRun getNextRunImpl()
+    private TextRun nextImpl()
     {
         // If current text run has next, return it
         if (_textRun != null) {
@@ -106,6 +109,12 @@ public class TextRunIter {
         // Return no next run
         return null;
     }
+
+    /**
+     * Return as iterator.
+     */
+    @Override
+    public Iterator<TextRun> iterator()  { return this; }
 
     /**
      * Returns the current line.

@@ -102,30 +102,30 @@ public abstract class TextModel extends TextLayout implements XMLArchiver.Archiv
     /**
      * Removes characters in given range.
      */
-    public abstract void removeChars(int aStartCharIndex, int anEndCharIndex);
+    public abstract void removeChars(int startCharIndex, int endCharIndex);
 
     /**
      * Replaces chars in given range, with given String, using the given attributes.
      */
-    public void replaceChars(CharSequence theChars, int aStart, int anEnd)
+    public void replaceChars(CharSequence theChars, int startCharIndex, int endCharIndex)
     {
-        replaceCharsWithStyle(theChars, null, aStart, anEnd);
+        replaceCharsWithStyle(theChars, null, startCharIndex, endCharIndex);
     }
 
     /**
      * Replaces chars in given range, with given String, using the given attributes.
      */
-    public void replaceCharsWithStyle(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
+    public void replaceCharsWithStyle(CharSequence theChars, TextStyle theStyle, int startCharIndex, int endCharIndex)
     {
         // Get TextStyle for add chars range (if not provided)
         TextStyle style = theStyle;
         if (style == null)
-            style = getTextStyleForCharRange(aStart, anEnd);
+            style = getTextStyleForCharRange(startCharIndex, endCharIndex);
 
         // Remove given range and add chars
-        if (anEnd > aStart)
-            removeChars(aStart, anEnd);
-        addCharsWithStyle(theChars, style, aStart);
+        if (endCharIndex > startCharIndex)
+            removeChars(startCharIndex, endCharIndex);
+        addCharsWithStyle(theChars, style, startCharIndex);
     }
 
     /**
@@ -142,21 +142,20 @@ public abstract class TextModel extends TextLayout implements XMLArchiver.Archiv
     /**
      * Sets the given text style for given range.
      */
-    public void setTextStyle(TextStyle textStyle, int aStart, int anEnd)
+    public void setTextStyle(TextStyle textStyle, int startCharIndex, int endCharIndex)
     {
         // If plaint text, just return (can't apply style to range for plain text)
         if (!isRichText()) return;
 
         // Get run iter and split end runs
-        TextRunIter runIter = getRunIterForCharRange(aStart, anEnd);
+        TextRunIter runIter = getRunIterForCharRange(startCharIndex, endCharIndex);
         runIter.splitEndRuns();
         TextLine startLine = runIter.getLine();
 
         // Iterate over runs and reset style
-        while (runIter.hasNextRun()) {
+        for (TextRun textRun : runIter) {
 
             // Set style
-            TextRun textRun = runIter.getNextRun();
             TextStyle oldStyle = textRun.getTextStyle();
             textRun.setTextStyle(textStyle);
 
@@ -254,7 +253,7 @@ public abstract class TextModel extends TextLayout implements XMLArchiver.Archiv
     /**
      * Sets a given style to a given range.
      */
-    protected void setLineStyleRich(TextLineStyle aStyle, int aStart, int anEnd)
+    private void setLineStyleRich(TextLineStyle aStyle, int aStart, int anEnd)
     {
         // Get start/end line indexes for char range
         int startLineIndex = getLineForCharIndex(aStart).getLineIndex();
@@ -275,7 +274,7 @@ public abstract class TextModel extends TextLayout implements XMLArchiver.Archiv
     /**
      * Sets a given style to a given range.
      */
-    protected void setLineStyleValueRich(String aKey, Object aValue, int aStart, int anEnd)
+    private void setLineStyleValueRich(String aKey, Object aValue, int aStart, int anEnd)
     {
         // Get start/end line indexes
         int startLineIndex = getLineForCharIndex(aStart).getLineIndex();
@@ -471,10 +470,8 @@ public abstract class TextModel extends TextLayout implements XMLArchiver.Archiv
 
         // Add chars for range
         TextRunIter runIter = getRunIterForCharRange(aStart, anEnd);
-        while (runIter.hasNextRun()) {
-            TextRun textRun = runIter.getNextRun();
+        for (TextRun textRun : runIter)
             textCopy.addCharsWithStyle(textRun.getString(), textRun.getTextStyle());
-        }
 
         // Return
         return textCopy;

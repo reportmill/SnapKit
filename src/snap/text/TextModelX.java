@@ -546,10 +546,9 @@ public class TextModelX extends TextBlock {
         TextRunIter runIter = _sourceText.getRunIterForCharRange(charIndex, endCharIndexBlock);
 
         // Iterate over source text runs for range and add
-        while (runIter.hasNextRun()) {
+        for (TextRun nextRun : runIter) {
 
             // Set temp LineStyle
-            TextRun nextRun = runIter.getNextRun();
             TextLine textLine = nextRun.getLine();
             _updateTextLineStyle = textLine.getLineStyle();
 
