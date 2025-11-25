@@ -9,6 +9,7 @@ import snap.gfx.Painter;
 import snap.props.PropObject;
 import snap.util.CharSequenceX;
 import snap.util.MathUtils;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -521,8 +522,8 @@ public abstract class TextLayout extends PropObject implements CharSequenceX {
         }
 
         // Paint underlines
-//        if (isUnderlined())
-//            TextModelUtils.paintTextModelUnderlines(aPntr, this, textClipBounds);
+        if (isUnderlined())
+            paintUnderlines(aPntr, textClipBounds);
 
         // Restore state
         aPntr.restore();
@@ -555,6 +556,57 @@ public abstract class TextLayout extends PropObject implements CharSequenceX {
                 aPntr.setStroke(border.getStroke());
                 aPntr.strokeString(tokenStr, tokenX, lineY, charSpacing);
             }
+        }
+    }
+
+    /**
+     * Returns underlined runs for text.
+     */
+    public List<TextRun> getUnderlineRuns(Rect clipRect)
+    {
+        List<TextRun> underlineRuns = new ArrayList<>();
+
+        // Iterate over lines to add underline runs to list
+        for (TextLine line : getLines()) {
+
+            // If line above rect, continue, if below, break
+            if (clipRect != null) {
+                if (line.getMaxY() < clipRect.y)
+                    continue;
+                else if (line.getY() >= clipRect.getMaxY())
+                    break;
+            }
+
+            // If run underlined, add to list
+            for (TextRun run : line.getRuns())
+                if (run.getTextStyle().isUnderlined())
+                    underlineRuns.add(run);
+        }
+
+        // Return
+        return underlineRuns;
+    }
+
+    /**
+     * Paints text underlines with given painter.
+     */
+    private void paintUnderlines(Painter aPntr, Rect clipRect)
+    {
+        for (TextRun run : getUnderlineRuns(clipRect)) {
+
+            // Set underline color and width
+            TextLine textLine = run.getLine();
+            Font font = run.getFont();
+            double underlineOffset = Math.ceil(Math.abs(font.getUnderlineOffset()));
+            double underlineThickness = font.getUnderlineThickness();
+            aPntr.setColor(run.getColor());
+            aPntr.setStrokeWidth(underlineThickness);
+
+            // Get underline endpoints and draw line
+            double lineX = textLine.getTextX() + run.getX();
+            double lineMaxX = lineX + run.getWidth() - run.getTrailingWhitespaceWidth();
+            double lineY = textLine.getTextBaseline() + underlineOffset;
+            aPntr.drawLine(lineX, lineY, lineMaxX, lineY);
         }
     }
 

@@ -3,7 +3,6 @@
  */
 package snap.text;
 import snap.geom.HPos;
-import snap.geom.Rect;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.props.PropChange;
@@ -484,11 +483,6 @@ public abstract class TextModel extends TextLayout implements XMLArchiver.Archiv
     {
         return TextModelUtils.createTokensForTextLine(aTextLine);
     }
-
-    /**
-     * Returns underlined runs for text.
-     */
-    public TextRun[] getUnderlineRuns(Rect aRect)  { return TextModelUtils.getUnderlineRuns(this, aRect); }
 
     /**
      * XMLArchiver.Archivable archival.

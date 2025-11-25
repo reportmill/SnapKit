@@ -1,11 +1,9 @@
 package snap.text;
 import snap.geom.Path2D;
-import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.gfx.Painter;
 import snap.props.PropChange;
 import snap.util.XMLArchiver;
 import snap.util.XMLElement;
@@ -80,60 +78,6 @@ public class TextModelUtils {
         // Close path and return
         path.close();
         return path;
-    }
-
-    /**
-     * Returns underlined runs for text.
-     */
-    public static TextRun[] getUnderlineRuns(TextLayout textLayout, Rect aRect)
-    {
-        // Get lines
-        List<TextLine> textLines = textLayout.getLines();
-        List<TextRun> underlineRuns = new ArrayList<>();
-
-        // Iterate over lines to add underline runs to list
-        for (TextLine line : textLines) {
-
-            // If line above rect, continue, if below, break
-            if (aRect != null) {
-                if (line.getMaxY() < aRect.y) continue;
-                else if (line.getY() >= aRect.getMaxY())
-                    break;
-            }
-
-            // If run underlined, add to list
-            for (TextRun run : line.getRuns())
-                if (run.getTextStyle().isUnderlined())
-                    underlineRuns.add(run);
-        }
-
-        // Return
-        return underlineRuns.toArray(new TextRun[0]);
-    }
-
-    /**
-     * Paints text underlines with given painter.
-     */
-    public static void paintTextModelUnderlines(Painter aPntr, TextLayout textLayout, Rect clipRect)
-    {
-        TextRun[] underlineRuns = getUnderlineRuns(textLayout, clipRect);
-
-        for (TextRun run : underlineRuns) {
-
-            // Set underline color and width
-            TextLine textLine = run.getLine();
-            Font font = run.getFont();
-            double underlineOffset = Math.ceil(Math.abs(font.getUnderlineOffset()));
-            double underlineThickness = font.getUnderlineThickness();
-            aPntr.setColor(run.getColor());
-            aPntr.setStrokeWidth(underlineThickness);
-
-            // Get underline endpoints and draw line
-            double lineX = textLine.getTextX() + run.getX();
-            double lineMaxX = lineX + run.getWidth() - run.getTrailingWhitespaceWidth();
-            double lineY = textLine.getTextBaseline() + underlineOffset;
-            aPntr.drawLine(lineX, lineY, lineMaxX, lineY);
-        }
     }
 
     /**
