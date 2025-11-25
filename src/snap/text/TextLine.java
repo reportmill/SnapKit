@@ -4,12 +4,12 @@
 package snap.text;
 import snap.geom.HPos;
 import snap.util.ArrayUtils;
-import snap.util.CharSequenceX;
+import java.util.List;
 
 /**
  * This class represents a line of text in a Text.
  */
-public class TextLine implements CharSequenceX, Cloneable {
+public class TextLine extends TextModel implements Cloneable {
 
     // The TextModel that contains this line
     protected TextModel _textModel;
@@ -32,18 +32,6 @@ public class TextLine implements CharSequenceX, Cloneable {
     // The index of this line in text
     protected int _lineIndex;
 
-    // The X location of line in block
-    protected double _x;
-
-    // The Y location of line in block
-    protected double _y = -1;
-
-    // The width of this line
-    protected double  _width = -1;
-
-    // The height of this line
-    protected double  _height = -1;
-
     // The TextMetrics
     private TextMetrics _textMetrics;
 
@@ -58,6 +46,7 @@ public class TextLine implements CharSequenceX, Cloneable {
         _textModel = textModel;
         _lineStyle = _textModel.getDefaultLineStyle();
         addRun(createRun(), 0);
+        _y = _width = _height = -1;
     }
 
     /**
@@ -90,14 +79,25 @@ public class TextLine implements CharSequenceX, Cloneable {
      */
     public String getString()  { return _sb.toString(); }
 
+    @Override
+    public int getLineCount()  { return 1; }
+
+    @Override
+    public TextLine getLine(int anIndex)  { return this; }
+
+    @Override
+    public List<TextLine> getLines()  { return List.of(this); }
+
     /**
      * Returns the start char index of this line in text.
      */
+    @Override
     public int getStartCharIndex()  { return _startCharIndex; }
 
     /**
      * Returns the end char index of this line in text.
      */
+    @Override
     public int getEndCharIndex()  { return _startCharIndex + length(); }
 
     /**
@@ -108,6 +108,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Adds characters with text style to this line at given index.
      */
+    @Override
     public void addCharsWithStyle(CharSequence theChars, TextStyle aStyle, int anIndex)
     {
         // Add length to run
@@ -170,6 +171,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Removes characters in given range.
      */
+    @Override
     public void removeChars(int aStart, int anEnd)
     {
         // If empty range, just return
@@ -315,7 +317,8 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Sets the style for the given range.
      */
-    protected void setTextStyle(TextStyle textStyle, int startCharIndex, int endCharIndex)
+    @Override
+    public void setTextStyle(TextStyle textStyle, int startCharIndex, int endCharIndex)
     {
         // Forward to textModel - though I think it should be the other way around
         int lineStartCharIndex = getStartCharIndex();
@@ -338,13 +341,9 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Returns the line x.
-     */
-    public double getX()  { return _x; }
-
-    /**
      * Returns the line y.
      */
+    @Override
     public double getY()
     {
         // If already set, just return
@@ -366,6 +365,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Returns the width of line.
      */
+    @Override
     public double getWidth()
     {
         // If already set, just return
@@ -383,6 +383,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Returns the height of line.
      */
+    @Override
     public double getHeight()
     {
         if (_height >= 0) return _height;
@@ -425,16 +426,6 @@ public class TextLine implements CharSequenceX, Cloneable {
      * Returns the y position for this line (in same coords as the layout frame).
      */
     public double getBaseline()  { return getY() + getMetrics().getAscent(); }
-
-    /**
-     * Returns the max X.
-     */
-    public double getMaxX()  { return getX() + getWidth(); }
-
-    /**
-     * Returns the max Y.
-     */
-    public double getMaxY()  { return getY() + getHeight(); }
 
     /**
      * Returns the line x in text model coords.
@@ -928,16 +919,6 @@ public class TextLine implements CharSequenceX, Cloneable {
 
         // Return
         return clone;
-    }
-
-    /**
-     * Standard toString implementation.
-     */
-    public String toString()
-    {
-        String className = getClass().getSimpleName();
-        String propStrings = toStringProps();
-        return className + " { " + propStrings + " }";
     }
 
     /**
