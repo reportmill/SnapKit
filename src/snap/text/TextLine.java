@@ -822,8 +822,8 @@ public class TextLine implements CharSequenceX, Cloneable {
         _textMetrics = null;
 
         // Update Lines
-        if (_textModel != null)
-            _textModel.resetLineYForLinesAfterIndex(getLineIndex());
+        if (_textModel instanceof TextBlock textBlock)
+            textBlock.resetLineYForLinesAfterIndex(getLineIndex());
     }
 
     /**
@@ -837,8 +837,8 @@ public class TextLine implements CharSequenceX, Cloneable {
         _textMetrics = null;
 
         // Update Lines
-        if (_textModel != null)
-            _textModel.updateLines(getLineIndex());
+        if (_textModel instanceof TextBlock textBlock)
+            textBlock.updateLines(getLineIndex());
     }
 
     /**

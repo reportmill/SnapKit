@@ -94,7 +94,7 @@ public class TextModelX extends TextBlock {
      * Adds characters with given style to this text at given index.
      */
     @Override
-    protected void addCharsWithStyleImpl(CharSequence theChars, TextStyle theStyle, int anIndex)
+    public void addCharsWithStyle(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
         // Get start char index - just return if index before text start
         int startCharIndex = Math.max(anIndex, getStartCharIndex());
@@ -107,7 +107,7 @@ public class TextModelX extends TextBlock {
             theStyle = theStyle.copyForStyleValue(theStyle.getFont().copyForScale(fontScale));
 
         // Do normal version
-        super.addCharsWithStyleImpl(theChars, theStyle, anIndex);
+        super.addCharsWithStyle(theChars, theStyle, anIndex);
 
         // If linked, remove any lines below bounds
         if (isLinked())
