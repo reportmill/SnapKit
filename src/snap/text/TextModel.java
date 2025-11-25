@@ -8,17 +8,13 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.props.PropChange;
 import snap.util.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /**
  * This class is the basic text storage class, holding a list of TextLine.
  */
-public abstract class TextModel extends TextLayout implements Cloneable, XMLArchiver.Archivable {
-
-    // The TextLines in this text
-    protected List<TextLine> _lines = new ArrayList<>();
+public abstract class TextModel extends TextLayout implements XMLArchiver.Archivable {
 
     // The default text style for this text
     protected TextStyle _defaultTextStyle = TextStyle.DEFAULT;
@@ -45,6 +41,15 @@ public abstract class TextModel extends TextLayout implements Cloneable, XMLArch
     public TextModel()
     {
         super();
+    }
+
+    /**
+     * Constructor with option to make rich text.
+     */
+    public TextModel(boolean isRich)
+    {
+        super();
+        _rich = isRich;
     }
 
     /**
@@ -561,52 +566,14 @@ public abstract class TextModel extends TextLayout implements Cloneable, XMLArch
     }
 
     /**
-     * Returns the string for the text.
-     */
-    public String getString()
-    {
-        StringBuilder sb = new StringBuilder(length());
-        for (TextLine line : _lines)
-            sb.append(line._sb);
-
-        // Return
-        return sb.toString();
-    }
-
-    /**
-     * Returns the number of block in this doc.
-     */
-    public int getLineCount()  { return _lines.size(); }
-
-    /**
-     * Returns the individual block in this doc.
-     */
-    public TextLine getLine(int anIndex)  { return _lines.get(anIndex); }
-
-    /**
-     * Returns the list of blocks.
-     */
-    public List<TextLine> getLines()  { return _lines; }
-
-    /**
      * Adds a block at given index.
      */
-    protected void addLine(TextLine aLine, int anIndex)
-    {
-        _lines.add(anIndex, aLine);
-        aLine._textModel = this;
-        updateLines(anIndex - 1);
-    }
+    protected abstract void addLine(TextLine aLine, int anIndex);
 
     /**
      * Removes the block at given index.
      */
-    protected void removeLine(int anIndex)
-    {
-        TextLine line = _lines.remove(anIndex);
-        line._textModel = null;
-        updateLines(anIndex - 1);
-    }
+    protected abstract void removeLine(int anIndex);
 
     /**
      * Clears the text.
@@ -740,7 +707,7 @@ public abstract class TextModel extends TextLayout implements Cloneable, XMLArch
     protected void resetLineYForLinesAfterIndex(int lineIndex)
     {
         // Iterate over lines beyond given lineIndex and reset Y (stop if line is already reset)
-        for (int i = lineIndex + 1, iMax = _lines.size(); i < iMax; i++) {
+        for (int i = lineIndex + 1, iMax = getLineCount(); i < iMax; i++) {
             TextLine line = getLine(i);
             if (line._y == -1)
                 return;
@@ -758,7 +725,7 @@ public abstract class TextModel extends TextLayout implements Cloneable, XMLArch
         _length = baseLine != null ? baseLine.getEndCharIndex() : 0;
 
         // Iterate over lines beyond BaseLine and update Index, Start, Length and Y
-        for (int i = anIndex + 1, iMax = _lines.size(); i < iMax; i++) {
+        for (int i = anIndex + 1, iMax = getLineCount(); i < iMax; i++) {
             TextLine line = getLine(i);
             updateLine(line, i, _length);
             _length += line.length();
@@ -790,7 +757,7 @@ public abstract class TextModel extends TextLayout implements Cloneable, XMLArch
     {
         // Create new RichText and iterate over lines in range to add copies for subrange
         TextModel textCopy = TextModel.createDefaultTextModel(isRichText());
-        textCopy._lines.remove(0);
+        textCopy.removeLine(0);
 
         // Get start/end line indexes
         int startLineIndex = getLineForCharIndex(aStart).getLineIndex();
@@ -807,43 +774,6 @@ public abstract class TextModel extends TextLayout implements Cloneable, XMLArch
 
         // Return
         return textCopy;
-    }
-
-    /**
-     * Sets the width.
-     */
-    @Override
-    public void setWidth(double aValue)
-    {
-        if (aValue == _width) return;
-        super.setWidth(aValue);
-        _lines.forEach(line -> line.updateAlignmentAndJustify());
-    }
-
-    /**
-     * Standard clone implementation.
-     */
-    @Override
-    public TextModel clone()
-    {
-        // Do normal clone
-        TextModel clone;
-        try { clone = (TextModel) super.clone(); }
-        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
-
-        // Reset lines array and length
-        clone._lines = new ArrayList<>(getLineCount());
-        clone._length = 0;
-
-        // Copy lines deep
-        for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
-            TextLine line = getLine(i);
-            TextLine lineClone = line.clone();
-            clone.addLine(lineClone, i);
-        }
-
-        // Return
-        return clone;
     }
 
     /**
