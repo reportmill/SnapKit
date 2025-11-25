@@ -86,8 +86,11 @@ public class TextBlock extends TextModel {
         TextLine textLine = getLineForCharIndex(anIndex);
 
         // If adding at text end and last line and ends with newline, create/add new line (should never happen)
-        if (anIndex == textLine.getEndCharIndex() && textLine.isLastCharNewline())
-            textLine = splitLineAtIndex(textLine, textLine.length());
+        if (anIndex == textLine.getEndCharIndex() && textLine.isLastCharNewline()) {
+            TextLine remainderLine = textLine.splitLineAtIndex(textLine.length());
+            addLine(remainderLine, textLine.getLineIndex() + 1);
+            textLine = remainderLine;
+        }
 
         // Loop vars
         int charsLength = theChars.length();
@@ -161,7 +164,7 @@ public class TextBlock extends TextModel {
         // Get next line to move chars to
         TextLine nextLine = textLine.getNext();
 
-        // If no next line or moving chars + newline, clone line and remove chars
+        // If no next line or moving chars + newline, create/add new line
         if (nextLine == null || startCharIndex < textLine.length() && textLine.isLastCharNewline()) {
             nextLine = textLine.clone();
             nextLine.removeChars(0, nextLine.length());
@@ -253,23 +256,6 @@ public class TextBlock extends TextModel {
     }
 
     /**
-     * Splits given line at given character index and adds remainder to text and returns it.
-     */
-    protected TextLine splitLineAtIndex(TextLine textLine, int anIndex)
-    {
-        // Create remainder from clone and remove respective chars from given line and remainder
-        TextLine remainderLine = textLine.clone();
-        textLine.removeChars(anIndex, length());
-        remainderLine.removeChars(0, anIndex);
-
-        // Add remainder
-        addLine(remainderLine, textLine.getLineIndex() + 1);
-
-        // Return
-        return remainderLine;
-    }
-
-    /**
      * Joins given line with next line.
      */
     protected void joinLineWithNextLine(TextLine textLine)
@@ -345,56 +331,4 @@ public class TextBlock extends TextModel {
         super.setWidth(aValue);
         _lines.forEach(line -> line.updateAlignmentAndJustify());
     }
-
-    /**
-     * Returns a copy of this text for given char range.
-     */
-    public TextModel copyForRange(int aStart, int aEnd)
-    {
-        // Create new RichText and iterate over lines in range to add copies for subrange
-        TextBlock textCopy = (TextBlock) TextModel.createDefaultTextModel(isRichText());
-        textCopy.removeLine(0);
-
-        // Get start/end line indexes
-        int startLineIndex = getLineForCharIndex(aStart).getLineIndex();
-        int endLineIndex = getLineForCharIndex(aEnd).getLineIndex();
-
-        // Iterate over lines and add
-        for (int i = startLineIndex; i <= endLineIndex; i++) {
-            TextLine line = getLine(i);
-            int lineStart = line.getStartCharIndex();
-            int start = Math.max(aStart - lineStart, 0), end = Math.min(aEnd - lineStart, line.length());
-            TextLine lineCopy = line.copyForRange(start, end);
-            textCopy.addLine(lineCopy, textCopy.getLineCount());
-        }
-
-        // Return
-        return textCopy;
-    }
-
-    /**
-     * Standard clone implementation.
-     */
-//    @Override
-//    public TextModel clone()
-//    {
-//        // Do normal clone
-//        TextBlock clone;
-//        try { clone = (TextBlock) super.clone(); }
-//        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
-//
-//        // Reset lines array and length
-//        clone._lines = new ArrayList<>(getLineCount());
-//        clone._length = 0;
-//
-//        // Copy lines deep
-//        for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
-//            TextLine line = getLine(i);
-//            TextLine lineClone = line.clone();
-//            clone.addLine(lineClone, i);
-//        }
-//
-//        // Return
-//        return clone;
-//    }
 }

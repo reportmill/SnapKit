@@ -5,7 +5,6 @@ package snap.text;
 import snap.geom.HPos;
 import snap.util.ArrayUtils;
 import snap.util.CharSequenceX;
-import snap.util.SnapEnv;
 
 /**
  * This class represents a line of text in a Text.
@@ -84,12 +83,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Returns the index of given string in line.
      */
-    public int indexOf(String aStr, int aStart)
-    {
-        if (SnapEnv.isTeaVM)
-            return _sb.toString().indexOf(aStr, aStart);
-        return _sb.indexOf(aStr, aStart);
-    }
+    public int indexOf(String aStr, int aStart)  { return _sb.indexOf(aStr, aStart); }
 
     /**
      * Returns the string for the line.
@@ -114,7 +108,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Adds characters with text style to this line at given index.
      */
-    protected void addCharsWithStyle(CharSequence theChars, TextStyle aStyle, int anIndex)
+    public void addCharsWithStyle(CharSequence theChars, TextStyle aStyle, int anIndex)
     {
         // Add length to run
         TextRun run = getRunForCharIndexAndStyle(anIndex, aStyle);
@@ -132,7 +126,7 @@ public class TextLine implements CharSequenceX, Cloneable {
      * Returns the run to add chars to for given style and char index.
      * Will try to use any adjacent run with conforming style, otherwise, will create/add new.
      */
-    private TextRun getRunForCharIndexAndStyle(int charIndex, TextStyle aStyle)
+    public TextRun getRunForCharIndexAndStyle(int charIndex, TextStyle aStyle)
     {
         // Get run at index (just return if style is null or equal)
         TextRun run = getRunForCharIndex(charIndex);
@@ -903,27 +897,21 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Returns a copy of this line for given char range.
+     * Splits this line at given character index and adds remainder to text and returns it.
      */
-    public TextLine copyForRange(int aStart, int aEnd)
+    protected TextLine splitLineAtIndex(int anIndex)
     {
-        // Do normal clone
-        TextLine clone = clone();
-
-        // Remove leading/trailing chars
-        if (aEnd < length())
-            clone.removeChars(aEnd, length());
-        if (aStart > 0)
-            clone.removeChars(0, aStart);
-
-        // Return
-        return clone;
+        TextLine remainderLine = clone();
+        removeChars(anIndex, length());
+        remainderLine.removeChars(0, anIndex);
+        return remainderLine;
     }
 
     /**
      * Standard clone implementation.
      */
-    public TextLine clone()
+    @Override
+    protected TextLine clone()
     {
         // Do normal version
         TextLine clone;
@@ -932,12 +920,10 @@ public class TextLine implements CharSequenceX, Cloneable {
 
         // Clone StringBuilder, Runs
         clone._sb = new StringBuilder(_sb);
-        if (_runs != null) {
-            clone._runs = _runs.clone();
-            for (int i = 0; i < _runs.length; i++) {
-                TextRun runClone = clone._runs[i] = _runs[i].clone();
-                runClone._textLine = clone;
-            }
+        clone._runs = _runs.clone();
+        for (int i = 0; i < _runs.length; i++) {
+            TextRun runClone = clone._runs[i] = _runs[i].clone();
+            runClone._textLine = clone;
         }
 
         // Return

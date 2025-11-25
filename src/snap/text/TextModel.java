@@ -462,7 +462,23 @@ public abstract class TextModel extends TextLayout implements XMLArchiver.Archiv
     /**
      * Returns a copy of this text for given char range.
      */
-    public abstract TextModel copyForRange(int aStart, int aEnd);
+    public TextModel copyForRange(int aStart, int anEnd)
+    {
+        // Get empty copy
+        TextModel textCopy = TextModel.createDefaultTextModel(isRichText());
+        textCopy.setDefaultTextStyle(getDefaultTextStyle());
+        textCopy.setDefaultLineStyle(getDefaultLineStyle());
+
+        // Add chars for range
+        TextRunIter runIter = getRunIterForCharRange(aStart, anEnd);
+        while (runIter.hasNextRun()) {
+            TextRun textRun = runIter.getNextRun();
+            textCopy.addCharsWithStyle(textRun.getString(), textRun.getTextStyle());
+        }
+
+        // Return
+        return textCopy;
+    }
 
     /**
      * Creates TextTokens for a TextLine.
