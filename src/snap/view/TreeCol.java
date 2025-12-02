@@ -136,7 +136,10 @@ public class TreeCol <T> extends ListView <T> {
             aCell.setImage(itemImage);
 
         // Do normal version
-        super.configureCell(aCell);
+        configureCellFills(aCell);
+        Consumer<ListCell<T>> cellConfigure = getCellConfigure();
+        if (cellConfigure != null)
+            cellConfigure.accept(aCell);
 
         // If no item or not main column, just return
         if (item == null || col > 0)

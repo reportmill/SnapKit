@@ -508,11 +508,9 @@ public class TextModelX extends TextBlock {
                 else removeChars(charIndex, charIndex + removeChars.length());
             }
 
-            // Handle DefaultTextStyle
-            case TextModel.DefaultTextStyle_Prop -> {
-                TextStyle textStyle = (TextStyle) propChange.getNewValue();
-                setDefaultTextStyle(textStyle);
-            }
+            // Handle DefaultTextStyle, DefaultLineStyle
+            case TextModel.DefaultTextStyle_Prop -> setDefaultTextStyle((TextStyle) propChange.getNewValue());
+            case TextModel.DefaultLineStyle_Prop -> setDefaultLineStyle((TextLineStyle) propChange.getNewValue());
 
             // Handle anything else
             default -> System.out.println("TextModelX.handleSourceTextPropChange: Not syncing property: " + propName);
