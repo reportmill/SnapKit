@@ -519,9 +519,8 @@ public class TextModelX extends TextBlock {
 
             // Handle LineStyle
             case TextModel.LineStyle_Prop -> {
-                TextModelUtils.LineStyleChange styleChange = (TextModelUtils.LineStyleChange) propChange;
                 TextLineStyle textLineStyle = (TextLineStyle) propChange.getNewValue();
-                int lineIndex = styleChange.getIndex();
+                int lineIndex = propChange.getIndex();
                 TextLine textLine = getLine(lineIndex);
                 setLineStyle(textLineStyle, textLine.getStartCharIndex(), textLine.getEndCharIndex());
             }
