@@ -508,6 +508,24 @@ public class TextModelX extends TextBlock {
                 else removeChars(charIndex, charIndex + removeChars.length());
             }
 
+            // Handle Style
+            case TextModel.Style_Prop -> {
+                TextModelUtils.StyleChange styleChange = (TextModelUtils.StyleChange) propChange;
+                TextStyle textStyle = (TextStyle) propChange.getNewValue();
+                int startIndex = styleChange.getStart();
+                int endIndex = styleChange.getEnd();
+                setTextStyle(textStyle, startIndex, endIndex);
+            }
+
+            // Handle LineStyle
+            case TextModel.LineStyle_Prop -> {
+                TextModelUtils.LineStyleChange styleChange = (TextModelUtils.LineStyleChange) propChange;
+                TextLineStyle textLineStyle = (TextLineStyle) propChange.getNewValue();
+                int lineIndex = styleChange.getIndex();
+                TextLine textLine = getLine(lineIndex);
+                setLineStyle(textLineStyle, textLine.getStartCharIndex(), textLine.getEndCharIndex());
+            }
+
             // Handle DefaultTextStyle, DefaultLineStyle
             case TextModel.DefaultTextStyle_Prop -> setDefaultTextStyle((TextStyle) propChange.getNewValue());
             case TextModel.DefaultLineStyle_Prop -> setDefaultLineStyle((TextLineStyle) propChange.getNewValue());
