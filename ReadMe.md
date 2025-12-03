@@ -418,9 +418,9 @@ work with the same files and sites.
 The SnapKit **[WebAPI](https://github.com/reportmill/SnapKit/tree/master/src/snap/webapi)** package provides a
 set of WebAPI wrapper classes that are a bridge to the browser WebAPIs. This allows Java developers to directly manipulate
 the DOM when running in the browser. SnapKit itself uses this package in the browser to get native graphics
-acceleration, 3D and more.
+acceleration, 3D and more. [More information is available here](https://github.com/reportmill/SnapKit/wiki/The-WebAPI-package).
 
-[More information is available here](https://github.com/reportmill/SnapKit/wiki/The-WebAPI-package).
+<img width="569" height="480" alt="DomSamples" src="https://github.com/user-attachments/assets/3b8b1790-7b6d-4039-9479-42dad2d33bef" />
 
 ## The SnapBuilder UI Builder
 
