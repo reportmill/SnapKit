@@ -1,4 +1,5 @@
 package snap.webenv;
+import org.w3c.dom.html.HTMLFrameElement;
 import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
 import snap.view.ViewUtils;
@@ -294,21 +295,40 @@ public class CJProcess extends Process {
      */
     private void handleIframeChildListChange(MutationRecord[] mutationRecords)
     {
-        // Iterate over mutation records
+        // Iterate over mutation records and show screen if any added node shows activity
         for (MutationRecord mutationRecord : mutationRecords) {
             Node[] addedNodes = mutationRecord.getAddedNodes();
             for (Node addedNode : addedNodes) {
-                if (addedNode instanceof HTMLDivElement div) {
-
-                    // If Swing/Snapkit window, make iframe visible and disconnect observer
-                    if (Objects.equals(div.getId(), "WindowDiv") || div.getClassName().startsWith("cjTitleBar")) {
-                        _iframe.getStyle().setProperty("z-index", "1");
-                        _iframeChildListChangeLsnr.disconnect();
-                        return;
-                    }
+                if (isActiveScreenForAddedNode(addedNode)) {
+                    _iframe.getStyle().setProperty("z-index", "1");
+                    _iframeChildListChangeLsnr.disconnect();
+                    return;
                 }
             }
         }
+    }
+
+    /**
+     * Returns whether given added node indicates that screen is active (e.g.: swing/snapkit window added)
+     */
+    private static boolean isActiveScreenForAddedNode(Node addedNode)
+    {
+        // If Swing/Snapkit window, return true
+        if (addedNode instanceof HTMLDivElement div) {
+            if (Objects.equals(div.getId(), "WindowDiv") || div.getClassName().startsWith("cjTitleBar"))
+                return true;
+        }
+
+        // If canvas/image, return true
+        else if (addedNode instanceof CanvasImageSource)
+            return true;
+
+        // If anything other than script or frame, return true
+        else if (!(addedNode instanceof HTMLScriptElement) && !(addedNode instanceof HTMLFrameElement))
+            return true;
+
+        // Return false
+        return false;
     }
 
     /**
