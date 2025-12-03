@@ -22,6 +22,7 @@ SnapKit is designed to resolve this with no compromises.
 * [The Games Package](#the-games-package)
 * [The 3D Graphics Package](#the-3d-graphics-package)
 * [The Web Package](#the-web-package)
+* [The WebAPI Package](#the-webapi-package)
 * [The SnapBuilder UI Builder](#the-snapbuilder-ui-builder)
 * [Integrated Runtime Developer Tools](#integrated-runtime-developer-tools)
 * [Including SnapKit with Gradle and Maven](#including-snapkit-with-gradle-and-maven)
@@ -411,6 +412,15 @@ These classes make it easy to ambiguously work with files regardless of whether 
 or from a remote HTTP site or even from a Zip archive file, Github repository or DropBox account. The package provides
 unique shared instances of WebFile and WebSite to make it easy to track changes across different modules of code that
 work with the same files and sites.
+
+## The WebAPI Package
+
+The SnapKit **[WebAPI](https://github.com/reportmill/SnapKit/tree/master/src/snap/webapi)** package provides a
+set of WebAPI wrapper classes that are a bridge to the browser WebAPIs. This allows Java developers to directly manipulate
+the DOM when running in the browser. SnapKit itself uses this package in the browser to get native graphics
+acceleration, 3D and more.
+
+[More information is available here](https://github.com/reportmill/SnapKit/wiki/The-WebAPI-package).
 
 ## The SnapBuilder UI Builder
 
