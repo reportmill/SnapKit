@@ -1,5 +1,6 @@
 package snap.util;
 import snap.gfx.GFXEnv;
+import snap.webenv.CJWebEnv;
 
 /**
  * This class manages information about the SnapKit environment.
@@ -49,8 +50,10 @@ public class SnapEnv {
     {
         // Get class name for platform GFXEnv
         String className = isTeaVM ? "snaptea.TV" : "snap.swing.AWTEnv";
-        if (isWebVM || isJxBrowser)
-            className = "snapcj.CJEnv";
+        if (isWebVM || isJxBrowser) {
+            try { CJWebEnv.get().window(); className = "snap.webenv.CJEnv"; }
+            catch (Throwable ignore) { }
+        }
 
         // Return GFXEnv class
         try { return (Class<? extends GFXEnv>) Class.forName(className); }
