@@ -49,18 +49,18 @@ its age and lack of recent updates. There are still many things developers love:
 - Relatively easy to create and update UI and respond to user input and UI changes
 - Full set of geometric shape primitives: Line, Rect, Ellipse, Path, Polygon, etc.
 - Easily set component borders, fills, and fonts with simple API
-- The whole convenient painting model - just override paint() to customize
-- It handles property changes in conventional Java property change manner
-- It binds easily with POJOs
+- Has convenient painting model - just override paint() to customize
+- Handles property changes in conventional Java property change manner
+- Binds easily with POJOs
 
-When JavaFX was introduced it rewrote the rulebook for Java UI with dramatic changes, often for the better:
+When JavaFX was introduced it rewrote the rules for Java UI with dramatic changes, often for the better:
 
 - Easily mix graphics and app controls
 - Easily add gradients, textures, effects
 - Set arbitrary transforms (rotate, scale, skew) on any node
-- It has built-in binding support to easily wire values across objects
-- It has a full set of nodes for easy layout: Box, BorderView, StackPane, etc.
-- It has support for easily defining UI in a separate text file (FXML)
+- Has built-in binding support to easily wire values across objects
+- Has a full set of nodes for easy layout: Box, BorderView, StackPane, etc.
+- Has support for easily defining UI in a text file (FXML)
 
 ## SnapKit Advantages
 
@@ -68,10 +68,10 @@ SnapKit is the right blend of modern and conventional. SnapKit tries to be more 
 keeps the basic simplicity and standard conventions of Swing while adding the visual richness of JavaFX and bringing the
 whole thing to the browser:
 
-- It provides all the essential features of Swing and JavaFX (above)
-- It runs on top of Swing, JavaFX and HTML DOM
-- It is easily portable to any future UI kit and platform
-- The base class is called View (that puts the V in MVC!)
+- Provides all the essential features of Swing and JavaFX (above)
+- Runs on top of Swing, JavaFX and HTML DOM
+- Easily portable to any future UI kit and platform
+- The base class is called View (that puts the V back in MVC)
 - The ViewOwner class provides control functionally
 - The ViewEvent class unifies all input events for more consistent handling
 
@@ -176,12 +176,13 @@ The same applies to ViewEvent (the sole parameter to respondUI()):
 ```
 public void respondUI(ViewEvent anEvent)
 {
-    // Handle MyTextField, MySlider, ...
-    if (anEvent.equals("MyTextField"))
-        _myModel.updatePropertyForTextField(anEvent.getStringValue());
-    if (anEvent.equals("MySlider"))
-        _myModel.updatePropertyForSlider(anEvent.getFloatValue());
-    ...
+    switch (anEvent.getName()) {
+
+      // Handle MyTextField, MySlider, ...
+      case "MyTextField" -> _myModel.setPropertyForTextField(anEvent.getStringValue());
+      case "MySlider" -> _myModel.setPropertyForSlider(anEvent.getFloatValue());
+      ...
+    }
 }
 ```
 
