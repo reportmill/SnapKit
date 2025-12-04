@@ -349,17 +349,35 @@ public class TextLine extends TextModel implements Cloneable {
         // If already set, just return
         if (_y >= 0) return _y;
 
-        // Get Y from previous line. Need to fix this to not stack overflow for large text showing tail first.
-        double y = 0;
+        // Get previous line - if this is first line, just return/set 0
         TextLine previousLine = getPrevious();
-        if (previousLine != null) {
-            double prevY = previousLine.getY();
-            double prevH = previousLine.getMetrics().getLineAdvance();
-            y = prevY + prevH;
-        }
+        if (previousLine == null)
+            return _y = 0;
 
-        // Set and return
-        return _y = y;
+        // If previous line Y not yet defined, define lines in a non-recursive way to avoid stack overflow
+        if (previousLine._y < 0)
+            defineLineYsNoRecursion();
+
+        // Get Y from previous line Y + advance
+        double prevY = previousLine.getY();
+        double prevH = previousLine.getMetrics().getLineAdvance();
+        return _y = prevY + prevH;
+    }
+
+    /**
+     * Finds the last line with defined Y and define forward to avoid recursion and stack overflow.
+     */
+    private void defineLineYsNoRecursion()
+    {
+        // Get last defined line index
+        int lineIndex = getLineIndex();
+        int lastDefinedLineIndex = lineIndex - 1;
+        while (lastDefinedLineIndex > 0 && _textModel.getLine(lastDefinedLineIndex)._y < 0)
+            lastDefinedLineIndex--;
+
+        // Define line Y's forward to this line
+        while (lastDefinedLineIndex != lineIndex)
+            _textModel.getLine(lastDefinedLineIndex++).getY();
     }
 
     /**
