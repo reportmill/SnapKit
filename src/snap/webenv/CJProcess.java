@@ -1,5 +1,4 @@
 package snap.webenv;
-import org.w3c.dom.html.HTMLFrameElement;
 import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
 import snap.view.ViewUtils;
@@ -300,6 +299,9 @@ public class CJProcess extends Process {
             Node[] addedNodes = mutationRecord.getAddedNodes();
             for (Node addedNode : addedNodes) {
                 if (isActiveScreenForAddedNode(addedNode)) {
+                    System.out.println("Activating for node " + addedNode.getNodeName() + ", id: " + addedNode.getClass().getSimpleName());
+                    if (addedNode instanceof HTMLElement htmlElement)
+                        System.out.println("  also id: " + htmlElement.getId() + ", class: " + htmlElement.getClassName());
                     _iframe.getStyle().setProperty("z-index", "1");
                     _iframeChildListChangeLsnr.disconnect();
                     return;
@@ -314,21 +316,19 @@ public class CJProcess extends Process {
     private static boolean isActiveScreenForAddedNode(Node addedNode)
     {
         // If Swing/Snapkit window, return true
-        if (addedNode instanceof HTMLDivElement div) {
-            if (Objects.equals(div.getId(), "WindowDiv") || div.getClassName().startsWith("cjTitleBar"))
-                return true;
-        }
+        if (addedNode instanceof HTMLDivElement div)
+            return div.getClassName().startsWith("cjTitleBar") ||  Objects.equals(div.getId(), "WindowDiv");
 
-        // If canvas/image, return true
-        else if (addedNode instanceof CanvasImageSource)
-            return true;
+        // If Script, iframe or Text, return false
+        if (addedNode instanceof HTMLScriptElement)
+            return false;
+        if (addedNode instanceof HTMLIFrameElement)
+            return false;
+        if (addedNode instanceof Text)
+            return false;
 
-        // If anything other than script or frame, return true
-        else if (!(addedNode instanceof HTMLScriptElement) && !(addedNode instanceof HTMLFrameElement))
-            return true;
-
-        // Return false
-        return false;
+        // Return true
+        return true;
     }
 
     /**
