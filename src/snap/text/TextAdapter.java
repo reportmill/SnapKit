@@ -1070,9 +1070,9 @@ public class TextAdapter extends PropObject {
             case MouseDrag: mouseDragged(anEvent); break;
             case MouseRelease: mouseReleased(anEvent); break;
             case MouseMove: mouseMoved(anEvent); break;
-            case KeyPress: keyPressed(anEvent); break;
-            case KeyType: keyTyped(anEvent); break;
-            case KeyRelease: keyReleased(anEvent); break;
+            case KeyPress: handleKeyPressEvent(anEvent); break;
+            case KeyType: handleKeyTypeEvent(anEvent); break;
+            case KeyRelease: handleKeyReleaseEvent(anEvent); break;
         }
 
         // Consume all mouse events
@@ -1165,91 +1165,108 @@ public class TextAdapter extends PropObject {
     /**
      * Called when a key is pressed.
      */
-    public void keyPressed(ViewEvent anEvent)
+    public void handleKeyPressEvent(ViewEvent anEvent)
     {
         // Get event info
-        int keyCode = anEvent.getKeyCode();
-        boolean shortcutDown = anEvent.isShortcutDown();
-        boolean controlDown = anEvent.isControlDown();
-        boolean emacsDown = SnapEnv.isWindows ? anEvent.isAltDown() : controlDown;
-        boolean shiftDown = anEvent.isShiftDown();
+        boolean emacsDown = SnapEnv.isWindows ? anEvent.isAltDown() : anEvent.isControlDown();
 
         // Reset caret
         setCaretAnim(false);
         setShowCaret(isCaretNeeded());
 
         // Handle shortcut keys
-        if (shortcutDown) {
+        if (anEvent.isShortcutDown())
+            handleShortcutKeyPressEvent(anEvent);
 
-            // If shift-down, just return
-            if (shiftDown && keyCode != KeyCode.Z) return;
+        // Handle emacs keys
+        else if (emacsDown)
+            handleEmacsKeyPressEvent(anEvent);
 
-            // Handle common command keys
-            switch(keyCode) {
-                case KeyCode.X: cut(); anEvent.consume(); break; // Handle command-x cut
-                case KeyCode.C: copy(); anEvent.consume(); break; // Handle command-c copy
-                case KeyCode.V: paste(); anEvent.consume(); break; // Handle command-v paste
-                case KeyCode.A: selectAll(); anEvent.consume(); break; // Handle command-a select all
-                case KeyCode.Z:
-                    if (shiftDown)
-                        redo();
-                    else undo();
-                    anEvent.consume(); break; // Handle command-z undo
-                case KeyCode.Y: redo(); break;
-            }
+        // Handle anything else
+        else handlePlainKeyPressEvent(anEvent);
+    }
+
+    /**
+     * Called when a shortcut key is pressed.
+     */
+    protected void handleShortcutKeyPressEvent(ViewEvent anEvent)
+    {
+        // If shift-down, just return
+        int keyCode = anEvent.getKeyCode();
+        boolean shiftDown = anEvent.isShiftDown();
+        if (shiftDown && keyCode != KeyCode.Z)
+            return;
+
+        // Handle common command keys
+        switch(keyCode) {
+            case KeyCode.X: cut(); anEvent.consume(); break; // Handle command-x cut
+            case KeyCode.C: copy(); anEvent.consume(); break; // Handle command-c copy
+            case KeyCode.V: paste(); anEvent.consume(); break; // Handle command-v paste
+            case KeyCode.A: selectAll(); anEvent.consume(); break; // Handle command-a select all
+            case KeyCode.Z:
+                if (shiftDown)
+                    redo();
+                else undo();
+                anEvent.consume(); break; // Handle command-z undo
+            case KeyCode.Y: redo(); break;
         }
+    }
 
-        // Handle control keys (not applicable on Windows, since they are handled by command key code above)
-        else if (emacsDown) {
+    /**
+     * Called when an emacs key is pressed.
+     */
+    protected void handleEmacsKeyPressEvent(ViewEvent anEvent)
+    {
+        // If shift down, just return
+        if (anEvent.isShiftDown()) return;
 
-            // If shift down, just return
-            if (shiftDown) return;
-
-            // Handle common emacs key bindings
-            switch (keyCode) {
-                case KeyCode.F: selectForward(); break; // Handle control-f key forward
-                case KeyCode.B: selectBackward(); break; // Handle control-b key backward
-                case KeyCode.P: selectUp(); break; // Handle control-p key up
-                case KeyCode.N: selectDown(); break; // Handle control-n key down
-                case KeyCode.A: selectLineStart(); break; // Handle control-a line start
-                case KeyCode.E: selectLineEnd(); break; // Handle control-e line end
-                case KeyCode.D: deleteForward(); break; // Handle control-d delete forward
-                case KeyCode.K: deleteToLineEnd(); break; // Handle control-k delete line to end
-            }
+        // Handle common emacs key bindings
+        switch (anEvent.getKeyCode()) {
+            case KeyCode.F: selectForward(); break; // Handle control-f key forward
+            case KeyCode.B: selectBackward(); break; // Handle control-b key backward
+            case KeyCode.P: selectUp(); break; // Handle control-p key up
+            case KeyCode.N: selectDown(); break; // Handle control-n key down
+            case KeyCode.A: selectLineStart(); break; // Handle control-a line start
+            case KeyCode.E: selectLineEnd(); break; // Handle control-e line end
+            case KeyCode.D: deleteForward(); break; // Handle control-d delete forward
+            case KeyCode.K: deleteToLineEnd(); break; // Handle control-k delete line to end
         }
+    }
 
-        // Handle supported non-character keys
-        else {
-            switch (keyCode) {
+    /**
+     * Called when a plain key is pressed (not shortcut or emacs).
+     */
+    protected void handlePlainKeyPressEvent(ViewEvent anEvent)
+    {
+        switch (anEvent.getKeyCode()) {
 
-                // Handle Tab, Enter
-                case KeyCode.TAB: replaceChars("\t"); anEvent.consume(); break;
-                case KeyCode.ENTER: replaceChars("\n"); anEvent.consume(); break;
+            // Handle Tab, Enter
+            case KeyCode.TAB: handleTabKeyPressEvent(anEvent); break;
+            case KeyCode.ENTER: handleEnterKeyPressEvent(anEvent); break;
 
-                // Handle Left, Right, Up, Down arrows
-                case KeyCode.LEFT: selectBackward(); anEvent.consume(); break;
-                case KeyCode.RIGHT: selectForward(); anEvent.consume(); break;
-                case KeyCode.UP: selectUp(); anEvent.consume(); break;
-                case KeyCode.DOWN: selectDown(); anEvent.consume(); break;
+            // Handle Left, Right, Up, Down arrows
+            case KeyCode.LEFT: selectBackward(); anEvent.consume(); break;
+            case KeyCode.RIGHT: selectForward(); anEvent.consume(); break;
+            case KeyCode.UP: selectUp(); anEvent.consume(); break;
+            case KeyCode.DOWN: selectDown(); anEvent.consume(); break;
 
-                // Handle Home, End
-                case KeyCode.HOME: selectLineStart(); break;
-                case KeyCode.END: selectLineEnd(); break;
+            // Handle Home, End
+            case KeyCode.HOME: selectLineStart(); break;
+            case KeyCode.END: selectLineEnd(); break;
 
-                // Handle Backspace, Delete
-                case KeyCode.BACK_SPACE: deleteBackward(); anEvent.consume(); break;
-                case KeyCode.DELETE: deleteForward(); anEvent.consume(); break;
+            // Handle Backspace, Delete
+            case KeyCode.BACK_SPACE: handleBackSpaceKeyPressEvent(anEvent); break;
+            case KeyCode.DELETE: deleteForward(); anEvent.consume(); break;
 
-                // Handle Space key
-                case KeyCode.SPACE: anEvent.consume(); break;
-            }
+            // Handle Space key
+            case KeyCode.SPACE: anEvent.consume(); break;
         }
     }
 
     /**
      * Called when a key is typed.
      */
-    public void keyTyped(ViewEvent anEvent)
+    public void handleKeyTypeEvent(ViewEvent anEvent)
     {
         // Get event info
         String keyChars = anEvent.getKeyString();
@@ -1269,9 +1286,36 @@ public class TextAdapter extends PropObject {
     /**
      * Called when a key is released.
      */
-    public void keyReleased(ViewEvent anEvent)
+    public void handleKeyReleaseEvent(ViewEvent anEvent)
     {
         updateCaretAnim();
+    }
+
+    /**
+     * Called when adapter gets Enter key pressed event.
+     */
+    protected void handleEnterKeyPressEvent(ViewEvent anEvent)
+    {
+        replaceChars("\n");
+        anEvent.consume();
+    }
+
+    /**
+     * Called when adapter gets backspace key pressed event.
+     */
+    protected void handleBackSpaceKeyPressEvent(ViewEvent anEvent)
+    {
+        deleteBackward();
+        anEvent.consume();
+    }
+
+    /**
+     * Called when adapter gets tab key pressed event.
+     */
+    protected void handleTabKeyPressEvent(ViewEvent anEvent)
+    {
+        replaceChars("\t");
+        anEvent.consume();
     }
 
     /**

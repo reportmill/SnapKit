@@ -452,17 +452,17 @@ public class TextArea extends ParentView {
     /**
      * Called when a key is pressed.
      */
-    protected void keyPressed(ViewEvent anEvent)  { _textAdapter.keyPressed(anEvent); }
+    protected void keyPressed(ViewEvent anEvent)  { _textAdapter.handleKeyPressEvent(anEvent); }
 
     /**
      * Called when a key is typed.
      */
-    protected void keyTyped(ViewEvent anEvent)  { _textAdapter.keyTyped(anEvent); }
+    protected void keyTyped(ViewEvent anEvent)  { _textAdapter.handleKeyTypeEvent(anEvent); }
 
     /**
      * Called when a key is released.
      */
-    protected void keyReleased(ViewEvent anEvent)  { _textAdapter.keyReleased(anEvent); }
+    protected void keyReleased(ViewEvent anEvent)  { _textAdapter.handleKeyReleaseEvent(anEvent); }
 
     /**
      * Called when action event is received.

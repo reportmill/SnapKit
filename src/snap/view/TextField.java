@@ -405,8 +405,8 @@ public class TextField extends ParentView {
             case MouseRelease: _textAdapter.mouseReleased(anEvent); break;
             case MouseMove: _textAdapter.mouseMoved(anEvent); break;
             case KeyPress: keyPressed(anEvent); break;
-            case KeyType: _textAdapter.keyTyped(anEvent); break;
-            case KeyRelease: _textAdapter.keyReleased(anEvent); break;
+            case KeyType: _textAdapter.handleKeyTypeEvent(anEvent); break;
+            case KeyRelease: _textAdapter.handleKeyReleaseEvent(anEvent); break;
             case Action: processActionEvent(anEvent);
         }
 
@@ -432,7 +432,7 @@ public class TextField extends ParentView {
             escape(anEvent);
 
         // Forward to text adapter
-        else _textAdapter.keyPressed(anEvent);
+        else _textAdapter.handleKeyPressEvent(anEvent);
 
         // Handle BackSpace: If auto-completing, run extra time to delete selection and char
         if (_autoCompleting && anEvent.isBackSpaceKey()) {
