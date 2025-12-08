@@ -363,39 +363,24 @@ public class CJScreen {
     /**
      * Called when body gets keyDown.
      */
-    public void keyDown(KeyboardEvent anEvent)
+    public void keyDown(KeyboardEvent keyboardEvent)
     {
-        ViewEvent event = createEvent(_win, anEvent, View.KeyPress, null);
-        _win.dispatchEventToWindow(event);
+        ViewEvent keyPressEvent = createEvent(_win, keyboardEvent, View.KeyPress, null);
+        _win.dispatchEventToWindow(keyPressEvent);
 
-        // If key name is special/modifier key name, just return
-        String keyName = anEvent.getKey();
-        if (keyName == null || keyName.isEmpty() || IGNORE_KEY_NAMES.contains(keyName))
-            return;
-
-        // Forward to keyPress
-        keyPress(anEvent);
-    }
-
-    // Key names to ignore
-    private static Set<String> IGNORE_KEY_NAMES = Set.of("Control", "Alt", "Meta", "Shift", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
-        "Enter", "Backspace", "Escape");
-
-    /**
-     * Called when body gets keyPress.
-     */
-    public void keyPress(KeyboardEvent anEvent)
-    {
-        ViewEvent event = createEvent(_win, anEvent, View.KeyType, null);
-        _win.dispatchEventToWindow(event);
+        // If event is typeable, send as KeyType too
+        if (isTypeableKeyboardEvent(keyboardEvent)) {
+            ViewEvent keyTypeEvent = createEvent(_win, keyboardEvent, View.KeyType, null);
+            _win.dispatchEventToWindow(keyTypeEvent);
+        }
     }
 
     /**
      * Called when body gets keyUp.
      */
-    public void keyUp(KeyboardEvent anEvent)
+    public void keyUp(KeyboardEvent keyboardEvent)
     {
-        ViewEvent event = createEvent(_win, anEvent, View.KeyRelease, null);
+        ViewEvent event = createEvent(_win, keyboardEvent, View.KeyRelease, null);
         _win.dispatchEventToWindow(event);
     }
 
@@ -582,4 +567,25 @@ public class CJScreen {
         getScreen();
         return _screenDiv;
     }
+
+    /**
+     * Returns whether given keyboard event can be typed.
+     */
+    private static boolean isTypeableKeyboardEvent(KeyboardEvent keyboardEvent)
+    {
+        // If control/command modifier is down, just return
+        if (keyboardEvent.isCtrlKey() || keyboardEvent.isMetaKey())
+            return false;
+
+        // If key name is special/modifier key name, just return
+        String keyName = keyboardEvent.getKey();
+        if (keyName == null || keyName.isEmpty() || IGNORE_KEY_NAMES.contains(keyName))
+            return false;
+
+        return true;
+    }
+
+    // Key names to ignore
+    private static Set<String> IGNORE_KEY_NAMES = Set.of("Control", "Alt", "Meta", "Shift", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+            "Enter", "Backspace", "Escape");
 }
