@@ -21,7 +21,8 @@ snap/text/*.java \
 snap/util/*.java \
 snap/view/*.java \
 snap/viewx/*.java \
-snap/web/*.java
+snap/web/*.java \
+snap/webapi/*.java
 
 # Create javadoc.zip
 echo "Zipping javadoc.zip"
