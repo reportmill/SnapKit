@@ -132,8 +132,12 @@ public class TextRun implements CharSequenceX, Cloneable {
 
         // Iterate over chars and accumulate width
         double width = 0;
-        for (int i = 0; i < endCharIndex; i++)
-            width += _textStyle.getCharAdvance(charAt(i));
+        for (int i = 0; i < endCharIndex; i++) {
+            char loopChar = charAt(i);
+            if (loopChar == '\t')
+                width = _textLine.getXForTabAtIndexAndX(i, width);
+            else width += _textStyle.getCharAdvance(charAt(i));
+        }
 
         // Add char spacing
         if (endCharIndex > 1 && getCharSpacing() > 0)
