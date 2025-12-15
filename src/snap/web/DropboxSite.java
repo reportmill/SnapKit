@@ -3,8 +3,8 @@
  */
 package snap.web;
 import snap.util.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
@@ -14,9 +14,6 @@ public class DropboxSite extends WebSite {
 
     // Header value
     private static String _atok;
-
-    // Constants
-    private static DateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
 
     // Constants for Dropbox endpoints
     private static final String GET_METADATA = "https://api.dropboxapi.com/2/files/get_metadata";
@@ -149,9 +146,8 @@ public class DropboxSite extends WebSite {
         // Get last modified date from JSON response and set in web response
         String lastModifiedDateStr = jsonResp.getStringValue("server_modified");
         if (lastModifiedDateStr != null && lastModifiedDateStr.endsWith("Z")) {
-            Date lastModifiedDate = parseJsonDateString(lastModifiedDateStr);
-            if (lastModifiedDate != null)
-                aResp.setLastModTime(lastModifiedDate.getTime());
+            Instant lastModifiedDate = parseJsonDateString(lastModifiedDateStr);
+            aResp.setLastModTime(lastModifiedDate.toEpochMilli());
         }
         else System.err.println("DropboxSite.doPutFile: Can't get save mod time: " + jsonResp);
     }
@@ -307,9 +303,8 @@ public class DropboxSite extends WebSite {
             // Get/set last modified date
             String lastModifiedDateStr = fileEntry.getStringValue("server_modified");
             if (lastModifiedDateStr.endsWith("Z")) {
-                Date lastModifiedDate = parseJsonDateString(lastModifiedDateStr);
-                if (lastModifiedDate != null)
-                    fileHeader.setLastModTime(lastModifiedDate.getTime());
+                Instant lastModifiedDate = parseJsonDateString(lastModifiedDateStr);
+                fileHeader.setLastModTime(lastModifiedDate.toEpochMilli());
             }
         }
 
@@ -318,11 +313,14 @@ public class DropboxSite extends WebSite {
     }
 
     /**
-     * Parses a string as a JSON formatted date.
+     * Parses a string as a JSON formatted date ("yyyy-MM-dd'T'HH:mm:ssZ"), e.g.: "2025-12-12T19:50:42Z".
      */
-    private static Date parseJsonDateString(String dateString)
+    private static Instant parseJsonDateString(String dateString)
     {
-        try { return JSON_DATE_FORMAT.parse(dateString); }
-        catch (Exception e) { System.err.println(e.getMessage()); return null; }
+        try { return Instant.parse(dateString); }
+        catch (DateTimeParseException e) {
+            System.err.println("DropboxSite.parseJsonDateString: " + e.getMessage());
+            return Instant.now();
+        }
     }
 }
