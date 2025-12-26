@@ -237,34 +237,6 @@ public class StringView extends View implements Cloneable {
     }
 
     /**
-     * Returns the text bounds for the given range of characters.
-     */
-    public Rect getTextBounds(int aStart, int aEnd)
-    {
-        // Get text, font and full text bounds
-        String text = getText();
-        Font font = getFont();
-        Rect bnds = getTextBounds();
-
-        // Trim left edge by characters up to start
-        for (int i = 0; i < aStart; i++) {
-            char c = text.charAt(i);
-            double dx = font.charAdvance(c);
-            bnds.x += dx;
-            bnds.width -= dx;
-        }
-
-        // Trim right edge by characters after end
-        for (int i = aEnd, iMax = text.length(); i < iMax; i++) {
-            char c = text.charAt(i);
-            bnds.width -= font.charAdvance(c);
-        }
-
-        // Return bounds
-        return bnds;
-    }
-
-    /**
      * Returns the char index for the X location.
      */
     public int getCharIndexForX(double aX)

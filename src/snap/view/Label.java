@@ -42,8 +42,7 @@ public class Label extends ParentView {
         super();
 
         // Create text area and add
-        _textArea = new TextArea();
-        _textArea.setAlignX(getAlignX());
+        _textArea = new TextArea(TextModel.createDefaultTextModel());
         _textArea.setVisible(false);
         addChild(_textArea);
     }
