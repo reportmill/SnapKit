@@ -7,6 +7,7 @@ import snap.util.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -264,6 +265,11 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      * Returns the modified date.
      */
     public Date getLastModDate()  { return new Date(_lastModTime); }
+
+    /**
+     * Returns the modified time as instant.
+     */
+    public Instant getLastModInstant()  { return Instant.ofEpochMilli(_lastModTime); }
 
     /**
      * Returns the file size.
