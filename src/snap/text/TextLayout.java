@@ -3,11 +3,11 @@ import snap.geom.HPos;
 import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.geom.VPos;
-import snap.gfx.Border;
 import snap.gfx.Font;
 import snap.gfx.Painter;
 import snap.props.PropObject;
 import snap.util.CharSequenceX;
+import snap.util.ListUtils;
 import snap.util.MathUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -303,11 +303,8 @@ public abstract class TextLayout extends PropObject implements CharSequenceX {
     public boolean isUnderlined()
     {
         // Handle Rich
-        if (isRichText()) {
-            for (TextLine line : getLines())
-                if (line.isUnderlined())
-                    return true;
-        }
+        if (isRichText())
+            return ListUtils.hasMatch(getLines(), line -> line.isUnderlined());
 
         TextStyle textStyle = getTextStyleForCharIndex(0);
         return textStyle.isUnderlined();
@@ -517,46 +514,11 @@ public abstract class TextLayout extends PropObject implements CharSequenceX {
                 break;
 
             // Paint line
-            double lineY = getAlignedY() + textLine.getBaseline();
-            paintLine(aPntr, textLine, lineY);
+            textLine.paint(aPntr);
         }
-
-        // Paint underlines
-        if (isUnderlined())
-            paintUnderlines(aPntr, textClipBounds);
 
         // Restore state
         aPntr.restore();
-    }
-
-    /**
-     * Paint text line to given painter.
-     */
-    public void paintLine(Painter aPntr, TextLine textLine, double lineY)
-    {
-        TextToken[] lineTokens = textLine.getTokens();
-
-        // Iterate over line tokens
-        for (TextToken token : lineTokens) {
-
-            // Set token font and color
-            aPntr.setFont(token.getFont());
-            aPntr.setPaint(token.getTextColor());
-
-            // Do normal paint token
-            String tokenStr = token.getString();
-            double tokenX = token.getTextX();
-            double charSpacing = token.getTextStyle().getCharSpacing();
-            aPntr.drawString(tokenStr, tokenX, lineY, charSpacing);
-
-            // Handle TextBorder: Get outline and stroke
-            Border border = token.getTextStyle().getBorder();
-            if (border != null) {
-                aPntr.setPaint(border.getColor());
-                aPntr.setStroke(border.getStroke());
-                aPntr.strokeString(tokenStr, tokenX, lineY, charSpacing);
-            }
-        }
     }
 
     /**
@@ -585,29 +547,6 @@ public abstract class TextLayout extends PropObject implements CharSequenceX {
 
         // Return
         return underlineRuns;
-    }
-
-    /**
-     * Paints text underlines with given painter.
-     */
-    private void paintUnderlines(Painter aPntr, Rect clipRect)
-    {
-        for (TextRun run : getUnderlineRuns(clipRect)) {
-
-            // Set underline color and width
-            TextLine textLine = run.getLine();
-            Font font = run.getFont();
-            double underlineOffset = Math.ceil(Math.abs(font.getUnderlineOffset()));
-            double underlineThickness = font.getUnderlineThickness();
-            aPntr.setColor(run.getColor());
-            aPntr.setStrokeWidth(underlineThickness);
-
-            // Get underline endpoints and draw line
-            double lineX = textLine.getTextX() + run.getX();
-            double lineMaxX = lineX + run.getWidth() - run.getTrailingWhitespaceWidth();
-            double lineY = textLine.getTextBaseline() + underlineOffset;
-            aPntr.drawLine(lineX, lineY, lineMaxX, lineY);
-        }
     }
 
     /**

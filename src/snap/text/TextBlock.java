@@ -70,7 +70,7 @@ public class TextBlock extends TextModel {
     protected void removeLine(int anIndex)
     {
         TextLine line = _lines.remove(anIndex);
-        line._textModel = null;
+        line._textModel = line;
         updateLines(anIndex - 1);
     }
 

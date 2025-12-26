@@ -3,6 +3,10 @@
  */
 package snap.text;
 import snap.geom.HPos;
+import snap.geom.Rect;
+import snap.gfx.Border;
+import snap.gfx.Font;
+import snap.gfx.Painter;
 import snap.util.ArrayUtils;
 import java.util.List;
 
@@ -435,12 +439,12 @@ public class TextLine extends TextModel implements Cloneable {
     /**
      * Returns the line x in text model coords.
      */
-    public double getTextX()  { return getX() + _textModel.getX(); }
+    public double getTextX()  { return _textModel == this ? getX() : getX() + _textModel.getX(); }
 
     /**
      * Returns the line y.
      */
-    public double getTextY()  { return getY() + _textModel.getAlignedY(); }
+    public double getTextY()  { return _textModel == this ? getY() : getY() + _textModel.getAlignedY(); }
 
     /**
      * Returns the y position for this line (in same coords as the layout frame).
@@ -709,8 +713,9 @@ public class TextLine extends TextModel implements Cloneable {
      */
     public TextLine getNext()
     {
+        if (_textModel == this) return null;
         int nextIndex = _lineIndex + 1;
-        return _textModel != null && nextIndex < _textModel.getLineCount() ? _textModel.getLine(nextIndex) : null;
+        return nextIndex < _textModel.getLineCount() ? _textModel.getLine(nextIndex) : null;
     }
 
     /**
@@ -718,8 +723,9 @@ public class TextLine extends TextModel implements Cloneable {
      */
     public TextLine getPrevious()
     {
+        if (_textModel == this) return null;
         int prevIndex = _lineIndex - 1;
-        return _textModel != null && prevIndex >= 0 ? _textModel.getLine(prevIndex) : null;
+        return prevIndex >= 0 ? _textModel.getLine(prevIndex) : null;
     }
 
     /**
@@ -739,13 +745,13 @@ public class TextLine extends TextModel implements Cloneable {
     /**
      * Returns whether line contains an underlined run.
      */
+    @Override
     public boolean isUnderlined()
     {
+        if (!isRichText())
+            return getRun(0).isUnderlined() && !isEmpty();
         TextRun[] runs = getRuns();
-        for (TextRun run : runs)
-            if (run.isUnderlined() && !run.isEmpty())
-                return true;
-        return false;
+        return ArrayUtils.hasMatch(runs, run -> run.isUnderlined() && !run.isEmpty());
     }
 
     /**
@@ -901,6 +907,68 @@ public class TextLine extends TextModel implements Cloneable {
         removeChars(anIndex, length());
         remainderLine.removeChars(0, anIndex);
         return remainderLine;
+    }
+
+    /**
+     * Paint text line with given painter.
+     */
+    @Override
+    public void paint(Painter aPntr)
+    {
+        TextToken[] lineTokens = getTokens();
+        double lineY = getBaseline();
+        if (_textModel != this)
+            lineY += _textModel.getAlignedY();
+
+        // Iterate over line tokens
+        for (TextToken token : lineTokens) {
+
+            // Set token font and color
+            aPntr.setFont(token.getFont());
+            aPntr.setPaint(token.getTextColor());
+
+            // Do normal paint token
+            String tokenStr = token.getString();
+            double tokenX = token.getTextX();
+            double charSpacing = token.getTextStyle().getCharSpacing();
+            aPntr.drawString(tokenStr, tokenX, lineY, charSpacing);
+
+            // Handle TextBorder: Get outline and stroke
+            Border border = token.getTextStyle().getBorder();
+            if (border != null) {
+                aPntr.setPaint(border.getColor());
+                aPntr.setStroke(border.getStroke());
+                aPntr.strokeString(tokenStr, tokenX, lineY, charSpacing);
+            }
+        }
+
+        // If underlined, paint underlines
+        if (isUnderlined())
+            paintUnderlines(aPntr);
+    }
+
+    /**
+     * Paints text line underlines with given painter.
+     */
+    private void paintUnderlines(Painter aPntr)
+    {
+        for (TextRun run : getRuns()) {
+            if (!run.isUnderlined() || run.isEmpty())
+                continue;
+
+            // Set underline color and width
+            Font font = run.getFont();
+            double underlineOffset = Math.ceil(Math.abs(font.getUnderlineOffset()));
+            double underlineThickness = font.getUnderlineThickness();
+            aPntr.setColor(run.getColor());
+            aPntr.setStrokeWidth(underlineThickness);
+
+            // Get underline endpoints and draw line
+            double lineX = getTextX() + run.getX();
+            double lineMaxX = lineX + run.getWidth() - run.getTrailingWhitespaceWidth();
+            double lineY = getTextBaseline() + underlineOffset;
+            aPntr.drawLine(lineX, lineY, lineMaxX, lineY);
+        }
     }
 
     /**
