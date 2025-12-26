@@ -178,9 +178,11 @@ public class TreeCol <T> extends ListView <T> {
             if (cellGraphic == null)
                 aCell.setGraphic(branchImageView);
 
-            // If both a branch image and an cell graphic, wrap in a label
+            // If both a branch image and a cell graphic, wrap in a label
             else {
-                View branchImageAndCellGraphicLabel = new Label(branchImageView, null, cellGraphic);
+                Label branchImageAndCellGraphicLabel = new Label();
+                branchImageAndCellGraphicLabel.setGraphic(branchImageView);
+                branchImageAndCellGraphicLabel.setGraphicAfter(cellGraphic);
                 branchImageAndCellGraphicLabel.setSpacing(0);
                 aCell.setGraphic(branchImageAndCellGraphicLabel);
             }

@@ -763,7 +763,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
             cell._row = i;
             for (int j = cell.getChildCount() - 1; j >= 0; j--) {
                 View child = cell.getChild(j);
-                if (child != cell._stringView && child != cell._graphic)
+                if (child != cell._textArea && child != cell._graphic)
                     cell.removeChild(j);
             }
 

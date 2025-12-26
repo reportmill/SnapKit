@@ -5,6 +5,7 @@ package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
 import snap.props.PropSet;
+import snap.text.TextModel;
 import snap.text.TextStyle;
 import snap.util.*;
 import java.util.List;
@@ -15,17 +16,17 @@ import java.util.Objects;
  */
 public class Label extends ParentView {
     
-    // The view to show text string
-    protected StringView  _stringView;
+    // The text area
+    protected TextArea _textArea;
     
     // The graphics view
-    protected View  _graphic;
+    protected View _graphic;
     
     // The graphics view after text
-    private View  _graphicAfter;
+    private View _graphicAfter;
     
     // The image name, if loaded from local resource
-    private String  _imageName;
+    private String _imageName;
     
     // Constants for properties
     public static final String ImageName_Prop = "ImageName";
@@ -34,15 +35,21 @@ public class Label extends ParentView {
     public static final String Editing_Prop = "Editing";
 
     /**
-     * Creates a label node.
+     * Constructor.
      */
     public Label()
     {
         super();
+
+        // Create text area and add
+        _textArea = new TextArea();
+        _textArea.setAlignX(getAlignX());
+        _textArea.setVisible(false);
+        addChild(_textArea);
     }
 
     /**
-     * Creates a label node with given text.
+     * Constructor with given text.
      */
     public Label(String aStr)
     {
@@ -51,38 +58,23 @@ public class Label extends ParentView {
     }
 
     /**
-     * Creates a label node with given graphic, text, and after graphic.
-     */
-    public Label(View aGrph, String aStr, View aGrphAfter)
-    {
-        this();
-        setGraphic(aGrph);
-        setText(aStr);
-        setGraphicAfter(aGrphAfter);
-    }
-
-    /**
      * Returns the text.
      */
-    public String getText()
-    {
-        return _stringView != null ? _stringView.getText() : null;
-    }
+    public String getText()  { return _textArea.getText(); }
 
     /**
      * Sets the text.
      */
     public void setText(String aValue)
     {
-        // If value already set or setting null in label with no StringView, just return
-        String oldVal = getText(); if (Objects.equals(aValue, oldVal)) return;
-        if (aValue == null && !isStringViewSet())
+        // If value already set, just return
+        String oldVal = getText();
+        if (Objects.equals(aValue, oldVal))
             return;
 
         // Set value and fire prop change
-        StringView stringView = getStringView();
-        stringView.setText(aValue);
-        stringView.setVisible(aValue != null && !aValue.isEmpty());
+        _textArea.setText(aValue);
+        _textArea.setVisible(aValue != null && !aValue.isEmpty());
         firePropChange(Text_Prop, oldVal, aValue);
     }
 
@@ -128,62 +120,29 @@ public class Label extends ParentView {
      * Returns the text color.
      */
     @Override
-    public Color getTextColor()
-    {
-        return _stringView != null ? _stringView.getTextColor() : (Color) getPropDefault(TextColor_Prop);
-    }
+    public Color getTextColor()  { return _textArea.getTextColor(); }
 
     /**
      * Sets the text color.
      */
     @Override
-    public void setTextColor(Color aColor)
-    {
-        getStringView().setTextColor(aColor);
-    }
-
-    /**
-     * Returns the text style.
-     */
-    public TextStyle getTextStyle()  { return getStringView().getTextStyle(); }
-
-    /**
-     * Sets the text style.
-     */
-    public void setTextStyle(TextStyle textStyle)
-    {
-        getStringView().setTextStyle(textStyle);
-    }
+    public void setTextColor(Color aColor)  { _textArea.setTextColor(aColor); }
 
     /**
      * Sets the text style to style updated for style string.
      */
     public void setTextStyleString(String styleString)
     {
-        TextStyle textStyle = getTextStyle();
+        TextModel textModel = _textArea.getTextModel();
+        TextStyle textStyle = textModel.getTextStyleForCharIndex(0);
         TextStyle textStyle2 = textStyle.copyForStyleString(styleString);
-        setTextStyle(textStyle2);
+        textModel.setTextStyle(textStyle2, 0, textModel.length());
     }
 
     /**
-     * Returns the StringView.
+     * Returns the TextArea.
      */
-    protected boolean isStringViewSet()  { return _stringView != null; }
-
-    /**
-     * Returns the StringView.
-     */
-    protected StringView getStringView()
-    {
-        // If StringView already set, just return
-        if (_stringView != null) return _stringView;
-
-        // Create, configure, add StringView and return
-        _stringView = new StringView();
-        _stringView.setAlignX(getAlignX());
-        addChild(_stringView, getGraphic() != null ? 1 : 0);
-        return _stringView;
-    }
+    protected TextArea getTextArea()  { return _textArea; }
 
     /**
      * Returns the graphic node.
@@ -261,15 +220,13 @@ public class Label extends ParentView {
      */
     public Rect getTextBounds()
     {
-        if (_stringView == null)
-            return Rect.ZeroRect;
-        if (!isNeedsLayout() && _stringView.isShowing())
-            return _stringView.getBounds();
+        if (!isNeedsLayout() && _textArea.isShowing())
+            return _textArea.getBounds();
 
         // Layout children and return text bounds
-        int textIndex = _stringView.indexInParent();
+        int textIndex = _textArea.indexInParent();
         ParentViewProxy<?> viewProxy = isHorizontal() ? new RowViewProxy<>(this) : new ColViewProxy<>(this);
-        List<View> children = _graphic != null ? List.of(_graphic, _stringView) : List.of(_stringView);
+        List<View> children = _graphic != null ? List.of(_graphic, _textArea) : List.of(_textArea);
         List<ViewProxy<?>> childProxies = ListUtils.map(children, child -> ViewProxy.getProxy(child));
         viewProxy.setChildren(childProxies);
         viewProxy.layoutProxy();
@@ -308,19 +265,19 @@ public class Label extends ParentView {
     }
 
     /**
-     * Returns a mapped property name.
+     * Override to forward to text area.
      */
-    public String getValuePropName()  { return "Text"; }
-
-    /**
-     * Override to forward to StringView.
-     */
+    @Override
     public void setAlign(Pos aPos)
     {
         super.setAlign(aPos);
-        if (isStringViewSet())
-            getStringView().setAlignX(getAlignX());
+        _textArea.setAlignX(getAlignX());
     }
+
+    /**
+     * Returns a mapped property name.
+     */
+    public String getValuePropName()  { return "Text"; }
 
     /**
      * Initialize Props. Override to provide custom defaults.
@@ -366,12 +323,12 @@ public class Label extends ParentView {
         switch (aPropName) {
 
             // ImageName, Graphic, GraphicAfter
-            case ImageName_Prop: setImageName(Convert.stringValue(aValue)); break;
-            case Graphic_Prop: setGraphic((View) aValue); break;
-            case GraphicAfter_Prop: setGraphicAfter(((View) aValue)); break;
+            case ImageName_Prop -> setImageName(Convert.stringValue(aValue));
+            case Graphic_Prop -> setGraphic((View) aValue);
+            case GraphicAfter_Prop -> setGraphicAfter(((View) aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 

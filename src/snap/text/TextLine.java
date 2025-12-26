@@ -43,7 +43,7 @@ public class TextLine extends TextModel implements Cloneable {
      */
     public TextLine(TextModel textModel)
     {
-        _textModel = textModel;
+        _textModel = textModel != null ? textModel : this;
         _lineStyle = _textModel.getDefaultLineStyle();
         addRun(createRun(), 0);
         _y = _width = _height = -1;
@@ -312,19 +312,6 @@ public class TextLine extends TextModel implements Cloneable {
         for (TextRun run : getRuns())
             run.setTextStyle(textStyle);
         updateLineStyle();
-    }
-
-    /**
-     * Sets the style for the given range.
-     */
-    @Override
-    public void setTextStyle(TextStyle textStyle, int startCharIndex, int endCharIndex)
-    {
-        // Forward to textModel - though I think it should be the other way around
-        int lineStartCharIndex = getStartCharIndex();
-        int startCharIndexInText = lineStartCharIndex + startCharIndex;
-        int endCharIndexInText = lineStartCharIndex + endCharIndex;
-        _textModel.setTextStyle(textStyle, startCharIndexInText, endCharIndexInText);
     }
 
     /**
