@@ -3,7 +3,6 @@
  */
 package snap.text;
 import snap.geom.Shape;
-import snap.util.CharSequenceX;
 import snap.view.ViewUtils;
 
 /**

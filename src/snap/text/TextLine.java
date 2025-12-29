@@ -90,6 +90,19 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     public CharSequence getChars()  { return _chars; }
 
     /**
+     * Returns whether text is blank.
+     */
+    public boolean isBlank()
+    {
+        if (_chars instanceof String string)
+            return string.isBlank();
+        for (int i = 0, iMax = _chars.length(); i < iMax; i++)
+            if (!Character.isWhitespace(_chars.charAt(i)))
+                return false;
+        return true;
+    }
+
+    /**
      * Returns the string for the line.
      */
     public String getString()  { return _chars.toString(); }
@@ -939,6 +952,25 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     @Override
     public void paint(Painter aPntr)
     {
+        if (isBlank())
+            return;
+
+        // Save painter state and clip
+        aPntr.save();
+        aPntr.clip(getBounds());
+
+        // Paint line
+        paintLine(aPntr);
+
+        // Restore state
+        aPntr.restore();
+    }
+
+    /**
+     * Paint text line with given painter.
+     */
+    public void paintLine(Painter aPntr)
+    {
         TextToken[] lineTokens = getTokens();
         double lineY = getBaseline();
         if (_textModel != this)
@@ -1006,8 +1038,9 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
         try { clone = (TextLine) super.clone(); }
         catch (Exception e) { throw new RuntimeException(e); }
 
-        // Clone StringBuilder, Runs
+        // Clone chars, Runs
         clone._chars = _chars.toString();
+        clone._charsX = null;
         clone._runs = _runs.clone();
         for (int i = 0; i < _runs.length; i++) {
             TextRun runClone = clone._runs[i] = _runs[i].clone();

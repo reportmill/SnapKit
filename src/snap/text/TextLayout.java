@@ -540,7 +540,8 @@ public abstract class TextLayout extends PropObject {
                 break;
 
             // Paint line
-            textLine.paint(aPntr);
+            if (!textLine.isBlank())
+                textLine.paintLine(aPntr);
         }
 
         // Restore state
