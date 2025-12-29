@@ -34,8 +34,10 @@ public class TextBlock extends TextModel {
      */
     public String getString()
     {
+        if (getLineCount() == 1)
+            return getLine(0).getString();
         StringBuilder sb = new StringBuilder(length());
-        _lines.forEach(line -> sb.append(line._sb));
+        _lines.forEach(line -> sb.append(line.getChars()));
         return sb.toString();
     }
 

@@ -3,7 +3,6 @@
  */
 package snap.text;
 import snap.geom.HPos;
-import snap.geom.Rect;
 import snap.gfx.Border;
 import snap.gfx.Font;
 import snap.gfx.Painter;
@@ -18,8 +17,8 @@ public class TextLine extends TextModel implements Cloneable {
     // The TextModel that contains this line
     protected TextModel _textModel;
 
-    // The StringBuilder that holds line chars
-    protected StringBuilder _sb = new StringBuilder();
+    // The line chars (either String or StringBuilder)
+    protected CharSequence _chars = "";
 
     // The char index of the start of this line in text
     protected int  _startCharIndex;
@@ -61,27 +60,37 @@ public class TextLine extends TextModel implements Cloneable {
     /**
      * Returns the length of this text line.
      */
-    public int length()  { return _sb.length(); }
+    public int length()  { return _chars.length(); }
 
     /**
      * Returns the char value at the specified index.
      */
-    public char charAt(int anIndex)  { return _sb.charAt(anIndex); }
+    public char charAt(int anIndex)  { return _chars.charAt(anIndex); }
 
     /**
      * Returns a new char sequence that is a subsequence of this sequence.
      */
-    public CharSequence subSequence(int aStart, int anEnd)  { return _sb.subSequence(aStart, anEnd); }
+    public CharSequence subSequence(int aStart, int anEnd)  { return _chars.subSequence(aStart, anEnd); }
 
     /**
      * Returns the index of given string in line.
      */
-    public int indexOf(String aStr, int aStart)  { return _sb.indexOf(aStr, aStart); }
+    public int indexOf(String aStr, int aStart)
+    {
+        if (_chars instanceof StringBuilder stringBuilder)
+            return stringBuilder.indexOf(aStr, aStart);
+        return _chars.toString().indexOf(aStr, aStart);
+    }
+
+    /**
+     * Returns the characters for line.
+     */
+    public CharSequence getChars()  { return _chars; }
 
     /**
      * Returns the string for the line.
      */
-    public String getString()  { return _sb.toString(); }
+    public String getString()  { return _chars.toString(); }
 
     @Override
     public int getLineCount()  { return 1; }
@@ -120,7 +129,12 @@ public class TextLine extends TextModel implements Cloneable {
         run.addLength(theChars.length());
 
         // Add chars
-        _sb.insert(anIndex, theChars);
+        if (anIndex == 0 && _chars.isEmpty())
+            _chars = theChars.toString();
+        else {
+            if (_chars instanceof String) _chars = new StringBuilder(theChars);
+            ((StringBuilder)_chars).insert(anIndex, theChars);
+        }
 
         // Update runs and text
         updateRuns(run.getIndex());
@@ -185,11 +199,15 @@ public class TextLine extends TextModel implements Cloneable {
         // If empty range, just return
         if (anEnd == aStart) return;
 
+        // Make sure chars are StringBuilder
+        if (!(_chars instanceof StringBuilder))
+            _chars = new StringBuilder(_chars);
+
         // Handle plain text: Just remove length from run and chars from string and update text
         if (!_textModel.isRichText()) {
             TextRun run = getRun(0);
             run.addLength(aStart - anEnd);
-            _sb.delete(aStart, anEnd);
+            ((StringBuilder) _chars).delete(aStart, anEnd);
             updateText();
             return;
         }
@@ -207,14 +225,14 @@ public class TextLine extends TextModel implements Cloneable {
             if (start == runStart && end == run.getEndCharIndex() && getRunCount() > 1) {
                 int runIndex = run.getIndex();
                 removeRun(runIndex);
-                _sb.delete(start, end);
+                ((StringBuilder) _chars).delete(start, end);
                 updateRuns(runIndex - 1);
             }
 
             // Otherwise delete chars from run
             else {
                 run.addLength(start - end);
-                _sb.delete(start, end);
+                ((StringBuilder) _chars).delete(start, end);
                 updateRuns(run.getIndex());
             }
 
@@ -987,7 +1005,7 @@ public class TextLine extends TextModel implements Cloneable {
         catch (Exception e) { throw new RuntimeException(e); }
 
         // Clone StringBuilder, Runs
-        clone._sb = new StringBuilder(_sb);
+        clone._chars = _chars.toString();
         clone._runs = _runs.clone();
         for (int i = 0; i < _runs.length; i++) {
             TextRun runClone = clone._runs[i] = _runs[i].clone();
