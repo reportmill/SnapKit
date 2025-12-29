@@ -1670,7 +1670,7 @@ public class TextAdapter extends PropObject {
     private void handleViewShowingChanged()
     {
         // If showing, update TextBounds
-        if (_view.isShowing()) {
+        if (_view.isShowing() && isWrapLines()) {
             Rect textBounds = ViewUtils.getAreaBounds(_view);
             setTextBounds(textBounds);
         }

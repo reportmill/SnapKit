@@ -5,6 +5,7 @@ package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
 import snap.props.PropSet;
+import snap.text.TextLine;
 import snap.text.TextModel;
 import snap.text.TextStyle;
 import snap.util.*;
@@ -42,7 +43,7 @@ public class Label extends ParentView {
         super();
 
         // Create text area and add
-        _textArea = new TextArea(TextModel.createDefaultTextModel());
+        _textArea = new TextArea(new TextLine(null));
         _textArea.setVisible(false);
         addChild(_textArea);
     }

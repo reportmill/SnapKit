@@ -125,6 +125,10 @@ public class TextLine extends TextModel implements Cloneable {
         // Update runs and text
         updateRuns(run.getIndex());
         updateText();
+
+        // Send PropertyChange
+        if (_textModel == this && isPropChangeEnabled())
+            firePropChange(new TextModelUtils.CharsChange(this, null, theChars, anIndex));
     }
 
     /**
