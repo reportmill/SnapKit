@@ -506,7 +506,12 @@ public abstract class TextModel extends TextLayout implements XMLArchiver.Archiv
     public static TextModel createDefaultTextModel()  { return new TextBlock(); }
 
     /**
-     * Creates a default text model.
+     * Creates a default text model with option for rich text.
      */
     public static TextModel createDefaultTextModel(boolean isRich)  { return new TextBlock(isRich); }
+
+    /**
+     * Creates a minimal text model (single line) with option for rich text.
+     */
+    public static TextModel createMinimalTextModel(boolean isRich)  { return new TextLine(isRich); }
 }

@@ -45,6 +45,18 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     /**
      * Constructor.
      */
+    public TextLine(boolean isRich)
+    {
+        super(isRich);
+        _textModel = this;
+        _lineStyle = _textModel.getDefaultLineStyle();
+        addRun(createRun(), 0);
+        _y = _width = _height = -1;
+    }
+
+    /**
+     * Constructor.
+     */
     public TextLine(TextModel textModel)
     {
         _textModel = textModel != null ? textModel : this;
