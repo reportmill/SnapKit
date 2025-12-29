@@ -20,9 +20,6 @@ public abstract class TextLayout extends PropObject {
     // Whether text is rich
     protected boolean _rich;
 
-    // The length of this text
-    protected int  _length;
-
     // The X/Y of the text model
     protected double _x, _y;
 
@@ -76,7 +73,7 @@ public abstract class TextLayout extends PropObject {
     /**
      * Returns the number of characters in the text.
      */
-    public int length()  { return _length; }
+    public abstract int length();
 
     /**
      * Returns whether text is empty.

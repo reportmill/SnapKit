@@ -8,6 +8,9 @@ import java.util.List;
  */
 public class TextBlock extends TextModel {
 
+    // The length of this text
+    protected int _length;
+
     // The TextLines in this text
     protected List<TextLine> _lines = new ArrayList<>();
 
@@ -28,6 +31,12 @@ public class TextBlock extends TextModel {
         TextLine defaultLine = new TextLine(this);
         addLine(defaultLine, 0);
     }
+
+    /**
+     * Returns the number of characters in the text.
+     */
+    @Override
+    public int length()  { return _length; }
 
     /**
      * Returns the string for the text.
