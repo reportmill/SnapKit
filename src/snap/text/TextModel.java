@@ -71,7 +71,7 @@ public abstract class TextModel extends TextLayout implements XMLArchiver.Archiv
     {
         String string = aString != null ? aString : "";
 
-        if (!string.contentEquals(this)) {
+        if (!string.contentEquals(getChars())) {
             //setPropChangeEnabled(false);
             replaceChars(string, 0, length());
             //setPropChangeEnabled(true);

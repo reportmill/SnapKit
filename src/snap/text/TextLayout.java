@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * This interface provides the functionality to describe the layout of text.
  */
-public abstract class TextLayout extends PropObject implements CharSequenceX {
+public abstract class TextLayout extends PropObject {
 
     // Whether text is rich
     protected boolean _rich;
@@ -37,6 +37,9 @@ public abstract class TextLayout extends PropObject implements CharSequenceX {
 
     // The y alignment amount
     protected double _alignedY = -1;
+
+    // A version of this layout as a CharSequenceX
+    protected CharSequenceX _charsX;
 
     /**
      * Constructor.
@@ -76,6 +79,11 @@ public abstract class TextLayout extends PropObject implements CharSequenceX {
     public int length()  { return _length; }
 
     /**
+     * Returns whether text is empty.
+     */
+    public boolean isEmpty()  { return length() == 0; }
+
+    /**
      * Returns the char value at the specified index.
      */
     public char charAt(int anIndex)
@@ -106,6 +114,24 @@ public abstract class TextLayout extends PropObject implements CharSequenceX {
      * Returns the string for the text.
      */
     public abstract String getString();
+
+    /**
+     * Returns a char sequence for layout.
+     */
+    public CharSequence getChars()  { return getCharsX(); }
+
+    /**
+     * Returns a char sequence for layout.
+     */
+    public CharSequenceX getCharsX()
+    {
+        if (_charsX != null) return _charsX;
+        return _charsX = new CharSequenceX() {
+            public int length()  { return TextLayout.this.length(); }
+            public char charAt(int i)  { return TextLayout.this.charAt(i); }
+            public CharSequence subSequence(int aStart, int anEnd)  { return TextLayout.this.subSequence(aStart, anEnd); }
+        };
+    }
 
     /**
      * Returns the number of block in this doc.

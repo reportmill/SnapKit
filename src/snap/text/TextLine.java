@@ -7,12 +7,13 @@ import snap.gfx.Border;
 import snap.gfx.Font;
 import snap.gfx.Painter;
 import snap.util.ArrayUtils;
+import snap.util.CharSequenceX;
 import java.util.List;
 
 /**
  * This class represents a line of text in a Text.
  */
-public class TextLine extends TextModel implements Cloneable {
+public class TextLine extends TextModel implements CharSequenceX, Cloneable {
 
     // The TextModel that contains this line
     protected TextModel _textModel;
@@ -85,6 +86,7 @@ public class TextLine extends TextModel implements Cloneable {
     /**
      * Returns the characters for line.
      */
+    @Override
     public CharSequence getChars()  { return _chars; }
 
     /**
@@ -132,7 +134,7 @@ public class TextLine extends TextModel implements Cloneable {
         if (anIndex == 0 && _chars.isEmpty())
             _chars = theChars.toString();
         else {
-            if (_chars instanceof String) _chars = new StringBuilder(theChars);
+            if (_chars instanceof String) _chars = new StringBuilder(_chars);
             ((StringBuilder)_chars).insert(anIndex, theChars);
         }
 

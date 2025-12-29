@@ -914,8 +914,8 @@ public class TextAdapter extends PropObject {
 
         int deleteEnd = getSelStart(); if (deleteEnd == 0) return;
         int deleteStart = deleteEnd - 1;
-        if (_textModel.isAfterLineEnd(deleteEnd))
-            deleteStart = _textModel.lastIndexOfNewline(deleteEnd);
+        if (_textModel.getCharsX().isAfterLineEnd(deleteEnd))
+            deleteStart = _textModel.getCharsX().lastIndexOfNewline(deleteEnd);
 
         removeChars(deleteStart, deleteEnd);
     }
@@ -932,8 +932,8 @@ public class TextAdapter extends PropObject {
 
         int deleteStart = getSelStart(); if (deleteStart >= length()) return;
         int deleteEnd = deleteStart + 1;
-        if (_textModel.isLineEnd(deleteEnd - 1))
-            deleteEnd = _textModel.indexAfterNewline(deleteEnd - 1);
+        if (_textModel.getCharsX().isLineEnd(deleteEnd - 1))
+            deleteEnd = _textModel.getCharsX().indexAfterNewline(deleteEnd - 1);
 
         removeChars(deleteStart, deleteEnd);
     }
@@ -948,12 +948,12 @@ public class TextAdapter extends PropObject {
             delete();
 
         // Otherwise, if at line end, delete line end
-        else if (_textModel.isLineEnd(getSelEnd()))
-            removeChars(getSelStart(), _textModel.indexAfterNewline(getSelStart()));
+        else if (_textModel.getCharsX().isLineEnd(getSelEnd()))
+            removeChars(getSelStart(), _textModel.getCharsX().indexAfterNewline(getSelStart()));
 
         // Otherwise delete up to next newline or line end
         else {
-            int index = _textModel.indexOfNewline(getSelStart());
+            int index = _textModel.getCharsX().indexOfNewline(getSelStart());
             removeChars(getSelStart(), index >= 0 ? index : length());
         }
     }

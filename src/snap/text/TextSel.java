@@ -70,9 +70,9 @@ public class TextSel {
 
         // If paragraph selecting, expand selection to paragraph boundary
         else if (isParaSel) {
-            while (selStart > 0 && !_textModel.isLineEndChar(selStart - 1))
+            while (selStart > 0 && !_textModel.getCharsX().isLineEndChar(selStart - 1))
                 selStart--;
-            while (selEnd < textLength && !_textModel.isLineEndChar(selEnd))
+            while (selEnd < textLength && !_textModel.getCharsX().isLineEndChar(selEnd))
                 selEnd++;
             if (selEnd < textLength)
                 selEnd++;
@@ -133,7 +133,7 @@ public class TextSel {
         // If selection empty but not at end, get next char (or after newline, if at newline)
         int charIndex = getEnd();
         if ((isEmpty() || ViewUtils.isShiftDown()) && charIndex < _textLayout.length())
-            charIndex = _textLayout.isLineEnd(charIndex) ? _textLayout.indexAfterNewline(charIndex) : (charIndex + 1);
+            charIndex = _textLayout.getCharsX().isLineEnd(charIndex) ? _textLayout.getCharsX().indexAfterNewline(charIndex) : (charIndex + 1);
         return charIndex;
     }
 
@@ -145,7 +145,7 @@ public class TextSel {
         // If selection empty but not at start, get previous char (or before newline if after newline)
         int charIndex = getStart();
         if ((isEmpty() || ViewUtils.isShiftDown()) && charIndex > 0)
-            charIndex = _textLayout.isAfterLineEnd(charIndex) ? _textLayout.lastIndexOfNewline(charIndex) : (charIndex - 1);
+            charIndex = _textLayout.getCharsX().isAfterLineEnd(charIndex) ? _textLayout.getCharsX().lastIndexOfNewline(charIndex) : (charIndex - 1);
         return charIndex;
     }
 
@@ -190,7 +190,7 @@ public class TextSel {
     public int getLineStart()
     {
         // Get index at beginning of current line
-        int index1 = _textLayout.lastIndexAfterNewline(getEnd());
+        int index1 = _textLayout.getCharsX().lastIndexAfterNewline(getEnd());
         if (index1 < 0)
             index1 = 0;
 
@@ -209,7 +209,7 @@ public class TextSel {
     public int getLineEnd()
     {
         // Get index of newline and set selection
-        int index = _textLayout.indexOfNewline(getEnd());
+        int index = _textLayout.getCharsX().indexOfNewline(getEnd());
         return index >= 0 ? index : _textLayout.length();
     }
 

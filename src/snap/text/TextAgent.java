@@ -154,7 +154,7 @@ public class TextAgent {
      */
     protected void handleTextModelCharsChange(PropChange propChange)
     {
-        boolean textModified = !_unmodifiedString.contentEquals(_textModel);
+        boolean textModified = !_unmodifiedString.contentEquals(_textModel.getChars());
         if (textModified == isTextModified())
             return;
 
