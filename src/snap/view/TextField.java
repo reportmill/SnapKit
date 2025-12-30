@@ -16,16 +16,10 @@ import java.util.Objects;
 /**
  * A view subclass for editing a single line of text.
  */
-public class TextField extends ParentView {
+public class TextField extends TextArea {
 
-    // The TextAdapter
-    private TextAdapter _textAdapter;
-    
     // The column count to be used for preferred width (if set)
     private int _colCount;
-    
-    // The color for the text
-    private Color _textColor;
     
     // A label in the background for prompt text or other background decoration
     private Label _promptLabel;
@@ -71,19 +65,12 @@ public class TextField extends ParentView {
 
         // Override default properties
         setOverflow(Overflow.Scroll);
-        setFocusable(true);
-        setFocusWhenPressed(true);
         setActionable(true);
-        enableEvents(MouseEvents);
-        enableEvents(KeyEvents);
         enableEvents(Action);
 
-        // Create TextAdapter
-        _textAdapter = new TextFieldTextAdapter(TextModel.createDefaultTextModel());
-        _textAdapter.setView(this);
-        _textAdapter.setEditable(true);
-        _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
-        _textAdapter.addTextModelPropChangeListener(this::handleTextModelPropChange);
+        // Make editable
+        setEditable(true);
+        setFocusKeysEnabled(true);
 
         // Configure label and set
         _promptLabel = new Label();
@@ -93,31 +80,18 @@ public class TextField extends ParentView {
     }
 
     /**
-     * Override to support TextColor.
+     * Override to create minimal text model.
      */
     @Override
-    protected void initStyleProps()
-    {
-        super.initStyleProps();
-        ViewStyle viewStyle = ViewTheme.get().getViewStyleForClass(getClass());
-        _textColor = viewStyle.getTextColor();
-    }
+    protected TextModel createDefaultTextModel(boolean isRichText)  { return TextModel.createMinimalTextModel(isRichText); }
 
     /**
-     * Returns the text color.
+     * Override to return custom text field text adapter.
      */
     @Override
-    public Color getTextColor()  { return _textColor; }
-
-    /**
-     * Sets the text color.
-     */
-    @Override
-    public void setTextColor(Color aPaint)
+    protected TextAdapter createTextAdapter(TextModel textModel)
     {
-        if (Objects.equals(aPaint, _textColor)) return;
-        firePropChange(TextColor_Prop, _textColor, _textColor = aPaint);
-        repaint();
+        return new TextFieldTextAdapter(TextModel.createDefaultTextModel());
     }
 
     /**
@@ -244,50 +218,6 @@ public class TextField extends ParentView {
     }
 
     /**
-     * Returns the number of characters in the text string.
-     */
-    public int length()  { return _textAdapter.length(); }
-
-    /**
-     * Returns the plain string of the text being edited.
-     */
-    public String getText()  { return _textAdapter.getString(); }
-
-    /**
-     * Set text string of text editor.
-     */
-    public void setText(String aString)
-    {
-        _textAdapter.setString(aString);
-        setSel(length());
-    }
-
-    /**
-     * Returns the character index of the start of the text selection.
-     */
-    public int getSelStart()  { return _textAdapter.getSelStart(); }
-
-    /**
-     * Returns the character index of the end of the text selection.
-     */
-    public int getSelEnd()  { return _textAdapter.getSelEnd(); }
-
-    /**
-     * Returns whether the selection is empty.
-     */
-    public boolean isSelEmpty()  { return _textAdapter.isSelEmpty(); }
-
-    /**
-     * Sets the character index of the text cursor.
-     */
-    public void setSel(int newStartEnd)  { _textAdapter.setSel(newStartEnd); }
-
-    /**
-     * Sets the character index of the start and end of the text selection.
-     */
-    public void setSel(int aStart, int anEnd)  { _textAdapter.setSel(aStart, anEnd); }
-
-    /**
      * Selects all the characters in the text editor.
      */
     public void selectAll()
@@ -334,7 +264,7 @@ public class TextField extends ParentView {
     protected void paintFront(Painter aPntr)
     {
         aPntr.save();
-        Rect textBounds = _textAdapter.getTextBounds();
+        Rect textBounds = getTextBounds();
         aPntr.clip(textBounds);
 
         // Paint text (only paint selection when focused)
@@ -378,6 +308,8 @@ public class TextField extends ParentView {
     @Override
     protected void layoutImpl()
     {
+        super.layoutImpl();
+
         // Layout PromptLabel
         Insets ins = getInsetsAll();
         double areaX = ins.left;
@@ -386,14 +318,10 @@ public class TextField extends ParentView {
         double areaH = Math.max(getHeight() - ins.getHeight(), 0);
         _promptLabel.setBounds(areaX, areaY, areaW, areaH);
 
-        // Update text bounds
-        Rect textBounds = getTextBounds();
-        _textAdapter.setTextBounds(textBounds);
-
         // Promote to WrapLines if text is long
         if (!_textAdapter.isWrapLines()) {
             double prefW = _textAdapter.getPrefWidth();
-            if (prefW > textBounds.width && !isAnimActive())
+            if (prefW > getTextLayout().getWidth() && !isAnimActive())
                 runLater(() -> _textAdapter.setWrapLines(true));
         }
 
@@ -405,6 +333,7 @@ public class TextField extends ParentView {
     /**
      * Returns the text bounds.
      */
+    @Override
     protected Rect getTextBounds()
     {
         Insets ins = getInsetsAll();
@@ -414,47 +343,6 @@ public class TextField extends ParentView {
         double textW = Math.max(viewW - textX - ins.right, 0);
         double textH = getHeight() - ins.getHeight();
         return new Rect(textX, textY, textW, textH);
-    }
-
-    /**
-     * Process event.
-     */
-    protected void processEvent(ViewEvent anEvent)
-    {
-        switch (anEvent.getType()) {
-            case MousePress -> _textAdapter.mousePressed(anEvent);
-            case MouseDrag -> _textAdapter.mouseDragged(anEvent);
-            case MouseRelease -> _textAdapter.mouseReleased(anEvent);
-            case MouseMove -> _textAdapter.mouseMoved(anEvent);
-            case KeyPress -> _textAdapter.handleKeyPressEvent(anEvent);
-            case KeyType -> _textAdapter.handleKeyTypeEvent(anEvent);
-            case KeyRelease -> _textAdapter.handleKeyReleaseEvent(anEvent);
-            case Action -> processActionEvent(anEvent);
-        }
-
-        // Consume all mouse events
-        if (anEvent.isMouseEvent())
-            anEvent.consume();
-    }
-
-    /**
-     * Called when action event is received.
-     */
-    protected void processActionEvent(ViewEvent anEvent)
-    {
-        // Get shared action name
-        SharedAction action = anEvent.getSharedAction();
-        String actionName = action !=  null ? action.getName() : null;
-        if (actionName == null)
-            return;
-
-        // Handle shared actions
-        switch (action.getName()) {
-            case SharedAction.Cut_Action_Name: _textAdapter.cut(); anEvent.consume(); break;
-            case SharedAction.Copy_Action_Name: _textAdapter.copy(); anEvent.consume(); break;
-            case SharedAction.Paste_Action_Name: _textAdapter.paste(); anEvent.consume(); break;
-            case SharedAction.SelectAll_Action_Name: selectAll(); anEvent.consume(); break;
-        }
     }
 
     /**
@@ -486,20 +374,24 @@ public class TextField extends ParentView {
     /**
      * Called when TextAdapter has prop change.
      */
-    private void handleTextAdapterPropChange(PropChange aPC)
+    @Override
+    protected void handleTextAdapterPropChange(PropChange propChange)
     {
+        super.handleTextAdapterPropChange(propChange);
+
         // Handle Selection
-        if (aPC.getPropName() == TextAdapter.Selection_Prop) {
-            firePropChange(Selection_Prop, aPC.getOldValue(), aPC.getNewValue());
+        if (propChange.getPropName() == TextAdapter.Selection_Prop)
             _autoCompleting = false;
-        }
     }
 
     /**
      * Called when text model changes (chars added, updated or deleted).
      */
-    protected void handleTextModelPropChange(PropChange aPC)
+    @Override
+    protected void handleTextModelPropChange(PropChange propChange)
     {
+        super.handleTextModelPropChange(propChange);
+
         // If PromptText present, update PromptLabel.Text
         if (_promptText != null)
             _promptLabel.setText(length() == 0 ? _promptText : "");
@@ -507,48 +399,7 @@ public class TextField extends ParentView {
         // If focused and text has changed, updated Edited
         if (isFocused() && !isEdited() && !Objects.equals(getText(), _focusGainedText))
             setEdited(true);
-
-        // Relayout parent and repaint
-        relayoutParent();
-        relayout();
-        repaint();
     }
-
-    /**
-     * Override to forward to text layout.
-     */
-    @Override
-    public void setAlign(Pos aPos)
-    {
-        super.setAlign(aPos);
-        _textAdapter.setAlign(aPos);
-    }
-
-    /**
-     * Override to update font.
-     */
-    @Override
-    public void setFont(Font aFont)
-    {
-        if (Objects.equals(aFont, getFont())) return;
-        super.setFont(aFont);
-        _textAdapter.setTextFont(getFont());
-    }
-
-    /**
-     * Override to update font.
-     */
-    @Override
-    protected void parentFontChanged()
-    {
-        super.parentFontChanged();
-        _textAdapter.setTextFont(getFont());
-    }
-
-    /**
-     * Returns a mapped property name.
-     */
-    public String getValuePropName()  { return Text_Prop; }
 
     /**
      * Override to customize for this class.
@@ -601,17 +452,6 @@ public class TextField extends ParentView {
             // Do normal version
             default -> super.setPropValue(aPropName, aValue);
         }
-    }
-
-    /**
-     * Standard toString implementation.
-     */
-    public String toString()
-    {
-        String str = getText();
-        if (str.length() > 40)
-            str = str.substring(0, 40) + "...";
-        return getClass().getSimpleName() + ": " + str;
     }
 
     /**
@@ -692,6 +532,18 @@ public class TextField extends ParentView {
         }
 
         /**
+         * Override to support auto completing.
+         */
+        @Override
+        protected void handleBackSpaceKeyPressEvent(ViewEvent anEvent)
+        {
+            boolean autoCompleting = _autoCompleting;
+            super.handleBackSpaceKeyPressEvent(anEvent);
+            if (autoCompleting)
+                deleteBackward();
+        }
+
+        /**
          * Override to handle escape key.
          */
         @Override
@@ -703,12 +555,6 @@ public class TextField extends ParentView {
 
             // Do normal version
             else super.handlePlainKeyPressEvent(anEvent);
-
-            // Handle BackSpace: If auto-completing, run extra time to delete selection and char
-            if (_autoCompleting && anEvent.isBackSpaceKey()) {
-                _autoCompleting = false;
-                deleteBackward();
-            }
         }
     }
 }

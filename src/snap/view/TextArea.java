@@ -17,7 +17,7 @@ import java.util.Objects;
 public class TextArea extends ParentView {
 
     // The text adapter
-    private TextAdapter _textAdapter;
+    protected TextAdapter _textAdapter;
 
     // The text being edited
     private TextModel _textModel;
@@ -54,7 +54,7 @@ public class TextArea extends ParentView {
         super();
 
         // Create/set default text
-        _textModel = new TextModelX(isRichText);
+        _textModel = createDefaultTextModel(isRichText);
 
         // Create TextAdapter
         _textAdapter = createTextAdapter(_textModel);
@@ -82,6 +82,11 @@ public class TextArea extends ParentView {
     }
 
     /**
+     * Returns a default text model.
+     */
+    protected TextModel createDefaultTextModel(boolean isRichText)  { return new TextModelX(isRichText); }
+
+    /**
      * Returns the text adapter.
      */
     public TextAdapter getTextAdapter()  { return _textAdapter; }
@@ -92,6 +97,11 @@ public class TextArea extends ParentView {
     protected TextAdapter createTextAdapter(TextModel textModel)  { return new TextAdapter(textModel); }
 
     /**
+     * Returns the text layout that displays the text.
+     */
+    public TextLayout getTextLayout()  { return _textAdapter.getTextLayout(); }
+
+    /**
      * Returns the text model that holds the text.
      */
     public TextModel getTextModel()  { return _textAdapter.getTextModel(); }
@@ -100,16 +110,6 @@ public class TextArea extends ParentView {
      * Returns the text model that holds the text.
      */
     public void setTextModel(TextModel textModel)  { _textAdapter.setTextModel(textModel); }
-
-    /**
-     * Returns the text layout that displays the text.
-     */
-    public TextLayout getTextLayout()  { return _textAdapter.getTextLayout(); }
-
-    /**
-     * Returns the text layout that displays the text.
-     */
-    public void setTextLayout(TextLayout textLayout)  { _textAdapter.setTextLayout(textLayout); }
 
     /**
      * Returns the plain string of the text being edited.
@@ -278,7 +278,13 @@ public class TextArea extends ParentView {
      * Sets the color of the current selection or cursor.
      */
     @Override
-    public void setTextColor(Color aColor)  { _textAdapter.setTextColor(aColor); }
+    public void setTextColor(Color aColor)
+    {
+        Color textColor = getTextColor();
+        if (Objects.equals(aColor, textColor)) return;
+        _textAdapter.setTextColor(aColor);
+        firePropChange(TextColor_Prop, textColor, aColor);
+    }
 
     /**
      * Returns the format of the current selection or cursor.
@@ -700,7 +706,7 @@ public class TextArea extends ParentView {
     /**
      * Returns a mapped property name.
      */
-    public String getValuePropName()  { return "Text"; }
+    public String getValuePropName()  { return Text_Prop; }
 
     /**
      * Standard toString implementation.
