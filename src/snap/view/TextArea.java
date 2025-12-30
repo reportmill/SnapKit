@@ -3,6 +3,8 @@
  */
 package snap.view;
 import snap.geom.Insets;
+import snap.geom.Pos;
+import snap.geom.Rect;
 import snap.gfx.*;
 import snap.props.*;
 import snap.text.*;
@@ -553,6 +555,21 @@ public class TextArea extends ParentView {
     }
 
     /**
+     * Layout children.
+     */
+    @Override
+    protected void layoutImpl()
+    {
+        Rect textBounds = getTextBounds();
+        _textAdapter.setTextBounds(textBounds);
+    }
+
+    /**
+     * Returns the text bounds.
+     */
+    protected Rect getTextBounds()  { return ViewUtils.getAreaBounds(this); }
+
+    /**
      * Override to trigger parent layout if WrapLines.
      */
     @Override
@@ -562,6 +579,16 @@ public class TextArea extends ParentView {
         super.setWidth(aValue);
         if (isWrapLines())
             relayoutParent();
+    }
+
+    /**
+     * Override to forward to text layout.
+     */
+    @Override
+    public void setAlign(Pos aPos)
+    {
+        super.setAlign(aPos);
+        _textAdapter.setAlign(aPos);
     }
 
     /**

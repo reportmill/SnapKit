@@ -635,6 +635,17 @@ public class TextAdapter extends PropObject {
     }
 
     /**
+     * Set the alignment of text.
+     */
+    public void setAlign(Pos aPos)
+    {
+        TextModel textLayout = (TextModel) getTextLayout();
+        if (aPos.getHPos() != textLayout.getDefaultLineStyle().getAlign())
+            textLayout.setDefaultLineStyle(textLayout.getDefaultLineStyle().copyForAlign(aPos.getHPos()));
+        textLayout.setAlignY(aPos.getVPos());
+    }
+
+    /**
      * Returns the text line alignment.
      */
     public HPos getLineAlign()
@@ -1599,8 +1610,7 @@ public class TextAdapter extends PropObject {
      */
     public void setTextBounds(Rect boundsRect)
     {
-        TextModel textModel = _textLayout instanceof TextModel ? (TextModel) _textLayout : _textModel;
-        textModel.setBounds(boundsRect);
+        _textLayout.setBounds(boundsRect);
     }
 
     /**
@@ -1648,20 +1658,9 @@ public class TextAdapter extends PropObject {
     private void handleViewPropChanged(PropChange propChange)
     {
         switch (propChange.getPropName()) {
-            case View.Width_Prop, View.Height_Prop -> handleViewSizeChanged();
             case View.Showing_Prop -> handleViewShowingChanged();
             case View.Focused_Prop -> handleViewFocusedChanged();
-            case View.Align_Prop -> handleViewAlignChanged();
         }
-    }
-
-    /**
-     * Called when View width/height changes.
-     */
-    private void handleViewSizeChanged()
-    {
-        Rect textBounds = ViewUtils.getAreaBounds(_view);
-        setTextBounds(textBounds);
     }
 
     /**
@@ -1709,23 +1708,6 @@ public class TextAdapter extends PropObject {
             _showingWindow = null;
             _windowFocusedChangedLsnr = null;
         }
-    }
-
-    /**
-     * Override to forward to text model.
-     */
-    private void handleViewAlignChanged()
-    {
-        Pos viewAlign = _view.getAlign();
-
-        // Push align to TextModel via DefaultLineStyle.Align (X) and TextModel align Y
-        TextLineStyle lineStyle = getDefaultLineStyle().copyForPropKeyValue(TextLineStyle.Align_Prop, viewAlign.getHPos());
-        setDefaultLineStyle(lineStyle);
-
-        // Forward to text model
-        if (_textLayout instanceof TextModelX textModelX)
-            textModelX.setAlignY(viewAlign.getVPos());
-        _view.repaint();
     }
 
     /**

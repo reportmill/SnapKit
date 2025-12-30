@@ -403,6 +403,20 @@ public class TextField extends ParentView {
     }
 
     /**
+     * Returns the text bounds.
+     */
+    protected Rect getTextBounds()
+    {
+        Insets ins = getInsetsAll();
+        double viewW = getWidth();
+        double textX = ins.left + _promptLabel.getTextBounds().x;
+        double textY = ins.top;
+        double textW = Math.max(viewW - textX - ins.right, 0);
+        double textH = getHeight() - ins.getHeight();
+        return new Rect(textX, textY, textW, textH);
+    }
+
+    /**
      * Process event.
      */
     protected void processEvent(ViewEvent anEvent)
@@ -501,34 +515,13 @@ public class TextField extends ParentView {
     }
 
     /**
-     * Returns the text bounds.
+     * Override to forward to text layout.
      */
-    private Rect getTextBounds()
+    @Override
+    public void setAlign(Pos aPos)
     {
-        // Get basic bounds for TextField size/insets and font/string width/height
-        Insets ins = getInsetsAll();
-        double viewW = getWidth();
-        double viewH = getHeight();
-        double textX = ins.left + _promptLabel.getTextBounds().x;
-        double textY = ins.top;
-        double textW = Math.max(viewW - ins.getWidth(), 0);
-        double prefH = _textAdapter.getPrefHeight(textW);
-        double textH = Math.min(prefH, viewH - ins.getHeight());
-
-        // Adjust rect by alignment
-        double alignX = ViewUtils.getAlignX(this);
-        double alignY = ViewUtils.getAlignY(this);
-        if (alignX > 0) {
-            double extra = viewW - textX - ins.right - textW;
-            textX = Math.max(textX + extra * alignX, textX);
-        }
-        if (alignY > 0) {
-            double extra = viewH - textY - ins.bottom - textH;
-            textY = Math.max(textY + Math.round(extra * alignY), textY);
-        }
-
-        // Create/return rect
-        return new Rect(textX, textY, textW, textH);
+        super.setAlign(aPos);
+        _textAdapter.setAlign(aPos);
     }
 
     /**
