@@ -52,27 +52,27 @@ public class TextArea extends ParentView {
     public TextArea(boolean isRichText)
     {
         super();
-
-        // Create/set default text
-        _textModel = createDefaultTextModel(isRichText);
-
-        // Create TextAdapter
-        _textAdapter = createTextAdapter(_textModel);
-        _textAdapter.setView(this);
-        _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
-        _textAdapter.addTextModelPropChangeListener(this::handleTextModelPropChange);
+        initTextArea(createDefaultTextModel(isRichText));
     }
 
     /**
-     * Constructor for source text.
+     * Constructor for text model.
      */
-    public TextArea(TextModel sourceText)
+    public TextArea(TextModel textModel)
     {
         super();
+        initTextArea(textModel);
+    }
+
+    /**
+     * Initialize text area for given text model.
+     */
+    private void initTextArea(TextModel textModel)
+    {
         setFocusPainted(false);
 
         // Set text model
-        _textModel = sourceText;
+        _textModel = textModel;
 
         // Create TextAdapter
         _textAdapter = createTextAdapter(_textModel);
@@ -423,14 +423,14 @@ public class TextArea extends ParentView {
     public void processEvent(ViewEvent anEvent)
     {
         switch (anEvent.getType()) {
-            case MousePress: mousePressed(anEvent); break;
-            case MouseDrag: mouseDragged(anEvent); break;
-            case MouseRelease: mouseReleased(anEvent); break;
-            case MouseMove: mouseMoved(anEvent); break;
-            case KeyPress: keyPressed(anEvent); break;
-            case KeyType: keyTyped(anEvent); break;
-            case KeyRelease: keyReleased(anEvent); break;
-            case Action: processActionEvent(anEvent);
+            case MousePress -> mousePressed(anEvent);
+            case MouseDrag -> _textAdapter.mouseDragged(anEvent);
+            case MouseRelease -> _textAdapter.mouseReleased(anEvent);
+            case MouseMove -> mouseMoved(anEvent);
+            case KeyPress -> keyPressed(anEvent);
+            case KeyType -> keyTyped(anEvent);
+            case KeyRelease -> keyReleased(anEvent);
+            case Action -> processActionEvent(anEvent);
         }
 
         // Consume all mouse events
@@ -441,16 +441,6 @@ public class TextArea extends ParentView {
      * Handles mouse pressed.
      */
     protected void mousePressed(ViewEvent anEvent)  { _textAdapter.mousePressed(anEvent); }
-
-    /**
-     * Handles mouse dragged.
-     */
-    protected void mouseDragged(ViewEvent anEvent)  { _textAdapter.mouseDragged(anEvent); }
-
-    /**
-     * Handles mouse released.
-     */
-    protected void mouseReleased(ViewEvent anEvent)  { _textAdapter.mouseReleased(anEvent); }
 
     /**
      * Handle MouseMoved.
@@ -631,17 +621,17 @@ public class TextArea extends ParentView {
     /**
      * Called when TextAdapter has prop change.
      */
-    protected void handleTextAdapterPropChange(PropChange aPC)
+    protected void handleTextAdapterPropChange(PropChange propChange)
     {
-        switch (aPC.getPropName()) {
+        switch (propChange.getPropName()) {
 
             // Handle Selection, TextModel, WrapLines: Repost for TextArea
-            case TextAdapter.Selection_Prop: firePropChange(Selection_Prop, aPC.getOldValue(), aPC.getNewValue()); break;
-            case TextAdapter.TextModel_Prop: firePropChange(TextModel_Prop, aPC.getOldValue(), aPC.getNewValue()); break;
-            case TextAdapter.WrapLines_Prop: firePropChange(WrapLines_Prop, aPC.getOldValue(), aPC.getNewValue()); break;
+            case TextAdapter.Selection_Prop -> firePropChange(Selection_Prop, propChange.getOldValue(), propChange.getNewValue());
+            case TextAdapter.TextModel_Prop -> firePropChange(TextModel_Prop, propChange.getOldValue(), propChange.getNewValue());
+            case TextAdapter.WrapLines_Prop -> firePropChange(WrapLines_Prop, propChange.getOldValue(), propChange.getNewValue());
 
             // Handle Editable
-            case TextAdapter.Editable_Prop: handleTextAdapterEditableChanged(); break;
+            case TextAdapter.Editable_Prop -> handleTextAdapterEditableChanged();
         }
     }
 
@@ -674,10 +664,10 @@ public class TextArea extends ParentView {
     /**
      * Called when text model changes (chars added, updated or deleted).
      */
-    protected void handleTextModelPropChange(PropChange aPC)
+    protected void handleTextModelPropChange(PropChange propChange)
     {
         // Handle DefaultTextStyle and SyncTextFont
-        String propName = aPC.getPropName();
+        String propName = propChange.getPropName();
         if (propName == TextModel.DefaultTextStyle_Prop && isSyncTextFont()) {
             Font font = _textModel.getDefaultFont();
             setFont(font);
@@ -738,16 +728,16 @@ public class TextArea extends ParentView {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // RichText, Editable, WrapLines
-            case RichText_Prop: return isRichText();
-            case Editable_Prop: return isEditable();
-            case WrapLines_Prop: return isWrapLines();
+            case RichText_Prop -> isRichText();
+            case Editable_Prop -> isEditable();
+            case WrapLines_Prop -> isWrapLines();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -759,12 +749,12 @@ public class TextArea extends ParentView {
         switch (aPropName) {
 
             // RichText, Editable, WrapLines_Prop
-            case RichText_Prop: setRichText(Convert.boolValue(aValue)); break;
-            case Editable_Prop: setEditable(Convert.boolValue(aValue)); break;
-            case WrapLines_Prop: setWrapLines(Convert.boolValue(aValue)); break;
+            case RichText_Prop -> setRichText(Convert.boolValue(aValue));
+            case Editable_Prop -> setEditable(Convert.boolValue(aValue));
+            case WrapLines_Prop -> setWrapLines(Convert.boolValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue); break;
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 

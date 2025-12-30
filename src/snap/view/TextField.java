@@ -64,9 +64,9 @@ public class TextField extends TextArea {
         _fireActionOnFocusLost = DEFAULT_FIRE_ACTION_ON_FOCUS_LOST;
 
         // Override default properties
+        setFocusPainted(true);
         setOverflow(Overflow.Scroll);
         setActionable(true);
-        enableEvents(Action);
 
         // Make editable
         setEditable(true);
@@ -409,6 +409,9 @@ public class TextField extends TextArea {
     {
         // Do normal version
         super.initProps(aPropSet);
+
+        // Override Editable
+        aPropSet.getPropForName(Editable_Prop).setDefaultValue(true);
 
         // ColCount, PromptText, Multiline
         aPropSet.addPropNamed(ColCount_Prop, int.class, DEFAULT_COL_COUNT);

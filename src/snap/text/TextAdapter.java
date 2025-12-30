@@ -408,8 +408,7 @@ public class TextAdapter extends PropObject {
     public TextSel getSel()
     {
         if (_sel != null) return _sel;
-        TextSel sel = new TextSel(_textLayout, _selAnchor, _selIndex);
-        return _sel = sel;
+        return _sel = new TextSel(_textLayout, _selAnchor, _selIndex);
     }
 
     /**
@@ -426,10 +425,12 @@ public class TextAdapter extends PropObject {
         int len = length();
         int anchor = Math.min(aStart, len);
         int index = Math.min(aEnd, len);
-        if (anchor == _selAnchor && index == _selIndex) return;
+        if (anchor == _selAnchor && index == _selIndex)
+            return;
 
         // Repaint old selection
-        if (_view != null && _view.isShowing()) repaintSel();
+        if (_view != null && _view.isShowing())
+            repaintSel();
 
         // Set new values
         _selAnchor = aStart;
@@ -450,7 +451,7 @@ public class TextAdapter extends PropObject {
         if (_view != null && _view.isShowing()) {
             repaintSel();
             updateCaretAnim();
-            _view.runLater(() -> scrollSelToVisible());
+            _view.runLater(this::scrollSelToVisible);
         }
     }
 
@@ -646,48 +647,6 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Returns the text line alignment.
-     */
-    public HPos getLineAlign()
-    {
-        TextLineStyle textLineStyle = getSelLineStyle();
-        return textLineStyle.getAlign();
-    }
-
-    /**
-     * Sets the text line alignment.
-     */
-    public void setLineAlign(HPos anAlign)
-    {
-        setSelLineStyleValue(TextLineStyle.Align_Prop, anAlign);
-    }
-
-    /**
-     * Returns whether the text line justifies text.
-     */
-    public boolean isLineJustify()
-    {
-        TextLineStyle textLineStyle = getSelLineStyle();
-        return textLineStyle.isJustify();
-    }
-
-    /**
-     * Sets whether the text line justifies text.
-     */
-    public void setLineJustify(boolean aValue)
-    {
-        setSelLineStyleValue(TextLineStyle.Justify_Prop, aValue);
-    }
-
-    /**
-     * Returns the style at given char index.
-     */
-    public TextStyle getTextStyleForCharIndex(int charIndex)
-    {
-        return _textModel.getTextStyleForCharIndex(charIndex);
-    }
-
-    /**
      * Returns the TextStyle for the current selection and/or input characters.
      */
     public TextStyle getSelTextStyle()
@@ -722,22 +681,6 @@ public class TextAdapter extends PropObject {
             if (_view != null)
                 _view.repaint();
         }
-    }
-
-    /**
-     * Returns the TextLineStyle for currently selection.
-     */
-    public TextLineStyle getSelLineStyle()
-    {
-        return _textModel.getLineStyleForCharIndex(getSelStart());
-    }
-
-    /**
-     * Sets the line attributes that are applied to current selection or newly typed chars.
-     */
-    public void setSelLineStyleValue(String aKey, Object aValue)
-    {
-        _textModel.setLineStyleValue(aKey, aValue, getSelStart(), getSelEnd());
     }
 
     /**
@@ -1077,13 +1020,13 @@ public class TextAdapter extends PropObject {
     public void processEvent(ViewEvent anEvent)
     {
         switch (anEvent.getType()) {
-            case MousePress: mousePressed(anEvent); break;
-            case MouseDrag: mouseDragged(anEvent); break;
-            case MouseRelease: mouseReleased(anEvent); break;
-            case MouseMove: mouseMoved(anEvent); break;
-            case KeyPress: handleKeyPressEvent(anEvent); break;
-            case KeyType: handleKeyTypeEvent(anEvent); break;
-            case KeyRelease: handleKeyReleaseEvent(anEvent); break;
+            case MousePress -> mousePressed(anEvent);
+            case MouseDrag -> mouseDragged(anEvent);
+            case MouseRelease -> mouseReleased(anEvent);
+            case MouseMove -> mouseMoved(anEvent);
+            case KeyPress -> handleKeyPressEvent(anEvent);
+            case KeyType -> handleKeyTypeEvent(anEvent);
+            case KeyRelease -> handleKeyReleaseEvent(anEvent);
         }
 
         // Consume all mouse events
@@ -1233,14 +1176,14 @@ public class TextAdapter extends PropObject {
 
         // Handle common emacs key bindings
         switch (anEvent.getKeyCode()) {
-            case KeyCode.F: selectForward(); break; // Handle control-f key forward
-            case KeyCode.B: selectBackward(); break; // Handle control-b key backward
-            case KeyCode.P: selectUp(); break; // Handle control-p key up
-            case KeyCode.N: selectDown(); break; // Handle control-n key down
-            case KeyCode.A: selectLineStart(); break; // Handle control-a line start
-            case KeyCode.E: selectLineEnd(); break; // Handle control-e line end
-            case KeyCode.D: deleteForward(); break; // Handle control-d delete forward
-            case KeyCode.K: deleteToLineEnd(); break; // Handle control-k delete line to end
+            case KeyCode.F -> selectForward(); // Handle control-f key forward
+            case KeyCode.B -> selectBackward(); // Handle control-b key backward
+            case KeyCode.P -> selectUp(); // Handle control-p key up
+            case KeyCode.N -> selectDown(); // Handle control-n key down
+            case KeyCode.A -> selectLineStart(); // Handle control-a line start
+            case KeyCode.E -> selectLineEnd(); // Handle control-e line end
+            case KeyCode.D -> deleteForward(); // Handle control-d delete forward
+            case KeyCode.K -> deleteToLineEnd(); // Handle control-k delete line to end
         }
     }
 
@@ -1252,25 +1195,26 @@ public class TextAdapter extends PropObject {
         switch (anEvent.getKeyCode()) {
 
             // Handle Tab, Enter
-            case KeyCode.TAB: handleTabKeyPressEvent(anEvent); break;
-            case KeyCode.ENTER: handleEnterKeyPressEvent(anEvent); break;
+            case KeyCode.TAB -> handleTabKeyPressEvent(anEvent);
+            case KeyCode.ENTER -> handleEnterKeyPressEvent(anEvent);
 
             // Handle Left, Right, Up, Down arrows
-            case KeyCode.LEFT: selectBackward(); anEvent.consume(); break;
-            case KeyCode.RIGHT: selectForward(); anEvent.consume(); break;
-            case KeyCode.UP: selectUp(); anEvent.consume(); break;
-            case KeyCode.DOWN: selectDown(); anEvent.consume(); break;
+            case KeyCode.LEFT -> { selectBackward(); anEvent.consume(); }
+            case KeyCode.RIGHT -> { selectForward(); anEvent.consume(); }
+            case KeyCode.UP -> { selectUp(); anEvent.consume(); }
+            case KeyCode.DOWN -> { selectDown(); anEvent.consume(); }
 
             // Handle Home, End
-            case KeyCode.HOME: selectLineStart(); break;
-            case KeyCode.END: selectLineEnd(); break;
+            case KeyCode.HOME -> selectLineStart();
+            case KeyCode.END -> selectLineEnd();
+
 
             // Handle Backspace, Delete
-            case KeyCode.BACK_SPACE: handleBackSpaceKeyPressEvent(anEvent); break;
-            case KeyCode.DELETE: deleteForward(); anEvent.consume(); break;
+            case KeyCode.BACK_SPACE -> handleBackSpaceKeyPressEvent(anEvent);
+            case KeyCode.DELETE -> { deleteForward(); anEvent.consume(); }
 
             // Handle Space key
-            case KeyCode.SPACE: anEvent.consume(); break;
+            case KeyCode.SPACE -> anEvent.consume();
         }
     }
 
@@ -1668,12 +1612,6 @@ public class TextAdapter extends PropObject {
      */
     private void handleViewShowingChanged()
     {
-        // If showing, update TextBounds
-        if (_view.isShowing() && isWrapLines()) {
-            Rect textBounds = ViewUtils.getAreaBounds(_view);
-            setTextBounds(textBounds);
-        }
-
         // If focused, update CaretAnim
         if (_view.isFocused()) {
             updateCaretAnim();
@@ -1733,7 +1671,8 @@ public class TextAdapter extends PropObject {
     public String toString()
     {
         String str = getString();
-        if (str.length() > 40) str = str.substring(0, 40) + "...";
+        if (str.length() > 40)
+            str = str.substring(0, 40) + "...";
         return getClass().getSimpleName() + ": " + str;
     }
 }

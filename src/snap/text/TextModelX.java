@@ -57,6 +57,7 @@ public class TextModelX extends TextBlock {
     {
         super(sourceText.isRichText());
         setSourceText(sourceText);
+        setBounds(sourceText.getBounds());
     }
 
     /**
