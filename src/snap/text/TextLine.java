@@ -170,6 +170,7 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
         // Send PropertyChange
         if (_textModel == this && isPropChangeEnabled())
             firePropChange(new TextModelUtils.CharsChange(this, null, theChars, anIndex));
+        _prefW = -1;
     }
 
     /**
@@ -226,6 +227,9 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
         // If empty range, just return
         if (anEnd == aStart) return;
 
+        // If PropChangeEnabled, get chars to be deleted
+        CharSequence removedChars = _textModel == this && isPropChangeEnabled() ? subSequence(aStart, anEnd) : null;
+
         // Make sure chars are StringBuilder
         if (!(_chars instanceof StringBuilder))
             _chars = new StringBuilder(_chars);
@@ -235,39 +239,44 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
             TextRun run = getRun(0);
             run.addLength(aStart - anEnd);
             ((StringBuilder) _chars).delete(aStart, anEnd);
-            updateText();
-            return;
         }
 
         // Handle RichText: Iterate over effected runs and remove chars
-        int end = anEnd;
-        while (aStart < end) {
+        else {
+            int end = anEnd;
+            while (aStart < end) {
 
-            // Get run at end
-            TextRun run = getRunForCharIndex(end);
-            int runStart = run.getStartCharIndex();
-            int start = Math.max(aStart, runStart);
+                // Get run at end
+                TextRun run = getRunForCharIndex(end);
+                int runStart = run.getStartCharIndex();
+                int start = Math.max(aStart, runStart);
 
-            // If range matches run range, just remove it
-            if (start == runStart && end == run.getEndCharIndex() && getRunCount() > 1) {
-                int runIndex = run.getIndex();
-                removeRun(runIndex);
-                ((StringBuilder) _chars).delete(start, end);
-                updateRuns(runIndex - 1);
+                // If range matches run range, just remove it
+                if (start == runStart && end == run.getEndCharIndex() && getRunCount() > 1) {
+                    int runIndex = run.getIndex();
+                    removeRun(runIndex);
+                    ((StringBuilder) _chars).delete(start, end);
+                    updateRuns(runIndex - 1);
+                }
+
+                // Otherwise delete chars from run
+                else {
+                    run.addLength(start - end);
+                    ((StringBuilder) _chars).delete(start, end);
+                    updateRuns(run.getIndex());
+                }
+
+                // Reset end to runStart
+                end = runStart;
             }
-
-            // Otherwise delete chars from run
-            else {
-                run.addLength(start - end);
-                ((StringBuilder) _chars).delete(start, end);
-                updateRuns(run.getIndex());
-            }
-
-            // Reset end to runStart
-            end = runStart;
         }
 
         updateText();
+        _prefW = -1;
+
+        // If deleted chars is set, send property change
+        if (_textModel == this && isPropChangeEnabled())
+            firePropChange(new TextModelUtils.CharsChange(this, removedChars, null, aStart));
     }
 
     /**

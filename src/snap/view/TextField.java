@@ -89,10 +89,7 @@ public class TextField extends TextArea {
      * Override to return custom text field text adapter.
      */
     @Override
-    protected TextAdapter createTextAdapter(TextModel textModel)
-    {
-        return new TextFieldTextAdapter(TextModel.createDefaultTextModel());
-    }
+    protected TextAdapter createTextAdapter(TextModel textModel)  { return new TextFieldTextAdapter(textModel); }
 
     /**
      * Returns the column count.
