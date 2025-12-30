@@ -79,7 +79,7 @@ public class TextField extends ParentView {
         enableEvents(Action);
 
         // Create TextAdapter
-        _textAdapter = new TextAdapter(TextModel.createDefaultTextModel());
+        _textAdapter = new TextFieldTextAdapter(TextModel.createDefaultTextModel());
         _textAdapter.setView(this);
         _textAdapter.setEditable(true);
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
@@ -386,8 +386,16 @@ public class TextField extends ParentView {
         double areaH = Math.max(getHeight() - ins.getHeight(), 0);
         _promptLabel.setBounds(areaX, areaY, areaW, areaH);
 
-        // Reset text bounds
-        updateTextBounds();
+        // Update text bounds
+        Rect textBounds = getTextBounds();
+        _textAdapter.setTextBounds(textBounds);
+
+        // Promote to WrapLines if text is long
+        if (!_textAdapter.isWrapLines()) {
+            double prefW = _textAdapter.getPrefWidth();
+            if (prefW > textBounds.width && !isAnimActive())
+                runLater(() -> _textAdapter.setWrapLines(true));
+        }
 
         // Check for whether to wrap in scroll view
         if (_textAdapter.getLineCount() > 1 && getOverflow() == Overflow.Scroll)
@@ -400,45 +408,19 @@ public class TextField extends ParentView {
     protected void processEvent(ViewEvent anEvent)
     {
         switch (anEvent.getType()) {
-            case MousePress: _textAdapter.mousePressed(anEvent); break;
-            case MouseDrag: _textAdapter.mouseDragged(anEvent); break;
-            case MouseRelease: _textAdapter.mouseReleased(anEvent); break;
-            case MouseMove: _textAdapter.mouseMoved(anEvent); break;
-            case KeyPress: keyPressed(anEvent); break;
-            case KeyType: _textAdapter.handleKeyTypeEvent(anEvent); break;
-            case KeyRelease: _textAdapter.handleKeyReleaseEvent(anEvent); break;
-            case Action: processActionEvent(anEvent);
+            case MousePress -> _textAdapter.mousePressed(anEvent);
+            case MouseDrag -> _textAdapter.mouseDragged(anEvent);
+            case MouseRelease -> _textAdapter.mouseReleased(anEvent);
+            case MouseMove -> _textAdapter.mouseMoved(anEvent);
+            case KeyPress -> _textAdapter.handleKeyPressEvent(anEvent);
+            case KeyType -> _textAdapter.handleKeyTypeEvent(anEvent);
+            case KeyRelease -> _textAdapter.handleKeyReleaseEvent(anEvent);
+            case Action -> processActionEvent(anEvent);
         }
 
         // Consume all mouse events
         if (anEvent.isMouseEvent())
             anEvent.consume();
-    }
-
-    /**
-     * Called when a key is pressed.
-     */
-    protected void keyPressed(ViewEvent anEvent)
-    {
-        // Handle EnterKey
-        if (anEvent.isEnterKey() && !isMultiline() &&
-            !anEvent.isShortcutDown() && !anEvent.isControlDown() && !anEvent.isAltDown()) {
-            selectAll();
-            fireActionEvent(anEvent);
-        }
-
-        // Handle Escape
-        else if (anEvent.isEscapeKey())
-            escape(anEvent);
-
-        // Forward to text adapter
-        else _textAdapter.handleKeyPressEvent(anEvent);
-
-        // Handle BackSpace: If auto-completing, run extra time to delete selection and char
-        if (_autoCompleting && anEvent.isBackSpaceKey()) {
-            _autoCompleting = false;
-            _textAdapter.deleteBackward();
-        }
     }
 
     /**
@@ -516,23 +498,6 @@ public class TextField extends ParentView {
         relayoutParent();
         relayout();
         repaint();
-    }
-
-    /**
-     * Updates the text bounds.
-     */
-    private void updateTextBounds()
-    {
-        // Get text bounds and set
-        Rect textBounds = getTextBounds();
-        _textAdapter.setTextBounds(textBounds);
-
-        // Promote to WrapLines if text is long
-        if (!_textAdapter.isWrapLines()) {
-            double prefW = _textAdapter.getPrefWidth();
-            if (prefW > textBounds.width && !isAnimActive())
-                runLater(() -> _textAdapter.setWrapLines(true));
-        }
     }
 
     /**
@@ -701,5 +666,56 @@ public class TextField extends ParentView {
             else ViewAnimUtils.setAlign(textFieldLabel, Pos.CENTER, 600);
             textFieldLabel.getChild(0).getAnim(0).setOnFrame(aTextField::relayout);
         }, View.Focused_Prop);
+    }
+
+    /**
+     * A TextAdapter for TextField.
+     */
+    private class TextFieldTextAdapter extends TextAdapter {
+
+        /**
+         * Constructor.
+         */
+        public TextFieldTextAdapter(TextModel textModel)
+        {
+            super(textModel);
+        }
+
+        /**
+         * Override to fire action.
+         */
+        @Override
+        protected void handleEnterKeyPressEvent(ViewEvent anEvent)
+        {
+            // If normal text field and no modifiers, select all and fire action event
+            if (!isMultiline() && !anEvent.isControlDown() && !anEvent.isAltDown()) {
+                selectAll();
+                fireActionEvent(anEvent);
+                anEvent.consume();
+            }
+
+            // Do normal version
+            else super.handleEnterKeyPressEvent(anEvent);
+        }
+
+        /**
+         * Override to handle escape key.
+         */
+        @Override
+        protected void handlePlainKeyPressEvent(ViewEvent anEvent)
+        {
+            // Handle Escape
+            if (anEvent.isEscapeKey())
+                escape(anEvent);
+
+            // Do normal version
+            else super.handlePlainKeyPressEvent(anEvent);
+
+            // Handle BackSpace: If auto-completing, run extra time to delete selection and char
+            if (_autoCompleting && anEvent.isBackSpaceKey()) {
+                _autoCompleting = false;
+                deleteBackward();
+            }
+        }
     }
 }
