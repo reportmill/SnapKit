@@ -8,12 +8,11 @@ import snap.gfx.Font;
 import snap.gfx.Painter;
 import snap.util.ArrayUtils;
 import snap.util.CharSequenceX;
-import java.util.List;
 
 /**
  * This class represents a line of text in a Text.
  */
-public class TextLine extends TextModel implements CharSequenceX, Cloneable {
+public class TextLine implements CharSequenceX, Cloneable {
 
     // The TextModel that contains this line
     protected TextModel _textModel;
@@ -36,6 +35,9 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     // The index of this line in text
     protected int _lineIndex;
 
+    // The line bounds
+    protected double _x, _y, _width, _height;
+
     // The TextMetrics
     private TextMetrics _textMetrics;
 
@@ -45,21 +47,9 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     /**
      * Constructor.
      */
-    public TextLine(boolean isRich)
-    {
-        super(isRich);
-        _textModel = this;
-        _lineStyle = _textModel.getDefaultLineStyle();
-        addRun(createRun(), 0);
-        _y = _width = _height = -1;
-    }
-
-    /**
-     * Constructor.
-     */
     public TextLine(TextModel textModel)
     {
-        _textModel = textModel != null ? textModel : this;
+        _textModel = textModel;
         _lineStyle = _textModel.getDefaultLineStyle();
         addRun(createRun(), 0);
         _y = _width = _height = -1;
@@ -98,7 +88,6 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     /**
      * Returns the characters for line.
      */
-    @Override
     public CharSequence getChars()  { return _chars; }
 
     /**
@@ -119,25 +108,14 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
      */
     public String getString()  { return _chars.toString(); }
 
-    @Override
-    public int getLineCount()  { return 1; }
-
-    @Override
-    public TextLine getLine(int anIndex)  { return this; }
-
-    @Override
-    public List<TextLine> getLines()  { return List.of(this); }
-
     /**
      * Returns the start char index of this line in text.
      */
-    @Override
     public int getStartCharIndex()  { return _startCharIndex; }
 
     /**
      * Returns the end char index of this line in text.
      */
-    @Override
     public int getEndCharIndex()  { return _startCharIndex + length(); }
 
     /**
@@ -148,7 +126,6 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     /**
      * Adds characters with text style to this line at given index.
      */
-    @Override
     public void addCharsWithStyle(CharSequence theChars, TextStyle aStyle, int anIndex)
     {
         // Add length to run
@@ -166,11 +143,6 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
         // Update runs and text
         updateRuns(run.getIndex());
         updateText();
-
-        // Send PropertyChange
-        if (_textModel == this && isPropChangeEnabled())
-            firePropChange(new TextModelUtils.CharsChange(this, null, theChars, anIndex));
-        _prefW = -1;
     }
 
     /**
@@ -221,14 +193,10 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     /**
      * Removes characters in given range.
      */
-    @Override
     public void removeChars(int aStart, int anEnd)
     {
         // If empty range, just return
         if (anEnd == aStart) return;
-
-        // If PropChangeEnabled, get chars to be deleted
-        CharSequence removedChars = _textModel == this && isPropChangeEnabled() ? subSequence(aStart, anEnd) : null;
 
         // Make sure chars are StringBuilder
         if (!(_chars instanceof StringBuilder))
@@ -272,11 +240,6 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
         }
 
         updateText();
-        _prefW = -1;
-
-        // If deleted chars is set, send property change
-        if (_textModel == this && isPropChangeEnabled())
-            firePropChange(new TextModelUtils.CharsChange(this, removedChars, null, aStart));
     }
 
     /**
@@ -315,10 +278,7 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     /**
      * Creates a new run.
      */
-    protected TextRun createRun()
-    {
-        return new TextRun(this);
-    }
+    protected TextRun createRun()  { return new TextRun(this); }
 
     /**
      * Returns the head run for the line.
@@ -390,9 +350,13 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Returns the line x.
+     */
+    public double getX()  { return _x; }
+
+    /**
      * Returns the line y.
      */
-    @Override
     public double getY()
     {
         // If already set, just return
@@ -432,7 +396,6 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     /**
      * Returns the width of line.
      */
-    @Override
     public double getWidth()
     {
         // If already set, just return
@@ -450,7 +413,6 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     /**
      * Returns the height of line.
      */
-    @Override
     public double getHeight()
     {
         if (_height >= 0) return _height;
@@ -458,6 +420,16 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
         double descent = getMetrics().getDescent();
         return _height = ascent + descent;
     }
+
+    /**
+     * Returns the max X.
+     */
+    public double getMaxX()  { return getX() + getWidth(); }
+
+    /**
+     * Returns the max Y.
+     */
+    public double getMaxY()  { return getY() + getHeight(); }
 
     /**
      * Returns the width of line from given index.
@@ -497,12 +469,12 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     /**
      * Returns the line x in text model coords.
      */
-    public double getTextX()  { return _textModel == this ? getX() : getX() + _textModel.getX(); }
+    public double getTextX()  { return getX() + _textModel.getX(); }
 
     /**
      * Returns the line y.
      */
-    public double getTextY()  { return _textModel == this ? getY() : getY() + _textModel.getAlignedY(); }
+    public double getTextY()  { return getY() + _textModel.getAlignedY(); }
 
     /**
      * Returns the y position for this line (in same coords as the layout frame).
@@ -771,7 +743,6 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
      */
     public TextLine getNext()
     {
-        if (_textModel == this) return null;
         int nextIndex = _lineIndex + 1;
         return nextIndex < _textModel.getLineCount() ? _textModel.getLine(nextIndex) : null;
     }
@@ -781,7 +752,6 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
      */
     public TextLine getPrevious()
     {
-        if (_textModel == this) return null;
         int prevIndex = _lineIndex - 1;
         return prevIndex >= 0 ? _textModel.getLine(prevIndex) : null;
     }
@@ -803,10 +773,9 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     /**
      * Returns whether line contains an underlined run.
      */
-    @Override
     public boolean isUnderlined()
     {
-        if (!isRichText())
+        if (!_textModel.isRichText())
             return getRun(0).isUnderlined() && !isEmpty();
         TextRun[] runs = getRuns();
         return ArrayUtils.hasMatch(runs, run -> run.isUnderlined() && !run.isEmpty());
@@ -970,7 +939,6 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     /**
      * Paint text line with given painter.
      */
-    @Override
     public void paint(Painter aPntr)
     {
         if (isBlank())
@@ -978,7 +946,7 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
 
         // Save painter state and clip
         aPntr.save();
-        aPntr.clip(getBounds());
+        aPntr.clipRect(getTextX(), getTextY(), getWidth(), getHeight());
 
         // Paint line
         paintLine(aPntr);
@@ -993,9 +961,7 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     public void paintLine(Painter aPntr)
     {
         TextToken[] lineTokens = getTokens();
-        double lineY = getBaseline();
-        if (_textModel != this)
-            lineY += _textModel.getAlignedY();
+        double lineY = getBaseline() + _textModel.getAlignedY();
 
         // Iterate over line tokens
         for (TextToken token : lineTokens) {
@@ -1061,7 +1027,6 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
 
         // Clone chars, Runs
         clone._chars = _chars.toString();
-        clone._charsX = null;
         clone._runs = _runs.clone();
         for (int i = 0; i < _runs.length; i++) {
             TextRun runClone = clone._runs[i] = _runs[i].clone();
@@ -1073,23 +1038,16 @@ public class TextLine extends TextModel implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Standard toStringProps implementation.
+     * Standard toString implementation.
      */
-    public String toStringProps()
+    public String toString()
     {
-        StringBuilder sb = new StringBuilder();
+        // Get props string for props: Start, End, Length, Index, String
+        String propsStr = "Start=" + getStartCharIndex() + ", End=" + getEndCharIndex() +
+            ", Length=" + length() + ", Index=" + getLineIndex() +
+            ", String=" + getString().replace("\n", "\\n");
 
-        // Add Start, End, Length, Index, String
-        sb.append("Start=").append(getStartCharIndex());
-        sb.append(", End=").append(getEndCharIndex());
-        sb.append(", Length=").append(length());
-        sb.append(", Index=").append(getLineIndex());
-
-        // Append String
-        String string = getString().replace("\n", "\\n");
-        sb.append(", String=").append(string);
-
-        // Return
-        return sb.toString();
+        // Return string
+        return getClass().getSimpleName() + " { " + propsStr + " }";
     }
 }

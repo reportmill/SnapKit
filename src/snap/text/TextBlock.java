@@ -12,7 +12,7 @@ public class TextBlock extends TextModel {
     protected int _length;
 
     // The TextLines in this text
-    protected List<TextLine> _lines = new ArrayList<>();
+    protected List<TextLine> _lines = new ArrayList<>(1);
 
     /**
      * Constructor.
@@ -81,7 +81,7 @@ public class TextBlock extends TextModel {
     protected void removeLine(int anIndex)
     {
         TextLine line = _lines.remove(anIndex);
-        line._textModel = line;
+        line._textModel = null;
         updateLines(anIndex - 1);
     }
 

@@ -84,7 +84,7 @@ public class TextField extends TextArea {
      * Override to create minimal text model.
      */
     @Override
-    protected TextModel createDefaultTextModel(boolean isRichText)  { return TextModel.createMinimalTextModel(isRichText); }
+    protected TextModel createDefaultTextModel(boolean isRichText)  { return TextModel.createDefaultTextModel(isRichText); }
 
     /**
      * Override to return custom text field text adapter.

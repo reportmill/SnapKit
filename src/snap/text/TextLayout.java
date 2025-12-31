@@ -3,7 +3,6 @@ import snap.geom.HPos;
 import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.geom.VPos;
-import snap.gfx.Font;
 import snap.gfx.Painter;
 import snap.props.PropObject;
 import snap.util.CharSequenceX;
@@ -94,6 +93,11 @@ public abstract class TextLayout extends PropObject {
      */
     public CharSequence subSequence(int aStart, int anEnd)
     {
+        if (aStart == 0 && anEnd == length())
+            return getChars();
+        if (getLineCount() == 1)
+            return getLine(0).subSequence(aStart, anEnd);
+
         StringBuffer sb = new StringBuffer(anEnd - aStart);
         TextLine line = getLineForCharIndex(aStart);
         while (aStart < anEnd) {
@@ -115,7 +119,12 @@ public abstract class TextLayout extends PropObject {
     /**
      * Returns a char sequence for layout.
      */
-    public CharSequence getChars()  { return getCharsX(); }
+    public CharSequence getChars()
+    {
+        if (getLineCount() == 1)
+            return getLine(0).getChars();
+        return getCharsX();
+    }
 
     /**
      * Returns a char sequence for layout.
@@ -242,15 +251,6 @@ public abstract class TextLayout extends PropObject {
         int lineStart = textLine.getStartCharIndex();
         int selStartInLine = charIndex - lineStart;
         return textLine.getTokenForCharIndex(selStartInLine);
-    }
-
-    /**
-     * Returns the Font for run at given character index.
-     */
-    public Font getFontForCharIndex(int charIndex)
-    {
-        TextRun textRun = getRunForCharIndex(charIndex);
-        return textRun.getFont();
     }
 
     /**
@@ -512,6 +512,10 @@ public abstract class TextLayout extends PropObject {
         int lineCount = getLineCount();
         if (lineCount == 0)
             return;
+        if (lineCount == 1) {
+            getLine(0).paint(aPntr);
+            return;
+        }
 
         // Get text clip bounds and clip
         Rect textBounds = getBounds();
