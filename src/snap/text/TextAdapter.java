@@ -151,7 +151,9 @@ public class TextAdapter extends PropObject {
         }
 
         // Make sure text layout matches text model
-        if (_textLayout == null || _textLayout.getTextModel() != _textModel)
+        if (_textLayout instanceof TextModelX textModelX)
+            textModelX.setSourceText(_textModel);
+        else if (_textLayout == null || _textLayout.getTextModel() != _textModel)
             setTextLayout(_textModel);
 
         // FirePropChange
