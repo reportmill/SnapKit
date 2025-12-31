@@ -71,6 +71,7 @@ public class TextField extends TextArea {
         // Make editable
         setEditable(true);
         setFocusKeysEnabled(true);
+        getTextLayout().setAlignY(getAlignY());
 
         // Configure label and set
         _promptLabel = new Label();

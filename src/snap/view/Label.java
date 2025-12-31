@@ -43,6 +43,7 @@ public class Label extends ParentView {
 
         // Create text area and add
         _textArea = new TextArea(TextModel.createMinimalTextModel(false));
+        _textArea.setAlign(getAlign());
         _textArea.setVisible(false);
         addChild(_textArea);
     }
@@ -270,7 +271,7 @@ public class Label extends ParentView {
     public void setAlign(Pos aPos)
     {
         super.setAlign(aPos);
-        _textArea.setAlignX(getAlignX());
+        _textArea.setAlign(aPos);
     }
 
     /**
