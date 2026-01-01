@@ -578,6 +578,31 @@ public abstract class TextLayout extends PropObject {
     }
 
     /**
+     * Returns whether this text couldn't fit all text.
+     */
+    public boolean isTextOutOfBounds()
+    {
+        // Check Y no matter what
+        int lineCount = getLineCount();
+        double lineMaxY = lineCount > 0 ? getLine(lineCount - 1).getMaxY() : 0;
+        double textMaxY = getMaxY();
+        if (lineMaxY >= textMaxY || getEndCharIndex() < getTextModel().length())
+            return true;
+
+        // If not WrapLines, check X
+        if (!isWrapLines()) {
+            TextLine line = getLineLongest();
+            double lineW = line != null ? line.getWidth() : 0;
+            double textW = getWidth();
+            if (lineW > textW)
+                return true;
+        }
+
+        // Return false
+        return false;
+    }
+
+    /**
      * Returns the width of text.
      */
     public double getPrefWidth()

@@ -436,31 +436,6 @@ public class TextModelX extends TextBlock {
     }
 
     /**
-     * Returns whether this text couldn't fit all text.
-     */
-    public boolean isTextOutOfBounds()
-    {
-        // Check Y no matter what
-        int lineCount = getLineCount();
-        double lineMaxY = lineCount > 0 ? getLine(lineCount - 1).getMaxY() : 0;
-        double tboxMaxY = getMaxY();
-        if (lineMaxY >= tboxMaxY || getEndCharIndex() < _sourceText.length())
-            return true;
-
-        // If not WrapLines, check X
-        if (!isWrapLines()) {
-            TextLine line = getLineLongest();
-            double lineW = line != null ? line.getWidth() : 0;
-            double tboxW = getWidth();
-            if (lineW > tboxW)
-                return true;
-        }
-
-        // Return false
-        return false;
-    }
-
-    /**
      * Removes all lines not fully above bottom border.
      */
     private void removeOutOfBoundsLines()
