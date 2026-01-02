@@ -121,11 +121,8 @@ public class TextArea extends ParentView {
      */
     public void setText(String aString)
     {
+        if (aString == null) aString = "";
         _textAdapter.setString(aString);
-
-        // Reset selection (to line end if single-line, otherwise text start)
-        int selIndex = _textModel.getLineCount() == 1 && length() < 40 ? length() : 0;
-        setSel(selIndex);
     }
 
     /**

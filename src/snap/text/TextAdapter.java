@@ -199,7 +199,12 @@ public class TextAdapter extends PropObject {
      */
     public void setString(String aString)
     {
+        if (aString.contentEquals(_textModel.getChars())) return;
         _textModel.setString(aString);
+
+        // Reset selection (to line end if single-line, otherwise text start)
+        int defaultSelIndex = _textModel.getLineCount() == 1 && length() < 40 ? length() : 0;
+        setSel(defaultSelIndex);
         getUndoer().reset();
     }
 
