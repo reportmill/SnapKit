@@ -159,8 +159,12 @@ public abstract class TextLayout extends PropObject {
      */
     public TextLine getLineForCharIndex(int charIndex)
     {
+        // Special case single line
+        int lineCount = getLineCount(), length = length();
+        if (lineCount == 1 && charIndex <= length)
+            return getLine(0);
+
         // Check for index outside bounds or index at end
-        int length = length();
         if (charIndex < 0 || charIndex >= length) {
             if (charIndex == length)
                 return getLastLine();
@@ -169,7 +173,7 @@ public abstract class TextLayout extends PropObject {
 
         // Get Low/high indexes
         int lowIndex = 0;
-        int highIndex = getLineCount() - 1;
+        int highIndex = lineCount - 1;
 
         // Iterate over lines until found
         while (lowIndex <= highIndex) {

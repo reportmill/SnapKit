@@ -283,16 +283,19 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Returns the head run for the line.
      */
-    public TextRun getRunForCharIndex(int anIndex)
+    public TextRun getRunForCharIndex(int charIndex)
     {
+        if (_runs.length == 1 && charIndex <= length())
+            return _runs[0];
+
         // Iterate over runs and return run containing char index
         TextRun[] runs = getRuns();
         for (TextRun run : runs)
-            if (anIndex <= run.getEndCharIndex())
+            if (charIndex <= run.getEndCharIndex())
                 return run;
 
         // Complain
-        throw new IndexOutOfBoundsException("Index " + anIndex + " beyond " + length());
+        throw new IndexOutOfBoundsException("Index " + charIndex + " beyond " + length());
     }
 
     /**
@@ -300,6 +303,9 @@ public class TextLine implements CharSequenceX, Cloneable {
      */
     public TextRun getRunForCharRange(int startIndex, int endIndex)
     {
+        if (_runs.length == 1 && endIndex <= length())
+            return _runs[0];
+
         // Get run at start index
         TextRun textRun = getRunForCharIndex(startIndex);
 
