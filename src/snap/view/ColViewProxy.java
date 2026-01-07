@@ -16,8 +16,10 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     public ColViewProxy(View aParent)
     {
         super(aParent);
-        if (aParent instanceof ColView colView)
+        if (aParent instanceof ColView colView) {
             setFillWidth(colView.isFillWidth());
+            setHugging(colView.isHugging());
+        }
     }
 
     /**

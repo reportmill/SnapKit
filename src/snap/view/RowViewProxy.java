@@ -17,8 +17,10 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
     {
         super(aParent);
 
-        if (aParent instanceof RowView colView)
-            setFillHeight(colView.isFillHeight());
+        if (aParent instanceof RowView rowView) {
+            setFillHeight(rowView.isFillHeight());
+            setHugging(rowView.isHugging());
+        }
     }
 
     /**

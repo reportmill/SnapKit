@@ -40,8 +40,8 @@ public class ViewProxy<T extends View> extends Rect {
     // Spacing
     private double  _spacing = UNSET_DOUBLE;
 
-    // Whether this proxy should fillWidth, fillHeight (common attributes for ParentView)
-    private boolean  _fillWidth, _fillHeight;
+    // Whether this proxy should fillWidth, fillHeight, hugging (common attributes for ParentView)
+    private boolean  _fillWidth, _fillHeight, _hugging;
 
     // Constants for unset vars
     private static double UNSET_DOUBLE = -Float.MIN_VALUE;
@@ -349,6 +349,16 @@ public class ViewProxy<T extends View> extends Rect {
      * Sets whether view fills height.
      */
     public void setFillHeight(boolean aValue)  { _fillHeight = aValue; }
+
+    /**
+     * Returns whether to wrap closely around children and project their margins.
+     */
+    public boolean isHugging()  { return _hugging; }
+
+    /**
+     * Sets whether to wrap closely around children and project their margins.
+     */
+    public void setHugging(boolean aValue)  { _hugging = aValue; }
 
     /**
      * Returns the best width.

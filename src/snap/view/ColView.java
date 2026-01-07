@@ -11,10 +11,14 @@ import snap.util.*;
 public class ColView extends ChildView {
 
     // Whether to fill to with
-    private boolean  _fillWidth;
-    
+    private boolean _fillWidth;
+
+    // Whether to wrap closely around children and project their margins
+    private boolean _hugging;
+
     // Constants for properties
     public static final String FillWidth_Prop = "FillWidth";
+    public static final String Hugging_Prop = "Hugging";
 
     // Constants for property defaults
     private static final boolean DEFAULT_COL_VIEW_VERTICAL = true;
@@ -40,6 +44,21 @@ public class ColView extends ChildView {
     {
         if (aValue == _fillWidth) return;
         firePropChange(FillWidth_Prop, _fillWidth, _fillWidth = aValue);
+        relayout();
+    }
+
+    /**
+     * Returns whether to wrap closely around children and project their margins.
+     */
+    public boolean isHugging()  { return _hugging; }
+
+    /**
+     * Sets whether to wrap closely around children and project their margins.
+     */
+    public void setHugging(boolean aValue)
+    {
+        if (aValue == _hugging) return;
+        firePropChange(Hugging_Prop, _hugging, _hugging = aValue);
         relayout();
     }
 
@@ -91,8 +110,9 @@ public class ColView extends ChildView {
         // Do normal version
         super.initProps(aPropSet);
 
-        // FillWidth
+        // FillWidth, Hugging
         aPropSet.addPropNamed(FillWidth_Prop, boolean.class, false);
+        aPropSet.addPropNamed(Hugging_Prop, boolean.class, false);
     }
 
     /**
@@ -103,8 +123,9 @@ public class ColView extends ChildView {
     {
         switch (aPropName) {
 
-            // FillWidth
+            // FillWidth, Hugging
             case FillWidth_Prop: return isFillWidth();
+            case Hugging_Prop: return isHugging();
 
             // Do normal version
             default: return super.getPropValue(aPropName);
@@ -119,8 +140,9 @@ public class ColView extends ChildView {
     {
         switch (aPropName) {
 
-            // FillWidth
+            // FillWidth, Hugging
             case FillWidth_Prop: setFillWidth(Convert.boolValue(aValue)); break;
+            case Hugging_Prop: setHugging(Convert.boolValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);
@@ -135,9 +157,9 @@ public class ColView extends ChildView {
         // Archive basic view attributes
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive FillWidth
-        if (isFillWidth())
-            e.add(FillWidth_Prop, true);
+        // Archive FillWidth, Hugging
+        if (isFillWidth()) e.add(FillWidth_Prop, true);
+        if (isHugging()) e.add(Hugging_Prop, true);
         return e;
     }
 
@@ -149,9 +171,9 @@ public class ColView extends ChildView {
         // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive FillWidth
-        if (anElement.hasAttribute(FillWidth_Prop))
-            setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
+        // Unarchive FillWidth, Hugging
+        if (anElement.hasAttribute(FillWidth_Prop)) setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
+        if (anElement.hasAttribute(Hugging_Prop)) setHugging(anElement.getAttributeBoolValue(Hugging_Prop));
     }
 
     /**

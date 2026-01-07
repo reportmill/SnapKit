@@ -11,10 +11,14 @@ import snap.util.*;
 public class RowView extends ChildView {
     
     // Whether to fill to height
-    private boolean  _fillHeight;
+    private boolean _fillHeight;
+
+    // Whether to wrap closely around children and project their margins
+    private boolean _hugging;
     
     // Constants for properties
     public static final String FillHeight_Prop = "FillHeight";
+    public static final String Hugging_Prop = "Hugging";
 
     /**
      * Constructor.
@@ -36,6 +40,21 @@ public class RowView extends ChildView {
     {
         if (aValue == _fillHeight) return;
         firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
+        relayout();
+    }
+
+    /**
+     * Returns whether to wrap closely around children and project their margins.
+     */
+    public boolean isHugging()  { return _hugging; }
+
+    /**
+     * Sets whether to wrap closely around children and project their margins.
+     */
+    public void setHugging(boolean aValue)
+    {
+        if (aValue == _hugging) return;
+        firePropChange(Hugging_Prop, _hugging, _hugging = aValue);
         relayout();
     }
 
@@ -84,8 +103,9 @@ public class RowView extends ChildView {
         // Do normal version
         super.initProps(aPropSet);
 
-        // FillHeight
+        // FillHeight, Hugging
         aPropSet.addPropNamed(FillHeight_Prop, boolean.class, false);
+        aPropSet.addPropNamed(Hugging_Prop, boolean.class, false);
     }
 
     /**
@@ -96,8 +116,9 @@ public class RowView extends ChildView {
     {
         switch (aPropName) {
 
-            // FillHeight
+            // FillHeight, Hugging
             case FillHeight_Prop: return isFillHeight();
+            case Hugging_Prop: return isFillHeight();
 
             // Do normal version
             default: return super.getPropValue(aPropName);
@@ -112,8 +133,9 @@ public class RowView extends ChildView {
     {
         switch (aPropName) {
 
-            // FillHeight
+            // FillHeight, Hugging
             case FillHeight_Prop: setFillHeight(Convert.boolValue(aValue)); break;
+            case Hugging_Prop: setFillHeight(Convert.boolValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);
@@ -128,9 +150,9 @@ public class RowView extends ChildView {
         // Archive basic view attributes
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive FillHeight
-        if (isFillHeight())
-            e.add(FillHeight_Prop, true);
+        // Archive FillHeight, Hugging
+        if (isFillHeight()) e.add(FillHeight_Prop, true);
+        if (isHugging()) e.add(Hugging_Prop, true);
         return e;
     }
 
@@ -142,9 +164,11 @@ public class RowView extends ChildView {
         // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive FillHeight
+        // Unarchive FillHeight, Hugging
         if (anElement.hasAttribute(FillHeight_Prop))
             setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop, false));
+        if (anElement.hasAttribute(Hugging_Prop))
+            setHugging(anElement.getAttributeBoolValue(Hugging_Prop, false));
     }
 
     /**
