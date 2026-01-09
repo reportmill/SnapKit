@@ -319,7 +319,7 @@ public class SplitView extends ParentView implements ViewHost {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        ParentViewProxy<?> viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         return viewProxy.getPrefWidth(aH);
     }
 
@@ -328,7 +328,7 @@ public class SplitView extends ParentView implements ViewHost {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        ParentViewProxy<?> viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         return viewProxy.getPrefHeight(aW);
     }
 
@@ -337,7 +337,7 @@ public class SplitView extends ParentView implements ViewHost {
      */
     protected void layoutImpl()
     {
-        ParentViewProxy<?> viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         viewProxy.layoutView();
     }
 
@@ -345,7 +345,7 @@ public class SplitView extends ParentView implements ViewHost {
      * Override to return RowViewProxy or ColViewProxy.
      */
     @Override
-    protected ParentViewProxy<?> getViewProxy()
+    protected ParentViewProxy<?> getViewProxyImpl()
     {
         ParentViewProxy<?> viewProxy = isHorizontal() ? new RowViewProxy<>(this) :
             new ColViewProxy<>(this);
@@ -618,10 +618,8 @@ public class SplitView extends ParentView implements ViewHost {
         splitView.setGrowHeight(aView.isGrowHeight());
 
         // Handle ViewHost
-        if (aView instanceof ViewHost) {
-            ViewHost host = (ViewHost) aView;
+        if (aView instanceof ViewHost host)
             splitView.setItems(host.getGuests());
-        }
 
         // Replace given View with new SplitView and return SplitView
         if (aView.getParent() != null)

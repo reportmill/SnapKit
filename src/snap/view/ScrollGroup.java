@@ -146,7 +146,9 @@ public class ScrollGroup extends ParentView {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        return BorderView.getPrefWidth(this, _scrollView, _topScrollerCol, null, null, _leftScroller, aH);
+        ViewProxy<?> viewProxy = getViewProxy();
+        return viewProxy.getPrefWidth(aH);
+        //return BorderView.getPrefWidth(this, _scrollView, _topScrollerCol, null, null, _leftScroller, aH);
     }
 
     /**
@@ -154,7 +156,9 @@ public class ScrollGroup extends ParentView {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        return BorderView.getPrefHeight(this, _scrollView, _topScrollerCol, null, null, _leftScroller, aW);
+        ViewProxy<?> viewProxy = getViewProxy();
+        return viewProxy.getPrefHeight(aW);
+        //return BorderView.getPrefHeight(this, _scrollView, _topScrollerCol, null, null, _leftScroller, aW);
     }
 
     /**
@@ -162,7 +166,15 @@ public class ScrollGroup extends ParentView {
      */
     protected void layoutImpl()
     {
-        BorderView.layout(this, _scrollView, _topScrollerCol, null, null, _leftScroller);
+        ViewProxy<?> viewProxy = getViewProxy();
+        viewProxy.layoutView();
+        //BorderView.layout(this, _scrollView, _topScrollerCol, null, null, _leftScroller);
+    }
+
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()
+    {
+        return new BorderViewProxy(this, _scrollView, _topScrollerCol, null, null, _leftScroller);
     }
 
     /**

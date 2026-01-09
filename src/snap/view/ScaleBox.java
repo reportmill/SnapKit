@@ -68,8 +68,5 @@ public class ScaleBox extends BoxView {
      * Override to return ScaleBoxProxy.
      */
     @Override
-    protected ScaleBoxProxy getViewProxy()
-    {
-        return new ScaleBoxProxy(this);
-    }
+    protected ScaleBoxProxy getViewProxyImpl()  { return new ScaleBoxProxy(this); }
 }

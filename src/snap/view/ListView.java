@@ -621,7 +621,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         }
 
         // Do real layout
-        ColViewProxy<?> viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         viewProxy.layoutView();
 
         // If NeedsScrollSelToVisible, send later
@@ -636,7 +636,8 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the ViewProxy to do layout.
      */
-    protected ColViewProxy<?> getViewProxy()
+    @Override
+    protected ColViewProxy<?> getViewProxyImpl()
     {
         // Create proxy
         ColViewProxy<?> viewProxy = new ColViewProxy<>(this);

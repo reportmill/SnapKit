@@ -376,9 +376,8 @@ public class ButtonBase extends ParentView {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        BoxViewProxy<?> viewProxy = getViewProxy();
-        double prefW = viewProxy.getPrefWidth(aH);
-        return prefW;
+        ViewProxy<?> viewProxy = getViewProxy();
+        return viewProxy.getPrefWidth(aH);
     }
 
     /**
@@ -386,9 +385,8 @@ public class ButtonBase extends ParentView {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        BoxViewProxy<?> viewProxy = getViewProxy();
-        double prefH = viewProxy.getPrefHeight(aW);
-        return prefH;
+        ViewProxy<?> viewProxy = getViewProxy();
+        return viewProxy.getPrefHeight(aW);
     }
 
     /**
@@ -396,18 +394,19 @@ public class ButtonBase extends ParentView {
      */
     protected void layoutImpl()
     {
-        BoxViewProxy<?> viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         viewProxy.layoutView();
     }
 
     /**
      * Returns the ViewProxy to layout button.
      */
-    protected BoxViewProxy<?> getViewProxy()
+    @Override
+    protected BoxViewProxy<?> getViewProxyImpl()
     {
         // Create ViewProxy with Label ViewProxy as Content
         BoxViewProxy<?> viewProxy = new BoxViewProxy<>(this);
-        ViewProxy<?> labelProxy = ViewProxy.getProxy(getLabel());
+        ViewProxy<?> labelProxy = getLabel().getViewProxy();
         viewProxy.setContent(labelProxy);
 
         // If ShowArea, add padding
@@ -455,16 +454,16 @@ public class ButtonBase extends ParentView {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // ShowArea, Position, ImageName
-            case ShowArea_Prop: return isShowArea();
-            case Position_Prop: return getPosition();
-            case ImageName_Prop: return getImageName();
+            case ShowArea_Prop -> isShowArea();
+            case Position_Prop -> getPosition();
+            case ImageName_Prop -> getImageName();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -476,12 +475,12 @@ public class ButtonBase extends ParentView {
         switch (aPropName) {
 
             // ShowArea, Position, ImageName
-            case ShowArea_Prop: setShowArea(Convert.boolValue(aValue)); break;
-            case Position_Prop: setPosition(Pos.of(aValue)); break;
-            case ImageName_Prop: setImageName(Convert.stringValue(aValue)); break;
+            case ShowArea_Prop -> setShowArea(Convert.boolValue(aValue));
+            case Position_Prop -> setPosition(Pos.of(aValue));
+            case ImageName_Prop -> setImageName(Convert.stringValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue); break;
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 

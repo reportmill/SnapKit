@@ -159,21 +159,29 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
      */
     public double getPrefWidth(double aH)
     {
+        View view = getView();
+        if (view != null && view.isPrefWidthSet())
+            return view.getPrefWidth();
+
         setSize(-1, aH);
         layoutProxy();
-        double prefW = getPrefWidthImpl(aH);
-        return prefW;
+        return _prefW = getPrefWidthImpl(aH);
     }
+
+    double _prefW, _prefH;
 
     /**
      * Returns preferred height of layout.
      */
     public double getPrefHeight(double aW)
     {
+        View view = getView();
+        if (view != null && view.isPrefHeightSet())
+            return view.getPrefHeight();
+
         // If given width is not specified, see if view has explicit pref width
         double prefW = aW > 0 ? aW : -1;
         if (prefW < 0) {
-            View view = getView();
             if (view != null && view.isPrefWidthSet())
                 prefW = view.getPrefWidth();
         }
@@ -183,8 +191,7 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
         layoutProxy();
 
         // Return pref height
-        double prefH = getPrefHeightImpl(prefW);
-        return prefH;
+        return _prefH = getPrefHeightImpl(prefW);
     }
 
     /**
@@ -193,7 +200,11 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
     public void layoutView()
     {
         // Layout
-        layoutProxy();
+        View view = getView();
+        if (view != null && (_prefW != view.getWidth() || _prefH != view.getHeight())) {
+            setSize(view.getWidth(), view.getHeight());
+            layoutProxy();
+        }
 
         // Apply bounds
         setBoundsInClient();

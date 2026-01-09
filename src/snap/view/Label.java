@@ -227,7 +227,7 @@ public class Label extends ParentView {
         int textIndex = _textArea.indexInParent();
         ParentViewProxy<?> viewProxy = isHorizontal() ? new RowViewProxy<>(this) : new ColViewProxy<>(this);
         List<View> children = _graphic != null ? List.of(_graphic, _textArea) : List.of(_textArea);
-        List<ViewProxy<?>> childProxies = ListUtils.map(children, child -> ViewProxy.getProxy(child));
+        List<ViewProxy<?>> childProxies = ListUtils.map(children, child -> child.getViewProxy());
         viewProxy.setChildren(childProxies);
         viewProxy.layoutProxy();
         ViewProxy<?> textProxy = childProxies.get(textIndex);

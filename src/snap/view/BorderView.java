@@ -143,7 +143,7 @@ public class BorderView extends ParentView {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        BorderViewProxy viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         return viewProxy.getPrefWidth(aH);
     }
 
@@ -152,7 +152,7 @@ public class BorderView extends ParentView {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        BorderViewProxy viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         return viewProxy.getPrefHeight(aW);
     }
 
@@ -161,7 +161,7 @@ public class BorderView extends ParentView {
      */
     protected void layoutImpl()
     {
-        BorderViewProxy viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         viewProxy.layoutView();
     }
 
@@ -169,7 +169,7 @@ public class BorderView extends ParentView {
      * Override to return ColViewProxy.
      */
     @Override
-    protected BorderViewProxy getViewProxy()
+    protected BorderViewProxy getViewProxyImpl()
     {
         return new BorderViewProxy(this, _center, _top, _right, _bottom, _left);
     }

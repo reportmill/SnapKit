@@ -109,7 +109,7 @@ public class BoxView extends ParentView implements ViewHost {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        BoxViewProxy<?> viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         return viewProxy.getPrefWidth(aH);
     }
 
@@ -118,7 +118,7 @@ public class BoxView extends ParentView implements ViewHost {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        BoxViewProxy<?> viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         return viewProxy.getPrefHeight(aW);
     }
 
@@ -127,7 +127,7 @@ public class BoxView extends ParentView implements ViewHost {
      */
     protected void layoutImpl()
     {
-        BoxViewProxy<?> viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         viewProxy.layoutView();
     }
 
@@ -135,7 +135,7 @@ public class BoxView extends ParentView implements ViewHost {
      * Override to return BoxViewProxy.
      */
     @Override
-    protected BoxViewProxy<?> getViewProxy()
+    protected BoxViewProxy<?> getViewProxyImpl()
     {
         return new BoxViewProxy<>(this);
     }

@@ -10,6 +10,9 @@ import java.util.List;
  */
 public class BorderViewProxy extends ColViewProxy<View> {
 
+    // The views
+    View _topView, _bottomView;
+
     // The row proxy
     public RowViewProxy<?> _rowProxy;
 
@@ -19,6 +22,8 @@ public class BorderViewProxy extends ColViewProxy<View> {
     public BorderViewProxy(ParentView aPar, View centerView, View topView, View rightView, View bottomView, View leftView)
     {
         super(aPar);
+        _topView = topView;
+        _bottomView = bottomView;
         setFillWidth(true);
 
         // Create RowProxy
@@ -27,10 +32,10 @@ public class BorderViewProxy extends ColViewProxy<View> {
         // Create and add proxies for top/bottom views
         List<ViewProxy<?>> childProxies = new ArrayList<>(3);
         if (topView != null && topView.isVisible())
-            childProxies.add(new ViewProxy<>(topView));
+            childProxies.add(topView.getViewProxy());
         childProxies.add(_rowProxy);
         if (bottomView != null && bottomView.isVisible())
-            childProxies.add(new ViewProxy<>(bottomView));
+            childProxies.add(bottomView.getViewProxy());
 
         // Set trimmed children
         setChildren(childProxies.toArray(new ViewProxy[0]));
@@ -47,15 +52,15 @@ public class BorderViewProxy extends ColViewProxy<View> {
         // Create and add proxies for left/center/right views
         List<ViewProxy<?>> childProxies = new ArrayList<>(3);
         if (leftView != null && leftView.isVisible())
-            childProxies.add(new ViewProxy<>(leftView));
+            childProxies.add(leftView.getViewProxy());
         if (centerView != null && centerView.isVisible()) {
-            ViewProxy<?> centerProxy = new ViewProxy<>(centerView);
+            ViewProxy<?> centerProxy = centerView.getViewProxy();
             centerProxy.setGrowWidth(true);
             centerProxy.setGrowHeight(true);
             childProxies.add(centerProxy);
         }
         if (rightView != null && rightView.isVisible())
-            childProxies.add(new ViewProxy<>(rightView));
+            childProxies.add(rightView.getViewProxy());
 
         // Set trimmed children and GrowHeight
         viewProxy.setChildren(childProxies.toArray(new ViewProxy[0]));
@@ -78,9 +83,17 @@ public class BorderViewProxy extends ColViewProxy<View> {
      * Override to layout RowView.
      */
     @Override
-    public void layoutProxy()
+    public void layoutView()
     {
-        super.layoutProxy();
+        super.layoutView();
+
+        double rowH = getHeight();
+        ViewProxy<?> topViewProxy = getChildren()[0];
+        ViewProxy<?> bottomViewProxy = getLastChild();
+        if (topViewProxy != _rowProxy) rowH -= _topView.getHeight();
+        if (bottomViewProxy != _rowProxy) rowH -= _bottomView.getHeight();
+        _rowProxy.setSize(getWidth(), rowH);
         _rowProxy.layoutProxy();
+        _rowProxy.layoutView();
     }
 }

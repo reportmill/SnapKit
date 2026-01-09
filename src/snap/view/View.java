@@ -137,6 +137,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // A map to hold additional data about this view
     private Map<String,Object> _metadata = Collections.EMPTY_MAP;
 
+    // An object to help with layout and hold cached layout info
+    private ViewProxy<?> _viewProxy;
+
     // The view best width and height
     private double  _bestWidth = -1, _bestHeight = -1, _bestWidthParam, _bestHeightParam;
 
@@ -1798,6 +1801,20 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
+     * Returns a ViewProxy to help with layout and hold cached layout info.
+     */
+    protected ViewProxy<?> getViewProxy()
+    {
+        if (_viewProxy != null) return _viewProxy;
+        return _viewProxy = getViewProxyImpl();
+    }
+
+    /**
+     * Creates a ViewProxy for this View.
+     */
+    protected ViewProxy<?> getViewProxyImpl()  { return new ViewProxy<>(this); }
+
+    /**
      * Returns the best width for view - accounting for pref/min/max.
      */
     public double getBestWidth(double aH)
@@ -2187,6 +2204,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void relayoutParent()
     {
+        _viewProxy = null;
         _bestWidth = _bestHeight = -1;
         ParentView par = getParent();
         if (par == null) return;

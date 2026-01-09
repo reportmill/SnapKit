@@ -68,7 +68,7 @@ public class ColView extends ChildView {
     @Override
     protected double getPrefWidthImpl(double aH)
     {
-        ColViewProxy<?> viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         return viewProxy.getPrefWidth(aH);
     }
 
@@ -78,7 +78,7 @@ public class ColView extends ChildView {
     @Override
     protected double getPrefHeightImpl(double aW)
     {
-        ColViewProxy<?> viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         return viewProxy.getPrefHeight(aW);
     }
 
@@ -88,7 +88,7 @@ public class ColView extends ChildView {
     @Override
     protected void layoutImpl()
     {
-        ColViewProxy<?> viewProxy = getViewProxy();
+        ViewProxy<?> viewProxy = getViewProxy();
         viewProxy.layoutView();
     }
 
@@ -96,7 +96,7 @@ public class ColView extends ChildView {
      * Override to return ColViewProxy.
      */
     @Override
-    protected ColViewProxy<?> getViewProxy()
+    protected ColViewProxy<?> getViewProxyImpl()
     {
         return new ColViewProxy<>(this);
     }
@@ -121,15 +121,15 @@ public class ColView extends ChildView {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // FillWidth, Hugging
-            case FillWidth_Prop: return isFillWidth();
-            case Hugging_Prop: return isHugging();
+            case FillWidth_Prop -> isFillWidth();
+            case Hugging_Prop -> isHugging();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -141,11 +141,11 @@ public class ColView extends ChildView {
         switch (aPropName) {
 
             // FillWidth, Hugging
-            case FillWidth_Prop: setFillWidth(Convert.boolValue(aValue)); break;
-            case Hugging_Prop: setHugging(Convert.boolValue(aValue)); break;
+            case FillWidth_Prop -> setFillWidth(Convert.boolValue(aValue));
+            case Hugging_Prop -> setHugging(Convert.boolValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 

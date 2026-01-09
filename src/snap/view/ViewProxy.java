@@ -111,8 +111,16 @@ public class ViewProxy<T extends View> extends Rect {
     {
         if (_children != null)
             for (ViewProxy<?> child : _children)
-                child.setBoundsInClient();
-        else if (_view != null)
+                child.setBoundsInView();
+        else setBoundsInView();
+    }
+
+    /**
+     * Sets the bounds back in the view.
+     */
+    private void setBoundsInView()
+    {
+        if (_view != null)
             _view.setBounds(x, y, width, height);
     }
 
@@ -146,7 +154,7 @@ public class ViewProxy<T extends View> extends Rect {
         if (_children != null || _view == null) return _children;
         ParentView par = (ParentView) _view;
         View[] children = par.getChildrenManaged();
-        return _children = ArrayUtils.map(children, child -> new ViewProxy<>(child), ViewProxy.class);
+        return _children = ArrayUtils.map(children, child -> child.getViewProxy(), ViewProxy.class);
     }
 
     /**
@@ -390,6 +398,24 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public double getLeanYAsDouble()  { return ViewUtils.getAlignY(getLeanY()); }
 
+    /**
+     * Returns preferred width of layout.
+     */
+    public double getPrefWidth(double aH)  { return _view.getPrefWidth(aH); }
+
+    /**
+     * Returns preferred height of layout.
+     */
+    public double getPrefHeight(double aW)  { return _view.getPrefHeight(aW); }
+
+    /**
+     * Performs layout.
+     */
+    public void layoutView()
+    {
+        System.out.println("Frick");
+    }
+
     @Override
     public String toString()
     {
@@ -403,6 +429,6 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public static ViewProxy<?> getProxy(View aView)
     {
-        return aView != null ? new ViewProxy<>(aView) : null;
+        return aView != null ? aView.getViewProxy() : null;
     }
 }

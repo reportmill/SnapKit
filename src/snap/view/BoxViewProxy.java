@@ -16,8 +16,7 @@ public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
     {
         super(aParent);
 
-        if (aParent instanceof BoxView) {
-            BoxView boxView = (BoxView) aParent;
+        if (aParent instanceof BoxView boxView) {
             setFillWidth(boxView.isFillWidth());
             setFillHeight(boxView.isFillHeight());
         }
@@ -30,7 +29,7 @@ public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
     {
         super(aParent);
         if (aChild != null)
-            setContent(ViewProxy.getProxy(aChild));
+            setContent(aChild.getViewProxy());
         setFillWidth(isFillWidth);
         setFillHeight(isFillHeight);
     }
@@ -39,20 +38,18 @@ public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
      * Returns preferred width of layout.
      */
     @Override
-    protected double getPrefWidthImpl(double aH)
+    public double getPrefWidthImpl(double aH)
     {
-        double prefW = getLastChildMaxXWithInsets();
-        return prefW;
+        return getLastChildMaxXWithInsets();
     }
 
     /**
      * Returns preferred height of layout.
      */
     @Override
-    protected double getPrefHeightImpl(double aW)
+    public double getPrefHeightImpl(double aW)
     {
-        double prefH = getLastChildMaxYWithInsets();
-        return prefH;
+        return getLastChildMaxYWithInsets();
     }
 
     /**
