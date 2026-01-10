@@ -52,13 +52,31 @@ public class ViewProxy<T extends View> extends Rect {
     public ViewProxy(View aView)
     {
         _view = (T) aView;
-        width = height = UNSET_DOUBLE;
+        x = y = width = height = UNSET_DOUBLE;
     }
 
     /**
      * Returns the view.
      */
     public T getView()  { return _view; }
+
+    /**
+     * Returns the x.
+     */
+    public double getX()
+    {
+        if (x != UNSET_DOUBLE) return x;
+        return x = _view != null ? _view.getX() : 0;
+    }
+
+    /**
+     * Returns the y.
+     */
+    public double getY()
+    {
+        if (y != UNSET_DOUBLE) return y;
+        return y = _view != null ? _view.getY() : 0;
+    }
 
     /**
      * Returns the width.
@@ -401,27 +419,88 @@ public class ViewProxy<T extends View> extends Rect {
     /**
      * Returns preferred width of layout.
      */
-    public double getPrefWidth(double aH)  { return _view.getPrefWidth(aH); }
+    public double getPrefWidth(double aH)
+    {
+        View view = getView();
+        if (view != null && view.isPrefWidthSet())
+            return view.getPrefWidth();
+
+        setSize(-1, aH);
+        layoutProxy();
+        return _prefW = getPrefWidthImpl(aH);
+    }
+
+    double _prefW = -1, _prefH = -1;
 
     /**
      * Returns preferred height of layout.
      */
-    public double getPrefHeight(double aW)  { return _view.getPrefHeight(aW); }
+    public double getPrefHeight(double aW)
+    {
+        View view = getView();
+        if (view != null && view.isPrefHeightSet())
+            return view.getPrefHeight();
+
+        // If given width is not specified, see if view has explicit pref width
+        double prefW = aW > 0 ? aW : -1;
+        if (prefW < 0) {
+            if (view != null && view.isPrefWidthSet())
+                prefW = view.getPrefWidth();
+        }
+
+        // Set size and layout
+        setSize(prefW, -1);
+        layoutProxy();
+
+        // Return pref height
+        return _prefH = getPrefHeightImpl(prefW);
+    }
 
     /**
-     * Performs layout.
+     * Performs BoxView layout.
      */
     public void layoutView()
     {
-        System.out.println("Frick");
+        // Layout
+        View view = getView();
+        if (view != null && (_prefW != view.getWidth() || _prefH != view.getHeight())) {
+            setSize(view.getWidth(), view.getHeight());
+            layoutProxy();
+        }
+
+        // Apply bounds
+        setBoundsInClient();
     }
 
+    /**
+     * Returns preferred width of layout.
+     */
+    protected double getPrefWidthImpl(double aH)  { return _view.getPrefWidthImpl(aH); }
+
+    /**
+     * Returns preferred height of layout.
+     */
+    protected double getPrefHeightImpl(double aW)  { return _view.getPrefHeightImpl(aW); }
+
+    /**
+     * Performs Box layout for given parent, child and fill width/height.
+     */
+    public void layoutProxy()
+    {
+        if (_view instanceof ParentView parentView)
+            parentView.layoutImpl();
+    }
+
+    /**
+     * Standard toString implementation.
+     */
     @Override
     public String toString()
     {
+        String className = getClass().getSimpleName();
         if (_view != null)
-            return "ViewProxy : " + _view;
-        return "ViewProxy { Bounds=" + getBounds() + " }";
+            return className + ": " + _view;
+        return className + " { Bounds=" + getBounds() + " }";
     }
 
     /**

@@ -1708,7 +1708,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public double getPrefWidth(double aH)
     {
         if (_prefWidth >= 0) return _prefWidth;
-        return getPrefWidthImpl(aH);
+        ViewProxy<?> viewProxy = getViewProxy();
+        return viewProxy.getPrefWidth(aH);
     }
 
     /**
@@ -1740,7 +1741,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public double getPrefHeight(double aW)
     {
         if (_prefHeight >= 0) return _prefHeight;
-        return getPrefHeightImpl(aW);
+        ViewProxy<?> viewProxy = getViewProxy();
+        return viewProxy.getPrefHeight(aW);
     }
 
     /**

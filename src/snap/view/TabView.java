@@ -275,33 +275,14 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     }
 
     /**
-     * Returns the preferred width.
+     * Override to return row or column layout.
      */
-    protected double getPrefWidthImpl(double aH)
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()
     {
         if (_tabSide.isLeftOrRight())
-            return RowView.getPrefWidth(this, aH);
-        return ColView.getPrefWidth(this, aH);
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        if (_tabSide.isLeftOrRight())
-            return RowView.getPrefHeight(this, aW);
-        return ColView.getPrefHeight(this, aW, true);
-    }
-
-    /**
-     * Override to layout children with ColView layout.
-     */
-    protected void layoutImpl()
-    {
-        if (_tabSide.isLeftOrRight())
-            RowView.layout(this, true);
-        else ColView.layout(this, true);
+            return new RowViewProxy<>(this, true);
+        return new ColViewProxy<>(this, true);
     }
 
     /**
@@ -347,12 +328,12 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
 
         // Update TabBar Min/Max size to make TabView unsizable when there is no content for sake of SplitView
         if (isVertical) {
-            double prefH = isContentSet ? -1 : getPrefHeightImpl(-1);
+            double prefH = isContentSet ? -1 : getPrefHeight(-1);
             setMinHeight(prefH);
             setMaxHeight(prefH);
         }
         else {
-            double prefW = isContentSet ? -1 : getPrefWidthImpl(-1);
+            double prefW = isContentSet ? -1 : getPrefWidth(-1);
             setMinWidth(prefW);
             setMaxWidth(prefW);
         }

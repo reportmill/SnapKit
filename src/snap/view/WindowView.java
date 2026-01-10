@@ -778,27 +778,12 @@ public class WindowView extends ParentView {
     protected void setPopup(PopupWindow aPopup)  { _eventDispatcher.setPopup(aPopup); }
 
     /**
-     * Returns the preferred width.
+     * Override to return box layout.
      */
-    protected double getPrefWidthImpl(double aH)
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()
     {
-        return BoxView.getPrefWidth(this, getRootView(), aH);
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        return BoxView.getPrefHeight(this, getRootView(), aW);
-    }
-
-    /**
-     * Layout children.
-     */
-    protected void layoutImpl()
-    {
-        BoxView.layout(this, getRootView(), true, true);
+        return new BoxViewProxy<>(this, getRootView(), true, true);
     }
 
     /**

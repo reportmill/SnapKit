@@ -24,6 +24,15 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
     }
 
     /**
+     * Constructor for given parent view.
+     */
+    public RowViewProxy(View aParent, boolean isFillHeight)
+    {
+        super(aParent);
+        setFillHeight(isFillHeight);
+    }
+
+    /**
      * Returns preferred width of given parent proxy using RowView layout.
      */
     @Override

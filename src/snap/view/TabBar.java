@@ -287,27 +287,12 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     public ParentView getTabsBox()  { return _tabsBox; }
 
     /**
-     * Returns the preferred width.
+     * Override to return box layout.
      */
-    protected double getPrefWidthImpl(double aH)
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()
     {
-        return BoxView.getPrefWidth(this, _tabsBox, aH);
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        return BoxView.getPrefHeight(this, _tabsBox, aW);
-    }
-
-    /**
-     * Override to layout children with BoxView layout.
-     */
-    protected void layoutImpl()
-    {
-        BoxView.layout(this, _tabsBox, true, true);
+        return new BoxViewProxy<>(this, _tabsBox, true, true);
     }
 
     /**

@@ -235,33 +235,14 @@ public class Label extends ParentView {
     }
 
     /**
-     * Returns the preferred width.
+     * Override to return Row or Column layout.
      */
-    protected double getPrefWidthImpl(double aH)
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()
     {
         if (isHorizontal())
-            return RowView.getPrefWidth(this, aH);
-        return ColView.getPrefWidth(this, -1);
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        if (isHorizontal())
-            return RowView.getPrefHeight(this, aW);
-        return ColView.getPrefHeight(this, -1, false);
-    }
-
-    /**
-     * Layout children.
-     */
-    protected void layoutImpl()
-    {
-        if (isHorizontal())
-            RowView.layout(this, false);
-        else ColView.layout(this, false);
+            return new RowViewProxy<>(this);
+        return new ColViewProxy<>(this);
     }
 
     /**

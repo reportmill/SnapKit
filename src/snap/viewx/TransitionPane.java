@@ -77,27 +77,12 @@ public class TransitionPane extends ParentView {
     }
 
     /**
-     * Override to return preferred width of content.
+     * Override to return box layout.
      */
-    protected double getPrefWidthImpl(double aH)
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()
     {
-        return BoxView.getPrefWidth(this, getContent(), aH);
-    }
-
-    /**
-     * Override to return preferred height of content.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        return BoxView.getPrefHeight(this, getContent(), aW);
-    }
-
-    /**
-     * Override to layout content.
-     */
-    protected void layoutImpl()
-    {
-        BoxView.layout(this, getContent(), true, true);
+        return new BoxViewProxy<>(this, getContent(), true, true);
     }
 
     /**

@@ -23,6 +23,15 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     }
 
     /**
+     * Constructor for given parent view.
+     */
+    public ColViewProxy(View aParent, boolean aFillWidth)
+    {
+        super(aParent);
+        setFillWidth(aFillWidth);
+    }
+
+    /**
      * Returns preferred width of given parent proxy using ColView layout.
      */
     @Override

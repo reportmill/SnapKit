@@ -68,26 +68,11 @@ public class RootView extends ParentView {
     protected void repaintInParent(Rect aRect)  { repaint(); }
 
     /**
-     * Returns the preferred width.
+     * Override to return Box layout.
      */
-    protected double getPrefWidthImpl(double aH)
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()
     {
-        return BoxView.getPrefWidth(this, _content, aH);
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        return BoxView.getPrefHeight(this, _content, aW);
-    }
-
-    /**
-     * Layout children.
-     */
-    protected void layoutImpl()
-    {
-        BoxView.layout(this, _content, true, true);
+        return new BoxViewProxy<>(this, _content, true, true);
     }
 }
