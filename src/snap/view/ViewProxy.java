@@ -425,8 +425,10 @@ public class ViewProxy<T extends View> extends Rect {
         if (view != null && view.isPrefWidthSet())
             return view.getPrefWidth();
 
+        double oldW = width, oldH = height;
         setSize(-1, aH);
         layoutProxy();
+        width = oldW; height = oldH;
         return _prefW = getPrefWidthImpl(aH);
     }
 
@@ -449,8 +451,10 @@ public class ViewProxy<T extends View> extends Rect {
         }
 
         // Set size and layout
+        double oldW = width, oldH = height;
         setSize(prefW, -1);
         layoutProxy();
+        width = oldW; height = oldH;
 
         // Return pref height
         return _prefH = getPrefHeightImpl(prefW);
@@ -487,8 +491,19 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public void layoutProxy()
     {
-        if (_view instanceof ParentView parentView)
+        if (_view instanceof ParentView parentView) {
             parentView.layoutImpl();
+
+            // Copy children bounds from parent view layout back to child layouts
+            ViewProxy<?>[] children = getChildren();
+            if (children != null) {
+                for (ViewProxy<?> child : children) {
+                    View childView = child.getView();
+                    if (childView != null)
+                        child.setBounds(childView.getX(), childView.getY(), childView.getWidth(), childView.getHeight());
+                }
+            }
+        }
     }
 
     /**

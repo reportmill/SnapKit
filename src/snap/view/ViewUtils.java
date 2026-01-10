@@ -643,6 +643,15 @@ public class ViewUtils {
         if (!(parentView instanceof ViewHost))
             return;
 
+        runLater(() -> checkWantsScrollViewImpl(aView));
+    }
+
+    /**
+     * Checks the given view to see if it wants a ScrollView (actual size smaller than preferred).
+     * If true, replaces with ScrollView.
+     */
+    private static void checkWantsScrollViewImpl(View aView)
+    {
         // If size less than preferred, replace with scroll view
         double viewW = aView.getWidth();
         double viewH = aView.getHeight();
