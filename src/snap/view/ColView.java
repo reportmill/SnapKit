@@ -142,37 +142,4 @@ public class ColView extends ChildView {
         if (anElement.hasAttribute(FillWidth_Prop)) setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
         if (anElement.hasAttribute(Hugging_Prop)) setHugging(anElement.getAttributeBoolValue(Hugging_Prop));
     }
-
-    /**
-     * Returns preferred width of given parent with given children.
-     */
-    public static double getPrefWidth(ParentView aPar, double aH)
-    {
-        ColViewLayout<?> viewLayout = new ColViewLayout<>(aPar);
-        return viewLayout.getPrefWidth(aH);
-    }
-
-    /**
-     * Returns preferred height of given parent with given children.
-     */
-    public static double getPrefHeight(ParentView aParent, double aW, boolean isFillWidth)
-    {
-        ColViewLayout<?> viewLayout = new ColViewLayout<>(aParent);
-        viewLayout.setFillWidth(isFillWidth);
-        return viewLayout.getPrefHeight(aW);
-    }
-
-    /**
-     * Performs layout for given parent with option to fill width.
-     */
-    public static void layout(ParentView aParent, boolean isFillWidth)
-    {
-        // Get layout children (just return if none)
-        if (aParent.getChildrenManaged().length == 0) return;
-
-        // Get Parent layout and layout views
-        ColViewLayout<?> viewLayout = new ColViewLayout<>(aParent);
-        viewLayout.setFillWidth(isFillWidth);
-        viewLayout.layoutView();
-    }
 }

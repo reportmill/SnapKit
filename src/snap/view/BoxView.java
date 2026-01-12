@@ -275,32 +275,4 @@ public class BoxView extends ParentView implements ViewHost {
         if (anElement.hasAttribute(FillHeight_Prop))
             setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop));
     }
-
-    /**
-     * Returns preferred width of layout.
-     */
-    public static double getPrefWidth(ParentView aParent, View aChild, double aH)
-    {
-        BoxViewLayout<?> viewLayout = new BoxViewLayout<>(aParent, aChild, false, false);
-        return viewLayout.getPrefWidth(aH);
-    }
-
-    /**
-     * Returns preferred height of layout.
-     */
-    public static double getPrefHeight(ParentView aParent, View aChild, double aW)
-    {
-        BoxViewLayout<?> viewLayout = new BoxViewLayout<>(aParent, aChild, false, false);
-        return viewLayout.getPrefHeight(aW);
-    }
-
-    /**
-     * Performs Box layout for given parent, child and fill width/height.
-     */
-    public static void layout(ParentView aPar, View aChild, boolean isFillWidth, boolean isFillHeight)
-    {
-        if (aChild == null) return;
-        BoxViewLayout<?> viewLayout = new BoxViewLayout<>(aPar, aChild, isFillWidth, isFillHeight);
-        viewLayout.layoutView();
-    }
 }

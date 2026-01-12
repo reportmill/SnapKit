@@ -8,9 +8,7 @@ import snap.geom.Shape;
 import snap.geom.Vector;
 import snap.gfx.Image;
 import snap.util.*;
-import snap.view.ImageView;
-import snap.view.ParentView;
-import snap.view.StackView;
+import snap.view.*;
 import java.util.List;
 
 /**
@@ -402,22 +400,10 @@ public class Actor extends ParentView {
     }
 
     /**
-     * Layout.
+     * Override to return stack layout.
      */
     @Override
-    protected void layoutImpl()  { StackView.layout(this); }
-
-    /**
-     * Pref width.
-     */
-    @Override
-    protected double getPrefWidthImpl(double aH)  { return StackView.getPrefWidth(this, aH); }
-
-    /**
-     * Pref height.
-     */
-    @Override
-    protected double getPrefHeightImpl(double aW)  { return StackView.getPrefHeight(this, aW); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new StackViewLayout<>(this); }
 
     /**
      * Override to archive X/Y and ImageName.

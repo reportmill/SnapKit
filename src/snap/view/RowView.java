@@ -140,36 +140,4 @@ public class RowView extends ChildView {
         if (anElement.hasAttribute(Hugging_Prop))
             setHugging(anElement.getAttributeBoolValue(Hugging_Prop, false));
     }
-
-    /**
-     * Returns preferred width of given parent using RowView layout.
-     */
-    public static double getPrefWidth(View aParent, double aH)
-    {
-        RowViewLayout<?> viewLayout = new RowViewLayout<>(aParent);
-        return viewLayout.getPrefWidth(aH);
-    }
-
-    /**
-     * Returns preferred height of given parent using RowView layout.
-     */
-    public static double getPrefHeight(View aParent, double aW)
-    {
-        RowViewLayout<?> viewLayout = new RowViewLayout<>(aParent);
-        return viewLayout.getPrefHeight(aW);
-    }
-
-    /**
-     * Performs layout for given parent with given children.
-     */
-    public static void layout(ParentView aParent, boolean isFillHeight)
-    {
-        // If no children, just return
-        if (aParent.getChildrenManaged().length == 0) return;
-
-        // Get Parent row layout and layout views
-        RowViewLayout<?> viewLayout = new RowViewLayout<>(aParent);
-        viewLayout.setFillHeight(isFillHeight);
-        viewLayout.layoutView();
-    }
 }

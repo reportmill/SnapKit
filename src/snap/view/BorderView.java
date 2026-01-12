@@ -146,31 +146,4 @@ public class BorderView extends ParentView {
     {
         return new BorderViewLayout(this, _center, _top, _right, _bottom, _left);
     }
-
-    /**
-     * Returns preferred width of given parent with given children.
-     */
-    public static double getPrefWidth(ParentView aPar, View aCtr, View aTop, View aRgt, View aBtm, View aLft, double aH)
-    {
-        ViewLayout<?> proxy = new BorderViewLayout(aPar, aCtr, aTop, aRgt, aBtm, aLft);
-        return proxy.getBestWidth(aH);
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    public static double getPrefHeight(ParentView aPar, View aCtr, View aTop, View aRgt, View aBtm, View aLft, double aW)
-    {
-        ViewLayout<?> proxy = new BorderViewLayout(aPar, aCtr, aTop, aRgt, aBtm, aLft);
-        return proxy.getBestHeight(aW);
-    }
-
-    /**
-     * Layout children.
-     */
-    public static void layout(ParentView aPar, View aCtr, View aTop, View aRgt, View aBtm, View aLft)
-    {
-        BorderViewLayout viewLayout = new BorderViewLayout(aPar, aCtr, aTop, aRgt, aBtm, aLft);
-        viewLayout.layoutView();
-    }
 }

@@ -220,19 +220,10 @@ public class ArrowView extends ParentView {
     }
 
     /**
-     * Returns the preferred width.
+     * Override to return row layout.
      */
-    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, aH); }
-
-    /**
-     * Returns the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(this, aW); }
-
-    /**
-     * Layout children.
-     */
-    protected void layoutImpl()  { RowView.layout(this, false); }
+    @Override
+    protected ViewLayout<?> getViewLayoutImpl()  { return new RowViewLayout<>(this, false); }
 
     /**
      * Creates an arrow button.
