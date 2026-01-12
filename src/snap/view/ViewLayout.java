@@ -11,7 +11,7 @@ import java.util.List;
 public abstract class ViewLayout<T extends View> extends Rect {
 
     // The original view (if available)
-    private T  _view;
+    protected T _view;
 
     // The children
     private ViewLayout<?>[]  _children;
@@ -51,7 +51,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
      */
     public ViewLayout(View aView)
     {
-        _view = (T) aView;
+        _view = (T) aView; assert _view != null;
         x = y = width = height = UNSET_DOUBLE;
     }
 

@@ -46,7 +46,7 @@ public class BorderViewLayout extends ColViewLayout<View> {
      */
     private static RowViewLayout<?> getRowViewLayout(View centerView, View leftView, View rightView)
     {
-        RowViewLayout<?> viewLayout = new RowViewLayout<>(null);
+        RowViewLayout<?> viewLayout = new RowViewLayout<>(new View());
         viewLayout.setFillHeight(true);
 
         // Create and add proxies for left/center/right views
