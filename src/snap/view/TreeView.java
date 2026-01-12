@@ -5,7 +5,6 @@ package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
 
-import snap.geom.Insets;
 import snap.geom.Polygon;
 import snap.gfx.*;
 import snap.props.PropChange;
@@ -529,7 +528,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      * Override to return treeview layout.
      */
     @Override
-    protected ViewProxy<?> getViewProxyImpl()  { return new TreeViewLayout(this); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new TreeViewLayout(this); }
 
     /**
      * Returns the maximum height.
@@ -592,7 +591,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Custom layout for treeview.
      */
-    private static class TreeViewLayout extends BoxViewProxy<TreeView<?>> {
+    private static class TreeViewLayout extends BoxViewLayout<TreeView<?>> {
 
         public TreeViewLayout(TreeView<?> treeView)
         {

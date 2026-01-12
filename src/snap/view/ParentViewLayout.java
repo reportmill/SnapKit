@@ -7,9 +7,9 @@ import snap.util.ArrayUtils;
 import snap.util.MathUtils;
 
 /**
- * A ViewProxy that can layout content in the manner of BoxView for any View.
+ * A ViewLayout that can layout content in the manner of BoxView for any View.
  */
-public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
+public abstract class ParentViewLayout<T extends View> extends ViewLayout<T> {
 
     // The number of children that grow width/height
     protected int _growWidthCount = -1, _growHeightCount = -1;
@@ -17,7 +17,7 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
     /**
      * Constructor for given parent view.
      */
-    public ParentViewProxy(View aParent)
+    public ParentViewLayout(View aParent)
     {
         super(aParent);
     }
@@ -48,7 +48,7 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
         // Get info
         Insets parentPadding = getPadding();
         Insets borderInsets = getBorderInsets();
-        ViewProxy<?> lastChild = getLastChild();
+        ViewLayout<?> lastChild = getLastChild();
         Insets lastChildMargin = lastChild != null ? lastChild.getMargin() : Insets.EMPTY;
 
         // Return LastChildMaxX plus right margin plus border right
@@ -65,7 +65,7 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
         // Get info
         Insets parentPadding = getPadding();
         Insets borderInsets = getBorderInsets();
-        ViewProxy<?> lastChild = getLastChild();
+        ViewLayout<?> lastChild = getLastChild();
         Insets lastChildMargin = lastChild != null ? lastChild.getMargin() : Insets.EMPTY;
 
         // Return LastChildMaxY plus bottom margin plus border bottom
@@ -82,11 +82,11 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
         // Get info
         Insets parentPadding = getPadding();
         Insets borderInsets = getBorderInsets();
-        ViewProxy<?>[] children = getChildren();
+        ViewLayout<?>[] children = getChildren();
         double childrenMaxX = parentPadding.getWidth() + borderInsets.getWidth();
 
         // Iterate over children to get MaxX
-        for (ViewProxy<?> child : children) {
+        for (ViewLayout<?> child : children) {
             double childMaxX = child.getMaxX();
             Insets childMargin = child.getMargin();
             double rightMargin = Math.max(childMargin.right, parentPadding.right);
@@ -105,11 +105,11 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
         // Get info
         Insets parentPadding = getPadding();
         Insets borderInsets = getBorderInsets();
-        ViewProxy<?>[] children = getChildren();
+        ViewLayout<?>[] children = getChildren();
         double childMaxYAll = parentPadding.getHeight() + borderInsets.getHeight();
 
         // Iterate over children to get MaxY
-        for (ViewProxy<?> child : children) {
+        for (ViewLayout<?> child : children) {
             double childMaxY = child.getMaxY();
             Insets childMargin = child.getMargin();
             double bottomMargin = Math.max(childMargin.bottom, parentPadding.bottom);

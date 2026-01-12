@@ -278,11 +278,11 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
      * Override to return row or column layout.
      */
     @Override
-    protected ViewProxy<?> getViewProxyImpl()
+    protected ViewLayout<?> getViewLayoutImpl()
     {
         if (_tabSide.isLeftOrRight())
-            return new RowViewProxy<>(this, true);
-        return new ColViewProxy<>(this, true);
+            return new RowViewLayout<>(this, true);
+        return new ColViewLayout<>(this, true);
     }
 
     /**

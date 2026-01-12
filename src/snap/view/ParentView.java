@@ -486,8 +486,8 @@ public class ParentView extends View {
         if (_inLayout) return;
         _inLayout = true;
         if (getWidth() > 0 && getHeight() > 0) {
-            ViewProxy<?> viewProxy = getViewProxy();
-            viewProxy.layoutView();
+            ViewLayout<?> viewLayout = getViewLayout();
+            viewLayout.layoutView();
             //layoutImpl();
             layoutFloatingViews();
         }

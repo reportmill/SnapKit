@@ -568,7 +568,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
      * Override to return row layout.
      */
     @Override
-    protected ViewProxy<?> getViewProxyImpl()  { return new RowViewProxy<>(this, true); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new RowViewLayout<>(this, true); }
 
     /**
      * Override to focus text or button.

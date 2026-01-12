@@ -8,13 +8,13 @@ import java.util.List;
 /**
  * This class represents a view for the purpose of layout.
  */
-public abstract class ViewProxy<T extends View> extends Rect {
+public abstract class ViewLayout<T extends View> extends Rect {
 
     // The original view (if available)
     private T  _view;
 
     // The children
-    private ViewProxy<?>[]  _children;
+    private ViewLayout<?>[]  _children;
 
     // The border
     private Border  _border;
@@ -47,9 +47,9 @@ public abstract class ViewProxy<T extends View> extends Rect {
     private static double UNSET_DOUBLE = -Float.MIN_VALUE;
 
     /**
-     * Creates a new ViewProxy for given View.
+     * Constructor for given View.
      */
-    public ViewProxy(View aView)
+    public ViewLayout(View aView)
     {
         _view = (T) aView;
         x = y = width = height = UNSET_DOUBLE;
@@ -128,7 +128,7 @@ public abstract class ViewProxy<T extends View> extends Rect {
     public void setBoundsInClient()
     {
         if (_children != null)
-            for (ViewProxy<?> child : _children)
+            for (ViewLayout<?> child : _children)
                 child.setBoundsInView();
         else setBoundsInView();
     }
@@ -145,18 +145,18 @@ public abstract class ViewProxy<T extends View> extends Rect {
     /**
      * Returns the content.
      */
-    public ViewProxy<?> getContent()
+    public ViewLayout<?> getContent()
     {
-        ViewProxy<?>[] children = getChildren();
+        ViewLayout<?>[] children = getChildren();
         return children.length > 0 ? children[0] : null;
     }
 
     /**
      * Sets the content.
      */
-    public void setContent(ViewProxy<?> aViewProxy)
+    public void setContent(ViewLayout<?> aViewLayout)
     {
-        setChildren(aViewProxy != null ? List.of(aViewProxy) : Collections.emptyList());
+        setChildren(aViewLayout != null ? List.of(aViewLayout) : Collections.emptyList());
     }
 
     /**
@@ -167,18 +167,18 @@ public abstract class ViewProxy<T extends View> extends Rect {
     /**
      * Returns the children.
      */
-    public ViewProxy<?>[] getChildren()
+    public ViewLayout<?>[] getChildren()
     {
         if (_children != null || _view == null) return _children;
         ParentView par = (ParentView) _view;
         View[] children = par.getChildrenManaged();
-        return _children = ArrayUtils.map(children, child -> child.getViewProxy(), ViewProxy.class);
+        return _children = ArrayUtils.map(children, child -> child.getViewLayout(), ViewLayout.class);
     }
 
     /**
      * Returns the children.
      */
-    public void setChildren(ViewProxy<?>[] theProxies)
+    public void setChildren(ViewLayout<?>[] theProxies)
     {
         _children = theProxies;
     }
@@ -186,9 +186,9 @@ public abstract class ViewProxy<T extends View> extends Rect {
     /**
      * Returns the children.
      */
-    public void setChildren(List<ViewProxy<?>> theProxies)
+    public void setChildren(List<ViewLayout<?>> theProxies)
     {
-        _children = theProxies.toArray(new ViewProxy[0]);
+        _children = theProxies.toArray(new ViewLayout[0]);
     }
 
     /**
@@ -199,28 +199,28 @@ public abstract class ViewProxy<T extends View> extends Rect {
     /**
      * Returns the last child.
      */
-    public ViewProxy<?> getLastChild()
+    public ViewLayout<?> getLastChild()
     {
-        ViewProxy<?>[] children = getChildren();
+        ViewLayout<?>[] children = getChildren();
         return children.length > 0 ? children[children.length-1] : null;
     }
 
     /**
      * Returns the child for given component class.
      */
-    public <E extends View> ViewProxy<E> getChildForClass(Class<E> aClass)
+    public <E extends View> ViewLayout<E> getChildForClass(Class<E> aClass)
     {
-        ViewProxy<?>[] children = getChildren();
-        return (ViewProxy<E>) ArrayUtils.findMatch(children, child -> aClass.isInstance(child.getView()));
+        ViewLayout<?>[] children = getChildren();
+        return (ViewLayout<E>) ArrayUtils.findMatch(children, child -> aClass.isInstance(child.getView()));
     }
 
     /**
      * Returns the children for given component class.
      */
-    public <E extends View> ViewProxy<E>[] getChildrenForClass(Class<E> aClass)
+    public <E extends View> ViewLayout<E>[] getChildrenForClass(Class<E> aClass)
     {
-        ViewProxy<?>[] children = getChildren();
-        return (ViewProxy<E>[]) ArrayUtils.filter(children, child -> aClass.isInstance(child.getView()));
+        ViewLayout<?>[] children = getChildren();
+        return (ViewLayout<E>[]) ArrayUtils.filter(children, child -> aClass.isInstance(child.getView()));
     }
 
     /**
@@ -506,8 +506,8 @@ public abstract class ViewProxy<T extends View> extends Rect {
     /**
      * Returns a proxy for given view.
      */
-    public static ViewProxy<?> getProxy(View aView)
+    public static ViewLayout<?> getProxy(View aView)
     {
-        return aView != null ? aView.getViewProxy() : null;
+        return aView != null ? aView.getViewLayout() : null;
     }
 }

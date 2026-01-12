@@ -3,7 +3,7 @@ package snap.view;
 /**
  * A layout that delegates back to the view.
  */
-public class NullLayout extends ViewProxy<View> {
+public class NullLayout extends ViewLayout<View> {
 
     /**
      * Constructor.
@@ -38,9 +38,9 @@ public class NullLayout extends ViewProxy<View> {
             parentView.layoutImpl();
 
             // Copy children bounds from parent view layout back to child layouts
-            ViewProxy<?>[] children = getChildren();
+            ViewLayout<?>[] children = getChildren();
             if (children != null) {
-                for (ViewProxy<?> child : children) {
+                for (ViewLayout<?> child : children) {
                     View childView = child.getView();
                     if (childView != null)
                         child.setBounds(childView.getX(), childView.getY(), childView.getWidth(), childView.getHeight());

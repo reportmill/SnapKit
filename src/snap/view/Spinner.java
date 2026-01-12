@@ -223,7 +223,7 @@ public class Spinner <T> extends ParentView {
      * Override to return row layout.
      */
     @Override
-    protected ViewProxy<?> getViewProxyImpl()  { return new RowViewProxy<>(this, true); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new RowViewLayout<>(this, true); }
 
     /**
      * Override to forward to StringView.

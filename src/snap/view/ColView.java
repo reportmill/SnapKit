@@ -63,10 +63,10 @@ public class ColView extends ChildView {
     }
 
     /**
-     * Override to return ColViewProxy.
+     * Override to return column layout.
      */
     @Override
-    protected ColViewProxy<?> getViewProxyImpl()  { return new ColViewProxy<>(this); }
+    protected ColViewLayout<?> getViewLayoutImpl()  { return new ColViewLayout<>(this); }
 
     /**
      * Override to support props for this class.
@@ -148,8 +148,8 @@ public class ColView extends ChildView {
      */
     public static double getPrefWidth(ParentView aPar, double aH)
     {
-        ColViewProxy<?> viewProxy = new ColViewProxy<>(aPar);
-        return viewProxy.getPrefWidth(aH);
+        ColViewLayout<?> viewLayout = new ColViewLayout<>(aPar);
+        return viewLayout.getPrefWidth(aH);
     }
 
     /**
@@ -157,9 +157,9 @@ public class ColView extends ChildView {
      */
     public static double getPrefHeight(ParentView aParent, double aW, boolean isFillWidth)
     {
-        ColViewProxy<?> viewProxy = new ColViewProxy<>(aParent);
-        viewProxy.setFillWidth(isFillWidth);
-        return viewProxy.getPrefHeight(aW);
+        ColViewLayout<?> viewLayout = new ColViewLayout<>(aParent);
+        viewLayout.setFillWidth(isFillWidth);
+        return viewLayout.getPrefHeight(aW);
     }
 
     /**
@@ -170,9 +170,9 @@ public class ColView extends ChildView {
         // Get layout children (just return if none)
         if (aParent.getChildrenManaged().length == 0) return;
 
-        // Get Parent ColViewProxy and layout views
-        ColViewProxy<?> viewProxy = new ColViewProxy<>(aParent);
-        viewProxy.setFillWidth(isFillWidth);
-        viewProxy.layoutView();
+        // Get Parent layout and layout views
+        ColViewLayout<?> viewLayout = new ColViewLayout<>(aParent);
+        viewLayout.setFillWidth(isFillWidth);
+        viewLayout.layoutView();
     }
 }

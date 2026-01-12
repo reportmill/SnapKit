@@ -138,7 +138,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     private Map<String,Object> _metadata = Collections.EMPTY_MAP;
 
     // An object to help with layout and hold cached layout info
-    private ViewProxy<?> _viewProxy;
+    private ViewLayout<?> _viewLayout;
 
     // The view best width and height
     private double  _bestWidth = -1, _bestHeight = -1, _bestWidthParam, _bestHeightParam;
@@ -1708,8 +1708,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public double getPrefWidth(double aH)
     {
         if (_prefWidth >= 0) return _prefWidth;
-        ViewProxy<?> viewProxy = getViewProxy();
-        return viewProxy.getPrefWidth(aH);
+        ViewLayout<?> viewLayout = getViewLayout();
+        return viewLayout.getPrefWidth(aH);
     }
 
     /**
@@ -1741,8 +1741,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public double getPrefHeight(double aW)
     {
         if (_prefHeight >= 0) return _prefHeight;
-        ViewProxy<?> viewProxy = getViewProxy();
-        return viewProxy.getPrefHeight(aW);
+        ViewLayout<?> viewLayout = getViewLayout();
+        return viewLayout.getPrefHeight(aW);
     }
 
     /**
@@ -1803,18 +1803,18 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
-     * Returns a ViewProxy to help with layout and hold cached layout info.
+     * Returns a ViewLayout to help with layout and hold cached layout info.
      */
-    protected ViewProxy<?> getViewProxy()
+    protected ViewLayout<?> getViewLayout()
     {
-        if (_viewProxy != null) return _viewProxy;
-        return _viewProxy = getViewProxyImpl();
+        if (_viewLayout != null) return _viewLayout;
+        return _viewLayout = getViewLayoutImpl();
     }
 
     /**
-     * Creates a ViewProxy for this View.
+     * Creates a ViewLayout for this View.
      */
-    protected ViewProxy<?> getViewProxyImpl()  { return new NullLayout(this); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new NullLayout(this); }
 
     /**
      * Returns the best width for view - accounting for pref/min/max.
@@ -2206,7 +2206,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void relayoutParent()
     {
-        _viewProxy = null;
+        _viewLayout = null;
         _bestWidth = _bestHeight = -1;
         ParentView par = getParent();
         if (par == null) return;

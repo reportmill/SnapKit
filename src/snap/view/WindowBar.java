@@ -190,7 +190,7 @@ public class WindowBar extends ParentView {
      * Override to return box layout.
      */
     @Override
-    protected ViewProxy<?> getViewProxyImpl()  { return new BoxViewProxy<>(this, getContent(), true, true); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new BoxViewLayout<>(this, getContent(), true, true); }
 
     /**
      * Attaches a WindowBar to a view.

@@ -225,12 +225,12 @@ public class Label extends ParentView {
 
         // Layout children and return text bounds
         int textIndex = _textArea.indexInParent();
-        ParentViewProxy<?> viewProxy = isHorizontal() ? new RowViewProxy<>(this) : new ColViewProxy<>(this);
+        ParentViewLayout<?> viewLayout = isHorizontal() ? new RowViewLayout<>(this) : new ColViewLayout<>(this);
         List<View> children = _graphic != null ? List.of(_graphic, _textArea) : List.of(_textArea);
-        List<ViewProxy<?>> childProxies = ListUtils.map(children, child -> child.getViewProxy());
-        viewProxy.setChildren(childProxies);
-        viewProxy.layoutProxy();
-        ViewProxy<?> textProxy = childProxies.get(textIndex);
+        List<ViewLayout<?>> childProxies = ListUtils.map(children, child -> child.getViewLayout());
+        viewLayout.setChildren(childProxies);
+        viewLayout.layoutProxy();
+        ViewLayout<?> textProxy = childProxies.get(textIndex);
         return textProxy;
     }
 
@@ -238,11 +238,11 @@ public class Label extends ParentView {
      * Override to return Row or Column layout.
      */
     @Override
-    protected ViewProxy<?> getViewProxyImpl()
+    protected ViewLayout<?> getViewLayoutImpl()
     {
         if (isHorizontal())
-            return new RowViewProxy<>(this);
-        return new ColViewProxy<>(this);
+            return new RowViewLayout<>(this);
+        return new ColViewLayout<>(this);
     }
 
     /**

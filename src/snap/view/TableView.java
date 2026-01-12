@@ -638,7 +638,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      * Override to return table view layout.
      */
     @Override
-    protected ViewProxy<?> getViewProxyImpl()  { return new TableViewLayout(this); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new TableViewLayout(this); }
 
     /**
      * Handle events.
@@ -1005,7 +1005,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Custom layout for TableView.
      */
-    private static class TableViewLayout extends BoxViewProxy<TableView<?>> {
+    private static class TableViewLayout extends BoxViewLayout<TableView<?>> {
 
         public TableViewLayout(TableView<?> tableView)
         {

@@ -781,9 +781,9 @@ public class WindowView extends ParentView {
      * Override to return box layout.
      */
     @Override
-    protected ViewProxy<?> getViewProxyImpl()
+    protected ViewLayout<?> getViewLayoutImpl()
     {
-        return new BoxViewProxy<>(this, getRootView(), true, true);
+        return new BoxViewLayout<>(this, getRootView(), true, true);
     }
 
     /**

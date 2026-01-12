@@ -108,7 +108,7 @@ public class BoxView extends ParentView implements ViewHost {
      * Override to return box layout.
      */
     @Override
-    protected BoxViewProxy<?> getViewProxyImpl()  { return new BoxViewProxy<>(this); }
+    protected BoxViewLayout<?> getViewLayoutImpl()  { return new BoxViewLayout<>(this); }
 
     /**
      * ViewHost method: Override to return 1 if content is present.
@@ -281,8 +281,8 @@ public class BoxView extends ParentView implements ViewHost {
      */
     public static double getPrefWidth(ParentView aParent, View aChild, double aH)
     {
-        BoxViewProxy<?> viewProxy = new BoxViewProxy<>(aParent, aChild, false, false);
-        return viewProxy.getPrefWidth(aH);
+        BoxViewLayout<?> viewLayout = new BoxViewLayout<>(aParent, aChild, false, false);
+        return viewLayout.getPrefWidth(aH);
     }
 
     /**
@@ -290,8 +290,8 @@ public class BoxView extends ParentView implements ViewHost {
      */
     public static double getPrefHeight(ParentView aParent, View aChild, double aW)
     {
-        BoxViewProxy<?> viewProxy = new BoxViewProxy<>(aParent, aChild, false, false);
-        return viewProxy.getPrefHeight(aW);
+        BoxViewLayout<?> viewLayout = new BoxViewLayout<>(aParent, aChild, false, false);
+        return viewLayout.getPrefHeight(aW);
     }
 
     /**
@@ -300,7 +300,7 @@ public class BoxView extends ParentView implements ViewHost {
     public static void layout(ParentView aPar, View aChild, boolean isFillWidth, boolean isFillHeight)
     {
         if (aChild == null) return;
-        BoxViewProxy<?> viewProxy = new BoxViewProxy<>(aPar, aChild, isFillWidth, isFillHeight);
-        viewProxy.layoutView();
+        BoxViewLayout<?> viewLayout = new BoxViewLayout<>(aPar, aChild, isFillWidth, isFillHeight);
+        viewLayout.layoutView();
     }
 }

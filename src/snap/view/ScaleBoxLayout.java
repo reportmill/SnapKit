@@ -5,9 +5,9 @@ package snap.view;
 import snap.geom.Insets;
 
 /**
- * A ViewProxy that can layout content in the manner of ScaleBox for any View.
+ * A ViewLayout that can layout content in the manner of ScaleBox for any View.
  */
-public class ScaleBoxProxy extends BoxViewProxy<View> {
+public class ScaleBoxLayout extends BoxViewLayout<View> {
 
     // Whether to preserve natural aspect when scaling
     private boolean  _keepAspect;
@@ -15,7 +15,7 @@ public class ScaleBoxProxy extends BoxViewProxy<View> {
     /**
      * Constructor for given parent view.
      */
-    public ScaleBoxProxy(View aParent)
+    public ScaleBoxLayout(View aParent)
     {
         super(aParent);
 
@@ -43,7 +43,7 @@ public class ScaleBoxProxy extends BoxViewProxy<View> {
      */
     public double getAspect()
     {
-        ViewProxy<?> child = getContent(); if (child == null) return 1;
+        ViewLayout<?> child = getContent(); if (child == null) return 1;
         double bestW = child.getBestWidth(-1);
         double bestH = child.getBestHeight(-1);
         return bestW / bestH;
@@ -87,7 +87,7 @@ public class ScaleBoxProxy extends BoxViewProxy<View> {
     public void layoutProxy()
     {
         // Get child (if null, just return)
-        ViewProxy<?> child = getContent(); if (child == null) return;
+        ViewLayout<?> child = getContent(); if (child == null) return;
 
         // Get layout info
         double viewW = getWidth();

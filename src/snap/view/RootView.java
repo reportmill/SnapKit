@@ -71,8 +71,8 @@ public class RootView extends ParentView {
      * Override to return Box layout.
      */
     @Override
-    protected ViewProxy<?> getViewProxyImpl()
+    protected ViewLayout<?> getViewLayoutImpl()
     {
-        return new BoxViewProxy<>(this, _content, true, true);
+        return new BoxViewLayout<>(this, _content, true, true);
     }
 }

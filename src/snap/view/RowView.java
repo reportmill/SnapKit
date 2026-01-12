@@ -62,7 +62,7 @@ public class RowView extends ChildView {
      * Override to return row layout.
      */
     @Override
-    protected RowViewProxy<?> getViewProxyImpl()  { return new RowViewProxy<>(this); }
+    protected RowViewLayout<?> getViewLayoutImpl()  { return new RowViewLayout<>(this); }
 
     /**
      * Override to support props for this class.
@@ -146,8 +146,8 @@ public class RowView extends ChildView {
      */
     public static double getPrefWidth(View aParent, double aH)
     {
-        RowViewProxy<?> viewProxy = new RowViewProxy<>(aParent);
-        return viewProxy.getPrefWidth(aH);
+        RowViewLayout<?> viewLayout = new RowViewLayout<>(aParent);
+        return viewLayout.getPrefWidth(aH);
     }
 
     /**
@@ -155,8 +155,8 @@ public class RowView extends ChildView {
      */
     public static double getPrefHeight(View aParent, double aW)
     {
-        RowViewProxy<?> viewProxy = new RowViewProxy<>(aParent);
-        return viewProxy.getPrefHeight(aW);
+        RowViewLayout<?> viewLayout = new RowViewLayout<>(aParent);
+        return viewLayout.getPrefHeight(aW);
     }
 
     /**
@@ -167,9 +167,9 @@ public class RowView extends ChildView {
         // If no children, just return
         if (aParent.getChildrenManaged().length == 0) return;
 
-        // Get Parent ColViewProxy and layout views
-        RowViewProxy<?> viewProxy = new RowViewProxy<>(aParent);
-        viewProxy.setFillHeight(isFillHeight);
-        viewProxy.layoutView();
+        // Get Parent row layout and layout views
+        RowViewLayout<?> viewLayout = new RowViewLayout<>(aParent);
+        viewLayout.setFillHeight(isFillHeight);
+        viewLayout.layoutView();
     }
 }

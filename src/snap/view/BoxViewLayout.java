@@ -5,14 +5,14 @@ package snap.view;
 import snap.geom.Insets;
 
 /**
- * A ViewProxy that can layout content in the manner of BoxView for any View.
+ * A layout that can layout content in the manner of BoxView for any View.
  */
-public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
+public class BoxViewLayout<T extends View> extends ParentViewLayout<T> {
 
     /**
      * Constructor for given parent view.
      */
-    public BoxViewProxy(View aParent)
+    public BoxViewLayout(View aParent)
     {
         super(aParent);
 
@@ -25,11 +25,11 @@ public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
     /**
      * Constructor for given parent view and FillWidth, FillHeight params.
      */
-    public BoxViewProxy(View aParent, View aChild, boolean isFillWidth, boolean isFillHeight)
+    public BoxViewLayout(View aParent, View aChild, boolean isFillWidth, boolean isFillHeight)
     {
         super(aParent);
         if (aChild != null)
-            setContent(aChild.getViewProxy());
+            setContent(aChild.getViewLayout());
         setFillWidth(isFillWidth);
         setFillHeight(isFillHeight);
     }
@@ -65,7 +65,7 @@ public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
         boolean isFillHeight = isFillHeight();
 
         // Get child
-        ViewProxy<?> child = getContent(); if (child == null) return;
+        ViewLayout<?> child = getContent(); if (child == null) return;
 
         // Get parent bounds for insets (just return if empty)
         Insets borderInsets = getBorderInsets();

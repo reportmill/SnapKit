@@ -142,9 +142,9 @@ public class BorderView extends ParentView {
      * Override to return border layout.
      */
     @Override
-    protected BorderViewProxy getViewProxyImpl()
+    protected BorderViewLayout getViewLayoutImpl()
     {
-        return new BorderViewProxy(this, _center, _top, _right, _bottom, _left);
+        return new BorderViewLayout(this, _center, _top, _right, _bottom, _left);
     }
 
     /**
@@ -152,7 +152,7 @@ public class BorderView extends ParentView {
      */
     public static double getPrefWidth(ParentView aPar, View aCtr, View aTop, View aRgt, View aBtm, View aLft, double aH)
     {
-        ViewProxy<?> proxy = new BorderViewProxy(aPar, aCtr, aTop, aRgt, aBtm, aLft);
+        ViewLayout<?> proxy = new BorderViewLayout(aPar, aCtr, aTop, aRgt, aBtm, aLft);
         return proxy.getBestWidth(aH);
     }
 
@@ -161,7 +161,7 @@ public class BorderView extends ParentView {
      */
     public static double getPrefHeight(ParentView aPar, View aCtr, View aTop, View aRgt, View aBtm, View aLft, double aW)
     {
-        ViewProxy<?> proxy = new BorderViewProxy(aPar, aCtr, aTop, aRgt, aBtm, aLft);
+        ViewLayout<?> proxy = new BorderViewLayout(aPar, aCtr, aTop, aRgt, aBtm, aLft);
         return proxy.getBestHeight(aW);
     }
 
@@ -170,7 +170,7 @@ public class BorderView extends ParentView {
      */
     public static void layout(ParentView aPar, View aCtr, View aTop, View aRgt, View aBtm, View aLft)
     {
-        BorderViewProxy viewProxy = new BorderViewProxy(aPar, aCtr, aTop, aRgt, aBtm, aLft);
-        viewProxy.layoutView();
+        BorderViewLayout viewLayout = new BorderViewLayout(aPar, aCtr, aTop, aRgt, aBtm, aLft);
+        viewLayout.layoutView();
     }
 }

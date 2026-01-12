@@ -602,7 +602,7 @@ public class DrawerView extends ParentView {
      * Override to return box layout.
      */
     @Override
-    protected ViewProxy<?> getViewProxyImpl()  { return new BoxViewProxy<>(this, _contentBox, true, true); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new BoxViewLayout<>(this, _contentBox, true, true); }
 
     /**
      * Override to handle DrawerY.

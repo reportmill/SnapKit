@@ -6,14 +6,14 @@ import snap.geom.Insets;
 import snap.util.MathUtils;
 
 /**
- * A ViewProxy subclass to layout child views vertically, from top to bottom.
+ * A ViewLayout subclass to layout child views vertically, from top to bottom.
  */
-public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
+public class ColViewLayout<T extends View> extends ParentViewLayout<T> {
 
     /**
      * Constructor for given parent view.
      */
-    public ColViewProxy(View aParent)
+    public ColViewLayout(View aParent)
     {
         super(aParent);
         if (aParent instanceof ColView colView) {
@@ -25,7 +25,7 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     /**
      * Constructor for given parent view.
      */
-    public ColViewProxy(View aParent, boolean aFillWidth)
+    public ColViewLayout(View aParent, boolean aFillWidth)
     {
         super(aParent);
         setFillWidth(aFillWidth);
@@ -44,7 +44,7 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     protected double getPrefHeightImpl(double aW)  { return getLastChildMaxYWithInsets(); }
 
     /**
-     * Performs layout for given ViewProxy.
+     * Performs layout.
      */
     @Override
     public void layoutProxy()
@@ -54,7 +54,7 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
 
         // If FillHeight and no children grow, make last child grow
         if (isFillHeight() && getGrowHeightCount() == 0) {
-            ViewProxy<?> lastChild = getChildren()[getChildCount() - 1];
+            ViewLayout<?> lastChild = getChildren()[getChildCount() - 1];
             lastChild.setGrowHeight(true);
             _growHeightCount++;
         }
@@ -70,7 +70,7 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     private void layoutProxyX()
     {
         // Get parent info
-        ViewProxy<?>[] children = getChildren();
+        ViewLayout<?>[] children = getChildren();
         double alignX = getAlignXAsDouble();
         boolean isFillWidth = isFillWidth();
 
@@ -80,7 +80,7 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
         Insets borderInsets = getBorderInsets();
 
         // Iterate over children to calculate/set child X & Width
-        for (ViewProxy<?> child : children) {
+        for (ViewLayout<?> child : children) {
 
             // Initialize child X to left margin
             Insets childMargin = child.getMargin();
@@ -126,7 +126,7 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     private void layoutProxyY()
     {
         // Get parent info
-        ViewProxy<?>[] children = getChildren();
+        ViewLayout<?>[] children = getChildren();
         double parentW = getWidth();
         Insets parentPadding = getPadding();
         double parentSpacing = getSpacing();
@@ -134,11 +134,11 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
 
         // Loop vars
         double childY = borderInsets.top;
-        ViewProxy<?> lastChild = null;
+        ViewLayout<?> lastChild = null;
         double lastMargin = parentPadding.top;
 
         // Iterate over children to calculate bounds Y and Height
-        for (ViewProxy<?> child : children) {
+        for (ViewLayout<?> child : children) {
 
             // Calculate spacing between lastChild and loop child
             Insets childMargin = child.getMargin();
@@ -184,7 +184,7 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     /**
      * Adds extra space to growers or alignment.
      */
-    private static void addExtraSpaceY(ParentViewProxy<?> aPar, int extra)
+    private static void addExtraSpaceY(ParentViewLayout<?> aPar, int extra)
     {
         // If there is child/children with GrowHeight, add extra height to child growers
         if (aPar.getGrowHeightCount() > 0)
@@ -201,7 +201,7 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     /**
      * Adds extra space Y to children that GrowWidth.
      */
-    private static void addExtraSpaceY_ToGrowers(ParentViewProxy<?> aPar, int extra)
+    private static void addExtraSpaceY_ToGrowers(ParentViewLayout<?> aPar, int extra)
     {
         // Get amount to add to each grower (plus 1 for some if not evenly divisible by grow)
         int grow = aPar.getGrowHeightCount();
@@ -210,9 +210,9 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
         int count2 = Math.abs(extra % grow);
 
         // Iterate over children and add their share (plus 1 for some if not evenly divisible by grow)
-        ViewProxy<?>[] children = aPar.getChildren();
+        ViewLayout<?>[] children = aPar.getChildren();
         for (int i = 0, j = 0, shiftY = 0, iMax = children.length; i < iMax; i++) {
-            ViewProxy<?> child = children[i];
+            ViewLayout<?> child = children[i];
             if (shiftY != 0)
                 child.setY(child.getY() + shiftY);
             if (child.isGrowHeight()) {
@@ -227,13 +227,13 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     /**
      * Adds extra space Y to child alignment/lean.
      */
-    private static void addExtraSpaceY_ToAlign(ViewProxy<?> aPar, int extra)
+    private static void addExtraSpaceY_ToAlign(ViewLayout<?> aPar, int extra)
     {
-        ViewProxy<?>[] children = aPar.getChildren();
+        ViewLayout<?>[] children = aPar.getChildren();
         double alignY = aPar.getAlignYAsDouble();
         double shiftY = 0;
 
-        for (ViewProxy<?> child : children) {
+        for (ViewLayout<?> child : children) {
 
             // If child has lean, apply shift
             if (child.getLeanY() != null && extra > 0) {
@@ -263,11 +263,11 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     /**
      * Remove extra space from last child.
      */
-    private static void removeExtraSpaceY_FromLastChild(ViewProxy<?> aPar, int extra)
+    private static void removeExtraSpaceY_FromLastChild(ViewLayout<?> aPar, int extra)
     {
         // Get last child
-        ViewProxy<?>[] children = aPar.getChildren();
-        ViewProxy<?> lastChild = children[children.length - 1];
+        ViewLayout<?>[] children = aPar.getChildren();
+        ViewLayout<?> lastChild = children[children.length - 1];
 
         // Remove width from last child - probably should iterate to previous children if needed
         double childH = Math.max(lastChild.height + extra, 10);

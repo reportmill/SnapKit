@@ -80,9 +80,9 @@ public class TransitionPane extends ParentView {
      * Override to return box layout.
      */
     @Override
-    protected ViewProxy<?> getViewProxyImpl()
+    protected ViewLayout<?> getViewLayoutImpl()
     {
-        return new BoxViewProxy<>(this, getContent(), true, true);
+        return new BoxViewLayout<>(this, getContent(), true, true);
     }
 
     /**
