@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * This class represents a view for the purpose of layout.
  */
-public class ViewProxy<T extends View> extends Rect {
+public abstract class ViewProxy<T extends View> extends Rect {
 
     // The original view (if available)
     private T  _view;
@@ -479,32 +479,17 @@ public class ViewProxy<T extends View> extends Rect {
     /**
      * Returns preferred width of layout.
      */
-    protected double getPrefWidthImpl(double aH)  { return _view.getPrefWidthImpl(aH); }
+    protected abstract double getPrefWidthImpl(double aH);
 
     /**
      * Returns preferred height of layout.
      */
-    protected double getPrefHeightImpl(double aW)  { return _view.getPrefHeightImpl(aW); }
+    protected abstract double getPrefHeightImpl(double aW);
 
     /**
      * Performs Box layout for given parent, child and fill width/height.
      */
-    public void layoutProxy()
-    {
-        if (_view instanceof ParentView parentView) {
-            parentView.layoutImpl();
-
-            // Copy children bounds from parent view layout back to child layouts
-            ViewProxy<?>[] children = getChildren();
-            if (children != null) {
-                for (ViewProxy<?> child : children) {
-                    View childView = child.getView();
-                    if (childView != null)
-                        child.setBounds(childView.getX(), childView.getY(), childView.getWidth(), childView.getHeight());
-                }
-            }
-        }
-    }
+    public abstract void layoutProxy();
 
     /**
      * Standard toString implementation.

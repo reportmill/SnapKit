@@ -621,8 +621,8 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         }
 
         // Do real layout
-        ViewProxy<?> viewProxy = getViewProxy();
-        viewProxy.layoutView();
+        //ViewProxy<?> viewProxy = getViewProxy();
+        //viewProxy.layoutView();
 
         // If NeedsScrollSelToVisible, send later
         if (_needsScrollSelToVisible)
@@ -640,7 +640,17 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     protected ColViewProxy<?> getViewProxyImpl()
     {
         // Create proxy
-        ColViewProxy<?> viewProxy = new ColViewProxy<>(this);
+        ColViewProxy<?> viewProxy = new ColViewProxy<>(this) {
+            @Override
+            public double getPrefWidth(double aH)  { return ListView.this.getPrefWidthImpl(aH); }
+            public double getPrefHeight(double aW)  { return ListView.this.getPrefHeightImpl(aW); }
+            @Override
+            public void layoutView()
+            {
+                ListView.this.layoutImpl();
+                super.layoutView();
+            }
+        };
         viewProxy.setFillWidth(true);
 
         // Set padding.top to include space for hidden rows at top
