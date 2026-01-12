@@ -327,28 +327,10 @@ public class CollapseView extends ParentView implements ViewHost {
     }
 
     /**
-     * Returns the preferred width.
+     * Override to return Column layout.
      */
-    protected double getPrefWidthImpl(double aH)
-    {
-        return ColView.getPrefWidth(this, -1);
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        return ColView.getPrefHeight(this, -1, true);
-    }
-
-    /**
-     * Layout children.
-     */
-    protected void layoutImpl()
-    {
-        ColView.layout(this, true);
-    }
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()  { return new ColViewProxy<>(this, true); }
 
     /**
      * ViewHost method: Override to return 1 if content is present.

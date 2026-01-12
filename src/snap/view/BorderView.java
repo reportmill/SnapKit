@@ -139,34 +139,7 @@ public class BorderView extends ParentView {
     }
 
     /**
-     * Returns the preferred width.
-     */
-    protected double getPrefWidthImpl(double aH)
-    {
-        ViewProxy<?> viewProxy = getViewProxy();
-        return viewProxy.getPrefWidth(aH);
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        ViewProxy<?> viewProxy = getViewProxy();
-        return viewProxy.getPrefHeight(aW);
-    }
-
-    /**
-     * Layout children.
-     */
-    protected void layoutImpl()
-    {
-        ViewProxy<?> viewProxy = getViewProxy();
-        viewProxy.layoutView();
-    }
-
-    /**
-     * Override to return ColViewProxy.
+     * Override to return border layout.
      */
     @Override
     protected BorderViewProxy getViewProxyImpl()

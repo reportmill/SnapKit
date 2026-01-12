@@ -187,28 +187,10 @@ public class WindowBar extends ParentView {
     }
 
     /**
-     * Override to return preferred width of content.
+     * Override to return box layout.
      */
-    protected double getPrefWidthImpl(double aH)
-    {
-        return BoxView.getPrefWidth(this, getContent(), aH);
-    }
-
-    /**
-     * Override to return preferred height of content.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        return BoxView.getPrefHeight(this, getContent(), aW);
-    }
-
-    /**
-     * Override to layout content.
-     */
-    protected void layoutImpl()
-    {
-        BoxView.layout(this, getContent(), true, true);
-    }
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()  { return new BoxViewProxy<>(this, getContent(), true, true); }
 
     /**
      * Attaches a WindowBar to a view.

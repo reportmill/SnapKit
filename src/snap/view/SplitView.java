@@ -315,43 +315,13 @@ public class SplitView extends ParentView implements ViewHost {
     }
 
     /**
-     * Calculates the preferred width.
-     */
-    protected double getPrefWidthImpl(double aH)
-    {
-        ViewProxy<?> viewProxy = getViewProxy();
-        return viewProxy.getPrefWidth(aH);
-    }
-
-    /**
-     * Calculates the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        ViewProxy<?> viewProxy = getViewProxy();
-        return viewProxy.getPrefHeight(aW);
-    }
-
-    /**
-     * Override to layout children.
-     */
-    protected void layoutImpl()
-    {
-        ViewProxy<?> viewProxy = getViewProxy();
-        viewProxy.layoutView();
-    }
-
-    /**
-     * Override to return RowViewProxy or ColViewProxy.
+     * Override to return row or column layout.
      */
     @Override
-    protected ParentViewProxy<?> getViewProxyImpl()
+    protected ViewProxy<?> getViewProxyImpl()
     {
-        ParentViewProxy<?> viewProxy = isHorizontal() ? new RowViewProxy<>(this) :
-            new ColViewProxy<>(this);
-        viewProxy.setFillWidth(true);
-        viewProxy.setFillHeight(true);
-        return viewProxy;
+        return isHorizontal() ? new RowViewProxy<>(this, true) :
+            new ColViewProxy<>(this, true);
     }
 
     /**

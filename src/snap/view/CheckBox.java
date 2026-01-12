@@ -70,28 +70,10 @@ public class CheckBox extends ToggleButton {
     }
 
     /**
-     * Returns the preferred width.
+     * Override to return row layout.
      */
-    protected double getPrefWidthImpl(double aH)
-    {
-        return RowView.getPrefWidth(this, aH);
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        return RowView.getPrefHeight(this, aW);
-    }
-
-    /**
-     * Override to layout children.
-     */
-    protected void layoutImpl()
-    {
-        RowView.layout(this, false);
-    }
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()  { return new RowViewProxy<>(this, false); }
 
     /**
      * Initialize Props. Override to provide custom defaults.

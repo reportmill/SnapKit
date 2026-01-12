@@ -142,35 +142,8 @@ public class ScrollGroup extends ParentView {
     }
 
     /**
-     * Calculates the preferred width.
+     * Override to return border layout.
      */
-    protected double getPrefWidthImpl(double aH)
-    {
-        ViewProxy<?> viewProxy = getViewProxy();
-        return viewProxy.getPrefWidth(aH);
-        //return BorderView.getPrefWidth(this, _scrollView, _topScrollerCol, null, null, _leftScroller, aH);
-    }
-
-    /**
-     * Calculates the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        ViewProxy<?> viewProxy = getViewProxy();
-        return viewProxy.getPrefHeight(aW);
-        //return BorderView.getPrefHeight(this, _scrollView, _topScrollerCol, null, null, _leftScroller, aW);
-    }
-
-    /**
-     * Override to layout children.
-     */
-    protected void layoutImpl()
-    {
-        ViewProxy<?> viewProxy = getViewProxy();
-        viewProxy.layoutView();
-        //BorderView.layout(this, _scrollView, _topScrollerCol, null, null, _leftScroller);
-    }
-
     @Override
     protected ViewProxy<?> getViewProxyImpl()
     {

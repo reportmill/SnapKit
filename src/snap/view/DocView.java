@@ -152,28 +152,10 @@ public class DocView extends ParentView {
     }
 
     /**
-     * Returns the preferred width.
+     * Override to return box layout.
      */
-    protected double getPrefWidthImpl(double aH)
-    {
-        return BoxView.getPrefWidth(this, getPage(), -1);
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        return BoxView.getPrefHeight(this, getPage(), -1);
-    }
-
-    /**
-     * Layout children.
-     */
-    protected void layoutImpl()
-    {
-        BoxView.layout(this, getPage(), false, false);
-    }
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()  { return new BoxViewProxy<>(this, getPage(), false, false); }
 
     /**
      * XML archival deep.

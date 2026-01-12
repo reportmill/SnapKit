@@ -372,10 +372,10 @@ public class ButtonBase extends ParentView {
     }
 
     /**
-     * Returns the ViewProxy to layout button.
+     * Override to return box layout.
      */
     @Override
-    protected BoxViewProxy<?> getViewProxyImpl()
+    protected ViewProxy<?> getViewProxyImpl()
     {
         // Create ViewProxy with Label ViewProxy as Content
         BoxViewProxy<?> viewProxy = new BoxViewProxy<>(this);
@@ -388,7 +388,7 @@ public class ButtonBase extends ParentView {
             viewProxy.setPadding(padding);
         }
 
-        // Return ViewProxy
+        // Return
         return viewProxy;
     }
 

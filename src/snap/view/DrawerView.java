@@ -599,28 +599,10 @@ public class DrawerView extends ParentView {
     }
 
     /**
-     * Override to return preferred width of content.
+     * Override to return box layout.
      */
-    protected double getPrefWidthImpl(double aH)
-    {
-        return BoxView.getPrefWidth(this, _contentBox, aH);
-    }
-
-    /**
-     * Override to return preferred height of content.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        return BoxView.getPrefHeight(this, _contentBox, aW);
-    }
-
-    /**
-     * Override to layout content.
-     */
-    protected void layoutImpl()
-    {
-        BoxView.layout(this, _contentBox, true, true);
-    }
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()  { return new BoxViewProxy<>(this, _contentBox, true, true); }
 
     /**
      * Override to handle DrawerY.

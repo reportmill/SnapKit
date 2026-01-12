@@ -105,40 +105,10 @@ public class BoxView extends ParentView implements ViewHost {
     }
 
     /**
-     * Override.
-     */
-    protected double getPrefWidthImpl(double aH)
-    {
-        ViewProxy<?> viewProxy = getViewProxy();
-        return viewProxy.getPrefWidth(aH);
-    }
-
-    /**
-     * Override.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        ViewProxy<?> viewProxy = getViewProxy();
-        return viewProxy.getPrefHeight(aW);
-    }
-
-    /**
-     * Override.
-     */
-    protected void layoutImpl()
-    {
-        ViewProxy<?> viewProxy = getViewProxy();
-        viewProxy.layoutView();
-    }
-
-    /**
-     * Override to return BoxViewProxy.
+     * Override to return box layout.
      */
     @Override
-    protected BoxViewProxy<?> getViewProxyImpl()
-    {
-        return new BoxViewProxy<>(this);
-    }
+    protected BoxViewProxy<?> getViewProxyImpl()  { return new BoxViewProxy<>(this); }
 
     /**
      * ViewHost method: Override to return 1 if content is present.

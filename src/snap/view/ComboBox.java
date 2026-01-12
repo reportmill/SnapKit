@@ -565,19 +565,10 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Returns the preferred width.
+     * Override to return row layout.
      */
-    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, -1); }
-
-    /**
-     * Returns the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(this, -1); }
-
-    /**
-     * Layout children.
-     */
-    protected void layoutImpl()  { RowView.layout(this, true); }
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()  { return new RowViewProxy<>(this, true); }
 
     /**
      * Override to focus text or button.

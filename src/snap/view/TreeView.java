@@ -4,6 +4,8 @@
 package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
+
+import snap.geom.Insets;
 import snap.geom.Polygon;
 import snap.gfx.*;
 import snap.props.PropChange;
@@ -524,41 +526,10 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Returns the preferred height.
-     */
-//    @Override
-//    protected double getPrefHeightImpl(double aW)
-//    {
-//        // If PrefRowCount set, return PrefRowCount * RowHeight
-//        int prefRowCount = getPrefRowCount();
-//        if (prefRowCount > 0)
-//            return prefRowCount * getRowHeight() + getInsetsAll().getHeight();
-//
-//        // Return pref height of Scroll
-//        return BoxView.getPrefHeight(this, _splitView, aW);
-//    }
-
-    /**
-     * Override to layout ScrollView.
-     */
-//    @Override
-//    protected void layoutImpl()
-//    {
-//        BoxView.layout(this, _splitView, true, true);
-//
-//        // Check wants ScrollView
-//        if (getOverflow() == Overflow.Scroll)
-//            ViewUtils.checkWantsScrollView(this);
-//    }
-
-    /**
-     * Override to return box layout.
+     * Override to return treeview layout.
      */
     @Override
-    protected ViewProxy<?> getViewProxyImpl()
-    {
-        return new BoxViewProxy<>(this, _splitView, true, true);
-    }
+    protected ViewProxy<?> getViewProxyImpl()  { return new TreeViewLayout(this); }
 
     /**
      * Returns the maximum height.
@@ -616,5 +587,40 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     protected boolean equalsItems(List<T> theItems)
     {
         return ListUtils.equalsId(theItems, getItems()) || theItems.equals(getItems());
+    }
+
+    /**
+     * Custom layout for treeview.
+     */
+    private static class TreeViewLayout extends BoxViewProxy<TreeView<?>> {
+
+        public TreeViewLayout(TreeView<?> treeView)
+        {
+            super(treeView, treeView._splitView, true, true);
+        }
+
+        @Override
+        public double getPrefHeightImpl(double aW)
+        {
+            // If PrefRowCount set, return PrefRowCount * RowHeight
+            TreeView<?> treeView = getView();
+            int prefRowCount = treeView.getPrefRowCount();
+            if (prefRowCount > 0)
+                return prefRowCount * treeView.getRowHeight() + treeView.getInsetsAll().getHeight();
+
+            // Do normal version
+            return super.getPrefHeightImpl(aW);
+        }
+
+        @Override
+        public void layoutView()
+        {
+            super.layoutView();
+
+            // Check wants ScrollView
+            TreeView<?> treeView = getView();
+            if (treeView.getOverflow() == Overflow.Scroll)
+                ViewUtils.checkWantsScrollView(treeView);
+        }
     }
 }

@@ -220,28 +220,10 @@ public class Spinner <T> extends ParentView {
     }
 
     /**
-     * Returns the preferred width.
+     * Override to return row layout.
      */
-    protected double getPrefWidthImpl(double aH)
-    {
-        return RowView.getPrefWidth(this, aH);
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        return RowView.getPrefHeight(this, aW);
-    }
-
-    /**
-     * Layout children.
-     */
-    protected void layoutImpl()
-    {
-        RowView.layout(this, true);
-    }
+    @Override
+    protected ViewProxy<?> getViewProxyImpl()  { return new RowViewProxy<>(this, true); }
 
     /**
      * Override to forward to StringView.
