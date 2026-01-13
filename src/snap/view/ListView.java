@@ -557,9 +557,9 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Override to layout children with ColView layout.
+     * Resets the list cells for current bounds.
      */
-    protected void layoutImpl()
+    protected void resetListCellsForCurrentBounds()
     {
         // Get size info
         double areaW = getWidth();
@@ -623,35 +623,32 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         // If NeedsScrollSelToVisible, send later
         if (_needsScrollSelToVisible)
             runLater(this::scrollSelToVisible);
-
-        // Check wants ScrollView
-        if (getOverflow() == Overflow.Scroll)
-            ViewUtils.checkWantsScrollView(this);
     }
 
     /**
      * Override to return column layout with hook.
      */
     @Override
-    protected ColViewLayout<?> getViewLayoutImpl()
+    protected ViewLayout<?> getViewLayoutImpl()
     {
-        // Create layout
-        ColViewLayout<?> viewLayout = new ColViewLayout<>(this, true) {
+        return new ColViewLayout<>(this, true) {
             @Override
             public double getPrefWidth(double aH)  { return ListView.this.getPrefWidthImpl(aH); }
             public double getPrefHeight(double aW)  { return ListView.this.getPrefHeightImpl(aW); }
             @Override
             public void layoutView()
             {
-                ListView.this.layoutImpl();
+                resetListCellsForCurrentBounds();
+                clearChildren();
+                double insTop = _cellStart * getRowHeight();
+                setPadding(Insets.add(_view.getPadding(), insTop, 0, 0, 0));
                 super.layoutView();
+
+                // Check wants ScrollView
+                if (getOverflow() == Overflow.Scroll)
+                    ViewUtils.checkWantsScrollView(ListView.this);
             }
         };
-
-        // Set padding.top to include space for hidden rows at top
-        double insTop = _cellStart * getRowHeight();
-        viewLayout.setPadding(Insets.add(viewLayout.getPadding(), insTop, 0, 0, 0));
-        return viewLayout;
     }
 
     /**

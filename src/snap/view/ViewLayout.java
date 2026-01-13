@@ -460,8 +460,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public void layoutView()
     {
         // Layout
-        View view = getView();
-        setSize(view.getWidth(), view.getHeight());
+        setSize(_view.getWidth(), _view.getHeight());
         layoutProxy();
 
         // Apply bounds

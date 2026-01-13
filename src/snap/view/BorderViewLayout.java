@@ -93,7 +93,6 @@ public class BorderViewLayout extends ColViewLayout<View> {
         if (topViewLayout != _rowLayout) rowH -= _topView.getHeight();
         if (bottomViewLayout != _rowLayout) rowH -= _bottomView.getHeight();
         _rowLayout.setSize(getWidth(), rowH);
-        _rowLayout.layoutProxy();
         _rowLayout.layoutView();
     }
 }
