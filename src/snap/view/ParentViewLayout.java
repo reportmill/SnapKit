@@ -126,15 +126,9 @@ public abstract class ParentViewLayout<T extends View> extends ViewLayout<T> {
     public double getBestWidth(double aH)
     {
         double prefW = getPrefWidth(aH);
-
-        View view = getView();
-        if (view != null) {
-            double minW = view.getMinWidth();
-            double maxW = view.getMaxWidth();
-            prefW = MathUtils.clamp(prefW, minW, maxW);
-        }
-
-        return prefW;
+        double minW = _view.getMinWidth();
+        double maxW = _view.getMaxWidth();
+        return MathUtils.clamp(prefW, minW, maxW);
     }
 
     /**
@@ -143,14 +137,8 @@ public abstract class ParentViewLayout<T extends View> extends ViewLayout<T> {
     public double getBestHeight(double aW)
     {
         double prefH = getPrefHeight(aW);
-
-        View view = getView();
-        if (view != null) {
-            double minH = view.getMinHeight();
-            double maxH = view.getMaxHeight();
-            prefH = MathUtils.clamp(prefH, minH, maxH);
-        }
-
-        return prefH;
+        double minH = _view.getMinHeight();
+        double maxH = _view.getMaxHeight();
+        return MathUtils.clamp(prefH, minH, maxH);
     }
 }

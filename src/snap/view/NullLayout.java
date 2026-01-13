@@ -16,35 +16,31 @@ public class NullLayout extends ViewLayout<View> {
     @Override
     public double getPrefWidth(double aH)
     {
-        View view = getView();
-        if (view.isPrefWidthSet())
-            return view.getPrefWidth(aH);
-        return view.getPrefWidthImpl(aH);
+        if (_view.isPrefWidthSet())
+            return _view.getPrefWidth(aH);
+        return _view.getPrefWidthImpl(aH);
     }
 
     @Override
     public double getPrefHeight(double aW)
     {
-        View view = getView();
-        if (view.isPrefHeightSet())
-            return view.getPrefHeight(aW);
-        return view.getPrefHeightImpl(aW);
+        if (_view.isPrefHeightSet())
+            return _view.getPrefHeight(aW);
+        return _view.getPrefHeightImpl(aW);
     }
 
     @Override
     public void layoutView()
     {
-        if (getView() instanceof ParentView parentView) {
+        if (_view instanceof ParentView parentView) {
             parentView.layoutImpl();
 
             // Copy children bounds from parent view layout back to child layouts
             ViewLayout<?>[] children = getChildren();
-            if (children != null) {
-                for (ViewLayout<?> child : children) {
-                    View childView = child.getView();
-                    if (childView != null)
-                        child.setBounds(childView.getX(), childView.getY(), childView.getWidth(), childView.getHeight());
-                }
+            for (ViewLayout<?> child : children) {
+                View childView = child.getView();
+                if (childView != null)
+                    child.setBounds(childView.getX(), childView.getY(), childView.getWidth(), childView.getHeight());
             }
         }
     }

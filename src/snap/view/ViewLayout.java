@@ -66,7 +66,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public double getX()
     {
         if (x != UNSET_DOUBLE) return x;
-        return x = _view != null ? _view.getX() : 0;
+        return x = _view.getX();
     }
 
     /**
@@ -75,7 +75,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public double getY()
     {
         if (y != UNSET_DOUBLE) return y;
-        return y = _view != null ? _view.getY() : 0;
+        return y = _view.getY();
     }
 
     /**
@@ -84,7 +84,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public double getWidth()
     {
         if (width != UNSET_DOUBLE) return width;
-        return width = _view != null ? _view.getWidth() : 0;
+        return width = _view.getWidth();
     }
 
     /**
@@ -93,7 +93,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public double getHeight()
     {
         if (height != UNSET_DOUBLE) return height;
-        return height = _view != null ? _view.getHeight() : 0;
+        return height = _view.getHeight();
     }
 
     /**
@@ -138,8 +138,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
      */
     private void setBoundsInView()
     {
-        if (_view != null)
-            _view.setBounds(x, y, width, height);
+        _view.setBounds(x, y, width, height);
     }
 
     /**
@@ -169,7 +168,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
      */
     public ViewLayout<?>[] getChildren()
     {
-        if (_children != null || _view == null) return _children;
+        if (_children != null) return _children;
         ParentView par = (ParentView) _view;
         View[] children = par.getChildrenManaged();
         return _children = ArrayUtils.map(children, child -> child.getViewLayout(), ViewLayout.class);
@@ -229,7 +228,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public Border getBorder()
     {
         if (_border != null) return _border;
-        return _border = _view != null ? _view.getBorder() : null;
+        return _border = _view.getBorder();
     }
 
     /**
@@ -252,8 +251,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public Insets getMargin()
     {
         if (_margin != null) return _margin;
-        _margin = _view != null ? _view.getMargin() : Insets.EMPTY;
-        return _margin;
+        return _margin = _view.getMargin();
     }
 
     /**
@@ -267,7 +265,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public Insets getPadding()
     {
         if (_padding != null) return _padding;
-        return _padding = _view != null ? _view.getPadding() : Insets.EMPTY;
+        return _padding = _view.getPadding();
     }
 
     /**
@@ -278,7 +276,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     /**
      * Returns whether proxy is visible.
      */
-    public boolean isVisible()  { return _view != null && _view.isVisible(); }
+    public boolean isVisible()  { return _view.isVisible(); }
 
     /**
      * Returns the alignment.
@@ -286,7 +284,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public Pos getAlign()
     {
         if (_align != null) return _align;
-        return _align = _view != null ? _view.getAlign() : Pos.TOP_LEFT;
+        return _align = _view.getAlign();
     }
 
     /**
@@ -300,8 +298,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public HPos getLeanX()
     {
         if (_leanX != null) return _leanX;
-        _leanX = _view != null ? _view.getLeanX() : null;
-        return _leanX;
+        return _leanX = _view.getLeanX();
     }
 
     /**
@@ -310,8 +307,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public VPos getLeanY()
     {
         if (_leanY != null) return _leanY;
-        _leanY = _view != null ? _view.getLeanY() : null;
-        return _leanY;
+        return _leanY = _view.getLeanY();
     }
 
     /**
@@ -320,7 +316,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public boolean isGrowWidth()
     {
         if (_growX != null) return _growX;
-        return _growX = _view != null && _view.isGrowWidth();
+        return _growX = _view.isGrowWidth();
     }
 
     /**
@@ -334,7 +330,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public boolean isGrowHeight()
     {
         if (_growY != null) return _growY;
-        return _growY = _view != null && _view.isGrowHeight();
+        return _growY = _view.isGrowHeight();
     }
 
     /**
@@ -348,7 +344,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public double getSpacing()
     {
         if (_spacing != UNSET_DOUBLE) return _spacing;
-        return _spacing = _view != null ? _view.getSpacing() : 0;
+        return _spacing = _view.getSpacing();
     }
 
     /**
@@ -421,9 +417,8 @@ public abstract class ViewLayout<T extends View> extends Rect {
      */
     public double getPrefWidth(double aH)
     {
-        View view = getView();
-        if (view != null && view.isPrefWidthSet())
-            return view.getPrefWidth();
+        if (_view.isPrefWidthSet())
+            return _view.getPrefWidth();
 
         double oldW = width, oldH = height;
         setSize(-1, aH);
@@ -439,15 +434,14 @@ public abstract class ViewLayout<T extends View> extends Rect {
      */
     public double getPrefHeight(double aW)
     {
-        View view = getView();
-        if (view != null && view.isPrefHeightSet())
-            return view.getPrefHeight();
+        if (_view.isPrefHeightSet())
+            return _view.getPrefHeight();
 
         // If given width is not specified, see if view has explicit pref width
         double prefW = aW > 0 ? aW : -1;
         if (prefW < 0) {
-            if (view != null && view.isPrefWidthSet())
-                prefW = view.getPrefWidth();
+            if (_view.isPrefWidthSet())
+                prefW = _view.getPrefWidth();
         }
 
         // Set size and layout
@@ -467,10 +461,8 @@ public abstract class ViewLayout<T extends View> extends Rect {
     {
         // Layout
         View view = getView();
-        if (view != null && (_prefW != view.getWidth() || _prefH != view.getHeight())) {
-            setSize(view.getWidth(), view.getHeight());
-            layoutProxy();
-        }
+        setSize(view.getWidth(), view.getHeight());
+        layoutProxy();
 
         // Apply bounds
         setBoundsInClient();
@@ -498,9 +490,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public String toString()
     {
         String className = getClass().getSimpleName();
-        if (_view != null)
-            return className + ": " + _view;
-        return className + " { Bounds=" + getBounds() + " }";
+        return className + ": " + _view;
     }
 
     /**

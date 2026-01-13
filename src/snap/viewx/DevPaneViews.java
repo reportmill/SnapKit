@@ -459,7 +459,7 @@ public class DevPaneViews extends ViewOwner {
 
         // Get HostView
         View parent = view != null ? view.getParent() : null;
-        if (parent instanceof Label || parent instanceof ButtonBase || parent instanceof TextField || parent instanceof ComboBox) {
+        if (isControlView(parent)) {
             view = parent;
             parent = parent.getParent();
             if (parent instanceof ButtonBase || parent instanceof TextField || parent instanceof ComboBox)
@@ -468,6 +468,16 @@ public class DevPaneViews extends ViewOwner {
 
         // Return
         return view;
+    }
+
+    /**
+     * Returns whether given view is a control view.
+     */
+    private static boolean isControlView(View aView)
+    {
+        //if (aView instanceof Label || aView instanceof ButtonBase || aView instanceof TextField || aView instanceof ComboBox)
+        //    return true;
+        return false;
     }
 
     /**
@@ -486,7 +496,7 @@ public class DevPaneViews extends ViewOwner {
         {
             if (!(anItem instanceof ParentView))
                 return false;
-            if (anItem instanceof Label || anItem instanceof ButtonBase || anItem instanceof TextField || anItem instanceof ComboBox)
+            if (isControlView(anItem))
                 return false;
             return ((ParentView) anItem).getChildCount() > 0;
         }
