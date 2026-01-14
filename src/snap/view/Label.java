@@ -229,7 +229,7 @@ public class Label extends ParentView {
         List<View> children = _graphic != null ? List.of(_graphic, _textArea) : List.of(_textArea);
         List<ViewLayout<?>> childProxies = ListUtils.map(children, child -> child.getViewLayout());
         viewLayout.setChildren(childProxies);
-        viewLayout.layoutViewImpl();
+        viewLayout.layoutViewLayout();
         ViewLayout<?> textProxy = childProxies.get(textIndex);
         return textProxy;
     }

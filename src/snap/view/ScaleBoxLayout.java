@@ -84,7 +84,7 @@ public class ScaleBoxLayout extends BoxViewLayout<View> {
     /**
      * Performs Box layout for given parent, child and fill width/height.
      */
-    public void layoutViewImpl()
+    public void layoutViewLayout()
     {
         // Get child (if null, just return)
         ViewLayout<?> child = getContent(); if (child == null) return;

@@ -47,7 +47,7 @@ public class RowViewLayout<T extends View> extends ParentViewLayout<T> {
     /**
      * Performs layout.
      */
-    public void layoutViewImpl()
+    public void layoutViewLayout()
     {
         // If no children, just return
         if (getChildCount() == 0) return;

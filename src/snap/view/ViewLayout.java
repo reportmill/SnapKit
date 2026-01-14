@@ -423,13 +423,13 @@ public abstract class ViewLayout<T extends View> extends Rect {
         if (_prefW >=0 && (aH < 0 || aH == _prefH))
             return _prefW;
         if (_view.isPrefWidthSet())
-            return _view.getPrefWidth();
+            return _view.getPrefWidth(aH);
 
         // Perform layout with given height
         double oldW = width, oldH = height;
         double prefH = aH > 0 ? aH : _view.isPrefHeightSet() ? _view.getPrefHeight() : -1;
         setSize(-1, prefH);
-        layoutViewImpl();
+        layoutViewLayout();
         width = oldW; height = oldH;
 
         // Get pref width/height and return
@@ -446,13 +446,13 @@ public abstract class ViewLayout<T extends View> extends Rect {
         if (_prefH >= 0 && (aW < 0 || aW == _prefW))
             return _prefH;
         if (_view.isPrefHeightSet())
-            return _view.getPrefHeight();
+            return _view.getPrefHeight(aW);
 
         // Perform layout with given width
         double oldW = width, oldH = height;
         double prefW = aW > 0 ? aW : _view.isPrefWidthSet() ? _view.getPrefWidth() : -1;
         setSize(prefW, -1);
-        layoutViewImpl();
+        layoutViewLayout();
         width = oldW; height = oldH;
 
         // Get pref height/width and return
@@ -468,7 +468,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     {
         // Perform layout for current view size
         setSize(_view.getWidth(), _view.getHeight());
-        layoutViewImpl();
+        layoutViewLayout();
 
         // Apply bounds
         setBoundsInClient();
@@ -485,25 +485,18 @@ public abstract class ViewLayout<T extends View> extends Rect {
     protected abstract double getPrefHeightImpl(double aW);
 
     /**
-     * Performs layout of child views.
+     * Performs layout of child layouts.
      */
-    public abstract void layoutViewImpl();
+    public abstract void layoutViewLayout();
 
     /**
      * Standard toString implementation.
      */
     @Override
-    public String toString()
-    {
-        String className = getClass().getSimpleName();
-        return className + ": " + _view;
-    }
+    public String toString()  { return getClass().getSimpleName() + ": " + _view; }
 
     /**
-     * Returns a proxy for given view.
+     * Returns the view layout for given view.
      */
-    public static ViewLayout<?> getProxy(View aView)
-    {
-        return aView != null ? aView.getViewLayout() : null;
-    }
+    public static ViewLayout<?> getViewLayout(View aView)  { return aView != null ? aView.getViewLayout() : null; }
 }

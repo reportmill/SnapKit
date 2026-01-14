@@ -56,7 +56,7 @@ public class BoxViewLayout<T extends View> extends ParentViewLayout<T> {
      * Performs Box layout for given parent, child and fill width/height.
      */
     @Override
-    public void layoutViewImpl()
+    public void layoutViewLayout()
     {
         // Get parent info
         double viewW = getWidth();
