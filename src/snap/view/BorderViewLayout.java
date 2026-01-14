@@ -10,8 +10,8 @@ import java.util.List;
  */
 public class BorderViewLayout extends ColViewLayout<View> {
 
-    // The views
-    View _topView, _bottomView;
+    // The top view
+    private View _topView;
 
     // The row layout
     public RowViewLayout<?> _rowLayout;
@@ -23,76 +23,66 @@ public class BorderViewLayout extends ColViewLayout<View> {
     {
         super(aPar);
         _topView = topView;
-        _bottomView = bottomView;
         setFillWidth(true);
 
         // Create row layout
         _rowLayout = getRowViewLayout(centerView, leftView, rightView);
 
-        // Create and add proxies for top/bottom views
-        List<ViewLayout<?>> childProxies = new ArrayList<>(3);
+        // Create and add layouts for top/bottom views
+        List<ViewLayout<?>> childLayouts = new ArrayList<>(3);
         if (topView != null && topView.isVisible())
-            childProxies.add(topView.getViewLayout());
-        childProxies.add(_rowLayout);
+            childLayouts.add(topView.getViewLayout());
+        childLayouts.add(_rowLayout);
         if (bottomView != null && bottomView.isVisible())
-            childProxies.add(bottomView.getViewLayout());
+            childLayouts.add(bottomView.getViewLayout());
 
         // Set trimmed children
-        setChildren(childProxies.toArray(new ViewLayout[0]));
+        setChildren(childLayouts);
     }
 
     /**
-     * Constructor for BorderView Center, Right, Left.
+     * Creates a row layout for left/center/right views.
      */
     private static RowViewLayout<?> getRowViewLayout(View centerView, View leftView, View rightView)
     {
-        RowViewLayout<?> viewLayout = new RowViewLayout<>(new View());
-        viewLayout.setFillHeight(true);
+        RowViewLayout<?> rowLayout = new RowViewLayout<>(new View());
+        rowLayout.setFillHeight(true);
 
-        // Create and add proxies for left/center/right views
-        List<ViewLayout<?>> childProxies = new ArrayList<>(3);
+        // Create and add layouts for left/center/right views
+        List<ViewLayout<?>> childLayouts = new ArrayList<>(3);
         if (leftView != null && leftView.isVisible())
-            childProxies.add(leftView.getViewLayout());
+            childLayouts.add(leftView.getViewLayout());
         if (centerView != null && centerView.isVisible()) {
-            ViewLayout<?> centerProxy = centerView.getViewLayout();
-            centerProxy.setGrowWidth(true);
-            centerProxy.setGrowHeight(true);
-            childProxies.add(centerProxy);
+            ViewLayout<?> centerLayout = centerView.getViewLayout();
+            centerLayout.setGrowWidth(true);
+            centerLayout.setGrowHeight(true);
+            childLayouts.add(centerLayout);
         }
         if (rightView != null && rightView.isVisible())
-            childProxies.add(rightView.getViewLayout());
+            childLayouts.add(rightView.getViewLayout());
 
         // Set trimmed children and GrowHeight
-        viewLayout.setChildren(childProxies.toArray(new ViewLayout[0]));
-        viewLayout.setGrowHeight(true);
-        return viewLayout;
+        rowLayout.setChildren(childLayouts);
+        rowLayout.setGrowHeight(true);
+        return rowLayout;
     }
 
     /**
-     * Override to update row layout children y value before normal version.
-     */
-    @Override
-    public void setBoundsInClient()
-    {
-        for (ViewLayout<?> child : _rowLayout.getChildren())
-            child.setY(child.getY() + _rowLayout.getY());
-        super.setBoundsInClient();
-    }
-
-    /**
-     * Override to layout RowView.
+     * Override to layout row views.
      */
     @Override
     public void layoutView()
     {
         super.layoutView();
 
-        double rowH = getHeight();
-        ViewLayout<?> topViewLayout = getChildren()[0];
-        ViewLayout<?> bottomViewLayout = getLastChild();
-        if (topViewLayout != _rowLayout) rowH -= _topView.getHeight();
-        if (bottomViewLayout != _rowLayout) rowH -= _bottomView.getHeight();
-        _rowLayout.setSize(getWidth(), rowH);
+        // Layout row
         _rowLayout.layoutView();
+
+        // If top view is present, adjust Y for row children
+        if (_topView != null) {
+            double rowY = _topView.getMaxY();
+            for (ViewLayout<?> child : _rowLayout.getChildren())
+                child._view.setY(rowY);
+        }
     }
 }
