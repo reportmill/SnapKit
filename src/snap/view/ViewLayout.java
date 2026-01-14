@@ -43,6 +43,9 @@ public abstract class ViewLayout<T extends View> extends Rect {
     // Whether this proxy should fillWidth, fillHeight, hugging (common attributes for ParentView)
     private boolean  _fillWidth, _fillHeight, _hugging;
 
+    // The last calculated pref width and height
+    private double _prefW = -1, _prefH = -1;
+
     // Constants for unset vars
     private static double UNSET_DOUBLE = -Float.MIN_VALUE;
 
@@ -417,41 +420,45 @@ public abstract class ViewLayout<T extends View> extends Rect {
      */
     public double getPrefWidth(double aH)
     {
+        if (_prefW >=0 && (aH < 0 || aH == _prefH))
+            return _prefW;
         if (_view.isPrefWidthSet())
             return _view.getPrefWidth();
 
+        // Perform layout with given height
         double oldW = width, oldH = height;
-        setSize(-1, aH);
+        double prefH = aH > 0 ? aH : _view.isPrefHeightSet() ? _view.getPrefHeight() : -1;
+        setSize(-1, prefH);
         layoutProxy();
         width = oldW; height = oldH;
-        return _prefW = getPrefWidthImpl(aH);
-    }
 
-    double _prefW = -1, _prefH = -1;
+        // Get pref width/height and return
+        _prefW = getPrefWidthImpl(aH);
+        _prefH = getPrefHeightImpl(_prefW);
+        return _prefW;
+    }
 
     /**
      * Returns preferred height of layout.
      */
     public double getPrefHeight(double aW)
     {
+        if (_prefH >= 0 && (aW < 0 || aW == _prefW))
+            return _prefH;
         if (_view.isPrefHeightSet())
             return _view.getPrefHeight();
 
-        // If given width is not specified, see if view has explicit pref width
-        double prefW = aW > 0 ? aW : -1;
-        if (prefW < 0) {
-            if (_view.isPrefWidthSet())
-                prefW = _view.getPrefWidth();
-        }
-
-        // Set size and layout
+        // Perform layout with given width
         double oldW = width, oldH = height;
+        double prefW = aW > 0 ? aW : _view.isPrefWidthSet() ? _view.getPrefWidth() : -1;
         setSize(prefW, -1);
         layoutProxy();
         width = oldW; height = oldH;
 
-        // Return pref height
-        return _prefH = getPrefHeightImpl(prefW);
+        // Get pref height/width and return
+        _prefH = getPrefHeightImpl(prefW);
+        _prefW = getPrefWidthImpl(_prefH);
+        return _prefH;
     }
 
     /**
@@ -459,7 +466,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
      */
     public void layoutView()
     {
-        // Layout
+        // Perform layout for current view size
         setSize(_view.getWidth(), _view.getHeight());
         layoutProxy();
 
