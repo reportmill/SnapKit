@@ -561,8 +561,9 @@ public class TextAdapter extends PropObject {
      */
     public Color getTextColor()
     {
-        TextStyle selStyle = getSelTextStyle();
-        return selStyle.getColor();
+        if (isRichText())
+            return getSelTextStyle().getColor();
+        return _textModel.getDefaultTextColor();
     }
 
     /**
@@ -660,6 +661,10 @@ public class TextAdapter extends PropObject {
     {
         // If already set, just return
         if (_selStyle != null) return _selStyle;
+
+        // If not rich text, just return default style
+        if (!isRichText())
+            return _selStyle = getDefaultTextStyle();
 
         // Get style for sel range
         int selStart = getSelStart();
