@@ -47,7 +47,7 @@ public class ColViewLayout<T extends View> extends ParentViewLayout<T> {
      * Performs layout.
      */
     @Override
-    public void layoutProxy()
+    public void layoutViewImpl()
     {
         // If no children, just return
         if (getChildCount() == 0) return;

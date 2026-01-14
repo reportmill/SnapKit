@@ -599,7 +599,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
         }
 
         @Override
-        public double getPrefHeightImpl(double aW)
+        protected double getPrefHeightImpl(double aW)
         {
             // If PrefRowCount set, return PrefRowCount * RowHeight
             TreeView<?> treeView = getView();

@@ -429,7 +429,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
         double oldW = width, oldH = height;
         double prefH = aH > 0 ? aH : _view.isPrefHeightSet() ? _view.getPrefHeight() : -1;
         setSize(-1, prefH);
-        layoutProxy();
+        layoutViewImpl();
         width = oldW; height = oldH;
 
         // Get pref width/height and return
@@ -452,7 +452,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
         double oldW = width, oldH = height;
         double prefW = aW > 0 ? aW : _view.isPrefWidthSet() ? _view.getPrefWidth() : -1;
         setSize(prefW, -1);
-        layoutProxy();
+        layoutViewImpl();
         width = oldW; height = oldH;
 
         // Get pref height/width and return
@@ -462,13 +462,13 @@ public abstract class ViewLayout<T extends View> extends Rect {
     }
 
     /**
-     * Performs BoxView layout.
+     * Performs layout of child views.
      */
     public void layoutView()
     {
         // Perform layout for current view size
         setSize(_view.getWidth(), _view.getHeight());
-        layoutProxy();
+        layoutViewImpl();
 
         // Apply bounds
         setBoundsInClient();
@@ -485,9 +485,9 @@ public abstract class ViewLayout<T extends View> extends Rect {
     protected abstract double getPrefHeightImpl(double aW);
 
     /**
-     * Performs Box layout for given parent, child and fill width/height.
+     * Performs layout of child views.
      */
-    public abstract void layoutProxy();
+    public abstract void layoutViewImpl();
 
     /**
      * Standard toString implementation.

@@ -1015,7 +1015,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         /**
          * Returns the preferred height.
          */
-        public double getPrefHeightImpl(double aW)
+        protected double getPrefHeightImpl(double aW)
         {
             TableView<?> tableView = getView();
             Insets ins = tableView.getInsetsAll();

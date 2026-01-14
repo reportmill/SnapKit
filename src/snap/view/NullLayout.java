@@ -52,5 +52,5 @@ public class NullLayout extends ViewLayout<View> {
     protected double getPrefHeightImpl(double aW)  { return 0; }
 
     @Override
-    public void layoutProxy()  { }
+    public void layoutViewImpl()  { }
 }

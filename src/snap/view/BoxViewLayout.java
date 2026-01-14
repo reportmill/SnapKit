@@ -38,7 +38,7 @@ public class BoxViewLayout<T extends View> extends ParentViewLayout<T> {
      * Returns preferred width of layout.
      */
     @Override
-    public double getPrefWidthImpl(double aH)
+    protected double getPrefWidthImpl(double aH)
     {
         return getLastChildMaxXWithInsets();
     }
@@ -47,7 +47,7 @@ public class BoxViewLayout<T extends View> extends ParentViewLayout<T> {
      * Returns preferred height of layout.
      */
     @Override
-    public double getPrefHeightImpl(double aW)
+    protected double getPrefHeightImpl(double aW)
     {
         return getLastChildMaxYWithInsets();
     }
@@ -56,7 +56,7 @@ public class BoxViewLayout<T extends View> extends ParentViewLayout<T> {
      * Performs Box layout for given parent, child and fill width/height.
      */
     @Override
-    public void layoutProxy()
+    public void layoutViewImpl()
     {
         // Get parent info
         double viewW = getWidth();

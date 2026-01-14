@@ -18,7 +18,7 @@ public class StackViewLayout<T extends View> extends ParentViewLayout<T> {
      * Performs layout in content rect.
      */
     @Override
-    public void layoutProxy()
+    public void layoutViewImpl()
     {
         // Get children (just return if empty)
         ViewLayout<?>[] children = getChildren();
