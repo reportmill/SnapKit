@@ -15,26 +15,6 @@ public class StackViewLayout<T extends View> extends ParentViewLayout<T> {
     }
 
     /**
-     * Returns preferred width of given parent with given children.
-     */
-    @Override
-    public double getPrefWidthImpl(double aH)
-    {
-        ViewLayout<?> viewLayout = new ColViewLayout<>(getView());
-        return viewLayout.getPrefWidth(aH);
-    }
-
-    /**
-     * Returns preferred height of given parent with given children.
-     */
-    @Override
-    public double getPrefHeightImpl(double aW)
-    {
-        ViewLayout<?> viewLayout = new RowViewLayout<>(getView());
-        return viewLayout.getPrefHeight(aW);
-    }
-
-    /**
      * Performs layout in content rect.
      */
     @Override
@@ -44,45 +24,44 @@ public class StackViewLayout<T extends View> extends ParentViewLayout<T> {
         ViewLayout<?>[] children = getChildren();
         if (children.length == 0) return;
 
-        // Get parent bounds for insets
-        Insets ins = getPadding(); if (getBorder() != null) ins = Insets.add(ins, getBorderInsets());
-        double areaX = ins.left;
-        double areaY = ins.top;
-        double areaW = getWidth() - ins.getWidth();
-        if (areaW < 0) areaW = 0;
-        double areaH = getHeight() - ins.getHeight();
-        if (areaH < 0) areaH = 0;
-
-        // Get child bounds
-        double alignX = getAlignXAsDouble();
-        double alignY = getAlignYAsDouble();
+        // Get parent bounds and insets
+        double viewW = getWidth();
+        double viewH = getHeight();
+        Insets parentPadding = getPadding();
+        Insets borderInsets = getBorderInsets();
 
         // Layout children
         for (ViewLayout<?> child : children) {
 
-            // Get child margin
-            Insets marg = child.getMargin();
+            // Get child X
+            Insets childMargin = child.getMargin();
+            double childMarginLeft = Math.max(parentPadding.left, childMargin.left);
+            double childMarginRight = Math.max(parentPadding.right, childMargin.right);
+            double childX = borderInsets.left + childMarginLeft;
 
             // Get child width
-            double maxW = Math.max(areaW - marg.getWidth(), 0);
-            double childW = child.isGrowWidth() ? maxW : Math.min(child.getBestWidth(-1), maxW);
+            double maxChildW = viewW >= 0 ? Math.max(viewW - childMarginLeft - childMarginRight, 0) : -1;
+            double childW = viewW >= 0 && child.isGrowWidth() ? maxChildW : child.getBestWidth(-1);
 
-            // Calc x accounting for margin and alignment
-            double childX = areaX + marg.left;
-            if (childW < maxW) {
-                double alignX2 = Math.max(alignX, child.getLeanXAsDouble());
-                childX = Math.max(childX, areaX + Math.round((areaW - childW) * alignX2));
+            // If parent width provided, update child X accounting alignment
+            if (viewW >= 0 && childW < maxChildW) {
+                double childAlignX = child.getLeanX() != null ? child.getLeanXAsDouble() : getAlignXAsDouble();
+                childX += Math.round((maxChildW - childW) * childAlignX);
             }
 
-            // Get child height
-            double maxH = Math.max(areaH - marg.getHeight(), 0);
-            double childH = child.isGrowHeight() ? maxH : Math.min(child.getBestHeight(-1), maxH);
+            // Get child Y
+            double childMarginTop = Math.max(parentPadding.top, childMargin.top);
+            double childMarginBottom = Math.max(parentPadding.bottom, childMargin.bottom);
+            double childY = borderInsets.top + childMarginTop;
 
-            // Calc y accounting for margin and alignment
-            double childY = areaY + marg.top;
-            if (childH < maxH) {
-                double alignY2 = Math.max(alignY, child.getLeanYAsDouble());
-                childY = Math.max(childY, areaY + Math.round((areaH - childH) * alignY2));
+            // Get child height
+            double maxChildH = viewH >= 0 ? Math.max(viewH - childMarginTop - childMarginBottom, 0) : -1;
+            double childH = viewH >= 0 && child.isGrowHeight() ? maxChildH : child.getBestHeight(-1);
+
+            // If parent height provided, update child Y accounting alignment
+            if (viewH >= 0 && childH < maxChildH) {
+                double childAlignY = child.getLeanY() != null ? child.getLeanYAsDouble() : getAlignYAsDouble();
+                childY += Math.round((maxChildH - childH) * childAlignY);
             }
 
             // Set child bounds

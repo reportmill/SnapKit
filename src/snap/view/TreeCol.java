@@ -23,7 +23,7 @@ public class TreeCol <T> extends ListView <T> {
     private boolean _resizable;
 
     // Constant for branch image padding
-    private static final Insets BRANCH_IMAGE_PADDING = new Insets(2, 4, 2, 4);
+    private static final Insets BRANCH_IMAGE_PADDING = new Insets(3, 4, 2, 4);
     
     /**
      * Constructor.

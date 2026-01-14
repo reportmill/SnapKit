@@ -141,4 +141,16 @@ public abstract class ParentViewLayout<T extends View> extends ViewLayout<T> {
         double maxH = _view.getMaxHeight();
         return MathUtils.clamp(prefH, minH, maxH);
     }
+
+    /**
+     * Returns preferred width of given parent with given children.
+     */
+    @Override
+    protected double getPrefWidthImpl(double aH)  { return getChildrenMaxXWithInsets(); }
+
+    /**
+     * Returns preferred height of given parent with given children.
+     */
+    @Override
+    protected double getPrefHeightImpl(double aW)  { return getChildrenMaxYWithInsets(); }
 }
