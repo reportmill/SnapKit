@@ -10,6 +10,9 @@ import snap.util.MathUtils;
  */
 public class ColViewLayout<T extends View> extends ParentViewLayout<T> {
 
+    // Whether to wrap closely around children and project their margins
+    private boolean  _hugging;
+
     /**
      * Constructor for given parent view.
      */
@@ -30,6 +33,16 @@ public class ColViewLayout<T extends View> extends ParentViewLayout<T> {
         super(aParent);
         setFillWidth(aFillWidth);
     }
+
+    /**
+     * Returns whether to wrap closely around children and project their margins.
+     */
+    public boolean isHugging()  { return _hugging; }
+
+    /**
+     * Sets whether to wrap closely around children and project their margins.
+     */
+    public void setHugging(boolean aValue)  { _hugging = aValue; }
 
     /**
      * Returns preferred width of given parent proxy using ColView layout.
@@ -272,5 +285,48 @@ public class ColViewLayout<T extends View> extends ParentViewLayout<T> {
         // Remove width from last child - probably should iterate to previous children if needed
         double childH = Math.max(lastChild.height + extra, 10);
         lastChild.setHeight(childH);
+    }
+
+    /**
+     * Override to activate hugging if needed.
+     */
+    @Override
+    public Insets getMargin()
+    {
+        if (_margin != null) return _margin;
+        if (isHugging())
+            activateHuggingForColumn();
+        return super.getMargin();
+    }
+
+    /**
+     * Activates hugging by changing margins of this layout and children.
+     */
+    private void activateHuggingForColumn()
+    {
+        ViewLayout<?>[] children = getChildren(); if (children.length == 0) return;
+        ViewLayout<?> firstChild = children[0];
+        ViewLayout<?> lastChild = getLastChild();
+
+        // Initialize new margin for this row from first/last child
+        double marginTop = firstChild.getMargin().top;
+        double marginLeft = Math.max(firstChild.getMargin().left, lastChild.getMargin().left);
+        double marginRight = Math.max(firstChild.getMargin().right, lastChild.getMargin().right);
+        double marginBottom = lastChild.getMargin().bottom;
+
+        // Reset first/last child margins
+        firstChild.setMargin(new Insets(0, 0, firstChild.getMargin().bottom, 0));
+        lastChild.setMargin(new Insets(lastChild.getMargin().top, 0, 0, 0));
+
+        // Get max left/right margins for inner children and reset theirs to zero
+        for (int i = 1, iMax = children.length - 1; i < iMax; i++) {
+            ViewLayout<?> child = children[i];
+            marginLeft = Math.max(marginLeft, child.getMargin().left);
+            marginRight = Math.max(marginRight, child.getMargin().right);
+            child.setMargin(new Insets(child.getMargin().top, 0, child.getMargin().bottom, 0));
+        }
+
+        // Reset this column layout margin
+        setMargin(new Insets(marginTop, marginRight, marginBottom, marginLeft));
     }
 }

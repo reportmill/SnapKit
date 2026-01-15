@@ -20,7 +20,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     private Border  _border;
 
     // The margin
-    private Insets  _margin;
+    protected Insets  _margin;
 
     // The Padding
     private Insets  _padding;
@@ -40,8 +40,8 @@ public abstract class ViewLayout<T extends View> extends Rect {
     // Spacing
     private double  _spacing = UNSET_DOUBLE;
 
-    // Whether this proxy should fillWidth, fillHeight, hugging (common attributes for ParentView)
-    private boolean  _fillWidth, _fillHeight, _hugging;
+    // Whether this layout should fillWidth, fillHeight (common attributes for ParentView)
+    private boolean  _fillWidth, _fillHeight;
 
     // The last calculated pref width and height
     private double _prefW = -1, _prefH = -1;
@@ -277,7 +277,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public void setPadding(Insets theIns)  { _padding = theIns; }
 
     /**
-     * Returns whether proxy is visible.
+     * Returns whether layout is visible.
      */
     public boolean isVisible()  { return _view.isVisible(); }
 
@@ -374,16 +374,6 @@ public abstract class ViewLayout<T extends View> extends Rect {
      * Sets whether view fills height.
      */
     public void setFillHeight(boolean aValue)  { _fillHeight = aValue; }
-
-    /**
-     * Returns whether to wrap closely around children and project their margins.
-     */
-    public boolean isHugging()  { return _hugging; }
-
-    /**
-     * Sets whether to wrap closely around children and project their margins.
-     */
-    public void setHugging(boolean aValue)  { _hugging = aValue; }
 
     /**
      * Returns the best width.

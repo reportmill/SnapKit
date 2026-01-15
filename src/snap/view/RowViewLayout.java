@@ -10,6 +10,9 @@ import snap.util.MathUtils;
  */
 public class RowViewLayout<T extends View> extends ParentViewLayout<T> {
 
+    // Whether to wrap closely around children and project their margins
+    private boolean  _hugging;
+
     /**
      * Constructor for given parent view.
      */
@@ -31,6 +34,16 @@ public class RowViewLayout<T extends View> extends ParentViewLayout<T> {
         super(aParent);
         setFillHeight(isFillHeight);
     }
+
+    /**
+     * Returns whether to wrap closely around children and project their margins.
+     */
+    public boolean isHugging()  { return _hugging; }
+
+    /**
+     * Sets whether to wrap closely around children and project their margins.
+     */
+    public void setHugging(boolean aValue)  { _hugging = aValue; }
 
     /**
      * Returns preferred width of given parent proxy using RowView layout.
@@ -272,5 +285,48 @@ public class RowViewLayout<T extends View> extends ParentViewLayout<T> {
         // Remove width from last child - probably should iterate to previous children if needed
         double childW = Math.max(lastChild.width + extra, 10);
         lastChild.setWidth(childW);
+    }
+
+    /**
+     * Override to activate hugging if needed.
+     */
+    @Override
+    public Insets getMargin()
+    {
+        if (_margin != null) return _margin;
+        if (isHugging())
+            activateHuggingForRow();
+        return super.getMargin();
+    }
+
+    /**
+     * Activates hugging by changing margins of this layout and children.
+     */
+    private void activateHuggingForRow()
+    {
+        ViewLayout<?>[] children = getChildren(); if (children.length == 0) return;
+        ViewLayout<?> firstChild = children[0];
+        ViewLayout<?> lastChild = getLastChild();
+
+        // Initialize new margin for this row from first/last child
+        double marginTop = Math.max(firstChild.getMargin().top, lastChild.getMargin().top);
+        double marginLeft = firstChild.getMargin().left;
+        double marginRight = lastChild.getMargin().right;
+        double marginBottom = Math.max(firstChild.getMargin().bottom, lastChild.getMargin().bottom);
+
+        // Reset first/last child margins
+        firstChild.setMargin(new Insets(0, firstChild.getMargin().right, 0, 0));
+        lastChild.setMargin(new Insets(0, 0, 0, lastChild.getMargin().left));
+
+        // Get max top/bottom margins for inner children and reset theirs to zero
+        for (int i = 1, iMax = children.length - 1; i < iMax; i++) {
+            ViewLayout<?> child = children[i];
+            marginTop = Math.max(marginTop, child.getMargin().top);
+            marginBottom = Math.max(marginBottom, child.getMargin().bottom);
+            child.setMargin(new Insets(0, child.getMargin().right, 0, child.getMargin().left));
+        }
+
+        // Reset this row layout margin
+        setMargin(new Insets(marginTop, marginRight, marginBottom, marginLeft));
     }
 }
