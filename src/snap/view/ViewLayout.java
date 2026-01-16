@@ -2,6 +2,7 @@ package snap.view;
 import snap.geom.*;
 import snap.gfx.Border;
 import snap.util.ArrayUtils;
+import snap.util.MathUtils;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,6 +43,9 @@ public abstract class ViewLayout<T extends View> extends Rect {
 
     // Whether this layout should fillWidth, fillHeight (common attributes for ParentView)
     private boolean  _fillWidth, _fillHeight;
+
+    // The view best width and height
+    private double _bestWidth = -1, _bestHeight = -1, _bestWidthParam, _bestHeightParam;
 
     // Constants for unset vars
     private static double UNSET_DOUBLE = -Float.MIN_VALUE;
@@ -375,12 +379,42 @@ public abstract class ViewLayout<T extends View> extends Rect {
     /**
      * Returns the best width.
      */
-    public double getBestWidth(double aH)  { return _view.getBestWidth(aH); }
+    public double getBestWidth(double aH)
+    {
+        // If cached case, return cached value
+        if (MathUtils.equals(aH, _bestWidthParam) && _bestWidth >= 0)
+            return _bestWidth;
+
+        // Calculate best width
+        double prefW = getPrefWidth(aH);
+        double minW = _view.getMinWidth();
+        double maxW = _view.getMaxWidth();
+        double bestW = MathUtils.clamp(prefW, minW, maxW);
+
+        // Set and return
+        _bestWidthParam = aH;
+        return _bestWidth = bestW;
+    }
 
     /**
      * Returns the best height.
      */
-    public double getBestHeight(double aW)  { return _view.getBestHeight(aW); }
+    public double getBestHeight(double aW)
+    {
+        // If common case, return cached value (set if needed)
+        if (MathUtils.equals(aW, _bestHeightParam) && _bestHeight >= 0)
+            return _bestHeight;
+
+        // Calculate best height
+        double prefH = getPrefHeight(aW);
+        double minH = _view.getMinHeight();
+        double maxH = _view.getMaxHeight();
+        double bestH = MathUtils.clamp(prefH, minH, maxH);
+
+        // Set and return
+        _bestHeightParam = aW;
+        return _bestHeight = bestH;
+    }
 
     /**
      * Returns the align x factor.

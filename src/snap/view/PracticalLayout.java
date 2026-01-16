@@ -3,7 +3,6 @@
  */
 package snap.view;
 import snap.geom.Insets;
-import snap.util.MathUtils;
 
 /**
  * A base layout where subclasses only need to implement layoutViewLayout and pref sizes will be calculated from that.
@@ -98,7 +97,7 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
     /**
      * Returns the MaxX of last child with insets.
      */
-    public double getLastChildMaxXWithInsets()
+    protected double getLastChildMaxXWithInsets()
     {
         // Get info
         Insets parentPadding = getPadding();
@@ -115,7 +114,7 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
     /**
      * Returns the MaxY of last child with insets.
      */
-    public double getLastChildMaxYWithInsets()
+    protected double getLastChildMaxYWithInsets()
     {
         // Get info
         Insets parentPadding = getPadding();
@@ -132,7 +131,7 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
     /**
      * Returns the MaxX of children with insets.
      */
-    public double getChildrenMaxXWithInsets()
+    protected double getChildrenMaxXWithInsets()
     {
         // Get info
         Insets parentPadding = getPadding();
@@ -155,7 +154,7 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
     /**
      * Returns the MaxY of children with insets.
      */
-    public double getChildrenMaxYWithInsets()
+    protected double getChildrenMaxYWithInsets()
     {
         // Get info
         Insets parentPadding = getPadding();
@@ -173,27 +172,5 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
 
         // Return (round up)
         return Math.ceil(childMaxYAll + borderInsets.bottom);
-    }
-
-    /**
-     * Returns the best width for view - accounting for pref/min/max.
-     */
-    public double getBestWidth(double aH)
-    {
-        double prefW = getPrefWidth(aH);
-        double minW = _view.getMinWidth();
-        double maxW = _view.getMaxWidth();
-        return MathUtils.clamp(prefW, minW, maxW);
-    }
-
-    /**
-     * Returns the best height for view - accounting for pref/min/max.
-     */
-    public double getBestHeight(double aW)
-    {
-        double prefH = getPrefHeight(aW);
-        double minH = _view.getMinHeight();
-        double maxH = _view.getMaxHeight();
-        return MathUtils.clamp(prefH, minH, maxH);
     }
 }

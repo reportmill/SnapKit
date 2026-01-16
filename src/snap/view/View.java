@@ -140,9 +140,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // An object to help with layout and hold cached layout info
     private ViewLayout<?> _viewLayout;
 
-    // The view best width and height
-    private double  _bestWidth = -1, _bestHeight = -1, _bestWidthParam, _bestHeightParam;
-
     // The class name to use at runtime (for archival/unarchival use)
     private String _runtimeClassName;
 
@@ -1821,19 +1818,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public double getBestWidth(double aH)
     {
-        // If cached case, return cached value
-        if (MathUtils.equals(aH, _bestWidthParam) && _bestWidth >= 0)
-            return _bestWidth;
-
-        // Calculate best width
-        double prefW = getPrefWidth(aH);
-        double minW = getMinWidth();
-        double maxW = getMaxWidth();
-        double bestW = MathUtils.clamp(prefW, minW, maxW);
-
-        // Set and return
-        _bestWidthParam = aH;
-        return _bestWidth = bestW;
+        ViewLayout<?> viewLayout = getViewLayout();
+        return viewLayout.getBestWidth(aH);
     }
 
     /**
@@ -1841,19 +1827,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public double getBestHeight(double aW)
     {
-        // If common case, return cached value (set if needed)
-        if (MathUtils.equals(aW, _bestHeightParam) && _bestHeight >= 0)
-            return _bestHeight;
-
-        // Calculate best height
-        double prefH = getPrefHeight(aW);
-        double minH = getMinHeight();
-        double maxH = getMaxHeight();
-        double bestH = MathUtils.clamp(prefH, minH, maxH);
-
-        // Set and return
-        _bestHeightParam = aW;
-        return _bestHeight = bestH;
+        ViewLayout<?> viewLayout = getViewLayout();
+        return viewLayout.getBestHeight(aW);
     }
 
     /**
@@ -2207,7 +2182,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void relayoutParent()
     {
         _viewLayout = null;
-        _bestWidth = _bestHeight = -1;
         ParentView par = getParent();
         if (par == null) return;
         par.relayout();
