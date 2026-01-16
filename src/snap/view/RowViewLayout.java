@@ -3,6 +3,7 @@
  */
 package snap.view;
 import snap.geom.Insets;
+import snap.util.ArrayUtils;
 import snap.util.MathUtils;
 
 /**
@@ -11,7 +12,10 @@ import snap.util.MathUtils;
 public class RowViewLayout<T extends View> extends PracticalLayout<T> {
 
     // Whether to wrap closely around children and project their margins
-    private boolean  _hugging;
+    private boolean _hugging;
+
+    // The number of children that grow width
+    protected int _growWidthCount = -1;
 
     /**
      * Constructor for given parent view.
@@ -50,12 +54,6 @@ public class RowViewLayout<T extends View> extends PracticalLayout<T> {
      */
     @Override
     protected double getPrefWidthImpl(double aH)  { return getLastChildMaxXWithInsets(); }
-
-    /**
-     * Returns preferred height of given parent proxy using RowView layout.
-     */
-    @Override
-    protected double getPrefHeightImpl(double aW)  { return getChildrenMaxYWithInsets(); }
 
     /**
      * Performs layout.
@@ -276,6 +274,15 @@ public class RowViewLayout<T extends View> extends PracticalLayout<T> {
         // Remove width from last child - probably should iterate to previous children if needed
         double childW = Math.max(lastChild.width + extra, 10);
         lastChild.setWidth(childW);
+    }
+
+    /**
+     * Returns the number of children that grow width.
+     */
+    public int getGrowWidthCount()
+    {
+        if (_growWidthCount >= 0) return _growWidthCount;
+        return _growWidthCount = ArrayUtils.count(getChildren(), child -> child.isGrowWidth());
     }
 
     /**

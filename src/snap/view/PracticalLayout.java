@@ -3,7 +3,6 @@
  */
 package snap.view;
 import snap.geom.Insets;
-import snap.util.ArrayUtils;
 import snap.util.MathUtils;
 
 /**
@@ -13,9 +12,6 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
 
     // The last calculated pref width and height
     private double _prefW = -1, _prefH = -1;
-
-    // The number of children that grow width/height
-    protected int _growWidthCount = -1, _growHeightCount = -1;
 
     /**
      * Constructor for given parent view.
@@ -98,24 +94,6 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
      * Performs layout of child layouts.
      */
     public abstract void layoutViewLayout();
-
-    /**
-     * Returns the number of children that grow width.
-     */
-    public int getGrowWidthCount()
-    {
-        if (_growWidthCount >= 0) return _growWidthCount;
-        return _growWidthCount = ArrayUtils.count(getChildren(), child -> child.isGrowWidth());
-    }
-
-    /**
-     * Returns the number of children that grow height.
-     */
-    public int getGrowHeightCount()
-    {
-        if (_growHeightCount >= 0) return _growHeightCount;
-        return _growHeightCount = ArrayUtils.count(getChildren(), child -> child.isGrowHeight());
-    }
 
     /**
      * Returns the MaxX of last child with insets.
