@@ -1814,7 +1814,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Creates a ViewLayout for this View.
      */
-    protected ViewLayout<?> getViewLayoutImpl()  { return new NullLayout(this); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new CallbackLayout(this); }
 
     /**
      * Returns the best width for view - accounting for pref/min/max.

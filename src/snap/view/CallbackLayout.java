@@ -1,14 +1,14 @@
 package snap.view;
 
 /**
- * A layout that delegates back to the view.
+ * A layout that just delegates back to the view.
  */
-public class NullLayout extends ViewLayout<View> {
+public class CallbackLayout extends ViewLayout<View> {
 
     /**
      * Constructor.
      */
-    public NullLayout(View aView)
+    public CallbackLayout(View aView)
     {
         super(aView);
     }
@@ -44,13 +44,4 @@ public class NullLayout extends ViewLayout<View> {
             }
         }
     }
-
-    @Override
-    protected double getPrefWidthImpl(double aH)  { return 0; }
-
-    @Override
-    protected double getPrefHeightImpl(double aW)  { return 0; }
-
-    @Override
-    public void layoutViewLayout()  { }
 }

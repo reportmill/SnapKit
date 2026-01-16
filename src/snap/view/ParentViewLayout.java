@@ -11,6 +11,9 @@ import snap.util.MathUtils;
  */
 public abstract class ParentViewLayout<T extends View> extends ViewLayout<T> {
 
+    // The last calculated pref width and height
+    private double _prefW = -1, _prefH = -1;
+
     // The number of children that grow width/height
     protected int _growWidthCount = -1, _growHeightCount = -1;
 
@@ -21,6 +24,80 @@ public abstract class ParentViewLayout<T extends View> extends ViewLayout<T> {
     {
         super(aParent);
     }
+
+    /**
+     * Returns preferred width of layout.
+     */
+    public double getPrefWidth(double aH)
+    {
+        if (_prefW >= 0 && (aH < 0 || aH == _prefH))
+            return _prefW;
+        if (_view.isPrefWidthSet())
+            return _view.getPrefWidth(aH);
+
+        // Perform layout with given height
+        double oldW = width, oldH = height;
+        double prefH = aH > 0 ? aH : _view.isPrefHeightSet() ? _view.getPrefHeight() : -1;
+        setSize(-1, prefH);
+        layoutViewLayout();
+        width = oldW; height = oldH;
+
+        // Get pref width/height and return
+        _prefW = getPrefWidthImpl(aH);
+        _prefH = getPrefHeightImpl(_prefW);
+        return _prefW;
+    }
+
+    /**
+     * Returns preferred height of layout.
+     */
+    public double getPrefHeight(double aW)
+    {
+        if (_prefH >= 0 && (aW < 0 || aW == _prefW))
+            return _prefH;
+        if (_view.isPrefHeightSet())
+            return _view.getPrefHeight(aW);
+
+        // Perform layout with given width
+        double oldW = width, oldH = height;
+        double prefW = aW > 0 ? aW : _view.isPrefWidthSet() ? _view.getPrefWidth() : -1;
+        setSize(prefW, -1);
+        layoutViewLayout();
+        width = oldW; height = oldH;
+
+        // Get pref height/width and return
+        _prefH = getPrefHeightImpl(prefW);
+        _prefW = getPrefWidthImpl(_prefH);
+        return _prefH;
+    }
+
+    /**
+     * Performs layout of child views.
+     */
+    public void layoutView()
+    {
+        // Perform layout for current view size
+        setSize(_view.getWidth(), _view.getHeight());
+        layoutViewLayout();
+
+        // Apply bounds
+        setBoundsInClient();
+    }
+
+    /**
+     * Returns preferred width of given parent with given children.
+     */
+    protected double getPrefWidthImpl(double aH)  { return getChildrenMaxXWithInsets(); }
+
+    /**
+     * Returns preferred height of given parent with given children.
+     */
+    protected double getPrefHeightImpl(double aW)  { return getChildrenMaxYWithInsets(); }
+
+    /**
+     * Performs layout of child layouts.
+     */
+    public abstract void layoutViewLayout();
 
     /**
      * Returns the number of children that grow width.
@@ -141,16 +218,4 @@ public abstract class ParentViewLayout<T extends View> extends ViewLayout<T> {
         double maxH = _view.getMaxHeight();
         return MathUtils.clamp(prefH, minH, maxH);
     }
-
-    /**
-     * Returns preferred width of given parent with given children.
-     */
-    @Override
-    protected double getPrefWidthImpl(double aH)  { return getChildrenMaxXWithInsets(); }
-
-    /**
-     * Returns preferred height of given parent with given children.
-     */
-    @Override
-    protected double getPrefHeightImpl(double aW)  { return getChildrenMaxYWithInsets(); }
 }
