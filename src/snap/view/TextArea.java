@@ -84,7 +84,7 @@ public class TextArea extends ParentView {
     /**
      * Returns a default text model.
      */
-    protected TextModel createDefaultTextModel(boolean isRichText)  { return new TextModelX(isRichText); }
+    protected TextModel createDefaultTextModel(boolean isRichText)  { return new TextBlock(isRichText); }
 
     /**
      * Returns the text adapter.
