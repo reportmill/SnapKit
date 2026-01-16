@@ -73,8 +73,8 @@ public class ColViewLayout<T extends View> extends ParentViewLayout<T> {
         }
 
         // Load layout rects and return
-        layoutProxyY();
         layoutProxyX();
+        layoutProxyY();
     }
 
     /**
@@ -105,17 +105,14 @@ public class ColViewLayout<T extends View> extends ParentViewLayout<T> {
             double childW = childMaxW;
 
             // If Parent.Width not set, just set width to Child.PrefWidth
-            if (viewW < 0) {
-                double childH = child.getHeight();
-                childW = child.getBestWidth(childH);
-            }
+            if (viewW < 0)
+                childW = child.getBestWidth(-1);
 
             // Otherwise, if not FillWidth, set width to Child.PrefWidth and align X
             else if (!(isFillWidth || child.isGrowWidth())) {
 
                 // Set child width to Child.PrefWidth
-                double childH = child.getHeight();
-                childW = child.getBestWidth(childH);
+                childW = child.getBestWidth(-1);
 
                 // Constrain child width to max child width or if space available and align set, shift X
                 if (childW > childMaxW)
@@ -140,7 +137,6 @@ public class ColViewLayout<T extends View> extends ParentViewLayout<T> {
     {
         // Get parent info
         ViewLayout<?>[] children = getChildren();
-        double parentW = getWidth();
         Insets parentPadding = getPadding();
         double parentSpacing = getSpacing();
         Insets borderInsets = getBorderInsets();
@@ -159,18 +155,13 @@ public class ColViewLayout<T extends View> extends ParentViewLayout<T> {
             if (lastChild != null)
                 childSpacing = Math.max(childSpacing, parentSpacing);
 
-            // Get child pref width
-            double childInsetLeft = Math.max(parentPadding.left, childMargin.left);
-            double childInsetRight = Math.max(parentPadding.right, childMargin.right);
-            double childW = Math.max(parentW - childInsetLeft - childInsetRight, 0);
-
             // Update ChildY with spacing, round and set
             childY += childSpacing;
             childY = Math.round(childY);
             child.setY(childY);
 
             // Calculate child height and set
-            double childH = child.getBestHeight(childW);
+            double childH = child.getBestHeight(child.width);
             child.setHeight(childH);
 
             // Update child Y loop var and last child

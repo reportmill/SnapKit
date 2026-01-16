@@ -73,8 +73,8 @@ public class RowViewLayout<T extends View> extends ParentViewLayout<T> {
         }
 
         // Load layout rects and return
-        layoutProxyX();
         layoutProxyY();
+        layoutProxyX();
     }
 
     /**
@@ -84,7 +84,6 @@ public class RowViewLayout<T extends View> extends ParentViewLayout<T> {
     {
         // Get parent info
         ViewLayout<?>[] children = getChildren();
-        double parentH = getHeight();
         Insets parentPadding = getPadding();
         double parentSpacing = getSpacing();
         Insets borderInsets = getBorderInsets();
@@ -103,18 +102,13 @@ public class RowViewLayout<T extends View> extends ParentViewLayout<T> {
             if (lastChild != null)
                 childSpacing = Math.max(childSpacing, parentSpacing);
 
-            // If child pref height for PrefWidth calc
-            double childInsetTop = Math.max(parentPadding.top, childMargin.top);
-            double childInsetBottom = Math.max(parentPadding.bottom, childMargin.bottom);
-            double childH = Math.max(parentH - childInsetTop - childInsetBottom, 0);
-
             // Update ChildX with spacing, round and set
             childX += childSpacing;
             childX = Math.round(childX);
             child.setX(childX);
 
             // Calculate child width and set
-            double childW = child.getBestWidth(childH);
+            double childW = child.getBestWidth(child.height);
             child.setWidth(childW);
 
             // Update child x loop var and last child
@@ -166,17 +160,14 @@ public class RowViewLayout<T extends View> extends ParentViewLayout<T> {
             double childH = childMaxH;
 
             // If Parent.Height not set, just set height to Child.PrefHeight
-            if (viewH < 0) {
-                double childW = child.getWidth();
-                childH = child.getBestHeight(childW);
-            }
+            if (viewH < 0)
+                childH = child.getBestHeight(-1);
 
             // Otherwise, if not FillHeight, set height to Child.PrefHeight and align Y
             else if (!(isFillHeight || child.isGrowHeight())) {
 
                 // Set child height to Child.PrefHeight
-                double childW = child.getWidth();
-                childH = child.getBestHeight(childW);
+                childH = child.getBestHeight(-1);
 
                 // Constrain child height to max child height or if space available and align set, shift Y
                 if (childH > childMaxH)

@@ -410,7 +410,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
      */
     public double getPrefWidth(double aH)
     {
-        if (_prefW >=0 && (aH < 0 || aH == _prefH))
+        if (_prefW >= 0 && (aH < 0 || aH == _prefH))
             return _prefW;
         if (_view.isPrefWidthSet())
             return _view.getPrefWidth(aH);
