@@ -196,8 +196,9 @@ public class DirSite extends WebSite {
     private WebFile getDirFileForPath(String aPath)
     {
         WebFile dir = getDir();
+        String dirPath = dir.getPath();
+        String dirFilePath = FilePathUtils.getChildPath(dirPath, aPath);
         WebSite dirSite = dir.getSite();
-        String dirFilePath = dir.getPath() + aPath;
         return dirSite.getFileForPath(dirFilePath);
     }
 
@@ -207,8 +208,9 @@ public class DirSite extends WebSite {
     private WebFile createDirFileForPath(String aPath, boolean isDir)
     {
         WebFile dir = getDir();
+        String dirPath = dir.getPath();
+        String dirFilePath = FilePathUtils.getChildPath(dirPath, aPath);
         WebSite dirSite = dir.getSite();
-        String dirFilePath = dir.getPath() + aPath;
         return dirSite.createFileForPath(dirFilePath, isDir);
     }
 
