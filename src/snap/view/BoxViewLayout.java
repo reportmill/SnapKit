@@ -7,7 +7,7 @@ import snap.geom.Insets;
 /**
  * A layout that can layout content in the manner of BoxView for any View.
  */
-public class BoxViewLayout<T extends View> extends ParentViewLayout<T> {
+public class BoxViewLayout<T extends View> extends PracticalLayout<T> {
 
     /**
      * Constructor for given parent view.

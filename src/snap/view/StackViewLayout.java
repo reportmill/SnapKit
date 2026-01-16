@@ -4,7 +4,7 @@ import snap.geom.Insets;
 /**
  * A layout class to layout children stacked on top of each other.
  */
-public class StackViewLayout<T extends View> extends ParentViewLayout<T> {
+public class StackViewLayout<T extends View> extends PracticalLayout<T> {
 
     /**
      * Constructor.

@@ -225,7 +225,7 @@ public class Label extends ParentView {
 
         // Layout children and return text bounds
         int textIndex = _textArea.indexInParent();
-        ParentViewLayout<?> viewLayout = isHorizontal() ? new RowViewLayout<>(this) : new ColViewLayout<>(this);
+        PracticalLayout<?> viewLayout = isHorizontal() ? new RowViewLayout<>(this) : new ColViewLayout<>(this);
         List<View> children = _graphic != null ? List.of(_graphic, _textArea) : List.of(_textArea);
         List<ViewLayout<?>> childProxies = ListUtils.map(children, child -> child.getViewLayout());
         viewLayout.setChildren(childProxies);

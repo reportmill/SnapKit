@@ -7,9 +7,9 @@ import snap.util.ArrayUtils;
 import snap.util.MathUtils;
 
 /**
- * A ViewLayout that can layout content in the manner of BoxView for any View.
+ * A base layout where subclasses only need to implement layoutViewLayout and pref sizes will be calculated from that.
  */
-public abstract class ParentViewLayout<T extends View> extends ViewLayout<T> {
+public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
 
     // The last calculated pref width and height
     private double _prefW = -1, _prefH = -1;
@@ -20,7 +20,7 @@ public abstract class ParentViewLayout<T extends View> extends ViewLayout<T> {
     /**
      * Constructor for given parent view.
      */
-    public ParentViewLayout(View aParent)
+    public PracticalLayout(View aParent)
     {
         super(aParent);
     }

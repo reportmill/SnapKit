@@ -8,7 +8,7 @@ import snap.util.MathUtils;
 /**
  * A ViewLayout subclass to layout child views vertically, from top to bottom.
  */
-public class ColViewLayout<T extends View> extends ParentViewLayout<T> {
+public class ColViewLayout<T extends View> extends PracticalLayout<T> {
 
     // Whether to wrap closely around children and project their margins
     private boolean  _hugging;
@@ -182,39 +182,39 @@ public class ColViewLayout<T extends View> extends ParentViewLayout<T> {
         // Calculate extra space and add to growers or alignment
         int extraY = (int) Math.round(viewH - layoutH);
         if (extraY != 0)
-            addExtraSpaceY(this, extraY);
+            addExtraSpaceY(extraY);
     }
 
     /**
      * Adds extra space to growers or alignment.
      */
-    private static void addExtraSpaceY(ParentViewLayout<?> aPar, int extra)
+    private void addExtraSpaceY(int extra)
     {
         // If there is child/children with GrowHeight, add extra height to child growers
-        if (aPar.getGrowHeightCount() > 0)
-            addExtraSpaceY_ToGrowers(aPar, extra);
+        if (getGrowHeightCount() > 0)
+            addExtraSpaceY_ToGrowers(extra);
 
         // If extra is positive, use for vertical alignment/lean shift
         else if (extra > 0)
-            addExtraSpaceY_ToAlign(aPar, extra);
+            addExtraSpaceY_ToAlign(extra);
 
         // If negative, try to trim last child back
-        else removeExtraSpaceY_FromLastChild(aPar, extra);
+        else removeExtraSpaceY_FromLastChild(extra);
     }
 
     /**
      * Adds extra space Y to children that GrowWidth.
      */
-    private static void addExtraSpaceY_ToGrowers(ParentViewLayout<?> aPar, int extra)
+    private void addExtraSpaceY_ToGrowers(int extra)
     {
         // Get amount to add to each grower (plus 1 for some if not evenly divisible by grow)
-        int grow = aPar.getGrowHeightCount();
+        int grow = getGrowHeightCount();
         int each = extra / grow;
         int eachP1 = each + MathUtils.sign(extra);
         int count2 = Math.abs(extra % grow);
 
         // Iterate over children and add their share (plus 1 for some if not evenly divisible by grow)
-        ViewLayout<?>[] children = aPar.getChildren();
+        ViewLayout<?>[] children = getChildren();
         for (int i = 0, j = 0, shiftY = 0, iMax = children.length; i < iMax; i++) {
             ViewLayout<?> child = children[i];
             if (shiftY != 0)
@@ -231,10 +231,10 @@ public class ColViewLayout<T extends View> extends ParentViewLayout<T> {
     /**
      * Adds extra space Y to child alignment/lean.
      */
-    private static void addExtraSpaceY_ToAlign(ViewLayout<?> aPar, int extra)
+    private void addExtraSpaceY_ToAlign(int extra)
     {
-        ViewLayout<?>[] children = aPar.getChildren();
-        double alignY = aPar.getAlignYAsDouble();
+        ViewLayout<?>[] children = getChildren();
+        double alignY = getAlignYAsDouble();
         double shiftY = 0;
 
         for (ViewLayout<?> child : children) {
@@ -267,10 +267,10 @@ public class ColViewLayout<T extends View> extends ParentViewLayout<T> {
     /**
      * Remove extra space from last child.
      */
-    private static void removeExtraSpaceY_FromLastChild(ViewLayout<?> aPar, int extra)
+    private void removeExtraSpaceY_FromLastChild(int extra)
     {
         // Get last child
-        ViewLayout<?>[] children = aPar.getChildren();
+        ViewLayout<?>[] children = getChildren();
         ViewLayout<?> lastChild = children[children.length - 1];
 
         // Remove width from last child - probably should iterate to previous children if needed
