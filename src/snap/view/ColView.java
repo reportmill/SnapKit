@@ -66,7 +66,7 @@ public class ColView extends ChildView {
      * Override to return column layout.
      */
     @Override
-    protected ColViewLayout<?> getViewLayoutImpl()  { return new ColViewLayout<>(this); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new ColViewLayout<>(this); }
 
     /**
      * Override to support props for this class.

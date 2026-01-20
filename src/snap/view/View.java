@@ -1802,7 +1802,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns a ViewLayout to help with layout and hold cached layout info.
      */
-    protected ViewLayout<?> getViewLayout()
+    public ViewLayout<?> getViewLayout()
     {
         if (_viewLayout != null) return _viewLayout;
         return _viewLayout = getViewLayoutImpl();

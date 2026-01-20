@@ -62,7 +62,7 @@ public class RowView extends ChildView {
      * Override to return row layout.
      */
     @Override
-    protected RowViewLayout<?> getViewLayoutImpl()  { return new RowViewLayout<>(this); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new RowViewLayout<>(this); }
 
     /**
      * Override to support props for this class.

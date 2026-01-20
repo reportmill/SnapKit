@@ -68,5 +68,5 @@ public class ScaleBox extends BoxView {
      * Override to return ScaleBoxProxy.
      */
     @Override
-    protected ScaleBoxLayout getViewLayoutImpl()  { return new ScaleBoxLayout(this); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new ScaleBoxLayout(this); }
 }

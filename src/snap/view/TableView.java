@@ -336,8 +336,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     protected void setTableCols(List<TableCol<T>> tableCols)
     {
-        for (TableCol<T> tableCol : tableCols)
-            addCol(tableCol);
+        tableCols.forEach(this::addCol);
     }
 
     /**
@@ -350,24 +349,22 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         aCol._table = this;
 
         // Create Header Box for Column Header label
-        View hdr = aCol.getHeader();
-        BoxView hdrBox = new BoxView(hdr) {
-            protected double getPrefWidthImpl(double aH)  { return aCol.getPrefWidth(); }
-            public boolean isGrowWidth()  { return aCol.isGrowWidth(); }
-        };
-        hdrBox.setFillWidth(true);
+        View columnHeader = aCol.getHeader();
+        BoxView colHeaderBox = new BoxView(columnHeader);
+        colHeaderBox.setFillWidth(true);
 
-        // Bind hdrBox.PrefWidth to aCol.PrefWidth, and visa-versa
-        ViewUtils.bind(aCol, PrefWidth_Prop, hdrBox, true);
+        // Bind column header PrefWidth to column PrefWidth, and visa-versa
+        colHeaderBox.setPrefWidth(aCol.getPrefWidth());
+        ViewUtils.bind(aCol, PrefWidth_Prop, colHeaderBox, true);
 
         // Add Header Box to Header SplitView
-        SplitView hsplit = getHeaderView();
-        hsplit.addItem(hdrBox);
+        SplitView tableHeaderSplitView = getHeaderView();
+        tableHeaderSplitView.addItem(colHeaderBox);
 
         // Configure split dividers
         for (Divider div : _splitView.getDividers()) {
             div.setFill(DIVIDER_FILL); div.setBorder(null); }
-        for (Divider div : hsplit.getDividers()) {
+        for (Divider div : tableHeaderSplitView.getDividers()) {
             div.setFill(DIVIDER_FILLH); div.setBorder(null); }
 
         // Replace column picklist with tableView picklist
@@ -776,7 +773,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Called to edit given cell.
      */
-    public void editCell(ListCell aCell)
+    public void editCell(ListCell<?> aCell)
     {
         // If not appropriate, just return
         if (aCell == null || !isEditable() || aCell.isEditing())

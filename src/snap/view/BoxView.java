@@ -108,7 +108,7 @@ public class BoxView extends ParentView implements ViewHost {
      * Override to return box layout.
      */
     @Override
-    protected BoxViewLayout<?> getViewLayoutImpl()  { return new BoxViewLayout<>(this); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new BoxViewLayout<>(this); }
 
     /**
      * ViewHost method: Override to return 1 if content is present.

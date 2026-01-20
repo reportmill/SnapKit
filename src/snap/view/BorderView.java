@@ -142,7 +142,7 @@ public class BorderView extends ParentView {
      * Override to return border layout.
      */
     @Override
-    protected BorderViewLayout getViewLayoutImpl()
+    protected ViewLayout<?> getViewLayoutImpl()
     {
         return new BorderViewLayout(this, _center, _top, _right, _bottom, _left);
     }
