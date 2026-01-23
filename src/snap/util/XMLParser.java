@@ -34,7 +34,7 @@ public class XMLParser extends Parser {
     /**
      * Kicks off xml parsing from given URL and builds on this parser's element.
      */
-    public XMLElement parseXMLFromUrl(WebURL xmlUrl) throws Exception
+    public XMLElement parseXMLFromUrl(WebURL xmlUrl)
     {
         // Get XML string from source
         String xmlString = xmlUrl.getText();
@@ -50,7 +50,7 @@ public class XMLParser extends Parser {
     /**
      * Kicks off xml parsing from given source and builds on this parser's element.
      */
-    public XMLElement parseXMLFromString(String xmlString) throws Exception
+    public XMLElement parseXMLFromString(String xmlString)
     {
         ParseNode node = parse(xmlString);
         return (XMLElement) node.getCustomNode();
@@ -65,6 +65,20 @@ public class XMLParser extends Parser {
      * A Tokenizer subclass to read XML contents.
      */
     public static class XMLTokenizer extends Tokenizer {
+
+        /** Override to eat xml comments. */
+        @Override
+        protected ParseToken getNextTokenImpl()
+        {
+            // If XML comment, eat chars till XML comment terminator
+            if (nextCharsStartWith("<!--")) {
+                while (!nextCharsStartWith("-->"))
+                    eatChar();
+                eatChars("-->".length());
+            }
+
+            return super.getNextTokenImpl();
+        }
 
         /** Called to return the value of an element and update the char index. */
         protected String getContent()
