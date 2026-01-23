@@ -6,7 +6,6 @@ import snap.geom.*;
 import snap.gfx.*;
 import snap.props.PropSet;
 import snap.text.TextModel;
-import snap.text.TextStyle;
 import snap.util.*;
 import java.util.List;
 import java.util.Objects;
@@ -134,9 +133,7 @@ public class Label extends ParentView {
     public void setTextStyleString(String styleString)
     {
         TextModel textModel = _textArea.getTextModel();
-        TextStyle textStyle = textModel.getTextStyleForCharIndex(0);
-        TextStyle textStyle2 = textStyle.copyForStyleString(styleString);
-        textModel.setTextStyle(textStyle2, 0, textModel.length());
+        textModel.setDefaultTextStyleString(styleString);
     }
 
     /**
