@@ -16,16 +16,12 @@ public class CallbackLayout extends ViewLayout<View> {
     @Override
     public double getPrefWidth(double aH)
     {
-        if (_view.isPrefWidthSet())
-            return _view.getPrefWidth(aH);
         return _view.getPrefWidthImpl(aH);
     }
 
     @Override
     public double getPrefHeight(double aW)
     {
-        if (_view.isPrefHeightSet())
-            return _view.getPrefHeight(aW);
         return _view.getPrefHeightImpl(aW);
     }
 

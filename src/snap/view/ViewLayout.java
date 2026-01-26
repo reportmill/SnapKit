@@ -386,7 +386,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
             return _bestWidth;
 
         // Calculate best width
-        double prefW = getPrefWidth(aH);
+        double prefW = _view.getPrefWidth(aH);
         double minW = _view.getMinWidth();
         double maxW = _view.getMaxWidth();
         double bestW = MathUtils.clamp(prefW, minW, maxW);
@@ -406,7 +406,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
             return _bestHeight;
 
         // Calculate best height
-        double prefH = getPrefHeight(aW);
+        double prefH = _view.getPrefHeight(aW);
         double minH = _view.getMinHeight();
         double maxH = _view.getMaxHeight();
         double bestH = MathUtils.clamp(prefH, minH, maxH);

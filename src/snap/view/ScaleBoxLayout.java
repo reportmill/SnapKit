@@ -57,7 +57,7 @@ public class ScaleBoxLayout extends BoxViewLayout<View> {
     {
         // If scaling and value provided, return value by aspect
         if (aH > 0) {
-            if (isFillHeight() || aH < getPrefHeight(-1))
+            if (isFillHeight() || aH < _view.getPrefHeight(-1))
                 return Math.ceil(aH * getAspect());
         }
 
@@ -73,7 +73,7 @@ public class ScaleBoxLayout extends BoxViewLayout<View> {
     {
         // If scaling and value provided, return value by aspect
         if (aW > 0) {
-            if (isFillWidth() || aW < getPrefWidth(-1))
+            if (isFillWidth() || aW < _view.getPrefWidth(-1))
                 return Math.ceil(aW / getAspect());
         }
 
