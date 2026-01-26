@@ -525,10 +525,41 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Override to return treeview layout.
+     * Override to return pref row count.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()  { return new TreeViewLayout(this); }
+    protected double getPrefHeightImpl(double aW)
+    {
+        // If PrefRowCount set, return PrefRowCount * RowHeight
+        int prefRowCount = getPrefRowCount();
+        if (prefRowCount > 0)
+            return prefRowCount * getRowHeight() + getInsetsAll().getHeight();
+
+        // Do normal version
+        return super.getPrefHeightImpl(aW);
+    }
+
+    /**
+     * Override to check for overflow.
+     */
+    @Override
+    protected void layoutImpl()
+    {
+        super.layoutImpl();
+
+        // Check wants ScrollView
+        if (getOverflow() == Overflow.Scroll)
+            ViewUtils.checkWantsScrollView(this);
+    }
+
+    /**
+     * Override to return box layout.
+     */
+    @Override
+    protected ViewLayout<?> getViewLayoutImpl()
+    {
+        return new BoxViewLayout<>(this, _splitView, true, true);
+    }
 
     /**
      * Returns the maximum height.
@@ -586,40 +617,5 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     protected boolean equalsItems(List<T> theItems)
     {
         return ListUtils.equalsId(theItems, getItems()) || theItems.equals(getItems());
-    }
-
-    /**
-     * Custom layout for treeview.
-     */
-    private static class TreeViewLayout extends BoxViewLayout<TreeView<?>> {
-
-        public TreeViewLayout(TreeView<?> treeView)
-        {
-            super(treeView, treeView._splitView, true, true);
-        }
-
-        @Override
-        protected double getPrefHeightImpl(double aW)
-        {
-            // If PrefRowCount set, return PrefRowCount * RowHeight
-            TreeView<?> treeView = getView();
-            int prefRowCount = treeView.getPrefRowCount();
-            if (prefRowCount > 0)
-                return prefRowCount * treeView.getRowHeight() + treeView.getInsetsAll().getHeight();
-
-            // Do normal version
-            return super.getPrefHeightImpl(aW);
-        }
-
-        @Override
-        public void layoutView()
-        {
-            super.layoutView();
-
-            // Check wants ScrollView
-            TreeView<?> treeView = getView();
-            if (treeView.getOverflow() == Overflow.Scroll)
-                ViewUtils.checkWantsScrollView(treeView);
-        }
     }
 }

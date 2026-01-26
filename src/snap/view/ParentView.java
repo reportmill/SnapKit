@@ -486,9 +486,7 @@ public class ParentView extends View {
         if (_inLayout) return;
         _inLayout = true;
         if (getWidth() > 0 && getHeight() > 0) {
-            ViewLayout<?> viewLayout = getViewLayout();
-            viewLayout.layoutView();
-            //layoutImpl();
+            layoutImpl();
             layoutFloatingViews();
         }
         _inLayout = false;
@@ -497,7 +495,11 @@ public class ParentView extends View {
     /**
      * Actual method to layout children.
      */
-    protected void layoutImpl()  { }
+    protected void layoutImpl()
+    {
+        ViewLayout<?> viewLayout = getViewLayout();
+        viewLayout.layoutView();
+    }
 
     /**
      * Called to layout floating children (those unmanaged with lean) according to their Lean, Grow and Margin.

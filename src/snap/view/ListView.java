@@ -557,6 +557,28 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
+     * Override to reset child cells and layout padding
+     */
+    @Override
+    protected void layoutImpl()
+    {
+        resetListCellsForCurrentBounds(); //getViewLayout().clearChildren();
+        double insTop = _cellStart * getRowHeight();
+        getViewLayout().setPadding(Insets.add(getPadding(), insTop, 0, 0, 0));
+        super.layoutImpl();
+
+        // Check wants ScrollView
+        if (getOverflow() == Overflow.Scroll)
+            ViewUtils.checkWantsScrollView(this);
+    }
+
+    /**
+     * Override to return column layout with hook.
+     */
+    @Override
+    protected ViewLayout<?> getViewLayoutImpl()  { return new ColViewLayout<>(this, true); }
+
+    /**
      * Resets the list cells for current bounds.
      */
     protected void resetListCellsForCurrentBounds()
@@ -624,12 +646,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         if (_needsScrollSelToVisible)
             runLater(this::scrollSelToVisible);
     }
-
-    /**
-     * Override to return column layout with hook.
-     */
-    @Override
-    protected ViewLayout<?> getViewLayoutImpl()  { return new ListViewLayout(this); }
 
     /**
      * Creates a cell for item at index.
@@ -1081,46 +1097,5 @@ public class ListView <T> extends ParentView implements Selectable<T> {
             setRowHeight(anElement.getAttributeIntValue(RowHeight_Prop));
         if (anElement.hasAttribute(ItemKey_Prop))
             setItemKey(anElement.getAttributeValue(ItemKey_Prop));
-    }
-
-    /**
-     * A layout for ListView based on column layout.
-     */
-    private class ListViewLayout extends ColViewLayout<ListView<?>> {
-
-        public ListViewLayout(ListView listView)
-        {
-            super(listView, true);
-        }
-
-        @Override
-        public double getPrefWidth(double aH)
-        {
-            if (_view.isPrefWidthSet())
-                return _view.getPrefWidth(aH);
-            return ListView.this.getPrefWidthImpl(aH);
-        }
-
-        @Override
-        public double getPrefHeight(double aW)
-        {
-            if (_view.isPrefHeightSet())
-                return _view.getPrefHeight(aW);
-            return ListView.this.getPrefHeightImpl(aW);
-        }
-
-        @Override
-        public void layoutView()
-        {
-            resetListCellsForCurrentBounds();
-            clearChildren();
-            double insTop = _cellStart * getRowHeight();
-            setPadding(Insets.add(_view.getPadding(), insTop, 0, 0, 0));
-            super.layoutView();
-
-            // Check wants ScrollView
-            if (getOverflow() == Overflow.Scroll)
-                ViewUtils.checkWantsScrollView(ListView.this);
-        }
     }
 }

@@ -1,5 +1,4 @@
 package snap.view;
-
 import snap.geom.Insets;
 
 /**
@@ -23,6 +22,14 @@ public class GridView extends ChildView {
     private double  _cellPrefHeight = -1;
 
     /**
+     * Constructor.
+     */
+    public GridView()
+    {
+        super();
+    }
+
+    /**
      * Returns whether grid is uniform size.
      */
     public boolean isUniform()  { return _uniform; }
@@ -42,18 +49,18 @@ public class GridView extends ChildView {
      */
     private double getCellPrefWidth()
     {
-        if (_cellPrefWidth>0) return _cellPrefWidth;
+        if (_cellPrefWidth > 0) return _cellPrefWidth;
 
         if (isUniform()) {
             View cell = getChildren().getFirst();
-            return cell!=null ? cell.getPrefWidth() : 0;
+            return cell != null ? cell.getPrefWidth() : 0;
         }
 
         // Otherwise, just max pref width
-        double mpw = 0;
+        double maxPrefW = 0;
         for (View child : getChildrenManaged())
-            mpw = Math.max(mpw, child.getPrefWidth());
-        return mpw;
+            maxPrefW = Math.max(maxPrefW, child.getPrefWidth());
+        return maxPrefW;
     }
 
     /**
@@ -61,18 +68,18 @@ public class GridView extends ChildView {
      */
     private double getCellPrefHeight()
     {
-        if (_cellPrefHeight>0) return _cellPrefHeight;
+        if (_cellPrefHeight > 0) return _cellPrefHeight;
 
         if (isUniform()) {
             View cell = getChildren().getFirst();
-            return cell!=null ? cell.getPrefHeight() : 0;
+            return cell != null ? cell.getPrefHeight() : 0;
         }
 
         // Otherwise, just max pref height of cells
-        double mph = 0;
+        double maxPrefH = 0;
         for (View child : getChildrenManaged())
-            mph = Math.max(mph, child.getPrefWidth());
-        return mph;
+            maxPrefH = Math.max(maxPrefH, child.getPrefWidth());
+        return maxPrefH;
     }
 
     /**
@@ -81,8 +88,8 @@ public class GridView extends ChildView {
     public int getColCountVisible()
     {
         Insets ins = getInsetsAll();
-        double pw = getWidth() - ins.getWidth();
-        return getColCountForWidth(pw);
+        double areaW = getWidth() - ins.getWidth();
+        return getColCountForWidth(areaW);
     }
 
     /**
@@ -91,9 +98,8 @@ public class GridView extends ChildView {
     public int getColCountForWidth(double aWidth)
     {
         // Get width of one cell
-        double cw = getCellPrefWidth(); if (cw<=0) return -1;
-        int count = (int) Math.floor(aWidth/cw);
-        return count;
+        double cellW = getCellPrefWidth(); if ( cellW <= 0) return -1;
+        return (int) Math.floor(aWidth / cellW);
     }
 
     /**
@@ -101,15 +107,16 @@ public class GridView extends ChildView {
      */
     public int getRowCountForCols(int aColCount)
     {
-        if (aColCount==0) return 0;
+        if (aColCount == 0) return 0;
         int cellCount = getChildCountManaged();
-        return (int) Math.ceil(cellCount/(double)aColCount);
+        return (int) Math.ceil(cellCount / (double) aColCount);
     }
 
     /**
      * Override to use grid layout.
      */
-    public double getPrefWidth(double aH)
+    @Override
+    protected double getPrefWidthImpl(double aH)
     {
         // Get number of columns and single cell width
         int colCount = getChildCountManaged();
@@ -124,10 +131,11 @@ public class GridView extends ChildView {
     /**
      * Override to use grid layout.
      */
-    public double getPrefHeight(double aW)
+    @Override
+    protected double getPrefHeightImpl(double aW)
     {
         // Get number of rows and single cell height
-        int colCount = aW>=0 ? getColCountForWidth(aW) : Integer.MAX_VALUE;
+        int colCount = aW >= 0 ? getColCountForWidth(aW) : Integer.MAX_VALUE;
         int rowCount = getRowCountForCols(colCount);
         double cellHeight = getCellPrefHeight();
 
@@ -140,35 +148,35 @@ public class GridView extends ChildView {
     /**
      * Override to use grid layout.
      */
-    public void layout()
+    @Override
+    protected void layoutImpl()
     {
         // If no children, just return
-        if (getChildCountManaged()==0) return;
+        if (getChildCountManaged() == 0) return;
 
         // Get children and number of cols
-        View children[] = getChildrenManaged();
+        View[] children = getChildrenManaged();
         int cellCount = children.length;
         int colCount = getColCountVisible();
         int rowCount = getRowCountForCols(colCount);
 
         // Loop vars
         Insets ins = getInsetsAll();
-        double cw = getCellPrefWidth();
-        double ch = getCellPrefHeight();
-        double cy = ins.top;
+        double cellW = getCellPrefWidth();
+        double cellH = getCellPrefHeight();
+        double cellY = ins.top;
 
         // Iterate over children and place
-        for (int i=0; i<rowCount; i++) {
-            double cx = ins.left;
-            for (int j=0; j<colCount; j++) {
+        for (int i = 0; i < rowCount; i++) {
+            double cellX = ins.left;
+            for (int j = 0; j < colCount; j++) {
                 int ind = i * colCount + j;
                 if (ind >= cellCount) break;
                 View child = children[ind];
-                child.setBounds(cx, cy, cw, ch);
-                cx += cw + getSpacingX();
+                child.setBounds(cellX, cellY, cellW, cellH);
+                cellX += cellW + getSpacingX();
             }
-            cy += ch + getSpacingY();
+            cellY += cellH + getSpacingY();
         }
     }
-
 }

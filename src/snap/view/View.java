@@ -1694,10 +1694,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view preferred width.
      */
-    public double getPrefWidth()
-    {
-        return getPrefWidth(-1);
-    }
+    public double getPrefWidth()  { return getPrefWidth(-1); }
 
     /**
      * Returns the view preferred width.
@@ -1705,8 +1702,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public double getPrefWidth(double aH)
     {
         if (_prefWidth >= 0) return _prefWidth;
-        ViewLayout<?> viewLayout = getViewLayout();
-        return viewLayout.getPrefWidth(aH);
+        return getPrefWidthImpl(aH);
     }
 
     /**
@@ -1727,10 +1723,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view preferred height.
      */
-    public double getPrefHeight()
-    {
-        return getPrefHeight(-1);
-    }
+    public double getPrefHeight()  { return getPrefHeight(-1); }
 
     /**
      * Returns the view preferred height.
@@ -1738,8 +1731,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public double getPrefHeight(double aW)
     {
         if (_prefHeight >= 0) return _prefHeight;
-        ViewLayout<?> viewLayout = getViewLayout();
-        return viewLayout.getPrefHeight(aW);
+        return getPrefHeightImpl(aW);
     }
 
     /**
@@ -1755,12 +1747,20 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Calculates the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return 0; }
+    protected double getPrefWidthImpl(double aH)
+    {
+        ViewLayout<?> viewLayout = getViewLayout();
+        return viewLayout.getPrefWidth(aH);
+    }
 
     /**
      * Calculates the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)  { return 0; }
+    protected double getPrefHeightImpl(double aW)
+    {
+        ViewLayout<?> viewLayout = getViewLayout();
+        return viewLayout.getPrefHeight(aW);
+    }
 
     /**
      * Returns the view preferred size.
@@ -1811,7 +1811,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Creates a ViewLayout for this View.
      */
-    protected ViewLayout<?> getViewLayoutImpl()  { return new CallbackLayout(this); }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new NullLayout(this); }
 
     /**
      * Returns the best width for view - accounting for pref/min/max.

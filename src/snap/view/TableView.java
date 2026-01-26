@@ -632,10 +632,25 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Override to return table view layout.
+     * Override to return row height * item count and account for header.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()  { return new TableViewLayout(this); }
+    protected double getPrefHeightImpl(double aW)
+    {
+        Insets ins = getInsetsAll();
+        double headerPrefH = isShowHeader() ? _header.getPrefHeight(aW) : 0;
+        double rowsPrefH = getRowHeight() * getItems().size();
+        return headerPrefH + rowsPrefH + ins.getHeight();
+    }
+
+    /**
+     * Override to return box layout.
+     */
+    @Override
+    protected ViewLayout<?> getViewLayoutImpl()
+    {
+        return new BoxViewLayout<>(this, _scrollGroup, true, true);
+    }
 
     /**
      * Handle events.
@@ -996,29 +1011,6 @@ public class TableView <T> extends ParentView implements Selectable<T> {
                 TableCol<T> col = (TableCol<T>) anArchiver.fromXML(childXML, this);
                 addCol(col);
             }
-        }
-    }
-
-    /**
-     * Custom layout for TableView.
-     */
-    private static class TableViewLayout extends BoxViewLayout<TableView<?>> {
-
-        public TableViewLayout(TableView<?> tableView)
-        {
-            super(tableView, tableView._scrollGroup, true, true);
-        }
-
-        /**
-         * Returns the preferred height.
-         */
-        protected double getPrefHeightImpl(double aW)
-        {
-            TableView<?> tableView = getView();
-            Insets ins = tableView.getInsetsAll();
-            double hdrPrefH = tableView.isShowHeader() ? tableView._header.getPrefHeight(aW) : 0;
-            double rowsPrefH = tableView.getRowHeight() * tableView.getItems().size();
-            return hdrPrefH + rowsPrefH + ins.getHeight();
         }
     }
 }

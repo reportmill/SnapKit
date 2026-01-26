@@ -646,8 +646,8 @@ public class ViewUtils {
         // If size less than preferred, replace with scroll view
         double viewW = aView.getWidth();
         double viewH = aView.getHeight();
-        double prefW = aView.getPrefWidth(-1);
-        double prefH = aView.getPrefHeight(viewW);
+        double prefW = aView.getPrefWidthImpl(-1);
+        double prefH = aView.getPrefHeightImpl(viewW);
         if (viewW < prefW || viewH < prefH) {
             aView.setOverflow(View.Overflow.Clip);
             runLater(() -> replaceWithScrollView(aView));
