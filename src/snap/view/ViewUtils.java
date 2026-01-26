@@ -612,16 +612,15 @@ public class ViewUtils {
 
         // Handle ViewHost
         if (aView.isGuest()) {
-            ViewHost host = aView.getHost();
-            int ind = host.removeGuest(aView);
-            host.addGuest(newView, ind);
+            ViewHost hostView = aView.getHost();
+            int childIndex = hostView.removeGuest(aView);
+            hostView.addGuest(newView, childIndex);
         }
 
         // Handle ChildView
-        else if (par instanceof ChildView) {
-            ChildView childView = (ChildView) par;
-            int ind = childView.removeChild(aView);
-            childView.addChild(newView, ind);
+        else if (par instanceof ChildView childView) {
+            int childIndex = childView.removeChild(aView);
+            childView.addChild(newView, childIndex);
         }
 
         // Otherwise, complain
@@ -648,23 +647,6 @@ public class ViewUtils {
         double viewH = aView.getHeight();
         double prefW = aView.getPrefWidthImpl(-1);
         double prefH = aView.getPrefHeightImpl(viewW);
-        if (viewW < prefW || viewH < prefH) {
-            aView.setOverflow(View.Overflow.Clip);
-            runLater(() -> replaceWithScrollView(aView));
-        }
-    }
-
-    /**
-     * Checks the given view to see if it wants a ScrollView (actual size smaller than preferred).
-     * If true, replaces with ScrollView.
-     */
-    private static void checkWantsScrollViewImpl(View aView)
-    {
-        // If size less than preferred, replace with scroll view
-        double viewW = aView.getWidth();
-        double viewH = aView.getHeight();
-        double prefW = aView.getPrefWidth(-1);
-        double prefH = aView.getPrefHeight(viewW);
         if (viewW < prefW || viewH < prefH) {
             aView.setOverflow(View.Overflow.Clip);
             runLater(() -> replaceWithScrollView(aView));

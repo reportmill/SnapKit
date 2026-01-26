@@ -63,12 +63,12 @@ public class BoxViewLayout<T extends View> extends PracticalLayout<T> {
 
         // Get parent bounds for insets (just return if empty)
         Insets borderInsets = getBorderInsets();
-        Insets pad = getPadding();
-        Insets marg = child.getMargin();
-        double areaX = borderInsets.left + Math.max(pad.left, marg.left);
-        double areaY = borderInsets.top + Math.max(pad.top, marg.top);
-        double areaW = Math.max(viewW - borderInsets.right - Math.max(pad.right, marg.right) - areaX, 0);
-        double areaH = Math.max(viewH - borderInsets.bottom - Math.max(pad.bottom, marg.bottom) - areaY, 0);
+        Insets padding = getPadding();
+        Insets childMargin = child.getMargin();
+        double areaX = borderInsets.left + Math.max(padding.left, childMargin.left);
+        double areaY = borderInsets.top + Math.max(padding.top, childMargin.top);
+        double areaW = Math.max(viewW - borderInsets.right - Math.max(padding.right, childMargin.right) - areaX, 0);
+        double areaH = Math.max(viewH - borderInsets.bottom - Math.max(padding.bottom, childMargin.bottom) - areaY, 0);
 
         // Get content width
         double childW = areaW;
