@@ -29,11 +29,9 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
             return _prefW;
 
         // Perform layout with given height
-        double oldW = width, oldH = height;
         double prefH = aH > 0 ? aH : _view.isPrefHeightSet() ? _view.getPrefHeight() : -1;
         setSize(-1, prefH);
         layoutViewLayout();
-        width = oldW; height = oldH;
 
         // Get pref width/height and return
         _prefW = getLayoutPrefWidth(aH);
@@ -50,11 +48,9 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
             return _prefH;
 
         // Perform layout with given width
-        double oldW = width, oldH = height;
         double prefW = aW > 0 ? aW : _view.isPrefWidthSet() ? _view.getPrefWidth() : -1;
         setSize(prefW, -1);
         layoutViewLayout();
-        width = oldW; height = oldH;
 
         // Get pref height/width and return
         _prefH = getLayoutPrefHeight(prefW);
