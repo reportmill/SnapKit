@@ -77,7 +77,7 @@ public class RadioButton extends ToggleButton {
      * Override to return row layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()  { return new RowViewLayout<>(this, false); }
+    protected ViewLayout getViewLayoutImpl()  { return new RowViewLayout(this, false); }
 
     /**
      * Initialize Props. Override to provide custom defaults.

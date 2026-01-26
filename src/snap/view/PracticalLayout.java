@@ -7,7 +7,7 @@ import snap.geom.Insets;
 /**
  * A base layout where subclasses only need to implement layoutViewLayout and pref sizes will be calculated from that.
  */
-public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
+public abstract class PracticalLayout extends ViewLayout {
 
     // The last calculated pref width and height
     private double _prefW = -1, _prefH = -1;
@@ -94,7 +94,7 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
         // Get info
         Insets parentPadding = getPadding();
         Insets borderInsets = getBorderInsets();
-        ViewLayout<?> lastChild = getLastChild();
+        ViewLayout lastChild = getLastChild();
         Insets lastChildMargin = lastChild != null ? lastChild.getMargin() : Insets.EMPTY;
 
         // Return LastChildMaxX plus right margin plus border right
@@ -111,7 +111,7 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
         // Get info
         Insets parentPadding = getPadding();
         Insets borderInsets = getBorderInsets();
-        ViewLayout<?> lastChild = getLastChild();
+        ViewLayout lastChild = getLastChild();
         Insets lastChildMargin = lastChild != null ? lastChild.getMargin() : Insets.EMPTY;
 
         // Return LastChildMaxY plus bottom margin plus border bottom
@@ -128,11 +128,11 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
         // Get info
         Insets parentPadding = getPadding();
         Insets borderInsets = getBorderInsets();
-        ViewLayout<?>[] children = getChildren();
+        ViewLayout[] children = getChildren();
         double childrenMaxX = parentPadding.getWidth() + borderInsets.getWidth();
 
         // Iterate over children to get MaxX
-        for (ViewLayout<?> child : children) {
+        for (ViewLayout child : children) {
             double childMaxX = child.getMaxX();
             Insets childMargin = child.getMargin();
             double rightMargin = Math.max(childMargin.right, parentPadding.right);
@@ -151,11 +151,11 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
         // Get info
         Insets parentPadding = getPadding();
         Insets borderInsets = getBorderInsets();
-        ViewLayout<?>[] children = getChildren();
+        ViewLayout[] children = getChildren();
         double childMaxYAll = parentPadding.getHeight() + borderInsets.getHeight();
 
         // Iterate over children to get MaxY
-        for (ViewLayout<?> child : children) {
+        for (ViewLayout child : children) {
             double childMaxY = child.getMaxY();
             Insets childMargin = child.getMargin();
             double bottomMargin = Math.max(childMargin.bottom, parentPadding.bottom);

@@ -556,9 +556,9 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      * Override to return box layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()
+    protected ViewLayout getViewLayoutImpl()
     {
-        return new BoxViewLayout<>(this, _splitView, true, true);
+        return new BoxViewLayout(this, _splitView, true, true);
     }
 
     /**

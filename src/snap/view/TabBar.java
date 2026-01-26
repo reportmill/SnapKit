@@ -290,9 +290,9 @@ public class TabBar extends ParentView implements Selectable<Tab> {
      * Override to return box layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()
+    protected ViewLayout getViewLayoutImpl()
     {
-        return new BoxViewLayout<>(this, _tabsBox, true, true);
+        return new BoxViewLayout(this, _tabsBox, true, true);
     }
 
     /**

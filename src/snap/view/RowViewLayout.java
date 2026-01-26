@@ -9,7 +9,7 @@ import snap.util.MathUtils;
 /**
  * A ViewLayout subclass to layout child views horizontally, from left to right.
  */
-public class RowViewLayout<T extends View> extends PracticalLayout<T> {
+public class RowViewLayout extends PracticalLayout {
 
     // Whether to wrap closely around children and project their margins
     private boolean _hugging;
@@ -65,7 +65,7 @@ public class RowViewLayout<T extends View> extends PracticalLayout<T> {
 
         // If FillWidth and no children grow, make last child grow
         if (isFillWidth() && getGrowWidthCount() == 0) {
-            ViewLayout<?> lastChild = getChildren()[getChildCount() - 1];
+            ViewLayout lastChild = getChildren()[getChildCount() - 1];
             lastChild.setGrowWidth(true);
             _growWidthCount++;
         }
@@ -81,18 +81,18 @@ public class RowViewLayout<T extends View> extends PracticalLayout<T> {
     private void layoutProxyX()
     {
         // Get parent info
-        ViewLayout<?>[] children = getChildren();
+        ViewLayout[] children = getChildren();
         Insets parentPadding = getPadding();
         double parentSpacing = getSpacing();
         Insets borderInsets = getBorderInsets();
 
         // Loop vars
         double childX = borderInsets.left;
-        ViewLayout<?> lastChild = null;
+        ViewLayout lastChild = null;
         double lastMargin = parentPadding.left;
 
         // Iterate over children to calculate bounds X and Width
-        for (ViewLayout<?> child : children) {
+        for (ViewLayout child : children) {
 
             // Calculate spacing between lastChild and loop child
             Insets childMargin = child.getMargin();
@@ -136,7 +136,7 @@ public class RowViewLayout<T extends View> extends PracticalLayout<T> {
     private void layoutProxyY()
     {
         // Get parent info
-        ViewLayout<?>[] children = getChildren();
+        ViewLayout[] children = getChildren();
         double alignY = getAlignYAsDouble();
         boolean isFillHeight = isFillHeight();
 
@@ -146,7 +146,7 @@ public class RowViewLayout<T extends View> extends PracticalLayout<T> {
         Insets borderInsets = getBorderInsets();
 
         // Iterate over children to calculate/set child Y & Height
-        for (ViewLayout<?> child : children) {
+        for (ViewLayout child : children) {
 
             // Initialize child Y to top margin
             Insets childMarg = child.getMargin();
@@ -212,9 +212,9 @@ public class RowViewLayout<T extends View> extends PracticalLayout<T> {
         int count2 = Math.abs(extra % grow);
 
         // Iterate over children and add their share (plus 1 for some if not evenly divisible by grow)
-        ViewLayout<?>[] children = getChildren();
+        ViewLayout[] children = getChildren();
         for (int i=0, j=0, shiftX = 0, iMax=children.length; i<iMax; i++) {
-            ViewLayout<?> child = children[i];
+            ViewLayout child = children[i];
             if (shiftX != 0)
                 child.setX(child.getX() + shiftX);
             if (child.isGrowWidth()) {
@@ -231,11 +231,11 @@ public class RowViewLayout<T extends View> extends PracticalLayout<T> {
      */
     private void addExtraSpaceX_ToAlign(int extra)
     {
-        ViewLayout<?>[] children = getChildren();
+        ViewLayout[] children = getChildren();
         double alignX = getAlignXAsDouble();
         double shiftX = 0;
 
-        for (ViewLayout<?> child : children) {
+        for (ViewLayout child : children) {
 
             // If child has lean, apply shift
             if (child.getLeanX() != null && extra > 0) {
@@ -268,8 +268,8 @@ public class RowViewLayout<T extends View> extends PracticalLayout<T> {
     private void removeExtraSpaceX_FromLastChild(int extra)
     {
         // Get last child
-        ViewLayout<?>[] children = getChildren();
-        ViewLayout<?> lastChild = children[children.length - 1];
+        ViewLayout[] children = getChildren();
+        ViewLayout lastChild = children[children.length - 1];
 
         // Remove width from last child - probably should iterate to previous children if needed
         double childW = Math.max(lastChild.width + extra, 10);
@@ -302,9 +302,9 @@ public class RowViewLayout<T extends View> extends PracticalLayout<T> {
      */
     private void activateHuggingForRow()
     {
-        ViewLayout<?>[] children = getChildren(); if (children.length == 0) return;
-        ViewLayout<?> firstChild = children[0];
-        ViewLayout<?> lastChild = getLastChild();
+        ViewLayout[] children = getChildren(); if (children.length == 0) return;
+        ViewLayout firstChild = children[0];
+        ViewLayout lastChild = getLastChild();
 
         // Initialize new margin for this row from first/last child
         double marginTop = Math.max(firstChild.getMargin().top, lastChild.getMargin().top);
@@ -318,7 +318,7 @@ public class RowViewLayout<T extends View> extends PracticalLayout<T> {
 
         // Get max top/bottom margins for inner children and reset theirs to zero
         for (int i = 1, iMax = children.length - 1; i < iMax; i++) {
-            ViewLayout<?> child = children[i];
+            ViewLayout child = children[i];
             marginTop = Math.max(marginTop, child.getMargin().top);
             marginBottom = Math.max(marginBottom, child.getMargin().bottom);
             child.setMargin(new Insets(0, child.getMargin().right, 0, child.getMargin().left));

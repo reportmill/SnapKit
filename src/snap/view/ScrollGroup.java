@@ -145,7 +145,7 @@ public class ScrollGroup extends ParentView {
      * Override to return border layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()
+    protected ViewLayout getViewLayoutImpl()
     {
         return new BorderViewLayout(this, _scrollView, _topScrollerCol, null, null, _leftScroller);
     }

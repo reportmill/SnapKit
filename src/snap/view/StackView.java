@@ -20,5 +20,5 @@ public class StackView extends ChildView {
      * Override to return stack layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()  { return new StackViewLayout<>(this); }
+    protected ViewLayout getViewLayoutImpl()  { return new StackViewLayout(this); }
 }

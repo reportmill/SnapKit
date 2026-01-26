@@ -403,7 +403,7 @@ public class Actor extends ParentView {
      * Override to return stack layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()  { return new StackViewLayout<>(this); }
+    protected ViewLayout getViewLayoutImpl()  { return new StackViewLayout(this); }
 
     /**
      * Override to archive X/Y and ImageName.

@@ -7,7 +7,7 @@ import snap.geom.Insets;
 /**
  * A layout that can layout content in the manner of BoxView for any View.
  */
-public class BoxViewLayout<T extends View> extends PracticalLayout<T> {
+public class BoxViewLayout extends PracticalLayout {
 
     /**
      * Constructor for given parent view.
@@ -59,7 +59,7 @@ public class BoxViewLayout<T extends View> extends PracticalLayout<T> {
         boolean isFillHeight = isFillHeight();
 
         // Get child
-        ViewLayout<?> child = getContent(); if (child == null) return;
+        ViewLayout child = getContent(); if (child == null) return;
 
         // Get parent bounds for insets (just return if empty)
         Insets borderInsets = getBorderInsets();

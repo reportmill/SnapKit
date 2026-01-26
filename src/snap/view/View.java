@@ -138,7 +138,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     private Map<String,Object> _metadata = Collections.EMPTY_MAP;
 
     // An object to help with layout and hold cached layout info
-    private ViewLayout<?> _viewLayout;
+    private ViewLayout _viewLayout;
 
     // The class name to use at runtime (for archival/unarchival use)
     private String _runtimeClassName;
@@ -1749,7 +1749,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        ViewLayout<?> viewLayout = getViewLayout();
+        ViewLayout viewLayout = getViewLayout();
         return viewLayout.getPrefWidth(aH);
     }
 
@@ -1758,7 +1758,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        ViewLayout<?> viewLayout = getViewLayout();
+        ViewLayout viewLayout = getViewLayout();
         return viewLayout.getPrefHeight(aW);
     }
 
@@ -1802,7 +1802,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns a ViewLayout to help with layout and hold cached layout info.
      */
-    public ViewLayout<?> getViewLayout()
+    public ViewLayout getViewLayout()
     {
         if (_viewLayout != null) return _viewLayout;
         return _viewLayout = getViewLayoutImpl();
@@ -1811,14 +1811,14 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Creates a ViewLayout for this View.
      */
-    protected ViewLayout<?> getViewLayoutImpl()  { return new NullLayout(this); }
+    protected ViewLayout getViewLayoutImpl()  { return new NullLayout(this); }
 
     /**
      * Returns the best width for view - accounting for pref/min/max.
      */
     public double getBestWidth(double aH)
     {
-        ViewLayout<?> viewLayout = getViewLayout();
+        ViewLayout viewLayout = getViewLayout();
         return viewLayout.getBestWidth(aH);
     }
 
@@ -1827,7 +1827,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public double getBestHeight(double aW)
     {
-        ViewLayout<?> viewLayout = getViewLayout();
+        ViewLayout viewLayout = getViewLayout();
         return viewLayout.getBestHeight(aW);
     }
 

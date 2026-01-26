@@ -318,10 +318,10 @@ public class SplitView extends ParentView implements ViewHost {
      * Override to return row or column layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()
+    protected ViewLayout getViewLayoutImpl()
     {
-        return isHorizontal() ? new RowViewLayout<>(this, true) :
-            new ColViewLayout<>(this, true);
+        return isHorizontal() ? new RowViewLayout(this, true) :
+            new ColViewLayout(this, true);
     }
 
     /**

@@ -497,7 +497,7 @@ public class ParentView extends View {
      */
     protected void layoutImpl()
     {
-        ViewLayout<?> viewLayout = getViewLayout();
+        ViewLayout viewLayout = getViewLayout();
         viewLayout.layoutView();
     }
 

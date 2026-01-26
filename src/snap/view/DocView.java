@@ -155,7 +155,7 @@ public class DocView extends ParentView {
      * Override to return box layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()  { return new BoxViewLayout<>(this, getPage(), false, false); }
+    protected ViewLayout getViewLayoutImpl()  { return new BoxViewLayout(this, getPage(), false, false); }
 
     /**
      * XML archival deep.

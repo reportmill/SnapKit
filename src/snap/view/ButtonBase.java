@@ -375,11 +375,11 @@ public class ButtonBase extends ParentView {
      * Override to return box layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()
+    protected ViewLayout getViewLayoutImpl()
     {
         // Create layout with Label layout as Content
-        BoxViewLayout<?> viewLayout = new BoxViewLayout<>(this);
-        ViewLayout<?> labelProxy = getLabel().getViewLayout();
+        BoxViewLayout viewLayout = new BoxViewLayout(this);
+        ViewLayout labelProxy = getLabel().getViewLayout();
         viewLayout.setContent(labelProxy);
 
         // If ShowArea, add padding

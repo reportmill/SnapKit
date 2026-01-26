@@ -470,7 +470,7 @@ public class MarkDownView extends ChildView {
      * Override to return Column layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()  { return new ColViewLayout<>(this); }
+    protected ViewLayout getViewLayoutImpl()  { return new ColViewLayout(this); }
 
     /**
      * Adds a text or link node content to a given text area.

@@ -330,7 +330,7 @@ public class CollapseView extends ParentView implements ViewHost {
      * Override to return Column layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()  { return new ColViewLayout<>(this, true); }
+    protected ViewLayout getViewLayoutImpl()  { return new ColViewLayout(this, true); }
 
     /**
      * ViewHost method: Override to return 1 if content is present.

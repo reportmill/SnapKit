@@ -3,7 +3,7 @@ package snap.view;
 /**
  * A layout that just delegates back to the view.
  */
-public class NullLayout extends ViewLayout<View> {
+public class NullLayout extends ViewLayout {
 
     /**
      * Constructor.

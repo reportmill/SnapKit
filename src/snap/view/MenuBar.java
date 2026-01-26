@@ -128,9 +128,9 @@ public class MenuBar extends ParentView {
      * Override to return row layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()
+    protected ViewLayout getViewLayoutImpl()
     {
-        return new RowViewLayout<>(this, true);
+        return new RowViewLayout(this, true);
     }
 
     /**

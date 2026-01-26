@@ -4,7 +4,7 @@ import snap.geom.Insets;
 /**
  * A layout class to layout children stacked on top of each other.
  */
-public class StackViewLayout<T extends View> extends PracticalLayout<T> {
+public class StackViewLayout extends PracticalLayout {
 
     /**
      * Constructor.
@@ -21,7 +21,7 @@ public class StackViewLayout<T extends View> extends PracticalLayout<T> {
     public void layoutViewLayout()
     {
         // Get children (just return if empty)
-        ViewLayout<?>[] children = getChildren();
+        ViewLayout[] children = getChildren();
         if (children.length == 0) return;
 
         // Get parent bounds and insets
@@ -31,7 +31,7 @@ public class StackViewLayout<T extends View> extends PracticalLayout<T> {
         Insets borderInsets = getBorderInsets();
 
         // Layout children
-        for (ViewLayout<?> child : children) {
+        for (ViewLayout child : children) {
 
             // Get child X
             Insets childMargin = child.getMargin();

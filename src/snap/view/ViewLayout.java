@@ -9,16 +9,16 @@ import java.util.List;
 /**
  * This class represents a view for the purpose of layout.
  */
-public abstract class ViewLayout<T extends View> extends Rect {
+public abstract class ViewLayout extends Rect {
 
     // The original view (if available)
-    protected T _view;
+    protected View _view;
 
     // The children
-    private ViewLayout<?>[]  _children;
+    private ViewLayout[] _children;
 
     // The border
-    private Border  _border;
+    private Border _border;
 
     // The margin
     protected Insets  _margin;
@@ -55,14 +55,14 @@ public abstract class ViewLayout<T extends View> extends Rect {
      */
     public ViewLayout(View aView)
     {
-        _view = (T) aView; assert _view != null;
+        _view = aView; assert _view != null;
         x = y = width = height = UNSET_DOUBLE;
     }
 
     /**
      * Returns the view.
      */
-    public T getView()  { return _view; }
+    public View getView()  { return _view; }
 
     /**
      * Returns the x.
@@ -132,7 +132,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     public void setBoundsInClient()
     {
         if (_children != null)
-            for (ViewLayout<?> child : _children)
+            for (ViewLayout child : _children)
                 child.setBoundsInView();
         else setBoundsInView();
     }
@@ -148,16 +148,16 @@ public abstract class ViewLayout<T extends View> extends Rect {
     /**
      * Returns the content.
      */
-    public ViewLayout<?> getContent()
+    public ViewLayout getContent()
     {
-        ViewLayout<?>[] children = getChildren();
+        ViewLayout[] children = getChildren();
         return children.length > 0 ? children[0] : null;
     }
 
     /**
      * Sets the content.
      */
-    public void setContent(ViewLayout<?> aViewLayout)
+    public void setContent(ViewLayout aViewLayout)
     {
         setChildren(aViewLayout != null ? List.of(aViewLayout) : Collections.emptyList());
     }
@@ -170,7 +170,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     /**
      * Returns the children.
      */
-    public ViewLayout<?>[] getChildren()
+    public ViewLayout[] getChildren()
     {
         if (_children != null) return _children;
         ParentView par = (ParentView) _view;
@@ -181,7 +181,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     /**
      * Returns the children.
      */
-    public void setChildren(ViewLayout<?>[] theProxies)
+    public void setChildren(ViewLayout[] theProxies)
     {
         _children = theProxies;
     }
@@ -189,7 +189,7 @@ public abstract class ViewLayout<T extends View> extends Rect {
     /**
      * Returns the children.
      */
-    public void setChildren(List<ViewLayout<?>> theProxies)
+    public void setChildren(List<ViewLayout> theProxies)
     {
         _children = theProxies.toArray(new ViewLayout[0]);
     }
@@ -202,28 +202,28 @@ public abstract class ViewLayout<T extends View> extends Rect {
     /**
      * Returns the last child.
      */
-    public ViewLayout<?> getLastChild()
+    public ViewLayout getLastChild()
     {
-        ViewLayout<?>[] children = getChildren();
+        ViewLayout[] children = getChildren();
         return children.length > 0 ? children[children.length-1] : null;
     }
 
     /**
      * Returns the child for given component class.
      */
-    public <E extends View> ViewLayout<E> getChildForClass(Class<E> aClass)
+    public <E extends View> ViewLayout getChildForClass(Class<E> aClass)
     {
-        ViewLayout<?>[] children = getChildren();
-        return (ViewLayout<E>) ArrayUtils.findMatch(children, child -> aClass.isInstance(child.getView()));
+        ViewLayout[] children = getChildren();
+        return ArrayUtils.findMatch(children, child -> aClass.isInstance(child.getView()));
     }
 
     /**
      * Returns the children for given component class.
      */
-    public <E extends View> ViewLayout<E>[] getChildrenForClass(Class<E> aClass)
+    public <E extends View> ViewLayout[] getChildrenForClass(Class<E> aClass)
     {
-        ViewLayout<?>[] children = getChildren();
-        return (ViewLayout<E>[]) ArrayUtils.filter(children, child -> aClass.isInstance(child.getView()));
+        ViewLayout[] children = getChildren();
+        return ArrayUtils.filter(children, child -> aClass.isInstance(child.getView()));
     }
 
     /**
@@ -460,5 +460,5 @@ public abstract class ViewLayout<T extends View> extends Rect {
     /**
      * Returns the view layout for given view.
      */
-    public static ViewLayout<?> getViewLayout(View aView)  { return aView != null ? aView.getViewLayout() : null; }
+    public static ViewLayout getViewLayout(View aView)  { return aView != null ? aView.getViewLayout() : null; }
 }

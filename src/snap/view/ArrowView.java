@@ -223,7 +223,7 @@ public class ArrowView extends ParentView {
      * Override to return row layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()  { return new RowViewLayout<>(this, false); }
+    protected ViewLayout getViewLayoutImpl()  { return new RowViewLayout(this, false); }
 
     /**
      * Creates an arrow button.

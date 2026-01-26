@@ -8,13 +8,13 @@ import java.util.List;
 /**
  * A layout subclass to layout views along edges (top, bottom, left, right) and center.
  */
-public class BorderViewLayout extends ColViewLayout<View> {
+public class BorderViewLayout extends ColViewLayout {
 
     // The top view
     private View _topView;
 
     // The row layout
-    public RowViewLayout<?> _rowLayout;
+    public RowViewLayout _rowLayout;
 
     /**
      * Constructor for given parent view and border views.
@@ -29,7 +29,7 @@ public class BorderViewLayout extends ColViewLayout<View> {
         _rowLayout = getRowViewLayout(centerView, leftView, rightView);
 
         // Create and add layouts for top/bottom views
-        List<ViewLayout<?>> childLayouts = new ArrayList<>(3);
+        List<ViewLayout> childLayouts = new ArrayList<>(3);
         if (topView != null && topView.isVisible())
             childLayouts.add(topView.getViewLayout());
         childLayouts.add(_rowLayout);
@@ -43,18 +43,18 @@ public class BorderViewLayout extends ColViewLayout<View> {
     /**
      * Creates a row layout for left/center/right views.
      */
-    private static RowViewLayout<?> getRowViewLayout(View centerView, View leftView, View rightView)
+    private static RowViewLayout getRowViewLayout(View centerView, View leftView, View rightView)
     {
         RowView virtualRowView = new RowView();
-        RowViewLayout<?> rowLayout = (RowViewLayout<?>) virtualRowView.getViewLayout();
+        RowViewLayout rowLayout = (RowViewLayout) virtualRowView.getViewLayout();
         rowLayout.setFillHeight(true);
 
         // Create and add layouts for left/center/right views
-        List<ViewLayout<?>> childLayouts = new ArrayList<>(3);
+        List<ViewLayout> childLayouts = new ArrayList<>(3);
         if (leftView != null && leftView.isVisible())
             childLayouts.add(leftView.getViewLayout());
         if (centerView != null && centerView.isVisible()) {
-            ViewLayout<?> centerLayout = centerView.getViewLayout();
+            ViewLayout centerLayout = centerView.getViewLayout();
             centerLayout.setGrowWidth(true);
             centerLayout.setGrowHeight(true);
             childLayouts.add(centerLayout);
@@ -82,7 +82,7 @@ public class BorderViewLayout extends ColViewLayout<View> {
         // If top view is present, adjust Y for row children
         if (_topView != null) {
             double rowY = _topView.getMaxY();
-            for (ViewLayout<?> child : _rowLayout.getChildren())
+            for (ViewLayout child : _rowLayout.getChildren())
                 child._view.setY(rowY);
         }
     }

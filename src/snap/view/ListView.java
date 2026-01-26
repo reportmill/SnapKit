@@ -576,7 +576,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      * Override to return column layout with hook.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()  { return new ColViewLayout<>(this, true); }
+    protected ViewLayout getViewLayoutImpl()  { return new ColViewLayout(this, true); }
 
     /**
      * Resets the list cells for current bounds.
