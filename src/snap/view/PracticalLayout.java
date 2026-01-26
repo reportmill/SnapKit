@@ -36,8 +36,8 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
         width = oldW; height = oldH;
 
         // Get pref width/height and return
-        _prefW = getPrefWidthImpl(aH);
-        _prefH = getPrefHeightImpl(_prefW);
+        _prefW = getLayoutPrefWidth(aH);
+        _prefH = getLayoutPrefHeight(_prefW);
         return _prefW;
     }
 
@@ -57,8 +57,8 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
         width = oldW; height = oldH;
 
         // Get pref height/width and return
-        _prefH = getPrefHeightImpl(prefW);
-        _prefW = getPrefWidthImpl(_prefH);
+        _prefH = getLayoutPrefHeight(prefW);
+        _prefW = getLayoutPrefWidth(_prefH);
         return _prefH;
     }
 
@@ -76,14 +76,14 @@ public abstract class PracticalLayout<T extends View> extends ViewLayout<T> {
     }
 
     /**
-     * Returns preferred width of given parent with given children.
+     * Returns pref width for parent view given current layout of children.
      */
-    protected double getPrefWidthImpl(double aH)  { return getChildrenMaxXWithInsets(); }
+    protected double getLayoutPrefWidth(double aH)  { return getChildrenMaxXWithInsets(); }
 
     /**
-     * Returns preferred height of given parent with given children.
+     * Returns pref height for parent view given current layout of children.
      */
-    protected double getPrefHeightImpl(double aW)  { return getChildrenMaxYWithInsets(); }
+    protected double getLayoutPrefHeight(double aW)  { return getChildrenMaxYWithInsets(); }
 
     /**
      * Performs layout of child layouts.

@@ -35,16 +35,16 @@ public class BoxViewLayout<T extends View> extends PracticalLayout<T> {
     }
 
     /**
-     * Returns preferred width of layout.
+     * Override to optimize to only use last child.
      */
     @Override
-    protected double getPrefWidthImpl(double aH)  { return getLastChildMaxXWithInsets(); }
+    protected double getLayoutPrefWidth(double aH)  { return getLastChildMaxXWithInsets(); }
 
     /**
-     * Returns preferred height of layout.
+     * Override to optimize to only use last child.
      */
     @Override
-    protected double getPrefHeightImpl(double aW)  { return getLastChildMaxYWithInsets(); }
+    protected double getLayoutPrefHeight(double aW)  { return getLastChildMaxYWithInsets(); }
 
     /**
      * Performs Box layout for given parent, child and fill width/height.

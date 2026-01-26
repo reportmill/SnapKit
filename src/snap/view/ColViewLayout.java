@@ -49,10 +49,10 @@ public class ColViewLayout<T extends View> extends PracticalLayout<T> {
     public void setHugging(boolean aValue)  { _hugging = aValue; }
 
     /**
-     * Returns preferred height of given parent proxy using ColView layout.
+     * Override to optimize to only use last child.
      */
     @Override
-    protected double getPrefHeightImpl(double aW)  { return getLastChildMaxYWithInsets(); }
+    protected double getLayoutPrefHeight(double aW)  { return getLastChildMaxYWithInsets(); }
 
     /**
      * Performs layout.

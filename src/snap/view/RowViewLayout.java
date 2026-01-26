@@ -50,10 +50,10 @@ public class RowViewLayout<T extends View> extends PracticalLayout<T> {
     public void setHugging(boolean aValue)  { _hugging = aValue; }
 
     /**
-     * Returns preferred width of given parent proxy using RowView layout.
+     * Override to optimize to only use last child.
      */
     @Override
-    protected double getPrefWidthImpl(double aH)  { return getLastChildMaxXWithInsets(); }
+    protected double getLayoutPrefWidth(double aH)  { return getLastChildMaxXWithInsets(); }
 
     /**
      * Performs layout.
