@@ -11,7 +11,7 @@ Attribute { Name "=" String }
 
 Content { Element* }
 
-Name { "[a-zA-Z0-9_:-]*" }
+Name { "[a-zA-Z_][\w.\-:]*" }
 
 String { "\"[^\"]*\"" }
 
