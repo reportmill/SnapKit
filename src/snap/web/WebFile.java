@@ -716,8 +716,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public static WebFile getFileForPath(String filePath)
     {
-        WebURL url = WebURL.getUrl(filePath);
-        return url != null ? url.getFile() : null;
+        WebURL url = WebURL.createUrl(filePath);
+        return url.getFile();
     }
 
     /**
@@ -725,8 +725,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public static WebFile createFileForPath(String filePath, boolean isDir)
     {
-        WebURL url = WebURL.getUrl(filePath);
-        return url != null ? url.createFile(isDir) : null;
+        WebURL url = WebURL.createUrl(filePath);
+        return url.createFile(isDir);
     }
 
     /**
@@ -743,7 +743,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public static WebFile getFileForJavaFile(File aFile)
     {
-        WebURL fileUrl = WebURL.getUrl(aFile);
-        return fileUrl != null ? fileUrl.getFile() : null;
+        WebURL fileUrl = WebURL.createUrl(aFile);
+        return fileUrl.getFile();
     }
 }
