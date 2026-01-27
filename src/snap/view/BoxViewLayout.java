@@ -7,7 +7,7 @@ import snap.geom.Insets;
 /**
  * A layout that can layout content in the manner of BoxView for any View.
  */
-public class BoxViewLayout extends PracticalLayout {
+public class BoxViewLayout extends EmpiricalLayout {
 
     /**
      * Constructor for given parent view.
@@ -38,13 +38,13 @@ public class BoxViewLayout extends PracticalLayout {
      * Override to optimize to only use last child.
      */
     @Override
-    protected double getLayoutPrefWidth(double aH)  { return getLastChildMaxXWithInsets(); }
+    protected double getLayoutPrefWidth()  { return getLastChildMaxXWithInsets(); }
 
     /**
      * Override to optimize to only use last child.
      */
     @Override
-    protected double getLayoutPrefHeight(double aW)  { return getLastChildMaxYWithInsets(); }
+    protected double getLayoutPrefHeight()  { return getLastChildMaxYWithInsets(); }
 
     /**
      * Performs Box layout for given parent, child and fill width/height.

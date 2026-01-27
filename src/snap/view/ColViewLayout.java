@@ -9,7 +9,7 @@ import snap.util.MathUtils;
 /**
  * A ViewLayout subclass to layout child views vertically, from top to bottom.
  */
-public class ColViewLayout extends PracticalLayout {
+public class ColViewLayout extends EmpiricalLayout {
 
     // Whether to wrap closely around children and project their margins
     private boolean  _hugging;
@@ -52,7 +52,7 @@ public class ColViewLayout extends PracticalLayout {
      * Override to optimize to only use last child.
      */
     @Override
-    protected double getLayoutPrefHeight(double aW)  { return getLastChildMaxYWithInsets(); }
+    protected double getLayoutPrefHeight()  { return getLastChildMaxYWithInsets(); }
 
     /**
      * Performs layout.

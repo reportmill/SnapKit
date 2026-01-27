@@ -9,7 +9,7 @@ import snap.util.MathUtils;
 /**
  * A ViewLayout subclass to layout child views horizontally, from left to right.
  */
-public class RowViewLayout extends PracticalLayout {
+public class RowViewLayout extends EmpiricalLayout {
 
     // Whether to wrap closely around children and project their margins
     private boolean _hugging;
@@ -53,7 +53,7 @@ public class RowViewLayout extends PracticalLayout {
      * Override to optimize to only use last child.
      */
     @Override
-    protected double getLayoutPrefWidth(double aH)  { return getLastChildMaxXWithInsets(); }
+    protected double getLayoutPrefWidth()  { return getLastChildMaxXWithInsets(); }
 
     /**
      * Performs layout.

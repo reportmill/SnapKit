@@ -5,9 +5,9 @@ package snap.view;
 import snap.geom.Insets;
 
 /**
- * A base layout where subclasses only need to implement layoutViewLayout and pref sizes will be calculated from that.
+ * A base layout where subclasses only need to implement the actual layout and pref sizes are calculated from that.
  */
-public abstract class PracticalLayout extends ViewLayout {
+public abstract class EmpiricalLayout extends ViewLayout {
 
     // The last calculated pref width and height
     private double _prefW = -1, _prefH = -1;
@@ -15,7 +15,7 @@ public abstract class PracticalLayout extends ViewLayout {
     /**
      * Constructor for given parent view.
      */
-    public PracticalLayout(View aParent)
+    public EmpiricalLayout(View aParent)
     {
         super(aParent);
     }
@@ -34,8 +34,8 @@ public abstract class PracticalLayout extends ViewLayout {
         layoutViewLayout();
 
         // Get pref width/height and return
-        _prefW = getLayoutPrefWidth(aH);
-        _prefH = getLayoutPrefHeight(_prefW);
+        _prefW = getLayoutPrefWidth();
+        _prefH = getLayoutPrefHeight();
         return _prefW;
     }
 
@@ -53,8 +53,8 @@ public abstract class PracticalLayout extends ViewLayout {
         layoutViewLayout();
 
         // Get pref height/width and return
-        _prefH = getLayoutPrefHeight(prefW);
-        _prefW = getLayoutPrefWidth(_prefH);
+        _prefH = getLayoutPrefHeight();
+        _prefW = getLayoutPrefWidth();
         return _prefH;
     }
 
@@ -74,12 +74,12 @@ public abstract class PracticalLayout extends ViewLayout {
     /**
      * Returns pref width for parent view given current layout of children.
      */
-    protected double getLayoutPrefWidth(double aH)  { return getChildrenMaxXWithInsets(); }
+    protected double getLayoutPrefWidth()  { return getChildrenMaxXWithInsets(); }
 
     /**
      * Returns pref height for parent view given current layout of children.
      */
-    protected double getLayoutPrefHeight(double aW)  { return getChildrenMaxYWithInsets(); }
+    protected double getLayoutPrefHeight()  { return getChildrenMaxYWithInsets(); }
 
     /**
      * Performs layout of child layouts.
