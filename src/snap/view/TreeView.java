@@ -336,7 +336,11 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Expands all tree nodes.
      */
-    public void expandAll()  { for (int i = 0; i< getItems().size(); i++) expandItem(getItems().get(i)); }
+    public void expandAll()
+    {
+        for (int i = 0; i < getItems().size(); i++)
+            expandItem(getItems().get(i));
+    }
 
     /**
      * Expands the given item.
@@ -356,6 +360,15 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
         setItemExpanded(anItem, true);
         setItems(getItems());
         updateItem(anItem);
+    }
+
+    /**
+     * Collapses all tree nodes.
+     */
+    public void collapseAll()
+    {
+        for (int i = 0; i < getItems().size(); i++)
+            collapseItem(getItems().get(i));
     }
 
     /**
@@ -465,7 +478,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
 
         for (int i = index - 1; i >= 0; i--) {
             T item = items.get(i);
-            if (isItemParent(item) && isItemExpanded(item) && ListUtils.contains(getItemChildren(item), anItem))
+            if (isItemParent(item) && isItemExpanded(item) && getItemChildren(item).contains(anItem))
                 return item;
         }
 
