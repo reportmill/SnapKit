@@ -5,6 +5,7 @@ package snap.view;
 import java.util.List;
 import java.util.function.Consumer;
 import snap.geom.Insets;
+import snap.geom.Pos;
 import snap.gfx.*;
 import snap.util.ArrayUtils;
 
@@ -145,47 +146,31 @@ public class TreeCol <T> extends ListView <T> {
         if (item == null || col > 0)
             return;
 
-        // Calculate indent level
-        int indentLevel = tree.getItemParentCount(item);
-        if (!tree.isItemParent(item))
-            indentLevel++;
-
-        // Set cell indent
+        // Calculate indent level and set cell indent
+        int indentLevel = tree.getItemParentCount(item) + 1;
         double indentW = tree.getExpandedImage().getWidth() + BRANCH_IMAGE_PADDING.getWidth();
         aCell.setPadding(0, 2, 0, indentLevel * indentW);
 
         // If item is parent, configure branch image
         if (tree.isItemParent(item)) {
 
-            // Get branch image
-            Image branchImage = tree.isItemExpanded(item) ? tree.getExpandedImage() : tree.getCollapsedImage();
-
             // If branch image view already present, update image and return
             ImageView branchImageView = (ImageView) aCell.getChildForName("BranchImageView");
             if (branchImageView != null) {
-                branchImageView.setImage(branchImage);
+                branchImageView.setImage(tree.isItemExpanded(item) ? tree.getExpandedImage() : tree.getCollapsedImage());
                 return;
             }
 
             // Create branch image view
+            Image branchImage = tree.isItemExpanded(item) ? tree.getExpandedImage() : tree.getCollapsedImage();
             branchImageView = new ImageView(branchImage);
             branchImageView.setName("BranchImageView");
+            branchImageView.setMargin(0, 0, 0, (indentLevel - 1) * indentW);
             branchImageView.setPadding(BRANCH_IMAGE_PADDING);
+            branchImageView.setLean(Pos.CENTER_LEFT);
+            branchImageView.setManaged(false);
             branchImageView.addEventHandler(e -> handleBranchImageViewMousePress(e, item), MousePress);
-
-            // If no cell graphic, just set branch image as cell graphic
-            View cellGraphic = aCell.getGraphic();
-            if (cellGraphic == null)
-                aCell.setGraphic(branchImageView);
-
-            // If both a branch image and a cell graphic, wrap in a label
-            else {
-                Label branchImageAndCellGraphicLabel = new Label();
-                branchImageAndCellGraphicLabel.setGraphic(branchImageView);
-                branchImageAndCellGraphicLabel.setGraphicAfter(cellGraphic);
-                branchImageAndCellGraphicLabel.setSpacing(0);
-                aCell.setGraphic(branchImageAndCellGraphicLabel);
-            }
+            ViewUtils.addChild(aCell, branchImageView);
         }
     }
 
