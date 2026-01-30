@@ -109,7 +109,7 @@ public class SwitchView extends ChildView implements Selectable<View> {
     /**
      * Override to return preferred width of content.
      */
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         Insets ins = getInsetsAll();
         View child = getSelectedPane();
@@ -120,7 +120,7 @@ public class SwitchView extends ChildView implements Selectable<View> {
     /**
      * Override to return preferred height of content.
      */
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         Insets ins = getInsetsAll();
         View child = getSelectedPane();

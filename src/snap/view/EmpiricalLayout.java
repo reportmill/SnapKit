@@ -23,7 +23,7 @@ public abstract class EmpiricalLayout extends ViewLayout {
     /**
      * Returns preferred width of layout.
      */
-    public double getPrefWidth(double aH)
+    public double computePrefWidth(double aH)
     {
         if (_prefW >= 0 && (aH < 0 || aH == _prefH))
             return _prefW;
@@ -42,7 +42,7 @@ public abstract class EmpiricalLayout extends ViewLayout {
     /**
      * Returns preferred height of layout.
      */
-    public double getPrefHeight(double aW)
+    public double computePrefHeight(double aW)
     {
         if (_prefH >= 0 && (aW < 0 || aW == _prefW))
             return _prefH;

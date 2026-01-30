@@ -283,7 +283,7 @@ public class StringView extends View implements Cloneable {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         Insets ins = getInsetsAll();
         double textW = getTextWidth();
@@ -293,7 +293,7 @@ public class StringView extends View implements Cloneable {
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         Insets ins = getInsetsAll();
         double textH = getTextHeight();

@@ -281,7 +281,7 @@ public class ImageView extends View {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         // Get insets (just return insets width if no image)
         Insets ins = getInsetsAll();
@@ -307,7 +307,7 @@ public class ImageView extends View {
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         // Get insets (just return insets height if no image)
         Insets ins = getInsetsAll();

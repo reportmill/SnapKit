@@ -468,12 +468,12 @@ public class ColorPanel extends ViewOwner {
         /**
          * Override to provide size.
          */
-        protected double getPrefWidthImpl(double aH)
+        protected double computePrefWidth(double aH)
         {
             return _image != null ? _image.getWidth() : 0;
         }
 
-        protected double getPrefHeightImpl(double aW)
+        protected double computePrefHeight(double aW)
         {
             return _image != null ? _image.getHeight() : 0;
         }

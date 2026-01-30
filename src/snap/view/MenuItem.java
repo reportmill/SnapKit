@@ -170,9 +170,9 @@ public class MenuItem extends ButtonBase implements Cloneable {
      * Returns the preferred height.
      */
     @Override
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
-        return isSeparator() ? 3 : super.getPrefHeightImpl(aW);
+        return isSeparator() ? 3 : super.computePrefHeight(aW);
     }
 
     /**

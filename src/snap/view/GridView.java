@@ -116,7 +116,7 @@ public class GridView extends ChildView {
      * Override to use grid layout.
      */
     @Override
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         // Get number of columns and single cell width
         int colCount = getChildCountManaged();
@@ -132,7 +132,7 @@ public class GridView extends ChildView {
      * Override to use grid layout.
      */
     @Override
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         // Get number of rows and single cell height
         int colCount = aW >= 0 ? getColCountForWidth(aW) : Integer.MAX_VALUE;

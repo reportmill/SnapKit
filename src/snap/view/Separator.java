@@ -61,7 +61,7 @@ public class Separator extends View {
     /**
      * Override to return default preferred width.
      */
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         return isVertical()? 3 : 0;
     }
@@ -69,7 +69,7 @@ public class Separator extends View {
     /**
      * Override to return default preferred height.
      */
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         return isHorizontal()? 3 : 0;
     }

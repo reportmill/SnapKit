@@ -125,7 +125,7 @@ public class PathView extends View {
     /**
      * Calculates the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         Shape path = getPath();
         Rect pathBounds = path.getBounds();
@@ -136,7 +136,7 @@ public class PathView extends View {
     /**
      * Calculates the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         Shape path = getPath();
         Rect pathBounds = path.getBounds();

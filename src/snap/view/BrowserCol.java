@@ -70,5 +70,5 @@ public class BrowserCol <T> extends ListView <T> {
     /**
      * Override to return Browser.PrefColWidth.
      */
-    protected double getPrefWidthImpl(double aH)  { return _browser.getPrefColWidth(); }
+    protected double computePrefWidth(double aH)  { return _browser.getPrefColWidth(); }
 }

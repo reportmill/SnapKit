@@ -126,7 +126,7 @@ public class ShapeView extends View {
     /**
      * Calculates the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         Insets ins = getInsetsAll();
         return ins.left + getShape().getBounds().getMaxX() + ins.right;
@@ -135,7 +135,7 @@ public class ShapeView extends View {
     /**
      * Calculates the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         Insets ins = getInsetsAll();
         return ins.top + getShape().getBounds().getMaxY() + ins.bottom;

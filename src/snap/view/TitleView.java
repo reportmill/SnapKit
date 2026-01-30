@@ -330,12 +330,12 @@ public class TitleView extends ParentView implements ViewHost {
     /**
      * Override to return preferred width of content.
      */
-    protected double getPrefWidthImpl(double aH)  { return _titleArea.getPrefWidth(aH); }
+    protected double computePrefWidth(double aH)  { return _titleArea.getPrefWidth(aH); }
 
     /**
      * Override to return preferred height of content.
      */
-    protected double getPrefHeightImpl(double aW)  { return _titleArea.getPrefHeight(aW); }
+    protected double computePrefHeight(double aW)  { return _titleArea.getPrefHeight(aW); }
 
     /**
      * Override to layout content.
@@ -503,7 +503,7 @@ public class TitleView extends ParentView implements ViewHost {
         public boolean isContentShowing()  { return _titleView.isContentShowing(); }
 
         /** Override to return preferred width of TitleArea. */
-        protected double getPrefWidthImpl(double aH)
+        protected double computePrefWidth(double aH)
         {
             // Get max of Content.PrefWidth and TitleArea.PrefWidth
             double prefWidth = _label.getPrefWidth();
@@ -517,7 +517,7 @@ public class TitleView extends ParentView implements ViewHost {
         }
 
         /** Override to return preferred height of TitleArea. */
-        protected double getPrefHeightImpl(double aW)
+        protected double computePrefHeight(double aW)
         {
             // Get combined of Content.PrefHeight and Label.PrefHeight
             double prefH = _label.getPrefHeight();
@@ -650,7 +650,7 @@ public class TitleView extends ParentView implements ViewHost {
         }
 
         /** Override to return preferred width of TitleArea. */
-        protected double getPrefWidthImpl(double aH)
+        protected double computePrefWidth(double aH)
         {
             // Get Button.PrefWidth and Content.PrefWidth
             double buttonW = _button.getPrefWidth();
@@ -666,7 +666,7 @@ public class TitleView extends ParentView implements ViewHost {
         }
 
         /** Override to return preferred height of TitleArea. */
-        protected double getPrefHeightImpl(double aW)
+        protected double computePrefHeight(double aW)
         {
             // Get Button.PrefWidth and Content.PrefWidth
             double buttonH = _button.getPrefHeight();

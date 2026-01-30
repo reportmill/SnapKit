@@ -437,14 +437,14 @@ public abstract class ViewLayout extends Rect {
     public double getLeanYAsDouble()  { return ViewUtils.getAlignY(getLeanY()); }
 
     /**
-     * Returns preferred width of layout.
+     * Computes the preferred width of this layout.
      */
-    public abstract double getPrefWidth(double aH);
+    public abstract double computePrefWidth(double aH);
 
     /**
-     * Returns preferred height of layout.
+     * Computes the preferred height of this layout.
      */
-    public abstract double getPrefHeight(double aW);
+    public abstract double computePrefHeight(double aW);
 
     /**
      * Performs layout of child views.

@@ -70,7 +70,7 @@ public class ScaleBox extends BoxView {
      * Returns preferred width of layout.
      */
     @Override
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         // If scaling and value provided, return value by aspect
         if (aH > 0) {
@@ -79,14 +79,14 @@ public class ScaleBox extends BoxView {
         }
 
         // Do normal version
-        return super.getPrefWidthImpl(aH);
+        return super.computePrefWidth(aH);
     }
 
     /**
      * Returns preferred height of layout.
      */
     @Override
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         // If scaling and value provided, return value by aspect
         if (aW > 0) {
@@ -95,7 +95,7 @@ public class ScaleBox extends BoxView {
         }
 
         // Do normal version
-        return super.getPrefHeightImpl(aW);
+        return super.computePrefHeight(aW);
     }
 
     /**

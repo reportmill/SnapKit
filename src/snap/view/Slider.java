@@ -101,7 +101,7 @@ public class Slider extends View {
     /**
      * Calculates the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         return isHorizontal() ? 100 : (SIZE + 4);
     }
@@ -109,7 +109,7 @@ public class Slider extends View {
     /**
      * Calculates the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         return isVertical() ? 100 : (SIZE + 4);
     }

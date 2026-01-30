@@ -383,7 +383,7 @@ public class Scroller extends ParentView implements ViewHost {
     /**
      * Calculates the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         Insets ins = getInsetsAll();
         double prefW = _content != null ? _content.getBestWidth(aH) : 0;
@@ -393,7 +393,7 @@ public class Scroller extends ParentView implements ViewHost {
     /**
      * Calculates the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         Insets ins = getInsetsAll();
         double prefH = _content != null ? _content.getBestHeight(aW) : 0;

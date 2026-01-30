@@ -14,10 +14,10 @@ public class NullLayout extends ViewLayout {
     }
 
     @Override
-    public double getPrefWidth(double aH)  { return 0; }
+    public double computePrefWidth(double aH)  { return 0; }
 
     @Override
-    public double getPrefHeight(double aW)  { return 0; }
+    public double computePrefHeight(double aW)  { return 0; }
 
     @Override
     public void layoutView()  { }

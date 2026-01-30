@@ -367,12 +367,12 @@ public class GradientStopPicker extends ParentView {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return 180; }
+    protected double computePrefWidth(double aH)  { return 180; }
 
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)  { return 62; }
+    protected double computePrefHeight(double aW)  { return 62; }
 
     /**
      * Override to reset knobs and such.

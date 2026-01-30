@@ -495,7 +495,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     /**
      * PreferredSize.
      */
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         Insets ins = getInsetsAll();
         double prefW = getPrefColCount() * getPrefColWidth();
@@ -505,7 +505,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         Insets ins = getInsetsAll();
         double prefH = 0;

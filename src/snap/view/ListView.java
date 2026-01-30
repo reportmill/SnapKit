@@ -538,7 +538,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      * Returns the preferred width.
      */
     @Override
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         if (_sampleWidth < 0)
             calcSampleSize();
@@ -549,7 +549,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      * Returns the preferred height.
      */
     @Override
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         double rowH = getRowHeight();
         int itemCount = getItemCount();

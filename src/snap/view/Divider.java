@@ -242,7 +242,7 @@ public class Divider extends View {
      * Override to return pref span.
      */
     @Override
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         return !isVertical() ? 0 : isDisabled() ? 1 : getSpan();
     }
@@ -251,7 +251,7 @@ public class Divider extends View {
      * Override to return pref span.
      */
     @Override
-    protected double getPrefHeightImpl(double aH)
+    protected double computePrefHeight(double aH)
     {
         return isVertical() ? 0 : isDisabled() ? 1 : getSpan();
     }

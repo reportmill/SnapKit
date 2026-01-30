@@ -86,12 +86,12 @@ public class SpringView extends ChildView {
     /**
      * Returns preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return getWidth(); }
+    protected double computePrefWidth(double aH)  { return getWidth(); }
 
     /**
      * Returns preferred height.
      */
-    protected double getPrefHeightImpl(double aW)  { return getHeight(); }
+    protected double computePrefHeight(double aW)  { return getHeight(); }
 
     /**
      * Override to perform layout.

@@ -541,7 +541,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      * Override to return pref row count.
      */
     @Override
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         // If PrefRowCount set, return PrefRowCount * RowHeight
         int prefRowCount = getPrefRowCount();
@@ -549,7 +549,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
             return prefRowCount * getRowHeight() + getInsetsAll().getHeight();
 
         // Do normal version
-        return super.getPrefHeightImpl(aW);
+        return super.computePrefHeight(aW);
     }
 
     /**

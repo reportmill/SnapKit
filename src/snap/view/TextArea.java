@@ -529,7 +529,7 @@ public class TextArea extends ParentView {
     /**
      * Returns the width needed to display all characters.
      */
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         Insets ins = getInsetsAll();
         double prefW = _textAdapter.getPrefWidth();
@@ -539,7 +539,7 @@ public class TextArea extends ParentView {
     /**
      * Returns the height needed to display all characters.
      */
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         Insets ins = getInsetsAll();
         double prefW = aW >= 0 ? aW - ins.getWidth() : aW;

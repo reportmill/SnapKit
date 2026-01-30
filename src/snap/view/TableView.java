@@ -635,7 +635,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      * Override to return row height * item count and account for header.
      */
     @Override
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         Insets ins = getInsetsAll();
         double headerPrefH = isShowHeader() ? _header.getPrefHeight(aW) : 0;

@@ -108,10 +108,10 @@ public class TableCol <T> extends ListView <T> {
     /**
      * Override to account for header (if showing).
      */
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         // Do normal version
-        double prefW = super.getPrefWidthImpl(aH);
+        double prefW = super.computePrefWidth(aH);
 
         // Add Header.PrefWidth
         TableView<T> table = getTable();
