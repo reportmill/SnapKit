@@ -4,7 +4,7 @@
 package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
-
+import snap.geom.Insets;
 import snap.geom.Polygon;
 import snap.gfx.*;
 import snap.props.PropChange;
@@ -26,12 +26,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     
     // Row height
     private int _rowHeight = 20;
-
-    // The Preferred number of rows
-    private int _prefRowCount = -1;
-    
-    // The maximum number of rows
-    private int _maxRowCount = -1;
 
     // The Cell Configure method
     private Consumer <ListCell<T>> _cellConf;
@@ -94,34 +88,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     public void setRowHeight(int aValue)
     {
         firePropChange("RowHeight", _rowHeight, _rowHeight = aValue);
-    }
-
-    /**
-     * Returns the preferred number of rows.
-     */
-    public int getPrefRowCount()  { return _prefRowCount; }
-
-    /**
-     * Sets the preferred number of rows.
-     */
-    public void setPrefRowCount(int aValue)
-    {
-        _prefRowCount = aValue;
-        relayoutParent();
-    }
-
-    /**
-     * Returns the maximum number of rows.
-     */
-    public int getMaxRowCount()  { return _maxRowCount; }
-
-    /**
-     * Sets the maximum number of rows.
-     */
-    public void setMaxRowCount(int aValue)
-    {
-        _maxRowCount = aValue;
-        relayoutParent();
     }
 
     /**
@@ -246,23 +212,23 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      */
     public List <T> getExpandedItems(List <T> theItems)
     {
-        List <T> items = theItems;
-        for (int i = 0; i < items.size(); i++) {
+        List <T> expandedItems = theItems;
+        for (int i = 0; i < expandedItems.size(); i++) {
 
             // If item not expanded just continue
-            T item = items.get(i);
+            T item = expandedItems.get(i);
             if (!isItemExpanded(item))
                 continue;
 
             // If we haven't yet created new list, do it now
-            if (items == theItems)
-                items = new ArrayList<>(items);
+            if (expandedItems == theItems)
+                expandedItems = new ArrayList<>(expandedItems);
 
-            // Remove successive items decended from current item
-            for (int j = i + 1, jMax = items.size(); j < jMax; j++) {
-                T next = items.get(i + 1);
+            // Remove successive items descended from current item
+            while (i + 1 < expandedItems.size()) {
+                T next = expandedItems.get(i + 1);
                 if (isItemAncestor(next,item))
-                    items.remove(i + 1);
+                    expandedItems.remove(i + 1);
                 else break;
             }
 
@@ -274,12 +240,11 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
 
             // Get item children and add after item
             List<T> childItems = getItemChildren(item);
-            for (int j = 0; j < childItems.size(); j++)
-                items.add(i + j + 1, childItems.get(j));
+            expandedItems.addAll(i + 1, childItems);
         }
 
-        // Return items
-        return items;
+        // Return
+        return expandedItems;
     }
 
     /**
@@ -543,13 +508,10 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     @Override
     protected double computePrefHeight(double aW)
     {
-        // If PrefRowCount set, return PrefRowCount * RowHeight
-        int prefRowCount = getPrefRowCount();
-        if (prefRowCount > 0)
-            return prefRowCount * getRowHeight() + getInsetsAll().getHeight();
-
-        // Do normal version
-        return super.computePrefHeight(aW);
+        double rowH = getRowHeight();
+        int itemCount = getItems().size();
+        Insets insets = getInsetsAll();
+        return rowH * itemCount + insets.getHeight();
     }
 
     /**
@@ -572,19 +534,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     protected ViewLayout getViewLayoutImpl()
     {
         return new BoxViewLayout(this, _splitView, true, true);
-    }
-
-    /**
-     * Returns the maximum height.
-     */
-    public double getMaxHeight()
-    {
-        // If MaxRowCount set, return MaxRowCount*RowHeight
-        if (getMaxRowCount() > 0)
-            return getMaxRowCount() * getRowHeight() + getInsetsAll().getHeight();
-
-        // Return normal version
-        return super.getMaxHeight();
     }
 
     /**
