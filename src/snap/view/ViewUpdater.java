@@ -14,7 +14,7 @@ public class ViewUpdater {
     private WindowView  _win;
     
     // The RootView
-    private RootView  _rview;
+    private RootView _rootView;
 
     // A set of Runnables to be called at beginning of update
     private Set <Runnable>  _runBefores = Collections.synchronizedSet(new HashSet<>());
@@ -57,7 +57,7 @@ public class ViewUpdater {
     public ViewUpdater(WindowView aWin)
     {
         _win = aWin;
-        _rview = _win.getRootView();
+        _rootView = _win.getRootView();
     }
 
     /**
@@ -162,7 +162,7 @@ public class ViewUpdater {
         }
 
         // Layout all views that need it
-        _rview.layoutDeep();
+        _rootView.layoutDeep();
 
         // Get composite repaint rect from all repaint views
         Rect rect = getRepaintRect();
@@ -185,7 +185,7 @@ public class ViewUpdater {
 
             // If ClearFlash, register for proper repaint to clear highlight
             if (_clearFlash)
-                ViewUtils.runDelayed(() -> _rview.repaint(rect), 10);
+                ViewUtils.runDelayed(() -> _rootView.repaint(rect), 10);
         }
     }
 
@@ -206,7 +206,7 @@ public class ViewUpdater {
 
             // Clip to rect, clear background
             aPntr.clip(aRect);
-            if (_rview.getFill() == null)
+            if (_rootView.getFill() == null)
                 aPntr.clearRect(aRect.x, aRect.y, aRect.width, aRect.height);
 
             // Paint views
@@ -214,14 +214,14 @@ public class ViewUpdater {
                 paintFrameRate(aPntr);
             else if (_paintDebug)
                 paintDebug(aPntr, aRect);
-            else _rview.paintAll(aPntr);
+            else _rootView.paintAll(aPntr);
 
             // If paint was called outside of paintLater (maybe Window.show() or resize), repaint all
             if (!_painting && !_paintFrameRateText) {
                 for (View v : _repaintViews)
                     v._repaintRect = null;
                 _repaintViews.clear();
-                _rview.repaint();
+                _rootView.repaint();
             }
         }
 
@@ -253,7 +253,7 @@ public class ViewUpdater {
     {
         // If ClearFlash, pause for a moment, paint and return
         if (_clearFlash) {
-            _rview.paintAll(aPntr);
+            _rootView.paintAll(aPntr);
             _clearFlash = false;
             return;
         }
@@ -280,7 +280,7 @@ public class ViewUpdater {
         for (View view : views) {
 
             // If view no longer in hierarchy or has no Repaint rect, just continue
-            if (view.getRootView() != _rview || !view.isVisible())
+            if (view.getRootView() != _rootView || !view.isVisible())
                 continue;
 
             // Get view repaint rect - just continue if not set
@@ -301,8 +301,8 @@ public class ViewUpdater {
                 continue;
 
             // Transform to root coords
-            if (view != _rview)
-                viewPaintRectClipped = view.localToParent(viewPaintRectClipped, _rview).getBounds();
+            if (view != _rootView)
+                viewPaintRectClipped = view.localToParent(viewPaintRectClipped, _rootView).getBounds();
 
             // Combine
             if (totalRect == null)
@@ -318,14 +318,14 @@ public class ViewUpdater {
             totalRect.x = 0;
         if (totalRect.y < 0)
             totalRect.y = 0;
-        if (totalRect.width > _rview.getWidth())
-            totalRect.width = _rview.getWidth();
-        if (totalRect.height > _rview.getHeight())
-            totalRect.height = _rview.getHeight();
+        if (totalRect.width > _rootView.getWidth())
+            totalRect.width = _rootView.getWidth();
+        if (totalRect.height > _rootView.getHeight())
+            totalRect.height = _rootView.getHeight();
 
         // Give listener a chance to modify rect
         if (_lsnr != null)
-            totalRect = _lsnr.updaterWillPaint(_rview, totalRect);
+            totalRect = _lsnr.updaterWillPaint(_rootView, totalRect);
 
         // Return rect
         return totalRect;
@@ -438,8 +438,8 @@ public class ViewUpdater {
      */
     private Rect getFrameRateTextRect()
     {
-        double rectX = _rview.getWidth() - 50;
-        double rectY = _rview.getHeight() - 20;
+        double rectX = _rootView.getWidth() - 50;
+        double rectY = _rootView.getHeight() - 20;
         return new Rect(rectX, rectY, 48, 18);
     }
 

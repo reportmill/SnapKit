@@ -640,11 +640,6 @@ public class WindowView extends ParentView {
     public WindowView getWindow()  { return this; }
 
     /**
-     * Override to do layout immediately.
-     */
-    public void relayout()  { layout(); }
-
-    /**
      * Override to change to root view.
      */
     public void repaint(double aX, double aY, double aW, double aH)
