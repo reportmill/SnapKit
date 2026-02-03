@@ -38,7 +38,6 @@ public class ParentView extends View {
 
     // Constants for properties
     public static final String Children_Prop = "Children";
-    public static final String NeedsLayout_Prop = "NeedsLayout";
 
     /**
      * Constructor.
@@ -434,11 +433,6 @@ public class ParentView extends View {
     }
 
     /**
-     * Override to really request layout from RootView.
-     */
-    public void relayout()  { setNeedsLayout(true); }
-
-    /**
      * Returns whether needs layout.
      */
     public boolean isNeedsLayout()  { return _needsLayout; }
@@ -446,10 +440,10 @@ public class ParentView extends View {
     /**
      * Sets whether needs layout.
      */
-    protected void setNeedsLayout(boolean aVal)
+    public void relayout()
     {
         if (_needsLayout || _inLayout) return;
-        firePropChange(NeedsLayout_Prop, _needsLayout, _needsLayout = true);
+        _needsLayout = true;
         ParentView par = getParent();
         if (par != null)
             par.setNeedsLayoutDeep(true);
@@ -471,6 +465,44 @@ public class ParentView extends View {
         ParentView par = getParent();
         if (par != null)
             par.setNeedsLayoutDeep(true);
+    }
+
+    /**
+     * Lays out children deep.
+     */
+    public void layoutDeep()
+    {
+        // Set InLayoutDeep
+        _inLayoutDeep = true;
+
+        // Do layout
+        if (_needsLayout)
+            layout();
+
+        // Do layout deep (several times, if necessary)
+        for (int i = 0; _needsLayoutDeep; i++) {
+            _needsLayoutDeep = false;
+            layoutDeepImpl();
+            if (i == 5) {
+                System.err.println("ParentView.layoutDeep: Too many calls to relayout inside layout");
+                break;
+            }
+        }
+
+        // Clear flags
+        _needsLayout = _needsLayoutDeep = _inLayoutDeep = false;
+    }
+
+    /**
+     * Lays out children deep.
+     */
+    protected void layoutDeepImpl()
+    {
+        for (View child : getChildren())
+            if (child instanceof ParentView parentView) {
+                if (parentView._needsLayout || parentView._needsLayoutDeep)
+                    parentView.layoutDeep();
+            }
     }
 
     /**
@@ -548,45 +580,6 @@ public class ParentView extends View {
             // Set bounds
             child.setBounds(childX, childY, childW, childH);
         }
-    }
-
-    /**
-     * Lays out children deep.
-     */
-    public void layoutDeep()
-    {
-        // Set InLayoutDeep
-        _inLayoutDeep = true;
-
-        // Do layout
-        if (_needsLayout)
-            layout();
-
-        // Do layout deep (several times, if necessary)
-        for (int i = 0; _needsLayoutDeep; i++) {
-            _needsLayoutDeep = false;
-            layoutDeepImpl();
-            if (i == 5) {
-                System.err.println("ParentView.layoutDeep: Too many calls to relayout inside layout");
-                break;
-            }
-        }
-
-        // Clear flags
-        _needsLayout = _needsLayoutDeep = _inLayoutDeep = false;
-    }
-
-    /**
-     * Lays out children deep.
-     */
-    protected void layoutDeepImpl()
-    {
-        for (View child : getChildren())
-            if (child instanceof ParentView) {
-                ParentView par = (ParentView)child;
-                if (par._needsLayout || par._needsLayoutDeep)
-                    par.layoutDeep();
-            }
     }
 
     /**
