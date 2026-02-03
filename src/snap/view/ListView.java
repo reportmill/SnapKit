@@ -280,8 +280,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
             aPad = getCellPaddingDefault();
         if (aPad.equals(_cellPad)) return;
         firePropChange(CellPadding_Prop, _cellPad, _cellPad = aPad);
-        relayout();
-        relayoutParent();
+        updateItems();
     }
 
     /**
@@ -396,8 +395,8 @@ public class ListView <T> extends ParentView implements Selectable<T> {
             _updateItems.add(anItem);
         }
 
-        // Relayout
-        relayout();
+        // Reset cells
+        resetCellsForCurrentBounds();
     }
 
     /**
@@ -432,18 +431,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         T item = anIndex >= 0 && anIndex < getItemCount() ? getItem(anIndex) : null;
         if (item != null)
             updateItem(item);
-    }
-
-    /**
-     * Updates item at index (required to be in visible range).
-     */
-    protected void updateCellAt(int anIndex)
-    {
-        int cellIndex = anIndex - _cellStart;
-        ListCell<T> cell = createCell(anIndex);
-        configureCell(cell);
-        removeChild(cellIndex);
-        addChild(cell, cellIndex);
     }
 
     /**
@@ -562,7 +549,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     @Override
     protected void layoutImpl()
     {
-        resetListCellsForCurrentBounds(); //getViewLayout().clearChildren();
         double insTop = _cellStart * getRowHeight();
         getViewLayout().setPadding(Insets.add(getPadding(), insTop, 0, 0, 0));
         super.layoutImpl();
@@ -579,15 +565,29 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     protected ViewLayout getViewLayoutImpl()  { return new ColViewLayout(this, true); }
 
     /**
+     * Reset cells for next paint.
+     */
+    protected void resetCellsForCurrentBounds()
+    {
+        if (_resetCellsRun == null) {
+            ViewUpdater viewUpdater = getUpdater();
+            if (viewUpdater != null)
+                viewUpdater.runBeforeUpdate(_resetCellsRun = this::resetListCellsForCurrentBoundsImpl);
+        }
+    }
+
+    // Runnable to call reset cells
+    private Runnable _resetCellsRun;
+
+    /**
      * Resets the list cells for current bounds.
      */
-    protected void resetListCellsForCurrentBounds()
+    private void resetListCellsForCurrentBoundsImpl()
     {
-        // Get size info
-        double areaW = getWidth();
-        double rowH = getRowHeight();
+        _resetCellsRun = null;
 
         // Update CellStart/CellEnd for visible bounds
+        double rowH = getRowHeight();
         Rect visibleBounds = getVisibleBounds();
         _cellStart = (int) Math.max(visibleBounds.y / rowH, 0);
         _cellEnd = (int) (visibleBounds.getMaxY() / rowH);
@@ -618,13 +618,15 @@ public class ListView <T> extends ParentView implements Selectable<T> {
                     ListCell<T> cell2 = createCell(i);
                     addChild(cell2, cellIndex);
                     configureCell(cell2);
-                    cell.setBounds(0,i * rowH, areaW, rowH);
-                    cell.layout();
                 }
 
                 // Otherwise, if cell isn't point to item or registered for update, update cell
-                else if (item != cell.getItem() || _updateItems.contains(item))
-                    updateCellAt(i);
+                else if (item != cell.getItem() || _updateItems.contains(item)) {
+                    removeChild(cellIndex);
+                    ListCell<T> cell2 = createCell(i);
+                    addChild(cell2, cellIndex);
+                    configureCell(cell2);
+                }
             }
 
             // Otherwise create, configure and add
@@ -632,8 +634,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
                 ListCell<T> cell = createCell(i);
                 addChild(cell);
                 configureCell(cell);
-                cell.setBounds(0,i * rowH, areaW, rowH);
-                cell.layout();
             }
         }
 
@@ -650,7 +650,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Creates a cell for item at index.
      */
-    protected ListCell<T> createCell(int anIndex)
+    private ListCell<T> createCell(int anIndex)
     {
         T item = anIndex >= 0 && anIndex < getItemCount() ? getItem(anIndex) : null;
         ListCell<T> cell = new ListCell<>(this, item, anIndex, getColIndex(), isSelIndex(anIndex));
@@ -877,8 +877,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
 
         // Handle Items_Prop
         else if (propName == PickList.Item_Prop) {
-            relayout();
-            relayoutParent();
+            resetCellsForCurrentBounds();
             repaint();
             _sampleWidth = _sampleHeight = -1;
         }
@@ -892,7 +891,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     {
         if (aValue == getY()) return;
         super.setY(aValue);
-        relayout();
+        resetCellsForCurrentBounds();
     }
 
     /**
@@ -903,7 +902,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     {
         if (aValue == getHeight()) return;
         super.setHeight(aValue);
-        relayout();
+        resetCellsForCurrentBounds();
     }
 
     /**
@@ -922,7 +921,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         int cellStart = (int) Math.max(clipBounds.y / rowH, 0);
         int cellEnd = (int) (clipBounds.getMaxY() / rowH);
         if (cellStart < _cellStart || cellEnd > _cellEnd)
-            getEnv().runLater(() -> relayout());
+            resetCellsForCurrentBounds();
     }
 
     /**
