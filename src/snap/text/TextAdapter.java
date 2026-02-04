@@ -31,9 +31,6 @@ public class TextAdapter extends PropObject {
     // Whether text is editable
     private boolean  _editable;
 
-    // Whether text should wrap lines that overrun bounds
-    private boolean  _wrapLines;
-
     // The text undoer
     private Undoer _undoer = Undoer.DISABLED_UNDOER;
 
@@ -117,7 +114,7 @@ public class TextAdapter extends PropObject {
     {
         if (aView == getView()) return;
         _view = aView;
-        _view.addPropChangeListener(this::handleViewPropChanged);
+        _view.addPropChangeListener(this::handleViewPropChange);
     }
 
     /**
@@ -226,7 +223,7 @@ public class TextAdapter extends PropObject {
     /**
      * Returns whether to wrap lines that overrun bounds.
      */
-    public boolean isWrapLines()  { return _wrapLines; }
+    public boolean isWrapLines()  { return _textLayout.isWrapLines(); }
 
     /**
      * Sets whether to wrap lines that overrun bounds.
@@ -234,10 +231,7 @@ public class TextAdapter extends PropObject {
     public void setWrapLines(boolean aValue)
     {
         // If already set, just return
-        if (aValue == _wrapLines) return;
-
-        // Set and fire prop change
-        firePropChange(WrapLines_Prop, _wrapLines, _wrapLines = aValue);
+        if (aValue == isWrapLines()) return;
 
         // If already TextModelX, just forward to TextModelX
         if (_textModel instanceof TextModelX)
@@ -249,6 +243,9 @@ public class TextAdapter extends PropObject {
             wrappedTextLayout.setWrapLines(true);
             setTextLayout(wrappedTextLayout);
         }
+
+        // Fire prop change
+        firePropChange(WrapLines_Prop, !aValue, aValue);
     }
 
     /**
@@ -1611,18 +1608,18 @@ public class TextAdapter extends PropObject {
     /**
      * Called when view has prop change.
      */
-    private void handleViewPropChanged(PropChange propChange)
+    private void handleViewPropChange(PropChange propChange)
     {
         switch (propChange.getPropName()) {
-            case View.Showing_Prop -> handleViewShowingChanged();
-            case View.Focused_Prop -> handleViewFocusedChanged();
+            case View.Showing_Prop -> handleViewShowingChange();
+            case View.Focused_Prop -> handleViewFocusedChange();
         }
     }
 
     /**
      * Called when View.Showing changes.
      */
-    private void handleViewShowingChanged()
+    private void handleViewShowingChange()
     {
         // If focused, update CaretAnim
         if (_view.isFocused()) {
@@ -1646,7 +1643,7 @@ public class TextAdapter extends PropObject {
         if (_view.isShowing()) {
             _showingWindow = _view.getWindow();
             if (_showingWindow != null) {
-                _windowFocusedChangedLsnr = pc -> handleViewWindowFocusedChanged();
+                _windowFocusedChangedLsnr = pc -> handleViewWindowFocusedChange();
                 _showingWindow.addPropChangeListener(_windowFocusedChangedLsnr, View.Focused_Prop);
             }
         }
@@ -1663,7 +1660,7 @@ public class TextAdapter extends PropObject {
     /**
      * Called when view focus property changes to update caret anim.
      */
-    private void handleViewFocusedChanged()
+    private void handleViewFocusedChange()
     {
         setShowCaret(false);
         updateCaretAnim();
@@ -1672,7 +1669,7 @@ public class TextAdapter extends PropObject {
     /**
      * Called when view window focus property changes to update caret anim.
      */
-    private void handleViewWindowFocusedChanged()
+    private void handleViewWindowFocusedChange()
     {
         ViewUtils.runLater(this::updateCaretAnim);
     }
