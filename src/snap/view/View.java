@@ -2182,7 +2182,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void relayoutParent()
     {
         _viewLayout = null;
-        if (_parent == null || _parent.isNeedsLayout() || _parent.isInLayout())
+        if (_parent == null)
             return;
         _parent.relayout();
         _parent.relayoutParent();

@@ -470,7 +470,7 @@ public class ParentView extends View {
     /**
      * Lays out children deep.
      */
-    public void layoutDeep()
+    protected void layoutDeep()
     {
         // Set InLayoutDeep
         _inLayoutDeep = true;
@@ -483,7 +483,7 @@ public class ParentView extends View {
         for (int i = 0; _needsLayoutDeep; i++) {
             _needsLayoutDeep = false;
             layoutDeepImpl();
-            if (i == 5) {
+            if (i == 4) {
                 System.err.println("ParentView.layoutDeep: Too many calls to relayout inside layout");
                 break;
             }
@@ -496,13 +496,14 @@ public class ParentView extends View {
     /**
      * Lays out children deep.
      */
-    protected void layoutDeepImpl()
+    private void layoutDeepImpl()
     {
-        for (View child : getChildren())
+        for (View child : getChildren()) {
             if (child instanceof ParentView parentView) {
                 if (parentView._needsLayout || parentView._needsLayoutDeep)
                     parentView.layoutDeep();
             }
+        }
     }
 
     /**
@@ -521,7 +522,7 @@ public class ParentView extends View {
             layoutImpl();
             layoutFloatingViews();
         }
-        _inLayout = false;
+        _needsLayout = _inLayout = false;
     }
 
     /**
