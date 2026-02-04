@@ -89,13 +89,7 @@ public class ParentView extends View {
 
         // Add child to children list and set child's parent to this view
         aChild.setParent(this);
-
-        // Add child to Children list
         _children.addView(aChild, anIndex);
-        relayout();
-        relayoutParent();
-        repaint();
-        setNeedsLayoutDeep(true);
 
         // If this view has child prop listeners, add to this child as well
         if (_childPCL != null) {
@@ -105,6 +99,10 @@ public class ParentView extends View {
 
         // Fire property change
         firePropChange(Children_Prop, null, aChild, anIndex);
+        relayout();
+        relayoutParent();
+        setNeedsLayoutDeep(true);
+        repaint();
     }
 
     /**
@@ -427,9 +425,9 @@ public class ParentView extends View {
     {
         if (_needsRepaintDeep) return;
         _needsRepaintDeep = true;
-        ParentView par = getParent();
-        if (par != null)
-            par.setNeedsRepaintDeep(true);
+        ParentView parent = getParent();
+        if (parent != null)
+            parent.setNeedsRepaintDeep(true);
     }
 
     /**
@@ -444,9 +442,9 @@ public class ParentView extends View {
     {
         if (_needsLayout || _inLayout) return;
         _needsLayout = true;
-        ParentView par = getParent();
-        if (par != null)
-            par.setNeedsLayoutDeep(true);
+        ParentView parent = getParent();
+        if (parent != null)
+            parent.setNeedsLayoutDeep(true);
     }
 
     /**
@@ -461,10 +459,11 @@ public class ParentView extends View {
     {
         if (_needsLayoutDeep) return;
         _needsLayoutDeep = true;
-        if (_inLayoutDeep) return;
-        ParentView par = getParent();
-        if (par != null)
-            par.setNeedsLayoutDeep(true);
+        if (_inLayoutDeep)
+            return;
+        ParentView parent = getParent();
+        if (parent != null)
+            parent.setNeedsLayoutDeep(true);
     }
 
     /**
