@@ -198,6 +198,15 @@ public class TextLine implements CharSequenceX, Cloneable {
         // If empty range, just return
         if (anEnd == aStart) return;
 
+        // Handle remove all
+        if (aStart == 0 && anEnd == length()) {
+            _chars = "";
+            for (int i = getRunCount() - 1; i > 0; i--) removeRun(i);
+            getRun(0).addLength(-anEnd);
+            updateText();
+            return;
+        }
+
         // Make sure chars are StringBuilder
         if (!(_chars instanceof StringBuilder))
             _chars = new StringBuilder(_chars);
