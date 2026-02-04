@@ -667,19 +667,19 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         // Configure basic fills
         configureCellFills(aCell);
 
-        // If text function set, call text function and set cell text
-        T item = aCell.getItem();
-        if (_itemTextFunc != null && item != null)
-            aCell.setText(_itemTextFunc.apply(item));
-
         // If cell configure set, call it
         Consumer<ListCell<T>> cellConfigure = getCellConfigure();
         if (cellConfigure != null)
             cellConfigure.accept(aCell);
 
-        // Otherwise if no text function or cell configure, set cell text to item string
-        if (_itemTextFunc == null && cellConfigure == null && item != null)
-            aCell.setText(item.toString());
+        // Otherwise use item text function or item string
+        else {
+            T item = aCell.getItem();
+            if (item != null) {
+                String itemText = _itemTextFunc != null ? _itemTextFunc.apply(item) : item.toString();
+                aCell.setText(itemText);
+            }
+        }
     }
 
     /**

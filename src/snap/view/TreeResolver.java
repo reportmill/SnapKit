@@ -31,11 +31,6 @@ public abstract class TreeResolver <T> {
     public String getText(T anItem)  { return anItem.toString(); }
 
     /**
-     * Returns the text to be used for given item in given column.
-     */
-    public String getText(T anItem, int aCol)  { return getText(anItem); }
-
-    /**
      * Return the image to be used for given item.
      */
     public Image getImage(T anItem)  { return null; }

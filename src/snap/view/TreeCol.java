@@ -118,32 +118,39 @@ public class TreeCol <T> extends ListView <T> {
     /**
      * Override to add branch icons.
      */
+    @Override
     protected void configureCell(ListCell <T> aCell)
     {
-        // Get tree, column index and cell item
-        TreeView <T> tree = getTree();
-        int col = getColIndex();
-        T item = aCell.getItem();
-
-        // Configure cell text
-        TreeResolver<T> treeResolver = tree.getResolver();
-        String itemText = item != null ? treeResolver.getText(item, col) : null;
-        if (itemText != null)
-            aCell.setText(itemText);
-
-        // Configure cell image
-        Image itemImage = item != null ? treeResolver.getImage(item) : null;
-        if (itemImage != null)
-            aCell.setImage(itemImage);
-
         // Do normal version
         configureCellFills(aCell);
         Consumer<ListCell<T>> cellConfigure = getCellConfigure();
         if (cellConfigure != null)
             cellConfigure.accept(aCell);
 
-        // If no item or not main column, just return
-        if (item == null || col > 0)
+        // Get cell item
+        T item = aCell.getItem();
+        if (item == null)
+            return;
+
+        // Get tree and tree resolver
+        TreeView <T> tree = getTree();
+        TreeResolver<T> treeResolver = tree.getResolver();
+
+        // If no cell configure, configure text (from item text function or tree resolver)
+        if (cellConfigure == null) {
+            var itemTextFunc = getItemTextFunction();
+            String itemText = itemTextFunc != null ? itemTextFunc.apply(item) : treeResolver.getText(item);
+             aCell.setText(itemText);
+        }
+
+        // Configure cell image
+        Image itemImage = treeResolver.getImage(item);
+        if (itemImage != null)
+            aCell.setImage(itemImage);
+
+        // If not main column, just return
+        int col = getColIndex();
+        if (col > 0)
             return;
 
         // Calculate indent level and set cell indent
