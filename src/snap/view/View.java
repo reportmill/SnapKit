@@ -778,7 +778,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Called when parent font changes.
      */
-    protected void parentFontChanged()
+    protected void handleParentFontChange()
     {
         // If Font is explicitly set, just return
         if (isFontSet())
@@ -1206,7 +1206,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // If inherit font, propagate to children
         if (!isFontSet())
-            parentFontChanged();
+            handleParentFontChange();
     }
 
     /**
@@ -2182,10 +2182,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void relayoutParent()
     {
         _viewLayout = null;
-        ParentView par = getParent();
-        if (par == null) return;
-        par.relayout();
-        par.relayoutParent();
+        if (_parent == null || _parent.isNeedsLayout() || _parent.isInLayout())
+            return;
+        _parent.relayout();
+        _parent.relayoutParent();
     }
 
     /**

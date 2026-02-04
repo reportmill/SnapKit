@@ -446,10 +446,10 @@ public class StringView extends View implements Cloneable {
      * Override to update TextRun.
      */
     @Override
-    protected void parentFontChanged()
+    protected void handleParentFontChange()
     {
         // Do normal version
-        super.parentFontChanged();
+        super.handleParentFontChange();
 
         // Set font in TextRun
         Font font = getFont();

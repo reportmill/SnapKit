@@ -25,7 +25,7 @@ public class ToggleGroup {
     private ToggleButton  _sel;
     
     // A Listener to watch for button Selection change
-    private PropChangeListener _btnLsnr = pc -> buttonSelectionDidChange(pc);
+    private PropChangeListener _buttonSelectedPropLsnr = pc -> handleButtonSelectedChange(pc);
 
     /**
      * Returns the name.
@@ -86,7 +86,7 @@ public class ToggleGroup {
     public void add(ToggleButton aToggle)
     {
         _toggles.add(aToggle);
-        aToggle.addPropChangeListener(_btnLsnr, ToggleButton.Selected_Prop);
+        aToggle.addPropChangeListener(_buttonSelectedPropLsnr, ToggleButton.Selected_Prop);
         if (aToggle.isSelected())
             setSelected(aToggle);
     }
@@ -97,7 +97,7 @@ public class ToggleGroup {
     public void remove(ToggleButton aToggle)
     {
         _toggles.remove(aToggle);
-        aToggle.removePropChangeListener(_btnLsnr, ToggleButton.Selected_Prop);
+        aToggle.removePropChangeListener(_buttonSelectedPropLsnr, ToggleButton.Selected_Prop);
         if (aToggle == _sel)
             setSelected(null);
     }
@@ -105,7 +105,7 @@ public class ToggleGroup {
     /**
      * PropChangeListener method.
      */
-    protected void buttonSelectionDidChange(PropChange anEvent)
+    protected void handleButtonSelectedChange(PropChange anEvent)
     {
         // If button turned on, make it selected
         ToggleButton toggleButton = (ToggleButton) anEvent.getSource();

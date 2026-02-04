@@ -302,22 +302,22 @@ public class ParentView extends View {
         // Notify children that inherit font
         for (View child : getChildren())
             if (!child.isFontSet())
-                child.parentFontChanged();
+                child.handleParentFontChange();
     }
 
     /**
      * Override to forward to children that inherit font.
      */
     @Override
-    protected void parentFontChanged()
+    protected void handleParentFontChange()
     {
         // Do normal version
-        super.parentFontChanged();
+        super.handleParentFontChange();
 
         // Notify children that inherit font
         for (View child : getChildren())
             if (!child.isFontSet())
-                child.parentFontChanged();
+                child.handleParentFontChange();
     }
 
     /**
@@ -438,7 +438,7 @@ public class ParentView extends View {
     public boolean isNeedsLayout()  { return _needsLayout; }
 
     /**
-     * Sets whether needs layout.
+     * Registers this parent to relayout children.
      */
     public void relayout()
     {
@@ -684,32 +684,28 @@ public class ParentView extends View {
      * Override to support props for this class.
      */
     @Override
-    public Object getPropValue(String aPropName)
+    public Object getPropValue(String propName)
     {
-        switch (aPropName) {
+        // Handle Children
+        if (propName.equals(Children_Prop))
+            return ((ViewHost) this).getGuests();
 
-            // Children
-            case Children_Prop: return ((ViewHost) this).getGuests();
-
-            // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+        // Do normal version
+        return super.getPropValue(propName);
     }
 
     /**
      * Override to support props for this class.
      */
     @Override
-    public void setPropValue(String aPropName, Object aValue)
+    public void setPropValue(String propName, Object aValue)
     {
-        switch (aPropName) {
+        // Handle Children
+        if (propName.equals(Children_Prop))
+            ((ViewHost) this).setGuests((View[]) aValue);
 
-            // Children
-            case Children_Prop: ((ViewHost) this).setGuests((View[]) aValue); break;
-
-            // Do normal version
-            default: super.setPropValue(aPropName, aValue);
-        }
+        // Do normal version
+        else super.setPropValue(propName, aValue);
     }
 
     /**

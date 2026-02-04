@@ -602,13 +602,13 @@ public class TextArea extends ParentView {
      * Override to update font.
      */
     @Override
-    protected void parentFontChanged()
+    protected void handleParentFontChange()
     {
         // Handle RichText: Just return
         if (isRichText()) return;
 
         // Do normal version
-        super.parentFontChanged();
+        super.handleParentFontChange();
 
         // If SyncTextFont, forward to TextModel
         if (isSyncTextFont())
