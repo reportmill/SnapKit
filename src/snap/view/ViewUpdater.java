@@ -46,10 +46,11 @@ public class ViewUpdater {
     // Whether painting in debug mode
     protected static boolean _paintDebug = false;
     private static boolean _clearFlash;
-    private static boolean _paintFrameRateText = false;
-    private long _frameStartTime;
+
+    // ShowFrameRate support
+    protected static long[] _frameRates = null; //new long[20];
     private static int _frameCount;
-    protected static long[]  _frames = null; //new long[20];
+    private long _frameStartTime;
 
     /**
      * Creates a ViewUpdater.
@@ -200,8 +201,8 @@ public class ViewUpdater {
         // Exception handler so we make sure we always restore
         try {
 
-            // If calculating frame rate, call startTime
-            if (_frames != null && !_paintFrameRateText)
+            // If calculating frame rate, set start time
+            if (_frameRates != null)
                 _frameStartTime = System.currentTimeMillis();
 
             // Clip to rect, clear background
@@ -210,14 +211,12 @@ public class ViewUpdater {
                 aPntr.clearRect(aRect.x, aRect.y, aRect.width, aRect.height);
 
             // Paint views
-            if (_paintFrameRateText)
-                paintFrameRate(aPntr);
-            else if (_paintDebug)
+            if (_paintDebug)
                 paintDebug(aPntr, aRect);
             else _rootView.paintAll(aPntr);
 
             // If paint was called outside of paintLater (maybe Window.show() or resize), repaint all
-            if (!_painting && !_paintFrameRateText) {
+            if (!_painting) {
                 for (View v : _repaintViews)
                     v._repaintRect = null;
                 _repaintViews.clear();
@@ -229,19 +228,12 @@ public class ViewUpdater {
         finally {
             aPntr.restore();
 
-            // Handle PaintFrameRate
-            if (_paintFrameRateText)
-                _paintFrameRateText = false;
-            else if (_frames != null) {
-
-                // Add current frame to set
+            // Handle ShowFrameRate: add current frame
+            if (_frameRates != null && _win != _frameRateLabel.getWindow()) {
                 long frameRenderTime = Math.max(System.currentTimeMillis() - _frameStartTime, 1);
-                _frames[_frameCount % _frames.length] = frameRenderTime;
+                _frameRates[_frameCount % _frameRates.length] = frameRenderTime;
                 _frameCount++;
-
-                // Register to paint new average frame rate
-                _paintFrameRateText = true;
-                ViewUtils.runLater(() -> _win._helper.requestPaint(getFrameRateTextRect()));
+                showFrameRate();
             }
         }
     }
@@ -404,43 +396,46 @@ public class ViewUpdater {
     /**
      * Returns whether to show frame rate.
      */
-    public static boolean isShowFrameRate()  { return _frames != null; }
+    public static boolean isShowFrameRate()  { return _frameRates != null; }
 
     /**
      * Set whether to show frame rate.
      */
     public static void setShowFrameRate(boolean aValue)
     {
-        _frames = aValue ? new long[10] : null;
+        _frameRates = aValue ? new long[10] : null;
+
+        if (_frameRates != null) {
+            _frameRateLabel = new Label();
+            _frameRateLabel.setMargin(10, 10, 10, 20);
+            _frameRateLabel.setPrefSize(100, 32);
+            _frameRateLabel.setFont(new Font("Arial", 24));
+            ViewOwner frameRateOwner = new ViewOwner(_frameRateLabel);
+            frameRateOwner.getWindow().setType(WindowView.Type.UTILITY);
+            frameRateOwner.getWindow().setAlwaysOnTop(true);
+            frameRateOwner.setWindowVisible(true);
+            _frameRateLabel.addPropChangeListener(pc -> setShowFrameRate(false), View.Showing_Prop);
+        }
+        else {
+            if (_frameRateLabel != null)
+                _frameRateLabel.getWindow().hide();
+            _frameRateLabel = null;
+        }
     }
 
+    // The frame rate label
+    private static Label _frameRateLabel;
+
     /**
-     * Paints frame rate label.
+     * Updates the frame rate label.
      */
-    private void paintFrameRate(Painter aPntr)
+    private void showFrameRate()
     {
         // Calculate average frame rate
-        long totalFramesTime = 0; for (long frame : _frames) totalFramesTime += frame;
-        double averageFrameTime = totalFramesTime / (double) _frames.length;
+        long totalFramesTime = 0; for (long frame : _frameRates) totalFramesTime += frame;
+        double averageFrameTime = totalFramesTime / (double) _frameRates.length;
         int averageFrameRate = (int) Math.round(1000 / averageFrameTime);
-
-        // Paint fps in lower right corner
-        Rect rect = getFrameRateTextRect();
-        aPntr.setPaint(Color.PINK);
-        aPntr.fill(rect);
-        aPntr.setPaint(Color.BLACK);
-        aPntr.setFont(Font.Arial11);
-        aPntr.drawString(averageFrameRate + " fps", rect.x + 8, rect.y + 12);
-    }
-
-    /**
-     * Returns the rect to paint frame rate label.
-     */
-    private Rect getFrameRateTextRect()
-    {
-        double rectX = _rootView.getWidth() - 50;
-        double rectY = _rootView.getHeight() - 20;
-        return new Rect(rectX, rectY, 48, 18);
+        _frameRateLabel.setText(averageFrameRate + " fps");
     }
 
     /**
