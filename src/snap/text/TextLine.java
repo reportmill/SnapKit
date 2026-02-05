@@ -8,6 +8,7 @@ import snap.gfx.Font;
 import snap.gfx.Painter;
 import snap.util.ArrayUtils;
 import snap.util.CharSequenceX;
+import java.util.Arrays;
 
 /**
  * This class represents a line of text in a Text.
@@ -200,10 +201,7 @@ public class TextLine implements CharSequenceX, Cloneable {
 
         // Handle remove all
         if (aStart == 0 && anEnd == length()) {
-            _chars = "";
-            for (int i = getRunCount() - 1; i > 0; i--) removeRun(i);
-            getRun(0).addLength(-anEnd);
-            updateText();
+            clear();
             return;
         }
 
@@ -248,6 +246,17 @@ public class TextLine implements CharSequenceX, Cloneable {
             }
         }
 
+        updateText();
+    }
+
+    /**
+     * Clears the line.
+     */
+    private void clear()
+    {
+        _chars = "";
+        _runs = Arrays.copyOfRange(_runs, 0, 1);
+        _runs[0].setLength(0);
         updateText();
     }
 

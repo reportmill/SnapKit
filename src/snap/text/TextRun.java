@@ -199,14 +199,18 @@ public class TextRun implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Sets length to given char length.
+     */
+    protected void setLength(int aLength)
+    {
+        _length = aLength; assert (_length >= 0);
+        _width = -1;
+    }
+
+    /**
      * Adds length to grow this run (negative value reduces it).
      */
-    protected void addLength(int aLength)
-    {
-        _length += aLength;
-        _width = -1;
-        assert (_length >= 0);
-    }
+    protected void addLength(int aLength)  { setLength(_length + aLength);}
 
     /**
      * Returns the font for this run.

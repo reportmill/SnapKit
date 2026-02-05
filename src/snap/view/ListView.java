@@ -767,6 +767,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
             }
 
             // Configure (make sure text is not empty)
+            cell.getTextArea().getTextModel().clear();
             configureCell(cell);
             if (cell.getText() == null || cell.getText().isEmpty())
                 cell.setText("X");
