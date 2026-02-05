@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.*;
-import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 
 /**
  * A ListView subclass that represents a column in TreeView.
@@ -82,7 +82,7 @@ public class TreeCol <T> extends ListView <T> {
     /**
      * Returns the column index.
      */
-    public int getColIndex()  { return ArrayUtils.indexOfId(getTree().getCols(), this); }
+    public int getColIndex()  { return ListUtils.indexOfId(getTree().getCols(), this); }
 
     /**
      * Override to suppress setting items in pick list (already done by TreeView).
@@ -95,7 +95,7 @@ public class TreeCol <T> extends ListView <T> {
     protected void processEvent(ViewEvent anEvent)
     {
         if (anEvent.isMousePress()) {
-            int colIndex = ArrayUtils.indexOfId(getTree().getCols(), this);
+            int colIndex = ListUtils.indexOfId(getTree().getCols(), this);
             getTree().setSelCol(colIndex);
         }
         super.processEvent(anEvent);

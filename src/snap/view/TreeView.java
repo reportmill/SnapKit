@@ -113,10 +113,9 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the column at given index.
      */
-    public TreeCol<T>[] getCols()
+    public List<TreeCol<T>> getCols()
     {
-        List<TreeCol<?>> treeCols = (List<TreeCol<?>>) (List<?>) _splitView.getItems();
-        return treeCols.toArray(new TreeCol[0]);
+        return (List<TreeCol<T>>) (List<?>) _splitView.getItems();
     }
 
     /**
@@ -477,7 +476,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
         if (aValue == getY()) return;
         super.setY(aValue);
         for (TreeCol<T> treeCol : getCols())
-            treeCol.relayout();
+            treeCol.resetCellsForCurrentBounds();
     }
 
     /**
@@ -489,7 +488,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
         if (aValue == getHeight()) return;
         super.setHeight(aValue);
         for (TreeCol<T> treeCol : getCols())
-            treeCol.relayout();
+            treeCol.resetCellsForCurrentBounds();
     }
 
     /**
