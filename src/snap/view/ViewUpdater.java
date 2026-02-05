@@ -163,6 +163,8 @@ public class ViewUpdater {
         }
 
         // Layout all views that need it
+        if (_win.isNeedsLayout())
+            _win.layout();
         _rootView.layoutDeep();
 
         // Get composite repaint rect from all repaint views
