@@ -72,7 +72,8 @@ public class Label extends ParentView {
             return;
 
         // Set value and fire prop change
-        _textArea.setText(aValue);
+        TextModel textModel = _textArea.getTextModel();
+        textModel.setString(aValue != null ? aValue : ""); // In text model to skip unneeded stuff
         _textArea.setVisible(aValue != null && !aValue.isEmpty());
         firePropChange(Text_Prop, oldVal, aValue);
     }
