@@ -347,8 +347,11 @@ public class Label extends ParentView {
     /**
      * Standard toString implementation.
      */
-    public String toString()
+    @Override
+    public String toStringProps()
     {
-        return getClass().getSimpleName() + " { text=" + getText() + "}";
+        String text = _textArea != null ? getText() : "";
+        if (text.length() > 40) text = text.substring(0, 40) + "...";
+        return super.toStringProps() + ", Text=\"" + text + '"';
     }
 }

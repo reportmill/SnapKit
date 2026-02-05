@@ -696,16 +696,6 @@ public class TextArea extends ParentView {
     public String getValuePropName()  { return Text_Prop; }
 
     /**
-     * Standard toString implementation.
-     */
-    public String toString()
-    {
-        String str = getText();
-        if (str.length() > 40) str = str.substring(0, 40) + "...";
-        return getClass().getSimpleName() + ": " + str;
-    }
-
-    /**
      * Override to support properties for this class.
      */
     @Override
@@ -782,5 +772,16 @@ public class TextArea extends ParentView {
             setWrapLines(anElement.getAttributeBoolValue(WrapLines_Prop));
 
         return this;
+    }
+
+    /**
+     * Standard toStringProps implementation.
+     */
+    @Override
+    public String toStringProps()
+    {
+        String text = _textAdapter != null ? getText() : "";
+        if (text.length() > 40) text = text.substring(0, 40) + "...";
+        return super.toStringProps() + ", Text=\"" + text + '"';
     }
 }
