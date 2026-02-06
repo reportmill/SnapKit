@@ -208,7 +208,7 @@ public class TitleView extends ParentView implements ViewHost {
 
         // Set value and fire prop change
         firePropChange(Expanded_Prop, _expanded, _expanded = aValue);
-        relayout();
+        relayoutParent();
 
         // Update graphic
         View graphic = _label.getGraphic();
@@ -493,6 +493,12 @@ public class TitleView extends ParentView implements ViewHost {
         // The label
         protected Label _label;
 
+        /** Constructor. */
+        public TitleArea()
+        {
+            super();
+        }
+
         /** Sets the TitleView. */
         public void setTitleView(TitleView aTV)  { _titleView = aTV; }
 
@@ -509,7 +515,7 @@ public class TitleView extends ParentView implements ViewHost {
             double prefWidth = _label.getPrefWidth();
             View content = getContent();
             if (isContentShowing())
-                prefWidth = Math.max(prefWidth, content.getPrefWidth());
+                prefWidth = Math.max(prefWidth, content.getBestWidth(aH));
 
             // Get insets and return Content.PrefWidth + insets width
             Insets ins = getInsetsAll();
@@ -523,7 +529,7 @@ public class TitleView extends ParentView implements ViewHost {
             double prefH = _label.getPrefHeight();
             View content = getContent();
             if (isContentShowing())
-                prefH += content.getPrefHeight();
+                prefH += content.getBestHeight(aW);
 
             // Get insets and return Content.PrefHeight + insets height
             Insets ins = getInsetsAll();
@@ -568,7 +574,7 @@ public class TitleView extends ParentView implements ViewHost {
      */
     private static class TitleAreaPlain extends TitleArea {
 
-        /** Create TitleAreaPlain. */
+        /** Constructor. */
         public TitleAreaPlain()
         {
             // Create/configure label (for EtchBorder)
@@ -585,7 +591,7 @@ public class TitleView extends ParentView implements ViewHost {
      */
     private static class TitleAreaEtched extends TitleAreaPlain {
 
-        /** Create TitleAreaEtched. */
+        /** Constructor. */
         public TitleAreaEtched()
         {
             _label.setPadding(0,0,0,10);
@@ -658,7 +664,7 @@ public class TitleView extends ParentView implements ViewHost {
             if (isContentShowing()) {
                 View content = getContent();
                 Insets ins = getInsetsAll();
-                contentW = content.getPrefWidth() + ins.getWidth();
+                contentW = content.getBestWidth(aH) + ins.getWidth();
             }
 
             // Return max of Button.PrefWidth and Content.PrefWidth
@@ -674,7 +680,7 @@ public class TitleView extends ParentView implements ViewHost {
             if (isContentShowing()) {
                 View content = getContent();
                 Insets ins = getInsetsAll();
-                contentH = content.getPrefHeight() + ins.getHeight();
+                contentH = content.getBestHeight(aW) + ins.getHeight();
             }
 
             // Return combined Button.PrefWidth and Content.PrefWidth
