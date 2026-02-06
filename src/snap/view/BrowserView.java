@@ -48,6 +48,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     private boolean _needsScrollSelToVisible;
 
     // Constants for properties
+    public static final String RowHeight_Prop = ListView.RowHeight_Prop;
     public static final String PrefColCount_Prop = "PrefColCount";
     public static final String PrefColWidth_Prop = "PrefColWidth";
 
@@ -132,11 +133,10 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     public void setRowHeight(int aValue)
     {
         // Set value
-        firePropChange("RowHeight", _rowHeight, _rowHeight = aValue);
+        firePropChange(RowHeight_Prop, _rowHeight, _rowHeight = aValue);
 
         // Update columns
-        for (BrowserCol<T> col : getCols())
-            col.setRowHeight(aValue);
+        getCols().forEach(col -> col.setRowHeight(aValue));
     }
 
     /**
@@ -573,7 +573,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     /**
      * Called to configure browser cell.
      */
-    protected void configureBrowserCell(BrowserCol<T> aCol, ListCell<T> aCell)
+    protected void configureBrowserCell(ListCell<T> aCell)
     {
         // Set real text for item, image for item, and make text grow width
         T item = aCell.getItem();

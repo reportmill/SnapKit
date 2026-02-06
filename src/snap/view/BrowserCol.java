@@ -31,7 +31,7 @@ public class BrowserCol <T> extends ListView <T> {
         setRowHeight(_browser.getRowHeight());
 
         // Configure ListView to use Browser.configureBrowserCell
-        setCellConfigure(listCell -> _browser.configureBrowserCell(this, listCell));
+        setCellConfigure(_browser::configureBrowserCell);
     }
 
     /**

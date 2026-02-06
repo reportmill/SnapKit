@@ -61,7 +61,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public static final String TableCols_Prop = "TableCols";
     public static final String CellPadding_Prop = "CellPadding";
     public static final String Editable_Prop = "Editable";
-    public static final String RowHeight_Prop = "RowHeight";
+    public static final String RowHeight_Prop = ListView.RowHeight_Prop;
     public static final String EditingCell_Prop = "EditingCell";
 
     // Internal constants

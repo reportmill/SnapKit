@@ -41,7 +41,10 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
 
     // The SplitView to hold columns
     private SplitView _splitView;
-    
+
+    // Constants for properties
+    public static final String RowHeight_Prop = ListView.RowHeight_Prop;
+
     // Constants
     private static final Paint DIVIDER_FILL = new Color("#EEEEEE");
 
@@ -87,7 +90,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      */
     public void setRowHeight(int aValue)
     {
-        firePropChange("RowHeight", _rowHeight, _rowHeight = aValue);
+        firePropChange(RowHeight_Prop, _rowHeight, _rowHeight = aValue);
     }
 
     /**
