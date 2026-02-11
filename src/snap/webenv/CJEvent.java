@@ -68,8 +68,7 @@ public class CJEvent extends ViewEvent {
     public double getScrollX()
     {
         MouseEvent mouseEvent = getMouseEvent();
-        WheelEvent wheelEvent = (WheelEvent) mouseEvent;
-        return wheelEvent.getDeltaX();
+        return mouseEvent instanceof WheelEvent wheelEvent ? wheelEvent.getDeltaX() : 0;
     }
 
     /**
@@ -78,8 +77,7 @@ public class CJEvent extends ViewEvent {
     public double getScrollY()
     {
         MouseEvent mouseEvent = getMouseEvent();
-        WheelEvent wheelEvent = (WheelEvent) mouseEvent;
-        return wheelEvent.getDeltaY();
+        return mouseEvent instanceof WheelEvent wheelEvent ? wheelEvent.getDeltaY() : 0;
     }
 
     /**
@@ -88,16 +86,16 @@ public class CJEvent extends ViewEvent {
     @Override
     public int getKeyCode()
     {
-        KeyboardEvent keyboardEvent = getKeyEvent();
+        KeyboardEvent keyboardEvent = getKeyEvent(); if (keyboardEvent == null) return 0;
         int keyCode = keyboardEvent.getKeyCode();
 
         // Remap some codes
-        switch (keyCode) {
-            case 13: return KeyCode.ENTER;
-            case 91: return KeyCode.COMMAND;
-            case 46: return KeyCode.DELETE;
-            default: return keyCode;
-        }
+        return switch (keyCode) {
+            case 13 -> KeyCode.ENTER;
+            case 91 -> KeyCode.COMMAND;
+            case 46 -> KeyCode.DELETE;
+            default -> keyCode;
+        };
     }
 
     /** Returns the event key char. */
@@ -110,13 +108,12 @@ public class CJEvent extends ViewEvent {
             return keyString.charAt(0);
 
         // Handle some known values
-        switch (keyString) {
-            case "Backspace": return 8;
-            case "Delete": return 127;
-        }
-
-        // Return 0
-        return KeyCode.CHAR_UNDEFINED;
+        return switch (keyString) {
+            case "Backspace" -> '\b';
+            case "Delete" -> 127;
+            case "Tab" -> '\t';
+            default -> KeyCode.CHAR_UNDEFINED;
+        };
     }
 
     /**
@@ -125,8 +122,11 @@ public class CJEvent extends ViewEvent {
     @Override
     public String getKeyString()
     {
-        KeyboardEvent keyboardEvent = getKeyEvent();
-        return keyboardEvent.getKey();
+        KeyboardEvent keyboardEvent = getKeyEvent(); if (keyboardEvent == null) return "";
+        String keyString = keyboardEvent.getKey();
+        if (keyString.equals("Tab"))
+            return "\t";
+        return keyString;
     }
 
     /**
@@ -266,15 +266,15 @@ public class CJEvent extends ViewEvent {
     {
         Event event = (Event) getEvent();
         String type = event.getType();
-        switch(type) {
-            case "dragstart": return Type.DragGesture;
-            case "dragend": return Type.DragSourceEnd;
-            case "dragenter": return Type.DragEnter;
-            case "dragexit": return Type.DragExit;
-            case "dragover": return Type.DragOver;
-            case "drop": return Type.DragDrop;
-            default: return null;
-        }
+        return switch (type) {
+            case "dragstart" -> Type.DragGesture;
+            case "dragend" -> Type.DragSourceEnd;
+            case "dragenter" -> Type.DragEnter;
+            case "dragexit" -> Type.DragExit;
+            case "dragover" -> Type.DragOver;
+            case "drop" -> Type.DragDrop;
+            default -> null;
+        };
     }
 
     /**

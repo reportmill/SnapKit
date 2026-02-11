@@ -1,11 +1,9 @@
 package snap.swing;
-
 import java.awt.AWTEvent;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.dnd.*;
 import java.awt.event.*;
-
 import snap.view.*;
 
 /**
@@ -21,7 +19,10 @@ public class SwingEvent extends ViewEvent {
      */
     private InputEvent getInputEvent()
     {
-        return getEvent(InputEvent.class);
+        for (ViewEvent viewEvent = this; viewEvent != null; viewEvent = viewEvent.getParentEvent())
+            if (viewEvent.getEvent() instanceof InputEvent inputEvent)
+                return inputEvent;
+        return null;
     }
 
     /**
@@ -83,20 +84,14 @@ public class SwingEvent extends ViewEvent {
     private Point getLocation()
     {
         Object event = getEvent();
-        if (event instanceof DragGestureEvent)
-            event = ((DragGestureEvent) event).getTriggerEvent();
-        if (event instanceof MouseEvent) {
-            MouseEvent me = (MouseEvent) event;
-            return me.getPoint();
-        }
-        if (event instanceof DropTargetDragEvent) {
-            DropTargetDragEvent de = (DropTargetDragEvent) event;
-            return de.getLocation();
-        }
-        if (event instanceof DropTargetDropEvent) {
-            DropTargetDropEvent de = (DropTargetDropEvent) event;
-            return de.getLocation();
-        }
+        if (event instanceof DragGestureEvent dragGestureEvent)
+            event = dragGestureEvent.getTriggerEvent();
+        if (event instanceof MouseEvent mouseEvent)
+            return mouseEvent.getPoint();
+        if (event instanceof DropTargetDragEvent dropTargetDragEvent)
+            return dropTargetDragEvent.getLocation();
+        if (event instanceof DropTargetDropEvent dropTargetDropEvent)
+            return dropTargetDropEvent.getLocation();
         return new Point();
     }
 
@@ -134,7 +129,10 @@ public class SwingEvent extends ViewEvent {
      */
     private KeyEvent getKeyEvent()
     {
-        return getEvent(KeyEvent.class);
+        for (ViewEvent viewEvent = this; viewEvent != null; viewEvent = viewEvent.getParentEvent())
+            if (viewEvent.getEvent() instanceof KeyEvent keyEvent)
+                return keyEvent;
+        return null;
     }
 
     /**
@@ -142,7 +140,8 @@ public class SwingEvent extends ViewEvent {
      */
     public int getKeyCode()
     {
-        return getKeyEvent() != null ? getKeyEvent().getKeyCode() : 0;
+        KeyEvent keyEvent = getKeyEvent();
+        return keyEvent != null ? keyEvent.getKeyCode() : 0;
     }
 
     /**
@@ -150,7 +149,8 @@ public class SwingEvent extends ViewEvent {
      */
     public char getKeyChar()
     {
-        return getKeyEvent() != null ? getKeyEvent().getKeyChar() : 0;
+        KeyEvent keyEvent = getKeyEvent();
+        return keyEvent != null ? keyEvent.getKeyChar() : 0;
     }
 
     /**
@@ -186,36 +186,36 @@ public class SwingEvent extends ViewEvent {
     public void consume()
     {
         super.consume();
-        if (getInputEvent() != null) getInputEvent().consume();
+        if (getInputEvent() != null)
+            getInputEvent().consume();
     }
 
-/**
- * Computes the event type from EventObject.
- */
-protected Type getTypeImpl()
-{
-    Object event = getEvent();
-    int id = event instanceof AWTEvent ? ((AWTEvent) event).getID() : 0;
-    switch (id) {
-        case ActionEvent.ACTION_PERFORMED: return Type.Action;
-        case MouseEvent.MOUSE_PRESSED: return Type.MousePress;
-        case MouseEvent.MOUSE_DRAGGED: return Type.MouseDrag;
-        case MouseEvent.MOUSE_RELEASED: return Type.MouseRelease;
-        case MouseEvent.MOUSE_ENTERED: return Type.MouseEnter;
-        case MouseEvent.MOUSE_MOVED: return Type.MouseMove;
-        case MouseEvent.MOUSE_EXITED: return Type.MouseExit;
-        case MouseEvent.MOUSE_WHEEL: return Type.Scroll;
-        case KeyEvent.KEY_PRESSED: return Type.KeyPress;
-        case KeyEvent.KEY_RELEASED: return Type.KeyRelease;
-        case KeyEvent.KEY_TYPED: return Type.KeyType;
-        case WindowEvent.WINDOW_CLOSING: return Type.WinClose;
-        case WindowEvent.WINDOW_OPENED: return Type.WinOpen;
+    /**
+     * Computes the event type from EventObject.
+     */
+    protected Type getTypeImpl()
+    {
+        Object event = getEvent();
+        int id = event instanceof AWTEvent ? ((AWTEvent) event).getID() : 0;
+        switch (id) {
+            case ActionEvent.ACTION_PERFORMED: return Type.Action;
+            case MouseEvent.MOUSE_PRESSED: return Type.MousePress;
+            case MouseEvent.MOUSE_DRAGGED: return Type.MouseDrag;
+            case MouseEvent.MOUSE_RELEASED: return Type.MouseRelease;
+            case MouseEvent.MOUSE_ENTERED: return Type.MouseEnter;
+            case MouseEvent.MOUSE_MOVED: return Type.MouseMove;
+            case MouseEvent.MOUSE_EXITED: return Type.MouseExit;
+            case MouseEvent.MOUSE_WHEEL: return Type.Scroll;
+            case KeyEvent.KEY_PRESSED: return Type.KeyPress;
+            case KeyEvent.KEY_RELEASED: return Type.KeyRelease;
+            case KeyEvent.KEY_TYPED: return Type.KeyType;
+            case WindowEvent.WINDOW_CLOSING: return Type.WinClose;
+            case WindowEvent.WINDOW_OPENED: return Type.WinOpen;
+        }
+        if (event instanceof DropTargetDropEvent)
+            return Type.DragDrop;
+        if (event instanceof DragGestureEvent)
+            return Type.DragGesture;
+        return null;
     }
-    if (event instanceof DropTargetDropEvent)
-        return Type.DragDrop;
-    if (event instanceof DragGestureEvent)
-        return Type.DragGesture;
-    return null;
-}
-
 }
