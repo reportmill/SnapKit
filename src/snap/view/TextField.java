@@ -521,9 +521,8 @@ public class TextField extends TextArea {
         @Override
         protected void handleEnterKeyPressEvent(ViewEvent anEvent)
         {
-            // If normal text field and no modifiers, select all and fire action event
+            // If normal text field and no modifiers, fire action event
             if (!isMultiline() && !anEvent.isControlDown() && !anEvent.isAltDown()) {
-                selectAll();
                 fireActionEvent(anEvent);
                 anEvent.consume();
             }
