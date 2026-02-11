@@ -488,21 +488,6 @@ public class TextField extends TextArea {
     }
 
     /**
-     * Sets the given TextField to animate background label alignment from center to left when focused.
-     */
-    public static void setBackLabelAlignAnimatedOnFocused(TextField aTextField, boolean aValue)
-    {
-        Label textFieldLabel = aTextField.getLabel();
-        textFieldLabel.setAlign(Pos.CENTER);
-        aTextField.addPropChangeListener(pce -> {
-            if (aTextField.isFocused())
-                ViewAnimUtils.setAlign(textFieldLabel, Pos.CENTER_LEFT, 200);
-            else ViewAnimUtils.setAlign(textFieldLabel, Pos.CENTER, 600);
-            textFieldLabel.getChild(0).getAnim(0).setOnFrame(aTextField::relayout);
-        }, View.Focused_Prop);
-    }
-
-    /**
      * A TextAdapter for TextField.
      */
     private class TextFieldTextAdapter extends TextAdapter {

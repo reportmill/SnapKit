@@ -242,14 +242,14 @@ public class ViewAnimUtils {
             div.getAnim(time).setOpacity(0).play();
 
             // Configure anim
-            aView.getAnim(time).setOpacity(0).setOnFinish(() -> setItemVisibleWithAnimDone(aSplitView, aView, div, size)).play();
+            aView.getAnim(time).setOpacity(0).setOnFinish(() -> handleSplitViewItemVisibleAnimFinished(aSplitView, aView, div, size)).play();
         }
     }
 
     /**
      * Called when setItemVisibleWithAnim is done.
      */
-    private static void setItemVisibleWithAnimDone(SplitView aSplitView, View aView,Divider aDiv, double size)
+    private static void handleSplitViewItemVisibleAnimFinished(SplitView aSplitView, View aView, Divider aDiv, double size)
     {
         aView.setVisible(false);
         aView.setOpacity(1);
@@ -257,5 +257,20 @@ public class ViewAnimUtils {
         if (aSplitView.isVertical())
             aView.setHeight(size);
         else aView.setWidth(size);
+    }
+
+    /**
+     * Configures the given TextField to animate background label alignment from center to left when focused.
+     */
+    public static void configureTextFieldImageToAnimateLeftOnFocused(TextField aTextField)
+    {
+        Label textFieldLabel = aTextField.getLabel();
+        textFieldLabel.setAlign(Pos.CENTER);
+        aTextField.addPropChangeListener(pce -> {
+            if (aTextField.isFocused())
+                setAlign(textFieldLabel, Pos.CENTER_LEFT, 200);
+            else setAlign(textFieldLabel, Pos.CENTER, 600);
+            textFieldLabel.getChild(0).getAnim(0).setOnFrame(aTextField::relayout);
+        }, View.Focused_Prop);
     }
 }
