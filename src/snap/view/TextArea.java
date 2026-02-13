@@ -494,7 +494,12 @@ public class TextArea extends ParentView {
     /**
      * Scales font sizes of all text to fit in bounds by finding/setting FontScale.
      */
-    public void scaleTextToFit()  { _textAdapter.scaleTextToFit(); }
+    public void scaleTextToFit()
+    {
+        Rect textBounds = getTextBounds();
+        _textAdapter.setTextBounds(textBounds);
+        _textAdapter.scaleTextToFit();
+    }
 
     /**
      * Copies the current selection onto the clip board, then deletes the current selection.
