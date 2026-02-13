@@ -120,7 +120,7 @@ public class ColorDock extends View {
     }
 
     /**
-     * Returns the color at given row & column.
+     * Returns the color at given row and column.
      */
     public Color getColor(int aRow, int aCol)
     {
@@ -130,7 +130,7 @@ public class ColorDock extends View {
     }
 
     /**
-     * Sets the color at the given row & column.
+     * Sets the color at the given row and column.
      */
     public void setColor(int aRow, int aCol, Color aColor)
     {

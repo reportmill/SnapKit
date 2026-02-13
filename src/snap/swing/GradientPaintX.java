@@ -104,7 +104,7 @@ public class GradientPaintX implements PaintContext, Paint {
     }
 
     /**
-     * Alpha & color definitions.
+     * Alpha and color definitions.
      */
     public int getTransparency()
     {

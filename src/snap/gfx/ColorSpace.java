@@ -185,7 +185,7 @@ public abstract class ColorSpace {
 
     /**
      * Returns a ColorSpace representing one of the specific predefined color spaces.
-     * @param colorspace a specific color space identified by one of the predefined class constants (e.g.
+     * @param aCS a specific color space identified by one of the predefined class constants (e.g.
      * CS_sRGB, CS_LINEAR_RGB, CS_CIEXYZ, CS_GRAY, or CS_PYCC)
      */
     public static ColorSpace getInstance(int aCS)

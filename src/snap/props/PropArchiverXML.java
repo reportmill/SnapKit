@@ -95,7 +95,7 @@ public class PropArchiverXML extends PropArchiver {
     }
 
     /**
-     * Reads resources from <Resource> elements in given xml (top-level) element, converts from ASCII encoding and
+     * Reads resources from {@literal <Resource>} elements in given xml (top-level) element, converts from ASCII encoding and
      * adds to archiver.
      */
     protected void readResources(XMLElement anElement)

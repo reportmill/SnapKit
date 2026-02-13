@@ -98,7 +98,7 @@ public class Transform implements Cloneable {
     }
 
     /**
-     * Translates this transform by given x & y.
+     * Translates this transform by given x and y.
      */
     public void translate(double dx, double dy)
     {
@@ -108,7 +108,7 @@ public class Transform implements Cloneable {
     }
 
     /**
-     * Translates this transform by given x & y in global space (pre-multiply).
+     * Translates this transform by given x and y in global space (pre-multiply).
      */
     public void preTranslate(double dx, double dy)
     {
