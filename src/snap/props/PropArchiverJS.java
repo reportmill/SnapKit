@@ -100,7 +100,7 @@ public class PropArchiverJS extends PropArchiver {
     }
 
     /**
-     * Reads resources from <Resource> objects in given JS (top-level) object, converts from ASCII encoding and
+     * Reads resources from {@literal <Resource>} objects in given JS (top-level) object, converts from ASCII encoding and
      * adds to archiver.
      */
     protected void readResources(JSObject anElement)

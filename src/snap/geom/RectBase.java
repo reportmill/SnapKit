@@ -202,7 +202,7 @@ public abstract class RectBase extends Shape implements Cloneable {
     }
 
     /**
-     * Offsets the receiver by the given x & y.
+     * Offsets the receiver by the given x and y.
      */
     public void offset(double dx, double dy)  { setXY(x + dx, y + dy); }
 

@@ -152,7 +152,7 @@ public class GradientStopPicker extends ParentView {
     }
 
     /**
-     * Sets the color & position of the stop at the given index.
+     * Sets the color and position of the stop at the given index.
      */
     public void setStop(int index, double anOffset, Color aColor)
     {

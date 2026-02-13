@@ -75,7 +75,7 @@ public class Matrix3D implements Cloneable {
     }
 
     /**
-     * Translates by given x, y & z.
+     * Translates by given x, y and z.
      */
     public Matrix3D translate(double x, double y, double z)
     {

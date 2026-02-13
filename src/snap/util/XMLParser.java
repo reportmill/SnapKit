@@ -129,7 +129,7 @@ public class XMLParser extends Parser {
     }
 
     /**
-     * Prolog Handler: Prolog { "<?xml" Attribute* "?>" }
+     * Prolog Handler: {@code Prolog { "<?xml" Attribute* "?>" }}
      */
     public static class PrologHandler extends ParseHandler <XMLElement> {
 
@@ -146,7 +146,7 @@ public class XMLParser extends Parser {
     }
 
     /**
-     * Element Handler: Element { "<" Name Attribute* ("/>" | (">" Content "</" Name ">")) }
+     * Element Handler: {@code Element { "<" Name Attribute* ("/>" | (">" Content "</" Name ">")) }}
      */
     public static class ElementHandler extends ParseHandler <XMLElement> {
 

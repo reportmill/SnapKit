@@ -11,7 +11,7 @@ import snap.view.*;
  * Activate by setting in thread:
  * <br>
  *   ExceptionReporter er = new ExceptionReporter("AppName");
- *   er.setURL(<url_to_some_SendMail.py>);
+ *   er.setURL({@literal <url_to_some_SendMail.py>});
  *   er.setToAddress("support@domain.com")
  *   er.setInfo("MyApp Version X, Build Date: " + MyUtils.getBuildDate());
  *   Thread.setDefaultUncaughtExceptionHandler(er);

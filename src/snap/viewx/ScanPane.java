@@ -206,7 +206,7 @@ public class ScanPane extends ViewOwner {
         /** Resets the buffer to the marked position. */
         public synchronized void reset() { pos = mark; }
 
-        /** Closing a <tt>BytesArrayInputStream</tt> has no effect. */
+        /** Closing a {@code BytesArrayInputStream} has no effect. */
         public void close() throws IOException  { }
     }
 

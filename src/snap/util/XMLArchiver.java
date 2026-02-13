@@ -552,7 +552,7 @@ public class XMLArchiver {
     }
 
     /**
-     * Reads resources from <resource> elements in given xml (top-level) element, converts from ASCII encoding and
+     * Reads resources from {@literal <resource>} elements in given xml (top-level) element, converts from ASCII encoding and
      * adds to archiver.
      */
     protected void getResources(XMLElement anElement)

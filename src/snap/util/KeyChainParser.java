@@ -122,7 +122,7 @@ public class KeyChainParser extends Parser {
     public static class LogicalOrExprHandler extends BinaryExprHandler { }
 
     /**
-     * LogicalAndExpr Handler: LogicalAndExpr { EqualityExpr ("&&" EqualityExpr)* }
+     * LogicalAndExpr Handler: {@code LogicalAndExpr { EqualityExpr ("&&" EqualityExpr)* }}
      */
     public static class LogicalAndExprHandler extends BinaryExprHandler { }
 
@@ -132,7 +132,7 @@ public class KeyChainParser extends Parser {
     public static class EqualityExprHandler extends BinaryExprHandler { }
 
     /**
-     * ComparativeExpr Handler: ComparativeExpr { AdditiveExpr ((">" | "<" | ">=" | "<=") AdditiveExpr)* }
+     * ComparativeExpr Handler: {@code ComparativeExpr { AdditiveExpr ((">" | "<" | ">=" | "<=") AdditiveExpr)* }}
      */
     public static class ComparativeExprHandler extends BinaryExprHandler { }
 

@@ -10,7 +10,7 @@ import java.util.List;
  *     * My list item 1                   |  ListItem (reads till next ListItem or blank line)
  *     [My Link Text](http:...)           |  Link
  *     ![My Image Text](http:...)         |  Image
- *     @ [ Header1:CustomName]            |  Directive - to redefine rendering
+ *     {@literal @} [ Header1:CustomName]            |  Directive - to redefine rendering
  *     ``` My Code ```                    |  CodeBlock
  *     ~~~ My Code ~~~                    |  Runnable code
  *     ---                                |  Separator (maybe soon)

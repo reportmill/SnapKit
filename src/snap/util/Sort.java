@@ -13,14 +13,15 @@ import java.util.*;
  *   Sort bestRevenueFirst = new Sort("Revenue", ORDER_DESCEND);
  * </pre></blockquote><p>
  * This class also provides useful static methods for comparison and sorting:
- * <p><blockquote><pre>
+ * <p>
+ * <blockquote><pre>
  *   Sort.sort(myList, "Title"); // Sort myList by its contents' getTitle method (alphabetically)
  *   Sort.sort(myList, bestRevenueFirst); // Sort myList by its contents' getRevenue method (largest first)
  *   List mySortList = new ArrayList();
  *   mySortList.add(bestRevenueFirst);
  *   mySortList.add(titleFirst);
  *   Sort.sort(myList, mySortList); // Sort myList by revenue and title
- * </blockquote></pre>
+ * </pre></blockquote>
  */
 public class Sort implements Comparator, Cloneable, JSArchiver.GetKeys {
 
@@ -100,7 +101,7 @@ public class Sort implements Comparator, Cloneable, JSArchiver.GetKeys {
     }
 
     /**
-     * Toggles the order for this sort between ORDER_ASCEND<->ORDER_DESCEND.
+     * Toggles the order for this sort between ORDER_ASCEND{@literal <->}ORDER_DESCEND.
      */
     public void toggleOrder()
     {

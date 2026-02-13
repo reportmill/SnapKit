@@ -7,7 +7,7 @@ import java.util.*;
 
 /**
  * A class for working with parameter strings as found in a URL query part or fragment id, typically with the format:
- * field1=value1&field2=value2
+ * {@code field1=value1&field2=value2}
  */
 public class ParsedUrlArgs {
 
