@@ -7,28 +7,32 @@ public abstract class CustomViewOwner extends ViewOwner {
 
     /**
      * Creates the top level view for this owner.
-     * @apiNote If you want the vanilla interaction of this class, return {@code default_createUI();}
+     * <br><br>
+     * API Note: If you want the vanilla interaction of this class, return {@code default_createUI();}
      */
     @Override
     abstract protected View createUI();
 
     /**
      * Initializes the UI panel.
-     * @apiNote If you want the vanilla interaction of this class, return {@code default_initUI();}
+     * <br><br>
+     * API Note: If you want the vanilla interaction of this class, return {@code default_initUI();}
      */
     @Override
     abstract protected void initUI();
 
     /**
      * Reset UI controls.
-     * @apiNote If you want the vanilla interaction of this class, return {@code default_resetUI();}
+     * <br><br>
+     * API Note: If you want the vanilla interaction of this class, return {@code default_resetUI();}
      */
     @Override
     abstract protected void resetUI();
 
     /**
      * Respond to UI controls.
-     * @apiNote If you want the vanilla interaction of this class, return {@code default_respondUI(ViewEvent);}
+     * <br><br>
+     * API Note: If you want the vanilla interaction of this class, return {@code default_respondUI(ViewEvent);}
      * @param anEvent Any event that has been caught by this ViewOwner.
      */
     @Override
