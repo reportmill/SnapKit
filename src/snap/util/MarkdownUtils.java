@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Utility methods for Markdown.
  */
-public class MDUtils {
+public class MarkdownUtils {
 
     // The header 1 style
     private static TextStyle _header1Style;
@@ -25,15 +25,15 @@ public class MDUtils {
     /**
      * Returns a Jepl string for Markdown string.
      */
-    public static String getJeplForJMD(String className, CharSequence markDown)
+    public static String getJeplForJMD(String className, CharSequence markdownChars)
     {
-        MDNode rootMarkdownNode = new MDParser().parseMarkdownChars(markDown);
-        List<MDNode> rootNodes = rootMarkdownNode.getChildNodes();
+        MarkdownNode rootMarkdownNode = new MarkdownParser().parseMarkdownChars(markdownChars);
+        List<MarkdownNode> rootNodes = rootMarkdownNode.getChildNodes();
 
         StringBuilder sb = new StringBuilder();
         int methodCount = 0;
-        for (MDNode node : rootNodes) {
-            if (node.getNodeType() == MDNode.NodeType.Runnable) {
+        for (MarkdownNode node : rootNodes) {
+            if (node.getNodeType() == MarkdownNode.NodeType.Runnable) {
                 sb.append("public static void method").append(methodCount++).append("()\n{\n");
                 sb.append(node.getText());
                 sb.append("\n}\n\n");

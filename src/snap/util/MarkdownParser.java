@@ -15,7 +15,7 @@ import java.util.List;
  *     ---                                |  Separator (maybe soon)
  *     > My block quote                   |  BlockQuote (maybe soon)
  */
-public class MDParser {
+public class MarkdownParser {
 
     // The input
     private CharSequence _input;
@@ -24,7 +24,7 @@ public class MDParser {
     private int _charIndex;
 
     // The running list of root nodes
-    private List<MDNode> _rootNodes = new ArrayList<>();
+    private List<MarkdownNode> _rootNodes = new ArrayList<>();
 
     // Constants
     public static final String HEADER_MARKER = "#";
@@ -46,7 +46,7 @@ public class MDParser {
     /**
      * Constructor.
      */
-    public MDParser()
+    public MarkdownParser()
     {
         super();
     }
@@ -54,19 +54,19 @@ public class MDParser {
     /**
      * Parses given text string and returns node.
      */
-    public MDNode parseMarkdownChars(CharSequence theChars)
+    public MarkdownNode parseMarkdownChars(CharSequence theChars)
     {
         // Set input chars
         _input = theChars;
         _charIndex = 0;
 
         // Create rootNode and child nodes
-        MDNode rootNode = new MDNode(MDNode.NodeType.Root, null);
+        MarkdownNode rootNode = new MarkdownNode(MarkdownNode.NodeType.Root, null);
         _rootNodes = new ArrayList<>();
 
         // Read nodes
         while (hasChars()) {
-            MDNode nextNode = parseNextNode();
+            MarkdownNode nextNode = parseNextNode();
             if (nextNode != null)
                 _rootNodes.add(nextNode);
         }
@@ -81,7 +81,7 @@ public class MDParser {
     /**
      * Parses the next node.
      */
-    private MDNode parseNextNode()
+    private MarkdownNode parseNextNode()
     {
         // Skip white space - just return if no more chars
         skipWhiteSpace();
@@ -107,15 +107,15 @@ public class MDParser {
     /**
      * Parses mixable nodes: Text, Link, Image, CodeBlock or Mixed.
      */
-    private MDNode parseMixableNode()
+    private MarkdownNode parseMixableNode()
     {
         // Parse mixable node: Text, Link, Image, CodeBlock
-        MDNode mixableNode = parseMixableNodeImpl();
+        MarkdownNode mixableNode = parseMixableNodeImpl();
 
         // While next chars start with mixable node, parse and add child node
         while (nextCharsStartWithMixableNode()) {
-            mixableNode = MDNode.getMixedNodeForNode(mixableNode);
-            MDNode nextMixedNode = parseMixableNodeImpl();
+            mixableNode = MarkdownNode.getMixedNodeForNode(mixableNode);
+            MarkdownNode nextMixedNode = parseMixableNodeImpl();
             mixableNode.addChildNode(nextMixedNode);
         }
 
@@ -126,7 +126,7 @@ public class MDParser {
     /**
      * Parses mixable nodes: Text, Link, Image, CodeBlock
      */
-    private MDNode parseMixableNodeImpl()
+    private MarkdownNode parseMixableNodeImpl()
     {
         // Handle link
         if (nextCharsStartWith(LINK_MARKER))
@@ -155,7 +155,7 @@ public class MDParser {
     /**
      * Parses a Header node.
      */
-    private MDNode parseHeaderNode()
+    private MarkdownNode parseHeaderNode()
     {
         // Get header level by counting hash chars
         int headerLevel = 0;
@@ -165,36 +165,36 @@ public class MDParser {
         }
 
         // Get Header level NodeType and chars till line end
-        MDNode.NodeType nodeType = headerLevel == 1 ? MDNode.NodeType.Header1 : MDNode.NodeType.Header2;
+        MarkdownNode.NodeType nodeType = headerLevel == 1 ? MarkdownNode.NodeType.Header1 : MarkdownNode.NodeType.Header2;
         String charsTillLineEnd = getCharsTillLineEnd().toString().trim();
 
         // Return header node
-        return new MDNode(nodeType, charsTillLineEnd);
+        return new MarkdownNode(nodeType, charsTillLineEnd);
     }
 
     /**
      * Parses a text node.
      */
-    private MDNode parseTextNode()
+    private MarkdownNode parseTextNode()
     {
         String textChars = getCharsTillTextEnd().toString().trim();
-        return new MDNode(MDNode.NodeType.Text, textChars);
+        return new MarkdownNode(MarkdownNode.NodeType.Text, textChars);
     }
 
     /**
      * Parses a code block node.
      */
-    private MDNode parseCodeBlockNode()
+    private MarkdownNode parseCodeBlockNode()
     {
         eatChars(CODE_BLOCK_MARKER.length());
         String charsTillBlockEnd = getCharsTillMatchingTerminator(CODE_BLOCK_MARKER).toString();
-        return new MDNode(MDNode.NodeType.CodeBlock, charsTillBlockEnd);
+        return new MarkdownNode(MarkdownNode.NodeType.CodeBlock, charsTillBlockEnd);
     }
 
     /**
      * Parses a Runnable node.
      */
-    private MDNode parseRunnableNode()
+    private MarkdownNode parseRunnableNode()
     {
         // Get string
         eatChars(RUNNABLE_MARKER.length());
@@ -208,21 +208,21 @@ public class MDParser {
                 endIndex++;
             String codeBlockIndexStr = charsTillBlockEnd.substring(dollarIndex, endIndex);
             int codeBlockIndex = Convert.intValue(codeBlockIndexStr) - 1;
-            MDNode[] codeBlockNodes = ListUtils.filterToArray(_rootNodes, node -> node.getNodeType() == MDNode.NodeType.CodeBlock, MDNode.class);
+            MarkdownNode[] codeBlockNodes = ListUtils.filterToArray(_rootNodes, node -> node.getNodeType() == MarkdownNode.NodeType.CodeBlock, MarkdownNode.class);
             if (codeBlockIndex >= 0 && codeBlockIndex < codeBlockNodes.length) {
-                MDNode codeBlockNode = codeBlockNodes[codeBlockIndex];
+                MarkdownNode codeBlockNode = codeBlockNodes[codeBlockIndex];
                 String codeBlockText = codeBlockNode.getText();
                 charsTillBlockEnd = charsTillBlockEnd.replace(codeBlockIndexStr, codeBlockText);
                 dollarIndex += codeBlockText.length();
             }
             else {
-                System.out.println("MDParser.parseRunnableNode: invalid codeBlockIndex: " + codeBlockIndexStr);
+                System.out.println("MarkdownParser.parseRunnableNode: invalid codeBlockIndex: " + codeBlockIndexStr);
                 dollarIndex = endIndex;
             }
         }
 
         // Return node
-        MDNode runnableNode = new MDNode(MDNode.NodeType.Runnable, charsTillBlockEnd);
+        MarkdownNode runnableNode = new MarkdownNode(MarkdownNode.NodeType.Runnable, charsTillBlockEnd);
         if (!metaData.isEmpty())
             runnableNode.setOtherText(metaData);
         return runnableNode;
@@ -231,26 +231,26 @@ public class MDParser {
     /**
      * Parses a Separator node.
      */
-    private MDNode parseSeparatorNode()
+    private MarkdownNode parseSeparatorNode()
     {
         eatChars(SEPARATOR_MARKER.length());
         while (nextChar() != '\n' && nextChar() != '\r') eatChar();
         eatLineEnd();
-        return new MDNode(MDNode.NodeType.Separator, null);
+        return new MarkdownNode(MarkdownNode.NodeType.Separator, null);
     }
 
     /**
      * Parses a list node.
      */
-    private MDNode parseListNode()
+    private MarkdownNode parseListNode()
     {
         // Create list node and listItemNodes
-        MDNode listNode = new MDNode(MDNode.NodeType.List, null);
-        List<MDNode> listItemNodes = new ArrayList<>();
+        MarkdownNode listNode = new MarkdownNode(MarkdownNode.NodeType.List, null);
+        List<MarkdownNode> listItemNodes = new ArrayList<>();
 
         // Parse available list items and add to listItemNodes
         while (nextCharsStartWithListItemMarker()) {
-            MDNode listItemNode = parseListItemNode();
+            MarkdownNode listItemNode = parseListItemNode();
             listItemNodes.add(listItemNode);
         }
 
@@ -262,19 +262,19 @@ public class MDParser {
     /**
      * Parses a list item node. These can contain
      */
-    private MDNode parseListItemNode()
+    private MarkdownNode parseListItemNode()
     {
         // Eat identifier chars
         eatChars(LIST_ITEM_MARKER.length());
 
         // Parse mixable child node
-        MDNode mixableNode = parseMixableNode();
+        MarkdownNode mixableNode = parseMixableNode();
 
         // Create ListItem node
-        MDNode listItemNode = new MDNode(MDNode.NodeType.ListItem, null);
+        MarkdownNode listItemNode = new MarkdownNode(MarkdownNode.NodeType.ListItem, null);
 
         // If node is mixed, move its children to new node, otherwise just add child
-        if (mixableNode.getNodeType() == MDNode.NodeType.Mixed)
+        if (mixableNode.getNodeType() == MarkdownNode.NodeType.Mixed)
             listItemNode.setChildNodes(mixableNode.getChildNodes());
         else listItemNode.addChildNode(mixableNode);
 
@@ -285,24 +285,24 @@ public class MDParser {
     /**
      * Parses a link node.
      */
-    private MDNode parseLinkNode()
+    private MarkdownNode parseLinkNode()
     {
         // Eat marker chars
         eatChars(LINK_MARKER.length());
 
         // Parse nodes till link close
-        MDNode mixableNode = parseMixableNode();
+        MarkdownNode mixableNode = parseMixableNode();
 
         // If missing link close char, complain
         if (!nextCharsStartWith(LINK_END_MARKER))
-            System.err.println("MDParser.parseLinkNode: Missing link close char");
+            System.err.println("MarkdownParser.parseLinkNode: Missing link close char");
         else eatChar();
 
         // Create link node
-        MDNode linkNode = new MDNode(MDNode.NodeType.Link, null);
+        MarkdownNode linkNode = new MarkdownNode(MarkdownNode.NodeType.Link, null);
 
         // If node is mixed, move its children to new node, otherwise just add child
-        if (mixableNode.getNodeType() == MDNode.NodeType.Mixed)
+        if (mixableNode.getNodeType() == MarkdownNode.NodeType.Mixed)
             linkNode.setChildNodes(mixableNode.getChildNodes());
         else linkNode.addChildNode(mixableNode);
 
@@ -332,7 +332,7 @@ public class MDParser {
     /**
      * Parses an image node.
      */
-    private MDNode parseImageNode()
+    private MarkdownNode parseImageNode()
     {
         // Eat marker chars
         eatChars(IMAGE_MARKER.length());
@@ -341,7 +341,7 @@ public class MDParser {
         String imageText = getCharsTillMatchingTerminator("]").toString().trim();
 
         // Create link node
-        MDNode linkNode = new MDNode(MDNode.NodeType.Image, imageText);
+        MarkdownNode linkNode = new MarkdownNode(MarkdownNode.NodeType.Image, imageText);
 
         // Parse and set url text
         String urlAddr = parseLinkUrlAddress();
@@ -354,7 +354,7 @@ public class MDParser {
     /**
      * Parses a directive node.
      */
-    private MDNode parseDirectiveNode()
+    private MarkdownNode parseDirectiveNode()
     {
         // Eat marker chars
         eatChars(DIRECTIVE_MARKER.length());
@@ -363,7 +363,7 @@ public class MDParser {
         String directiveText = getCharsTillMatchingTerminator(LINK_END_MARKER).toString().trim();
 
         // Create directive node
-        MDNode directiveNode = new MDNode(MDNode.NodeType.Directive, directiveText);
+        MarkdownNode directiveNode = new MarkdownNode(MarkdownNode.NodeType.Directive, directiveText);
 
         // Return
         return directiveNode;

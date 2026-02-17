@@ -17,7 +17,7 @@ public class JMDViewer {
     private Class<?> _mainClass;
 
     // Markdown view
-    private MarkDownView _markDownView;
+    private MarkdownView _markdownView;
 
     // The console
     private JMDRunConsole _console = new JMDRunConsole();
@@ -58,12 +58,12 @@ public class JMDViewer {
 
         // Create Markdown view
         WebFile mainFile = getMainFile();
-        _markDownView = new MarkDownView();
-        _markDownView.setMarkDown(mainFile.getText());
-        _markDownView.setGrowWidth(true);
+        _markdownView = new MarkdownView();
+        _markdownView.setMarkdown(mainFile.getText());
+        _markdownView.setGrowWidth(true);
 
         // Iterate over markdown view runnables and run methods
-        ViewList children = _markDownView.getChildren();
+        ViewList children = _markdownView.getChildren();
         int runnableCount = 0;
         for (View child : children) {
             if (Objects.equals(child.getName(), "Runnable"))
@@ -135,6 +135,6 @@ public class JMDViewer {
     private class JMDDoneConsole extends DefaultConsole {
 
         @Override
-        public View getConsoleView()  { return _markDownView; }
+        public View getConsoleView()  { return _markdownView; }
     }
 }

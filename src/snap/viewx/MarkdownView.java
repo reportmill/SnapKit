@@ -15,16 +15,16 @@ import java.util.Map;
 /**
  * This view class renders mark down.
  */
-public class MarkDownView extends ChildView {
+public class MarkdownView extends ChildView {
 
     // The source url (and it's parent)
     private WebURL _sourceUrl, _sourceDirUrl;
 
     // The root markdown node
-    private MDNode _rootMarkdownNode;
+    private MarkdownNode _rootMarkdownNode;
 
     // The selected code block node
-    private MDNode _selCodeBlockNode;
+    private MarkdownNode _selCodeBlockNode;
 
     // Map of directive values
     private Map<String,String> _directives = new HashMap<>();
@@ -46,7 +46,7 @@ public class MarkDownView extends ChildView {
     /**
      * Constructor.
      */
-    public MarkDownView()
+    public MarkdownView()
     {
         super();
         setPadding(DOC_PADDING);
@@ -69,26 +69,26 @@ public class MarkDownView extends ChildView {
     }
 
     /**
-     * Sets MarkDown.
+     * Sets Markdown string.
      */
-    public void setMarkDown(String markDown)
+    public void setMarkdown(String markdownStr)
     {
-        _rootMarkdownNode = new MDParser().parseMarkdownChars(markDown);
-        List<MDNode> rootNodes = _rootMarkdownNode.getChildNodes();
+        _rootMarkdownNode = new MarkdownParser().parseMarkdownChars(markdownStr);
+        List<MarkdownNode> rootNodes = _rootMarkdownNode.getChildNodes();
 
-        for (MDNode node : rootNodes)
+        for (MarkdownNode node : rootNodes)
             addViewForNode(node);
     }
 
     /**
      * Returns the markdown nodes.
      */
-    public MDNode getRootMarkdownNode()  { return _rootMarkdownNode; }
+    public MarkdownNode getRootMarkdownNode()  { return _rootMarkdownNode; }
 
     /**
      * Returns the markdown nodes.
      */
-    public List<MDNode> getMarkdownNodes()  { return _rootMarkdownNode.getChildNodes(); }
+    public List<MarkdownNode> getMarkdownNodes()  { return _rootMarkdownNode.getChildNodes(); }
 
     /**
      * Returns the directive value.
@@ -117,25 +117,25 @@ public class MarkDownView extends ChildView {
     /**
      * Returns the selected code block node.
      */
-    public MDNode getSelCodeBlockNode()
+    public MarkdownNode getSelCodeBlockNode()
     {
         if (_selCodeBlockNode != null)
             return _selCodeBlockNode;
 
-        List<MDNode> rootNodes = _rootMarkdownNode.getChildNodes();
-        return ListUtils.findMatch(rootNodes, node -> node.getNodeType() == MDNode.NodeType.CodeBlock);
+        List<MarkdownNode> rootNodes = _rootMarkdownNode.getChildNodes();
+        return ListUtils.findMatch(rootNodes, node -> node.getNodeType() == MarkdownNode.NodeType.CodeBlock);
     }
 
     /**
      * Adds a view for given node.
      */
-    protected void addViewForNode(MDNode markNode)
+    protected void addViewForNode(MarkdownNode markNode)
     {
         View nodeView = createViewForNode(markNode);
         if (nodeView != null)
             addChild(nodeView);
 
-        if (markNode.getNodeType() == MDNode.NodeType.Header1 || markNode.getNodeType() == MDNode.NodeType.Header2)
+        if (markNode.getNodeType() == MarkdownNode.NodeType.Header1 || markNode.getNodeType() == MarkdownNode.NodeType.Header2)
             addViewForSeparatorNode();
     }
 
@@ -151,7 +151,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates view for node.
      */
-    protected View createViewForNode(MDNode markNode)
+    protected View createViewForNode(MarkdownNode markNode)
     {
         return switch (markNode.getNodeType()) {
             case Header1, Header2 -> createViewForHeaderNode(markNode);
@@ -164,7 +164,7 @@ public class MarkDownView extends ChildView {
             case Mixed -> createViewForMixedNode(markNode);
             case Directive -> createViewForDirectiveNode(markNode);
             default -> {
-                System.err.println("MarkDownView.createViewForNode: No support for type: " + markNode.getNodeType());
+                System.err.println("MarkdownView.createViewForNode: No support for type: " + markNode.getNodeType());
                 yield null;
             }
         };
@@ -173,15 +173,15 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for header node.
      */
-    protected View createViewForHeaderNode(MDNode headerNode)
+    protected View createViewForHeaderNode(MarkdownNode headerNode)
     {
         TextArea textArea = new TextArea();
         textArea.setMargin(HEADER1_MARGIN);
-        if (headerNode.getNodeType() == MDNode.NodeType.Header2)
+        if (headerNode.getNodeType() == MarkdownNode.NodeType.Header2)
             textArea.setMargin(HEADER2_MARGIN);
 
         // Reset style
-        TextStyle textStyle = headerNode.getNodeType() == MDNode.NodeType.Header1 ? MDUtils.getHeader1Style() : MDUtils.getHeader2Style();
+        TextStyle textStyle = headerNode.getNodeType() == MarkdownNode.NodeType.Header1 ? MarkdownUtils.getHeader1Style() : MarkdownUtils.getHeader2Style();
         TextModel textModel = textArea.getTextModel();
         textModel.setDefaultTextStyle(textStyle);
 
@@ -208,14 +208,14 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for text node.
      */
-    protected View createViewForTextNode(MDNode contentNode)
+    protected View createViewForTextNode(MarkdownNode contentNode)
     {
         TextArea textArea = new TextArea(true);
         textArea.setWrapLines(true);
         textArea.setMargin(GENERAL_MARGIN);
 
         // Reset style
-        TextStyle textStyle = MDUtils.getContentStyle();
+        TextStyle textStyle = MarkdownUtils.getContentStyle();
         TextModel textModel = textArea.getTextModel();
         textModel.setDefaultTextStyle(textStyle);
 
@@ -229,7 +229,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for link node.
      */
-    protected View createViewForLinkNode(MDNode linkNode)
+    protected View createViewForLinkNode(MarkdownNode linkNode)
     {
         // Create view for mixed node
         RowView linkedNodeView = createViewForMixedNode(linkNode);
@@ -258,7 +258,7 @@ public class MarkDownView extends ChildView {
 
             // Create link style
             TextLink textLink = new TextLink(urlAddr);
-            TextStyle textStyle = MDUtils.getContentStyle();
+            TextStyle textStyle = MarkdownUtils.getContentStyle();
             TextStyle linkTextStyle = textStyle.copyForStyleValue(textLink);
 
             // Add link
@@ -279,7 +279,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for image node.
      */
-    protected View createViewForImageNode(MDNode imageNode)
+    protected View createViewForImageNode(MarkdownNode imageNode)
     {
         String urlAddr = imageNode.getOtherText();
         WebURL url = getUrlForAddress(urlAddr);
@@ -310,14 +310,14 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for list node.
      */
-    protected ChildView createViewForListNode(MDNode listNode)
+    protected ChildView createViewForListNode(MarkdownNode listNode)
     {
         // Create list view
         ColView listNodeView = new ColView();
         listNodeView.setMargin(GENERAL_MARGIN);
 
         // Get list item views and add to listNodeView
-        List<MDNode> listItemNodes = listNode.getChildNodes();
+        List<MarkdownNode> listItemNodes = listNode.getChildNodes();
         List<View> listItemViews = ListUtils.map(listItemNodes, node -> createViewForListItemNode(node));
         listItemViews.forEach(listNodeView::addChild);
 
@@ -328,7 +328,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for list item node.
      */
-    protected ChildView createViewForListItemNode(MDNode listItemNode)
+    protected ChildView createViewForListItemNode(MarkdownNode listItemNode)
     {
         // Create view for mixed node
         RowView mixedNodeView = createViewForMixedNode(listItemNode);
@@ -339,7 +339,7 @@ public class MarkDownView extends ChildView {
 
         // Otherwise create text area and insert
         else {
-            View bulletTextArea = createViewForTextNode(new MDNode(MDNode.NodeType.Text, "• "));
+            View bulletTextArea = createViewForTextNode(new MarkdownNode(MarkdownNode.NodeType.Text, "• "));
             bulletTextArea.setMargin(NO_MARGIN);
             mixedNodeView.addChild(bulletTextArea, 0);
         }
@@ -351,7 +351,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for code block.
      */
-    protected TextArea createViewForCodeBlockNode(MDNode codeNode)
+    protected TextArea createViewForCodeBlockNode(MarkdownNode codeNode)
     {
         TextArea textView = new TextView();
         textView.setMargin(GENERAL_MARGIN);
@@ -363,7 +363,7 @@ public class MarkDownView extends ChildView {
         textView.setFocusPainted(true);
 
         // Reset style
-        TextStyle textStyle = MDUtils.getCodeStyle();
+        TextStyle textStyle = MarkdownUtils.getCodeStyle();
         TextModel textModel = textView.getTextModel();
         textModel.setDefaultTextStyle(textStyle);
 
@@ -380,7 +380,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for Runnable block.
      */
-    protected View createViewForRunnableNode(MDNode codeNode)
+    protected View createViewForRunnableNode(MarkdownNode codeNode)
     {
         // Wrap in box and return
         BoxView codeBlockBox = new BoxView();
@@ -404,7 +404,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for directive.
      */
-    protected View createViewForDirectiveNode(MDNode directiveNode)
+    protected View createViewForDirectiveNode(MarkdownNode directiveNode)
     {
         String directiveString = directiveNode.getText();
         String[] dirParts = directiveString.split("=");
@@ -416,7 +416,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for mixed node (children are Text, Link, Image or CodeBlock).
      */
-    protected RowView createViewForMixedNode(MDNode mixedNode)
+    protected RowView createViewForMixedNode(MarkdownNode mixedNode)
     {
         // Create row view for mixed node
         RowView mixedNodeView = new RowView();
@@ -424,15 +424,15 @@ public class MarkDownView extends ChildView {
         mixedNodeView.setSpacing(4);
 
         // Get children
-        List<MDNode> childNodes = mixedNode.getChildNodes();
+        List<MarkdownNode> childNodes = mixedNode.getChildNodes();
         TextArea lastTextArea = null;
 
         // Iterate over children
-        for (MDNode childNode : childNodes) {
+        for (MarkdownNode childNode : childNodes) {
 
             // If last node is Text or Link and last view is TextArea, just add chars
-            MDNode.NodeType nodeType = childNode.getNodeType();
-            if (lastTextArea != null && (nodeType == MDNode.NodeType.Text || nodeType == MDNode.NodeType.Link))
+            MarkdownNode.NodeType nodeType = childNode.getNodeType();
+            if (lastTextArea != null && (nodeType == MarkdownNode.NodeType.Text || nodeType == MarkdownNode.NodeType.Link))
                 addTextOrLinkNodeToTextArea(lastTextArea, childNode);
 
             // Otherwise create view and add
@@ -440,7 +440,7 @@ public class MarkDownView extends ChildView {
                 View childNodeView = createViewForMixedNodeChildNode(childNode);
                 childNodeView.setMargin(NO_MARGIN);
                 mixedNodeView.addChild(childNodeView);
-                if (childNodeView instanceof TextArea && nodeType != MDNode.NodeType.CodeBlock)
+                if (childNodeView instanceof TextArea && nodeType != MarkdownNode.NodeType.CodeBlock)
                     lastTextArea = (TextArea) childNodeView;
                 else lastTextArea = null;
             }
@@ -453,12 +453,12 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for mixed node (children are Text, Link, Image or CodeBlock).
      */
-    private View createViewForMixedNodeChildNode(MDNode childNode)
+    private View createViewForMixedNodeChildNode(MarkdownNode childNode)
     {
-        MDNode.NodeType nodeType = childNode.getNodeType();
+        MarkdownNode.NodeType nodeType = childNode.getNodeType();
 
         // Handle CodeBlock special
-        if (nodeType == MDNode.NodeType.CodeBlock) {
+        if (nodeType == MarkdownNode.NodeType.CodeBlock) {
             View childNodeView = createViewForCodeBlockNode(childNode);
             childNodeView.setMargin(NO_MARGIN);
             childNodeView.setPadding(INLINE_PADDING);
@@ -480,14 +480,14 @@ public class MarkDownView extends ChildView {
     /**
      * Adds a text or link node content to a given text area.
      */
-    private void addTextOrLinkNodeToTextArea(TextArea textArea, MDNode aNode)
+    private void addTextOrLinkNodeToTextArea(TextArea textArea, MarkdownNode aNode)
     {
         // If text already present, add space
         if (textArea.length() > 0)
             textArea.addChars(" ");
 
         // Handle link node
-        if (aNode.getNodeType() == MDNode.NodeType.Link) {
+        if (aNode.getNodeType() == MarkdownNode.NodeType.Link) {
 
             // Create link style
             String urlAddr = aNode.getOtherText();
@@ -496,11 +496,11 @@ public class MarkDownView extends ChildView {
             TextStyle linkTextStyle = textStyle.copyForStyleValue(textLink);
 
             // Iterate over child nodes and add text to text area
-            List<MDNode> childNodes = aNode.getChildNodes();
-            for (MDNode childNode : childNodes) {
-                if (childNode.getNodeType() == MDNode.NodeType.Text)
+            List<MarkdownNode> childNodes = aNode.getChildNodes();
+            for (MarkdownNode childNode : childNodes) {
+                if (childNode.getNodeType() == MarkdownNode.NodeType.Text)
                     textArea.addCharsWithStyle(childNode.getText(), linkTextStyle);
-                else System.out.println("MarkDownView: Unsupported link content type: " + childNode.getNodeType());
+                else System.out.println("MarkdownView: Unsupported link content type: " + childNode.getNodeType());
             }
 
             // Enable events

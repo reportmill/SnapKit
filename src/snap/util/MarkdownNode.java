@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * This class represents a Markdown node.
  */
-public class MDNode {
+public class MarkdownNode {
 
     // The node type
     private NodeType _nodeType;
@@ -18,18 +18,18 @@ public class MDNode {
     private String _otherText;
 
     // Child nodes
-    private List<MDNode> _childNodes = EMPTY_NODE_LIST;
+    private List<MarkdownNode> _childNodes = EMPTY_NODE_LIST;
 
     // Constants for node type
     public enum NodeType { Root, Header1, Header2, Text, Link, Image, CodeBlock, List, ListItem, Mixed, Directive, Runnable, Separator }
 
     // Empty list
-    private static final List<MDNode> EMPTY_NODE_LIST = Collections.emptyList();
+    private static final List<MarkdownNode> EMPTY_NODE_LIST = Collections.emptyList();
 
     /**
      * Constructor.
      */
-    public MDNode(NodeType aType, String theText)
+    public MarkdownNode(NodeType aType, String theText)
     {
         _nodeType = aType;
         _text = theText;
@@ -58,12 +58,12 @@ public class MDNode {
     /**
      * Returns the child nodes.
      */
-    public List<MDNode> getChildNodes()  { return _childNodes; }
+    public List<MarkdownNode> getChildNodes()  { return _childNodes; }
 
     /**
      * Sets the child nodes.
      */
-    protected void setChildNodes(List<MDNode> nodesArray)
+    protected void setChildNodes(List<MarkdownNode> nodesArray)
     {
         _childNodes = new ArrayList<>(nodesArray);
     }
@@ -71,7 +71,7 @@ public class MDNode {
     /**
      * Adds a child node.
      */
-    public void addChildNode(MDNode aNode)
+    public void addChildNode(MarkdownNode aNode)
     {
         if (_childNodes == EMPTY_NODE_LIST) _childNodes = new ArrayList<>();
         _childNodes.add(aNode);
@@ -88,11 +88,11 @@ public class MDNode {
     /**
      * Returns a mixable node for given node.
      */
-    protected static MDNode getMixedNodeForNode(MDNode aNode)
+    protected static MarkdownNode getMixedNodeForNode(MarkdownNode aNode)
     {
         if (aNode.getNodeType() == NodeType.Mixed)
             return aNode;
-        MDNode mixedNode = new MDNode(NodeType.Mixed, null);
+        MarkdownNode mixedNode = new MarkdownNode(NodeType.Mixed, null);
         mixedNode.addChildNode(aNode);
         return mixedNode;
     }
@@ -103,7 +103,7 @@ public class MDNode {
     @Override
     public String toString()
     {
-        String str = "MDNode { NodeType: " + _nodeType;
+        String str = "MarkdownNode { NodeType: " + _nodeType;
         if (_text != null) str += ", Text: " + _text;
         if (_otherText != null) str += ", Link: " + _otherText;
         if (_childNodes != null) str += ", ChildCount: " + _childNodes.size();
