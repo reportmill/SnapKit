@@ -72,7 +72,7 @@ public class MDParser {
         }
 
         // Set child nodes
-        rootNode.setChildNodes(_rootNodes.toArray(new MDNode[0]));
+        rootNode.setChildNodes(_rootNodes);
 
         // Return
         return rootNode;
@@ -255,7 +255,7 @@ public class MDParser {
         }
 
         // Add listItemsNodes to list node and return
-        listNode.setChildNodes(listItemNodes.toArray(new MDNode[0]));
+        listNode.setChildNodes(listItemNodes);
         return listNode;
     }
 

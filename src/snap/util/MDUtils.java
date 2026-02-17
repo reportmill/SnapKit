@@ -3,6 +3,8 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.text.TextStyle;
 
+import java.util.List;
+
 /**
  * Utility methods for Markdown.
  */
@@ -26,7 +28,7 @@ public class MDUtils {
     public static String getJeplForJMD(String className, CharSequence markDown)
     {
         MDNode rootMarkdownNode = new MDParser().parseMarkdownChars(markDown);
-        MDNode[] rootNodes = rootMarkdownNode.getChildNodes();
+        List<MDNode> rootNodes = rootMarkdownNode.getChildNodes();
 
         StringBuilder sb = new StringBuilder();
         int methodCount = 0;

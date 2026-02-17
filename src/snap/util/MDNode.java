@@ -1,4 +1,7 @@
 package snap.util;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This class represents a Markdown node.
@@ -6,19 +9,22 @@ package snap.util;
 public class MDNode {
 
     // The node type
-    protected NodeType _nodeType;
+    private NodeType _nodeType;
 
     // The text
-    protected String _text;
+    private String _text;
 
     // Other text
     private String _otherText;
 
     // Child nodes
-    protected MDNode[] _childNodes;
+    private List<MDNode> _childNodes = EMPTY_NODE_LIST;
 
     // Constants for node type
     public enum NodeType { Root, Header1, Header2, Text, Link, Image, CodeBlock, List, ListItem, Mixed, Directive, Runnable, Separator }
+
+    // Empty list
+    private static final List<MDNode> EMPTY_NODE_LIST = Collections.emptyList();
 
     /**
      * Constructor.
@@ -52,14 +58,14 @@ public class MDNode {
     /**
      * Returns the child nodes.
      */
-    public MDNode[] getChildNodes()  { return _childNodes; }
+    public List<MDNode> getChildNodes()  { return _childNodes; }
 
     /**
      * Sets the child nodes.
      */
-    protected void setChildNodes(MDNode[] nodesArray)
+    protected void setChildNodes(List<MDNode> nodesArray)
     {
-        _childNodes = nodesArray;
+        _childNodes = new ArrayList<>(nodesArray);
     }
 
     /**
@@ -67,8 +73,8 @@ public class MDNode {
      */
     public void addChildNode(MDNode aNode)
     {
-        if (_childNodes == null) _childNodes = new MDNode[0];
-        _childNodes = ArrayUtils.add(_childNodes, aNode);
+        if (_childNodes == EMPTY_NODE_LIST) _childNodes = new ArrayList<>();
+        _childNodes.add(aNode);
     }
 
     /**
@@ -76,7 +82,7 @@ public class MDNode {
      */
     public void removeChildNode(int childIndex)
     {
-        _childNodes = ArrayUtils.remove(_childNodes, childIndex);
+        _childNodes.remove(childIndex);
     }
 
     /**
@@ -100,7 +106,7 @@ public class MDNode {
         String str = "MDNode { NodeType: " + _nodeType;
         if (_text != null) str += ", Text: " + _text;
         if (_otherText != null) str += ", Link: " + _otherText;
-        if (_childNodes != null) str += ", ChildCount: " + _childNodes.length;
+        if (_childNodes != null) str += ", ChildCount: " + _childNodes.size();
         return str + " }";
     }
 }

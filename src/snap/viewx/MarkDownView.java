@@ -5,16 +5,12 @@ import snap.gfx.*;
 import snap.text.TextModel;
 import snap.text.TextLink;
 import snap.text.TextStyle;
-import snap.util.ArrayUtils;
-import snap.util.MDNode;
-import snap.util.MDParser;
-import snap.util.MDUtils;
+import snap.util.*;
 import snap.view.*;
 import snap.web.WebURL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * This view class renders mark down.
@@ -78,7 +74,7 @@ public class MarkDownView extends ChildView {
     public void setMarkDown(String markDown)
     {
         _rootMarkdownNode = new MDParser().parseMarkdownChars(markDown);
-        MDNode[] rootNodes = _rootMarkdownNode.getChildNodes();
+        List<MDNode> rootNodes = _rootMarkdownNode.getChildNodes();
 
         for (MDNode node : rootNodes)
             addViewForNode(node);
@@ -92,7 +88,7 @@ public class MarkDownView extends ChildView {
     /**
      * Returns the markdown nodes.
      */
-    public List<MDNode> getMarkdownNodes()  { return List.of(_rootMarkdownNode.getChildNodes()); }
+    public List<MDNode> getMarkdownNodes()  { return _rootMarkdownNode.getChildNodes(); }
 
     /**
      * Returns the directive value.
@@ -126,8 +122,8 @@ public class MarkDownView extends ChildView {
         if (_selCodeBlockNode != null)
             return _selCodeBlockNode;
 
-        MDNode[] rootNodes = _rootMarkdownNode.getChildNodes();
-        return ArrayUtils.findMatch(rootNodes, node -> node.getNodeType() == MDNode.NodeType.CodeBlock);
+        List<MDNode> rootNodes = _rootMarkdownNode.getChildNodes();
+        return ListUtils.findMatch(rootNodes, node -> node.getNodeType() == MDNode.NodeType.CodeBlock);
     }
 
     /**
@@ -321,9 +317,9 @@ public class MarkDownView extends ChildView {
         listNodeView.setMargin(GENERAL_MARGIN);
 
         // Get list item views and add to listNodeView
-        MDNode[] listItemNodes = listNode.getChildNodes();
-        View[] listItemViews = ArrayUtils.map(listItemNodes, node -> createViewForListItemNode(node), View.class);
-        Stream.of(listItemViews).forEach(listNodeView::addChild);
+        List<MDNode> listItemNodes = listNode.getChildNodes();
+        List<View> listItemViews = ListUtils.map(listItemNodes, node -> createViewForListItemNode(node));
+        listItemViews.forEach(listNodeView::addChild);
 
         // Return
         return listNodeView;
@@ -428,7 +424,7 @@ public class MarkDownView extends ChildView {
         mixedNodeView.setSpacing(4);
 
         // Get children
-        MDNode[] childNodes = mixedNode.getChildNodes();
+        List<MDNode> childNodes = mixedNode.getChildNodes();
         TextArea lastTextArea = null;
 
         // Iterate over children
@@ -500,7 +496,7 @@ public class MarkDownView extends ChildView {
             TextStyle linkTextStyle = textStyle.copyForStyleValue(textLink);
 
             // Iterate over child nodes and add text to text area
-            MDNode[] childNodes = aNode.getChildNodes();
+            List<MDNode> childNodes = aNode.getChildNodes();
             for (MDNode childNode : childNodes) {
                 if (childNode.getNodeType() == MDNode.NodeType.Text)
                     textArea.addCharsWithStyle(childNode.getText(), linkTextStyle);
