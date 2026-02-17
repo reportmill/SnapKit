@@ -12,6 +12,7 @@ import snap.util.MDUtils;
 import snap.view.*;
 import snap.web.WebURL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -84,6 +85,16 @@ public class MarkDownView extends ChildView {
     }
 
     /**
+     * Returns the markdown nodes.
+     */
+    public MDNode getRootMarkdownNode()  { return _rootMarkdownNode; }
+
+    /**
+     * Returns the markdown nodes.
+     */
+    public List<MDNode> getMarkdownNodes()  { return List.of(_rootMarkdownNode.getChildNodes()); }
+
+    /**
      * Returns the directive value.
      */
     public boolean isDirectiveSet(String aKey)
@@ -146,20 +157,21 @@ public class MarkDownView extends ChildView {
      */
     protected View createViewForNode(MDNode markNode)
     {
-        switch (markNode.getNodeType()) {
-            case Header1: case Header2: return createViewForHeaderNode(markNode);
-            case Text: return createViewForTextNode(markNode);
-            case Link: return createViewForLinkNode(markNode);
-            case Image: return createViewForImageNode(markNode);
-            case CodeBlock: return createViewForCodeBlockNode(markNode);
-            case Runnable: return createViewForRunnableNode(markNode);
-            case List: return createViewForListNode(markNode);
-            case Mixed: return createViewForMixedNode(markNode);
-            case Directive: return createViewForDirectiveNode(markNode);
-            default:
+        return switch (markNode.getNodeType()) {
+            case Header1, Header2 -> createViewForHeaderNode(markNode);
+            case Text -> createViewForTextNode(markNode);
+            case Link -> createViewForLinkNode(markNode);
+            case Image -> createViewForImageNode(markNode);
+            case CodeBlock -> createViewForCodeBlockNode(markNode);
+            case Runnable -> createViewForRunnableNode(markNode);
+            case List -> createViewForListNode(markNode);
+            case Mixed -> createViewForMixedNode(markNode);
+            case Directive -> createViewForDirectiveNode(markNode);
+            default -> {
                 System.err.println("MarkDownView.createViewForNode: No support for type: " + markNode.getNodeType());
-                return null;
-        }
+                yield null;
+            }
+        };
     }
 
     /**
@@ -246,7 +258,7 @@ public class MarkDownView extends ChildView {
         linkNodeView.setCursor(Cursor.HAND);
 
         // Handle TextArea: Add link style
-        if (linkNodeView instanceof TextArea) {
+        if (linkNodeView instanceof TextArea textArea) {
 
             // Create link style
             TextLink textLink = new TextLink(urlAddr);
@@ -254,7 +266,6 @@ public class MarkDownView extends ChildView {
             TextStyle linkTextStyle = textStyle.copyForStyleValue(textLink);
 
             // Add link
-            TextArea textArea = (TextArea) linkNodeView;
             TextModel textModel = textArea.getTextModel();
             textModel.setTextStyle(linkTextStyle, 0, textModel.length());
         }
@@ -327,10 +338,8 @@ public class MarkDownView extends ChildView {
         RowView mixedNodeView = createViewForMixedNode(listItemNode);
 
         // If first child is TextArea, add bullet
-        if (mixedNodeView.getChild(0) instanceof TextArea) {
-            TextArea textArea = (TextArea) mixedNodeView.getChild(0);
+        if (mixedNodeView.getChild(0) instanceof TextArea textArea)
             textArea.getTextModel().addChars("• ", 0);
-        }
 
         // Otherwise create text area and insert
         else {
@@ -553,11 +562,12 @@ public class MarkDownView extends ChildView {
         // Get font for given fontStyle
         TextModel textModel = textArea.getTextModel();
         Font defaultFont = textModel.getDefaultFont();
-        switch (fontStyle) {
-            case "Bold": defaultFont = defaultFont.getBold(); break;
-            case "Italic": defaultFont = defaultFont.getItalic(); break;
-            case "BoldItalic": defaultFont = defaultFont.getBold().getItalic(); break;
-        }
+        defaultFont = switch (fontStyle) {
+            case "Bold" -> defaultFont.getBold();
+            case "Italic" -> defaultFont.getItalic();
+            case "BoldItalic" -> defaultFont.getBold().getItalic();
+            default -> defaultFont;
+        };
 
         // Get text style for font and add chars
         TextStyle textStyle = textArea.getDefaultTextStyle().copyForStyleValue(defaultFont);
@@ -567,21 +577,21 @@ public class MarkDownView extends ChildView {
     // Return regex for FontStyle
     private static String getRegexForFontStyle(String fontStyle)
     {
-        switch (fontStyle) {
-            case "BoldItalic": return "(?<!\\\\)\\*\\*\\*";
-            case "Bold": return "(?<!\\\\)\\*\\*";
-            case "Italic": return "(?<!\\\\)\\*";
-            default: throw new RuntimeException("Unknown font style: " + fontStyle);
-        }
+        return switch (fontStyle) {
+            case "BoldItalic" -> "(?<!\\\\)\\*\\*\\*";
+            case "Bold" -> "(?<!\\\\)\\*\\*";
+            case "Italic" -> "(?<!\\\\)\\*";
+            default -> throw new RuntimeException("Unknown font style: " + fontStyle);
+        };
     }
 
     // Return next FontStyle
     private static String getNextFontStyleForFontStyle(String fontStyle)
     {
-        switch (fontStyle) {
-            case "Bold": return "Italic";
-            case "BoldItalic": return "Bold";
-            default: return null;
-        }
+        return switch (fontStyle) {
+            case "Bold" -> "Italic";
+            case "BoldItalic" -> "Bold";
+            default -> null;
+        };
     }
 }

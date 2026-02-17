@@ -18,7 +18,7 @@ public class MDNode {
     protected MDNode[] _childNodes;
 
     // Constants for node type
-    public enum NodeType { Root, Header1, Header2, Text, Link, Image, CodeBlock, List, ListItem, Mixed, Directive, Runnable }
+    public enum NodeType { Root, Header1, Header2, Text, Link, Image, CodeBlock, List, ListItem, Mixed, Directive, Runnable, Separator }
 
     /**
      * Constructor.
@@ -65,10 +65,18 @@ public class MDNode {
     /**
      * Adds a child node.
      */
-    protected void addChildNode(MDNode aNode)
+    public void addChildNode(MDNode aNode)
     {
         if (_childNodes == null) _childNodes = new MDNode[0];
         _childNodes = ArrayUtils.add(_childNodes, aNode);
+    }
+
+    /**
+     * Removes a child node.
+     */
+    public void removeChildNode(int childIndex)
+    {
+        _childNodes = ArrayUtils.remove(_childNodes, childIndex);
     }
 
     /**

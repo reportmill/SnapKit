@@ -1,5 +1,4 @@
 package snap.util;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +28,16 @@ public class MDParser {
 
     // Constants
     public static final String HEADER_MARKER = "#";
-    public static final String LIST_ITEM_MARKER = "* ";
+    public static final String LIST_ITEM_MARKER = "- ";
+    public static final String LIST_ITEM_MARKER2 = "* ";
+    public static final String LIST_ITEM_MARKER3 = "+ ";
     public static final String LINK_MARKER = "[";
     public static final String IMAGE_MARKER = "![";
     public static final String DIRECTIVE_MARKER = "@[";
     public static final String CODE_BLOCK_MARKER = "```";
     private static final String LINK_END_MARKER = "]";
     private static final String RUNNABLE_MARKER = "~~~";
+    private static final String SEPARATOR_MARKER = "---";
 
     // Constant for Nodes that are stand-alone
     private static final String[] MIXABLE_NODE_MARKERS = { LINK_MARKER, IMAGE_MARKER, CODE_BLOCK_MARKER };
@@ -91,7 +93,7 @@ public class MDParser {
             return parseHeaderNode();
 
         // Handle list item
-        if (nextCharsStartWith(LIST_ITEM_MARKER))
+        if (nextCharsStartWithListItemMarker())
             return parseListNode();
 
         // Handle directive
@@ -142,6 +144,10 @@ public class MDParser {
         if (nextCharsStartWith(RUNNABLE_MARKER))
             return parseRunnableNode();
 
+        // Handle separator block
+        if (nextCharsStartWith(SEPARATOR_MARKER))
+            return parseSeparatorNode();
+
         // Return text node
         return parseTextNode();
     }
@@ -181,7 +187,6 @@ public class MDParser {
     private MDNode parseCodeBlockNode()
     {
         eatChars(CODE_BLOCK_MARKER.length());
-        if (nextCharsStartWith("!{")) return parseRunnableNode(); // Can go soon
         String charsTillBlockEnd = getCharsTillMatchingTerminator(CODE_BLOCK_MARKER).toString();
         return new MDNode(MDNode.NodeType.CodeBlock, charsTillBlockEnd);
     }
@@ -192,11 +197,9 @@ public class MDParser {
     private MDNode parseRunnableNode()
     {
         // Get string
-        String END_MARKER = nextCharsStartWith("!{") ? CODE_BLOCK_MARKER : RUNNABLE_MARKER;
-        if (nextCharsStartWith("!{")) eatChars(2); // Can go soon
-        else eatChars(RUNNABLE_MARKER.length());
+        eatChars(RUNNABLE_MARKER.length());
         String metaData = getCharsTillLineEnd().toString().replace("}", "");
-        String charsTillBlockEnd = getCharsTillMatchingTerminator(END_MARKER).toString();
+        String charsTillBlockEnd = getCharsTillMatchingTerminator(RUNNABLE_MARKER).toString();
 
         // Replace occurrences of '$<num>' with CodeBlock at that index
         for (int dollarIndex = charsTillBlockEnd.indexOf('$'); dollarIndex >= 0; dollarIndex = charsTillBlockEnd.indexOf('$', dollarIndex)) {
@@ -226,6 +229,17 @@ public class MDParser {
     }
 
     /**
+     * Parses a Separator node.
+     */
+    private MDNode parseSeparatorNode()
+    {
+        eatChars(SEPARATOR_MARKER.length());
+        while (nextChar() != '\n' && nextChar() != '\r') eatChar();
+        eatLineEnd();
+        return new MDNode(MDNode.NodeType.Separator, null);
+    }
+
+    /**
      * Parses a list node.
      */
     private MDNode parseListNode()
@@ -235,7 +249,7 @@ public class MDParser {
         List<MDNode> listItemNodes = new ArrayList<>();
 
         // Parse available list items and add to listItemNodes
-        while (nextCharsStartWith(LIST_ITEM_MARKER)) {
+        while (nextCharsStartWithListItemMarker()) {
             MDNode listItemNode = parseListItemNode();
             listItemNodes.add(listItemNode);
         }
@@ -558,5 +572,13 @@ public class MDParser {
 
         // Return true
         return true;
+    }
+
+    /**
+     * Returns whether next chars start with list marker: '-', '*' or '+'.
+     */
+    private boolean nextCharsStartWithListItemMarker()
+    {
+        return nextCharsStartWith(LIST_ITEM_MARKER) || nextCharsStartWith(LIST_ITEM_MARKER2) || nextCharsStartWith(LIST_ITEM_MARKER3);
     }
 }
