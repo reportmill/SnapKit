@@ -21,7 +21,7 @@ public class MarkdownNode {
     private List<MarkdownNode> _childNodes = EMPTY_NODE_LIST;
 
     // Constants for node type
-    public enum NodeType { Root, Header1, Header2, Text, Link, Image, CodeBlock, List, ListItem, Mixed, Directive, Runnable, Separator }
+    public enum NodeType { Document, Header1, Header2, Paragraph, Link, Image, CodeBlock, List, ListItem, Mixed, Directive, Runnable, Separator }
 
     // Empty list
     private static final List<MarkdownNode> EMPTY_NODE_LIST = Collections.emptyList();

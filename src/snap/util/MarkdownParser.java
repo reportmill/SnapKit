@@ -20,8 +20,8 @@ public class MarkdownParser {
     // The parse text
     private ParseText _parseText;
 
-    // The running list of root nodes
-    private List<MarkdownNode> _rootNodes = new ArrayList<>();
+    // The running list of document nodes
+    private List<MarkdownNode> _documentNodes = new ArrayList<>();
 
     // Constants
     public static final String HEADER_MARKER = "#";
@@ -49,29 +49,29 @@ public class MarkdownParser {
     }
 
     /**
-     * Parses given text string and returns node.
+     * Parses given markdown chars and returns document node.
      */
-    public MarkdownNode parseMarkdownChars(CharSequence theChars)
+    public MarkdownNode parseMarkdownChars(CharSequence markdownChars)
     {
         // Set input chars
-        _parseText = new ParseText(theChars);
+        _parseText = new ParseText(markdownChars);
 
-        // Create rootNode and child nodes
-        MarkdownNode rootNode = new MarkdownNode(MarkdownNode.NodeType.Root, null);
-        _rootNodes = new ArrayList<>();
+        // Create document node and child nodes
+        MarkdownNode documentNode = new MarkdownNode(MarkdownNode.NodeType.Document, null);
+        _documentNodes = new ArrayList<>();
 
         // Read nodes
         while (hasChars()) {
             MarkdownNode nextNode = parseNextNode();
             if (nextNode != null)
-                _rootNodes.add(nextNode);
+                _documentNodes.add(nextNode);
         }
 
         // Set child nodes
-        rootNode.setChildNodes(_rootNodes);
+        documentNode.setChildNodes(_documentNodes);
 
         // Return
-        return rootNode;
+        return documentNode;
     }
 
     /**
@@ -96,7 +96,7 @@ public class MarkdownParser {
         if (nextCharsStartWith(DIRECTIVE_MARKER))
             return parseDirectiveNode();
 
-        // Parse mixable node: Text, Link, Image, CodeBlock
+        // Parse inline node: Text, Link, Image, CodeBlock
         return parseMixableNode();
     }
 
@@ -173,8 +173,8 @@ public class MarkdownParser {
      */
     private MarkdownNode parseTextNode()
     {
-        String textChars = getCharsTillTextEnd().toString().trim();
-        return new MarkdownNode(MarkdownNode.NodeType.Text, textChars);
+        String textChars = getCharsTillParagraphEnd().toString().trim();
+        return new MarkdownNode(MarkdownNode.NodeType.Paragraph, textChars);
     }
 
     /**
@@ -204,7 +204,7 @@ public class MarkdownParser {
                 endIndex++;
             String codeBlockIndexStr = charsTillBlockEnd.substring(dollarIndex, endIndex);
             int codeBlockIndex = Convert.intValue(codeBlockIndexStr) - 1;
-            MarkdownNode[] codeBlockNodes = ListUtils.filterToArray(_rootNodes, node -> node.getNodeType() == MarkdownNode.NodeType.CodeBlock, MarkdownNode.class);
+            MarkdownNode[] codeBlockNodes = ListUtils.filterToArray(_documentNodes, node -> node.getNodeType() == MarkdownNode.NodeType.CodeBlock, MarkdownNode.class);
             if (codeBlockIndex >= 0 && codeBlockIndex < codeBlockNodes.length) {
                 MarkdownNode codeBlockNode = codeBlockNodes[codeBlockIndex];
                 String codeBlockText = codeBlockNode.getText();
@@ -366,9 +366,9 @@ public class MarkdownParser {
     }
 
     /**
-     * Returns chars till text end (which is either at next non-mixable node start or line end).
+     * Returns chars till paragraph end (which is either at next non-inline node start or line end).
      */
-    private CharSequence getCharsTillTextEnd()
+    private CharSequence getCharsTillParagraphEnd()
     {
         StringBuilder sb = new StringBuilder();
 
@@ -404,7 +404,7 @@ public class MarkdownParser {
      */
     private boolean nextCharsStartWithMixableNode()
     {
-        // If not at empty line, return true (any next chars will be text node). Except for link end marker
+        // If not at empty line, return true (any next chars will be paragraph node). Except for link end marker
         if (!isAtEmptyLine()) {
 
             // If next char is link end, return false

@@ -20,8 +20,8 @@ public class MarkdownView extends ChildView {
     // The source url (and it's parent)
     private WebURL _sourceUrl, _sourceDirUrl;
 
-    // The root markdown node
-    private MarkdownNode _rootMarkdownNode;
+    // The document markdown node
+    private MarkdownNode _documentNode;
 
     // The selected code block node
     private MarkdownNode _selCodeBlockNode;
@@ -73,22 +73,22 @@ public class MarkdownView extends ChildView {
      */
     public void setMarkdown(String markdownStr)
     {
-        _rootMarkdownNode = new MarkdownParser().parseMarkdownChars(markdownStr);
-        List<MarkdownNode> rootNodes = _rootMarkdownNode.getChildNodes();
+        _documentNode = new MarkdownParser().parseMarkdownChars(markdownStr);
+        List<MarkdownNode> documentNodes = _documentNode.getChildNodes();
 
-        for (MarkdownNode node : rootNodes)
+        for (MarkdownNode node : documentNodes)
             addViewForNode(node);
     }
 
     /**
-     * Returns the markdown nodes.
+     * Returns the document markdown node.
      */
-    public MarkdownNode getRootMarkdownNode()  { return _rootMarkdownNode; }
+    public MarkdownNode getDocumentNode()  { return _documentNode; }
 
     /**
      * Returns the markdown nodes.
      */
-    public List<MarkdownNode> getMarkdownNodes()  { return _rootMarkdownNode.getChildNodes(); }
+    public List<MarkdownNode> getMarkdownNodes()  { return _documentNode.getChildNodes(); }
 
     /**
      * Returns the directive value.
@@ -122,8 +122,8 @@ public class MarkdownView extends ChildView {
         if (_selCodeBlockNode != null)
             return _selCodeBlockNode;
 
-        List<MarkdownNode> rootNodes = _rootMarkdownNode.getChildNodes();
-        return ListUtils.findMatch(rootNodes, node -> node.getNodeType() == MarkdownNode.NodeType.CodeBlock);
+        List<MarkdownNode> docNodes = _documentNode.getChildNodes();
+        return ListUtils.findMatch(docNodes, node -> node.getNodeType() == MarkdownNode.NodeType.CodeBlock);
     }
 
     /**
@@ -155,7 +155,7 @@ public class MarkdownView extends ChildView {
     {
         return switch (markNode.getNodeType()) {
             case Header1, Header2 -> createViewForHeaderNode(markNode);
-            case Text -> createViewForTextNode(markNode);
+            case Paragraph -> createViewForTextNode(markNode);
             case Link -> createViewForLinkNode(markNode);
             case Image -> createViewForImageNode(markNode);
             case CodeBlock -> createViewForCodeBlockNode(markNode);
@@ -339,7 +339,7 @@ public class MarkdownView extends ChildView {
 
         // Otherwise create text area and insert
         else {
-            View bulletTextArea = createViewForTextNode(new MarkdownNode(MarkdownNode.NodeType.Text, "• "));
+            View bulletTextArea = createViewForTextNode(new MarkdownNode(MarkdownNode.NodeType.Paragraph, "• "));
             bulletTextArea.setMargin(NO_MARGIN);
             mixedNodeView.addChild(bulletTextArea, 0);
         }
@@ -432,7 +432,7 @@ public class MarkdownView extends ChildView {
 
             // If last node is Text or Link and last view is TextArea, just add chars
             MarkdownNode.NodeType nodeType = childNode.getNodeType();
-            if (lastTextArea != null && (nodeType == MarkdownNode.NodeType.Text || nodeType == MarkdownNode.NodeType.Link))
+            if (lastTextArea != null && (nodeType == MarkdownNode.NodeType.Paragraph || nodeType == MarkdownNode.NodeType.Link))
                 addTextOrLinkNodeToTextArea(lastTextArea, childNode);
 
             // Otherwise create view and add
@@ -498,7 +498,7 @@ public class MarkdownView extends ChildView {
             // Iterate over child nodes and add text to text area
             List<MarkdownNode> childNodes = aNode.getChildNodes();
             for (MarkdownNode childNode : childNodes) {
-                if (childNode.getNodeType() == MarkdownNode.NodeType.Text)
+                if (childNode.getNodeType() == MarkdownNode.NodeType.Paragraph)
                     textArea.addCharsWithStyle(childNode.getText(), linkTextStyle);
                 else System.out.println("MarkdownView: Unsupported link content type: " + childNode.getNodeType());
             }
