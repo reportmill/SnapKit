@@ -17,11 +17,8 @@ import java.util.List;
  */
 public class MarkdownParser {
 
-    // The input
-    private CharSequence _input;
-
-    // The char index
-    private int _charIndex;
+    // The parse text
+    private ParseText _parseText;
 
     // The running list of root nodes
     private List<MarkdownNode> _rootNodes = new ArrayList<>();
@@ -57,8 +54,7 @@ public class MarkdownParser {
     public MarkdownNode parseMarkdownChars(CharSequence theChars)
     {
         // Set input chars
-        _input = theChars;
-        _charIndex = 0;
+        _parseText = new ParseText(theChars);
 
         // Create rootNode and child nodes
         MarkdownNode rootNode = new MarkdownNode(MarkdownNode.NodeType.Root, null);
@@ -370,117 +366,6 @@ public class MarkdownParser {
     }
 
     /**
-     * Returns the char at given char index.
-     */
-    private char charAt(int charIndex)  { return _input.charAt(charIndex); }
-
-    /**
-     * Returns whether there are more chars.
-     */
-    private boolean hasChars()  { return _charIndex < _input.length(); }
-
-    /**
-     * Returns the next char.
-     */
-    private char nextChar()  { return _input.charAt(_charIndex); }
-
-    /**
-     * Advances charIndex by one.
-     */
-    private void eatChar()  { _charIndex++; }
-
-    /**
-     * Advances charIndex by given char count.
-     */
-    private void eatChars(int charCount)  { _charIndex += charCount; }
-
-    /**
-     * Eats the line end char.
-     */
-    private void eatLineEnd()
-    {
-        if (nextChar() == '\r')
-            eatChar();
-        if (hasChars() && nextChar() == '\n')
-            eatChar();
-    }
-
-    /**
-     * Returns whether next chars start with given string.
-     */
-    private boolean nextCharsStartWith(CharSequence startChars)
-    {
-        // If not enough chars, return false
-        int charsLeft = _input.length() - _charIndex;
-        if (charsLeft < startChars.length())
-            return false;
-
-        // Iterate over startChars and return false if any don't match nextChars
-        for (int charIndex = 0; charIndex < startChars.length(); charIndex++) {
-            if (startChars.charAt(charIndex) != _input.charAt(_charIndex + charIndex))
-                return false;
-        }
-
-        // Return true
-        return true;
-    }
-
-    /**
-     * Skips whitespace.
-     */
-    private void skipWhiteSpace()
-    {
-        while (_charIndex < _input.length() && Character.isWhitespace(nextChar()))
-            _charIndex++;
-    }
-
-    /**
-     * Returns the chars till line end.
-     */
-    private CharSequence getCharsTillLineEnd()
-    {
-        // Get startCharIndex and eatChars till line end or text end
-        int startCharIndex = _charIndex;
-        while (hasChars() && !CharSequenceUtils.isLineEndChar(nextChar()))
-            eatChar();
-
-        // Get endCharIndex and eatLineEnd
-        int endCharIndex = _charIndex;
-        if (hasChars())
-            eatLineEnd();
-
-        // Return chars
-        return getCharsForCharRange(startCharIndex, endCharIndex);
-    }
-
-    /**
-     * Returns the chars till matching terminator.
-     */
-    private CharSequence getCharsTillMatchingTerminator(CharSequence endChars)
-    {
-        // If leading newline, just skip it
-        if (hasChars() && CharSequenceUtils.isLineEndChar(nextChar()))
-            eatLineEnd();
-
-        // Get startCharIndex and eatChars till matching chars or text end
-        int startCharIndex = _charIndex;
-        while (hasChars() && !nextCharsStartWith(endChars))
-            eatChar();
-
-        // Get endCharIndex and eatChars for matching chars
-        int endCharIndex = _charIndex;
-        if (CharSequenceUtils.isLineEndChar(charAt(endCharIndex - 1)))
-            endCharIndex--;
-
-        // Get endCharIndex and eatChars for matching chars
-        if (hasChars())
-            eatChars(endChars.length());
-
-        // Return chars
-        return getCharsForCharRange(startCharIndex, endCharIndex);
-    }
-
-    /**
      * Returns chars till text end (which is either at next non-mixable node start or line end).
      */
     private CharSequence getCharsTillTextEnd()
@@ -511,32 +396,6 @@ public class MarkdownParser {
 
         // Return
         return sb;
-    }
-
-    /**
-     * Returns chars for char range.
-     */
-    private CharSequence getCharsForCharRange(int startCharIndex, int endCharIndex)
-    {
-        return _input.subSequence(startCharIndex, endCharIndex);
-    }
-
-    /**
-     * Returns the length of leading whitespace chars for given char sequence.
-     */
-    private boolean isAtEmptyLine()
-    {
-        // Get leading space chars
-        for (int i = _charIndex; i < _input.length(); i++) {
-            char loopChar = _input.charAt(i);
-            if (!Character.isWhitespace(loopChar))
-                return false;
-            if (loopChar == '\n')
-                break;
-        }
-
-        // Return
-        return true;
     }
 
     /**
@@ -581,4 +440,54 @@ public class MarkdownParser {
     {
         return nextCharsStartWith(LIST_ITEM_MARKER) || nextCharsStartWith(LIST_ITEM_MARKER2) || nextCharsStartWith(LIST_ITEM_MARKER3);
     }
+
+    /**
+     * Returns whether there are more chars.
+     */
+    private boolean hasChars()  { return _parseText.hasChars(); }
+
+    /**
+     * Returns the next char.
+     */
+    private char nextChar()  { return _parseText.nextChar(); }
+
+    /**
+     * Advances charIndex by one.
+     */
+    private void eatChar()  { _parseText.eatChar(); }
+
+    /**
+     * Advances charIndex by given char count.
+     */
+    private void eatChars(int charCount)  { _parseText.eatChars(charCount); }
+
+    /**
+     * Eats the line end char.
+     */
+    private void eatLineEnd()  { _parseText.eatLineEnd(); }
+
+    /**
+     * Returns whether next chars start with given string.
+     */
+    private boolean nextCharsStartWith(CharSequence startChars)  { return _parseText.nextCharsStartWith(startChars); }
+
+    /**
+     * Skips whitespace.
+     */
+    private void skipWhiteSpace()  { _parseText.skipWhiteSpace(); }
+
+    /**
+     * Returns the chars till line end.
+     */
+    private CharSequence getCharsTillLineEnd()  { return _parseText.getCharsTillLineEnd(); }
+
+    /**
+     * Returns the chars till matching terminator.
+     */
+    private CharSequence getCharsTillMatchingTerminator(CharSequence endChars)  { return _parseText.getCharsTillMatchingTerminator(endChars); }
+
+    /**
+     * Returns the length of leading whitespace chars for given char sequence.
+     */
+    private boolean isAtEmptyLine()  { return _parseText.isAtEmptyLine(); }
 }
