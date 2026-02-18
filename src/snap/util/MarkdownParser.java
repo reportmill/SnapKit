@@ -88,50 +88,6 @@ public class MarkdownParser {
         if (nextCharsStartWith(HEADER_MARKER))
             return parseHeaderNode();
 
-        // Handle list item
-        if (nextCharsStartWithListItemMarker())
-            return parseListNode();
-
-        // Handle directive
-        if (nextCharsStartWith(DIRECTIVE_MARKER))
-            return parseDirectiveNode();
-
-        // Parse inline node: Text, Link, Image, CodeBlock
-        return parseMixableNode();
-    }
-
-    /**
-     * Parses mixable nodes: Text, Link, Image, CodeBlock or Mixed.
-     */
-    private MarkdownNode parseMixableNode()
-    {
-        // Parse mixable node: Text, Link, Image, CodeBlock
-        MarkdownNode mixableNode = parseMixableNodeImpl();
-
-        // While next chars start with mixable node, parse and add child node
-        while (nextCharsStartWithMixableNode()) {
-            mixableNode = MarkdownNode.getMixedNodeForNode(mixableNode);
-            MarkdownNode nextMixedNode = parseMixableNodeImpl();
-            mixableNode.addChildNode(nextMixedNode);
-        }
-
-        // Return
-        return mixableNode;
-    }
-
-    /**
-     * Parses mixable nodes: Text, Link, Image, CodeBlock
-     */
-    private MarkdownNode parseMixableNodeImpl()
-    {
-        // Handle link
-        if (nextCharsStartWith(LINK_MARKER))
-            return parseLinkNode();
-
-        // Handle image
-        if (nextCharsStartWith(IMAGE_MARKER))
-            return parseImageNode();
-
         // Handle code block
         if (nextCharsStartWith(CODE_BLOCK_MARKER))
             return parseCodeBlockNode();
@@ -143,6 +99,50 @@ public class MarkdownParser {
         // Handle separator block
         if (nextCharsStartWith(SEPARATOR_MARKER))
             return parseSeparatorNode();
+
+        // Handle list item
+        if (nextCharsStartWithListItemMarker())
+            return parseListNode();
+
+        // Handle directive
+        if (nextCharsStartWith(DIRECTIVE_MARKER))
+            return parseDirectiveNode();
+
+        // Parse paragraph
+        return parseParagraphNode();
+    }
+
+    /**
+     * Parses paragraph node.
+     */
+    private MarkdownNode parseParagraphNode()
+    {
+        // Parse mixable node: Text, Link, Image, CodeBlock
+        MarkdownNode paragraphNode = parseInlineNode();
+
+        // While next chars start with mixable node, parse and add child node
+        while (nextCharsStartWithMixableNode()) {
+            paragraphNode = MarkdownNode.getMixedNodeForNode(paragraphNode);
+            MarkdownNode nextMixedNode = parseInlineNode();
+            paragraphNode.addChildNode(nextMixedNode);
+        }
+
+        // Return
+        return paragraphNode;
+    }
+
+    /**
+     * Parses inline node: link, image, code span, bold, italic, text.
+     */
+    private MarkdownNode parseInlineNode()
+    {
+        // Handle link
+        if (nextCharsStartWith(LINK_MARKER))
+            return parseLinkNode();
+
+        // Handle image
+        if (nextCharsStartWith(IMAGE_MARKER))
+            return parseImageNode();
 
         // Return text node
         return parseTextNode();
@@ -264,7 +264,7 @@ public class MarkdownParser {
         eatChars(LIST_ITEM_MARKER.length());
 
         // Parse mixable child node
-        MarkdownNode mixableNode = parseMixableNode();
+        MarkdownNode mixableNode = parseParagraphNode();
 
         // Create ListItem node
         MarkdownNode listItemNode = new MarkdownNode(MarkdownNode.NodeType.ListItem, null);
@@ -287,7 +287,7 @@ public class MarkdownParser {
         eatChars(LINK_MARKER.length());
 
         // Parse nodes till link close
-        MarkdownNode mixableNode = parseMixableNode();
+        MarkdownNode mixableNode = parseParagraphNode();
 
         // If missing link close char, complain
         if (!nextCharsStartWith(LINK_END_MARKER))
