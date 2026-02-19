@@ -155,14 +155,14 @@ public class MarkdownView extends ChildView {
     {
         return switch (markNode.getNodeType()) {
             case Header1, Header2 -> createViewForHeaderNode(markNode);
-            case Paragraph -> createViewForTextNode(markNode);
-            case Link -> createViewForLinkNode(markNode);
-            case Image -> createViewForImageNode(markNode);
+            case List -> createViewForListNode(markNode);
             case CodeBlock -> createViewForCodeBlockNode(markNode);
             case Runnable -> createViewForRunnableNode(markNode);
-            case List -> createViewForListNode(markNode);
-            case Mixed -> createViewForMixedNode(markNode);
             case Directive -> createViewForDirectiveNode(markNode);
+            case Paragraph -> createViewForParagraphNode(markNode);
+            case Link -> createViewForLinkNode(markNode);
+            case Image -> createViewForImageNode(markNode);
+            case Text -> createViewForTextNode(markNode);
             default -> {
                 System.err.println("MarkdownView.createViewForNode: No support for type: " + markNode.getNodeType());
                 yield null;
@@ -231,9 +231,10 @@ public class MarkdownView extends ChildView {
      */
     protected View createViewForLinkNode(MarkdownNode linkNode)
     {
-        // Create view for mixed node
-        RowView linkedNodeView = createViewForMixedNode(linkNode);
-        ViewList linkNodeViewChildren = linkedNodeView.getChildren();
+        // Create view for link paragraph node node
+        MarkdownNode paragraphNode = linkNode.getChildNodes().get(0);
+        RowView linkNodeView = createViewForParagraphNode(paragraphNode);
+        ViewList linkNodeViewChildren = linkNodeView.getChildren();
 
         // Add link to children
         String urlAddr = linkNode.getOtherText();
@@ -241,7 +242,7 @@ public class MarkdownView extends ChildView {
             linkNodeViewChildren.forEach(childView -> addLinkToLinkView(childView, urlAddr));
 
         // Return
-        return linkedNodeView;
+        return linkNodeView;
     }
 
     /**
@@ -318,7 +319,7 @@ public class MarkdownView extends ChildView {
 
         // Get list item views and add to listNodeView
         List<MarkdownNode> listItemNodes = listNode.getChildNodes();
-        List<View> listItemViews = ListUtils.map(listItemNodes, node -> createViewForListItemNode(node));
+        List<View> listItemViews = ListUtils.map(listItemNodes, this::createViewForListItemNode);
         listItemViews.forEach(listNodeView::addChild);
 
         // Return
@@ -330,22 +331,23 @@ public class MarkdownView extends ChildView {
      */
     protected ChildView createViewForListItemNode(MarkdownNode listItemNode)
     {
-        // Create view for mixed node
-        RowView mixedNodeView = createViewForMixedNode(listItemNode);
+        // Create view for paragraph node
+        MarkdownNode paragraphNode = listItemNode.getChildNodes().get(0);
+        RowView paragraphNodeView = createViewForParagraphNode(paragraphNode);
 
         // If first child is TextArea, add bullet
-        if (mixedNodeView.getChild(0) instanceof TextArea textArea)
+        if (paragraphNodeView.getChild(0) instanceof TextArea textArea)
             textArea.getTextModel().addChars("• ", 0);
 
         // Otherwise create text area and insert
         else {
-            View bulletTextArea = createViewForTextNode(new MarkdownNode(MarkdownNode.NodeType.Paragraph, "• "));
+            View bulletTextArea = createViewForTextNode(new MarkdownNode(MarkdownNode.NodeType.Text, "• "));
             bulletTextArea.setMargin(NO_MARGIN);
-            mixedNodeView.addChild(bulletTextArea, 0);
+            paragraphNodeView.addChild(bulletTextArea, 0);
         }
 
         // Return
-        return mixedNodeView;
+        return paragraphNodeView;
     }
 
     /**
@@ -414,17 +416,17 @@ public class MarkdownView extends ChildView {
     }
 
     /**
-     * Creates a view for mixed node (children are Text, Link, Image or CodeBlock).
+     * Creates a view for paragraph node (children are inline nodes: Text, Link, Image or CodeSpan).
      */
-    protected RowView createViewForMixedNode(MarkdownNode mixedNode)
+    protected RowView createViewForParagraphNode(MarkdownNode paragraphNode)
     {
-        // Create row view for mixed node
-        RowView mixedNodeView = new RowView();
-        mixedNodeView.setMargin(GENERAL_MARGIN);
-        mixedNodeView.setSpacing(4);
+        // Create row view for paragraph node
+        RowView paragraphNodeView = new RowView();
+        paragraphNodeView.setMargin(GENERAL_MARGIN);
+        paragraphNodeView.setSpacing(4);
 
-        // Get children
-        List<MarkdownNode> childNodes = mixedNode.getChildNodes();
+        // Get child inline nodes
+        List<MarkdownNode> childNodes = paragraphNode.getChildNodes();
         TextArea lastTextArea = null;
 
         // Iterate over children
@@ -432,14 +434,14 @@ public class MarkdownView extends ChildView {
 
             // If last node is Text or Link and last view is TextArea, just add chars
             MarkdownNode.NodeType nodeType = childNode.getNodeType();
-            if (lastTextArea != null && (nodeType == MarkdownNode.NodeType.Paragraph || nodeType == MarkdownNode.NodeType.Link))
+            if (lastTextArea != null && (nodeType == MarkdownNode.NodeType.Text || nodeType == MarkdownNode.NodeType.Link))
                 addTextOrLinkNodeToTextArea(lastTextArea, childNode);
 
             // Otherwise create view and add
             else {
-                View childNodeView = createViewForMixedNodeChildNode(childNode);
+                View childNodeView = createViewForParagraphChildBlockNode(childNode);
                 childNodeView.setMargin(NO_MARGIN);
-                mixedNodeView.addChild(childNodeView);
+                paragraphNodeView.addChild(childNodeView);
                 if (childNodeView instanceof TextArea && nodeType != MarkdownNode.NodeType.CodeBlock)
                     lastTextArea = (TextArea) childNodeView;
                 else lastTextArea = null;
@@ -447,13 +449,13 @@ public class MarkdownView extends ChildView {
         }
 
         // Return
-        return mixedNodeView;
+        return paragraphNodeView;
     }
 
     /**
-     * Creates a view for mixed node (children are Text, Link, Image or CodeBlock).
+     * Creates a view for paragraph child that is really block node.
      */
-    private View createViewForMixedNodeChildNode(MarkdownNode childNode)
+    private View createViewForParagraphChildBlockNode(MarkdownNode childNode)
     {
         MarkdownNode.NodeType nodeType = childNode.getNodeType();
 
@@ -466,7 +468,9 @@ public class MarkdownView extends ChildView {
         }
 
         // Handle anything else
-        View childNodeView = createViewForNode(childNode); assert (childNodeView != null);
+        View childNodeView = createViewForNode(childNode); //assert (childNodeView != null);
+        if (childNodeView == null)
+            createViewForNode(childNode);
         childNodeView.setMargin(NO_MARGIN);
         return childNodeView;
     }

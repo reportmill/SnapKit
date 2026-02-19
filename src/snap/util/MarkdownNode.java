@@ -21,7 +21,18 @@ public class MarkdownNode {
     private List<MarkdownNode> _childNodes = EMPTY_NODE_LIST;
 
     // Constants for node type
-    public enum NodeType { Document, Header1, Header2, Paragraph, Link, Image, CodeBlock, List, ListItem, Mixed, Directive, Runnable, Separator }
+    public enum NodeType {
+
+        // Root node
+        Document,
+
+        // Block nodes
+        Header1, Header2, Paragraph,
+        List, ListItem, Directive, CodeBlock, Runnable, Separator,
+
+        // Inline nodes
+        Link, Image, Text
+    }
 
     // Empty list
     private static final List<MarkdownNode> EMPTY_NODE_LIST = Collections.emptyList();
@@ -86,16 +97,9 @@ public class MarkdownNode {
     }
 
     /**
-     * Returns a mixable node for given node.
+     * Returns the first child.
      */
-    protected static MarkdownNode getMixedNodeForNode(MarkdownNode aNode)
-    {
-        if (aNode.getNodeType() == NodeType.Mixed)
-            return aNode;
-        MarkdownNode mixedNode = new MarkdownNode(NodeType.Mixed, null);
-        mixedNode.addChildNode(aNode);
-        return mixedNode;
-    }
+    public MarkdownNode getFirstChild()  { return !_childNodes.isEmpty() ? _childNodes.get(0) : null; }
 
     /**
      * Standard toString implementation.

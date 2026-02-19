@@ -37,8 +37,9 @@ public class MarkdownParser {
     private static final String SEPARATOR_MARKER = "---";
 
     // Constant for Nodes that are stand-alone
-    private static final String[] MIXABLE_NODE_MARKERS = { LINK_MARKER, IMAGE_MARKER, CODE_BLOCK_MARKER };
-    private static final String[] NON_MIXABLE_NODE_MARKERS = { HEADER_MARKER, LIST_ITEM_MARKER, DIRECTIVE_MARKER };
+    private static final String[] BLOCK_NODE_MARKERS = { HEADER_MARKER, LIST_ITEM_MARKER, LIST_ITEM_MARKER2, LIST_ITEM_MARKER3,
+            CODE_BLOCK_MARKER, DIRECTIVE_MARKER };
+    private static final String[] INLINE_NODE_MARKERS = { LINK_MARKER, IMAGE_MARKER };
 
     /**
      * Constructor.
@@ -113,42 +114,6 @@ public class MarkdownParser {
     }
 
     /**
-     * Parses paragraph node.
-     */
-    private MarkdownNode parseParagraphNode()
-    {
-        // Parse mixable node: Text, Link, Image, CodeBlock
-        MarkdownNode paragraphNode = parseInlineNode();
-
-        // While next chars start with mixable node, parse and add child node
-        while (nextCharsStartWithMixableNode()) {
-            paragraphNode = MarkdownNode.getMixedNodeForNode(paragraphNode);
-            MarkdownNode nextMixedNode = parseInlineNode();
-            paragraphNode.addChildNode(nextMixedNode);
-        }
-
-        // Return
-        return paragraphNode;
-    }
-
-    /**
-     * Parses inline node: link, image, code span, bold, italic, text.
-     */
-    private MarkdownNode parseInlineNode()
-    {
-        // Handle link
-        if (nextCharsStartWith(LINK_MARKER))
-            return parseLinkNode();
-
-        // Handle image
-        if (nextCharsStartWith(IMAGE_MARKER))
-            return parseImageNode();
-
-        // Return text node
-        return parseTextNode();
-    }
-
-    /**
      * Parses a Header node.
      */
     private MarkdownNode parseHeaderNode()
@@ -169,12 +134,51 @@ public class MarkdownParser {
     }
 
     /**
-     * Parses a text node.
+     * Parses a list node.
      */
-    private MarkdownNode parseTextNode()
+    private MarkdownNode parseListNode()
     {
-        String textChars = getCharsTillParagraphEnd().toString().trim();
-        return new MarkdownNode(MarkdownNode.NodeType.Paragraph, textChars);
+        // Create list node and listItemNodes
+        MarkdownNode listNode = new MarkdownNode(MarkdownNode.NodeType.List, null);
+        List<MarkdownNode> listItemNodes = new ArrayList<>();
+
+        // Parse available list items and add to listItemNodes
+        while (nextCharsStartWithListItemMarker()) {
+            MarkdownNode listItemNode = parseListItemNode();
+            listItemNodes.add(listItemNode);
+        }
+
+        // Add list items nodes to list node and return
+        listNode.setChildNodes(listItemNodes);
+        return listNode;
+    }
+
+    /**
+     * Parses a list item node. These can contain
+     */
+    private MarkdownNode parseListItemNode()
+    {
+        // Eat identifier chars
+        eatChars(LIST_ITEM_MARKER.length());
+
+        // Parse paragraph child node
+        MarkdownNode paragraphNode = parseParagraphNode();
+
+        // Create and return ListItem node with paragraph node
+        MarkdownNode listItemNode = new MarkdownNode(MarkdownNode.NodeType.ListItem, null);
+        listItemNode.addChildNode(paragraphNode);
+        return listItemNode;
+    }
+
+    /**
+     * Parses a Separator node.
+     */
+    private MarkdownNode parseSeparatorNode()
+    {
+        eatChars(SEPARATOR_MARKER.length());
+        while (nextChar() != '\n' && nextChar() != '\r') eatChar();
+        eatLineEnd();
+        return new MarkdownNode(MarkdownNode.NodeType.Separator, null);
     }
 
     /**
@@ -225,57 +229,67 @@ public class MarkdownParser {
     }
 
     /**
-     * Parses a Separator node.
+     * Parses a directive node.
      */
-    private MarkdownNode parseSeparatorNode()
+    private MarkdownNode parseDirectiveNode()
     {
-        eatChars(SEPARATOR_MARKER.length());
-        while (nextChar() != '\n' && nextChar() != '\r') eatChar();
-        eatLineEnd();
-        return new MarkdownNode(MarkdownNode.NodeType.Separator, null);
+        // Eat marker chars
+        eatChars(DIRECTIVE_MARKER.length());
+
+        // Get chars till link close
+        String directiveText = getCharsTillMatchingTerminator(LINK_END_MARKER).toString().trim();
+
+        // Create and return directive node
+        MarkdownNode directiveNode = new MarkdownNode(MarkdownNode.NodeType.Directive, directiveText);
+        return directiveNode;
     }
 
     /**
-     * Parses a list node.
+     * Parses paragraph node.
      */
-    private MarkdownNode parseListNode()
+    private MarkdownNode parseParagraphNode()
     {
-        // Create list node and listItemNodes
-        MarkdownNode listNode = new MarkdownNode(MarkdownNode.NodeType.List, null);
-        List<MarkdownNode> listItemNodes = new ArrayList<>();
+        // Parse inline node: Text, Link, Image, CodeBlock
+        MarkdownNode inlineNode = parseInlineNode();
+        List<MarkdownNode> inlineNodes = new ArrayList<>();
+        inlineNodes.add(inlineNode);
 
-        // Parse available list items and add to listItemNodes
-        while (nextCharsStartWithListItemMarker()) {
-            MarkdownNode listItemNode = parseListItemNode();
-            listItemNodes.add(listItemNode);
+        // While next chars start with inline node, parse and add child node
+        while (nextCharsStartWithInlineNode()) {
+            inlineNode = parseInlineNode();
+            inlineNodes.add(inlineNode);
         }
 
-        // Add listItemsNodes to list node and return
-        listNode.setChildNodes(listItemNodes);
-        return listNode;
+        // Create and return paragraph node
+        MarkdownNode paragraphNode = new MarkdownNode(MarkdownNode.NodeType.Paragraph, null);
+        paragraphNode.setChildNodes(inlineNodes);
+        return paragraphNode;
     }
 
     /**
-     * Parses a list item node. These can contain
+     * Parses inline node: link, image, code span, bold, italic, text.
      */
-    private MarkdownNode parseListItemNode()
+    private MarkdownNode parseInlineNode()
     {
-        // Eat identifier chars
-        eatChars(LIST_ITEM_MARKER.length());
+        // Handle link
+        if (nextCharsStartWith(LINK_MARKER))
+            return parseLinkNode();
 
-        // Parse mixable child node
-        MarkdownNode mixableNode = parseParagraphNode();
+        // Handle image
+        if (nextCharsStartWith(IMAGE_MARKER))
+            return parseImageNode();
 
-        // Create ListItem node
-        MarkdownNode listItemNode = new MarkdownNode(MarkdownNode.NodeType.ListItem, null);
+        // Return text node
+        return parseTextNode();
+    }
 
-        // If node is mixed, move its children to new node, otherwise just add child
-        if (mixableNode.getNodeType() == MarkdownNode.NodeType.Mixed)
-            listItemNode.setChildNodes(mixableNode.getChildNodes());
-        else listItemNode.addChildNode(mixableNode);
-
-        // Return
-        return listItemNode;
+    /**
+     * Parses a text node.
+     */
+    private MarkdownNode parseTextNode()
+    {
+        String textChars = getCharsTillTextEnd().toString().trim();
+        return new MarkdownNode(MarkdownNode.NodeType.Text, textChars);
     }
 
     /**
@@ -286,21 +300,17 @@ public class MarkdownParser {
         // Eat marker chars
         eatChars(LINK_MARKER.length());
 
-        // Parse nodes till link close
-        MarkdownNode mixableNode = parseParagraphNode();
+        // Parse paragraph node
+        MarkdownNode paragraphNode = parseParagraphNode();
 
         // If missing link close char, complain
         if (!nextCharsStartWith(LINK_END_MARKER))
             System.err.println("MarkdownParser.parseLinkNode: Missing link close char");
         else eatChar();
 
-        // Create link node
+        // Create link node with paragraph node as child
         MarkdownNode linkNode = new MarkdownNode(MarkdownNode.NodeType.Link, null);
-
-        // If node is mixed, move its children to new node, otherwise just add child
-        if (mixableNode.getNodeType() == MarkdownNode.NodeType.Mixed)
-            linkNode.setChildNodes(mixableNode.getChildNodes());
-        else linkNode.addChildNode(mixableNode);
+        linkNode.addChildNode(paragraphNode);
 
         // Parse and set url text
         String urlAddr = parseLinkUrlAddress();
@@ -348,36 +358,17 @@ public class MarkdownParser {
     }
 
     /**
-     * Parses a directive node.
+     * Returns chars till text end (which is either at next inline node start or line end).
      */
-    private MarkdownNode parseDirectiveNode()
-    {
-        // Eat marker chars
-        eatChars(DIRECTIVE_MARKER.length());
-
-        // Get chars till link close
-        String directiveText = getCharsTillMatchingTerminator(LINK_END_MARKER).toString().trim();
-
-        // Create directive node
-        MarkdownNode directiveNode = new MarkdownNode(MarkdownNode.NodeType.Directive, directiveText);
-
-        // Return
-        return directiveNode;
-    }
-
-    /**
-     * Returns chars till paragraph end (which is either at next non-inline node start or line end).
-     */
-    private CharSequence getCharsTillParagraphEnd()
+    private CharSequence getCharsTillTextEnd()
     {
         StringBuilder sb = new StringBuilder();
 
-        // Iterate over chars until next mixable node start or line end to get chars
+        // Iterate over chars until next inline node start or line end to get chars
         while (hasChars()) {
 
-            // If next chars start with mixable node, break
-            boolean nextCharsStartWithMixableNode = ArrayUtils.hasMatch(MIXABLE_NODE_MARKERS, str -> nextCharsStartWith(str));
-            if (nextCharsStartWithMixableNode)
+            // If next chars start with well-defined inline node marker, break
+            if (ArrayUtils.hasMatch(INLINE_NODE_MARKERS, this::nextCharsStartWith))
                 break;
 
             // If next char is newline, break
@@ -399,10 +390,10 @@ public class MarkdownParser {
     }
 
     /**
-     * Returns whether next chars associated with current node line start with mixable node.
+     * Returns whether next chars associated with current node line start with inline node.
      * Eats any chars before next node.
      */
-    private boolean nextCharsStartWithMixableNode()
+    private boolean nextCharsStartWithInlineNode()
     {
         // If not at empty line, return true (any next chars will be paragraph node). Except for link end marker
         if (!isAtEmptyLine()) {
@@ -419,14 +410,13 @@ public class MarkdownParser {
         // Eat reset of line
         getCharsTillLineEnd();
 
-        // If at empty line, return false (next node will be stand-alone)
+        // If at empty line, return false (next node will be block node)
         if (isAtEmptyLine())
             return false;
 
-        // If next char is non-mixable node
+        // If next char is block node, return false
         skipWhiteSpace();
-        boolean nextCharStartsWithNonMixableNode = ArrayUtils.hasMatch(NON_MIXABLE_NODE_MARKERS, this::nextCharsStartWith);
-        if (nextCharStartsWithNonMixableNode)
+        if (ArrayUtils.hasMatch(BLOCK_NODE_MARKERS, this::nextCharsStartWith))
             return false;
 
         // Return true
