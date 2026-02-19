@@ -180,7 +180,7 @@ public class MarkdownView extends ChildView {
 
         // Reset style
         int headerLevel = MarkdownUtils.getHeaderLevel(headerNode);
-        TextStyle textStyle = headerLevel == 1 ? MarkdownUtils.getHeader1Style() : MarkdownUtils.getHeader2Style();
+        TextStyle textStyle = MarkdownUtils.getHeaderStyleForLevel(headerLevel);
         TextModel textModel = textArea.getTextModel();
         textModel.setDefaultTextStyle(textStyle);
 

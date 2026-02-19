@@ -10,11 +10,8 @@ import java.util.List;
  */
 public class MarkdownUtils {
 
-    // The header 1 style
-    private static TextStyle _header1Style;
-
-    // The header 2 style
-    private static TextStyle  _header2Style;
+    // header styles
+    private static TextStyle _headerStyle1, _headerStyle2;
 
     // The content style
     private static TextStyle  _contentStyle;
@@ -61,37 +58,39 @@ public class MarkdownUtils {
     /**
      * Returns the header 1 style.
      */
-    public static TextStyle getHeader1Style()
+    public static TextStyle getHeaderStyleForLevel(int headerLevel)
     {
-        // If already set, just return
-        if (_header1Style != null) return _header1Style;
+        if (headerLevel == 1)
+            return getHeaderStyle1();
+        return getHeaderStyle2();
+    }
 
-        // Create, configure
+    /**
+     * Returns the header 1 style.
+     */
+    private static TextStyle getHeaderStyle1()
+    {
+        if (_headerStyle1 != null) return _headerStyle1;
+
+        // Create, configure, return
         TextStyle textStyle = TextStyle.DEFAULT;
         Font headerFont = new Font("Arial Bold", 34);
         Color headerColor = Color.BLACK;
-        TextStyle headerStyle = textStyle.copyForStyleValues(headerFont, headerColor);
-
-        // Set, return
-        return _header1Style = headerStyle;
+        return _headerStyle1 = textStyle.copyForStyleValues(headerFont, headerColor);
     }
 
     /**
      * Returns the header 2 style.
      */
-    public static TextStyle getHeader2Style()
+    private static TextStyle getHeaderStyle2()
     {
-        // If already set, just return
-        if (_header2Style != null) return _header2Style;
+        if (_headerStyle2 != null) return _headerStyle2;
 
-        // Create, configure
+        // Create, configure, return
         TextStyle textStyle = TextStyle.DEFAULT;
         Font headerFont = new Font("Arial Bold", 24);
         Color headerColor = Color.BLACK;
-        TextStyle headerStyle = textStyle.copyForStyleValues(headerFont, headerColor);
-
-        // Set, return
-        return _header2Style = headerStyle;
+        return _headerStyle2 = textStyle.copyForStyleValues(headerFont, headerColor);
     }
 
     /**
