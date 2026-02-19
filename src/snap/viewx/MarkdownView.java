@@ -232,8 +232,7 @@ public class MarkdownView extends ChildView {
     protected View createViewForLinkNode(MarkdownNode linkNode)
     {
         // Create view for link paragraph node node
-        MarkdownNode paragraphNode = linkNode.getChildNodes().get(0);
-        RowView linkNodeView = createViewForParagraphNode(paragraphNode);
+        RowView linkNodeView = createViewForParagraphNode(linkNode);
         ViewList linkNodeViewChildren = linkNodeView.getChildren();
 
         // Add link to children
@@ -426,16 +425,16 @@ public class MarkdownView extends ChildView {
         paragraphNodeView.setSpacing(4);
 
         // Get child inline nodes
-        List<MarkdownNode> childNodes = paragraphNode.getChildNodes();
+        List<MarkdownNode> inlineNodes = paragraphNode.getChildNodes();
         TextArea lastTextArea = null;
 
         // Iterate over children
-        for (MarkdownNode childNode : childNodes) {
+        for (MarkdownNode childNode : inlineNodes) {
 
             // If last node is Text or Link and last view is TextArea, just add chars
             MarkdownNode.NodeType nodeType = childNode.getNodeType();
             if (lastTextArea != null && (nodeType == MarkdownNode.NodeType.Text || nodeType == MarkdownNode.NodeType.Link))
-                addTextOrLinkNodeToTextArea(lastTextArea, childNode);
+                addInlineNodeToTextArea(childNode, lastTextArea);
 
             // Otherwise create view and add
             else {
@@ -469,8 +468,6 @@ public class MarkdownView extends ChildView {
 
         // Handle anything else
         View childNodeView = createViewForNode(childNode); //assert (childNodeView != null);
-        if (childNodeView == null)
-            createViewForNode(childNode);
         childNodeView.setMargin(NO_MARGIN);
         return childNodeView;
     }
@@ -482,27 +479,27 @@ public class MarkdownView extends ChildView {
     protected ViewLayout getViewLayoutImpl()  { return new ColViewLayout(this); }
 
     /**
-     * Adds a text or link node content to a given text area.
+     * Adds an inline node (Text, Link) to a given text area.
      */
-    private void addTextOrLinkNodeToTextArea(TextArea textArea, MarkdownNode aNode)
+    private void addInlineNodeToTextArea(MarkdownNode inlineNode, TextArea textArea)
     {
         // If text already present, add space
         if (textArea.length() > 0)
             textArea.addChars(" ");
 
         // Handle link node
-        if (aNode.getNodeType() == MarkdownNode.NodeType.Link) {
+        if (inlineNode.getNodeType() == MarkdownNode.NodeType.Link) {
 
             // Create link style
-            String urlAddr = aNode.getOtherText();
+            String urlAddr = inlineNode.getOtherText();
             TextLink textLink = new TextLink(urlAddr);
             TextStyle textStyle = textArea.getDefaultTextStyle();
             TextStyle linkTextStyle = textStyle.copyForStyleValue(textLink);
 
             // Iterate over child nodes and add text to text area
-            List<MarkdownNode> childNodes = aNode.getChildNodes();
+            List<MarkdownNode> childNodes = inlineNode.getChildNodes();
             for (MarkdownNode childNode : childNodes) {
-                if (childNode.getNodeType() == MarkdownNode.NodeType.Paragraph)
+                if (childNode.getNodeType() == MarkdownNode.NodeType.Text)
                     textArea.addCharsWithStyle(childNode.getText(), linkTextStyle);
                 else System.out.println("MarkdownView: Unsupported link content type: " + childNode.getNodeType());
             }
@@ -515,7 +512,7 @@ public class MarkdownView extends ChildView {
 
         // Otherwise, add chars
         else {
-            String nodeText = aNode.getText();
+            String nodeText = inlineNode.getText();
             if (nodeText != null)
                 addNodeTextToTextArea(textArea, nodeText);
         }

@@ -154,18 +154,16 @@ public class MarkdownParser {
     }
 
     /**
-     * Parses a list item node. These can contain
+     * Parses a list item node.
      */
     private MarkdownNode parseListItemNode()
     {
         // Eat identifier chars
         eatChars(LIST_ITEM_MARKER.length());
 
-        // Parse paragraph child node
-        MarkdownNode paragraphNode = parseParagraphNode();
-
-        // Create and return ListItem node with paragraph node
+        // Create and return ListItem node with inline nodes
         MarkdownNode listItemNode = new MarkdownNode(MarkdownNode.NodeType.ListItem, null);
+        MarkdownNode paragraphNode = parseParagraphNode();
         listItemNode.addChildNode(paragraphNode);
         return listItemNode;
     }
@@ -249,6 +247,17 @@ public class MarkdownParser {
      */
     private MarkdownNode parseParagraphNode()
     {
+        MarkdownNode paragraphNode = new MarkdownNode(MarkdownNode.NodeType.Paragraph, null);
+        List<MarkdownNode> inlineNodes = parseInlineNodes();
+        paragraphNode.setChildNodes(inlineNodes);
+        return paragraphNode;
+    }
+
+    /**
+     * Parses inline nodes.
+     */
+    private List<MarkdownNode> parseInlineNodes()
+    {
         // Parse inline node: Text, Link, Image, CodeBlock
         MarkdownNode inlineNode = parseInlineNode();
         List<MarkdownNode> inlineNodes = new ArrayList<>();
@@ -260,10 +269,8 @@ public class MarkdownParser {
             inlineNodes.add(inlineNode);
         }
 
-        // Create and return paragraph node
-        MarkdownNode paragraphNode = new MarkdownNode(MarkdownNode.NodeType.Paragraph, null);
-        paragraphNode.setChildNodes(inlineNodes);
-        return paragraphNode;
+        // Return
+        return inlineNodes;
     }
 
     /**
@@ -301,7 +308,7 @@ public class MarkdownParser {
         eatChars(LINK_MARKER.length());
 
         // Parse paragraph node
-        MarkdownNode paragraphNode = parseParagraphNode();
+        List<MarkdownNode> inlineNodes = parseInlineNodes();
 
         // If missing link close char, complain
         if (!nextCharsStartWith(LINK_END_MARKER))
@@ -310,7 +317,7 @@ public class MarkdownParser {
 
         // Create link node with paragraph node as child
         MarkdownNode linkNode = new MarkdownNode(MarkdownNode.NodeType.Link, null);
-        linkNode.addChildNode(paragraphNode);
+        linkNode.setChildNodes(inlineNodes);
 
         // Parse and set url text
         String urlAddr = parseLinkUrlAddress();

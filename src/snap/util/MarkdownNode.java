@@ -54,7 +54,12 @@ public class MarkdownNode {
     /**
      * Returns the text.
      */
-    public String getText()  { return _text; }
+    public String getText()
+    {
+        if (_text == null && !_childNodes.isEmpty())
+            _text = StringUtils.join(_childNodes, "");
+        return _text;
+    }
 
     /**
      * Returns the other text.
