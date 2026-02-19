@@ -1,7 +1,5 @@
 package snap.util;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class represents a Markdown node.
@@ -20,6 +18,9 @@ public class MarkdownNode {
     // Child nodes
     private List<MarkdownNode> _childNodes = EMPTY_NODE_LIST;
 
+    // Attributes
+    private Map<String,Object> _attributes = EMPTY_ATTRIBUTES_MAP;
+
     // Constants for node type
     public enum NodeType {
 
@@ -27,15 +28,18 @@ public class MarkdownNode {
         Document,
 
         // Block nodes
-        Header1, Header2, Paragraph,
-        List, ListItem, Directive, CodeBlock, Runnable, Separator,
+        Header, Paragraph, List, ListItem, Directive, CodeBlock, RunBlock, Separator, // BlockQuote
 
         // Inline nodes
-        Link, Image, Text
+        Link, Image, Text //, Strong, Emphasis, CodeSpan
     }
+
+    // Constants for attributes
+    public static final String HEADER_LEVEL = "HeaderLevel";
 
     // Empty list
     private static final List<MarkdownNode> EMPTY_NODE_LIST = Collections.emptyList();
+    private static final Map<String,Object> EMPTY_ATTRIBUTES_MAP = Collections.emptyMap();
 
     /**
      * Constructor.
@@ -105,6 +109,23 @@ public class MarkdownNode {
      * Returns the first child.
      */
     public MarkdownNode getFirstChild()  { return !_childNodes.isEmpty() ? _childNodes.get(0) : null; }
+
+    /**
+     * Returns attribute for given key.
+     */
+    public Object getAttributeValue(String attributeName)
+    {
+        return _attributes.get(attributeName);
+    }
+
+    /**
+     * Sets attribute for given key.
+     */
+    protected void setAttributeValue(String attributeName, Object aValue)
+    {
+        if (_attributes == EMPTY_ATTRIBUTES_MAP) _attributes = new HashMap<>(1);
+        _attributes.put(attributeName, aValue);
+    }
 
     /**
      * Standard toString implementation.

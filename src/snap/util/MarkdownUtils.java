@@ -23,6 +23,15 @@ public class MarkdownUtils {
     private static TextStyle  _codeStyle;
 
     /**
+     * Returns the header level for given header node.
+     */
+    public static int getHeaderLevel(MarkdownNode headerNode)
+    {
+        Object headerLevelObj = headerNode.getAttributeValue(MarkdownNode.HEADER_LEVEL);
+        return headerLevelObj instanceof Number headerLevel ? headerLevel.intValue() : 0;
+    }
+
+    /**
      * Returns a Jepl string for Markdown string.
      */
     public static String getJeplForJMD(String className, CharSequence markdownChars)
@@ -33,7 +42,7 @@ public class MarkdownUtils {
         StringBuilder sb = new StringBuilder();
         int methodCount = 0;
         for (MarkdownNode node : rootNodes) {
-            if (node.getNodeType() == MarkdownNode.NodeType.Runnable) {
+            if (node.getNodeType() == MarkdownNode.NodeType.RunBlock) {
                 sb.append("public static void method").append(methodCount++).append("()\n{\n");
                 sb.append(node.getText());
                 sb.append("\n}\n\n");

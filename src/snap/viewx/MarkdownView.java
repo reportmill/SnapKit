@@ -135,7 +135,7 @@ public class MarkdownView extends ChildView {
         if (nodeView != null)
             addChild(nodeView);
 
-        if (markNode.getNodeType() == MarkdownNode.NodeType.Header1 || markNode.getNodeType() == MarkdownNode.NodeType.Header2)
+        if (markNode.getNodeType() == MarkdownNode.NodeType.Header)
             addViewForSeparatorNode();
     }
 
@@ -154,10 +154,10 @@ public class MarkdownView extends ChildView {
     protected View createViewForNode(MarkdownNode markNode)
     {
         return switch (markNode.getNodeType()) {
-            case Header1, Header2 -> createViewForHeaderNode(markNode);
+            case Header -> createViewForHeaderNode(markNode);
             case List -> createViewForListNode(markNode);
             case CodeBlock -> createViewForCodeBlockNode(markNode);
-            case Runnable -> createViewForRunnableNode(markNode);
+            case RunBlock -> createViewForRunnableNode(markNode);
             case Directive -> createViewForDirectiveNode(markNode);
             case Paragraph -> createViewForParagraphNode(markNode);
             case Link -> createViewForLinkNode(markNode);
@@ -176,12 +176,11 @@ public class MarkdownView extends ChildView {
     protected View createViewForHeaderNode(MarkdownNode headerNode)
     {
         TextArea textArea = new TextArea();
-        textArea.setMargin(HEADER1_MARGIN);
-        if (headerNode.getNodeType() == MarkdownNode.NodeType.Header2)
-            textArea.setMargin(HEADER2_MARGIN);
+        textArea.setMargin(MarkdownUtils.getHeaderLevel(headerNode) == 1 ? HEADER1_MARGIN : HEADER2_MARGIN);
 
         // Reset style
-        TextStyle textStyle = headerNode.getNodeType() == MarkdownNode.NodeType.Header1 ? MarkdownUtils.getHeader1Style() : MarkdownUtils.getHeader2Style();
+        int headerLevel = MarkdownUtils.getHeaderLevel(headerNode);
+        TextStyle textStyle = headerLevel == 1 ? MarkdownUtils.getHeader1Style() : MarkdownUtils.getHeader2Style();
         TextModel textModel = textArea.getTextModel();
         textModel.setDefaultTextStyle(textStyle);
 

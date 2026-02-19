@@ -126,11 +126,12 @@ public class MarkdownParser {
         }
 
         // Get Header level NodeType and chars till line end
-        MarkdownNode.NodeType nodeType = headerLevel == 1 ? MarkdownNode.NodeType.Header1 : MarkdownNode.NodeType.Header2;
         String charsTillLineEnd = getCharsTillLineEnd().toString().trim();
 
         // Return header node
-        return new MarkdownNode(nodeType, charsTillLineEnd);
+        MarkdownNode headerNode = new MarkdownNode(MarkdownNode.NodeType.Header, charsTillLineEnd);
+        headerNode.setAttributeValue(MarkdownNode.HEADER_LEVEL, headerLevel);
+        return headerNode;
     }
 
     /**
@@ -220,7 +221,7 @@ public class MarkdownParser {
         }
 
         // Return node
-        MarkdownNode runnableNode = new MarkdownNode(MarkdownNode.NodeType.Runnable, charsTillBlockEnd);
+        MarkdownNode runnableNode = new MarkdownNode(MarkdownNode.NodeType.RunBlock, charsTillBlockEnd);
         if (!metaData.isEmpty())
             runnableNode.setOtherText(metaData);
         return runnableNode;
