@@ -11,7 +11,7 @@ import java.util.List;
  *     ![My Image Text](http:...)         |  Image
  *     {@literal @} [ Header1:CustomName]            |  Directive - to redefine rendering
  *     ``` My Code ```                    |  CodeBlock
- *     ~~~ My Code ~~~                    |  Runnable code
+ *     ~~~ My Code ~~~                    |  RunBlock code
  *     ---                                |  Separator (maybe soon)
  *     > My block quote                   |  BlockQuote (maybe soon)
  */
@@ -29,16 +29,16 @@ public class MarkdownParser {
     public static final String LIST_ITEM_MARKER2 = "* ";
     public static final String LIST_ITEM_MARKER3 = "+ ";
     public static final String LINK_MARKER = "[";
-    public static final String IMAGE_MARKER = "![";
-    public static final String DIRECTIVE_MARKER = "@[";
-    public static final String CODE_BLOCK_MARKER = "```";
     private static final String LINK_END_MARKER = "]";
-    private static final String RUNNABLE_MARKER = "~~~";
+    public static final String IMAGE_MARKER = "![";
+    public static final String CODE_BLOCK_MARKER = "```";
+    private static final String RUN_BLOCK_MARKER = "~~~";
     private static final String SEPARATOR_MARKER = "---";
+    public static final String DIRECTIVE_MARKER = "@[";
 
     // Constant for Nodes that are stand-alone
     private static final String[] BLOCK_NODE_MARKERS = { HEADER_MARKER, LIST_ITEM_MARKER, LIST_ITEM_MARKER2, LIST_ITEM_MARKER3,
-            CODE_BLOCK_MARKER, DIRECTIVE_MARKER };
+            CODE_BLOCK_MARKER, RUN_BLOCK_MARKER, DIRECTIVE_MARKER };
     private static final String[] INLINE_NODE_MARKERS = { LINK_MARKER, IMAGE_MARKER };
 
     /**
@@ -89,21 +89,21 @@ public class MarkdownParser {
         if (nextCharsStartWith(HEADER_MARKER))
             return parseHeaderNode();
 
-        // Handle code block
-        if (nextCharsStartWith(CODE_BLOCK_MARKER))
-            return parseCodeBlockNode();
-
-        // Handle runnable block
-        if (nextCharsStartWith(RUNNABLE_MARKER))
-            return parseRunnableNode();
+        // Handle list item
+        if (nextCharsStartWithListItemMarker())
+            return parseListNode();
 
         // Handle separator block
         if (nextCharsStartWith(SEPARATOR_MARKER))
             return parseSeparatorNode();
 
-        // Handle list item
-        if (nextCharsStartWithListItemMarker())
-            return parseListNode();
+        // Handle code block
+        if (nextCharsStartWith(CODE_BLOCK_MARKER))
+            return parseCodeBlockNode();
+
+        // Handle run block
+        if (nextCharsStartWith(RUN_BLOCK_MARKER))
+            return parseRunBlockNode();
 
         // Handle directive
         if (nextCharsStartWith(DIRECTIVE_MARKER))
@@ -208,14 +208,14 @@ public class MarkdownParser {
     }
 
     /**
-     * Parses a Runnable node.
+     * Parses a RunBlock node.
      */
-    private MarkdownNode parseRunnableNode()
+    private MarkdownNode parseRunBlockNode()
     {
         // Get string
-        eatChars(RUNNABLE_MARKER.length());
+        eatChars(RUN_BLOCK_MARKER.length());
         String metaData = getCharsTillLineEnd().toString().replace("}", "");
-        String charsTillBlockEnd = getCharsTillMatchingTerminator(RUNNABLE_MARKER).toString();
+        String charsTillBlockEnd = getCharsTillMatchingTerminator(RUN_BLOCK_MARKER).toString();
 
         // Replace occurrences of '$<num>' with CodeBlock at that index
         for (int dollarIndex = charsTillBlockEnd.indexOf('$'); dollarIndex >= 0; dollarIndex = charsTillBlockEnd.indexOf('$', dollarIndex)) {
@@ -232,16 +232,16 @@ public class MarkdownParser {
                 dollarIndex += codeBlockText.length();
             }
             else {
-                System.out.println("MarkdownParser.parseRunnableNode: invalid codeBlockIndex: " + codeBlockIndexStr);
+                System.out.println("MarkdownParser.parseRunBlockNode: invalid codeBlockIndex: " + codeBlockIndexStr);
                 dollarIndex = endIndex;
             }
         }
 
         // Return node
-        MarkdownNode runnableNode = new MarkdownNode(MarkdownNode.NodeType.RunBlock, charsTillBlockEnd);
+        MarkdownNode runBlockNode = new MarkdownNode(MarkdownNode.NodeType.RunBlock, charsTillBlockEnd);
         if (!metaData.isEmpty())
-            runnableNode.setOtherText(metaData);
-        return runnableNode;
+            runBlockNode.setOtherText(metaData);
+        return runBlockNode;
     }
 
     /**
@@ -439,7 +439,7 @@ public class MarkdownParser {
         if (isAtBlankLine())
             return false;
 
-        // If next char is block node, return false
+        // If next chars are block node, return false
         skipWhiteSpace();
         if (ArrayUtils.hasMatch(BLOCK_NODE_MARKERS, this::nextCharsStartWith))
             return false;
