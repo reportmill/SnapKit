@@ -61,7 +61,7 @@ public class MarkdownNode {
     public String getText()
     {
         if (_text == null && !_childNodes.isEmpty())
-            _text = StringUtils.join(_childNodes, "");
+            _text = ListUtils.mapToStringsAndJoin(_childNodes, MarkdownNode::getText, "");
         return _text;
     }
 

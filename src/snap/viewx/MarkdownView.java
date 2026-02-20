@@ -344,6 +344,18 @@ public class MarkdownView extends ChildView {
             paragraphNodeView.addChild(bulletTextArea, 0);
         }
 
+        // If more child nodes, wrap in ColView and return
+        if (listItemNode.getChildNodes().size() > 1) {
+            paragraphNodeView.setMargin(new Insets(0, 8, 0, 8));
+            ColView compoundListItemView = new ColView();
+            compoundListItemView.addChild(paragraphNodeView);
+            List<MarkdownNode> childNodes = listItemNode.getChildNodes().subList(1, listItemNode.getChildNodes().size());
+            List<View> listItemViews = ListUtils.map(childNodes, this::createViewForNode);
+            listItemViews.forEach(view -> view.setMargin(Insets.add(GENERAL_MARGIN, 0, 0, 0, 20)));
+            listItemViews.forEach(compoundListItemView::addChild);
+            return compoundListItemView;
+        }
+
         // Return
         return paragraphNodeView;
     }

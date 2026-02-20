@@ -142,9 +142,11 @@ public class MarkdownParser {
         // Create list node and listItemNodes
         MarkdownNode listNode = new MarkdownNode(MarkdownNode.NodeType.List, null);
         List<MarkdownNode> listItemNodes = new ArrayList<>();
+        int lineIndent = _parseText.getLineIndent();
 
         // Parse available list items and add to listItemNodes
-        while (nextCharsStartWithListItemMarker()) {
+        while (nextCharsStartWithListItemMarker() && (listItemNodes.isEmpty() || _parseText.getLineIndent() >= lineIndent)) {
+            lineIndent = _parseText.getLineIndent();
             MarkdownNode listItemNode = parseListItemNode();
             listItemNodes.add(listItemNode);
         }
@@ -159,13 +161,28 @@ public class MarkdownParser {
      */
     private MarkdownNode parseListItemNode()
     {
-        // Eat identifier chars
+        // Eat identifier chars and get current indent for this list item
         eatChars(LIST_ITEM_MARKER.length());
+        int lineIndent = _parseText.getLineIndent();
 
-        // Create and return ListItem node with inline nodes
+        // Create and return ListItem node with paragraph node
         MarkdownNode listItemNode = new MarkdownNode(MarkdownNode.NodeType.ListItem, null);
         MarkdownNode paragraphNode = parseParagraphNode();
         listItemNode.addChildNode(paragraphNode);
+
+        // If followed by blank line, eat it (should also mark list as 'loose')
+        if (isAtBlankLine())
+            _parseText.eatTillLineEnd();
+
+        // If next line is indented, parse node and add to list
+        while (_parseText.getLineIndent() > lineIndent + 2) {
+            MarkdownNode nextBlockNode = parseNextNode();
+            listItemNode.addChildNode(nextBlockNode);
+            if (isAtBlankLine())
+                _parseText.eatTillLineEnd();
+        }
+
+        // Return
         return listItemNode;
     }
 
@@ -404,7 +421,7 @@ public class MarkdownParser {
     private boolean nextCharsStartWithInlineNode()
     {
         // If not at empty line, return true (any next chars will be paragraph node). Except for link end marker
-        if (!isAtEmptyLine()) {
+        if (!isAtBlankLine()) {
 
             // If next char is link end, return false
             skipWhiteSpace();
@@ -419,7 +436,7 @@ public class MarkdownParser {
         getCharsTillLineEnd();
 
         // If at empty line, return false (next node will be block node)
-        if (isAtEmptyLine())
+        if (isAtBlankLine())
             return false;
 
         // If next char is block node, return false
@@ -485,7 +502,7 @@ public class MarkdownParser {
     private CharSequence getCharsTillMatchingTerminator(CharSequence endChars)  { return _parseText.getCharsTillMatchingTerminator(endChars); }
 
     /**
-     * Returns the length of leading whitespace chars for given char sequence.
+     * Returns whether current parse location is at a blank line.
      */
-    private boolean isAtEmptyLine()  { return _parseText.isAtEmptyLine(); }
+    private boolean isAtBlankLine()  { return _parseText.isAtBlankLine(); }
 }

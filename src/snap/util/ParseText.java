@@ -11,12 +11,32 @@ public class ParseText {
     // The char index
     private int _charIndex;
 
+    // The current line index
+    private int _lineCharIndex;
+
     /**
      * Constructor.
      */
     public ParseText(CharSequence theChars)
     {
         _input = theChars;
+    }
+
+    /**
+     * Returns the current line indent.
+     */
+    public int getLineIndent()
+    {
+        int lineIndent = 0;
+        for (int charIndex = _lineCharIndex; charIndex < _input.length(); charIndex++) {
+            char ch = _input.charAt(charIndex);
+            if (ch == ' ')
+                lineIndent++;
+            else if (ch == '\t')
+                lineIndent += 4;
+            else break;
+        }
+        return lineIndent;
     }
 
     /**
@@ -37,12 +57,22 @@ public class ParseText {
     /**
      * Advances charIndex by one.
      */
-    public void eatChar()  { _charIndex++; }
+    public void eatChar()
+    {
+        char chr = charAt(_charIndex);
+        _charIndex++;
+        if (chr == '\n' || !hasChars())
+            _lineCharIndex = _charIndex;
+    }
 
     /**
      * Advances charIndex by given char count.
      */
-    public void eatChars(int charCount)  { _charIndex += charCount; }
+    public void eatChars(int charCount)
+    {
+        for (int i = 0; i < charCount; i++)
+            eatChar();
+    }
 
     /**
      * Eats the line end char.
@@ -53,6 +83,17 @@ public class ParseText {
             eatChar();
         if (hasChars() && nextChar() == '\n')
             eatChar();
+    }
+
+    /**
+     * Eats chars till line end.
+     */
+    public void eatTillLineEnd()
+    {
+        while (hasChars() && !CharSequenceUtils.isLineEndChar(nextChar()))
+            eatChar();
+        if (hasChars())
+            eatLineEnd();
     }
 
     /**
@@ -139,9 +180,9 @@ public class ParseText {
     }
 
     /**
-     * Returns the length of leading whitespace chars for given char sequence.
+     * Returns whether current parse location is at a blank line.
      */
-    public boolean isAtEmptyLine()
+    public boolean isAtBlankLine()
     {
         // Get leading space chars
         for (int i = _charIndex; i < _input.length(); i++) {
