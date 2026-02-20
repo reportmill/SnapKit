@@ -6,6 +6,9 @@ import java.util.*;
  */
 public class MarkdownNode {
 
+    // The parent node
+    private MarkdownNode _parent;
+
     // The node type
     private NodeType _nodeType;
 
@@ -14,6 +17,9 @@ public class MarkdownNode {
 
     // Other text
     private String _otherText;
+
+    // The indent level of this node
+    private int _indentLevel;
 
     // Child nodes
     private List<MarkdownNode> _childNodes = EMPTY_NODE_LIST;
@@ -51,6 +57,11 @@ public class MarkdownNode {
     }
 
     /**
+     * Returns the parent node.
+     */
+    public MarkdownNode getParent()  { return _parent; }
+
+    /**
      * Returns the node type.
      */
     public NodeType getNodeType()  { return _nodeType; }
@@ -76,6 +87,16 @@ public class MarkdownNode {
     public void setOtherText(String otherText)  { _otherText = otherText; }
 
     /**
+     * Returns the indent level.
+     */
+    public int getIndentLevel()  { return _indentLevel; }
+
+    /**
+     * Sets the indent level.
+     */
+    protected void setIndentLevel(int aValue)  { _indentLevel = aValue; }
+
+    /**
      * Returns the child nodes.
      */
     public List<MarkdownNode> getChildNodes()  { return _childNodes; }
@@ -86,6 +107,7 @@ public class MarkdownNode {
     protected void setChildNodes(List<MarkdownNode> nodesArray)
     {
         _childNodes = new ArrayList<>(nodesArray);
+        nodesArray.forEach(childNode -> childNode._parent = this);
     }
 
     /**
@@ -95,6 +117,7 @@ public class MarkdownNode {
     {
         if (_childNodes == EMPTY_NODE_LIST) _childNodes = new ArrayList<>();
         _childNodes.add(aNode);
+        aNode._parent = this;
     }
 
     /**

@@ -20,6 +20,12 @@ public class MarkdownParser {
     // The parse text
     private ParseText _parseText;
 
+    // The current indent level
+    private int _indentLevel;
+
+    // The current line indent
+    private int _lineIndent;
+
     // The running list of document nodes
     private List<MarkdownNode> _documentNodes = new ArrayList<>();
 
@@ -85,6 +91,28 @@ public class MarkdownParser {
         if (!hasChars())
             return null;
 
+        // Update indent vars
+        int lastIndentLevel = _indentLevel;
+        int lastLineIndent = _lineIndent;
+        _lineIndent = _parseText.getLineIndent();
+        if (_lineIndent > lastLineIndent + 2)
+            _indentLevel++;
+
+        // Parse next node, set indent level and reset indent vars
+        MarkdownNode nextNode = parseNextNodeImpl();
+        nextNode.setIndentLevel(_indentLevel);
+        _indentLevel = lastIndentLevel;
+        _lineIndent = lastLineIndent;
+
+        // Return
+        return nextNode;
+    }
+
+    /**
+     * Parses the next node.
+     */
+    private MarkdownNode parseNextNodeImpl()
+    {
         // Handle headers
         if (nextCharsStartWith(HEADER_MARKER))
             return parseHeaderNode();

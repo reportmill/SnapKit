@@ -129,13 +129,13 @@ public class MarkdownView extends ChildView {
     /**
      * Adds a view for given node.
      */
-    protected void addViewForNode(MarkdownNode markNode)
+    protected void addViewForNode(MarkdownNode markdownNode)
     {
-        View nodeView = createViewForNode(markNode);
+        View nodeView = createViewForNode(markdownNode);
         if (nodeView != null)
             addChild(nodeView);
 
-        if (markNode.getNodeType() == MarkdownNode.NodeType.Header)
+        if (markdownNode.getNodeType() == MarkdownNode.NodeType.Header)
             addViewForSeparatorNode();
     }
 
@@ -151,20 +151,31 @@ public class MarkdownView extends ChildView {
     /**
      * Creates view for node.
      */
-    protected View createViewForNode(MarkdownNode markNode)
+    protected View createViewForNode(MarkdownNode markdownNode)
     {
-        return switch (markNode.getNodeType()) {
-            case Header -> createViewForHeaderNode(markNode);
-            case List -> createViewForListNode(markNode);
-            case CodeBlock -> createViewForCodeBlockNode(markNode);
-            case RunBlock -> createViewForRunnableNode(markNode);
-            case Directive -> createViewForDirectiveNode(markNode);
-            case Paragraph -> createViewForParagraphNode(markNode);
-            case Link -> createViewForLinkNode(markNode);
-            case Image -> createViewForImageNode(markNode);
-            case Text -> createViewForTextNode(markNode);
+        View nodeView = createViewForNodeImpl(markdownNode);
+        if (markdownNode.getIndentLevel() > 0)
+            nodeView.setMargin(Insets.add(nodeView.getMargin(), 0, 0, 0, 20));
+        return nodeView;
+    }
+
+    /**
+     * Creates view for node.
+     */
+    protected View createViewForNodeImpl(MarkdownNode markdownNode)
+    {
+        return switch (markdownNode.getNodeType()) {
+            case Header -> createViewForHeaderNode(markdownNode);
+            case List -> createViewForListNode(markdownNode);
+            case CodeBlock -> createViewForCodeBlockNode(markdownNode);
+            case RunBlock -> createViewForRunnableNode(markdownNode);
+            case Directive -> createViewForDirectiveNode(markdownNode);
+            case Paragraph -> createViewForParagraphNode(markdownNode);
+            case Link -> createViewForLinkNode(markdownNode);
+            case Image -> createViewForImageNode(markdownNode);
+            case Text -> createViewForTextNode(markdownNode);
             default -> {
-                System.err.println("MarkdownView.createViewForNode: No support for type: " + markNode.getNodeType());
+                System.err.println("MarkdownView.createViewForNode: No support for type: " + markdownNode.getNodeType());
                 yield null;
             }
         };
@@ -313,7 +324,7 @@ public class MarkdownView extends ChildView {
     {
         // Create list view
         ColView listNodeView = new ColView();
-        listNodeView.setMargin(GENERAL_MARGIN);
+        listNodeView.setMargin(listNode.getIndentLevel() == 0 ? GENERAL_MARGIN : Insets.EMPTY);
 
         // Get list item views and add to listNodeView
         List<MarkdownNode> listItemNodes = listNode.getChildNodes();
@@ -351,7 +362,6 @@ public class MarkdownView extends ChildView {
             compoundListItemView.addChild(paragraphNodeView);
             List<MarkdownNode> childNodes = listItemNode.getChildNodes().subList(1, listItemNode.getChildNodes().size());
             List<View> listItemViews = ListUtils.map(childNodes, this::createViewForNode);
-            listItemViews.forEach(view -> view.setMargin(Insets.add(GENERAL_MARGIN, 0, 0, 0, 20)));
             listItemViews.forEach(compoundListItemView::addChild);
             return compoundListItemView;
         }
