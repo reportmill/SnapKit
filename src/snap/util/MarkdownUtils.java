@@ -142,8 +142,8 @@ public class MarkdownUtils {
         int minIndent = Integer.MAX_VALUE;
         for (String line : lines) {
             int leadingSpaces = CharSequenceUtils.getIndentLength(line);
-            if (leadingSpaces > 0 && leadingSpaces < line.length())
-                minIndent = Math.min(minIndent, leadingSpaces);
+            if (leadingSpaces < minIndent && !line.isBlank())
+                minIndent = leadingSpaces;
         }
 
         // Remove last line if blank

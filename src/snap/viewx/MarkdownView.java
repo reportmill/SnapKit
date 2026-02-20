@@ -131,12 +131,67 @@ public class MarkdownView extends ChildView {
      */
     protected void addViewForNode(MarkdownNode markdownNode)
     {
+        // If view provided for node, add it
         View nodeView = createViewForNode(markdownNode);
         if (nodeView != null)
-            addChild(nodeView);
+            addViewForNode(nodeView, markdownNode);
 
+        // Otherwise
+        else if (markdownNode.getNodeType() == MarkdownNode.NodeType.List)
+            addViewForListNode(markdownNode);
+
+        // If Header, add separator
         if (markdownNode.getNodeType() == MarkdownNode.NodeType.Header)
             addViewForSeparatorNode();
+    }
+
+    /**
+     * Adds a view for given node.
+     */
+    protected void addViewForListNode(MarkdownNode listNode)
+    {
+        List<MarkdownNode> listItemNodes = listNode.getChildNodes();
+        listItemNodes.forEach(this::addViewForListItemNode);
+    }
+
+    /**
+     * Adds a view for given node.
+     */
+    protected void addViewForListItemNode(MarkdownNode listItemNode)
+    {
+        // Create view for paragraph node
+        MarkdownNode paragraphNode = listItemNode.getChildNodes().get(0);
+        RowView paragraphNodeView = createViewForParagraphNode(paragraphNode);
+        addViewForNode(paragraphNodeView, listItemNode);
+
+        // If first child is TextArea, add bullet
+        if (paragraphNodeView.getChild(0) instanceof TextArea textArea)
+            textArea.getTextModel().addChars("• ", 0);
+
+        // Otherwise create text area and insert
+        else {
+            View bulletTextArea = createViewForTextNode(new MarkdownNode(MarkdownNode.NodeType.Text, "• "));
+            bulletTextArea.setMargin(NO_MARGIN);
+            paragraphNodeView.addChild(bulletTextArea, 0);
+        }
+
+        // If more child nodes, wrap in ColView and return
+        if (listItemNode.getChildNodes().size() > 1) {
+            List<MarkdownNode> childNodes = listItemNode.getChildNodes().subList(1, listItemNode.getChildNodes().size());
+            childNodes.forEach(this::addViewForNode);
+        }
+    }
+
+    /**
+     * Adds a view for given node.
+     */
+    protected void addViewForNode(View nodeView, MarkdownNode markdownNode)
+    {
+        int STANDARD_INDENT = 40;
+        int indentLevel = markdownNode.getIndentLevel();
+        if (indentLevel > 0)
+            nodeView.setMargin(Insets.add(nodeView.getMargin(), 0, 0, 0, indentLevel * STANDARD_INDENT));
+        addChild(nodeView);
     }
 
     /**
@@ -152,17 +207,6 @@ public class MarkdownView extends ChildView {
      * Creates view for node.
      */
     protected View createViewForNode(MarkdownNode markdownNode)
-    {
-        View nodeView = createViewForNodeImpl(markdownNode);
-        if (markdownNode.getIndentLevel() > 0)
-            nodeView.setMargin(Insets.add(nodeView.getMargin(), 0, 0, 0, 20));
-        return nodeView;
-    }
-
-    /**
-     * Creates view for node.
-     */
-    protected View createViewForNodeImpl(MarkdownNode markdownNode)
     {
         return switch (markdownNode.getNodeType()) {
             case Header -> createViewForHeaderNode(markdownNode);
@@ -320,55 +364,7 @@ public class MarkdownView extends ChildView {
     /**
      * Creates a view for list node.
      */
-    protected ChildView createViewForListNode(MarkdownNode listNode)
-    {
-        // Create list view
-        ColView listNodeView = new ColView();
-        listNodeView.setMargin(listNode.getIndentLevel() == 0 ? GENERAL_MARGIN : Insets.EMPTY);
-
-        // Get list item views and add to listNodeView
-        List<MarkdownNode> listItemNodes = listNode.getChildNodes();
-        List<View> listItemViews = ListUtils.map(listItemNodes, this::createViewForListItemNode);
-        listItemViews.forEach(listNodeView::addChild);
-
-        // Return
-        return listNodeView;
-    }
-
-    /**
-     * Creates a view for list item node.
-     */
-    protected ChildView createViewForListItemNode(MarkdownNode listItemNode)
-    {
-        // Create view for paragraph node
-        MarkdownNode paragraphNode = listItemNode.getChildNodes().get(0);
-        RowView paragraphNodeView = createViewForParagraphNode(paragraphNode);
-
-        // If first child is TextArea, add bullet
-        if (paragraphNodeView.getChild(0) instanceof TextArea textArea)
-            textArea.getTextModel().addChars("• ", 0);
-
-        // Otherwise create text area and insert
-        else {
-            View bulletTextArea = createViewForTextNode(new MarkdownNode(MarkdownNode.NodeType.Text, "• "));
-            bulletTextArea.setMargin(NO_MARGIN);
-            paragraphNodeView.addChild(bulletTextArea, 0);
-        }
-
-        // If more child nodes, wrap in ColView and return
-        if (listItemNode.getChildNodes().size() > 1) {
-            paragraphNodeView.setMargin(new Insets(0, 8, 0, 8));
-            ColView compoundListItemView = new ColView();
-            compoundListItemView.addChild(paragraphNodeView);
-            List<MarkdownNode> childNodes = listItemNode.getChildNodes().subList(1, listItemNode.getChildNodes().size());
-            List<View> listItemViews = ListUtils.map(childNodes, this::createViewForNode);
-            listItemViews.forEach(compoundListItemView::addChild);
-            return compoundListItemView;
-        }
-
-        // Return
-        return paragraphNodeView;
-    }
+    protected ChildView createViewForListNode(MarkdownNode listNode)  { return null; }
 
     /**
      * Creates a view for code block.
