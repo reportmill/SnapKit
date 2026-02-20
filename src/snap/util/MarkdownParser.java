@@ -169,6 +169,7 @@ public class MarkdownParser {
     {
         // Create list node and listItemNodes
         MarkdownNode listNode = new MarkdownNode(MarkdownNode.NodeType.List, null);
+        listNode.setIndentLevel(_indentLevel);
         List<MarkdownNode> listItemNodes = new ArrayList<>();
         int lineIndent = _parseText.getLineIndent();
 
@@ -195,6 +196,7 @@ public class MarkdownParser {
 
         // Create and return ListItem node with paragraph node
         MarkdownNode listItemNode = new MarkdownNode(MarkdownNode.NodeType.ListItem, null);
+        listItemNode.setIndentLevel(_indentLevel);
         MarkdownNode paragraphNode = parseParagraphNode();
         listItemNode.addChildNode(paragraphNode);
 
@@ -231,8 +233,9 @@ public class MarkdownParser {
     private MarkdownNode parseCodeBlockNode()
     {
         eatChars(CODE_BLOCK_MARKER.length());
-        String charsTillBlockEnd = getCharsTillMatchingTerminator(CODE_BLOCK_MARKER).toString();
-        return new MarkdownNode(MarkdownNode.NodeType.CodeBlock, charsTillBlockEnd);
+        String codeBlockString = getCharsTillMatchingTerminator(CODE_BLOCK_MARKER).toString();
+        String codeBlockStringTrimmed = MarkdownUtils.getStringForTextBlock(codeBlockString);
+        return new MarkdownNode(MarkdownNode.NodeType.CodeBlock, codeBlockStringTrimmed);
     }
 
     /**
@@ -294,6 +297,7 @@ public class MarkdownParser {
     private MarkdownNode parseParagraphNode()
     {
         MarkdownNode paragraphNode = new MarkdownNode(MarkdownNode.NodeType.Paragraph, null);
+        paragraphNode.setIndentLevel(_indentLevel);
         List<MarkdownNode> inlineNodes = parseInlineNodes();
         paragraphNode.setChildNodes(inlineNodes);
         return paragraphNode;

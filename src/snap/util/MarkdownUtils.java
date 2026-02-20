@@ -3,6 +3,7 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.text.TextStyle;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -127,5 +128,40 @@ public class MarkdownUtils {
 
         // Set, return
         return _codeStyle = codeStyle;
+    }
+
+    /**
+     * Processes raw text block into string the way Java compiler would.
+     */
+    protected static String getStringForTextBlock(String textBlock)
+    {
+        // Split into lines
+        String[] lines = textBlock.split("\n", -1);
+
+        // Determine common leading whitespace (ignoring empty lines)
+        int minIndent = Integer.MAX_VALUE;
+        for (String line : lines) {
+            int leadingSpaces = CharSequenceUtils.getIndentLength(line);
+            if (leadingSpaces > 0 && leadingSpaces < line.length())
+                minIndent = Math.min(minIndent, leadingSpaces);
+        }
+
+        // Remove last line if blank
+        if (lines.length > 0 && lines[lines.length - 1].isBlank())
+            lines = Arrays.copyOf(lines, lines.length - 1);
+
+        // Remove common leading whitespace and handle escape sequences
+        StringBuilder result = new StringBuilder();
+        for (String line : lines) {
+            String trimmedLine = line.length() >= minIndent ? line.substring(minIndent) : line;
+            trimmedLine = trimmedLine.replace("\\s", " ");
+            result.append(trimmedLine).append("\n");
+        }
+
+        // Remove the final newline
+        if (!result.isEmpty())
+            result.setLength(result.length() - 1);
+
+        return result.toString();
     }
 }
