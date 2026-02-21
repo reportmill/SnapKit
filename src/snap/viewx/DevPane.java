@@ -106,14 +106,13 @@ public class DevPane extends ViewOwner {
      */
     public void installInWindow()
     {
-        // Get UI
+        // Set split view as window content
         View ui = getUI();
-
-        // Set in RootView
         _rootView.setContent(ui);
 
-        // Set Content back
+        // Set original window content as first split view item and make sure it can grow
         _splitView.addItem(_content);
+        _content.setGrowHeight(true);
     }
 
     /**
