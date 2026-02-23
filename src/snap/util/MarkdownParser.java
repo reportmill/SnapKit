@@ -40,11 +40,13 @@ public class MarkdownParser {
     public static final String CODE_BLOCK_MARKER = "```";
     private static final String RUN_BLOCK_MARKER = "~~~";
     private static final String SEPARATOR_MARKER = "---";
-    public static final String DIRECTIVE_MARKER = "@[";
+    public static final String DIRECTIVE_MARKER = "<!--";
+    public static final String DIRECTIVE_MARKER_END = "-->";
+    public static final String DIRECTIVE_MARKER2 = "@[";
 
     // Constant for Nodes that are stand-alone
     private static final String[] BLOCK_NODE_MARKERS = { HEADER_MARKER, LIST_ITEM_MARKER, LIST_ITEM_MARKER2, LIST_ITEM_MARKER3,
-            CODE_BLOCK_MARKER, RUN_BLOCK_MARKER, DIRECTIVE_MARKER };
+            CODE_BLOCK_MARKER, RUN_BLOCK_MARKER, DIRECTIVE_MARKER2};
     private static final String[] INLINE_NODE_MARKERS = { LINK_MARKER, IMAGE_MARKER };
 
     /**
@@ -136,6 +138,8 @@ public class MarkdownParser {
         // Handle directive
         if (nextCharsStartWith(DIRECTIVE_MARKER))
             return parseDirectiveNode();
+        if (nextCharsStartWith(DIRECTIVE_MARKER2))
+            return parseDirectiveNode2();
 
         // Parse paragraph
         return parseParagraphNode();
@@ -282,6 +286,22 @@ public class MarkdownParser {
     {
         // Eat marker chars
         eatChars(DIRECTIVE_MARKER.length());
+
+        // Get chars till link close
+        String directiveText = getCharsTillMatchingTerminator(DIRECTIVE_MARKER_END).toString().trim();
+
+        // Create and return directive node
+        MarkdownNode directiveNode = new MarkdownNode(MarkdownNode.NodeType.Directive, directiveText);
+        return directiveNode;
+    }
+
+    /**
+     * Parses a directive node.
+     */
+    private MarkdownNode parseDirectiveNode2()
+    {
+        // Eat marker chars
+        eatChars(DIRECTIVE_MARKER2.length());
 
         // Get chars till link close
         String directiveText = getCharsTillMatchingTerminator(LINK_END_MARKER).toString().trim();
