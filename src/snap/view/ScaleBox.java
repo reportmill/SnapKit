@@ -127,6 +127,10 @@ public class ScaleBox extends BoxView {
         // Get content width
         double childW = child.getBestWidth(-1);
         double childH = child.getBestHeight(-1);
+        if (childW <= 0 || childH <=0) {
+            child.setBounds(0, 0, 0, 0);
+            return;
+        }
 
         // Get content alignment as modifier/factor (0 = left, 1 = right)
         double alignX = child.getLeanX() != null ? ViewUtils.getLeanX(child) : ViewUtils.getAlignX(this);
