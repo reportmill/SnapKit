@@ -855,7 +855,7 @@ public class WindowView extends ParentView {
     private static void checkForExitWhenAllWindowsClosed()
     {
         if (_openWins.isEmpty())
-            System.exit(0);
+            GFXEnv.getEnv().exit(0);
     }
 
     /**

@@ -219,7 +219,7 @@ public class CJEnv extends GFXEnv {
     /**
      * This is really just here to help with TeaVM.
      */
-    public void exit(int aValue)  { }
+    public void exit(int aValue)  { System.exit(aValue); }
 
     /**
      * Executes a process.
