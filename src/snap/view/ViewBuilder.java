@@ -110,7 +110,7 @@ public class ViewBuilder<T extends View> {
         // Create View
         T view;
         Class<? extends View>  cls = _class != null ? _class : _defaultClass;
-        try { view = (T) cls.getConstructor().newInstance(); }
+        try { view = (T) cls.newInstance(); }
         catch (Exception e) { throw new RuntimeException(e); }
 
         // Configure props
