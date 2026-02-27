@@ -5,8 +5,8 @@ plugins {
     id 'maven-publish'
 }
 
-group 'com.reportmill'
-version  new SimpleDateFormat("yyyy.MM").format(new Date())
+group = 'com.reportmill'
+version = new SimpleDateFormat("yyyy.MM").format(new Date())
 
 sourceSets.main.java.srcDirs = ['src']
 sourceSets.main.resources.srcDirs = ['src']
