@@ -12,8 +12,9 @@ sourceSets.main.java.srcDirs = ['src']
 sourceSets.main.resources.srcDirs = ['src']
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 repositories { mavenCentral() }
@@ -23,4 +24,14 @@ dependencies {
 
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << "-parameters"
+}
+
+publishing {
+
+    publications {
+        gpr(MavenPublication) {
+            artifactId = 'snapkit'
+            from components.java
+        }
+    }
 }
