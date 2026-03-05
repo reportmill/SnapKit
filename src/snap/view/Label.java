@@ -45,6 +45,7 @@ public class Label extends ParentView {
         _textArea = new TextArea(TextModel.createDefaultTextModel(false));
         _textArea.setAlign(getAlign());
         _textArea.setVisible(false);
+        _textArea.getTextAdapter().setScrollable(false);
         _textArea.getTextAdapter().addTextModelPropChangeListener(this::handleTextModelPropChange);
         addChild(_textArea);
     }
