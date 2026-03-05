@@ -120,15 +120,13 @@ public class Scroller extends ParentView implements ViewHost {
     public void setScrollX(double aValue)
     {
         // Get value rounded and in valid range (just return if already set)
-        aValue = Math.round(aValue);
-        if (aValue < 0)
-            aValue = 0;
-        else if (aValue > getScrollMaxX())
-            aValue = getScrollMaxX();
+        aValue = MathUtils.clamp(Math.round(aValue), 0, getScrollMaxX());
         if (MathUtils.equals(aValue, _scrollX)) return;
 
         // Set value and relayout/repaint
         firePropChange(ScrollX_Prop, _scrollX, _scrollX = aValue);
+        if (_content != null)
+            _content.setX(-aValue);
         relayout();
         repaint();
     }
@@ -144,15 +142,13 @@ public class Scroller extends ParentView implements ViewHost {
     public void setScrollY(double aValue)
     {
         // Get value rounded and in valid range (just return if already set)
-        aValue = Math.round(aValue);
-        if (aValue < 0)
-            aValue = 0;
-        else if (aValue > getScrollMaxY())
-            aValue = getScrollMaxY();
+        aValue = MathUtils.clamp(Math.round(aValue), 0, getScrollMaxY());
         if (MathUtils.equals(aValue, _scrollY)) return;
 
         // Set value and relayout/repaint
         firePropChange(ScrollY_Prop, _scrollY, _scrollY = aValue);
+        if (_content != null)
+            _content.setY(-aValue);
         relayout();
         repaint();
     }
