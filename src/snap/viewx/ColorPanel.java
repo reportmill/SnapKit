@@ -12,7 +12,7 @@ import snap.view.*;
 /**
  * This class provides UI for selecting a color.
  */
-public class ColorPanel extends ViewOwner {
+public class ColorPanel extends ViewController {
 
     // The currently selected color
     private Color _color = Color.BLACK;

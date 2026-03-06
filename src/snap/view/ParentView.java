@@ -179,7 +179,7 @@ public class ParentView extends View {
 
             // If child is ParentView, recurse
             if (child instanceof ParentView) {
-                if (child.getOwner() == getOwner() || child.getOwner() == null) {
+                if (child.getController() == getController() || child.getController() == null) {
                     ParentView parent = (ParentView) child;
                     View childForName = parent.getChildForName(aName);
                     if (childForName != null)
@@ -335,23 +335,23 @@ public class ParentView extends View {
     /**
      * Override to send to children.
      */
-    public void setOwner(ViewOwner anOwner)
+    public void setController(ViewController viewController)
     {
         // Do normal version
-        if (getOwner() != null) return;
-        super.setOwner(anOwner);
+        if (getController() != null) return;
+        super.setController(viewController);
 
         // Send to children
-        setOwnerChildren(anOwner);
+        setOwnerChildren(viewController);
     }
 
     /**
      * Forwards setOwner() call to children.
      */
-    protected void setOwnerChildren(ViewOwner anOwner)
+    protected void setOwnerChildren(ViewController anOwner)
     {
         for (View child : getChildren())
-            child.setOwner(anOwner);
+            child.setController(anOwner);
     }
 
     /**

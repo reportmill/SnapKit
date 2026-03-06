@@ -1,10 +1,10 @@
 package snap.styler;
-import snap.view.ViewOwner;
+import snap.view.ViewController;
 
 /**
- * A simple subclass of ViewOwner to work with a Styler.
+ * A simple subclass of view controller to work with a Styler.
  */
-public class StylerOwner extends ViewOwner {
+public class StylerOwner extends ViewController {
 
     // The Styler
     private Styler _styler;

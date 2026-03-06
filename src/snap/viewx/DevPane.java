@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * A view to allow inspection of View hierarchy.
  */
-public class DevPane extends ViewOwner {
+public class DevPane extends ViewController {
 
     // The RootView
     private RootView  _rootView;
@@ -29,8 +29,8 @@ public class DevPane extends ViewOwner {
     // The Files inspector
     private DevPaneFiles _filesInsp;
 
-    // The ViewOwners inspector
-    private DevPaneViewOwners _viewOwnersInsp;
+    // The ViewControllers inspector
+    private DevPaneViewOwners _viewControllersInsp;
 
     // The ViewTree inspector
     private DevPaneViews _viewsInsp;
@@ -45,7 +45,7 @@ public class DevPane extends ViewOwner {
     private DevPaneExceptions  _exceptionInsp;
 
     // The array of all panes
-    private ViewOwner[] _allPanes;
+    private ViewController[] _allPanes;
 
     // Constants
     private static int DEFAULT_HEIGHT = 300;
@@ -64,14 +64,14 @@ public class DevPane extends ViewOwner {
 
         // Set DevPanes
         _filesInsp = new DevPaneFiles();
-        _viewOwnersInsp = new DevPaneViewOwners(this);
+        _viewControllersInsp = new DevPaneViewOwners(this);
         _viewsInsp = new DevPaneViews(this);
         _graphicsInsp = new DevPaneGraphics(this);
         _consoleInsp = new DevPaneConsole();
         _exceptionInsp = new DevPaneExceptions();
 
         // Set All Panes array
-        _allPanes = new ViewOwner[] { _filesInsp, _viewOwnersInsp, _viewsInsp, _graphicsInsp, _consoleInsp, _exceptionInsp };
+        _allPanes = new ViewController[] { _filesInsp, _viewControllersInsp, _viewsInsp, _graphicsInsp, _consoleInsp, _exceptionInsp };
     }
 
     /**
@@ -96,7 +96,7 @@ public class DevPane extends ViewOwner {
     /**
      * Returns the pane for given class.
      */
-    public <T extends ViewOwner> T getPaneForClass(Class<T> aClass)
+    public <T extends ViewController> T getPaneForClass(Class<T> aClass)
     {
         return (T) ArrayUtils.findMatch(_allPanes, pane -> aClass.isInstance(pane));
     }
@@ -162,7 +162,7 @@ public class DevPane extends ViewOwner {
         // Add tabs
         Tab.Builder tabBuilder = new Tab.Builder(_tabView.getTabBar());
         tabBuilder.title("Files").contentOwner(_filesInsp).add();
-        tabBuilder.title("View Owners").contentOwner(_viewOwnersInsp).add();
+        tabBuilder.title("View Controllers").contentOwner(_viewControllersInsp).add();
         tabBuilder.title("Views").contentOwner(_viewsInsp).add();
         tabBuilder.title("Graphics").contentOwner(_graphicsInsp).add();
         tabBuilder.title("Console").contentOwner(_consoleInsp).add();
@@ -212,7 +212,7 @@ public class DevPane extends ViewOwner {
     public static DevPane getDevPane(View aView)
     {
         RootView rootView = aView.getRootView();
-        ViewOwner owner = rootView.getContent().getOwner();
+        ViewController owner = rootView.getContent().getController();
         return owner instanceof DevPane ? (DevPane) owner : null;
     }
 
@@ -278,8 +278,8 @@ public class DevPane extends ViewOwner {
         @Override
         protected void paintAbove(Painter aPntr)
         {
-            if (_viewOwnersInsp.isShowing())
-                _viewOwnersInsp.paintViewSelection(aPntr, _splitView);
+            if (_viewControllersInsp.isShowing())
+                _viewControllersInsp.paintViewSelection(aPntr, _splitView);
             else if (_viewsInsp.isShowing())
                 _viewsInsp.paintViewSelection(aPntr, _splitView);
         }

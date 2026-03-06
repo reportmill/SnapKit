@@ -8,7 +8,7 @@ import snap.viewx.DialogBox;
 /**
  * A panel to help users pick a font by preview.
  */
-public class FontPicker extends ViewOwner {
+public class FontPicker extends ViewController {
     
     // The DialogBox when running
     private DialogBox  _dbox;

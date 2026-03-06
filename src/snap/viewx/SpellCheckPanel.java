@@ -8,7 +8,7 @@ import snap.view.*;
 /**
  * This class uses the SpellCheck class to check spelling.
  */
-public abstract class SpellCheckPanel extends ViewOwner {
+public abstract class SpellCheckPanel extends ViewController {
 
     // The current suspected misspelled word
     private SpellCheck.Word _word;

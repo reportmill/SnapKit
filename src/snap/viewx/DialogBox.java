@@ -492,7 +492,7 @@ public class DialogBox extends FormBuilder {
     {
         // Request focus on  Content.Owner.FirstFocus if available
         View content = getContent();
-        ViewOwner owner = content != null ? content.getOwner() : null;
+        ViewController owner = content != null ? content.getController() : null;
         if (owner != null && owner.getFirstFocus() != null)
             owner.requestFocus(owner.getFirstFocus());
     }

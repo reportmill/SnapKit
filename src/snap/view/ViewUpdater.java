@@ -1,12 +1,11 @@
 package snap.view;
 import java.util.*;
-
 import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.gfx.*;
 
 /**
- * A class to update view painting, layout and animation and ViewOwner resets.
+ * A class to update view painting, layout and animation and ViewController resets.
  */
 public class ViewUpdater {
     
@@ -22,8 +21,8 @@ public class ViewUpdater {
     // A set of ViewAnims with active animations
     private Set <ViewAnim>  _viewAnims = Collections.synchronizedSet(new HashSet<>());
 
-    // A set of ViewOwners that want to be reset on next UI update call
-    private Set <ViewOwner>  _resetLaters = Collections.synchronizedSet(new HashSet<>());
+    // A set of ViewControllers that want to be reset on next UI update call
+    private Set <ViewController> _resetLaters = Collections.synchronizedSet(new HashSet<>());
 
     // The set of views that have requested repaint
     private Set <View>  _repaintViews = new HashSet<>();
@@ -62,7 +61,7 @@ public class ViewUpdater {
     }
 
     /**
-     * Adds a given ViewOwner to set of owners that need reset on next UI update call.
+     * Adds a given ViewController to set of owners that need reset on next UI update call.
      */
     public void runBeforeUpdate(Runnable aRun)
     {
@@ -71,9 +70,9 @@ public class ViewUpdater {
     }
 
     /**
-     * Adds a given ViewOwner to set of owners that need reset on next UI update call.
+     * Adds a given ViewController to set of owners that need reset on next UI update call.
      */
-    public void resetLater(ViewOwner anOwnr)
+    public void resetLater(ViewController anOwnr)
     {
         _resetLaters.add(anOwnr);
         updateLater();
@@ -116,7 +115,7 @@ public class ViewUpdater {
     /**
      * Main update method: Updates these view things:
      *   - View animation
-     *   - ViewOwner resetUI calls
+     *   - ViewController resetUI calls
      *   - View layout
      *   - View painting.
      */
@@ -156,9 +155,9 @@ public class ViewUpdater {
         while (!_resetLaters.isEmpty()) {
 
             // Get resetLater owners
-            ViewOwner[] owners = _resetLaters.toArray(new ViewOwner[0]);
+            ViewController[] owners = _resetLaters.toArray(new ViewController[0]);
             _resetLaters.clear();
-            for (ViewOwner owner : owners)
+            for (ViewController owner : owners)
                 owner.invokeResetUI();
         }
 
@@ -412,7 +411,7 @@ public class ViewUpdater {
             _frameRateLabel.setMargin(10, 10, 10, 20);
             _frameRateLabel.setPrefSize(100, 32);
             _frameRateLabel.setFont(new Font("Arial", 24));
-            ViewOwner frameRateOwner = new ViewOwner(_frameRateLabel);
+            ViewController frameRateOwner = new ViewController(_frameRateLabel);
             frameRateOwner.getWindow().setType(WindowView.Type.UTILITY);
             frameRateOwner.getWindow().setAlwaysOnTop(true);
             frameRateOwner.setWindowVisible(true);

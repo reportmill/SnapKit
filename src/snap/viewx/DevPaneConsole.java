@@ -9,13 +9,13 @@ import snap.util.KeyChain;
 import snap.view.BoxView;
 import snap.view.ScrollView;
 import snap.view.View;
-import snap.view.ViewOwner;
+import snap.view.ViewController;
 import java.io.PrintStream;
 
 /**
  * A DevPane to show the console.
  */
-public class DevPaneConsole extends ViewOwner {
+public class DevPaneConsole extends ViewController {
 
     // The ConsoleView
     private static ConsoleTextArea _consoleTextArea;

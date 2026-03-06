@@ -33,7 +33,7 @@ public class Tab extends PropObject {
     private View  _content;
 
     // The content owner
-    private ViewOwner  _contentOwner;
+    private ViewController _contentOwner;
 
     // Constants for properties
     private static final String Title_Prop = "Title";
@@ -148,14 +148,14 @@ public class Tab extends PropObject {
     /**
      * Returns the content owner.
      */
-    public ViewOwner getContentOwner()  { return _contentOwner; }
+    public ViewController getContentOwner()  { return _contentOwner; }
 
     /**
      * Sets the content owner.
      */
-    public void setContentOwner(ViewOwner aViewOwner)
+    public void setContentOwner(ViewController viewController)
     {
-        _contentOwner = aViewOwner;
+        _contentOwner = viewController;
         _content = null;
     }
 
@@ -275,7 +275,7 @@ public class Tab extends PropObject {
         public Builder closable(boolean aValue)  { _tab()._closable = aValue; return this; }
         public Builder visible(boolean aValue)  { _tab()._visible = aValue; return this; }
         public Builder content(View aValue)  { _tab()._content = aValue; return this; }
-        public Builder contentOwner(ViewOwner aValue)  { _tab()._contentOwner = aValue; return this; }
+        public Builder contentOwner(ViewController aValue)  { _tab()._contentOwner = aValue; return this; }
 
         /**
          * Build.

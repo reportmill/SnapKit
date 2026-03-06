@@ -7,7 +7,7 @@ import java.util.Date;
 /**
  * A DevPane to show the console.
  */
-public class DevPaneExceptions extends ViewOwner {
+public class DevPaneExceptions extends ViewController {
 
     // The selected index
     private int _selIndex = -1;

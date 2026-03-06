@@ -23,8 +23,8 @@ class ActivityMonitorPanel {
     // Whether panel has already shown
     private boolean _didShow;
 
-    // The ViewOwner for UI
-    private ActivityMonitorPanelViewOwner _viewOwner;
+    // The view controller for UI
+    private ActivityMonitorPanelViewOwner _viewController;
 
     /**
      * Constructor for view and title.
@@ -34,7 +34,7 @@ class ActivityMonitorPanel {
         super();
         _view = aView;
         _activityMonitor = activityMonitor;
-        _viewOwner = new ActivityMonitorPanelViewOwner();
+        _viewController = new ActivityMonitorPanelViewOwner();
         activityMonitor.addPropChangeListener(this::handleMonitorPropChange);
         ViewUtils.runDelayed(this::checkForShowPanel, _delay);
     }
@@ -47,13 +47,13 @@ class ActivityMonitorPanel {
         if (_didShow) return;
         _didShow = true;
         ViewUtils.runLater(this::checkForHidePanel);
-        _viewOwner.showDialogBox();
+        _viewController.showDialogBox();
     }
 
     /**
      * Hide panel.
      */
-    protected void hide()  { _viewOwner.hideDialogBox(); }
+    protected void hide()  { _viewController.hideDialogBox(); }
 
     /**
      * Check for whether panel should show.
@@ -82,13 +82,13 @@ class ActivityMonitorPanel {
             case Activity.Finished_Prop -> ViewUtils.runDelayed(this::hide, 500);
             case Activity.Cancelled_Prop -> ViewUtils.runLater(this::hide);
         }
-        _viewOwner.resetLater();
+        _viewController.resetLater();
     }
 
     /**
-     * This ViewOwner class shows UI for ActivityMonitorPanel.
+     * This view controller class shows UI for ActivityMonitorPanel.
      */
-    private class ActivityMonitorPanelViewOwner extends ViewOwner {
+    private class ActivityMonitorPanelViewOwner extends ViewController {
 
         // The dialog box
         private DialogBox _dialogBox;
