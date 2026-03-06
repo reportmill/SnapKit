@@ -50,7 +50,7 @@ public class SnapEnv {
         // Get class name for platform GFXEnv
         String className = isTeaVM ? "snaptea.TV" : "snap.swing.AWTEnv";
         if (isWebVM || isJxBrowser) {
-            try { className = "snap.webenv.CJEnv"; }
+            try { snap.webenv.CJWebEnv.get().window(); className = "snap.webenv.CJEnv"; }
             catch (Throwable ignore) { }
         }
 
