@@ -794,12 +794,12 @@ public class WindowView extends ParentView {
     /**
      * Returns an array of all open windows.
      */
-    public static <T extends ViewController> T getOpenWindowOwner(Class <T> aClass)
+    public static <T extends ViewController> T getOpenWindowController(Class <T> aClass)
     {
         for (WindowView window : _openWins) {
-            ViewController owner = window.getController();
-            if (owner != null && (aClass == null || aClass.isAssignableFrom(owner.getClass())))
-                return (T) owner;
+            ViewController controller = window.getController();
+            if (controller != null && (aClass == null || aClass.isAssignableFrom(controller.getClass())))
+                return (T) controller;
         }
 
         // Return not found
@@ -809,13 +809,13 @@ public class WindowView extends ParentView {
     /**
      * Returns an array of all open windows.
      */
-    public static <T extends ViewController> T[] getOpenWindowOwners(Class <T> aClass)
+    public static <T extends ViewController> T[] getOpenWindowControllers(Class <T> aClass)
     {
         List <T> viewControllers = new ArrayList<>();
         for (WindowView window : _openWins) {
-            ViewController owner = window.getController();
-            if (owner != null && (aClass == null || aClass.isAssignableFrom(owner.getClass())))
-                viewControllers.add((T) owner);
+            ViewController controller = window.getController();
+            if (controller != null && (aClass == null || aClass.isAssignableFrom(controller.getClass())))
+                viewControllers.add((T) controller);
         }
 
         // Return array

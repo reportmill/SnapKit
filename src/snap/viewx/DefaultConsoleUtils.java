@@ -43,7 +43,7 @@ class DefaultConsoleUtils {
 
         // Handle ViewController
         if (value instanceof ViewController)
-            return createContentViewForViewOwner((ViewController) value);
+            return createContentViewForViewController((ViewController) value);
 
         // If snapcharts class, try to install snapcharts helper
         if (_helper == null && value != null && value.getClass().getName().startsWith("snapcharts"))
@@ -121,7 +121,7 @@ class DefaultConsoleUtils {
     /**
      * Creates content view for ViewController.
      */
-    private static View createContentViewForViewOwner(ViewController viewController)
+    private static View createContentViewForViewController(ViewController viewController)
     {
         View view = viewController.getUI();
         return view;

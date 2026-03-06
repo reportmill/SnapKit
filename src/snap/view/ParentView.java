@@ -342,16 +342,16 @@ public class ParentView extends View {
         super.setController(viewController);
 
         // Send to children
-        setOwnerChildren(viewController);
+        setControllerChildren(viewController);
     }
 
     /**
-     * Forwards setOwner() call to children.
+     * Forwards setController() call to children.
      */
-    protected void setOwnerChildren(ViewController anOwner)
+    protected void setControllerChildren(ViewController viewController)
     {
         for (View child : getChildren())
-            child.setController(anOwner);
+            child.setController(viewController);
     }
 
     /**

@@ -86,7 +86,7 @@ public class DevPane extends ViewController {
     {
         getUI();
         List<Tab> tabs = _tabView.getTabBar().getTabs();
-        int selIndex = ListUtils.findMatchIndex(tabs, tab -> aClass.isInstance(tab.getContentOwner()));
+        int selIndex = ListUtils.findMatchIndex(tabs, tab -> aClass.isInstance(tab.getContentController()));
         _tabView.setSelIndex(selIndex);
 
         if (!isShowing())
@@ -161,12 +161,12 @@ public class DevPane extends ViewController {
     {
         // Add tabs
         Tab.Builder tabBuilder = new Tab.Builder(_tabView.getTabBar());
-        tabBuilder.title("Files").contentOwner(_filesInsp).add();
-        tabBuilder.title("View Controllers").contentOwner(_viewControllersInsp).add();
-        tabBuilder.title("Views").contentOwner(_viewsInsp).add();
-        tabBuilder.title("Graphics").contentOwner(_graphicsInsp).add();
-        tabBuilder.title("Console").contentOwner(_consoleInsp).add();
-        tabBuilder.title("Exceptions").contentOwner(_exceptionInsp).add();
+        tabBuilder.title("Files").contentController(_filesInsp).add();
+        tabBuilder.title("View Controllers").contentController(_viewControllersInsp).add();
+        tabBuilder.title("Views").contentController(_viewsInsp).add();
+        tabBuilder.title("Graphics").contentController(_graphicsInsp).add();
+        tabBuilder.title("Console").contentController(_consoleInsp).add();
+        tabBuilder.title("Exceptions").contentController(_exceptionInsp).add();
 
         // Create CloseBox for TabView.TabBar
         CloseBox closeBox = new CloseBox();
