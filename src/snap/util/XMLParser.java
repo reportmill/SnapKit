@@ -189,6 +189,10 @@ public class XMLParser extends Parser {
                         _checkedContent = true;
                         _part.setValue(content);
                     }
+
+                    // Handle mixed content (additional text after a child element)
+                    //else { XMLTokenizer xt = (XMLTokenizer) aNode.getParser().getTokenizer();
+                    //    while (!xt.nextCharsStartWith("<") && xt.hasChar()) xt.eatChar(); }
                     break;
             }
         }
