@@ -81,6 +81,18 @@ public class MarkdownView extends ChildView {
     }
 
     /**
+     * Sets Markdown string.
+     */
+    public void setMarkdownNodes(List<MarkdownNode> markdownNodes)
+    {
+        _documentNode = new MarkdownNode(MarkdownNode.NodeType.Document, null);
+        _documentNode.setChildNodes(markdownNodes);
+
+        for (MarkdownNode node : markdownNodes)
+            addViewForNode(node);
+    }
+
+    /**
      * Returns the document markdown node.
      */
     public MarkdownNode getDocumentNode()  { return _documentNode; }

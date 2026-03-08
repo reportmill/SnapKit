@@ -104,7 +104,7 @@ public class MarkdownNode {
     /**
      * Sets the child nodes.
      */
-    protected void setChildNodes(List<MarkdownNode> nodesArray)
+    public void setChildNodes(List<MarkdownNode> nodesArray)
     {
         _childNodes = new ArrayList<>(nodesArray);
         nodesArray.forEach(childNode -> childNode._parent = this);
