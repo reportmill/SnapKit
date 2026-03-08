@@ -176,16 +176,9 @@ public class MarkdownView extends ChildView {
         RowView paragraphNodeView = createViewForParagraphNode(paragraphNode);
         addViewForNode(paragraphNodeView, listItemNode);
 
-        // If first child is TextArea, add bullet
-        if (paragraphNodeView.getChild(0) instanceof TextArea textArea)
-            textArea.getTextModel().addChars("• ", 0);
-
-        // Otherwise create text area and insert
-        else {
-            View bulletTextArea = createViewForTextNode(new MarkdownNode(MarkdownNode.NodeType.Text, "• "));
-            bulletTextArea.setMargin(NO_MARGIN);
-            paragraphNodeView.addChild(bulletTextArea, 0);
-        }
+        // Add bullet to text
+        TextArea textArea = (TextArea) paragraphNodeView.getChild(0);
+        textArea.getTextModel().addCharsWithStyle("• ", textArea.getDefaultTextStyle(), 0);
 
         // If more child nodes, wrap in ColView and return
         if (listItemNode.getChildNodes().size() > 1) {
@@ -229,7 +222,6 @@ public class MarkdownView extends ChildView {
             case Paragraph -> createViewForParagraphNode(markdownNode);
             case Link -> createViewForLinkNode(markdownNode);
             case Image -> createViewForImageNode(markdownNode);
-            case Text -> createViewForTextNode(markdownNode);
             default -> {
                 System.err.println("MarkdownView.createViewForNode: No support for type: " + markdownNode.getNodeType());
                 yield null;
@@ -276,19 +268,8 @@ public class MarkdownView extends ChildView {
      */
     protected View createViewForTextNode(MarkdownNode contentNode)
     {
-        TextArea textArea = new TextArea(true);
-        textArea.setWrapLines(true);
-        textArea.setMargin(GENERAL_MARGIN);
-
-        // Reset style
-        TextStyle textStyle = MarkdownUtils.getContentStyle();
-        TextModel textModel = textArea.getTextModel();
-        textModel.setDefaultTextStyle(textStyle);
-
-        // Set text
+        TextArea textArea = createParagraphNodeTextArea();
         addNodeTextToTextArea(textArea, contentNode.getText());
-
-        // Return
         return textArea;
     }
 
@@ -455,25 +436,15 @@ public class MarkdownView extends ChildView {
 
         // Get child inline nodes
         List<MarkdownNode> inlineNodes = paragraphNode.getChildNodes();
-        TextArea lastTextArea = null;
+        TextArea textArea = createParagraphNodeTextArea();
+        textArea.setMargin(NO_MARGIN);
+        paragraphNodeView.addChild(textArea);
 
-        // Iterate over children
+        // Iterate over children and add to text
         for (MarkdownNode childNode : inlineNodes) {
-
-            // If last node is Text or Link and last view is TextArea, just add chars
-            MarkdownNode.NodeType nodeType = childNode.getNodeType();
-            if (lastTextArea != null && (nodeType == MarkdownNode.NodeType.Text || nodeType == MarkdownNode.NodeType.Link))
-                addInlineNodeToTextArea(childNode, lastTextArea);
-
-            // Otherwise create view and add
-            else {
-                View childNodeView = createViewForParagraphChildBlockNode(childNode);
-                childNodeView.setMargin(NO_MARGIN);
-                paragraphNodeView.addChild(childNodeView);
-                if (childNodeView instanceof TextArea && nodeType != MarkdownNode.NodeType.CodeBlock)
-                    lastTextArea = (TextArea) childNodeView;
-                else lastTextArea = null;
-            }
+            if (isInlineNode(childNode))
+                addInlineNodeToTextArea(childNode, textArea);
+            else System.err.println("MarkdownView.createViewForParagraphNode: Unsupported child node type: " + childNode.getNodeType());
         }
 
         // Return
@@ -481,24 +452,21 @@ public class MarkdownView extends ChildView {
     }
 
     /**
-     * Creates a view for paragraph child that is really block node.
+     * Creates a view for text node.
      */
-    private View createViewForParagraphChildBlockNode(MarkdownNode childNode)
+    protected TextArea createParagraphNodeTextArea()
     {
-        MarkdownNode.NodeType nodeType = childNode.getNodeType();
+        TextArea textArea = new TextArea(true);
+        textArea.setWrapLines(true);
+        textArea.setMargin(GENERAL_MARGIN);
 
-        // Handle CodeBlock special
-        if (nodeType == MarkdownNode.NodeType.CodeBlock) {
-            View childNodeView = createViewForCodeBlockNode(childNode);
-            childNodeView.setMargin(NO_MARGIN);
-            childNodeView.setPadding(INLINE_PADDING);
-            return childNodeView;
-        }
+        // Reset style
+        TextStyle textStyle = MarkdownUtils.getContentStyle();
+        TextModel textModel = textArea.getTextModel();
+        textModel.setDefaultTextStyle(textStyle);
 
-        // Handle anything else
-        View childNodeView = createViewForNode(childNode); //assert (childNodeView != null);
-        childNodeView.setMargin(NO_MARGIN);
-        return childNodeView;
+        // Return
+        return textArea;
     }
 
     /**
@@ -619,5 +587,11 @@ public class MarkdownView extends ChildView {
             case "BoldItalic" -> "Bold";
             default -> null;
         };
+    }
+
+    // Returns whether node is block node
+    private static boolean isInlineNode(MarkdownNode node)
+    {
+        return node.getNodeType() == MarkdownNode.NodeType.Text || node.getNodeType() == MarkdownNode.NodeType.Link;
     }
 }

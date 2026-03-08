@@ -225,9 +225,11 @@ public class HtmlParser {
      */
     private MarkdownNode createMarkdownLinkNodeForHtml(XMLElement htmlNode)
     {
+        MarkdownNode linkMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Link, null);
         String linkText = htmlNode.getValue();
+        MarkdownNode textMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Text, linkText);
+        linkMarkdownNode.addChildNode(textMarkdownNode);
         String linkUrl = htmlNode.getAttributeValue("href");
-        MarkdownNode linkMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Link, linkText);
         linkMarkdownNode.setOtherText(linkUrl);
         return linkMarkdownNode;
     }
