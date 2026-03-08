@@ -112,14 +112,13 @@ public class XMLParser extends Parser {
             }
 
             // If next char isn't close tag, return null (assumes we hit child element instead of text content)
-            if (!nextCharsStartWith("</"))
-                return null;
+            //if (!nextCharsStartWith("</")) return null;
 
             // Return string for content
             String str = getInput().subSequence(start, _charIndex).toString();
             if (CharSequenceUtils.isWhiteSpace(str))
                 return null;
-            return decodeXMLString(str);
+            return decodeXMLString(str.trim());
         }
     }
 
@@ -221,7 +220,7 @@ public class XMLParser extends Parser {
                 String moreContent = tokenizer.getContent();
                 if (moreContent != null) {
                     String prevContent = _part.getValue();
-                    String newContent = prevContent != null ? prevContent + moreContent : moreContent;
+                    String newContent = prevContent != null ? prevContent + ' ' + moreContent : moreContent;
                     _part.setValue(newContent);
                 }
             }

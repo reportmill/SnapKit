@@ -1,6 +1,7 @@
 package snap.util;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Parser for HTML.
@@ -9,6 +10,25 @@ public class HtmlParser {
 
     // The HTML node
     private XMLElement _htmlNode;
+
+    // The indent level for markdown creation
+    private int _indentLevel = 0;
+
+    // Constants for nodes
+    private static final String HEADER_NODE = "h1";
+    private static final String PARAGRAPH_NODE = "p";
+    private static final String LINK_NODE = "a";
+    private static final String IMAGE_NODE = "img";
+    private static final String LIST_NODE = "ul";
+    private static final String LIST_ITEM_NODE = "li";
+    private static final String CODE_NODE = "code";
+    private static final String PRE_NODE = "pre";
+    private static final String EMPHASIS_NODE = "em";
+    private static final String BOLD_NODE = "b";
+
+    // Constant
+    private static final List<String> INLINE_NODES = List.of(LINK_NODE, EMPHASIS_NODE, BOLD_NODE);
+    private static final List<String> BLOCK_NODES = List.of(LIST_NODE, CODE_NODE);
 
     /**
      * Constructor.
@@ -64,15 +84,26 @@ public class HtmlParser {
      */
     private MarkdownNode createMarkdownNodeForHtml(XMLElement htmlNode)
     {
+        MarkdownNode markdownNode = createMarkdownNodeForHtmlImpl(htmlNode);
+        if (markdownNode != null)
+            markdownNode.setIndentLevel(_indentLevel);
+        return markdownNode;
+    }
+
+    /**
+     * Returns a markdown node for given XML node.
+     */
+    private MarkdownNode createMarkdownNodeForHtmlImpl(XMLElement htmlNode)
+    {
         return switch (htmlNode.getName()) {
-            case "h1" -> createMarkdownHeaderNodeForHtml(htmlNode);
-            case "ul" -> createMarkdownListNodeForHtml(htmlNode);
-            case "li" -> createMarkdownListItemNodeForHtml(htmlNode);
-            case "code" -> createMarkdownCodeBlockNodeForHtml(htmlNode);
-            case "p" -> createMarkdownParagraphNodeForHtml(htmlNode);
-            case "a" -> createMarkdownLinkNodeForHtml(htmlNode);
-            case "img" -> createMarkdownImageNodeForHtml(htmlNode);
-            case "pre" -> createMarkdwonTextNodeForHtml(htmlNode);
+            case HEADER_NODE -> createMarkdownHeaderNodeForHtml(htmlNode);
+            case LIST_NODE -> createMarkdownListNodeForHtml(htmlNode);
+            case LIST_ITEM_NODE -> createMarkdownListItemNodeForHtml(htmlNode);
+            case CODE_NODE -> createMarkdownCodeBlockNodeForHtml(htmlNode);
+            case PARAGRAPH_NODE -> createMarkdownParagraphNodeForHtml(htmlNode);
+            case LINK_NODE -> createMarkdownLinkNodeForHtml(htmlNode);
+            case IMAGE_NODE -> createMarkdownImageNodeForHtml(htmlNode);
+            case PRE_NODE -> createMarkdwonTextNodeForHtml(htmlNode);
             default -> {
                 System.out.println("Unknown HTML node: " + htmlNode.getName());
                 yield null;
@@ -113,16 +144,34 @@ public class HtmlParser {
     /**
      * Returns a markdown list item node for given html list item node.
      */
-    private MarkdownNode createMarkdownListItemNodeForHtml(XMLElement htmlNode)
+    private MarkdownNode createMarkdownListItemNodeForHtml(XMLElement listItemHtmlNode)
     {
-        String listText = htmlNode.getValue();
-        if (listText == null)
-            return null;
-        MarkdownNode textMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Text, listText);
-        MarkdownNode paragraphMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Paragraph, listText);
-        paragraphMarkdownNode.addChildNode(textMarkdownNode);
-        MarkdownNode listItemMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.ListItem, listText);
+        // Create list item markdown node and add paragraph node
+        MarkdownNode listItemMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.ListItem, null);
+        MarkdownNode paragraphMarkdownNode = createMarkdownParagraphNodeForHtml(listItemHtmlNode);
         listItemMarkdownNode.addChildNode(paragraphMarkdownNode);
+
+        // Iterate over children
+        List<XMLElement> childNodes = listItemHtmlNode.getElements();
+        for (XMLElement childNode : childNodes) {
+
+            // If block node, create/add markdown block node
+            if (isBlockNode(childNode)) {
+                _indentLevel++;
+                MarkdownNode childMarkdownNode = createMarkdownNodeForHtml(childNode);
+                if (childMarkdownNode != null) {
+                    listItemMarkdownNode.addChildNode(childMarkdownNode);
+                    childMarkdownNode.setIndentLevel(1);
+                }
+                _indentLevel--;
+            }
+
+            // Complain
+            else System.out.println("HtmlParser.createMarkdownListItemNodeForHtml: Unexpected list item child: " + childNode.getName());
+        }
+
+
+        // Return
         return listItemMarkdownNode;
     }
 
@@ -141,9 +190,34 @@ public class HtmlParser {
      */
     private MarkdownNode createMarkdownParagraphNodeForHtml(XMLElement htmlNode)
     {
-        String codeText = htmlNode.getValue();
-        MarkdownNode codeBlockMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Paragraph, codeText);
-        return codeBlockMarkdownNode;
+        MarkdownNode paragraphMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Paragraph, null);
+
+        // If text, add text node
+        String paragraphText = htmlNode.getValue();
+        if (paragraphText != null) {
+            MarkdownNode textMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Text, paragraphText);
+            paragraphMarkdownNode.addChildNode(textMarkdownNode);
+        }
+
+        // If child nodes, add them
+        List<XMLElement> childNodes = htmlNode.getElements();
+        for (XMLElement childNode : childNodes) {
+            if (isInlineNode(childNode)) {
+                MarkdownNode childMarkdownNode = createMarkdownNodeForHtml(childNode);
+                Objects.requireNonNull(childMarkdownNode);
+                paragraphMarkdownNode.addChildNode(childMarkdownNode);
+            }
+        }
+
+        // Complain about empty paragraph node
+        if (paragraphText == null && paragraphMarkdownNode.getChildNodes().isEmpty()) {
+            MarkdownNode textMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Text, " ");
+            paragraphMarkdownNode.addChildNode(textMarkdownNode);
+            System.out.println("HtmlParser.createMarkdownParagraphNodeForHtml: Empty paragraph/list node");
+        }
+
+        // Return
+        return paragraphMarkdownNode;
     }
 
     /**
@@ -177,4 +251,14 @@ public class HtmlParser {
         MarkdownNode textMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Text, text);
         return textMarkdownNode;
     }
+
+    /**
+     * Returns whether given HTML node is block node.
+     */
+    private static boolean isBlockNode(XMLElement htmlNode)  { return BLOCK_NODES.contains(htmlNode.getName()); }
+
+    /**
+     * Returns whether given HTML node is inline node.
+     */
+    private static boolean isInlineNode(XMLElement htmlNode)  { return INLINE_NODES.contains(htmlNode.getName()); }
 }
