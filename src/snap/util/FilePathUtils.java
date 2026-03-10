@@ -117,6 +117,15 @@ public class FilePathUtils {
         String childPath = getNormalizedPath(aChildPath);
         if (parentPath.length() <= 1)
             return childPath;
+
+        // Attempt to support relative path parent
+        if (childPath.startsWith("/../")) {
+            String parentPath2 = getParentPath(aPath);
+            String childPath2 = childPath.substring(4);
+            return getChildPath(parentPath2, childPath2);
+        }
+
+        // Return parent + child
         return parentPath + childPath;
     }
 

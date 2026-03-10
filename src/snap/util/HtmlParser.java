@@ -1,4 +1,5 @@
 package snap.util;
+import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -7,6 +8,9 @@ import java.util.Objects;
  * Parser for HTML.
  */
 public class HtmlParser {
+
+    // The HTML source URL
+    private WebURL _htmlSourceUrl;
 
     // The HTML node
     private XMLElement _htmlNode;
@@ -29,7 +33,7 @@ public class HtmlParser {
     private static final String BOLD_NODE = "b";
 
     // Constant
-    private static final List<String> INLINE_NODES = List.of(LINK_NODE, EMPHASIS_NODE, BOLD_NODE, CODE_NODE);
+    private static final List<String> INLINE_NODES = List.of(LINK_NODE, EMPHASIS_NODE, BOLD_NODE, CODE_NODE, IMAGE_NODE);
     private static final List<String> BLOCK_NODES = List.of(LIST_NODE, PRE_NODE);
 
     /**
@@ -38,6 +42,20 @@ public class HtmlParser {
     public HtmlParser()
     {
         super();
+    }
+
+    /**
+     * Returns the source URL.
+     */
+    public WebURL getHtmlSourceUrl()  { return _htmlSourceUrl; }
+
+    /**
+     * Sets the source.
+     */
+    public void setHtmlSourceUrl(WebURL htmlUrl)
+    {
+        if (htmlUrl == getHtmlSourceUrl()) return;
+        _htmlSourceUrl = htmlUrl;
     }
 
     /**
@@ -253,18 +271,27 @@ public class HtmlParser {
     private MarkdownNode createMarkdownImageNodeForHtml(XMLElement htmlNode)
     {
         String srcUrl = htmlNode.getAttributeValue("src");
-        MarkdownNode imageMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Image, srcUrl);
+        if (srcUrl != null)
+            srcUrl = resolveUrl(srcUrl);
+        String altText = htmlNode.getAttributeValue("alt");
+        MarkdownNode imageMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Image, altText);
+        imageMarkdownNode.setOtherText(srcUrl);
+        imageMarkdownNode.setAttributeValue("Size", "Small");
         return imageMarkdownNode;
     }
 
     /**
-     * Returns a markdown text node for given html text node.
+     * Resolves the given URL.
      */
-    private MarkdownNode createMarkdwonTextNodeForHtml(XMLElement htmlNode)
+    private String resolveUrl(String urlString)
     {
-        String text = htmlNode.getValue();
-        MarkdownNode textMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Text, text);
-        return textMarkdownNode;
+        WebURL htmlSourceUrl = getHtmlSourceUrl();
+        if (htmlSourceUrl == null || !urlString.contains(".."))
+            return urlString;
+        if (htmlSourceUrl.getFileType().equals("html"))
+            htmlSourceUrl = htmlSourceUrl.getParent();
+        WebURL absoluteUrl = htmlSourceUrl.getChildUrlForPath(urlString);
+        return absoluteUrl.getString();
     }
 
     /**

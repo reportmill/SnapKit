@@ -11,6 +11,7 @@ import snap.web.WebURL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This view class renders mark down.
@@ -341,6 +342,10 @@ public class MarkdownView extends ChildView {
         ImageView imageView = new ImageView(image);
         imageView.setKeepAspect(true);
 
+        // Hack support for
+        if (Objects.equals(imageNode.getAttributeValue("Size"), "Small"))
+            imageView.setMaxHeight(160);
+
         // Wrap in box
         BoxView boxView = new BoxView(imageView);
         boxView.setAlign(Pos.CENTER_LEFT);
@@ -460,14 +465,29 @@ public class MarkdownView extends ChildView {
 
         // Get child inline nodes
         List<MarkdownNode> inlineNodes = paragraphNode.getChildNodes();
-        TextArea textArea = createParagraphNodeTextArea();
-        textArea.setMargin(NO_MARGIN);
-        paragraphNodeView.addChild(textArea);
+        TextArea textArea = null;
 
         // Iterate over children and add to text
         for (MarkdownNode childNode : inlineNodes) {
-            if (isInlineNode(childNode))
+
+            // Handle image node
+            if (childNode.getNodeType() == MarkdownNode.NodeType.Image) {
+                View imageNodeView = createViewForImageNode(childNode);
+                paragraphNodeView.addChild(imageNodeView);
+                textArea = null;
+            }
+
+            // Handle text node
+            if (isInlineTextNode(childNode)) {
+                if (textArea == null) {
+                    textArea = createParagraphNodeTextArea();
+                    textArea.setMargin(NO_MARGIN);
+                    paragraphNodeView.addChild(textArea);
+                }
                 addInlineNodeToTextArea(childNode, textArea);
+            }
+
+            // Handle unexpected node
             else System.err.println("MarkdownView.createViewForParagraphNode: Unsupported child node type: " + childNode.getNodeType());
         }
 
@@ -613,8 +633,8 @@ public class MarkdownView extends ChildView {
         };
     }
 
-    // Returns whether node is block node
-    private static boolean isInlineNode(MarkdownNode node)
+    // Returns whether node is inline 'text' node (Text, Link, Bold, Emphasis)
+    private static boolean isInlineTextNode(MarkdownNode node)
     {
         return node.getNodeType() == MarkdownNode.NodeType.Text || node.getNodeType() == MarkdownNode.NodeType.Link;
     }
