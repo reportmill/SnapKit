@@ -162,7 +162,7 @@ public class MarkdownParser {
 
         // Return header node
         MarkdownNode headerNode = new MarkdownNode(MarkdownNode.NodeType.Header, charsTillLineEnd);
-        headerNode.setAttributeValue(MarkdownNode.HEADER_LEVEL, headerLevel);
+        MarkdownUtils.setHeaderLevel(headerNode, headerLevel);
         return headerNode;
     }
 

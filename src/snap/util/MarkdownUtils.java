@@ -30,6 +30,14 @@ public class MarkdownUtils {
     }
 
     /**
+     * Sets the header level for given header node.
+     */
+    public static void setHeaderLevel(MarkdownNode headerNode, int headerLevel)
+    {
+        headerNode.setAttributeValue(MarkdownNode.HEADER_LEVEL, headerLevel);
+    }
+
+    /**
      * Returns a Jepl string for Markdown string.
      */
     public static String getJeplForJMD(String className, CharSequence markdownChars)

@@ -16,6 +16,8 @@ public class HtmlParser {
 
     // Constants for nodes
     private static final String HEADER_NODE = "h1";
+    private static final String HEADER2_NODE = "h2";
+    private static final String HEADER3_NODE = "h3";
     private static final String PARAGRAPH_NODE = "p";
     private static final String LINK_NODE = "a";
     private static final String IMAGE_NODE = "img";
@@ -27,8 +29,8 @@ public class HtmlParser {
     private static final String BOLD_NODE = "b";
 
     // Constant
-    private static final List<String> INLINE_NODES = List.of(LINK_NODE, EMPHASIS_NODE, BOLD_NODE);
-    private static final List<String> BLOCK_NODES = List.of(LIST_NODE, CODE_NODE);
+    private static final List<String> INLINE_NODES = List.of(LINK_NODE, EMPHASIS_NODE, BOLD_NODE, CODE_NODE);
+    private static final List<String> BLOCK_NODES = List.of(LIST_NODE, PRE_NODE);
 
     /**
      * Constructor.
@@ -72,7 +74,8 @@ public class HtmlParser {
 
             // Get node
             MarkdownNode markdownNode = createMarkdownNodeForHtml(node);
-            markdownNodes.add(markdownNode);
+            if (markdownNode != null)
+                markdownNodes.add(markdownNode);
         }
 
         // Return
@@ -96,16 +99,16 @@ public class HtmlParser {
     private MarkdownNode createMarkdownNodeForHtmlImpl(XMLElement htmlNode)
     {
         return switch (htmlNode.getName()) {
-            case HEADER_NODE -> createMarkdownHeaderNodeForHtml(htmlNode);
+            case HEADER_NODE, HEADER2_NODE, HEADER3_NODE -> createMarkdownHeaderNodeForHtml(htmlNode);
             case LIST_NODE -> createMarkdownListNodeForHtml(htmlNode);
             case LIST_ITEM_NODE -> createMarkdownListItemNodeForHtml(htmlNode);
             case CODE_NODE -> createMarkdownCodeBlockNodeForHtml(htmlNode);
             case PARAGRAPH_NODE -> createMarkdownParagraphNodeForHtml(htmlNode);
             case LINK_NODE -> createMarkdownLinkNodeForHtml(htmlNode);
             case IMAGE_NODE -> createMarkdownImageNodeForHtml(htmlNode);
-            case PRE_NODE -> createMarkdwonTextNodeForHtml(htmlNode);
+            case PRE_NODE -> createMarkdownCodeBlockNodeForHtml(htmlNode);
             default -> {
-                System.out.println("Unknown HTML node: " + htmlNode.getName());
+                System.out.println("HtmlParser.createMarkdownNodeForHtml: Unknown HTML node: " + htmlNode.getName());
                 yield null;
             }
         };
@@ -138,6 +141,8 @@ public class HtmlParser {
     {
         String headerText = htmlNode.getValue();
         MarkdownNode headerMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Header, headerText);
+        int headerLevel = switch (htmlNode.getName()) { case HEADER_NODE -> 1; case HEADER2_NODE -> 2; default -> 3; };
+        MarkdownUtils.setHeaderLevel(headerMarkdownNode, headerLevel);
         return headerMarkdownNode;
     }
 
