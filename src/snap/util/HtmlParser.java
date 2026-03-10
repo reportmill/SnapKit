@@ -207,10 +207,18 @@ public class HtmlParser {
         // If child nodes, add them
         List<XMLElement> childNodes = htmlNode.getElements();
         for (XMLElement childNode : childNodes) {
+
+            // Handle paragraph inline nodes
             if (isInlineNode(childNode)) {
                 MarkdownNode childMarkdownNode = createMarkdownNodeForHtml(childNode);
                 Objects.requireNonNull(childMarkdownNode);
                 paragraphMarkdownNode.addChildNode(childMarkdownNode);
+            }
+
+            // Handle paragraph mixed content if child node has tail content
+            if (childNode.getTailContent() != null) {
+                MarkdownNode textMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Text, childNode.getTailContent());
+                paragraphMarkdownNode.addChildNode(textMarkdownNode);
             }
         }
 

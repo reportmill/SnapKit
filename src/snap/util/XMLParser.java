@@ -217,11 +217,10 @@ public class XMLParser extends Parser {
             // After child element is found, see if there is text content
             if (anId == "Element") {
                 XMLTokenizer tokenizer = (XMLTokenizer) aNode.getParser().getTokenizer();
-                String moreContent = tokenizer.getContent();
-                if (moreContent != null) {
-                    String prevContent = _part.getValue();
-                    String newContent = prevContent != null ? prevContent + ' ' + moreContent : moreContent;
-                    _part.setValue(newContent);
+                String tailContent = tokenizer.getContent();
+                if (tailContent != null) {
+                    XMLElement lastElement = aNode.getCustomNode(XMLElement.class);
+                    lastElement.setTailContent(tailContent);
                 }
             }
         }
