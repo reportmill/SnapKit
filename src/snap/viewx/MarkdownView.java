@@ -38,7 +38,6 @@ public class MarkdownView extends ChildView {
     private static final Insets GENERAL_MARGIN = new Insets(18, 8, 18, 8);
     private static final Insets GENERAL_PADDING = new Insets(16, 16, 16, 16);
     private static final Insets NO_MARGIN = Insets.EMPTY;
-    private static final Insets INLINE_PADDING = new Insets(8, 8, 8, 8);
     private static Color BLOCK_COLOR = new Color(.96, .97, .98);
     private static Color BLOCK_BORDER_COLOR = BLOCK_COLOR.blend(Color.BLACK, .15);
     private static Border BLOCK_BORDER = Border.createLineBorder(BLOCK_BORDER_COLOR, 1);
@@ -478,7 +477,7 @@ public class MarkdownView extends ChildView {
             }
 
             // Handle text node
-            if (isInlineTextNode(childNode)) {
+            else if (isInlineTextNode(childNode)) {
                 if (textArea == null) {
                     textArea = createParagraphNodeTextArea();
                     textArea.setMargin(NO_MARGIN);
@@ -551,11 +550,19 @@ public class MarkdownView extends ChildView {
             textArea.getTextAdapter().setLinkHandler((e,url) -> handleLinkClick(url));
         }
 
-        // Otherwise, add chars
+        // Handle 'text' inline nodes
         else {
             String nodeText = inlineNode.getText();
-            if (nodeText != null)
-                addNodeTextToTextArea(textArea, nodeText);
+            if (nodeText == null)
+                return;
+
+            // Handle Bold node
+            switch (inlineNode.getNodeType()) {
+                case Bold -> addTextAreaTextForFontStyle(textArea, nodeText, "Bold");
+                case Emphasis -> addTextAreaTextForFontStyle(textArea, nodeText, "Italic");
+                case CodeSpan -> addTextAreaTextForFontStyle(textArea, nodeText, "BoldItalic");
+                default -> addNodeTextToTextArea(textArea, nodeText);
+            }
         }
     }
 
@@ -636,7 +643,9 @@ public class MarkdownView extends ChildView {
     // Returns whether node is inline 'text' node (Text, Link, Bold, Emphasis)
     private static boolean isInlineTextNode(MarkdownNode node)
     {
-        return node.getNodeType() == MarkdownNode.NodeType.Text || node.getNodeType() == MarkdownNode.NodeType.Link;
+        return node.getNodeType() == MarkdownNode.NodeType.Text || node.getNodeType() == MarkdownNode.NodeType.Link ||
+            node.getNodeType() == MarkdownNode.NodeType.Bold || node.getNodeType() == MarkdownNode.NodeType.Emphasis ||
+            node.getNodeType() == MarkdownNode.NodeType.CodeSpan;
     }
 
     /**

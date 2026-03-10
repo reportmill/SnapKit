@@ -68,8 +68,6 @@ public class HtmlParser {
         htmlString = htmlString.replace("'", "\"");
         htmlString = htmlString.replace("<em>", "");
         htmlString = htmlString.replace("</em>", "");
-        htmlString = htmlString.replace("<b>", "");
-        htmlString = htmlString.replace("</b>", "");
         XMLParser xmlParser = new XMLParser();
         xmlParser.allowMixedContent();
         return _htmlNode = xmlParser.parseXMLFromString(htmlString);
@@ -120,7 +118,9 @@ public class HtmlParser {
             case HEADER_NODE, HEADER2_NODE, HEADER3_NODE -> createMarkdownHeaderNodeForHtml(htmlNode);
             case LIST_NODE -> createMarkdownListNodeForHtml(htmlNode);
             case LIST_ITEM_NODE -> createMarkdownListItemNodeForHtml(htmlNode);
-            case CODE_NODE -> createMarkdownCodeBlockNodeForHtml(htmlNode);
+            case BOLD_NODE -> createMarkdownBoldNodeForHtml(htmlNode);
+            case EMPHASIS_NODE -> createMarkdownEmphasisNodeForHtml(htmlNode);
+            case CODE_NODE -> createMarkdownCodeSpanNodeForHtml(htmlNode);
             case PARAGRAPH_NODE -> createMarkdownParagraphNodeForHtml(htmlNode);
             case LINK_NODE -> createMarkdownLinkNodeForHtml(htmlNode);
             case IMAGE_NODE -> createMarkdownImageNodeForHtml(htmlNode);
@@ -206,6 +206,36 @@ public class HtmlParser {
         String codeText = htmlNode.getValue();
         MarkdownNode codeBlockMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.CodeBlock, codeText);
         return codeBlockMarkdownNode;
+    }
+
+    /**
+     * Returns a markdown bold node for given html bold node.
+     */
+    private MarkdownNode createMarkdownBoldNodeForHtml(XMLElement htmlNode)
+    {
+        String nodeText = htmlNode.getValue();
+        MarkdownNode boldMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Bold, nodeText);
+        return boldMarkdownNode;
+    }
+
+    /**
+     * Returns a markdown emphasis node for given html emphasis node.
+     */
+    private MarkdownNode createMarkdownEmphasisNodeForHtml(XMLElement htmlNode)
+    {
+        String nodeText = htmlNode.getValue();
+        MarkdownNode emphasisMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Emphasis, nodeText);
+        return emphasisMarkdownNode;
+    }
+
+    /**
+     * Returns a markdown code span node for given html code node.
+     */
+    private MarkdownNode createMarkdownCodeSpanNodeForHtml(XMLElement htmlNode)
+    {
+        String nodeText = htmlNode.getValue();
+        MarkdownNode emphasisMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.CodeSpan, nodeText);
+        return emphasisMarkdownNode;
     }
 
     /**

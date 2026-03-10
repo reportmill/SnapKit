@@ -37,7 +37,7 @@ public class MarkdownNode {
         Header, Paragraph, List, ListItem, Directive, CodeBlock, RunBlock, Separator, // BlockQuote
 
         // Inline nodes
-        Link, Image, Text //, Strong, Emphasis, CodeSpan
+        Link, Image, Text, Bold, Emphasis, CodeSpan
     }
 
     // Constants for attributes
