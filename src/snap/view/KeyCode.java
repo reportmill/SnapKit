@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,6 +91,8 @@ public class KeyCode {
     public static final int SEMICOLON = 0x3B;        //KeyEvent.VK_SEMICOLON;
     public static final int SPACE = 0x20;            //KeyEvent.VK_SPACE;
     public static final int TAB = '\t';              //KeyEvent.VK_TAB;
+    public static final int PAGE_UP = 33;            //KeyEvent.VK_PAGE_UP;
+    public static final int PAGE_DOWN = 34;          //KeyEvent.VK_PAGE_DOWN;
 
     // Constant for char
     public static final char CHAR_UNDEFINED = 0xFFFF; //KeyEvent.CHAR_UNDEFINED;
