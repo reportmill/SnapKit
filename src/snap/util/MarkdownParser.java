@@ -43,11 +43,13 @@ public class MarkdownParser {
     public static final String DIRECTIVE_MARKER = "<!--";
     public static final String DIRECTIVE_MARKER_END = "-->";
     public static final String DIRECTIVE_MARKER2 = "@[";
+    public static final String SIMPLE_LINK1_MARKER = "https://";
+    public static final String SIMPLE_LINK2_MARKER = "http://";
 
     // Constant for Nodes that are stand-alone
     private static final String[] BLOCK_NODE_MARKERS = { HEADER_MARKER, LIST_ITEM_MARKER, LIST_ITEM_MARKER2, LIST_ITEM_MARKER3,
             CODE_BLOCK_MARKER, RUN_BLOCK_MARKER, DIRECTIVE_MARKER2};
-    private static final String[] INLINE_NODE_MARKERS = { LINK_MARKER, IMAGE_MARKER };
+    private static final String[] INLINE_NODE_MARKERS = { LINK_MARKER, IMAGE_MARKER, SIMPLE_LINK1_MARKER, SIMPLE_LINK2_MARKER };
 
     /**
      * Constructor.
@@ -356,6 +358,10 @@ public class MarkdownParser {
         if (nextCharsStartWith(IMAGE_MARKER))
             return parseImageNode();
 
+        // Handle simple link
+        if (nextCharsStartWith(SIMPLE_LINK1_MARKER) || nextCharsStartWith(SIMPLE_LINK1_MARKER))
+            return parseSimpleLinkNode();
+
         // Return text node
         return parseTextNode();
     }
@@ -385,13 +391,37 @@ public class MarkdownParser {
             System.err.println("MarkdownParser.parseLinkNode: Missing link close char");
         else eatChar();
 
-        // Create link node with paragraph node as child
+        // Create link node with inline nodes as children
         MarkdownNode linkNode = new MarkdownNode(MarkdownNode.NodeType.Link, null);
         linkNode.setChildNodes(inlineNodes);
 
         // Parse and set url text
         String urlAddr = parseLinkUrlAddress();
         linkNode.setOtherText(urlAddr);
+
+        // Return
+        return linkNode;
+    }
+
+    /**
+     * Parses a simple link node.
+     */
+    private MarkdownNode parseSimpleLinkNode()
+    {
+        // Get chars till next whitespace
+        StringBuilder linkUrlChars = new StringBuilder();
+        while (hasChars()) {
+            char nextChar = nextChar();
+             if (Character.isWhitespace(nextChar))
+                 break;
+            linkUrlChars.append(nextChar);
+            eatChar();
+        }
+
+        // Create link node with text node as child
+        MarkdownNode linkNode = new MarkdownNode(MarkdownNode.NodeType.Link, null);
+        MarkdownNode textNode = new MarkdownNode(MarkdownNode.NodeType.Text, linkUrlChars.toString());
+        linkNode.addChildNode(textNode);
 
         // Return
         return linkNode;
