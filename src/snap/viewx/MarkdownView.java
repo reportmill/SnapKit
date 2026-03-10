@@ -171,16 +171,11 @@ public class MarkdownView extends ChildView {
      */
     protected void addViewForListItemNode(MarkdownNode listItemNode)
     {
-        // Create view for paragraph node
-        MarkdownNode paragraphNode = listItemNode.getChildNodes().get(0);
-        RowView paragraphNodeView = createViewForParagraphNode(paragraphNode);
-        addViewForNode(paragraphNodeView, listItemNode);
+        // Add view for list item node (really for its paragraph (first node))
+        View listItemNodeView = createViewForNode(listItemNode);
+        addViewForNode(listItemNodeView, listItemNode);
 
-        // Add bullet to text
-        TextArea textArea = (TextArea) paragraphNodeView.getChild(0);
-        textArea.getTextModel().addCharsWithStyle("• ", textArea.getDefaultTextStyle(), 0);
-
-        // If more child nodes, wrap in ColView and return
+        // If more child nodes, add separately
         if (listItemNode.getChildNodes().size() > 1) {
             List<MarkdownNode> childNodes = listItemNode.getChildNodes().subList(1, listItemNode.getChildNodes().size());
             childNodes.forEach(this::addViewForNode);
@@ -213,9 +208,21 @@ public class MarkdownView extends ChildView {
      */
     protected View createViewForNode(MarkdownNode markdownNode)
     {
+        View nodeView = createViewForNodeImpl(markdownNode);
+        if (nodeView != null)
+            setMarkdownNodeForView(nodeView, markdownNode);
+        return nodeView;
+    }
+
+    /**
+     * Creates view for node.
+     */
+    protected View createViewForNodeImpl(MarkdownNode markdownNode)
+    {
         return switch (markdownNode.getNodeType()) {
             case Header -> createViewForHeaderNode(markdownNode);
             case List -> createViewForListNode(markdownNode);
+            case ListItem -> createViewForListItemNode(markdownNode);
             case CodeBlock -> createViewForCodeBlockNode(markdownNode);
             case RunBlock -> createViewForRunnableNode(markdownNode);
             case Directive -> createViewForDirectiveNode(markdownNode);
@@ -358,6 +365,23 @@ public class MarkdownView extends ChildView {
      * Creates a view for list node.
      */
     protected ChildView createViewForListNode(MarkdownNode listNode)  { return null; }
+
+    /**
+     * Creates a view for list item node.
+     */
+    protected ChildView createViewForListItemNode(MarkdownNode listItemNode)
+    {
+        // Create actual view from list item node paragraph node
+        MarkdownNode paragraphNode = listItemNode.getChildNodes().get(0);
+        RowView listItemNodeView = createViewForParagraphNode(paragraphNode);
+
+        // Add bullet to text
+        TextArea textArea = (TextArea) listItemNodeView.getChild(0);
+        textArea.getTextModel().addCharsWithStyle("• ", textArea.getDefaultTextStyle(), 0);
+
+        // Return
+        return listItemNodeView;
+    }
 
     /**
      * Creates a view for code block.
@@ -593,5 +617,21 @@ public class MarkdownView extends ChildView {
     private static boolean isInlineNode(MarkdownNode node)
     {
         return node.getNodeType() == MarkdownNode.NodeType.Text || node.getNodeType() == MarkdownNode.NodeType.Link;
+    }
+
+    /**
+     * Returns the markdown node for given markdown view.
+     */
+    public static MarkdownNode getMarkdownNodeForView(View aView)
+    {
+        return (MarkdownNode) aView.getMetadataForKey("MarkdownNode");
+    }
+
+    /**
+     * Sets the markdown node for given markdown view.
+     */
+    private static void setMarkdownNodeForView(View aView, MarkdownNode markdownNode)
+    {
+        aView.setMetadataForKey("MarkdownNode", markdownNode);
     }
 }
