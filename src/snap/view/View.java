@@ -880,7 +880,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Shape getClip()
     {
-        if (_overflow == Overflow.Clip)
+        if (_overflow == Overflow.Clip || _overflow == Overflow.Scroll && !(getParent() instanceof Scroller))
             return getBoundsShape();
         return null;
     }
