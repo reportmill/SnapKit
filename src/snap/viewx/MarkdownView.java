@@ -343,7 +343,7 @@ public class MarkdownView extends ChildView {
 
         // Hack support for
         if (Objects.equals(imageNode.getAttributeValue("Size"), "Small"))
-            imageView.setMaxHeight(160);
+            imageView.setMaxSize(400, 160);
 
         // Wrap in box
         BoxView boxView = new BoxView(imageView);
