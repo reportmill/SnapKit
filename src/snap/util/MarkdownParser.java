@@ -45,11 +45,18 @@ public class MarkdownParser {
     public static final String DIRECTIVE_MARKER2 = "@[";
     public static final String SIMPLE_LINK1_MARKER = "https://";
     public static final String SIMPLE_LINK2_MARKER = "http://";
+    public static final String BOLD_ITALIC_TEXT_MARKER = "***";
+    public static final String BOLD_TEXT_MARKER = "**";
+    public static final String BOLD_TEXT_MARKER2 = "__";
+    public static final String ITALIC_TEXT_MARKER = "*";
+    public static final String ITALIC_TEXT_MARKER2 = "_";
+    public static final String QUOTE_TEXT_MARKER = "`";
 
     // Constant for Nodes that are stand-alone
     private static final String[] BLOCK_NODE_MARKERS = { HEADER_MARKER, LIST_ITEM_MARKER, LIST_ITEM_MARKER2, LIST_ITEM_MARKER3,
             CODE_BLOCK_MARKER, RUN_BLOCK_MARKER, DIRECTIVE_MARKER2};
-    private static final String[] INLINE_NODE_MARKERS = { LINK_MARKER, IMAGE_MARKER, SIMPLE_LINK1_MARKER, SIMPLE_LINK2_MARKER };
+    private static final String[] INLINE_NODE_MARKERS = { LINK_MARKER, IMAGE_MARKER, SIMPLE_LINK1_MARKER, SIMPLE_LINK2_MARKER,
+            BOLD_ITALIC_TEXT_MARKER, BOLD_TEXT_MARKER, BOLD_TEXT_MARKER2, ITALIC_TEXT_MARKER, ITALIC_TEXT_MARKER2, QUOTE_TEXT_MARKER};
 
     /**
      * Constructor.
@@ -362,6 +369,16 @@ public class MarkdownParser {
         if (nextCharsStartWith(SIMPLE_LINK1_MARKER) || nextCharsStartWith(SIMPLE_LINK1_MARKER))
             return parseSimpleLinkNode();
 
+        // Handle BoldItalicText, BoldText, ItalicText, QuoteText
+        if (nextCharsStartWith(BOLD_ITALIC_TEXT_MARKER))
+            return parseBoldItalicTextNode();
+        if (nextCharsStartWith(BOLD_TEXT_MARKER) || nextCharsStartWith(BOLD_TEXT_MARKER2))
+            return parseBoldTextNode();
+        if (nextCharsStartWith(ITALIC_TEXT_MARKER) || nextCharsStartWith(ITALIC_TEXT_MARKER2))
+            return parseEmphasisTextNode();
+        if (nextCharsStartWith(QUOTE_TEXT_MARKER))
+            return parseQuoteTextNode();
+
         // Return text node
         return parseTextNode();
     }
@@ -373,6 +390,58 @@ public class MarkdownParser {
     {
         String textChars = getCharsTillTextEnd().toString().trim();
         return new MarkdownNode(MarkdownNode.NodeType.Text, textChars);
+    }
+
+    /**
+     * Parses a bold text node.
+     */
+    private MarkdownNode parseBoldTextNode()
+    {
+        eatChars(2);
+        String textChars = getCharsTillTextEnd().toString().trim();
+        MarkdownNode boldTextNode = new MarkdownNode(MarkdownNode.NodeType.BoldText, textChars);
+        if (nextCharsStartWith(BOLD_TEXT_MARKER) || nextCharsStartWith(BOLD_TEXT_MARKER2))
+            eatChars(2);
+        return boldTextNode;
+    }
+
+    /**
+     * Parses an emphasis text node.
+     */
+    private MarkdownNode parseEmphasisTextNode()
+    {
+        eatChar();
+        String textChars = getCharsTillTextEnd().toString().trim();
+        MarkdownNode emphasisTextNode = new MarkdownNode(MarkdownNode.NodeType.ItalicText, textChars);
+        if (nextCharsStartWith(ITALIC_TEXT_MARKER) || nextCharsStartWith(ITALIC_TEXT_MARKER2))
+            eatChar();
+        return emphasisTextNode;
+    }
+
+    /**
+     * Parses a bold italic text node.
+     */
+    private MarkdownNode parseBoldItalicTextNode()
+    {
+        eatChars(BOLD_ITALIC_TEXT_MARKER.length());
+        String textChars = getCharsTillTextEnd().toString().trim();
+        MarkdownNode boldTextNode = new MarkdownNode(MarkdownNode.NodeType.BoldItalicText, textChars);
+        if (nextCharsStartWith(BOLD_ITALIC_TEXT_MARKER))
+            eatChars(BOLD_ITALIC_TEXT_MARKER.length());
+        return boldTextNode;
+    }
+
+    /**
+     * Parses a quote text node.
+     */
+    private MarkdownNode parseQuoteTextNode()
+    {
+        eatChar();
+        String textChars = getCharsTillTextEnd().toString().trim();
+        MarkdownNode quoteTextNode = new MarkdownNode(MarkdownNode.NodeType.QuoteText, textChars);
+        if (nextCharsStartWith(QUOTE_TEXT_MARKER))
+            eatChar();
+        return quoteTextNode;
     }
 
     /**
@@ -420,6 +489,7 @@ public class MarkdownParser {
 
         // Create link node with text node as child
         MarkdownNode linkNode = new MarkdownNode(MarkdownNode.NodeType.Link, null);
+        linkNode.setOtherText(linkUrlChars.toString());
         MarkdownNode textNode = new MarkdownNode(MarkdownNode.NodeType.Text, linkUrlChars.toString());
         linkNode.addChildNode(textNode);
 
@@ -475,8 +545,14 @@ public class MarkdownParser {
         while (hasChars()) {
 
             // If next chars start with well-defined inline node marker, break
-            if (ArrayUtils.hasMatch(INLINE_NODE_MARKERS, this::nextCharsStartWith))
+            if (ArrayUtils.hasMatch(INLINE_NODE_MARKERS, this::nextCharsStartWith)) {
+                if (sb.isEmpty()) { // Bogus check but otherwise will infinite loop
+                    System.err.println("MarkdownParser.getCharsTillTextEnd: No chars found");
+                    String hitMarker = ArrayUtils.findMatch(INLINE_NODE_MARKERS, this::nextCharsStartWith);
+                    eatChars(hitMarker != null ? hitMarker.length() : 1);
+                }
                 break;
+            }
 
             // If next char is newline, break
             char nextChar = nextChar();

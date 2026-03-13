@@ -118,9 +118,9 @@ public class HtmlParser {
             case HEADER_NODE, HEADER2_NODE, HEADER3_NODE -> createMarkdownHeaderNodeForHtml(htmlNode);
             case LIST_NODE -> createMarkdownListNodeForHtml(htmlNode);
             case LIST_ITEM_NODE -> createMarkdownListItemNodeForHtml(htmlNode);
-            case BOLD_NODE -> createMarkdownBoldNodeForHtml(htmlNode);
-            case EMPHASIS_NODE -> createMarkdownEmphasisNodeForHtml(htmlNode);
-            case CODE_NODE -> createMarkdownCodeSpanNodeForHtml(htmlNode);
+            case BOLD_NODE -> createMarkdownBoldTextNodeForHtml(htmlNode);
+            case EMPHASIS_NODE -> createMarkdownItalicTextNodeForHtml(htmlNode);
+            case CODE_NODE -> createMarkdownQuoteTextNodeForHtml(htmlNode);
             case PARAGRAPH_NODE -> createMarkdownParagraphNodeForHtml(htmlNode);
             case LINK_NODE -> createMarkdownLinkNodeForHtml(htmlNode);
             case IMAGE_NODE -> createMarkdownImageNodeForHtml(htmlNode);
@@ -209,32 +209,32 @@ public class HtmlParser {
     }
 
     /**
-     * Returns a markdown bold node for given html bold node.
+     * Returns a markdown bold text node for given html bold node.
      */
-    private MarkdownNode createMarkdownBoldNodeForHtml(XMLElement htmlNode)
+    private MarkdownNode createMarkdownBoldTextNodeForHtml(XMLElement htmlNode)
     {
         String nodeText = htmlNode.getValue();
-        MarkdownNode boldMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Bold, nodeText);
+        MarkdownNode boldMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.BoldText, nodeText);
         return boldMarkdownNode;
     }
 
     /**
-     * Returns a markdown emphasis node for given html emphasis node.
+     * Returns a markdown italic text node for given html emphasis node.
      */
-    private MarkdownNode createMarkdownEmphasisNodeForHtml(XMLElement htmlNode)
+    private MarkdownNode createMarkdownItalicTextNodeForHtml(XMLElement htmlNode)
     {
         String nodeText = htmlNode.getValue();
-        MarkdownNode emphasisMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.Emphasis, nodeText);
+        MarkdownNode emphasisMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.ItalicText, nodeText);
         return emphasisMarkdownNode;
     }
 
     /**
-     * Returns a markdown code span node for given html code node.
+     * Returns a markdown quote text node for given html code node.
      */
-    private MarkdownNode createMarkdownCodeSpanNodeForHtml(XMLElement htmlNode)
+    private MarkdownNode createMarkdownQuoteTextNodeForHtml(XMLElement htmlNode)
     {
         String nodeText = htmlNode.getValue();
-        MarkdownNode emphasisMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.CodeSpan, nodeText);
+        MarkdownNode emphasisMarkdownNode = new MarkdownNode(MarkdownNode.NodeType.QuoteText, nodeText);
         return emphasisMarkdownNode;
     }
 

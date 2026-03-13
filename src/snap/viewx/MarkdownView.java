@@ -250,8 +250,8 @@ public class MarkdownView extends ChildView {
         TextModel textModel = textArea.getTextModel();
         textModel.setDefaultTextStyle(textStyle);
 
-        // Set text
-        addNodeTextToTextArea(textArea, headerNode.getText());
+        // Add text
+        textModel.addChars(headerNode.getText());
 
         // Return
         return textArea;
@@ -276,7 +276,7 @@ public class MarkdownView extends ChildView {
     protected View createViewForTextNode(MarkdownNode contentNode)
     {
         TextArea textArea = createParagraphNodeTextArea();
-        addNodeTextToTextArea(textArea, contentNode.getText());
+        textArea.addChars(contentNode.getText());
         return textArea;
     }
 
@@ -453,7 +453,7 @@ public class MarkdownView extends ChildView {
     }
 
     /**
-     * Creates a view for paragraph node (children are inline nodes: Text, Link, Image or CodeSpan).
+     * Creates a view for paragraph node (children are inline nodes: Text, Link, Image, BoldText, ItalicText, QuoteText).
      */
     protected RowView createViewForParagraphNode(MarkdownNode paragraphNode)
     {
@@ -558,46 +558,12 @@ public class MarkdownView extends ChildView {
 
             // Handle Bold node
             switch (inlineNode.getNodeType()) {
-                case Bold -> addTextAreaTextForFontStyle(textArea, nodeText, "Bold");
-                case Emphasis -> addTextAreaTextForFontStyle(textArea, nodeText, "Italic");
-                case CodeSpan -> addTextAreaTextForFontStyle(textArea, nodeText, "BoldItalic");
-                default -> addNodeTextToTextArea(textArea, nodeText);
+                case Text -> addTextAreaTextForFontStyle(textArea, nodeText, "Plain");
+                case BoldText -> addTextAreaTextForFontStyle(textArea, nodeText, "Bold");
+                case ItalicText -> addTextAreaTextForFontStyle(textArea, nodeText, "Italic");
+                case BoldItalicText, QuoteText -> addTextAreaTextForFontStyle(textArea, nodeText, "BoldItalic");
+                default -> System.out.println("MarkdownView: Unsupported inline node type: " + inlineNode.getNodeType());
             }
-        }
-    }
-
-    /**
-     * Adds node text (markdown formatted string) to a text area.
-     */
-    private static void addNodeTextToTextArea(TextArea textArea, String nodeText)
-    {
-        String fontStyle = nodeText.contains("*") ? "BoldItalic" : null;
-        addNodeTextToTextAreaImpl(textArea, nodeText, fontStyle);
-    }
-
-    /**
-     * Adds text to a text area.
-     */
-    private static void addNodeTextToTextAreaImpl(TextArea textArea, String nodeText, String fontStyle)
-    {
-        // If no fontStyle, just add chars with default font
-        if (fontStyle == null) {
-            TextModel textModel = textArea.getTextModel();
-            TextStyle textStyle = textArea.getDefaultTextStyle();
-            textModel.addCharsWithStyle(nodeText, textStyle);
-            return;
-        }
-
-        // Get strings separated by '***'
-        String regex = getRegexForFontStyle(fontStyle);
-        String[] splitStrings = nodeText.split(regex);
-        String nextFontStyle = getNextFontStyleForFontStyle(fontStyle);
-
-        // Iterate over separated strings
-        for (int i = 0; i < splitStrings.length; i += 2) {
-            addNodeTextToTextAreaImpl(textArea, splitStrings[i], nextFontStyle);
-            if (i + 1 < splitStrings.length)
-                addTextAreaTextForFontStyle(textArea, splitStrings[i + 1], fontStyle);
         }
     }
 
@@ -619,33 +585,12 @@ public class MarkdownView extends ChildView {
         textModel.addCharsWithStyle(theChars, textStyle);
     }
 
-    // Return regex for FontStyle
-    private static String getRegexForFontStyle(String fontStyle)
-    {
-        return switch (fontStyle) {
-            case "BoldItalic" -> "(?<!\\\\)\\*\\*\\*";
-            case "Bold" -> "(?<!\\\\)\\*\\*";
-            case "Italic" -> "(?<!\\\\)\\*";
-            default -> throw new RuntimeException("Unknown font style: " + fontStyle);
-        };
-    }
-
-    // Return next FontStyle
-    private static String getNextFontStyleForFontStyle(String fontStyle)
-    {
-        return switch (fontStyle) {
-            case "Bold" -> "Italic";
-            case "BoldItalic" -> "Bold";
-            default -> null;
-        };
-    }
-
     // Returns whether node is inline 'text' node (Text, Link, Bold, Emphasis)
     private static boolean isInlineTextNode(MarkdownNode node)
     {
         return node.getNodeType() == MarkdownNode.NodeType.Text || node.getNodeType() == MarkdownNode.NodeType.Link ||
-            node.getNodeType() == MarkdownNode.NodeType.Bold || node.getNodeType() == MarkdownNode.NodeType.Emphasis ||
-            node.getNodeType() == MarkdownNode.NodeType.CodeSpan;
+            node.getNodeType() == MarkdownNode.NodeType.BoldText || node.getNodeType() == MarkdownNode.NodeType.ItalicText ||
+            node.getNodeType() == MarkdownNode.NodeType.BoldItalicText || node.getNodeType() == MarkdownNode.NodeType.QuoteText;
     }
 
     /**
