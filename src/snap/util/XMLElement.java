@@ -22,6 +22,9 @@ public class XMLElement implements Cloneable {
     // The value string of the attribute
     private String  _value;
 
+    // The text after this element which is a part of parent element content
+    private String  _tailContent;
+
     // The list of attributes associated with this element
     private List<XMLAttribute>  _attributes;
 
@@ -113,6 +116,16 @@ public class XMLElement implements Cloneable {
     {
         _value = aValue;
     }
+
+    /**
+     * Returns the text after this element which is a part of parent element content.
+     */
+    public String getTailContent()  { return _tailContent; }
+
+    /**
+     * Sets the text after this element which is a part of parent element content.
+     */
+    public void setTailContent(String aValue)  { _tailContent = aValue; }
 
     /**
      * Returns the namespace.

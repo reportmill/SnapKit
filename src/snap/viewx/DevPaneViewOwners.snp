@@ -2,7 +2,7 @@
 <RowView PrefHeight="300" Padding="5" FillHeight="true">
   <ColView PrefWidth="300" Padding="5" Font="Arial 13" GrowWidth="true" FillWidth="true">
     <RowView Padding="2,4,3,4">
-      <Label Text="ViewOwner Hierarchy" />
+      <Label Text="ViewController Hierarchy" />
       <ToggleButton Name="TargetingButton" Padding="2,6,2,6" Font="Arial 11" LeanX="RIGHT" Text="Mouse Over Select..." />
     </RowView>
     <BrowserView Name="BrowserView" GrowHeight="true" PrefColCount="3" PrefColWidth="120" />

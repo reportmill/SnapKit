@@ -7,7 +7,7 @@ import snap.web.WebURL;
 /**
  * The controller class for a GameView.
  */
-public class GameController extends ViewOwner {
+public class GameController extends ViewController {
 
     // The frame rate
     private double _frameRate = 30;
@@ -172,7 +172,7 @@ public class GameController extends ViewOwner {
         if (_gameView == null || _gameView.getClass() == GameView.class) {
             WebURL snapFileUrl = UILoader.getSnapUrlForClass(getClass());
             if (snapFileUrl != null && snapFileUrl.getFile().getExists())
-                _gameView = (GameView) UILoader.loadViewForOwnerAndUrl(this, snapFileUrl);
+                _gameView = (GameView) UILoader.loadViewForControllerAndUrl(this, snapFileUrl);
         }
 
         // Create BoxView to hold game view

@@ -150,7 +150,7 @@ public class ViewArchiver extends XMLArchiver {
     {
         // If there is an Archiver.Owner, look for image as class resource
         Class<?> ownerClass = getOwnerClass();
-        for (Class<?> cls = ownerClass; cls != null && cls != ViewOwner.class; cls = cls.getSuperclass()) {
+        for (Class<?> cls = ownerClass; cls != null && cls != ViewController.class; cls = cls.getSuperclass()) {
             Image image = Image.getImageForClassResource(cls, aPath);
             if (image != null)
                 return image;

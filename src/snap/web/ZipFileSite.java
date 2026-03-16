@@ -222,8 +222,7 @@ public class ZipFileSite extends WebSite {
         fileHeader.setLastModTime(1000);
         if (zipEntry != null) {
             long lastModTime = zipEntry.getTime();
-            if (lastModTime == 0)
-                lastModTime = zipEntry.getLastModifiedTime().toMillis();
+            //if (lastModTime == 0) lastModTime = zipEntry.getLastModifiedTime().toMillis();
             if (lastModTime == 0)
                 lastModTime = 1000;
             fileHeader.setLastModTime(lastModTime);

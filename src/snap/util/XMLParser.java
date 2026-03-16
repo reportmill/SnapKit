@@ -9,7 +9,10 @@ import snap.web.WebURL;
  * A class to load an XMLElement from aSource.
  */
 public class XMLParser extends Parser {
-    
+
+    // Whether parser supports mixed content (additional text after child elements)
+    private boolean _allowMixedContent;
+
     /**
      * Constructor.
      */
@@ -17,6 +20,11 @@ public class XMLParser extends Parser {
     {
         super();
     }
+
+    /**
+     * Enabled mixed content.
+     */
+    public void allowMixedContent()  { _allowMixedContent = true; }
 
     /**
      * Override to install handlers.
@@ -29,6 +37,8 @@ public class XMLParser extends Parser {
         grammar.installHandlerForClass(PrologHandler.class);
         grammar.installHandlerForClass(ElementHandler.class);
         grammar.installHandlerForClass(AttributeHandler.class);
+        if (_allowMixedContent)
+            getRuleForName("Element").setHandler(new ElementHandlerWithMixedContent());
     }
 
     /**
@@ -102,12 +112,13 @@ public class XMLParser extends Parser {
             }
 
             // If next char isn't close tag, return null (assumes we hit child element instead of text content)
-            if (!nextCharsStartWith("</"))
-                return null;
+            //if (!nextCharsStartWith("</")) return null;
 
             // Return string for content
             String str = getInput().subSequence(start, _charIndex).toString();
-            return decodeXMLString(str);
+            if (CharSequenceUtils.isWhiteSpace(str))
+                return null;
+            return decodeXMLString(str.trim());
         }
     }
 
@@ -162,34 +173,55 @@ public class XMLParser extends Parser {
             switch (anId) {
 
                 // Handle Name
-                case "Name":
+                case "Name" -> {
                     if (_part == null) {
                         _part = new XMLElement(aNode.getString());
                         _checkedContent = false;
                     }
                     else if (!_part.getName().equals(aNode.getString()))
                         throw new RuntimeException("XMLParser: Expected closing tag " + _part.getName());
-                    break;
+                }
 
                 // Handle Attribute
-                case "Attribute":
-                    _part.addAttribute((XMLAttribute) aNode.getCustomNode());
-                    break;
+                case "Attribute" -> _part.addAttribute((XMLAttribute) aNode.getCustomNode());
 
                 // Handle Element
-                case "Element":
-                    _part.addElement((XMLElement) aNode.getCustomNode());
-                    break;
+                case "Element" -> _part.addElement((XMLElement) aNode.getCustomNode());
 
                 // Handle close: On first close, check for content
-                case ">":
+                case ">" -> {
                     if (!_checkedContent) {
-                        XMLTokenizer xt = (XMLTokenizer) aNode.getParser().getTokenizer();
-                        String content = xt.getContent();
+                        XMLTokenizer tokenizer = (XMLTokenizer) aNode.getParser().getTokenizer();
+                        String content = tokenizer.getContent();
+                        if (content != null)
+                            _part.setValue(content);
                         _checkedContent = true;
-                        _part.setValue(content);
                     }
-                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Element Handler with support for mixed content.
+     */
+    public static class ElementHandlerWithMixedContent extends ElementHandler {
+
+        /**
+         * ParseHandler method.
+         */
+        public void parsedOne(ParseNode aNode, String anId)
+        {
+            super.parsedOne(aNode, anId);
+
+            // After child element is found, see if there is text content
+            if (anId == "Element") {
+                XMLTokenizer tokenizer = (XMLTokenizer) aNode.getParser().getTokenizer();
+                String tailContent = tokenizer.getContent();
+                if (tailContent != null) {
+                    XMLElement lastElement = aNode.getCustomNode(XMLElement.class);
+                    lastElement.setTailContent(tailContent);
+                }
             }
         }
     }

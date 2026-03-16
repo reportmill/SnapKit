@@ -378,16 +378,16 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     }
 
     /**
-     * Override to suppress so TabBar doesn't fireAction to Owner.
+     * Override to suppress so TabBar doesn't fireAction to controller.
      */
     @Override
-    protected void setOwnerChildren(ViewOwner anOwner)
+    protected void setControllerChildren(ViewController viewController)
     {
         ViewList children = getChildren();
         for (View child : children) {
             if (child == _tabBar)
-                _tabBar.setOwnerChildren(anOwner);
-            else child.setOwner(anOwner);
+                _tabBar.setControllerChildren(viewController);
+            else child.setController(viewController);
         }
     }
 

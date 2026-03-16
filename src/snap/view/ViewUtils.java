@@ -642,6 +642,10 @@ public class ViewUtils {
         if (!(parentView instanceof ViewHost))
             return;
 
+        // If animating, just return
+        if (aView.isAnimActive())
+            return;
+
         // If size less than preferred, replace with scroll view
         double viewW = aView.getWidth();
         double viewH = aView.getHeight();
@@ -665,11 +669,16 @@ public class ViewUtils {
         ScrollView scrollView = new ScrollView();
         scrollView.setBarSize(12);
 
-        // Transfer LeanX, LeanY, GrowWidth, GrowHeight
+        // Transfer LeanX, LeanY, GrowWidth, GrowHeight, bounds
         scrollView.setLeanX(aView.getLeanX());
         scrollView.setLeanY(aView.getLeanY());
         scrollView.setGrowWidth(aView.isGrowWidth());
         scrollView.setGrowHeight(aView.isGrowHeight());
+
+        // Transfer bounds (probably shouldn't need this since we get initial layout)
+        scrollView.setBounds(aView.getBounds());
+        scrollView.getScroller().setBounds(0, 0, aView.getWidth(), aView.getHeight());
+        aView.setXY(0, 0);
 
         // Transfer PrefWidth, PrefHeight, MinWidth, MinHeight
         if (aView.isPrefWidthSet()) {

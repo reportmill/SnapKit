@@ -37,10 +37,12 @@ public class TransitionPane extends ParentView {
         if (aView==_content) return;
 
         // Make sure animations are finished
+        Transition transition = _transition;
         if (_content!=null)
             _content.getAnim(0).finish();
         if (_contentOld!=null)
             _contentOld.getAnim(0).finish();
+        _transition = transition;
 
         // Get last content (remove any previous content that might be transitioning out)
         _contentOld = _content;

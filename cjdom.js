@@ -954,7 +954,7 @@ function getNative()  { return _nativeStack[_nativeIndex++]; }
 function openDB()
 {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open("cjFS_/files/", 1);
+        const request = indexedDB.open("cjFS_/files/");
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
     });

@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 /**
  * A panel for editing text files.
  */
-public class TextPane extends ViewOwner {
+public class TextPane extends ViewController {
 
     // The text file being edited
     private WebFile _textFile;
@@ -580,7 +580,7 @@ public class TextPane extends ViewOwner {
         // Handle PopupTrigger
         if (anEvent.isPopupTrigger()) { //anEvent.consume();
             Menu contextMenu = createContextMenu();
-            contextMenu.setOwner(this);
+            contextMenu.setController(this);
             contextMenu.showMenuAtXY(_textArea, anEvent.getX(), anEvent.getY());
         }
     }

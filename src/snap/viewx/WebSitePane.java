@@ -3,7 +3,7 @@ import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.EventListener;
 import snap.view.ViewEvent;
-import snap.view.ViewOwner;
+import snap.view.ViewController;
 import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 /**
  * This class is the base class for WebSite open/save browsers.
  */
-public class WebSitePane extends ViewOwner {
+public class WebSitePane extends ViewController {
 
     // The site used to reference files
     protected WebSite  _site;

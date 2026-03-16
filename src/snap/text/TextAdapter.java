@@ -29,7 +29,10 @@ public class TextAdapter extends PropObject {
     protected TextLayout _textLayout;
 
     // Whether text is editable
-    private boolean  _editable;
+    private boolean _editable;
+
+    // Whether text is scrollable
+    private boolean _scrollable;
 
     // The text undoer
     private Undoer _undoer = Undoer.DISABLED_UNDOER;
@@ -100,6 +103,7 @@ public class TextAdapter extends PropObject {
     {
         super();
         setTextLayout(textLayout);
+        _scrollable = true;
     }
 
     /**
@@ -206,18 +210,32 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Returns whether Text shape is editable.
+     * Returns whether Text is editable.
      */
     public boolean isEditable()  { return _editable; }
 
     /**
-     * Sets whether Text shape is editable.
+     * Sets whether Text is editable.
      */
     public void setEditable(boolean aValue)
     {
         if (aValue == isEditable()) return;
 
         firePropChange(Editable_Prop, _editable, _editable = aValue);
+    }
+
+    /**
+     * Returns whether Text is scrollable.
+     */
+    public boolean isScrollable()  { return _scrollable; }
+
+    /**
+     * Sets whether Text is scrollable.
+     */
+    public void setScrollable(boolean aValue)
+    {
+        if (aValue == isScrollable()) return;
+        _scrollable = aValue;
     }
 
     /**
@@ -455,7 +473,8 @@ public class TextAdapter extends PropObject {
         if (_view != null && _view.isShowing()) {
             repaintSel();
             updateCaretAnim();
-            _view.runLater(this::scrollSelToVisible);
+            if (isScrollable())
+                _view.runLater(this::scrollSelToVisible);
         }
     }
 
@@ -1626,7 +1645,7 @@ public class TextAdapter extends PropObject {
             updateCaretAnim();
 
             // If Showing, make sure selection is visible
-            if (_view.isShowing() && getSelStart() != 0)
+            if (isScrollable() && _view.isShowing() && getSelStart() != 0)
                 _view.runDelayed(this::scrollSelToVisible, 200);
         }
 

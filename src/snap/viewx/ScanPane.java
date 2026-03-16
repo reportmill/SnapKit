@@ -2,7 +2,7 @@ package snap.viewx;
 import snap.gfx.Font;
 import snap.view.ScrollView;
 import snap.view.View;
-import snap.view.ViewOwner;
+import snap.view.ViewController;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,7 +13,7 @@ import java.util.Arrays;
  * A class to display and process System IN/OUT/ERR.
  * This can be useful to quickly add UI for Java command line programs.
  */
-public class ScanPane extends ViewOwner {
+public class ScanPane extends ViewController {
     
     // The ScanView
     private ScanView  _scanView;

@@ -104,7 +104,10 @@ public class FileUtils {
      */
     public static byte[] getBytesOrThrow(File aFile) throws IOException
     {
-        return Files.readAllBytes(aFile.toPath());
+        // return Files.readAllBytes(aFile.toPath()); - teavm doesn't have Path
+        try (FileInputStream fis = new FileInputStream(aFile)) {
+            return fis.readAllBytes();
+        }
     }
 
     /**
@@ -112,7 +115,10 @@ public class FileUtils {
      */
     public static void writeBytes(File aFile, byte[] theBytes) throws IOException
     {
-        Files.write(aFile.toPath(), theBytes);
+        //Files.write(aFile.toPath(), theBytes); - teavm doesn't have Path
+        try (OutputStream outputStream = new FileOutputStream(aFile)) {
+            outputStream.write(theBytes);
+        }
     }
 
     /**

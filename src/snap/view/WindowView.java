@@ -794,12 +794,12 @@ public class WindowView extends ParentView {
     /**
      * Returns an array of all open windows.
      */
-    public static <T extends ViewOwner> T getOpenWindowOwner(Class <T> aClass)
+    public static <T extends ViewController> T getOpenWindowController(Class <T> aClass)
     {
         for (WindowView window : _openWins) {
-            ViewOwner owner = window.getOwner();
-            if (owner != null && (aClass == null || aClass.isAssignableFrom(owner.getClass())))
-                return (T) owner;
+            ViewController controller = window.getController();
+            if (controller != null && (aClass == null || aClass.isAssignableFrom(controller.getClass())))
+                return (T) controller;
         }
 
         // Return not found
@@ -809,17 +809,17 @@ public class WindowView extends ParentView {
     /**
      * Returns an array of all open windows.
      */
-    public static <T extends ViewOwner> T[] getOpenWindowOwners(Class <T> aClass)
+    public static <T extends ViewController> T[] getOpenWindowControllers(Class <T> aClass)
     {
-        List <T> viewOwners = new ArrayList<>();
+        List <T> viewControllers = new ArrayList<>();
         for (WindowView window : _openWins) {
-            ViewOwner owner = window.getOwner();
-            if (owner != null && (aClass == null || aClass.isAssignableFrom(owner.getClass())))
-                viewOwners.add((T) owner);
+            ViewController controller = window.getController();
+            if (controller != null && (aClass == null || aClass.isAssignableFrom(controller.getClass())))
+                viewControllers.add((T) controller);
         }
 
         // Return array
-        return viewOwners.toArray((T[]) Array.newInstance(aClass, viewOwners.size()));
+        return viewControllers.toArray((T[]) Array.newInstance(aClass, viewControllers.size()));
     }
 
     /**
@@ -855,7 +855,7 @@ public class WindowView extends ParentView {
     private static void checkForExitWhenAllWindowsClosed()
     {
         if (_openWins.isEmpty())
-            System.exit(0);
+            GFXEnv.getEnv().exit(0);
     }
 
     /**

@@ -71,8 +71,8 @@ public class RowViewLayout extends EmpiricalLayout {
         }
 
         // Load layout rects and return
-        layoutProxyY();
         layoutProxyX();
+        layoutProxyY();
     }
 
     /**
@@ -106,7 +106,7 @@ public class RowViewLayout extends EmpiricalLayout {
             child.setX(childX);
 
             // Calculate child width and set
-            double childW = child.getBestWidth(child.height);
+            double childW = child.getBestWidth(-1);
             child.setWidth(childW);
 
             // Update child x loop var and last child
@@ -159,13 +159,13 @@ public class RowViewLayout extends EmpiricalLayout {
 
             // If Parent.Height not set, just set height to Child.PrefHeight
             if (viewH < 0)
-                childH = child.getBestHeight(-1);
+                childH = child.getBestHeight(child.width);
 
             // Otherwise, if not FillHeight, set height to Child.PrefHeight and align Y
             else if (!(isFillHeight || child.isGrowHeight())) {
 
                 // Set child height to Child.PrefHeight
-                childH = child.getBestHeight(-1);
+                childH = child.getBestHeight(child.width);
 
                 // Constrain child height to max child height or if space available and align set, shift Y
                 if (childH > childMaxH)

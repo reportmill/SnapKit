@@ -17,7 +17,7 @@ import java.util.*;
 /**
  * A DevPane tab for inspecting the view tree.
  */
-public class DevPaneViewOwners extends ViewOwner {
+public class DevPaneViewOwners extends ViewController {
 
     // The DevPane
     private DevPane  _devPane;
@@ -110,12 +110,12 @@ public class DevPaneViewOwners extends ViewOwner {
     }
 
     /**
-     * Returns the selected view owner.
+     * Returns the selected view controller.
      */
-    public ViewOwner getSelViewOwner()
+    public ViewController getSelViewOwner()
     {
         View selView = getSelView();
-        return selView != null ? selView.getOwner() : null;
+        return selView != null ? selView.getController() : null;
     }
 
     /**
@@ -128,10 +128,10 @@ public class DevPaneViewOwners extends ViewOwner {
             return "";
 
         // Get selected ViewOwner
-        ViewOwner owner = getSelViewOwner(); if (owner == null) return "";
+        ViewController owner = getSelViewOwner(); if (owner == null) return "";
 
         // If owner has UI file, get text
-        WebURL snapUrl = UILoader.getSnapUrlForOwner(owner);
+        WebURL snapUrl = UILoader.getSnapUrlForController(owner);
         if (snapUrl != null) {
             String str = snapUrl.getText();
             return str;
@@ -178,7 +178,7 @@ public class DevPaneViewOwners extends ViewOwner {
     {
         View view = ViewUtils.getDeepestViewAt(_devPane.getContent(), aX, aY);
         View par = view!=null ? view.getParent() : null;
-        while (par != null && (par.getOwner() == view.getOwner() || view.getOwner() == null)) {
+        while (par != null && (par.getController() == view.getController() || view.getController() == null)) {
             view = par;
             par = view.getParent();
         }
@@ -235,7 +235,7 @@ public class DevPaneViewOwners extends ViewOwner {
         setViewValue("TargetingButton", isTargeting());
 
         // Update XMLTextLabel
-        ViewOwner selOwner = getSelViewOwner();
+        ViewController selOwner = getSelViewOwner();
         String selOwnerName = selOwner != null ? selOwner.getClass().getSimpleName() + ".snp" : "ViewOwner XML";
         setViewValue("XMLTextLabel", selOwnerName);
 
@@ -287,7 +287,7 @@ public class DevPaneViewOwners extends ViewOwner {
     private void showInSnapBuilder(boolean isLocal)
     {
         // Get filename
-        ViewOwner selOwner = getSelViewOwner(); if (selOwner == null) return;
+        ViewController selOwner = getSelViewOwner(); if (selOwner == null) return;
         String filename = selOwner.getClass().getSimpleName() + ".html";
 
         // Get HTML String and bytes
@@ -338,7 +338,7 @@ public class DevPaneViewOwners extends ViewOwner {
             urls = SNAPBUILDER_URL_LOCAL;
 
         // Get SelOwner and XML string
-        ViewOwner selOwner = getSelViewOwner();
+        ViewController selOwner = getSelViewOwner();
         Class selClass = selOwner.getClass();
         String xmlFilename = selClass.getSimpleName() + ".snp";
         String xmlPath = selClass.getName().replace('.', '/') + ".snp";
@@ -393,8 +393,8 @@ public class DevPaneViewOwners extends ViewOwner {
     {
         // Get class name for selected view
         View selView = getSelView();
-        ViewOwner owner = selView!=null ? selView.getOwner() : null;
-        Class cls = owner!=null ? owner.getClass() : ViewOwner.class; if (cls==null) return null;
+        ViewController owner = selView!=null ? selView.getController() : null;
+        Class cls = owner!=null ? owner.getClass() : ViewController.class; if (cls==null) return null;
 
         // Iterate up through class parents until URL found or null
         while (cls!=null) {
@@ -428,24 +428,24 @@ public class DevPaneViewOwners extends ViewOwner {
     }
 
     /**
-     * Returns all ViewOwners for given View and its children.
+     * Returns all ViewControllers for given View and its children.
      */
-    private static List<ViewOwner> getChildViewOwnersForView(View aView)
+    private static List<ViewController> getChildViewOwnersForView(View aView)
     {
-        List<ViewOwner> list = new ArrayList<>();
+        List<ViewController> list = new ArrayList<>();
         getChildViewOwnersForView(aView, list);
-        ViewOwner owner = aView.getOwner();
+        ViewController owner = aView.getController();
         if (owner != null)
             list.remove(owner);
         return list;
     }
 
     /**
-     * Returns all ViewOwners for given View and its children.
+     * Returns all ViewControllers for given View and its children.
      */
-    private static void getChildViewOwnersForView(View aView, List<ViewOwner> aList)
+    private static void getChildViewOwnersForView(View aView, List<ViewController> aList)
     {
-        ViewOwner owner = aView.getOwner();
+        ViewController owner = aView.getController();
         if (owner != null && !aList.contains(owner))
             aList.add(owner);
         if (aView instanceof ParentView) {
@@ -469,21 +469,21 @@ public class DevPaneViewOwners extends ViewOwner {
         /** Whether given object is a parent (has children). */
         public boolean isParent(View anItem)
         {
-            List<ViewOwner> list = getChildViewOwnersForView(anItem);
+            List<ViewController> list = getChildViewOwnersForView(anItem);
             return !list.isEmpty();
         }
 
         /** Returns the children. */
         public List<View> getChildren(View aParent)
         {
-            List<ViewOwner> list = getChildViewOwnersForView(aParent);
-            return ListUtils.map(list, viewOwner -> viewOwner.getUI());
+            List<ViewController> list = getChildViewOwnersForView(aParent);
+            return ListUtils.map(list, viewCon -> viewCon.getUI());
         }
 
         /** Returns the text to be used for given item. */
         public String getText(View anItem)
         {
-            ViewOwner owner = anItem.getOwner();
+            ViewController owner = anItem.getController();
             return owner != null ? owner.getClass().getSimpleName() : "No Owner";
         }
     }

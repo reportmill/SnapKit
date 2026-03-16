@@ -136,6 +136,7 @@ public abstract class TextLayout extends PropObject {
             public int length()  { return TextLayout.this.length(); }
             public char charAt(int i)  { return TextLayout.this.charAt(i); }
             public CharSequence subSequence(int aStart, int anEnd)  { return TextLayout.this.subSequence(aStart, anEnd); }
+            public String toString()  { return TextLayout.this.getString(); }
         };
     }
 

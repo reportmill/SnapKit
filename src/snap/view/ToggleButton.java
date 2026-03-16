@@ -55,7 +55,7 @@ public class ToggleButton extends ButtonBase {
      */
     public ToggleGroup getToggleGroup()
     {
-        ViewOwner ownr = getOwner(); if (ownr == null) return null;
+        ViewController ownr = getController(); if (ownr == null) return null;
         return _groupName!=null? ownr.getToggleGroup(_groupName) : null;
     }
 
@@ -95,15 +95,15 @@ public class ToggleButton extends ButtonBase {
     /**
      * Override to add to ToggleGroup if name is set.
      */
-    public void setOwner(ViewOwner anOwner)
+    public void setController(ViewController viewController)
     {
         // Do normal version
-        super.setOwner(anOwner);
+        super.setController(viewController);
 
         // If GroupName provided, add this button to ToggleGroup
         String groupName = getGroupName();
         if (groupName != null) {
-            ToggleGroup toggleGroup = anOwner.getToggleGroup(groupName);
+            ToggleGroup toggleGroup = viewController.getToggleGroup(groupName);
             toggleGroup.add(this);
         }
     }

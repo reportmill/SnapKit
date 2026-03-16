@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * This class is a real implementation of Console.
  */
-public class DefaultConsole extends ViewOwner implements Console {
+public class DefaultConsole extends ViewController implements Console {
 
     // The Console view
     private ColView _consoleView;
@@ -202,13 +202,13 @@ public class DefaultConsole extends ViewOwner implements Console {
         Console defaultConsole = getShared();
 
         // Show console in window
-        if (defaultConsole instanceof ViewOwner) {
-            ViewOwner viewOwner = (ViewOwner) defaultConsole;
-            View consoleView = viewOwner.getUI();
+        if (defaultConsole instanceof ViewController) {
+            ViewController viewController = (ViewController) defaultConsole;
+            View consoleView = viewController.getUI();
             if (!SnapEnv.isWebVM)
                 consoleView.setPrefSize(700, 900);
-            viewOwner.getWindow().setMaximized(SnapEnv.isWebVM);
-            ViewUtils.runLater(() -> viewOwner.setWindowVisible(true));
+            viewController.getWindow().setMaximized(SnapEnv.isWebVM);
+            ViewUtils.runLater(() -> viewController.setWindowVisible(true));
         }
     }
 }

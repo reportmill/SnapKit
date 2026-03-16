@@ -270,11 +270,11 @@ public class Menu extends MenuItem {
      * Override to send to items.
      */
     @Override
-    public void setOwner(ViewOwner anOwner)
+    public void setController(ViewController viewController)
     {
-        super.setOwner(anOwner);
+        super.setController(viewController);
         for (View child : getMenuItems())
-            child.setOwner(anOwner);
+            child.setController(viewController);
     }
 
     /**

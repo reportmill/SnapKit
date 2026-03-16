@@ -155,8 +155,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // Provides information for physics simulations
     private ViewPhysics _physics;
 
-    // The view owner of this view
-    private ViewOwner  _owner;
+    // The view controller of this view
+    private ViewController _controller;
 
     // Constants for how to handle content out of bounds
     public enum Overflow { Visible, Clip, Scroll }
@@ -880,7 +880,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Shape getClip()
     {
-        if (_overflow == Overflow.Clip)
+        if (_overflow == Overflow.Clip || _overflow == Overflow.Scroll && !(getParent() instanceof Scroller))
             return getBoundsShape();
         return null;
     }
@@ -2416,33 +2416,33 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
-     * Returns the view owner.
+     * Returns the view controller.
      */
-    public ViewOwner getOwner()  { return _owner; }
+    public ViewController getController()  { return _controller; }
 
     /**
-     * Sets the owner.
+     * Sets the view controller.
      */
-    public void setOwner(ViewOwner anOwner)
+    public void setController(ViewController viewController)
     {
-        // If already set, just return - Owner cannot be reset
-        if (_owner != null) return;
-        _owner = anOwner;
+        // If already set, just return - controller cannot be reset
+        if (_controller != null) return;
+        _controller = viewController;
     }
 
     /**
-     * Returns the owner of given class.
+     * Returns the view controller of given class.
      */
-    public <T> T getOwner(Class<T> aClass)
+    public <T extends ViewController> T getController(Class<T> aClass)
     {
-        // If ViewOwner is of given class, return it
-        ViewOwner viewOwner = getOwner();
-        if (viewOwner != null && aClass.isAssignableFrom(viewOwner.getClass()))
-            return (T) viewOwner;
+        // If view controller is of given class, return it
+        ViewController viewController = getController();
+        if (viewController != null && aClass.isAssignableFrom(viewController.getClass()))
+            return (T) viewController;
 
         // Otherwise, forward to parent
         ParentView par = getParent();
-        return par != null ? par.getOwner(aClass) : null;
+        return par != null ? par.getController(aClass) : null;
     }
 
     /**
@@ -2596,9 +2596,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Process event
         processEvent(anEvent);
 
-        // If Action event, automatically forward to owner
-        if (anEvent.isActionEvent() && _owner != null && !anEvent.isConsumed())
-            _owner.dispatchEventToOwner(anEvent);
+        // If Action event, automatically forward to controller
+        if (anEvent.isActionEvent() && _controller != null && !anEvent.isConsumed())
+            _controller.dispatchEventToController(anEvent);
 
         // Get event handlers and event type
         EventAdapter eventAdapter = getEventAdapter();
@@ -2625,11 +2625,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected void fireActionEvent(ViewEvent sourceEvent)
     {
-        // Get window - can fail for menu items triggered by shortcut, so try owner (I don't love this)
+        // Get window - can fail for menu items triggered by shortcut, so try controller (I don't love this)
         WindowView window = getWindow();
         if (window == null) {
-            ViewOwner viewOwner = getOwner();
-            window = viewOwner != null ? viewOwner.getUI().getWindow() : null;
+            ViewController viewController = getController();
+            window = viewController != null ? viewController.getUI().getWindow() : null;
             if (window == null) {
                 System.err.println("View.fireActionEvent: Can't find window for view: " + this);
                 return;
@@ -2755,10 +2755,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         try { clone = (View) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
 
-        // Clear Parent, EventAdapter, Owner
+        // Clear Parent, EventAdapter, Controller
         clone._parent = null;
         clone._eventAdapter = null;
-        clone._owner = null;
+        clone._controller = null;
 
         // Return
         return clone;

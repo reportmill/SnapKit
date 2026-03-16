@@ -13,7 +13,7 @@ SnapKit is designed to resolve this with no compromises.
 * [Overview](#Overview)
 * [SnapKit Inspirations](#snapKit-inspirations)
 * [SnapKit Advantages](#snapKit-advantages)
-* [The ViewOwner](#the-viewowner)
+* [The ViewController](#the-viewcontroller)
 * [The Graphics Package](#the-graphics-package)
 * [The View Package](#the-view-package)
 * [The Text Package](#the-text-package)
@@ -72,11 +72,11 @@ whole thing to the browser:
 - Runs on top of Swing, JavaFX and HTML DOM
 - Easily portable to any future UI kit and platform
 - The base class is called View (that puts the V back in MVC)
-- The ViewOwner class provides control functionally
+- The ViewController class provides control functionally
 - The ViewEvent class unifies all input events for more consistent handling
 
     
-## The ViewOwner
+## The ViewController
 
 The one thing that may have hurt Swing and JavaFX the most is that there is no standard class to manage the basics of UI
 management: Create, Init, Reset, Respond (otherwise known as the "Controller" in MVC).
@@ -108,7 +108,7 @@ public void updateUI()
 });
 ```
 
-Here is the same thing with a ViewOwner:
+Here is the same thing with a ViewController:
 
 ```java
 /** Create UI. */
@@ -155,9 +155,9 @@ is called automatically when the user interacts with any UI (or explicitly via r
 place to look for all get/set code between controls and the model.
     
     
-## <a name="UniversalAccessors">ViewOwner "Universal Accessors"</a>
+## <a name="UniversalAccessors">ViewController "Universal Accessors"</a>
 
-As a convenience, ViewOwner will let you get/set values using standard methods and support all controls, which
+As a convenience, ViewController will let you get/set values using standard methods and support all controls, which
 avoids having to lookup or remember specific get/set methods for controls. It also provides common type conversions
 to avoid tedious conversions to/from String/number/boolean formats.
 
@@ -223,7 +223,7 @@ The essentail part of a good UI kit is the set of classes that model the scene g
 - Box, VBox, HBox, BorderView, StackView, SpringView to facilitate layout
 - ScrollView, SplitView, TabView, TitleView
 - DocView, PageView: represent a real world document and page
-- ViewOwner: integrated controller class to manage UI creation, initialization, updates, bindings and events
+- ViewController: integrated controller class to manage UI creation, initialization, updates, bindings and events
 - RootPane: Manages view event dispatch and hierarchy updates, layout and painting
 - WindowView: Maps to a platform window
 - MenuItem, Menu, MenuBar
@@ -426,7 +426,8 @@ acceleration, 3D and more. [More information is available here](https://github.c
 ## The SnapBuilder UI Builder
 
 Because the best line of code is the one you don't have to write, UI is almost always created using the UI builder
-and stored in simple XML files ('.snp' files). Simply create/save a .snp file with the same name as your custom ViewOwner class, and the default ViewOwner.createUI() method will load it.
+and stored in simple XML files ('.snp' files). Simply create/save a .snp file with the same name as your custom
+ViewController class, and the default ViewController.createUI() method will load it.
 
 As a bonus, you can run SnapBuilder in the browser and even open any UI file from a running application using the
 "Developer Tools Console", also available in any running app (see below).
@@ -438,7 +439,7 @@ As a bonus, you can run SnapBuilder in the browser and even open any UI file fro
 If you double-tap the control key in any SnapKit app, a developer console will appear. There are many features
 here to make it easier to debug visual layouts and explore new or large code bases:
 
-- Mouse-Over to select and inspect any individual nested ViewOwner controller and UI
+- Mouse-Over to select and inspect any individual nested ViewController controller and UI
 - Mouse-Over to select and inspect any View
 - Open any UI in the UI Builder, or controller in GitHub code, or View JavaDoc
 - Select different UI themes (standard, light, dark, light-blue, etc.)
@@ -459,6 +460,6 @@ repositories {
 dependencies {
 
     // Latest release: https://github.com/reportmill/SnapKit/releases
-    implementation 'com.reportmill:snapkit:2026.01'
+    implementation 'com.reportmill:snapkit:2026.03'
 }
 ```

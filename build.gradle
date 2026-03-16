@@ -5,13 +5,16 @@ plugins {
     id 'maven-publish'
 }
 
-group 'com.reportmill'
-version  new SimpleDateFormat("yyyy.MM").format(new Date())
+group = 'com.reportmill'
+version = new SimpleDateFormat("yyyy.MM").format(new Date())
 
 sourceSets.main.java.srcDirs = ['src']
 sourceSets.main.resources.srcDirs = ['src']
 
 java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
     withJavadocJar()
@@ -22,40 +25,21 @@ sourcesJar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
 
-repositories {
-}
+repositories { mavenCentral() }
 
 dependencies {
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << "-parameters"
-}
-
-tasks.publish.doFirst() {
-    def user = System.getenv("GITHUB_USER")
-    def pw = System.getenv("GITHUB_TOKEN")
-    println "Publish start user:$user"
 }
 
 publishing {
 
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/reportmill/SnapKit"
-            credentials {
-                username = System.getenv("GITHUB_USER")
-                password = System.getenv("GITHUB_TOKEN")
-                println "Publish user: username=$username"
-            }
-        }
-    }
-
     publications {
         gpr(MavenPublication) {
-            artifactId 'snapkit'
-            from(components.java)
+            artifactId = 'snapkit'
+            from components.java
         }
     }
 }

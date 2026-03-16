@@ -3,7 +3,9 @@
  */
 package snap.web;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -86,8 +88,8 @@ public class FileSite extends WebSite {
 
         // If regular file, just set bytes
         if (!aReq.isFileDir()) {
-            try {
-                byte[] bytes = Files.readAllBytes(javaFile.toPath());
+            try (InputStream fis = new FileInputStream(javaFile)) {
+                byte[] bytes = fis.readAllBytes();
                 aResp.setBytes(bytes);
             }
             catch(IOException e) { aResp.setException(e); }

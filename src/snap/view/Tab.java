@@ -32,8 +32,8 @@ public class Tab extends PropObject {
     // The content
     private View  _content;
 
-    // The content owner
-    private ViewOwner  _contentOwner;
+    // The content controller
+    private ViewController _contentController;
 
     // Constants for properties
     private static final String Title_Prop = "Title";
@@ -136,7 +136,7 @@ public class Tab extends PropObject {
         if (_content != null) return _content;
 
         // Create, set, return
-        View content = _contentOwner != null ? _contentOwner.getUI() : null;
+        View content = _contentController != null ? _contentController.getUI() : null;
         return _content = content;
     }
 
@@ -146,16 +146,16 @@ public class Tab extends PropObject {
     public void setContent(View aView)  { _content = aView; }
 
     /**
-     * Returns the content owner.
+     * Returns the content controller.
      */
-    public ViewOwner getContentOwner()  { return _contentOwner; }
+    public ViewController getContentController()  { return _contentController; }
 
     /**
-     * Sets the content owner.
+     * Sets the content controller.
      */
-    public void setContentOwner(ViewOwner aViewOwner)
+    public void setContentController(ViewController viewController)
     {
-        _contentOwner = aViewOwner;
+        _contentController = viewController;
         _content = null;
     }
 
@@ -275,7 +275,7 @@ public class Tab extends PropObject {
         public Builder closable(boolean aValue)  { _tab()._closable = aValue; return this; }
         public Builder visible(boolean aValue)  { _tab()._visible = aValue; return this; }
         public Builder content(View aValue)  { _tab()._content = aValue; return this; }
-        public Builder contentOwner(ViewOwner aValue)  { _tab()._contentOwner = aValue; return this; }
+        public Builder contentController(ViewController aValue)  { _tab()._contentController = aValue; return this; }
 
         /**
          * Build.

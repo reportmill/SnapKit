@@ -381,7 +381,7 @@ public class TabBar extends ParentView implements Selectable<Tab> {
          * Override to not send to Tab.Buttons.
          */
         @Override
-        protected void setOwnerChildren(ViewOwner anOwner)
+        protected void setControllerChildren(ViewController viewController)
         {
             ViewList children = getChildren();
             List<Tab> tabs = getTabs();
@@ -389,7 +389,7 @@ public class TabBar extends ParentView implements Selectable<Tab> {
             for (View child : children) {
                 boolean isTabButton = ListUtils.findMatch(tabs, tab -> tab.getButton() == child) != null;
                 if (!isTabButton)
-                    child.setOwner(anOwner);
+                    child.setController(viewController);
             }
         }
     }

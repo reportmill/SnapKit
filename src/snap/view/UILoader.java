@@ -7,26 +7,26 @@ import snap.web.WebURL;
 public class UILoader {
 
     /**
-     * Loads the snap UI file for given view owner and returns root view.
+     * Loads the snap UI file for given view controller and returns root view.
      */
-    public static ParentView loadViewForOwner(ViewOwner anOwner)
+    public static ParentView loadViewForController(ViewController viewController)
     {
-        // Get snap UI file URL for owner (complain if not found)
-        WebURL snapUrl = getSnapUrlForOwner(anOwner);
+        // Get snap UI file URL for controller (complain if not found)
+        WebURL snapUrl = getSnapUrlForController(viewController);
         if (snapUrl == null)
-            throw new RuntimeException("UILoader.loadViewForOwner: Couldn't find source for owner: " + anOwner.getClass().getName());
+            throw new RuntimeException("UILoader.loadViewForController: Couldn't find source for controller: " + viewController.getClass().getName());
 
         // Forward
-        return loadViewForOwnerAndUrl(anOwner, snapUrl);
+        return loadViewForControllerAndUrl(viewController, snapUrl);
     }
 
     /**
-     * Loads the snap UI file for given view owner and URL and returns root view.
+     * Loads the snap UI file for given view controller and URL and returns root view.
      */
-    public static ParentView loadViewForOwnerAndUrl(ViewOwner anOwner, WebURL snapUrl)
+    public static ParentView loadViewForControllerAndUrl(ViewController viewController, WebURL snapUrl)
     {
         ViewArchiver archiver = new ViewArchiver();
-        archiver.setOwner(anOwner);
+        archiver.setOwner(viewController);
         return (ParentView) archiver.readXmlFromUrl(snapUrl);
     }
 
@@ -35,13 +35,13 @@ public class UILoader {
      */
     public static ParentView loadViewForClass(Class<?> aClass)
     {
-        // Get snap UI file URL for owner (complain if not found)
+        // Get snap UI file URL for controller (complain if not found)
         WebURL snapUrl = getSnapUrlForClass(aClass);
         if (snapUrl == null)
-            throw new RuntimeException("UILoader.loadViewForClass: Couldn't find source for owner: " + aClass.getName());
+            throw new RuntimeException("UILoader.loadViewForClass: Couldn't find source for controller: " + aClass.getName());
 
         // Forward
-        return loadViewForOwnerAndUrl(null, snapUrl);
+        return loadViewForControllerAndUrl(null, snapUrl);
     }
 
     /**
@@ -49,7 +49,7 @@ public class UILoader {
      */
     public static ParentView loadViewForUrl(WebURL snapUrl)
     {
-        return loadViewForOwnerAndUrl(null, snapUrl);
+        return loadViewForControllerAndUrl(null, snapUrl);
     }
 
     /**
@@ -57,16 +57,16 @@ public class UILoader {
      */
     public static View loadViewForString(String snapString)
     {
-        return loadViewForOwnerAndString(null, snapString);
+        return loadViewForControllerAndString(null, snapString);
     }
 
     /**
-     * Loads the snap UI file for given owner and snap UI string and returns root view.
+     * Loads the snap UI file for given controller and snap UI string and returns root view.
      */
-    public static View loadViewForOwnerAndString(ViewOwner anOwner, String snapString)
+    public static View loadViewForControllerAndString(ViewController viewController, String snapString)
     {
         ViewArchiver archiver = new ViewArchiver();
-        archiver.setOwner(anOwner);
+        archiver.setOwner(viewController);
         return (View) archiver.readXmlFromString(snapString);
     }
 
@@ -80,11 +80,11 @@ public class UILoader {
     }
 
     /**
-     * Returns a UI source for given view owner.
+     * Returns a UI source for given view controller.
      */
-    public static WebURL getSnapUrlForOwner(ViewOwner anOwner)
+    public static WebURL getSnapUrlForController(ViewController viewController)
     {
-        return getSnapUrlForClass(anOwner.getClass());
+        return getSnapUrlForClass(viewController.getClass());
     }
 
     /**

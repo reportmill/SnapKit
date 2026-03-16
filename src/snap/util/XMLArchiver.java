@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import snap.web.WebURL;
 
@@ -577,8 +576,8 @@ public class XMLArchiver {
      */
     private static Object newInstance(Class<?> aClass)
     {
-        try { return aClass.getConstructor().newInstance(); }
-        catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+        try { return aClass.newInstance(); }
+        catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }

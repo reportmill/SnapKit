@@ -117,4 +117,7 @@ public interface CharSequenceX extends CharSequence {
     {
         return CharSequenceUtils.isWhiteSpace(this);
     }
+
+    // TeaVM needs this
+    default boolean isEmpty()  { return length() == 0; }
 }

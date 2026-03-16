@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * A DevPane tab for inspecting the view tree.
  */
-public class DevPaneViews extends ViewOwner {
+public class DevPaneViews extends ViewController {
 
     // The DevPane
     private DevPane  _devPane;

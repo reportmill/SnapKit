@@ -11,7 +11,7 @@ import snap.view.*;
 /**
  * A class to build a form.
  */
-public class FormBuilder extends ViewOwner {
+public class FormBuilder extends ViewController {
 
     // The root pane
     protected ColView  _formView;

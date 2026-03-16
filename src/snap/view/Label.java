@@ -4,6 +4,7 @@
 package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
+import snap.props.PropChange;
 import snap.props.PropSet;
 import snap.text.TextModel;
 import snap.util.*;
@@ -44,6 +45,8 @@ public class Label extends ParentView {
         _textArea = new TextArea(TextModel.createDefaultTextModel(false));
         _textArea.setAlign(getAlign());
         _textArea.setVisible(false);
+        _textArea.getTextAdapter().setScrollable(false);
+        _textArea.getTextAdapter().addTextModelPropChangeListener(this::handleTextModelPropChange);
         addChild(_textArea);
     }
 
@@ -74,7 +77,6 @@ public class Label extends ParentView {
         // Set value and fire prop change
         TextModel textModel = _textArea.getTextModel();
         textModel.setString(aValue != null ? aValue : ""); // In text model to skip unneeded stuff
-        _textArea.setVisible(aValue != null && !aValue.isEmpty());
         firePropChange(Text_Prop, oldVal, aValue);
     }
 
@@ -230,6 +232,14 @@ public class Label extends ParentView {
         viewLayout.layoutViewLayout();
         ViewLayout textProxy = childProxies.get(textIndex);
         return textProxy;
+    }
+
+    /**
+     * Called when TextModel gets prop changes.
+     */
+    private void handleTextModelPropChange(PropChange propChange)
+    {
+        _textArea.setVisible(_textArea.length() > 0);
     }
 
     /**
