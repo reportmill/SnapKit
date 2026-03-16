@@ -1,6 +1,7 @@
 package snap.viewx;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
+import snap.view.DefaultViewController;
 import snap.view.EventListener;
 import snap.view.ViewEvent;
 import snap.view.ViewController;
@@ -14,7 +15,7 @@ import java.util.function.Predicate;
 /**
  * This class is the base class for WebSite open/save browsers.
  */
-public class WebSitePane extends ViewController {
+public class WebSitePane extends DefaultViewController {
 
     // The site used to reference files
     protected WebSite  _site;

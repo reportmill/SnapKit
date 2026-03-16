@@ -88,7 +88,7 @@ class ActivityMonitorPanel {
     /**
      * This view controller class shows UI for ActivityMonitorPanel.
      */
-    private class ActivityMonitorPanelViewOwner extends ViewController {
+    private class ActivityMonitorPanelViewOwner extends DefaultViewController {
 
         // The dialog box
         private DialogBox _dialogBox;

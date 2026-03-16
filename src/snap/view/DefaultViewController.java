@@ -7,6 +7,16 @@ package snap.view;
 public class DefaultViewController extends SimpleViewController {
 
     /**
+     * Constructor.
+     */
+    public DefaultViewController()  {super();}
+
+    /**
+     * Constructor with given View for UI.
+     */
+    public DefaultViewController(View aView) {super(aView);}
+
+    /**
      * Initializes the UI panel. This method provides the ability to alter any settings or components of the View that
      * were not set by {@link #createUI()}.
      * <br><br>
