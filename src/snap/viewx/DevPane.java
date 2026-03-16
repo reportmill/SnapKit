@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * A view to allow inspection of View hierarchy.
  */
-public class DevPane extends ViewController {
+public class DevPane extends DefaultViewController {
 
     // The RootView
     private RootView  _rootView;
