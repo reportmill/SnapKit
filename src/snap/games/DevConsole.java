@@ -6,7 +6,7 @@ import snap.view.*;
 /**
  * A class to provide developer controls to a GameController.
  */
-public class DevConsole extends ViewController {
+public class DevConsole extends DefaultViewController {
 
     // The GameController
     private GameController _gameController;

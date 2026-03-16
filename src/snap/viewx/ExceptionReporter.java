@@ -16,7 +16,7 @@ import snap.view.*;
  *   er.setInfo("MyApp Version X, Build Date: " + MyUtils.getBuildDate());
  *   Thread.setDefaultUncaughtExceptionHandler(er);
  */
-public class ExceptionReporter extends ViewController implements Thread.UncaughtExceptionHandler {
+public class ExceptionReporter extends DefaultViewController implements Thread.UncaughtExceptionHandler {
     
     // Backtrace text
     private String _backtraceText;

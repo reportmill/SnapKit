@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 /**
  * A panel for editing text files.
  */
-public class TextPane extends ViewController {
+public class TextPane extends DefaultViewController {
 
     // The text file being edited
     private WebFile _textFile;

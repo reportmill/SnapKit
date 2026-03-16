@@ -411,7 +411,7 @@ public class ViewUpdater {
             _frameRateLabel.setMargin(10, 10, 10, 20);
             _frameRateLabel.setPrefSize(100, 32);
             _frameRateLabel.setFont(new Font("Arial", 24));
-            ViewController frameRateOwner = new ViewController(_frameRateLabel);
+            ViewController frameRateOwner = new DefaultViewController(_frameRateLabel);
             frameRateOwner.getWindow().setType(WindowView.Type.UTILITY);
             frameRateOwner.getWindow().setAlwaysOnTop(true);
             frameRateOwner.setWindowVisible(true);
