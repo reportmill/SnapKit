@@ -10,13 +10,13 @@ import snap.view.*;
 public class TransitionPane extends ParentView {
 
     // The current content view
-    private View  _content;
+    private View _content;
     
     // The last content view
-    private View  _contentOld;
+    private View _contentOld;
 
     // The Transition
-    private Transition  _transition = MoveDown;
+    private Transition _transition = MoveDown;
 
     /**
      * Creates a TransitionPane.
@@ -33,14 +33,13 @@ public class TransitionPane extends ParentView {
      */
     public void setContent(View aView)
     {
-        // If view already set, just return
-        if (aView==_content) return;
+        if (aView == _content) return;
 
-        // Make sure animations are finished
+        // Make sure animations are finished (preserving transition)
         Transition transition = _transition;
-        if (_content!=null)
+        if (_content != null)
             _content.getAnim(0).finish().clear();
-        if (_contentOld!=null)
+        if (_contentOld != null)
             _contentOld.getAnim(0).finish().clear();
         _transition = transition;
 
@@ -49,7 +48,7 @@ public class TransitionPane extends ParentView {
 
         // Set new Content (if null, remove children and return)
         _content = aView;
-        if (_content==null) {
+        if (_content == null) {
             removeChildren();
             return;
         }
@@ -105,21 +104,21 @@ public class TransitionPane extends ParentView {
     /**
      * A class to perform transitions.
      */
-    public static class Transition {
+    public static abstract class Transition {
 
         /** Configure. */
-        public void configure(TransitionPane aTP, View nview, View oview)  { }
+        public abstract void configure(TransitionPane aTP, View nview, View oview);
 
         /** Removes OldNode from TransitionPane. */
-        public void finish(TransitionPane aTP, View oldView)
+        public void finish(TransitionPane transitionPane, View oldView)
         {
             if (oldView.getParent()!=null)
-                aTP._transition = MoveDown;
-            aTP.removeChild(oldView);
+                transitionPane._transition = MoveDown;
+            transitionPane.removeChild(oldView);
             oldView.setTransX(0);
             oldView.setTransY(0);
             oldView.setOpacity(1);
-            aTP._contentOld = null;
+            transitionPane._contentOld = null;
         }
     }
 
@@ -129,13 +128,13 @@ public class TransitionPane extends ParentView {
     public static Transition MoveUp = new Transition() {
 
         /** Configure. */
-        public void configure(TransitionPane aTP, View nview, View oview)
+        public void configure(TransitionPane transitionPane, View newView, View oldView)
         {
-            nview.setTransY(aTP.getHeight());
-            nview.getAnim(500).setTransY(0).play();
-            if (oview==null) return;
-            oview.setTransY(0);
-            oview.getAnim(500).setTransY(-aTP.getHeight()).setOnFinish(() -> finish(aTP, oview)).play();
+            newView.setTransY(transitionPane.getHeight());
+            newView.getAnim(500).setTransY(0).play();
+            if (oldView == null) return;
+            oldView.setTransY(0);
+            oldView.getAnim(500).setTransY(-transitionPane.getHeight()).setOnFinish(() -> finish(transitionPane, oldView)).play();
         }
     };
 
@@ -145,13 +144,13 @@ public class TransitionPane extends ParentView {
     public static Transition MoveDown = new Transition() {
 
         /** Configure. */
-        public void configure(TransitionPane aTP, View nview, View oview)
+        public void configure(TransitionPane transitionPane, View newView, View oldView)
         {
-            nview.setTransY(-aTP.getHeight());
-            nview.getAnim(500).setTransY(0).play();
-            if (oview==null) return;
-            oview.setTransY(0);
-            oview.getAnim(500).setTransY(aTP.getHeight()).setOnFinish(() -> finish(aTP, oview)).play();
+            newView.setTransY(-transitionPane.getHeight());
+            newView.getAnim(500).setTransY(0).play();
+            if (oldView == null) return;
+            oldView.setTransY(0);
+            oldView.getAnim(500).setTransY(transitionPane.getHeight()).setOnFinish(() -> finish(transitionPane, oldView)).play();
         }
     };
 
@@ -161,13 +160,13 @@ public class TransitionPane extends ParentView {
     public static Transition MoveLeft = new Transition() {
 
         /** Configure. */
-        public void configure(TransitionPane aTP, View nview, View oview)
+        public void configure(TransitionPane transitionPane, View newView, View oldView)
         {
-            nview.setTransX(-aTP.getWidth());
-            nview.getAnim(500).setTransX(0).play();
-            if (oview==null) return;
-            oview.setTransX(0);
-            oview.getAnim(500).setTransX(aTP.getWidth()).setOnFinish(() -> finish(aTP, oview)).play();
+            newView.setTransX(-transitionPane.getWidth());
+            newView.getAnim(500).setTransX(0).play();
+            if (oldView == null) return;
+            oldView.setTransX(0);
+            oldView.getAnim(500).setTransX(transitionPane.getWidth()).setOnFinish(() -> finish(transitionPane, oldView)).play();
         }
     };
 
@@ -177,13 +176,13 @@ public class TransitionPane extends ParentView {
     public static Transition MoveRight = new Transition() {
 
         /** Configure. */
-        public void configure(TransitionPane aTP, View nview, View oview)
+        public void configure(TransitionPane transitionPane, View newView, View oldView)
         {
-            nview.setTransX(aTP.getWidth());
-            nview.getAnim(500).setTransX(0).play();
-            if (oview==null) return;
-            oview.setTransX(0);
-            oview.getAnim(500).setTransX(-aTP.getWidth()).setOnFinish(() -> finish(aTP, oview)).play();
+            newView.setTransX(transitionPane.getWidth());
+            newView.getAnim(500).setTransX(0).play();
+            if (oldView==null) return;
+            oldView.setTransX(0);
+            oldView.getAnim(500).setTransX(-transitionPane.getWidth()).setOnFinish(() -> finish(transitionPane, oldView)).play();
         }
     };
 
@@ -193,12 +192,12 @@ public class TransitionPane extends ParentView {
     public static Transition FadeIn = new Transition() {
 
         /** Configure. */
-        public void configure(TransitionPane aTP, View nview, View oview)
+        public void configure(TransitionPane transitionPane, View newView, View oldView)
         {
-            nview.setOpacity(0);
-            nview.getAnim(800).setOpacity(1).play();
-            if (oview==null) return;
-            oview.getAnim(800).setOnFinish(() -> finish(aTP, oview)).play();
+            newView.setOpacity(0);
+            newView.getAnim(800).setOpacity(1).play();
+            if (oldView==null) return;
+            oldView.getAnim(800).setOnFinish(() -> finish(transitionPane, oldView)).play();
         }
     };
 
@@ -208,10 +207,10 @@ public class TransitionPane extends ParentView {
     public static Transition Instant = new Transition() {
 
         /** Configure. */
-        public void configure(TransitionPane aTP, View nview, View oview)
+        public void configure(TransitionPane transitionPane, View newView, View oldView)
         {
-            aTP.removeChild(oview);
-            aTP._transition = MoveDown;
+            transitionPane.removeChild(oldView);
+            transitionPane._transition = MoveDown;
         }
     };
 }
