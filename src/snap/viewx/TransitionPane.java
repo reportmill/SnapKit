@@ -56,22 +56,30 @@ public class TransitionPane extends ParentView {
         // Add view
         addChild(aView,0);
 
-        // Make sure new content has no residual animation/transform
+        // Make sure this view and new content has no residual animation/transform
+        getAnim(0).clear();
         _content.getAnimCleared(0);
         _content.setTransX(0); _content.setTransY(0);
 
-        // If both old/new content, animate size change
-        getAnim(0).clear();
+        // If both old/new content, and current size matches old content pref size, animate size change
         if (_contentOld != null && _content != null) {
+
+            // Get old best size
             double oldBestW = _contentOld.getBestWidth(-1);
             double oldBestH = _contentOld.getBestHeight(-1);
-            double newBestW = _content.getBestWidth(-1);
-            double newBestH = _content.getBestHeight(-1);
-            if (oldBestW != newBestW || oldBestH != newBestH) {
-                setPrefSize(oldBestW, oldBestH);
-                getAnim(500).setPrefSize(newBestW, newBestH).setOnFinish(() -> setPrefSize(-1, -1)).play();
-                _contentOld.setSize(oldBestW, oldBestH);
-                _contentOld.getAnim(500).setWidth(newBestW).setHeight(newBestH).play();
+
+            // If old best size matches current size ...
+            if (oldBestW == _contentOld.getWidth() && oldBestH == _contentOld.getHeight()) {
+
+                // ... and new best size represents a change, animate size changes
+                double newBestW = _content.getBestWidth(-1);
+                double newBestH = _content.getBestHeight(-1);
+                if (oldBestW != newBestW || oldBestH != newBestH) {
+                    setPrefSize(oldBestW, oldBestH);
+                    getAnim(500).setPrefSize(newBestW, newBestH).setOnFinish(() -> setPrefSize(-1, -1)).play();
+                    _contentOld.setSize(oldBestW, oldBestH);
+                    _contentOld.getAnim(500).setWidth(newBestW).setHeight(newBestH).play();
+                }
             }
         }
 
