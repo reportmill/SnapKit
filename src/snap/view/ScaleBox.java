@@ -127,7 +127,7 @@ public class ScaleBox extends BoxView {
         // Get content width
         double childW = child.getBestWidth(-1);
         double childH = child.getBestHeight(-1);
-        if (childW <= 0 || childH <=0) {
+        if (childW <= 0 || childH <= 0) {
             child.setBounds(0, 0, 0, 0);
             return;
         }
@@ -140,8 +140,8 @@ public class ScaleBox extends BoxView {
         if (isFillWidth || isFillHeight || childW > areaW || childH > areaH)  {
 
             // Get/set Child bounds, and calculate scale X/Y to fit
-            double scaleX = isFillWidth || childW > areaW ? areaW/childW : 1;
-            double scaleY = isFillHeight || childH > areaH ? areaH/childH : 1;
+            double scaleX = isFillWidth || childW > areaW ? areaW / childW : 1;
+            double scaleY = isFillHeight || childH > areaH ? areaH / childH : 1;
 
             // If KeepAspect (or both FillWidth/FillHeight), constrain scale X/Y to min
             if (isKeepAspect || (isFillWidth && isFillHeight))
@@ -151,12 +151,24 @@ public class ScaleBox extends BoxView {
             child.setScaleX(scaleX);
             child.setScaleY(scaleY);
 
+            // If child grows width/height and space available, increase to available size
+            if (child.isGrowWidth() && childW * scaleX < areaW)
+                childW = areaW / scaleX;
+            if (child.isGrowHeight() && childH * scaleY < areaH)
+                childH = areaH / scaleY;
+
             // Get/set child bounds
-            double childX = Math.round(areaX + (areaW - childW * scaleX) * alignX + childW/2 * scaleX - childW/2);
-            double childY = Math.round(areaY + (areaH - childH * scaleY) * alignY + childH/2 * scaleY - childH/2);
+            double childX = Math.round(areaX + (areaW - childW * scaleX) * alignX + childW / 2 * scaleX - childW / 2);
+            double childY = Math.round(areaY + (areaH - childH * scaleY) * alignY + childH / 2 * scaleY - childH / 2);
             child.setBounds(childX, childY, childW, childH);
             return;
         }
+
+        // If child grows width/height and space available, increase to available size
+        if (child.isGrowWidth() && childW < areaW)
+            childW = areaW;
+        if (child.isGrowHeight() && childH < areaH)
+            childH = areaH;
 
         // Make sure scale is reset
         child.setScale(1);

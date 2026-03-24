@@ -5,7 +5,7 @@ package snap.viewx;
 import snap.view.*;
 
 /**
- * A panel that lets you set a view and have the old one transition out.
+ * A view that lets you set a content view and have the old one transition out.
  */
 public class TransitionPane extends ParentView {
 
@@ -18,18 +18,21 @@ public class TransitionPane extends ParentView {
     // The Transition
     private Transition _transition = MoveDown;
 
+    // Whether to animate size change
+    private boolean _animateSizeChange;
+
     /**
-     * Creates a TransitionPane.
+     * Constructor.
      */
     public TransitionPane()  { setClipToBounds(true); }
 
     /**
-     * Returns the content node.
+     * Returns the content view.
      */
     public View getContent()  { return _content; }
 
     /**
-     * Sets a new content node.
+     * Sets a new content view.
      */
     public void setContent(View aView)
     {
@@ -61,27 +64,9 @@ public class TransitionPane extends ParentView {
         _content.getAnimCleared(0);
         _content.setTransX(0); _content.setTransY(0);
 
-        // If both old/new content, and current size matches old content pref size, animate size change
-        if (_contentOld != null && _content != null) {
-
-            // Get old best size
-            double oldBestW = _contentOld.getBestWidth(-1);
-            double oldBestH = _contentOld.getBestHeight(-1);
-
-            // If old best size matches current size ...
-            if (oldBestW == _contentOld.getWidth() && oldBestH == _contentOld.getHeight()) {
-
-                // ... and new best size represents a change, animate size changes
-                double newBestW = _content.getBestWidth(-1);
-                double newBestH = _content.getBestHeight(-1);
-                if (oldBestW != newBestW || oldBestH != newBestH) {
-                    setPrefSize(oldBestW, oldBestH);
-                    getAnim(500).setPrefSize(newBestW, newBestH).setOnFinish(() -> setPrefSize(-1, -1)).play();
-                    _contentOld.setSize(oldBestW, oldBestH);
-                    _contentOld.getAnim(500).setWidth(newBestW).setHeight(newBestH).play();
-                }
-            }
-        }
+        // If AnimateSizeChange is set, try to animate size change for new content view
+        if (isAnimateSizeChange())
+            configureAnimateSizeChange();
 
         // Configure transition
         _transition.configure(this, _content, _contentOld);
@@ -98,6 +83,37 @@ public class TransitionPane extends ParentView {
     public void setTransition(Transition aTrans)
     {
         _transition = aTrans;
+    }
+
+    /**
+     * Returns whether to animate size change.
+     */
+    public boolean isAnimateSizeChange()  { return _animateSizeChange; }
+
+    /**
+     * Sets whether to animate size change.
+     */
+    public void setAnimateSizeChange(boolean aValue)  { _animateSizeChange = aValue; }
+
+    /**
+     * Configures animation for old/new content size change.
+     */
+    private void configureAnimateSizeChange()
+    {
+        // If old content is not at current view size, just return
+        if (_contentOld == null || _contentOld.getWidth() != getWidth() || _contentOld.getHeight() != getHeight())
+            return;
+
+        // If new content is at same size as old, just return
+        double newBestW = _content.getBestWidth(-1);
+        double newBestH = _content.getBestHeight(-1);
+        if (newBestW == getWidth() && newBestH == getHeight())
+            return;
+
+        // Configure animation for this view to new size and old content to new size
+        setPrefSize(getWidth(), getHeight());
+        getAnim(500).setPrefSize(newBestW, newBestH).setOnFinish(() -> setPrefSize(-1, -1)).play();
+        _contentOld.getAnim(500).setWidth(newBestW).setHeight(newBestH).play();
     }
 
     /**
