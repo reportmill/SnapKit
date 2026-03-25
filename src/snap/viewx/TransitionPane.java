@@ -18,9 +18,6 @@ public class TransitionPane extends ParentView {
     // The Transition
     private Transition _transition = MoveDown;
 
-    // Whether to animate size change
-    private boolean _animateSizeChange;
-
     /**
      * Constructor.
      */
@@ -64,9 +61,8 @@ public class TransitionPane extends ParentView {
         _content.getAnimCleared(0);
         _content.setTransX(0); _content.setTransY(0);
 
-        // If AnimateSizeChange is set, try to animate size change for new content view
-        if (isAnimateSizeChange())
-            configureAnimateSizeChange();
+        // Try to animate size change for new content view
+        configureAnimateSizeChange();
 
         // Configure transition
         _transition.configure(this, _content, _contentOld);
@@ -80,29 +76,15 @@ public class TransitionPane extends ParentView {
     /**
      * Sets the current transition.
      */
-    public void setTransition(Transition aTrans)
-    {
-        _transition = aTrans;
-    }
-
-    /**
-     * Returns whether to animate size change.
-     */
-    public boolean isAnimateSizeChange()  { return _animateSizeChange; }
-
-    /**
-     * Sets whether to animate size change.
-     */
-    public void setAnimateSizeChange(boolean aValue)  { _animateSizeChange = aValue; }
+    public void setTransition(Transition aTrans)  { _transition = aTrans; }
 
     /**
      * Configures animation for old/new content size change.
      */
     private void configureAnimateSizeChange()
     {
-        // If old content is not at current view size, just return
-        if (_contentOld == null || _contentOld.getWidth() != getWidth() || _contentOld.getHeight() != getHeight())
-            return;
+        // If old content is not set, just return
+        if (_contentOld == null) return;
 
         // If new content is at same size as old, just return
         double newBestW = _content.getBestWidth(-1);
@@ -110,19 +92,26 @@ public class TransitionPane extends ParentView {
         if (newBestW == getWidth() && newBestH == getHeight())
             return;
 
-        // Configure animation for this view to new size and old content to new size
+        // Configure animation for this view to new content pref size
         setPrefSize(getWidth(), getHeight());
         getAnim(500).setPrefSize(newBestW, newBestH).setOnFinish(() -> setPrefSize(-1, -1)).play();
-        _contentOld.getAnim(500).setWidth(newBestW).setHeight(newBestH).play();
     }
 
     /**
      * Override to return box layout.
      */
     @Override
-    protected ViewLayout getViewLayoutImpl()
+    protected ViewLayout getViewLayoutImpl()  { return new BoxViewLayout(this, getContent(), true, true); }
+
+    /**
+     * Override to sync old content view size to new content view.
+     */
+    @Override
+    protected void layoutImpl()
     {
-        return new BoxViewLayout(this, getContent(), true, true);
+        super.layoutImpl();
+        if (_contentOld != null && _content != null)
+            _contentOld.setSize(_content.getWidth(), _content.getHeight());
     }
 
     /**
