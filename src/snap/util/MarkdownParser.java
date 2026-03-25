@@ -29,6 +29,12 @@ public class MarkdownParser {
     // The running list of document nodes
     private List<MarkdownNode> _documentNodes = new ArrayList<>();
 
+    // Whether link is currently being parsed
+    private boolean _isLinkBeingParsed;
+
+    // Whether quote is currently being parsed
+    private boolean _isQuoteBeingParsed;
+
     // Constants
     public static final String HEADER_MARKER = "#";
     public static final String LIST_ITEM_MARKER = "- ";
@@ -437,7 +443,9 @@ public class MarkdownParser {
     private MarkdownNode parseQuoteTextNode()
     {
         eatChar();
+        _isQuoteBeingParsed = true;
         String textChars = getCharsTillTextEnd().toString().trim();
+        _isQuoteBeingParsed = false;
         MarkdownNode quoteTextNode = new MarkdownNode(MarkdownNode.NodeType.QuoteText, textChars);
         if (nextCharsStartWith(QUOTE_TEXT_MARKER))
             eatChar();
@@ -453,7 +461,9 @@ public class MarkdownParser {
         eatChars(LINK_MARKER.length());
 
         // Parse paragraph node
+        _isLinkBeingParsed = true;
         List<MarkdownNode> inlineNodes = parseInlineNodes();
+        _isLinkBeingParsed = false;
 
         // If missing link close char, complain
         if (!nextCharsStartWith(LINK_END_MARKER))
@@ -544,8 +554,14 @@ public class MarkdownParser {
         // Iterate over chars until next inline node start or line end to get chars
         while (hasChars()) {
 
-            // If next chars start with well-defined inline node marker, break
-            if (ArrayUtils.hasMatch(INLINE_NODE_MARKERS, this::nextCharsStartWith)) {
+            // Handle parsing quote chars: stop if next char is quote marker
+            if (_isQuoteBeingParsed) {
+                if (nextCharsStartWith(QUOTE_TEXT_MARKER))
+                    break;
+            }
+
+            // Handle normal text chars: If next chars start with any inline node marker, break
+            else if (ArrayUtils.hasMatch(INLINE_NODE_MARKERS, this::nextCharsStartWith)) {
                 if (sb.isEmpty()) { // Bogus check but otherwise will infinite loop
                     System.err.println("MarkdownParser.getCharsTillTextEnd: No chars found");
                     String hitMarker = ArrayUtils.findMatch(INLINE_NODE_MARKERS, this::nextCharsStartWith);
@@ -560,7 +576,7 @@ public class MarkdownParser {
                 break;
 
             // If next chars is link end, break
-            if (nextCharsStartWith(LINK_END_MARKER))
+            if (_isLinkBeingParsed && nextCharsStartWith(LINK_END_MARKER))
                 break;
 
             // Append char to buffer and eat
