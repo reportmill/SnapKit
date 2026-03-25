@@ -115,115 +115,85 @@ public class TransitionPane extends ParentView {
     }
 
     /**
-     * A class to perform transitions.
+     * This is called when a transition is finished.
      */
-    public static abstract class Transition {
-
-        /** Configure. */
-        public abstract void configure(TransitionPane aTP, View nview, View oview);
-
-        /** Removes OldNode from TransitionPane. */
-        public void finish(TransitionPane transitionPane, View oldView)
-        {
-            if (oldView.getParent()!=null)
-                transitionPane._transition = MoveDown;
-            transitionPane.removeChild(oldView);
-            oldView.setTransX(0);
-            oldView.setTransY(0);
-            oldView.setOpacity(1);
-            transitionPane._contentOld = null;
-        }
+    protected void handleTransitionFinished()
+    {
+        if (_contentOld.getParent() != null)
+            _transition = MoveDown;
+        removeChild(_contentOld);
+        _contentOld.setTransX(0);
+        _contentOld.setTransY(0);
+        _contentOld.setOpacity(1);
+        _contentOld = null;
     }
 
     /**
-     * A class to perform transitions.
+     * An interface to configure transitions.
      */
-    public static Transition MoveUp = new Transition() {
+    public interface Transition {
+        void configure(TransitionPane transView, View newView, View oldView);
+    }
 
-        /** Configure. */
-        public void configure(TransitionPane transitionPane, View newView, View oldView)
-        {
-            newView.setTransY(transitionPane.getHeight());
-            newView.getAnim(500).setTransY(0).play();
-            if (oldView == null) return;
-            oldView.setTransY(0);
-            oldView.getAnim(500).setTransY(-transitionPane.getHeight()).setOnFinish(() -> finish(transitionPane, oldView)).play();
-        }
+    /**
+     * This transition slides new content view in from bottom.
+     */
+    public static Transition MoveUp = (TransitionPane transView, View newView, View oldView) -> {
+        newView.setTransY(transView.getHeight());
+        newView.getAnim(500).setTransY(0).play();
+        if (oldView == null) return;
+        oldView.setTransY(0);
+        oldView.getAnim(500).setTransY(-transView.getHeight()).setOnFinish(transView::handleTransitionFinished).play();
     };
 
     /**
-     * A class to perform transitions.
+     * This transition slides new content view in from top.
      */
-    public static Transition MoveDown = new Transition() {
-
-        /** Configure. */
-        public void configure(TransitionPane transitionPane, View newView, View oldView)
-        {
-            newView.setTransY(-transitionPane.getHeight());
-            newView.getAnim(500).setTransY(0).play();
-            if (oldView == null) return;
-            oldView.setTransY(0);
-            oldView.getAnim(500).setTransY(transitionPane.getHeight()).setOnFinish(() -> finish(transitionPane, oldView)).play();
-        }
+    public static Transition MoveDown = (TransitionPane transView, View newView, View oldView) -> {
+        newView.setTransY(-transView.getHeight());
+        newView.getAnim(500).setTransY(0).play();
+        if (oldView == null) return;
+        oldView.setTransY(0);
+        oldView.getAnim(500).setTransY(transView.getHeight()).setOnFinish(transView::handleTransitionFinished).play();
     };
 
     /**
-     * A class to perform transitions.
+     * This transition slides new content view in from left.
      */
-    public static Transition MoveLeft = new Transition() {
-
-        /** Configure. */
-        public void configure(TransitionPane transitionPane, View newView, View oldView)
-        {
-            newView.setTransX(-transitionPane.getWidth());
-            newView.getAnim(500).setTransX(0).play();
-            if (oldView == null) return;
-            oldView.setTransX(0);
-            oldView.getAnim(500).setTransX(transitionPane.getWidth()).setOnFinish(() -> finish(transitionPane, oldView)).play();
-        }
+    public static Transition MoveLeft = (TransitionPane transView, View newView, View oldView) -> {
+        newView.setTransX(-transView.getWidth());
+        newView.getAnim(500).setTransX(0).play();
+        if (oldView == null) return;
+        oldView.setTransX(0);
+        oldView.getAnim(500).setTransX(transView.getWidth()).setOnFinish(transView::handleTransitionFinished).play();
     };
 
     /**
-     * A class to perform transitions.
+     * This transition slides new content view in from right.
      */
-    public static Transition MoveRight = new Transition() {
-
-        /** Configure. */
-        public void configure(TransitionPane transitionPane, View newView, View oldView)
-        {
-            newView.setTransX(transitionPane.getWidth());
-            newView.getAnim(500).setTransX(0).play();
-            if (oldView==null) return;
-            oldView.setTransX(0);
-            oldView.getAnim(500).setTransX(-transitionPane.getWidth()).setOnFinish(() -> finish(transitionPane, oldView)).play();
-        }
+    public static Transition MoveRight = (TransitionPane transView, View newView, View oldView) -> {
+        newView.setTransX(transView.getWidth());
+        newView.getAnim(500).setTransX(0).play();
+        if (oldView == null) return;
+        oldView.setTransX(0);
+        oldView.getAnim(500).setTransX(-transView.getWidth()).setOnFinish(transView::handleTransitionFinished).play();
     };
 
     /**
-     * A class to perform transitions.
+     * This transition fades new content view in.
      */
-    public static Transition FadeIn = new Transition() {
-
-        /** Configure. */
-        public void configure(TransitionPane transitionPane, View newView, View oldView)
-        {
-            newView.setOpacity(0);
-            newView.getAnim(800).setOpacity(1).play();
-            if (oldView==null) return;
-            oldView.getAnim(800).setOnFinish(() -> finish(transitionPane, oldView)).play();
-        }
+    public static Transition FadeIn = (TransitionPane transView, View newView, View oldView) -> {
+        newView.setOpacity(0);
+        newView.getAnim(800).setOpacity(1).play();
+        if (oldView == null) return;
+        oldView.getAnim(800).setOnFinish(transView::handleTransitionFinished).play();
     };
 
     /**
-     * A class to perform transitions.
+     * This transition sets new content view in immediately (no transition).
      */
-    public static Transition Instant = new Transition() {
-
-        /** Configure. */
-        public void configure(TransitionPane transitionPane, View newView, View oldView)
-        {
-            transitionPane.removeChild(oldView);
-            transitionPane._transition = MoveDown;
-        }
+    public static Transition Instant = (TransitionPane transView, View newView, View oldView) -> {
+        transView.removeChild(oldView);
+        transView._transition = MoveDown;
     };
 }
