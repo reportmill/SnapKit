@@ -253,7 +253,7 @@ public class MarkdownParser {
     {
         eatChars(CODE_BLOCK_MARKER.length());
         String codeBlockString = getCharsTillMatchingTerminator(CODE_BLOCK_MARKER).toString();
-        String codeBlockStringTrimmed = MarkdownUtils.getStringForTextBlock(codeBlockString);
+        String codeBlockStringTrimmed = codeBlockString.stripIndent().stripTrailing();
         return new MarkdownNode(MarkdownNode.NodeType.CodeBlock, codeBlockStringTrimmed);
     }
 
