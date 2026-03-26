@@ -436,13 +436,13 @@ public class Rect extends RectBase {
      */
     public static Rect getRectForString(String aString)
     {
-        double x = StringUtils.doubleValue(aString);
+        double x = Convert.doubleValue(aString);
         int start = aString.indexOf(' ');
-        double y = StringUtils.doubleValue(aString, start + 1);
+        double y = Convert.doubleValue(aString, start + 1);
         start = aString.indexOf(' ', start + 1);
-        double w = StringUtils.doubleValue(aString, start + 1);
+        double w = Convert.doubleValue(aString, start + 1);
         start = aString.indexOf(' ', start + 1);
-        double h = StringUtils.doubleValue(aString, start + 1);
+        double h = Convert.doubleValue(aString, start + 1);
         return new Rect(x, y, w, h);
     }
 

@@ -130,7 +130,7 @@ public class AWTFontFile extends FontFile {
     public Shape getOutline(CharSequence aStr, double aSize, double aX, double aY, double aCharSpacing)
     {
         // Get graphics, font render context and glyph vector
-        String str = StringUtils.trimEnd(aStr);
+        String str = aStr.toString().stripTrailing();
         Graphics2D gfx = getGraphics2D();
         FontRenderContext fontRenderContext = gfx.getFontRenderContext();
         Font awtFont = _awt.deriveFont((float) aSize);

@@ -12,20 +12,6 @@ import java.util.regex.*;
  */
 public class StringUtils {
 
-    // A regex pattern to find integer/long numbers
-    private static Pattern _intLongPattern = Pattern.compile("[-+]?[0-9]+");
-
-    // A regex pattern to find numbers in strings (supports positive/negative, floating point & exponents)
-    private static Pattern _numberPattern = Pattern.compile("[-+]?(([0-9]+\\.?[0-9]*)|([0-9]*\\.[0-9]+))([eE][-+]?[0-9]+)?");
-
-    /**
-     * Returns whether string is null or empty.
-     */
-    public static boolean isEmpty(String aString)
-    {
-        return aString == null || aString.trim().length() == 0;
-    }
-
     /**
      * Returns the length of given string (supports null).
      */
@@ -55,34 +41,12 @@ public class StringUtils {
     /**
      * String demotion - returns either the given string or null (if given string length is zero).
      */
-    public static String min(String s)
-    {
-        return s != null && s.length() == 0 ? null : s;
-    }
-
-    /**
-     * String promotion - returns either the given string or empty string (if given string is null).
-     */
-    public static String max(String s)
-    {
-        return s == null ? "" : s;
-    }
-
-    /**
-     * Returns the first non-null string of the two given strings (or null).
-     */
-    public static String or(String s1, String s2)
-    {
-        return s1 != null ? s1 : s2;
-    }
+    public static String min(String aStr)  { return aStr != null && aStr.isEmpty() ? null : aStr; }
 
     /**
      * Returns a string representation of the given float to (at most) 3 significant digits.
      */
-    public static String toString(double aValue)
-    {
-        return FormatUtils.formatNum(aValue);
-    }
+    public static String toString(double aValue)  { return FormatUtils.formatNum(aValue); }
 
     /**
      * Returns a basic toString for given object.
@@ -90,24 +54,15 @@ public class StringUtils {
     public static StringBuffer toString(Object anObj, String... theNames)
     {
         StringBuffer sb = new StringBuffer(anObj.getClass().getSimpleName()).append(" { }");
-        toStringAdd(sb, anObj, theNames);
+        for (String name : theNames)
+            toStringAdd(sb, name, Key.getValue(anObj, name));
         return sb;
     }
 
     /**
      * Adds an attribute to toString string.
      */
-    public static StringBuffer toStringAdd(StringBuffer aSB, Object anObj, String... theNames)
-    {
-        for (String name : theNames)
-            toStringAdd(aSB, name, Key.getValue(anObj, name));
-        return aSB;
-    }
-
-    /**
-     * Adds an attribute to toString string.
-     */
-    public static StringBuffer toStringAdd(StringBuffer aSB, String aName, Object aVal)
+    public static void toStringAdd(StringBuffer aSB, String aName, Object aVal)
     {
         Object val = aVal;
         if (val instanceof snap.gfx.Color)
@@ -120,7 +75,7 @@ public class StringUtils {
         int ind = aSB.length() - 2;
         if (aSB.charAt(ind - 1) != '{')
             aSB.insert(ind++, ',');
-        return aSB.insert(ind, ' ' + aName + '=' + val);
+        aSB.insert(ind, ' ' + aName + '=' + val);
     }
 
     /**
@@ -129,7 +84,7 @@ public class StringUtils {
     public static StringBuffer appendProp(StringBuffer aSB, String aName, Object aVal)
     {
         // Add separator
-        if (aSB.length() > 0)
+        if (!aSB.isEmpty())
             aSB.append(", ");
 
         // Add prop name
@@ -139,26 +94,6 @@ public class StringUtils {
         String str = Convert.stringValue(aVal);
         aSB.append(str);
         return aSB;
-    }
-
-    /**
-     * Trims the start of a string.
-     */
-    public static String trimStart(CharSequence aStr)
-    {
-        int len = aStr.length(), ind = 0;
-        while (ind < len && Character.isWhitespace(aStr.charAt(ind))) ind++;
-        return ind > 0 ? aStr.subSequence(ind, len).toString() : aStr.toString();
-    }
-
-    /**
-     * Trims the end of a string.
-     */
-    public static String trimEnd(CharSequence aStr)
-    {
-        int len = aStr.length(), ind = len;
-        while (ind > 0 && Character.isWhitespace(aStr.charAt(ind - 1))) ind--;
-        return ind < len ? aStr.subSequence(0, ind).toString() : aStr.toString();
     }
 
     /**
@@ -261,80 +196,12 @@ public class StringUtils {
     /**
      * Returns an int value by parsing the given string.
      */
-    public static int intValue(String aString)
-    {
-        return (int) longValue(aString, 0);
-    }
+    public static int intValue(String aString)  { return Convert.intValue(aString); }
 
     /**
-     * Returns an int value by parsing the given string.
+     * Returns a float value by parsing the given string.
      */
-    public static long longValue(String aString)
-    {
-        return longValue(aString, 0);
-    }
-
-    /**
-     * Returns an double value by parsing the given string starting at the given index.
-     */
-    public static long longValue(String aString, int aStart)
-    {
-        // Bail if string is null or start index beyond bounds
-        if (aString == null || aStart > aString.length()) return 0;
-
-        // Get number matcher for string
-        Matcher matcher = _intLongPattern.matcher(aString);
-
-        // If number found, have Double parse it
-        if (matcher.find(aStart)) {
-            String string = matcher.group();
-            try { return Long.parseLong(string); }
-            catch (Exception e) { }
-        }
-
-        // Return zero since number not found
-        return 0;
-    }
-
-    /**
-     * Returns an float value by parsing the given string.
-     */
-    public static float floatValue(String aString)
-    {
-        return (float) doubleValue(aString, 0);
-    }
-
-    /**
-     * Returns an double value by parsing the given string.
-     */
-    public static double doubleValue(String aString)
-    {
-        return doubleValue(aString, 0);
-    }
-
-    /**
-     * Returns an double value by parsing the given string starting at the given index.
-     */
-    public static double doubleValue(String aString, int aStart)
-    {
-        // Bail if string is null or start index beyond bounds
-        if (aString == null || aStart > aString.length()) return 0;
-
-        // Get number matcher for string
-        Matcher matcher = _numberPattern.matcher(aString);
-
-        // If number found, have Double parse it
-        if (matcher.find(aStart)) {
-            String str = matcher.group();
-            if (str.charAt(0) == '.')
-                str = '0' + str; // For TeaVM
-            try { return Double.parseDouble(str); }
-            catch (Exception e) { }
-        }
-
-        // Return zero since number not found
-        return 0;
-    }
+    public static float floatValue(String aString)  { return Convert.floatValue(aString); }
 
     /**
      * Returns the ASCII bytes of the given string (ISO-Latin).
@@ -373,9 +240,7 @@ public class StringUtils {
      */
     public static String getString(byte[] theBytes, String anEncoding)
     {
-        try {
-            return theBytes != null ? new String(theBytes, 0, theBytes.length, anEncoding) : null;
-        }
+        try { return theBytes != null ? new String(theBytes, anEncoding) : null; }
         catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -412,7 +277,7 @@ public class StringUtils {
         char fchar = theSearch.charAt(0);
         for (int cpos = aStart; cpos < charsLength; cpos++) {
             if (theChars.charAt(cpos) == fchar) {
-                int i = 1;
+                int i;
                 for (i = 0; i < searchLength; i++) {
                     if (theChars.charAt(cpos + i) != theSearch.charAt(i))
                         break;
@@ -433,7 +298,7 @@ public class StringUtils {
         char fchar = theSearch.charAt(0);
         while (--cpos >= 0) {
             if (theChars.charAt(cpos) == fchar) {
-                int i = 0;
+                int i;
                 for (i = 0; i < theSearch.length(); i++) if (theChars.charAt(cpos + i) != theSearch.charAt(i)) break;
                 if (i == theSearch.length())
                     return cpos;
@@ -513,7 +378,7 @@ public class StringUtils {
     public static String firstCharUpperCase(String aString)
     {
         // If first char already upper case (or if string empty) return string
-        if (aString == null || aString.length() == 0 || Character.isUpperCase(aString.charAt(0)))
+        if (aString == null || aString.isEmpty() || Character.isUpperCase(aString.charAt(0)))
             return aString;
 
         // Fix string
@@ -539,7 +404,7 @@ public class StringUtils {
     {
         // Get string buffer for string and make sure first char is upper case
         StringBuilder sb = new StringBuilder(aString);
-        if (sb.length() > 0 && Character.isLowerCase(sb.charAt(0)))
+        if (!sb.isEmpty() && Character.isLowerCase(sb.charAt(0)))
             sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
 
         // Iterate over chars
@@ -724,19 +589,6 @@ public class StringUtils {
 
         // Lord help us
         catch (Exception e) { throw new RuntimeException(e); }
-    }
-
-    /**
-     * Returns a stack trace string for given exception.
-     */
-    public static String getStackTraceString(Throwable aThrowable, int aDepth)
-    {
-        String str = getStackTraceString(aThrowable);
-        int index = str.indexOf('\n');
-        for (int i = 1; i < aDepth && index > 0; i++)
-            index = str.indexOf('\n', index + 1);
-        String str2 = index > 0 ? str.substring(0, index) : str;
-        return str2;
     }
 
     /**

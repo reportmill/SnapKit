@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.geom;
+import snap.util.Convert;
 import snap.util.MathUtils;
 import snap.util.StringUtils;
 
@@ -91,8 +92,8 @@ public class Size {
      */
     public static Size get(String aString)
     {
-        double w = StringUtils.floatValue(aString);
-        double h = StringUtils.doubleValue(aString, aString.indexOf(",") + 1);
+        double w = Convert.floatValue(aString);
+        double h = Convert.doubleValue(aString, aString.indexOf(",") + 1);
         return new Size(w, h);
     }
 }

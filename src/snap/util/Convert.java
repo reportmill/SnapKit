@@ -1,16 +1,23 @@
 package snap.util;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class holds utilities to convert values.
  */
 public class Convert {
 
+    // A regex pattern to find integer/long numbers
+    private static Pattern _intLongPattern = Pattern.compile("[-+]?[0-9]+");
+
     // A formatter to format double without exponent
     private static DecimalFormat  _doubleFmt = new DecimalFormat("0.#########");
+
+    // A regex pattern to find numbers in strings (supports positive/negative, floating point & exponents)
+    private static Pattern _numberPattern = Pattern.compile("[-+]?(([0-9]+\\.?[0-9]*)|([0-9]*\\.[0-9]+))([eE][-+]?[0-9]+)?");
 
     /**
      * Returns a boolean value for the given object.
@@ -53,7 +60,7 @@ public class Convert {
         if (anObj instanceof Number)
             return ((Number) anObj).longValue();
         if (anObj instanceof String)
-            return StringUtils.longValue((String) anObj);
+            return longValue((String) anObj);
         if (anObj instanceof Character)
             return (Character) anObj;
         if (anObj instanceof Boolean)
@@ -64,12 +71,36 @@ public class Convert {
     }
 
     /**
+     * Returns an double value by parsing the given string starting at the given index.
+     */
+    public static long longValue(String aString)
+    {
+        // Bail if string is null
+        if (aString == null) return 0;
+
+        // Get number matcher for string
+        Matcher matcher = _intLongPattern.matcher(aString);
+
+        // If number found, have Long parse it
+        if (matcher.find()) {
+            String string = matcher.group();
+            try { return Long.parseLong(string); }
+            catch (Exception ignore) { }
+        }
+
+        // Return zero since number not found
+        return 0;
+    }
+
+    /**
      * Returns the float value for a given object (assumed to be a string or number).
      */
-    public static float floatValue(Object anObj)
-    {
-        return (float) doubleValue(anObj);
-    }
+    public static float floatValue(Object anObj)  { return (float) doubleValue(anObj); }
+
+    /**
+     * Returns a float value by parsing the given string.
+     */
+    public static float floatValue(String aString)  { return (float) doubleValue(aString); }
 
     /**
      * Returns the double value for a given object (assumed to be a string or number).
@@ -80,13 +111,40 @@ public class Convert {
         if (anObj instanceof Number)
             return ((Number) anObj).doubleValue();
         if (anObj instanceof String)
-            return StringUtils.doubleValue((String) anObj);
+            return doubleValue((String) anObj);
         if (anObj instanceof Character)
             return (Character) anObj;
         if (anObj instanceof Boolean)
             return ((Boolean) anObj) ? 1 : 0;
 
         // Return default
+        return 0;
+    }
+
+    /**
+     * Returns a double value by parsing the given string.
+     */
+    public static double doubleValue(String aString)  { return doubleValue(aString, 0); }
+
+    /**
+     * Returns a double value by parsing the given string starting at the given index.
+     */
+    public static double doubleValue(String aString, int aStart)
+    {
+        // Bail if string is null or start index beyond bounds
+        if (aString == null || aStart > aString.length()) return 0;
+
+        // Get number matcher for string
+        Matcher matcher = _numberPattern.matcher(aString);
+
+        // If number found, have Double parse it
+        if (matcher.find(aStart)) {
+            String str = matcher.group();
+            try { return Double.parseDouble(str); }
+            catch (Exception ignore) { }
+        }
+
+        // Return zero since number not found
         return 0;
     }
 
@@ -256,66 +314,6 @@ public class Convert {
     }
 
     /**
-     * Returns an array of double values for given comma separated string.
-     */
-    public static double[] stringToDoubleArray(String aStr)
-    {
-        // Get string, stripped of surrounding non-number chars
-        String str = aStr.trim();
-        int start = 0;
-        while (start < str.length() && !isNumChar(str, start)) start++;
-        int end = str.length();
-        while(end > start && !isNumChar(str, end - 1)) end--;
-        str = str.substring(start, end);
-
-        // Get strings for values separated by comma
-        String[] valStrs = str.split("\\s*,\\s*");
-        int len = valStrs.length;
-
-        // Create array for return vals
-        double[] vals = new double[len];
-        int count = 0;
-
-        // Iterate over strings and add valid numbers
-        for (String valStr : valStrs) {
-            if (valStr.length() > 0) {
-                try {
-                    double val = Double.parseDouble(valStr);
-                    vals[count++] = val;
-                }
-                catch (Exception e)  { }
-            }
-        }
-
-        // Return vals (trimmed to size)
-        return count<len ? Arrays.copyOf(vals, count) : vals;
-    }
-
-    /**
-     * Returns an array of String values for given comma separated string.
-     */
-    public static String[] stringToStringArray(String aStr)
-    {
-        // String start/end brackets ( '[ one two three ]')
-        String str = aStr;
-        if (str.startsWith("[") && str.endsWith("]"))
-            str = str.substring(1, str.length() - 1);
-
-        String[] valStrs = str.split("\\s*,\\s*");
-        int len = valStrs.length;
-        int count = 0;
-        String[] vals = new String[len];
-        for (String valStr : valStrs) {
-            if (valStr.startsWith("\""))
-                valStr = valStr.substring(1);
-            if (valStr.endsWith("\""))
-                valStr = valStr.substring(0, valStr.length() - 1);
-            vals[count++] = valStr;
-        }
-        return vals;
-    }
-
-    /**
      * Returns a date for given object of arbitrary type.
      */
     public static Date getDate(Object anObj)
@@ -332,14 +330,5 @@ public class Convert {
         // Was this: return new java.text.SimpleDateFormat("MM/dd/yy").parse(anObj.toString());
         //try { return RMDateUtils.getDate(anObj.toString()); } catch(Exception e) { return null; }
         return DateParser.parseDate(anObj.toString());
-    }
-
-    /**
-     * Returns whether char at given index in given string is number char.
-     */
-    private static boolean isNumChar(String aStr, int anIndex)
-    {
-        char c = aStr.charAt(anIndex);
-        return Character.isDigit(c) || c == '.' || c == '-';
     }
 }

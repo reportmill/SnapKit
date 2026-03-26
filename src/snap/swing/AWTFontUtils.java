@@ -68,8 +68,8 @@ public class AWTFontUtils {
             String name = font.getFontName();
             String family = font.getFamily();
 
-            // skip fonts with bad names
-            if (StringUtils.isEmpty(name) || StringUtils.isEmpty(family))
+            // Skip fonts with bad names
+            if (name.isBlank() || family.isBlank())
                 continue;
 
             // If font name or family name doesn't start with a letter, skip this font
