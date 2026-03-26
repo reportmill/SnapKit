@@ -99,18 +99,12 @@ public class StringUtils {
     /**
      * Returns the result of deleting from the given string any occurrence of the search string.
      */
-    public static String delete(String aString, String aSearch)
-    {
-        return replace(aString, aSearch, "");
-    }
+    public static String delete(String aString, String aSearch)  { return replace(aString, aSearch, ""); }
 
     /**
      * Returns the result of deleting from the given string any occurrence of the search string (ignores case).
      */
-    public static String deleteIC(String aString, String aSearch)
-    {
-        return replaceIC(aString, aSearch, "");
-    }
+    public static String deleteIC(String aString, String aSearch)  { return replaceIC(aString, aSearch, ""); }
 
     /**
      * Returns the result of replacing in the given string the char range with the with-string.
@@ -206,10 +200,7 @@ public class StringUtils {
     /**
      * Returns the ASCII bytes of the given string (ISO-Latin).
      */
-    public static byte[] getBytes(String aString)
-    {
-        return getBytes(aString, "ISO-8859-1");
-    }
+    public static byte[] getBytes(String aString)  { return getBytes(aString, "ISO-8859-1"); }
 
     /**
      * Returns the bytes of the given string in the requested char encoding.
@@ -449,29 +440,24 @@ public class StringUtils {
      */
     public static String wrap(String aString, int aLimit)
     {
-        return wrap(aString, aLimit, "\\s*", "\n");
-    }
-
-    /**
-     * Returns a string wrapped on word boundaries as defined by regex string (eg., whitespace="\\s*", dot="\\.", etc.).
-     */
-    public static String wrap(String aString, int aLimit, String aSeperator, String aJoiner)
-    {
         // Create new string buffer and get matcher
-        StringBuffer sb = new StringBuffer();
-        Pattern pattern = Pattern.compile(aSeperator);
+        StringBuilder sb = new StringBuilder();
+        Pattern pattern = Pattern.compile("\\s*"); // Separator is whitespace
         Matcher matcher = pattern.matcher(aString);
 
         // Add words
-        int start = 0;
-        while (start < aString.length()) {
+        for (int start = 0; start < aString.length();) {
+
+            // If remaining chars don't exceed limit, just add remaining chars and break
             if (start + aLimit > aString.length()) {
                 sb.append(aString, start, aString.length());
                 break;
             }
+
+            // Otherwise add words up to limit
             else {
                 start = addWords(aString, start, start + aLimit, sb, matcher);
-                sb.append(aJoiner);
+                sb.append("\n");
             }
         }
 
@@ -482,11 +468,8 @@ public class StringUtils {
     /**
      * Adds words from given string and string start/end to given string buffer.
      */
-    public static int addWords(String aString, int aStart, int anEnd, StringBuffer aBuffer, Matcher aMatcher)
+    private static int addWords(String aString, int aStart, int anEnd, StringBuilder aBuffer, Matcher aMatcher)
     {
-        // If empty string, return
-        if (aString == null) return anEnd;
-
         // Configure matcher
         aMatcher.region(aStart, anEnd);
 
@@ -520,10 +503,7 @@ public class StringUtils {
     /**
      * Returns a joined string given a list and separator.
      */
-    public static String join(List<?> aList, String aSep)
-    {
-        return join(aList.toArray(), aSep);
-    }
+    public static String join(List<?> aList, String aSep)  { return join(aList.toArray(), aSep); }
 
     /**
      * Returns the index of a given string in the given array, ignoring case.
@@ -589,13 +569,5 @@ public class StringUtils {
 
         // Lord help us
         catch (Exception e) { throw new RuntimeException(e); }
-    }
-
-    /**
-     * Formats a number with given Decimal format pattern.
-     */
-    public static String formatNum(String aPattern, Object aNum)
-    {
-        return FormatUtils.formatNum(aPattern, aNum);
     }
 }
