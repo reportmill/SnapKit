@@ -269,8 +269,8 @@ public class TextField extends TextArea {
         // Paint text (only paint selection when focused)
         TextPainter textPainter = TextPainter.DEFAULT;
         if (isFocused())
-            textPainter.paintTextSel(aPntr, getSel(), _textAdapter);
-        textPainter.paintText(aPntr, getTextLayout());
+            textPainter.paintTextAdapterTextSel(aPntr, _textAdapter);
+        textPainter.paintTextLayout(aPntr, getTextLayout());
 
         aPntr.restore();
     }

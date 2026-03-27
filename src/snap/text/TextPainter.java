@@ -24,9 +24,9 @@ public class TextPainter {
     }
 
     /**
-     * Paints the given text.
+     * Paints the given text layout.
      */
-    public void paintText(Painter aPntr, TextLayout textLayout)
+    public void paintTextLayout(Painter aPntr, TextLayout textLayout)
     {
         // Just return if no lines
         int lineCount = textLayout.getLineCount();
@@ -39,7 +39,7 @@ public class TextPainter {
             if (!textLine.isBlank()) {
                 aPntr.save();
                 aPntr.clipRect(textLine.getTextX(), textLine.getTextY(), textLine.getWidth(), textLine.getHeight());
-                paintLine(aPntr, textLayout, textLine);
+                paintTextLine(aPntr, textLayout, textLine);
                 aPntr.restore();
             }
             return;
@@ -70,7 +70,7 @@ public class TextPainter {
 
             // Paint line
             if (!textLine.isBlank())
-                paintLine(aPntr, textLayout, textLine);
+                paintTextLine(aPntr, textLayout, textLine);
         }
 
         // Restore state
@@ -78,9 +78,9 @@ public class TextPainter {
     }
 
     /**
-     * Paint text line with given painter.
+     * Paint given text line with given painter.
      */
-    public void paintLine(Painter aPntr, TextLayout textLayout, TextLine textLine)
+    protected void paintTextLine(Painter aPntr, TextLayout textLayout, TextLine textLine)
     {
         TextToken[] lineTokens = textLine.getTokens();
         double lineY = textLine.getBaseline() + textLayout.getAlignedY();
@@ -109,13 +109,13 @@ public class TextPainter {
 
         // If underlined, paint underlines
         if (textLine.isUnderlined())
-            paintUnderlines(aPntr, textLine);
+            paintTextLineUnderlines(aPntr, textLine);
     }
 
     /**
      * Paints text line underlines with given painter.
      */
-    private void paintUnderlines(Painter aPntr, TextLine textLine)
+    private void paintTextLineUnderlines(Painter aPntr, TextLine textLine)
     {
         for (TextRun run : textLine.getRuns()) {
             if (!run.isUnderlined() || run.isEmpty())
@@ -137,31 +137,32 @@ public class TextPainter {
     }
 
     /**
-     * Paint selection and text.
+     * Paint given text adapter selection and text.
      */
     public void paintTextAdapter(Painter aPntr, TextAdapter textAdapter)
     {
         // Paint selection
-        paintTextSel(aPntr, textAdapter.getSel(), textAdapter);
+        paintTextAdapterTextSel(aPntr, textAdapter);
 
         // Paint spell check
         if (textAdapter.isSpellChecking() && textAdapter.length() > 0)
             paintSpellCheck(aPntr, textAdapter);
 
-        // Paint TextModel
+        // Paint text layout
         TextLayout textLayout = textAdapter.getTextLayout();
-        TextPainter.DEFAULT.paintText(aPntr, textLayout);
+        paintTextLayout(aPntr, textLayout);
     }
 
     /**
-     * Paints the selection.
+     * Paints the given text selection.
      */
-    public void paintTextSel(Painter aPntr, TextSel textSel, TextAdapter textAdapter)
+    public void paintTextAdapterTextSel(Painter aPntr, TextAdapter textAdapter)
     {
         // If not editable, just return
         if (!textAdapter.isEditable()) return;
 
         // Get selection path
+        TextSel textSel = textAdapter.getSel();
         Shape selPath = textSel.getPath();
 
         // If empty selection, paint carat
@@ -187,7 +188,7 @@ public class TextPainter {
     {
         // Get spelling path
         TextLayout textLayout = textAdapter.getTextLayout();
-        Shape spellingPath = getSpellingPath(textLayout, textAdapter.getSelStart());
+        Shape spellingPath = getSpellingPathForTextLayout(textLayout, textAdapter.getSelStart());
 
         // Paint spelling path
         aPntr.setColor(Color.RED);
@@ -198,12 +199,12 @@ public class TextPainter {
     }
 
     /**
-     * Returns a path for misspelled word underlining.
+     * Returns a path of misspelled word underlining for given text layout.
      */
-    public static Shape getSpellingPath(TextLayout textModel, int selStart)
+    private static Shape getSpellingPathForTextLayout(TextLayout textLayout, int selStart)
     {
         // Get text string and path object
-        String string = textModel.getString();
+        String string = textLayout.getString();
         Path2D spellingPath = new Path2D();
 
         // Iterate over text
@@ -212,23 +213,23 @@ public class TextPainter {
 
             // Get word bounds
             int wordStart = word.getStart();
-            if (wordStart >= textModel.getEndCharIndex())
+            if (wordStart >= textLayout.getEndCharIndex())
                 break;
             int wordEnd = word.getEnd();
-            if (wordEnd > textModel.getEndCharIndex())
-                wordEnd = textModel.getEndCharIndex();
+            if (wordEnd > textLayout.getEndCharIndex())
+                wordEnd = textLayout.getEndCharIndex();
 
             // If text editor selection starts in word bounds, just continue - they are still working on this word
             if (wordStart <= selStart && selStart <= wordEnd)
                 continue;
 
             // Get the selection's start line index and end line index
-            int startLineIndex = textModel.getLineForCharIndex(wordStart).getLineIndex();
-            int endLineIndex = textModel.getLineForCharIndex(wordEnd).getLineIndex();
+            int startLineIndex = textLayout.getLineForCharIndex(wordStart).getLineIndex();
+            int endLineIndex = textLayout.getLineForCharIndex(wordEnd).getLineIndex();
 
             // Iterate over selected lines
             for (int i = startLineIndex; i <= endLineIndex; i++) {
-                TextLine textLine = textModel.getLine(i);
+                TextLine textLine = textLayout.getLine(i);
 
                 // Get the bounds of line
                 double lineX = textLine.getTextX();
