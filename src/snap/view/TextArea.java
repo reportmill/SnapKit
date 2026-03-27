@@ -412,7 +412,10 @@ public class TextArea extends ParentView {
     /**
      * Paint text.
      */
-    protected void paintFront(Painter aPntr)  { _textAdapter.paintAll(aPntr); }
+    protected void paintFront(Painter aPntr)
+    {
+        TextPainter.DEFAULT.paintTextAdapter(aPntr, _textAdapter);
+    }
 
     /**
      * Process event. Make this public so TextArea can be used to edit text outside of normal Views.

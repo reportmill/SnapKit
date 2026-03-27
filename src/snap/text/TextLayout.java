@@ -3,7 +3,6 @@ import snap.geom.HPos;
 import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.geom.VPos;
-import snap.gfx.Painter;
 import snap.props.PropObject;
 import snap.util.CharSequenceX;
 import snap.util.ListUtils;
@@ -507,52 +506,6 @@ public abstract class TextLayout extends PropObject {
      * Returns the max Y.
      */
     public double getMaxY()  { return getY() + getHeight(); }
-
-    /**
-     * Paint text to given painter.
-     */
-    public void paint(Painter aPntr)
-    {
-        // Just return if no lines
-        int lineCount = getLineCount();
-        if (lineCount == 0)
-            return;
-        if (lineCount == 1) {
-            getLine(0).paint(aPntr);
-            return;
-        }
-
-        // Get text clip bounds and clip
-        Rect textBounds = getBounds();
-        Rect pntrClipBounds = aPntr.getClipBounds();
-        Rect textClipBounds = pntrClipBounds != null ? pntrClipBounds.getIntersectRect(textBounds) : textBounds;
-        if (textClipBounds.isEmpty())
-            return;
-
-        // Save painter state and clip
-        aPntr.save();
-        aPntr.clip(textClipBounds);
-
-        // Iterate over lines
-        for (int i = 0; i < lineCount; i++) {
-
-            // If line not yet visible, skip
-            TextLine textLine = getLine(i);
-            if (textLine.getTextMaxY() < textClipBounds.y)
-                continue;
-
-            // If line no longer visible, break
-            if (textLine.getTextY() >= textClipBounds.getMaxY())
-                break;
-
-            // Paint line
-            if (!textLine.isBlank())
-                textLine.paintLine(aPntr);
-        }
-
-        // Restore state
-        aPntr.restore();
-    }
 
     /**
      * Returns underlined runs for text.

@@ -5,8 +5,6 @@ package snap.text;
 import snap.geom.*;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.gfx.Painter;
-import snap.gfx.Stroke;
 import snap.props.*;
 import snap.util.*;
 import snap.view.*;
@@ -84,9 +82,6 @@ public class TextAdapter extends PropObject {
 
     // The MIME type for SnapKit RichText
     public static final String SNAP_RICHTEXT_TYPE = "reportmill/xstring";
-
-    // The Selection color
-    private static Color TEXT_SEL_COLOR = new Color(181, 214, 254, 255);
 
     // Constants for properties
     public static final String Editable_Prop = "Editable";
@@ -992,54 +987,6 @@ public class TextAdapter extends PropObject {
         int charIndex = getCharIndexForXY(aX, aY);
         TextStyle textStyle = _textLayout.getTextStyleForCharIndex(charIndex);
         return textStyle.getLink();
-    }
-
-    /**
-     * Paint selection and text.
-     */
-    public void paintAll(Painter aPntr)
-    {
-        // Paint selection
-        paintSel(aPntr);
-
-        // Paint TextModel
-        _textLayout.paint(aPntr);
-    }
-
-    /**
-     * Paints the selection.
-     */
-    public void paintSel(Painter aPntr)
-    {
-        // If not editable, just return
-        if (!isEditable()) return;
-
-        // Get Selection and path
-        TextSel textSel = getSel();
-        Shape selPath = textSel.getPath();
-
-        // If empty selection, paint carat
-        if (textSel.isEmpty()) {
-            if (isShowCaret()) {
-                aPntr.setPaint(Color.BLACK);
-                aPntr.setStroke(Stroke.Stroke1);
-                aPntr.draw(selPath);
-            }
-        }
-
-        // Otherwise
-        else {
-            aPntr.setPaint(TEXT_SEL_COLOR);
-            aPntr.fill(selPath);
-        }
-    }
-
-    /**
-     * Paint text.
-     */
-    public void paintText(Painter aPntr)
-    {
-        _textLayout.paint(aPntr);
     }
 
     /**

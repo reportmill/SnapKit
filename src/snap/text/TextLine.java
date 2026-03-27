@@ -3,9 +3,6 @@
  */
 package snap.text;
 import snap.geom.HPos;
-import snap.gfx.Border;
-import snap.gfx.Font;
-import snap.gfx.Painter;
 import snap.util.ArrayUtils;
 import snap.util.CharSequenceX;
 import java.util.Arrays;
@@ -958,84 +955,6 @@ public class TextLine implements CharSequenceX, Cloneable {
         removeChars(anIndex, length());
         remainderLine.removeChars(0, anIndex);
         return remainderLine;
-    }
-
-    /**
-     * Paint text line with given painter.
-     */
-    public void paint(Painter aPntr)
-    {
-        if (isBlank())
-            return;
-
-        // Save painter state and clip
-        aPntr.save();
-        aPntr.clipRect(getTextX(), getTextY(), getWidth(), getHeight());
-
-        // Paint line
-        paintLine(aPntr);
-
-        // Restore state
-        aPntr.restore();
-    }
-
-    /**
-     * Paint text line with given painter.
-     */
-    public void paintLine(Painter aPntr)
-    {
-        TextToken[] lineTokens = getTokens();
-        double lineY = getBaseline() + _textModel.getAlignedY();
-
-        // Iterate over line tokens
-        for (TextToken token : lineTokens) {
-
-            // Set token font and color
-            aPntr.setFont(token.getFont());
-            aPntr.setPaint(token.getTextColor());
-
-            // Do normal paint token
-            String tokenStr = token.getString();
-            double tokenX = token.getTextX();
-            double charSpacing = token.getTextStyle().getCharSpacing();
-            aPntr.drawString(tokenStr, tokenX, lineY, charSpacing);
-
-            // Handle TextBorder: Get outline and stroke
-            Border border = token.getTextStyle().getBorder();
-            if (border != null) {
-                aPntr.setPaint(border.getColor());
-                aPntr.setStroke(border.getStroke());
-                aPntr.strokeString(tokenStr, tokenX, lineY, charSpacing);
-            }
-        }
-
-        // If underlined, paint underlines
-        if (isUnderlined())
-            paintUnderlines(aPntr);
-    }
-
-    /**
-     * Paints text line underlines with given painter.
-     */
-    private void paintUnderlines(Painter aPntr)
-    {
-        for (TextRun run : getRuns()) {
-            if (!run.isUnderlined() || run.isEmpty())
-                continue;
-
-            // Set underline color and width
-            Font font = run.getFont();
-            double underlineOffset = Math.ceil(Math.abs(font.getUnderlineOffset()));
-            double underlineThickness = font.getUnderlineThickness();
-            aPntr.setColor(run.getColor());
-            aPntr.setStrokeWidth(underlineThickness);
-
-            // Get underline endpoints and draw line
-            double lineX = getTextX() + run.getX();
-            double lineMaxX = lineX + run.getWidth() - run.getTrailingWhitespaceWidth();
-            double lineY = getTextBaseline() + underlineOffset;
-            aPntr.drawLine(lineX, lineY, lineMaxX, lineY);
-        }
     }
 
     /**

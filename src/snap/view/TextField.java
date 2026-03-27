@@ -10,6 +10,7 @@ import snap.props.PropChange;
 import snap.props.PropSet;
 import snap.text.TextAdapter;
 import snap.text.TextModel;
+import snap.text.TextPainter;
 import snap.util.*;
 import java.util.Objects;
 
@@ -266,9 +267,10 @@ public class TextField extends TextArea {
         aPntr.clip(textBounds);
 
         // Paint text (only paint selection when focused)
+        TextPainter textPainter = TextPainter.DEFAULT;
         if (isFocused())
-            _textAdapter.paintSel(aPntr);
-        _textAdapter.paintText(aPntr);
+            textPainter.paintTextSel(aPntr, getSel(), _textAdapter);
+        textPainter.paintText(aPntr, getTextLayout());
 
         aPntr.restore();
     }
