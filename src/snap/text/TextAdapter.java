@@ -77,9 +77,6 @@ public class TextAdapter extends PropObject {
     // A pointer to window that text is showing in so we can remove WindowFocusChangedLsnr
     private WindowView _showingWindow;
 
-    // Whether as-you-type spell checking is enabled
-    public static boolean isSpellChecking = Prefs.getDefaultPrefs().getBoolean("SpellChecking", false);
-
     // The MIME type for SnapKit RichText
     public static final String SNAP_RICHTEXT_TYPE = "reportmill/xstring";
 
@@ -347,7 +344,7 @@ public class TextAdapter extends PropObject {
     /**
      * Returns whether editor is doing check-as-you-type spelling.
      */
-    public boolean isSpellChecking()  { return isSpellChecking; }
+    public boolean isSpellChecking()  { return false; }
 
     /**
      * Returns whether text supports multiple styles.
