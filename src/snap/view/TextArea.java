@@ -412,6 +412,7 @@ public class TextArea extends ParentView {
     /**
      * Paint text.
      */
+    @Override
     protected void paintFront(Painter aPntr)
     {
         TextPainter.DEFAULT.paintTextAdapter(aPntr, _textAdapter);

@@ -15,6 +15,9 @@ public class TextPainter {
     // The default text painter
     public static final TextPainter DEFAULT = new TextPainter();
 
+    // A default text painter that paints tokens
+    public static final TextPainter TOKEN_PAINTER = new TokenTextPainter();
+
     /**
      * Constructor.
      */
@@ -82,24 +85,24 @@ public class TextPainter {
      */
     protected void paintTextLine(Painter aPntr, TextLayout textLayout, TextLine textLine)
     {
-        TextToken[] lineTokens = textLine.getTokens();
+        TextRun[] lineRuns = textLine.getRuns();
         double lineY = textLine.getBaseline() + textLayout.getAlignedY();
 
-        // Iterate over line tokens
-        for (TextToken token : lineTokens) {
+        // Iterate over line runs
+        for (TextRun lineRun : lineRuns) {
 
-            // Set token font and color
-            aPntr.setFont(token.getFont());
-            aPntr.setPaint(token.getTextColor());
+            // Set lineRun font and color
+            aPntr.setFont(lineRun.getFont());
+            aPntr.setPaint(lineRun.getColor());
 
-            // Do normal paint token
-            String tokenStr = token.getString();
-            double tokenX = token.getTextX();
-            double charSpacing = token.getTextStyle().getCharSpacing();
+            // Do normal paint lineRun
+            String tokenStr = lineRun.getString();
+            double tokenX = textLine.getTextX() + lineRun.getX();
+            double charSpacing = lineRun.getTextStyle().getCharSpacing();
             aPntr.drawString(tokenStr, tokenX, lineY, charSpacing);
 
             // Handle TextBorder: Get outline and stroke
-            Border border = token.getTextStyle().getBorder();
+            Border border = lineRun.getTextStyle().getBorder();
             if (border != null) {
                 aPntr.setPaint(border.getColor());
                 aPntr.setStroke(border.getStroke());
@@ -115,7 +118,7 @@ public class TextPainter {
     /**
      * Paints text line underlines with given painter.
      */
-    private void paintTextLineUnderlines(Painter aPntr, TextLine textLine)
+    protected void paintTextLineUnderlines(Painter aPntr, TextLine textLine)
     {
         for (TextRun run : textLine.getRuns()) {
             if (!run.isUnderlined() || run.isEmpty())
@@ -252,5 +255,47 @@ public class TextPainter {
 
         // Return
         return spellingPath;
+    }
+
+    /**
+     * This subclass paints tokens instead of runs.
+     */
+    private static class TokenTextPainter extends TextPainter {
+
+        /**
+         * Override to paint tokens instead of runs.
+         */
+        @Override
+        protected void paintTextLine(Painter aPntr, TextLayout textLayout, TextLine textLine)
+        {
+            TextToken[] lineTokens = textLine.getTokens();
+            double lineY = textLine.getBaseline() + textLayout.getAlignedY();
+
+            // Iterate over line tokens
+            for (TextToken token : lineTokens) {
+
+                // Set token font and color
+                aPntr.setFont(token.getFont());
+                aPntr.setPaint(token.getTextColor());
+
+                // Do normal paint token
+                String tokenStr = token.getString();
+                double tokenX = token.getTextX();
+                double charSpacing = token.getTextStyle().getCharSpacing();
+                aPntr.drawString(tokenStr, tokenX, lineY, charSpacing);
+
+                // Handle TextBorder: Get outline and stroke
+                Border border = token.getTextStyle().getBorder();
+                if (border != null) {
+                    aPntr.setPaint(border.getColor());
+                    aPntr.setStroke(border.getStroke());
+                    aPntr.strokeString(tokenStr, tokenX, lineY, charSpacing);
+                }
+            }
+
+            // If underlined, paint underlines
+            if (textLine.isUnderlined())
+                paintTextLineUnderlines(aPntr, textLine);
+        }
     }
 }
