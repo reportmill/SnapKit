@@ -95,18 +95,18 @@ public class TextPainter {
             aPntr.setFont(lineRun.getFont());
             aPntr.setPaint(lineRun.getColor());
 
-            // Do normal paint lineRun
-            String tokenStr = lineRun.getString();
-            double tokenX = textLine.getTextX() + lineRun.getX();
+            // Paint line run
+            String runStr = lineRun.getString();
+            double runX = textLine.getTextX() + lineRun.getX();
             double charSpacing = lineRun.getTextStyle().getCharSpacing();
-            aPntr.drawString(tokenStr, tokenX, lineY, charSpacing);
+            aPntr.drawString(runStr, runX, lineY, charSpacing);
 
             // Handle TextBorder: Get outline and stroke
             Border border = lineRun.getTextStyle().getBorder();
             if (border != null) {
                 aPntr.setPaint(border.getColor());
                 aPntr.setStroke(border.getStroke());
-                aPntr.strokeString(tokenStr, tokenX, lineY, charSpacing);
+                aPntr.strokeString(runStr, runX, lineY, charSpacing);
             }
         }
 

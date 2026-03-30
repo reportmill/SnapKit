@@ -166,14 +166,8 @@ public class TextToken implements ParseToken, Cloneable {
      */
     public double getX()
     {
-        // If set, just return
         if (_x >= 0) return _x;
-
-        // Set X
-        setTokensX(_textLine);
-
-        // Return
-        return _x;
+        return _x = _textLine.getXForCharIndex(_startCharIndexInLine);
     }
 
     /**
@@ -181,12 +175,8 @@ public class TextToken implements ParseToken, Cloneable {
      */
     public double getWidth()
     {
-        // If already set, just return
         if (_width >= 0) return _width;
-
-        // Get, set, return
-        double tokenW = getWidthForLineRange(_startCharIndexInLine, _endCharIndexInLine, true);
-        return _width = tokenW;
+        return _width = _textLine.getXForCharIndex(_endCharIndexInLine) - getX() - getTextStyle().getCharSpacing();
     }
 
     /**
@@ -241,45 +231,12 @@ public class TextToken implements ParseToken, Cloneable {
     }
 
     /**
-     * Returns the width for given char range.
-     */
-    protected double getWidthForLineRange(int startCharIndex, int endCharIndex, boolean trimCharSpacing)
-    {
-        // Get run info
-        TextStyle textStyle = getTextStyle();
-        double charSpacing = textStyle.getCharSpacing();
-
-        // Iterate over chars
-        double tokenW = 0;
-        for (int i = startCharIndex; i < endCharIndex; i++) {
-            char loopChar = _textLine.charAt(i);
-            tokenW += textStyle.getCharAdvance(loopChar) + charSpacing;
-        }
-
-        // If TrimCharSpacing, remove extra spacing
-        if (trimCharSpacing && charSpacing != 0)
-            tokenW -= charSpacing;
-
-        // Return
-        return tokenW;
-    }
-
-    /**
      * Returns the X for given char index.
      */
     public double getXForCharIndex(int charIndex)
     {
-        // Weirdo
-        if (charIndex < 0) {
-            double charX = getX();
-            double charsW = getWidthForLineRange(_startCharIndexInLine + charIndex, _startCharIndexInLine, false);
-            return charX - charsW;
-        }
-
-        // Normal version
-        double charX = getX();
-        double charsW = getWidthForLineRange(_startCharIndexInLine, _startCharIndexInLine + charIndex, false);
-        return charX + charsW;
+        int charIndexInLine = _startCharIndexInLine + charIndex;
+        return _textLine.getXForCharIndex(charIndexInLine);
     }
 
     /**
@@ -317,18 +274,6 @@ public class TextToken implements ParseToken, Cloneable {
 
         // Set, return
         return _string = string;
-    }
-
-    /**
-     * Returns a copy from given char index to end.
-     */
-    public TextToken copyFromCharIndex(int charIndex)
-    {
-        TextToken copy = clone();
-        copy._startCharIndexInLine = _startCharIndexInLine + charIndex;
-        copy._width = -1;
-        copy._x = getXForCharIndex(charIndex);
-        return copy;
     }
 
     /**
@@ -419,45 +364,5 @@ public class TextToken implements ParseToken, Cloneable {
     {
         String name = getName();
         return name == Tokenizer.SINGLE_LINE_COMMENT || name == Tokenizer.MULTI_LINE_COMMENT;
-    }
-
-    /**
-     * Sets the X values for tokens in line.
-     */
-    private static void setTokensX(TextLine aTextLine)
-    {
-        TextToken[] tokens = aTextLine.getTokens();
-        TextRun textRun = aTextLine.getRun(0);
-        TextStyle textStyle = textRun.getTextStyle();
-        double charSpacing = textStyle.getCharSpacing();
-        int charIndex = 0;
-        double tokenX = 0;
-
-        for (TextToken token : tokens) {
-
-            // Update textStyle
-            if (token.getTextStyle() != textStyle) {
-                textStyle = token.getTextStyle();
-                charSpacing = textStyle.getCharSpacing();
-            }
-
-            // Find token start: Skip past whitespace
-            int tokenStart = token.getStartCharIndexInLine();
-            while (charIndex < tokenStart) {
-                char loopChar = aTextLine.charAt(charIndex);
-                if (loopChar == '\t')
-                    tokenX = aTextLine.getXForTabAtIndexAndX(charIndex, tokenX);
-                else tokenX += textStyle.getCharAdvance(loopChar) + charSpacing;
-                charIndex++;
-            }
-
-            // Set token X
-            token._x = tokenX;
-
-            // Update token Width
-            double tokenW = token.getWidth();
-            tokenX += tokenW + charSpacing;
-            charIndex = token.getEndCharIndexInLine();
-        }
     }
 }

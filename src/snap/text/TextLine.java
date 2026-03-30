@@ -18,6 +18,9 @@ public class TextLine implements CharSequenceX, Cloneable {
     // The line chars (either String or StringBuilder)
     protected CharSequence _chars = "";
 
+    // The X offsets for line chars
+    private float[] _charXs;
+
     // The char index of the start of this line in text
     protected int  _startCharIndex;
 
@@ -419,16 +422,8 @@ public class TextLine implements CharSequenceX, Cloneable {
      */
     public double getWidth()
     {
-        // If already set, just return
         if (_width >= 0) return _width;
-
-        // Get from runs
-        double width = 0;
-        for (TextRun run : _runs)
-            width += run.getWidth();
-
-        // Set, return
-        return _width = width;
+        return _width = getXForCharIndex(length()) - getX();
     }
 
     /**
@@ -511,6 +506,70 @@ public class TextLine implements CharSequenceX, Cloneable {
      * Returns the max Y.
      */
     public double getTextMaxY()  { return getTextY() + getHeight(); }
+
+    /**
+     * Returns an X offsets array for all characters in line.
+     */
+    private float[] getCharXs()
+    {
+        if (_charXs != null) return _charXs;
+        return _charXs = getCharXsImpl();
+    }
+
+    /**
+     * Returns an X offsets array for all characters in line.
+     */
+    private synchronized float[] getCharXsImpl()
+    {
+        int length = length();
+        TextRun run = getRun(0);
+        TextStyle textStyle = run.getTextStyle();
+        double charSpacing = textStyle.getCharSpacing();
+        float[] charXs = new float[length + 1];
+        double charX = 0;
+
+        // Iterate over chars and set char Xs in array
+        for (int i = 0; i < length; i++) {
+            charXs[i] = (float) charX;
+
+            // If beyond run end, get next run/text-style/charSpacing
+            if (i >= run.getEndCharIndex()) {
+                run = run.getNext();
+                textStyle = run.getTextStyle();
+                charSpacing = textStyle.getCharSpacing();
+            }
+
+            // Update charX
+            char loopChar = charAt(i);
+            if (loopChar == '\t')
+                charX = getXForTabAtIndexAndX(i, charX);
+            else if (loopChar != '\n' && loopChar != '\r')
+                charX += textStyle.getCharAdvance(loopChar) + charSpacing;
+        }
+
+        // Set X for line end
+        charXs[length] = (float) charX;
+
+        // Return
+        return charXs;
+    }
+
+    /**
+     * Returns the X coord for given char index.
+     */
+    public double getXForCharIndex(int anIndex)
+    {
+        float[] charXs = getCharXs();
+        return charXs[anIndex];
+    }
+
+    /**
+     * Returns the X coord for given char index.
+     */
+    public double getTextXForCharIndex(int anIndex)
+    {
+        return getTextX() + getXForCharIndex(anIndex);
+    }
 
     /**
      * Returns the x for tab at given x.
@@ -647,116 +706,26 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Returns the token at or before given char index.
-     */
-    public TextToken getLastTokenForCharIndex(int charIndex)
-    {
-        // Check bounds
-        if (charIndex < 0 || charIndex > length())
-            throw new IndexOutOfBoundsException("TextLine.getLastTokenForCharIndex: Index " + charIndex + " beyond " + length());
-
-        // Get tokens
-        TextToken[] tokens = getTokens();
-
-        // Iterate over tokens (backwards) and return first token that starts at or before char index
-        for (int i = tokens.length - 1; i >= 0; i--) {
-            TextToken token = tokens[i];
-            if (charIndex >= token.getStartCharIndexInLine())
-                return token;
-        }
-
-        // Return not found
-        return null;
-    }
-
-    /**
-     * Returns the X coord for given char index.
-     */
-    public double getXForCharIndex(int anIndex)
-    {
-        // Get token for char index and token style
-        TextToken textToken = getLastTokenForCharIndex(anIndex);
-        TextStyle textStyle = textToken != null ? textToken.getTextStyle() : getRun(0).getTextStyle();
-        double charSpacing = textStyle.getCharSpacing();
-
-        // Init charX to token start X
-        int startCharIndex = textToken != null ? textToken.getStartCharIndexInLine() : 0;
-        double charX = textToken != null ? textToken.getX() : 0;
-
-        // Iterate over subsequent chars after token start and add advance
-        for (int i = startCharIndex; i < anIndex; i++) {
-            char loopChar = charAt(i);
-            if (loopChar == '\t')
-                charX = getXForTabAtIndexAndX(i, charX);
-            else charX += textStyle.getCharAdvance(loopChar) + charSpacing;
-        }
-
-        // Return
-        return charX;
-    }
-
-    /**
-     * Returns the X coord for given char index.
-     */
-    public double getTextXForCharIndex(int anIndex)
-    {
-        return getTextX() + getXForCharIndex(anIndex);
-    }
-
-    /**
-     * Returns the token at index.
-     */
-    public TextToken getTokenForX(double anX)
-    {
-        // Get tokens
-        TextToken[] tokens = getTokens();
-        double xInLineCoords = anX - getX();
-
-        // Iterate over tokens (backwards) and return first token that starts at or before given X
-        for (int i = tokens.length - 1; i >= 0; i--) {
-            TextToken token = tokens[i];
-            if (xInLineCoords >= token.getX())
-                return token;
-        }
-
-        // Return null since given X is before first token
-        return null;
-    }
-
-    /**
      * Returns the character index for the given x/y point.
      */
     public int getCharIndexForX(double anX)
     {
-        // Get token for x coord
-        TextToken token = getTokenForX(anX);
-        int charIndex = token != null ? token.getStartCharIndexInLine() : 0;
-        TextStyle textStyle = token != null ? token.getTextStyle() : getRun(0).getTextStyle();
-        double charSpacing = textStyle.getCharSpacing();
-
-        // Get char start X and line length
         double xInLineCoords = anX - getX();
-        double charX = token != null ? token.getX() : 0;
-        int lineLength = length();
 
-        // Iterate over chars and return first char that contains given X
-        while (charIndex < lineLength) {
-            char loopChar = charAt(charIndex);
-            double charW = textStyle.getCharAdvance(loopChar) + charSpacing;
-            if (loopChar == '\t')
-                charW = getXForTabAtIndexAndX(charIndex, charX) - charX;
-            if (charX + charW / 2 > xInLineCoords)
-                return charIndex;
-            charIndex++;
-            charX += charW;
+        // Iterate over chars to find first char beyond given X
+        for (int i = 0, length = length(); i < length; i++) {
+            double charX = getXForCharIndex(i);
+
+            // If char beyond given X, return its index or previous index if less than halfway between chars
+            if (charX >= xInLineCoords) {
+                if (i > 0 && xInLineCoords < (charX + getXForCharIndex(i - 1)) / 2)
+                    return i - 1;
+                return i;
+            }
         }
 
-        // If at end of line with newline, back off 1
-        if (isLastCharNewline())
-            return lineLength - 1;
-
-        // Return
-        return lineLength;
+        // Return last real line char
+        return isLastCharNewline() ? length() - 1 : length();
     }
 
     /**
@@ -862,6 +831,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     {
         // Clear Width, Tokens
         _width = _height = -1;
+        _charXs = null;
         _tokens = null;
         _textMetrics = null;
 
@@ -877,6 +847,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     {
         // Clear Width, Tokens
         _width = _height = -1;
+        _charXs = null;
         _tokens = null;
         _textMetrics = null;
 
