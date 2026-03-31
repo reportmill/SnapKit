@@ -423,7 +423,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     public double getWidth()
     {
         if (_width >= 0) return _width;
-        return _width = getXForCharIndex(length()) - getX();
+        return _width = getXForCharIndex(length());
     }
 
     /**
