@@ -276,7 +276,7 @@ public class TextPainter {
 
                 // Set token font and color
                 aPntr.setFont(token.getFont());
-                aPntr.setPaint(token.getTextColor());
+                aPntr.setPaint(token.getColor());
 
                 // Do normal paint token
                 String tokenStr = token.getString();

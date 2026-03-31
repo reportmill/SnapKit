@@ -49,9 +49,6 @@ public class TextToken implements ParseToken, Cloneable {
     // Whether token is hyphenated
     private boolean _hyphenated;
 
-    // The shift x if text line is justified
-    protected double _justifyShiftX = 0;
-
     // The string for this token
     private String _string;
 
@@ -141,15 +138,12 @@ public class TextToken implements ParseToken, Cloneable {
     /**
      * Returns the token color.
      */
-    public Color getTextColor()  { return _color; }
+    public Color getColor()  { return _color; }
 
     /**
      * Sets token color.
      */
-    public void setTextColor(Color aColor)
-    {
-        _color = aColor;
-    }
+    public void setColor(Color aColor)  { _color = aColor; }
 
     /**
      * Returns whether this run has a hyphen at the end.
@@ -192,7 +186,7 @@ public class TextToken implements ParseToken, Cloneable {
     /**
      * Returns the token X coord in text model.
      */
-    public double getTextX()  { return _textLine.getTextX() + getX() + _justifyShiftX; }
+    public double getTextX()  { return _textLine.getTextX() + getX(); }
 
     /**
      * Returns token Y coord in text model.
