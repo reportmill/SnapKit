@@ -211,13 +211,15 @@ public class ViewTheme {
         textFieldStyle.setPropValue(View.Border_Prop, getContentBorder());
         textFieldStyle.setPropValue(View.BorderRadius_Prop, 3);
 
+        // TextView
+        setViewStylePropValue(TextView.class, View.Padding_Prop, new Insets(4));
+        setViewStylePropValue(TextView.class, View.Fill_Prop, getContentColor());
+        setViewStylePropValue(TextView.class, View.Border_Prop, getContentBorder());
+        setViewStylePropValue(TextView.class, View.BorderRadius_Prop, 4);
+
         // ComboBox, ImageView
         setViewStylePropValue(ComboBox.class, View.Align_Prop, Pos.CENTER_LEFT);
         setViewStylePropValue(ImageView.class, View.Align_Prop, Pos.CENTER);
-
-        // TextView
-        setViewStylePropValue(TextView.class, View.Padding_Prop, new Insets(2));
-        setViewStylePropValue(TextView.class, View.Fill_Prop, getContentColor());
 
         // BoxView, RowView, ColView, StackView, TitleView
         setViewStylePropValue(BoxView.class, View.Align_Prop, Pos.CENTER);
