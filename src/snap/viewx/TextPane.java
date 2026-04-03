@@ -280,8 +280,18 @@ public class TextPane extends ViewController {
         // Create BottomRowView and add SelectionText
         RowView bottomRowView = new RowView();
         bottomRowView.setName("BottomBox");
-        bottomRowView.setPadding(2, 2, 2, 5);
+        bottomRowView.setPadding(4, 2, 3, 5);
+        bottomRowView.setFill(_textArea.getFill());
+        bottomRowView.setVisible(false);
         bottomRowView.addChild(selectionLabel);
+
+        // Add separator to bottom view
+        RectView bottomSeparator = new RectView();
+        bottomSeparator.setPrefHeight(1);
+        bottomSeparator.setGrowWidth(true);
+        bottomSeparator.setFill(_separatorView.getFill());
+        bottomSeparator.setManaged(false);
+        bottomRowView.addChild(bottomSeparator);
 
         // Create BorderView and add ToolBar, text and bottom box
         BorderView borderView = new BorderView();
@@ -632,5 +642,13 @@ public class TextPane extends ViewController {
         textArea.setPrefSize(800, 600);
         //String text = WebURL.getURL(TextPane.class, "TextPane.snp").getText(); textArea.setText(text);
         textPane.setWindowVisible(true);
+    }
+
+    /**
+     * Override to update .
+     */
+    protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
+    {
+        getView("BottomBox").setFill(_textArea.getFill());
     }
 }
