@@ -3,8 +3,7 @@ import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.*;
 import snap.viewx.ColorDock;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A class to provide view area classes to define UI look.
@@ -333,10 +332,31 @@ public class ViewTheme {
         // Update windows
         WindowView[] openWindows = WindowView.getOpenWindows();
         for (WindowView openWindow : openWindows) {
+
+            // Notify all views
             RootView rootView = openWindow.getRootView();
             rootView.handleThemeChange(oldTheme, newTheme);
             rootView.setFill(_theme.getBackFill());
+
+            // Notify all controllers
+            Set<ViewController> windowControllers = new LinkedHashSet<>();
+            findViewControllersForView(openWindow, windowControllers);
+            windowControllers.forEach(viewCon -> viewCon.handleThemeChange(oldTheme, newTheme));
+
+            // Repaint
             rootView.repaint();
         }
+    }
+
+    /**
+     * Finds all window controllers.
+     */
+    private static void findViewControllersForView(View aView, Set<ViewController> viewControllers)
+    {
+        ViewController viewController = aView.getController();
+        if (viewController != null)
+            viewControllers.add(viewController);
+        if (aView instanceof ParentView parentView)
+            parentView.getChildren().forEach(childView -> findViewControllersForView(childView, viewControllers));
     }
 }

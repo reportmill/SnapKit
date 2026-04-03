@@ -735,4 +735,9 @@ public class ViewController extends PropObject {
      * Returns the ViewEnv for this controller.
      */
     public ViewEnv getEnv()  { return _env; }
+
+    /**
+     * Called when ViewTheme changes.
+     */
+    protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)  { }
 }
