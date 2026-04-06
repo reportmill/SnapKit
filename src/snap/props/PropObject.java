@@ -150,7 +150,7 @@ public abstract class PropObject implements PropChange.DoChange {
             if (!prop.isRelation() && !prop.isArray() && !isPropDefault(prop.getName())) {
                 Object propValue = getPropValue(prop.getName());
                 String propValueStr = StringCodec.SHARED.codeString(propValue);
-                if (sb.length() > 0) sb.append("; ");
+                if (!sb.isEmpty()) sb.append("; ");
                 sb.append(prop.getName()).append(": ").append(propValueStr);
             }
         }
@@ -362,9 +362,11 @@ public abstract class PropObject implements PropChange.DoChange {
      */
     protected void fireBatchPropChanges()
     {
-        if (_batchPropChange != null)
-            _pcs.fireBatchPropChange(_batchPropChange);
-        _batchPropChange = null;
+        if (_batchPropChange != null) {
+            PropChange batchPropChange = _batchPropChange;
+            _batchPropChange = null;
+            _pcs.fireBatchPropChange(batchPropChange);
+        }
     }
 
     /**
@@ -444,7 +446,7 @@ public abstract class PropObject implements PropChange.DoChange {
             String propName = prop.getName();
             Object propValue = getPropValue(propName);
             String stringValue = StringCodec.SHARED.codeString(propValue);
-            if (sb.length() > 0)
+            if (!sb.isEmpty())
                 sb.append(", ");
             sb.append(propName).append('=').append(stringValue);
         }

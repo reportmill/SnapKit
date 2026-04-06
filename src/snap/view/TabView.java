@@ -326,6 +326,9 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
         boolean isVertical = getTabSide().isTopOrBottom();
         boolean isContentSet = _contentBox.getContent() != null;
 
+        // Make ContentBox visible when content is set
+        _contentBox.setVisible(isContentSet);
+
         // Update TabBar Min/Max size to make TabView unsizable when there is no content for sake of SplitView
         if (isVertical) {
             double prefH = isContentSet ? -1 : getPrefHeight(-1);

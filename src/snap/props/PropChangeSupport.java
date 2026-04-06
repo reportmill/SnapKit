@@ -189,7 +189,7 @@ public class PropChangeSupport {
         PropChange nextBatchPropChange = propChange._nextBatchPropChange;
 
         // If prop change valid for prop name, fire prop change
-        if (propName == null || propName.equals(propName))
+        if (propName == null || propName.equals(propChange.getPropName()))
             propChangeLsnr.handlePropChange(propChange);
 
         // If next batch change available, recurse
