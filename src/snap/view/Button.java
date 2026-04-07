@@ -12,9 +12,6 @@ public class Button extends ButtonBase {
     // Whether this button is the window default button
     private boolean  _default;
     
-    // Whether this button is the window cancel button
-    private boolean  _cancel;
-    
     // Constants for properties
     public static final String DefaultButton_Prop = "DefaultButton";
 
@@ -56,10 +53,8 @@ public class Button extends ButtonBase {
     protected void paintButton(Painter aPntr)
     {
         // Handle ShowArea + DefaultButton
-        if (isShowArea() && isDefaultButton()) {
-            ButtonPainter buttonPainter = ViewTheme.get().getButtonPainter();
-            buttonPainter.paintDefaultButton(aPntr, this);
-        }
+        if (isShowArea() && isDefaultButton())
+            ButtonPainter.paintDefaultButton(aPntr, this);
 
         // Otherwise, do normal version
         else super.paintButton(aPntr);

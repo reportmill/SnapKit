@@ -166,42 +166,17 @@ public class ProgressBar extends View {
     protected void paintBack(Painter aPntr)
     {
         // Get RoundRect shape for bounds, Radius and Position
-        double pbarX = 0;
-        double pbarY = 0;
         double pbarW = getWidth();
         double pbarH = getHeight();
-        RoundRect rect = new RoundRect(pbarX, pbarY, pbarW, pbarH, getBorderRadius());
+        RoundRect pbarShape = new RoundRect(0, 0, pbarW, pbarH, getBorderRadius());
 
-        // Standard theme
-        if (ViewTheme.get() == ViewTheme.getClassic()) {
+        // Paint fill
+        Color fillColor = ViewTheme.get().getButtonColor();
+        aPntr.fillWithPaint(pbarShape, fillColor);
 
-            // Fill rect
-            aPntr.fillWithPaint(rect, PROGRESS_BAR_FILL);
-
-            // Paint bottom highlite ring (white)
-            rect.setRect(pbarX + .5, pbarY + .5, pbarW - 1, pbarH);
-            aPntr.drawWithPaint(rect, ButtonPainter.Classic.BOTTOM_HIGHLITE_PAINT);
-
-            // Paint inner ring (light gray gradient)
-            rect.setRect(pbarX + 1.5, pbarY + 1.5, pbarW - 3, pbarH - 4);
-            aPntr.drawWithPaint(rect, ButtonPainter.Classic.INNER_RING_PAINT);
-
-            // Paint outer ring (gray)
-            rect.setRect(pbarX + .5, pbarY + .5, pbarW - 1, pbarH - 1);
-            aPntr.drawWithPaint(rect, ButtonPainter.Classic.OUTER_RING_PAINT);
-        }
-
-        // Other themes
-        else {
-
-            // Get shape and paint fill
-            Color fillColor = ViewTheme.get().getButtonColor();
-            aPntr.fillWithPaint(rect, fillColor);
-
-            // Draw outer ring
-            Color strokeColor = ViewTheme.get().getButtonBorderColor();
-            aPntr.drawWithPaint(rect, strokeColor);
-        }
+        // Paint border
+        Color strokeColor = ViewTheme.get().getButtonBorderColor();
+        aPntr.drawWithPaint(pbarShape, strokeColor);
     }
 
     /**

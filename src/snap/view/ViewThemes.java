@@ -7,7 +7,7 @@ import snap.gfx.Color;
 public class ViewThemes {
 
     // Cached themes
-    private static ViewTheme _light, _dark, _classic;
+    private static ViewTheme _light, _dark;
 
     /**
      * Returns the light theme.
@@ -28,28 +28,21 @@ public class ViewThemes {
     }
 
     /**
-     * Returns the classic theme.
-     */
-    public static ViewTheme getClassic()
-    {
-        if (_classic != null) return _classic;
-        return _classic = new ClassicTheme();
-    }
-
-    /**
      * Returns the theme for name.
      */
     public static ViewTheme getThemeForName(String aName)
     {
         // Set new theme
-        switch (aName) {
-            case "Light": return getLight();
-            case "Dark": return getDark();
-            case "LightBlue": return new LightBlueTheme();
-            case "Classic": return getClassic();
-            case "BlackAndWhite": return new ViewThemes.BlackAndWhiteTheme();
-            default: System.err.println("ViewThemes.getThemeForName: Unknown theme name: " + aName); return getLight();
-        }
+        return switch (aName) {
+            case "Light" -> getLight();
+            case "Dark" -> getDark();
+            case "LightBlue" -> new LightBlueTheme();
+            case "BlackAndWhite" -> new BlackAndWhiteTheme();
+            default -> {
+                System.err.println("ViewThemes.getThemeForName: Unknown theme name: " + aName);
+                yield getLight();
+            }
+        };
     }
 
     /**
@@ -57,16 +50,6 @@ public class ViewThemes {
      */
     private static class LightTheme extends ViewTheme {
 
-        @Override
-        protected void initColors()
-        {
-            BACK_FILL = new Color("#FA");
-            GUTTER_FILL = new Color("#F0");
-            SEL_FILL = new Color("#DA");
-            TARG_FILL = new Color("#E6");
-            TEXT_SEL_COLOR = Color.BLACK;
-            TEXT_TARG_COLOR = Color.WHITE;
-        }
     }
 
     /**
@@ -124,16 +107,6 @@ public class ViewThemes {
             BUTTON_PRESSED_COLOR = new Color("#DFDFDF").blend(blue, fract);
             BUTTON_BORDER_PRESSED_COLOR = new Color("#87AFDA").blend(blue, fract);
         }
-    }
-
-    /**
-     * The classic theme.
-     */
-    private static class ClassicTheme extends ViewTheme {
-
-        /** Creates a button area. */
-        @Override
-        public ButtonPainter createButtonPainter()  { return new ButtonPainter.Classic(); }
     }
 
     /**

@@ -11,10 +11,10 @@ import java.util.*;
 public class ViewTheme {
 
     // Background fill
-    protected Color BACK_FILL = new Color("#E9E8EA");
+    protected Color BACK_FILL = new Color("#FA");
 
     // Far background fill, like gutters of scroll bar or tabview buttons
-    protected Color GUTTER_FILL = new Color("#E0"); // Color.LIGHTGRAY
+    protected Color GUTTER_FILL = new Color("#F0"); // Color.LIGHTGRAY
 
     // Color for content like text fields, text areas, list areas
     protected Color CONTENT_COLOR = Color.WHITE;
@@ -23,10 +23,10 @@ public class ViewTheme {
     protected Color CONTENT_ALT_COLOR = Color.get("#F8");
 
     // Selection fill, like list items
-    protected Color SEL_FILL = new Color("#C0"); // Color.LIGHTGRAY
+    protected Color SEL_FILL = new Color("#DA"); // Color.LIGHTGRAY
 
     // Targeted fill, like mouse over list items
-    protected Color TARG_FILL = new Color("#D0");
+    protected Color TARG_FILL = new Color("#E6");
 
     // Text color
     protected Color TEXT_COLOR = Color.BLACK;
@@ -81,7 +81,7 @@ public class ViewTheme {
         initViewStyles();
 
         // Create ButtonPainter
-        _buttonPainter = createButtonPainter();
+        _buttonPainter = new ButtonPainter(this);
     }
 
     /**
@@ -170,11 +170,6 @@ public class ViewTheme {
     public ButtonPainter getButtonPainter()  { return _buttonPainter; }
 
     /**
-     * Creates the button painter.
-     */
-    protected ButtonPainter createButtonPainter()  { return new ButtonPainter.Flat(this); }
-
-    /**
      * Initialize ViewStyles.
      */
     protected void initViewStyles()
@@ -254,6 +249,35 @@ public class ViewTheme {
         setViewStylePropValue(ProgressBar.class, View.BorderRadius_Prop, 4);
         setViewStylePropValue(ThumbWheel.class, View.Fill_Prop, getBackFill());
         setViewStylePropValue(ColorDock.class, View.Border_Prop, Border.createLoweredBevelBorder());
+
+        // Define Style
+//        String style = """
+//                Label { Align: CENTER_LEFT; Spacing: 4 }
+//                ButtonBase { Align: CENTER; Padding: 3; BorderRadius: 4 }
+//                RadioButton { Align: CENTER_LEFT; Padding 2; Spacing 5 }
+//                CheckBox { Align: CENTER_LEFT; Padding: 2; Spacing: 5 }
+//                TextField { Align: CENTER_LEFT; Padding: 3; Fill: ContentColor; Border: ContentBorder; BorderRadius: 3 }
+//                TextView { Padding: 4; Fill: ContentColor; Border: ContentBorder; BorderRadius: 4 }
+//                ComboBox { Align: CENTER_LEFT }
+//                ImageView { Align: Align: CENTER }
+//                BoxView { Align: CENTER }
+//                RowView { Align: CENTER_LEFT }
+//                ColView { Align: TOP_LEFT }
+//                StackView { Align: CENTER }
+//                TitleView { Padding: 2 }
+//                ScrollView { Border: ContentBorder }
+//                SplitView { Border: ContentBorder }
+//                ListView { Fill: ContentColor; Border: ContentBorder }
+//                TableView { Fill: ContentColor; Border: ContentBorder }
+//                TableCol { Fill: null; Border: null }
+//                TreeView { Fill: ContentColor; Border: ContentBorder }
+//                TreeCol { Fill: null; Border: null }
+//                MenuBar { Padding: 2, 10, 2, 10 }
+//                MenuItem { Align: CENTER_LEFT; Padding: 4, 8, 4, 6 }
+//                ProgressBar { BorderRadius: 4 }
+//                ThumbWheel { Fill: BackFill }
+//                ColorDock { Border: LoweredBevelBorder }
+//                """;
     }
 
     /**
@@ -293,11 +317,6 @@ public class ViewTheme {
      * Returns the dark theme.
      */
     public static ViewTheme getDark()  { return ViewThemes.getDark(); }
-
-    /**
-     * Returns the classic theme.
-     */
-    public static ViewTheme getClassic()  { return ViewThemes.getClassic(); }
 
     /**
      * Sets the style property values for given view if they were previously set to default of given old theme.

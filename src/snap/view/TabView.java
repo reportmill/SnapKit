@@ -361,15 +361,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     {
         super.handleThemeChange(oldTheme, newTheme);
         _contentBox.setFill(ViewUtils.getBackFill());
-
         _tabBar.setFill(null);
-        if (ViewTheme.get() == ViewTheme.getClassic() && isClassic()) {
-            Color c1 = new Color("#d6d6d6");
-            Color c2 = new Color("#dddddd");
-            GradientPaint.Stop[] SHELF_FILL_STOPS = GradientPaint.getStops(0, c1,.2, c2,1,c2);
-            Paint CLASSIC_TAB_BAR_FILL = new GradientPaint(.5,0,.5,1, SHELF_FILL_STOPS);
-            _tabBar.setFill(CLASSIC_TAB_BAR_FILL);
-        }
     }
 
     /**

@@ -90,9 +90,8 @@ public class WindowBar extends ParentView {
         if (_titleBarHeight == 0) return;
 
         // Paint title bar
-        ButtonPainter buttonPainter = ViewTheme.getClassic().getButtonPainter();
         RoundRect buttonRect = new RoundRect(0, 0, getWidth(), _titleBarHeight, 4).copyForPosition(Pos.TOP_CENTER);
-        buttonPainter.paintButtonInShape(aPntr, buttonRect, 0, false);
+        ButtonPainter.paintClassicButtonInShape(aPntr, buttonRect, 0);
 
         // Paint buttons
         aPntr.setStroke(Stroke.getStroke(.5));
