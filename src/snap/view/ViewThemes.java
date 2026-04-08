@@ -86,6 +86,12 @@ public class ViewThemes {
             setViewStyleStringForAlternate(ListView.class, "Fill: " + contentAltColorStr);
             setViewStyleStringForActive(ListView.class, "Fill: #90");
             setViewStyleStringForHover(ListView.class, "Fill: #80");
+
+            // TableView
+            setViewStyleString(TableView.class, "Fill: 2B");
+
+            // TreeView
+            setViewStyleString(TreeView.class, "Fill: 2B");
         }
     }
 

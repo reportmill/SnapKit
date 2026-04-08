@@ -154,112 +154,17 @@ public class ViewTheme {
         setViewStyleString(TreeView.class, "Fill: WHITE; Border: #C0");
         setViewStyleString(TreeCol.class, "Fill: null; Border: null");
 
-        // Label
-        //ViewStyle labelStyle = getViewStyleForClass(Label.class);
-        //labelStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
-        //labelStyle.setPropValue(View.Spacing_Prop, 4);
-
-        // ButtonBase
-        //ViewStyle buttonStyle = getViewStyleForClass(ButtonBase.class);
-        //buttonStyle.setPropValue(View.Align_Prop, Pos.CENTER);
-        //buttonStyle.setPropValue(View.Padding_Prop, new Insets(3));
-        //buttonStyle.setPropValue(View.BorderRadius_Prop, 4);
-
-        // RadioButton
-        //ViewStyle radioButtonStyle = getViewStyleForClass(RadioButton.class);
-        //radioButtonStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
-        //radioButtonStyle.setPropValue(View.Padding_Prop, new Insets(2));
-        //radioButtonStyle.setPropValue(View.Spacing_Prop, 5);
-
-        // CheckBox
-        //ViewStyle checkBoxStyle = getViewStyleForClass(CheckBox.class);
-        //checkBoxStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
-        //checkBoxStyle.setPropValue(View.Padding_Prop, new Insets(2));
-        //checkBoxStyle.setPropValue(View.Spacing_Prop, 5);
-
-        // TextField
-        //ViewStyle textFieldStyle = getViewStyleForClass(TextField.class);
-        //textFieldStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
-        //textFieldStyle.setPropValue(View.Padding_Prop, new Insets(3));
-        //textFieldStyle.setPropValue(View.Fill_Prop, getContentColor());
-        //textFieldStyle.setPropValue(View.Border_Prop, getContentBorder());
-        //textFieldStyle.setPropValue(View.BorderRadius_Prop, 3);
-
-        // TextView
-        //setViewStylePropValue(TextView.class, View.Padding_Prop, new Insets(4));
-        //setViewStylePropValue(TextView.class, View.Fill_Prop, getContentColor());
-        //setViewStylePropValue(TextView.class, View.Border_Prop, getContentBorder());
-        //setViewStylePropValue(TextView.class, View.BorderRadius_Prop, 4);
-
-        // ComboBox, ImageView
-        //setViewStylePropValue(ComboBox.class, View.Align_Prop, Pos.CENTER_LEFT);
-        //setViewStylePropValue(ImageView.class, View.Align_Prop, Pos.CENTER);
-
         // BoxView, RowView, ColView, StackView, TitleView
-        setViewStylePropValue(BoxView.class, View.Align_Prop, Pos.CENTER);
-        setViewStylePropValue(RowView.class, View.Align_Prop, Pos.CENTER_LEFT);
-        setViewStylePropValue(ColView.class, View.Align_Prop, Pos.TOP_LEFT);
-        setViewStylePropValue(StackView.class, View.Align_Prop, Pos.CENTER);
-        setViewStylePropValue(TitleView.class, View.Padding_Prop, new Insets(2));
-
-        // ScrollView, SplitView
-        //setViewStylePropValue(ScrollView.class, View.Border_Prop, getContentBorder());
-        //setViewStylePropValue(SplitView.class, View.Border_Prop, getContentBorder());
-
-        // ListView
-        //setViewStylePropValue(ListView.class, View.Fill_Prop, getContentColor());
-        //setViewStylePropValue(ListView.class, View.Border_Prop, getContentBorder());
-
-        // TableView
-        //setViewStylePropValue(TableView.class, View.Fill_Prop, getContentColor());
-        //setViewStylePropValue(TableView.class, View.Border_Prop, getContentBorder());
-        //setViewStylePropValue(TableCol.class, View.Fill_Prop, null);
-        //setViewStylePropValue(TableCol.class, View.Border_Prop, null);
-
-        // TreeView
-        //setViewStylePropValue(TreeView.class, View.Fill_Prop, getContentColor());
-        //setViewStylePropValue(TreeView.class, View.Border_Prop, getContentBorder());
-        //setViewStylePropValue(TreeCol.class, View.Fill_Prop, null);
-        //setViewStylePropValue(TreeCol.class, View.Border_Prop, null);
-
-        // MenuBar, MenuItem
-        //setViewStylePropValue(MenuBar.class, View.Padding_Prop, new Insets(2, 10, 2, 10));
-        //setViewStylePropValue(MenuItem.class, View.Align_Prop, Pos.CENTER_LEFT);
-        //setViewStylePropValue(MenuItem.class, View.Padding_Prop, new Insets(4, 8, 4, 6));
+        setViewStyleString(BoxView.class, "Align: CENTER");
+        setViewStyleString(RowView.class, "Align: CENTER_LEFT");
+        setViewStyleString(ColView.class, "Align: TOP_LEFT");
+        setViewStyleString(StackView.class, "Align: CENTER");
+        setViewStyleString(TitleView.class, "Padding: 2");
 
         // ProgressBar, ThumbWheel, ColorDock
-        setViewStylePropValue(ProgressBar.class, View.BorderRadius_Prop, 4);
-        setViewStylePropValue(ThumbWheel.class, View.Fill_Prop, getBackFill());
-        setViewStylePropValue(ColorDock.class, View.Border_Prop, Border.createLoweredBevelBorder());
-
-        // Define Style
-//        String style = """
-//                Label { Align: CENTER_LEFT; Spacing: 4 }
-//                ButtonBase { Align: CENTER; Padding: 3; BorderRadius: 4 }
-//                RadioButton { Align: CENTER_LEFT; Padding 2; Spacing 5 }
-//                CheckBox { Align: CENTER_LEFT; Padding: 2; Spacing: 5 }
-//                TextField { Align: CENTER_LEFT; Padding: 3; Fill: ContentColor; Border: ContentBorder; BorderRadius: 3 }
-//                TextView { Padding: 4; Fill: ContentColor; Border: ContentBorder; BorderRadius: 4 }
-//                ComboBox { Align: CENTER_LEFT }
-//                ImageView { Align: Align: CENTER }
-//                BoxView { Align: CENTER }
-//                RowView { Align: CENTER_LEFT }
-//                ColView { Align: TOP_LEFT }
-//                StackView { Align: CENTER }
-//                TitleView { Padding: 2 }
-//                ScrollView { Border: ContentBorder }
-//                SplitView { Border: ContentBorder }
-//                ListView { Fill: ContentColor; Border: ContentBorder }
-//                TableView { Fill: ContentColor; Border: ContentBorder }
-//                TableCol { Fill: null; Border: null }
-//                TreeView { Fill: ContentColor; Border: ContentBorder }
-//                TreeCol { Fill: null; Border: null }
-//                MenuBar { Padding: 2, 10, 2, 10 }
-//                MenuItem { Align: CENTER_LEFT; Padding: 4, 8, 4, 6 }
-//                ProgressBar { BorderRadius: 4 }
-//                ThumbWheel { Fill: BackFill }
-//                ColorDock { Border: LoweredBevelBorder }
-//                """;
+        setViewStyleString(ProgressBar.class, "BorderRadius: 4");
+        setViewStyleString(ThumbWheel.class, "Fill: getBackFill");
+        setViewStyleString(ColorDock.class, "Border: bevel");
     }
 
     /**

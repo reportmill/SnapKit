@@ -1003,7 +1003,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         super.handleThemeChange(oldTheme, newTheme);
         if (Objects.equals(_altRowColor, oldTheme.getContentAltColor()))
             _altRowColor = newTheme.getContentAltColor();
-        removeChildren();
+        updateItems();
     }
 
     /**
