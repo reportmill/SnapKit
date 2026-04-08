@@ -28,15 +28,6 @@ public class ViewTheme {
     // Targeted fill, like mouse over list items
     protected Color TARG_FILL = new Color("#E6");
 
-    // Text color
-    protected Color TEXT_COLOR = Color.BLACK;
-
-    // Text color for text in selected list item
-    protected Color TEXT_SEL_COLOR = Color.BLACK;
-
-    // Text color for text in targeted list item
-    protected Color TEXT_TARG_COLOR = Color.WHITE;
-
     // Main button color
     protected Color BUTTON_COLOR = Color.WHITE;
 
@@ -51,9 +42,6 @@ public class ViewTheme {
 
     // Button border pressed color
     protected Color BUTTON_BORDER_PRESSED_COLOR = new Color("#87AFDA");
-
-    // Border for distinct content areas like Scrollview, Splitview, TableView, TreeView
-    protected Border CONTENT_BORDER = Border.createLineBorder(Color.get("#C0"),1);
 
     // The ButtonPainter
     private ButtonPainter  _buttonPainter;
@@ -71,13 +59,13 @@ public class ViewTheme {
     {
         super();
 
-        // Initialize colors
-        initColors();
-
         // Create and initialize ViewStyles
         _viewStyles = new HashMap<>();
-        ViewStyle viewStyle = new ViewStyle(this);
+        ViewStyle viewStyle = new ViewStyle();
         _viewStyles.put(View.class, viewStyle);
+
+        // Initialize styles
+        initColors();
         initViewStyles();
 
         // Create ButtonPainter
@@ -120,21 +108,6 @@ public class ViewTheme {
     public Paint getTargetedFill()  { return TARG_FILL; }
 
     /**
-     * Returns the text color.
-     */
-    public Color getTextColor()  { return TEXT_COLOR; }
-
-    /**
-     * Returns the text color when in selected item.
-     */
-    public Color getTextSelectedColor()  { return TEXT_SEL_COLOR; }
-
-    /**
-     * Returns the text color when in targeted item.
-     */
-    public Color getTextTargetedColor()  { return TEXT_TARG_COLOR; }
-
-    /**
      * Returns the button color.
      */
     public Color getButtonColor()  { return BUTTON_COLOR; }
@@ -160,11 +133,6 @@ public class ViewTheme {
     public Color getButtonBorderPressedColor()  { return BUTTON_BORDER_PRESSED_COLOR; }
 
     /**
-     * Returns the border for distinct content areas like Scrollview, Splitview, TableView, TreeView.
-     */
-    public Border getContentBorder()  { return CONTENT_BORDER; }
-
-    /**
      * Returns the button painter.
      */
     public ButtonPainter getButtonPainter()  { return _buttonPainter; }
@@ -174,46 +142,89 @@ public class ViewTheme {
      */
     protected void initViewStyles()
     {
-        // Label
-        ViewStyle labelStyle = getViewStyleForClass(Label.class);
-        labelStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
-        labelStyle.setPropValue(View.Spacing_Prop, 4);
-
-        // ButtonBase
-        ViewStyle buttonStyle = getViewStyleForClass(ButtonBase.class);
-        buttonStyle.setPropValue(View.Align_Prop, Pos.CENTER);
-        buttonStyle.setPropValue(View.Padding_Prop, new Insets(3));
-        buttonStyle.setPropValue(View.BorderRadius_Prop, 4);
-
-        // RadioButton
-        ViewStyle radioButtonStyle = getViewStyleForClass(RadioButton.class);
-        radioButtonStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
-        radioButtonStyle.setPropValue(View.Padding_Prop, new Insets(2));
-        radioButtonStyle.setPropValue(View.Spacing_Prop, 5);
-
-        // CheckBox
-        ViewStyle checkBoxStyle = getViewStyleForClass(CheckBox.class);
-        checkBoxStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
-        checkBoxStyle.setPropValue(View.Padding_Prop, new Insets(2));
-        checkBoxStyle.setPropValue(View.Spacing_Prop, 5);
+        // Label, ButtonBase, RadioButton, CheckBox
+        setViewStyleString(Label.class, "Align: CENTER_LEFT; Spacing: 4");
+        setViewStyleString(ButtonBase.class, "Align: CENTER; Padding: 3; BorderRadius: 4");
+        setViewStyleString(RadioButton.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
+        setViewStyleString(CheckBox.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
 
         // TextField
-        ViewStyle textFieldStyle = getViewStyleForClass(TextField.class);
-        textFieldStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
-        textFieldStyle.setPropValue(View.Padding_Prop, new Insets(3));
-        textFieldStyle.setPropValue(View.Fill_Prop, getContentColor());
-        textFieldStyle.setPropValue(View.Border_Prop, getContentBorder());
-        textFieldStyle.setPropValue(View.BorderRadius_Prop, 3);
+        setViewStyleString(TextField.class, "Align: CENTER_LEFT; Padding: 3; Fill: WHITE; Border: #C0; BorderRadius: 3");
 
         // TextView
-        setViewStylePropValue(TextView.class, View.Padding_Prop, new Insets(4));
-        setViewStylePropValue(TextView.class, View.Fill_Prop, getContentColor());
-        setViewStylePropValue(TextView.class, View.Border_Prop, getContentBorder());
-        setViewStylePropValue(TextView.class, View.BorderRadius_Prop, 4);
+        setViewStyleString(TextView.class, "Padding: 4; Fill: WHITE; Border: #C0; BorderRadius: 4");
+        setViewStyleStringForHover(TextView.class, "TextColor: WHITE");
 
         // ComboBox, ImageView
-        setViewStylePropValue(ComboBox.class, View.Align_Prop, Pos.CENTER_LEFT);
-        setViewStylePropValue(ImageView.class, View.Align_Prop, Pos.CENTER);
+        setViewStyleString(ComboBox.class, "Align: CENTER_LEFT");
+        setViewStyleString(ImageView.class, "Align: CENTER");
+
+        // ListView
+        setViewStyleString(ListView.class, "Fill: WHITE; Border: #CO 1");
+        setViewStyleStringForActive(ListView.class, "Fill: #DA");
+        setViewStyleStringForHover(ListView.class, "Fill: #E6; TextColor: WHITE");
+
+        // MenuBar
+        setViewStyleString(MenuBar.class, "Padding: 2, 10, 2, 10");
+
+        // MenuItem
+        setViewStyleString(MenuItem.class, "Align: CENTER_LEFT; Padding: 4, 8, 4, 6");
+        setViewStyleStringForHover(MenuItem.class, "Fill: #E6; TextColor: WHITE");
+
+        // ScrollView
+        setViewStyleString(ScrollView.class, "Border: #C0");
+
+        // SplitView
+        setViewStyleString(SplitView.class, "Border: #C0");
+
+        // TableView
+        setViewStyleString(TableView.class, "Fill: WHITE; Border: #C0");
+        setViewStyleString(TableCol.class, "Fill: null; Border: null");
+
+        // TreeView
+        setViewStyleString(TreeView.class, "Fill: WHITE; Border: #C0");
+        setViewStyleString(TreeCol.class, "Fill: null; Border: null");
+
+        // Label
+        //ViewStyle labelStyle = getViewStyleForClass(Label.class);
+        //labelStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
+        //labelStyle.setPropValue(View.Spacing_Prop, 4);
+
+        // ButtonBase
+        //ViewStyle buttonStyle = getViewStyleForClass(ButtonBase.class);
+        //buttonStyle.setPropValue(View.Align_Prop, Pos.CENTER);
+        //buttonStyle.setPropValue(View.Padding_Prop, new Insets(3));
+        //buttonStyle.setPropValue(View.BorderRadius_Prop, 4);
+
+        // RadioButton
+        //ViewStyle radioButtonStyle = getViewStyleForClass(RadioButton.class);
+        //radioButtonStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
+        //radioButtonStyle.setPropValue(View.Padding_Prop, new Insets(2));
+        //radioButtonStyle.setPropValue(View.Spacing_Prop, 5);
+
+        // CheckBox
+        //ViewStyle checkBoxStyle = getViewStyleForClass(CheckBox.class);
+        //checkBoxStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
+        //checkBoxStyle.setPropValue(View.Padding_Prop, new Insets(2));
+        //checkBoxStyle.setPropValue(View.Spacing_Prop, 5);
+
+        // TextField
+        //ViewStyle textFieldStyle = getViewStyleForClass(TextField.class);
+        //textFieldStyle.setPropValue(View.Align_Prop, Pos.CENTER_LEFT);
+        //textFieldStyle.setPropValue(View.Padding_Prop, new Insets(3));
+        //textFieldStyle.setPropValue(View.Fill_Prop, getContentColor());
+        //textFieldStyle.setPropValue(View.Border_Prop, getContentBorder());
+        //textFieldStyle.setPropValue(View.BorderRadius_Prop, 3);
+
+        // TextView
+        //setViewStylePropValue(TextView.class, View.Padding_Prop, new Insets(4));
+        //setViewStylePropValue(TextView.class, View.Fill_Prop, getContentColor());
+        //setViewStylePropValue(TextView.class, View.Border_Prop, getContentBorder());
+        //setViewStylePropValue(TextView.class, View.BorderRadius_Prop, 4);
+
+        // ComboBox, ImageView
+        //setViewStylePropValue(ComboBox.class, View.Align_Prop, Pos.CENTER_LEFT);
+        //setViewStylePropValue(ImageView.class, View.Align_Prop, Pos.CENTER);
 
         // BoxView, RowView, ColView, StackView, TitleView
         setViewStylePropValue(BoxView.class, View.Align_Prop, Pos.CENTER);
@@ -223,27 +234,29 @@ public class ViewTheme {
         setViewStylePropValue(TitleView.class, View.Padding_Prop, new Insets(2));
 
         // ScrollView, SplitView
-        setViewStylePropValue(ScrollView.class, View.Border_Prop, getContentBorder());
-        setViewStylePropValue(SplitView.class, View.Border_Prop, getContentBorder());
+        //setViewStylePropValue(ScrollView.class, View.Border_Prop, getContentBorder());
+        //setViewStylePropValue(SplitView.class, View.Border_Prop, getContentBorder());
 
         // ListView
-        setViewStylePropValue(ListView.class, View.Fill_Prop, getContentColor());
-        setViewStylePropValue(ListView.class, View.Border_Prop, getContentBorder());
+        //setViewStylePropValue(ListView.class, View.Fill_Prop, getContentColor());
+        //setViewStylePropValue(ListView.class, View.Border_Prop, getContentBorder());
 
-        // TableView, TreeView
-        setViewStylePropValue(TableView.class, View.Fill_Prop, getContentColor());
-        setViewStylePropValue(TableView.class, View.Border_Prop, getContentBorder());
-        setViewStylePropValue(TableCol.class, View.Fill_Prop, null);
-        setViewStylePropValue(TableCol.class, View.Border_Prop, null);
-        setViewStylePropValue(TreeView.class, View.Fill_Prop, getContentColor());
-        setViewStylePropValue(TreeView.class, View.Border_Prop, getContentBorder());
-        setViewStylePropValue(TreeCol.class, View.Fill_Prop, null);
-        setViewStylePropValue(TreeCol.class, View.Border_Prop, null);
+        // TableView
+        //setViewStylePropValue(TableView.class, View.Fill_Prop, getContentColor());
+        //setViewStylePropValue(TableView.class, View.Border_Prop, getContentBorder());
+        //setViewStylePropValue(TableCol.class, View.Fill_Prop, null);
+        //setViewStylePropValue(TableCol.class, View.Border_Prop, null);
+
+        // TreeView
+        //setViewStylePropValue(TreeView.class, View.Fill_Prop, getContentColor());
+        //setViewStylePropValue(TreeView.class, View.Border_Prop, getContentBorder());
+        //setViewStylePropValue(TreeCol.class, View.Fill_Prop, null);
+        //setViewStylePropValue(TreeCol.class, View.Border_Prop, null);
 
         // MenuBar, MenuItem
-        setViewStylePropValue(MenuBar.class, View.Padding_Prop, new Insets(2, 10, 2, 10));
-        setViewStylePropValue(MenuItem.class, View.Align_Prop, Pos.CENTER_LEFT);
-        setViewStylePropValue(MenuItem.class, View.Padding_Prop, new Insets(4, 8, 4, 6));
+        //setViewStylePropValue(MenuBar.class, View.Padding_Prop, new Insets(2, 10, 2, 10));
+        //setViewStylePropValue(MenuItem.class, View.Align_Prop, Pos.CENTER_LEFT);
+        //setViewStylePropValue(MenuItem.class, View.Padding_Prop, new Insets(4, 8, 4, 6));
 
         // ProgressBar, ThumbWheel, ColorDock
         setViewStylePropValue(ProgressBar.class, View.BorderRadius_Prop, 4);
@@ -292,6 +305,50 @@ public class ViewTheme {
 
         // Creates style for class, adds to given map and returns it
         return ViewStyle.getViewStyleForClassMapAndClass(_viewStyles, viewClass);
+    }
+
+    /**
+     * Returns the ViewStyle for given class and state.
+     */
+    public ViewStyle getViewStyleForClassAndState(Class<? extends View> viewClass, ViewStyle.State state)
+    {
+        return getViewStyleForClass(viewClass).getStyleForState(state);
+    }
+
+    /**
+     * Sets a View style string for given class and style string.
+     */
+    public void setViewStyleString(Class<? extends View> viewClass, String styleString)
+    {
+        ViewStyle viewStyle = getViewStyleForClass(viewClass);
+        viewStyle.setStyleString(styleString);
+    }
+
+    /**
+     * Sets a View hover style string for given class and style string.
+     */
+    public void setViewStyleStringForHover(Class<? extends View> viewClass, String styleString)
+    {
+        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, ViewStyle.State.Hover);
+        viewStyle.setStyleString(styleString);
+    }
+
+    /**
+     * Sets a View active style string for given class and style string.
+     */
+    public void setViewStyleStringForActive(Class<? extends View> viewClass, String styleString)
+    {
+        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, ViewStyle.State.Active);
+        viewStyle.setStyleString(styleString);
+    }
+
+    /**
+     * Sets a View style string for given class and style string.
+     */
+    public void setViewStyleStringForClassAndState(Class<? extends View> viewClass, ViewStyle.State state, String styleString)
+    {
+        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, state);
+        viewStyle.setStyleString(styleString);
     }
 
     /**

@@ -76,21 +76,6 @@ public class ViewUtils {
     public static Paint getTargetFill()  { return ViewTheme.get().getTargetedFill(); }
 
     /**
-     * Returns the text color.
-     */
-    public static Color getTextColor()  { return ViewTheme.get().getTextColor(); }
-
-    /**
-     * Returns the text selected color.
-     */
-    public static Color getTextSelectedColor()  { return ViewTheme.get().getTextSelectedColor(); }
-
-    /**
-     * Returns the text targeted color.
-     */
-    public static Color getTextTargetedColor()  { return ViewTheme.get().getTextTargetedColor(); }
-
-    /**
      * Returns the area bounds for given view.
      */
     public static Rect getAreaBounds(View aView)

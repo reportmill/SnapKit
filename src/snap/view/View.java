@@ -635,6 +635,16 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
+     * Returns the style for this view.
+     */
+    public ViewStyle getStyle()  { return ViewTheme.get().getViewStyleForClass(getClass()); }
+
+    /**
+     * Returns the style for this view.
+     */
+    public ViewStyle getStyleForState(ViewStyle.State state)  { return getStyle().getStyleForState(state); }
+
+    /**
      * Returns fill paint.
      */
     public Paint getFill()  { return _fill; }
@@ -2483,7 +2493,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the text color.
      */
-    public Color getTextColor()  { return ViewUtils.getTextColor(); }
+    public Color getTextColor()  { return getStyle().getTextColor(); }
 
     /**
      * Sets the text color.

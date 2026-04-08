@@ -4,6 +4,8 @@
 package snap.text;
 import snap.geom.Rect;
 import snap.gfx.*;
+import snap.view.Label;
+import snap.view.ViewTheme;
 import snap.view.ViewUtils;
 
 /**
@@ -94,7 +96,7 @@ public class StyledString implements Cloneable {
     public Color getTextColor()
     {
         Color color = _textStyle.getColor();
-        Color defColor = ViewUtils.getTextColor();
+        Color defColor = ViewTheme.get().getViewStyleForClass(Label.class).getTextColor();
         if (defColor != Color.BLACK && color == Color.BLACK)
             color = defColor;
         return color;

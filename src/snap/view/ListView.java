@@ -689,26 +689,28 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     {
         // Handle Cell.Selected
         if (aCell.isSelected()) {
-            aCell.setFill(ViewUtils.getSelectFill());
-            aCell.setTextColor(ViewUtils.getTextSelectedColor());
+            ViewStyle selectedStyle = getStyleForState(ViewStyle.State.Active);
+            aCell.setFill(selectedStyle.getFill());
+            aCell.setTextColor(selectedStyle.getTextColor());
         }
 
         // Handle Targeting given cell
         else if (isTargeting() && aCell.getRow() == getTargetedIndex())  {
-            aCell.setFill(ViewUtils.getTargetFill());
-            aCell.setTextColor(ViewUtils.getTextTargetedColor());
+            ViewStyle hoverStyle = getStyleForState(ViewStyle.State.Hover);
+            aCell.setFill(hoverStyle.getFill());
+            aCell.setTextColor(hoverStyle.getTextColor());
         }
 
         // Handle alternate rows
         else if (_altRowColor != null && aCell.getRow() % 2 == 0) {
             aCell.setFill(_altRowColor);
-            aCell.setTextColor(ViewUtils.getTextColor());
+            aCell.setTextColor(getStyle().getTextColor());
         }
 
         // Handle normal case
         else {
             aCell.setFill(null);
-            aCell.setTextColor(ViewUtils.getTextColor());
+            aCell.setTextColor(getStyle().getTextColor());
         }
     }
 

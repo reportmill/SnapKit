@@ -67,15 +67,30 @@ public class ViewThemes {
             CONTENT_ALT_COLOR = BACK_FILL.brighter();
             SEL_FILL = new Color("#90");
             TARG_FILL = new Color("#80");
-            TEXT_COLOR = Color.WHITE;
-            TEXT_SEL_COLOR = Color.BLACK;
-            TEXT_TARG_COLOR = Color.WHITE;
+            setViewStyleString(View.class, "TextColor: WHITE");
+            setViewStyleStringForActive(TextView.class, "TextColor: BLACK");
+            setViewStyleStringForHover(TextView.class, "TextColor: WHITE");
 
             // Reset Button colors
             BUTTON_COLOR = new Color("#45494A");
             BUTTON_BORDER_COLOR = new Color("#BF");
             BUTTON_OVER_COLOR = BUTTON_COLOR.brighter();
             BUTTON_PRESSED_COLOR = BUTTON_OVER_COLOR.brighter();
+        }
+
+        @Override
+        protected void initViewStyles()
+        {
+            setViewStyleString(View.class, "TextColor: WHITE");
+            super.initViewStyles();
+
+            // TextField
+            setViewStyleString(TextField.class, "Fill: BLACK; TextColor: WHITE");
+
+            // TextView
+            setViewStyleString(TextView.class, "Fill: BLACK; TextColor: WHITE");
+            setViewStyleStringForActive(TextView.class, "TextColor: BLACK");
+            setViewStyleStringForHover(TextView.class, "TextColor: WHITE");
         }
     }
 
@@ -95,8 +110,6 @@ public class ViewThemes {
             CONTENT_ALT_COLOR = CONTENT_ALT_COLOR.blend(Color.BLUE, .075);
             SEL_FILL = BASE.blend(Color.WHITE, .6);
             TARG_FILL = BASE.blend(Color.WHITE, .7);
-            TEXT_SEL_COLOR = Color.BLACK;
-            TEXT_TARG_COLOR = Color.WHITE;
 
             // Reset Button colors
             Color blue = Color.BLUE;
@@ -106,6 +119,16 @@ public class ViewThemes {
             BUTTON_OVER_COLOR = new Color("#F8F8F8").blend(blue, fract);
             BUTTON_PRESSED_COLOR = new Color("#DFDFDF").blend(blue, fract);
             BUTTON_BORDER_PRESSED_COLOR = new Color("#87AFDA").blend(blue, fract);
+        }
+
+        @Override
+        protected void initViewStyles()
+        {
+            super.initViewStyles();
+
+            // Reset TextView
+            setViewStyleStringForActive(TextView.class, "TextColor: BLACK");
+            setViewStyleStringForHover(TextView.class, "TextColor: WHITE");
         }
     }
 
@@ -122,14 +145,23 @@ public class ViewThemes {
             GUTTER_FILL = Color.WHITE;
             SEL_FILL = new Color("#F0");
             TARG_FILL = new Color("#F8");
-            TEXT_SEL_COLOR = Color.BLACK;
-            TEXT_TARG_COLOR = Color.BLACK;
 
             // Reset Button colors
             BUTTON_COLOR = Color.WHITE;
             BUTTON_BORDER_COLOR = Color.BLACK;
             BUTTON_OVER_COLOR = new Color("#F8");
             BUTTON_PRESSED_COLOR = new Color("#F0");
+        }
+
+        @Override
+        protected void initViewStyles()
+        {
+            setViewStyleString(View.class, "TextColor: WHITE");
+            super.initViewStyles();
+
+            // Reset TextView
+            setViewStyleStringForActive(TextView.class, "TextColor: BLACK");
+            setViewStyleStringForHover(TextView.class, "TextColor: WHITE");
         }
     }
 }

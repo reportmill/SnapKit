@@ -90,10 +90,13 @@ public class FontPicker extends ViewController {
             _sel._sampleUC.setTextColor(Color.BLACK);
         }
         _sel = aFSV;
-        _sel.setFill(ViewUtils.getSelectFill());
-        _sel._label.setTextColor(ViewUtils.getTextSelectedColor());
-        _sel._sampleLC.setTextColor(ViewUtils.getTextSelectedColor());
-        _sel._sampleUC.setTextColor(ViewUtils.getTextSelectedColor());
+
+        // Set sample text color
+        ViewStyle selectedStyle = ViewTheme.get().getViewStyleForClassAndState(ListView.class, ViewStyle.State.Active);
+        _sel.setFill(selectedStyle.getFill());
+        _sel._label.setTextColor(selectedStyle.getTextColor());
+        _sel._sampleLC.setTextColor(selectedStyle.getTextColor());
+        _sel._sampleUC.setTextColor(selectedStyle.getTextColor());
     }
 
     /**
