@@ -32,7 +32,7 @@ public class ViewStyle implements Cloneable {
     private Map<String,ViewStyle> _states;
 
     // States
-    public enum State { Hover, Active, Link, Visited, Focus }
+    public enum State { Hover, Active, Alternate, Link, Visited, Focus }
 
     /**
      * Constructor.
@@ -185,13 +185,13 @@ public class ViewStyle implements Cloneable {
     public void setStyleString(String styleString)
     {
         // Get individual prop/value strings (separated by semi-colons)
-        String[] propStrings = styleString.split(";");
+        String[] propStrings = styleString.split("\\s*;\\s*");
 
         // Iterate over prop strings and add each
         for (String propString : propStrings) {
 
             // Get "name:value" string parts
-            String[] nameValueStrings = propString.split(":");
+            String[] nameValueStrings = propString.split("\\s*:\\s*");
 
             // If both prop/value parts found, get prop name and set value
             if (nameValueStrings.length == 2) {

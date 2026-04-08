@@ -165,13 +165,13 @@ public abstract class PropObject implements PropChange.DoChange {
     public void setPropsString(String propsString)
     {
         // Get individual prop/value strings (separated by semi-colons)
-        String[] propStrings = propsString.split(";");
+        String[] propStrings = propsString.split("\\s*;\\s*");
 
         // Iterate over prop strings and add each
         for (String propString : propStrings) {
 
             // Get "name:value" string parts
-            String[] nameValueStrings = propString.split(":");
+            String[] nameValueStrings = propString.split("\\s*:\\s*");
 
             // If both prop/value parts found, get prop name and set value
             if (nameValueStrings.length == 2) {

@@ -16,12 +16,6 @@ public class ViewTheme {
     // Far background fill, like gutters of scroll bar or tabview buttons
     protected Color GUTTER_FILL = new Color("#F0"); // Color.LIGHTGRAY
 
-    // Color for content like text fields, text areas, list areas
-    protected Color CONTENT_COLOR = Color.WHITE;
-
-    // Color for content like text fields, text areas, list areas
-    protected Color CONTENT_ALT_COLOR = Color.get("#F8");
-
     // Selection fill, like list items
     protected Color SEL_FILL = new Color("#DA"); // Color.LIGHTGRAY
 
@@ -90,12 +84,20 @@ public class ViewTheme {
     /**
      * Returns the color for content like text fields, text areas, list areas.
      */
-    public Color getContentColor()  { return CONTENT_COLOR; }
+    public Color getContentColor()
+    {
+        ViewStyle textViewStyle = getViewStyleForClass(TextView.class);
+        return textViewStyle.getFill().getColor();
+    }
 
     /**
      * Returns the color for alternate content, like list area alternate rows.
      */
-    public Color getContentAltColor()  { return CONTENT_ALT_COLOR; }
+    public Color getContentAltColor()
+    {
+        ViewStyle listViewAltStyle = getViewStyleForClassAndState(ListView.class, ViewStyle.State.Alternate);
+        return listViewAltStyle.getFill().getColor();
+    }
 
     /**
      * Returns the selection color.
@@ -160,7 +162,8 @@ public class ViewTheme {
         setViewStyleString(ImageView.class, "Align: CENTER");
 
         // ListView
-        setViewStyleString(ListView.class, "Fill: WHITE; Border: #CO 1");
+        setViewStyleString(ListView.class, "Fill: WHITE; Border: #CO");
+        setViewStyleStringForAlternate(ListView.class, "Fill: #F8");
         setViewStyleStringForActive(ListView.class, "Fill: #DA");
         setViewStyleStringForHover(ListView.class, "Fill: #E6; TextColor: WHITE");
 
@@ -339,6 +342,15 @@ public class ViewTheme {
     public void setViewStyleStringForActive(Class<? extends View> viewClass, String styleString)
     {
         ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, ViewStyle.State.Active);
+        viewStyle.setStyleString(styleString);
+    }
+
+    /**
+     * Sets a View active style string for given class and style string.
+     */
+    public void setViewStyleStringForAlternate(Class<? extends View> viewClass, String styleString)
+    {
+        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, ViewStyle.State.Alternate);
         viewStyle.setStyleString(styleString);
     }
 
