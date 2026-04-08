@@ -60,12 +60,6 @@ public class ViewThemes {
         @Override
         protected void initColors()
         {
-            // Reset Color constants
-            BACK_FILL = new Color("#2B");
-            GUTTER_FILL = BACK_FILL.darker().darker();
-            SEL_FILL = new Color("#90");
-            TARG_FILL = new Color("#80");
-
             // Reset Button colors
             BUTTON_COLOR = new Color("#45494A");
             BUTTON_BORDER_COLOR = new Color("#BF");
@@ -79,6 +73,10 @@ public class ViewThemes {
             setViewStyleString(View.class, "TextColor: WHITE");
             super.initViewStyles();
 
+            // RootView
+            setViewStyleString(RootView.class, "Fill: #2B");
+            setViewStyleStringForAlternate(RootView.class, "Fill: #15");
+
             // TextField
             setViewStyleString(TextField.class, "Fill: #2B; TextColor: WHITE");
 
@@ -91,8 +89,8 @@ public class ViewThemes {
             setViewStyleString(ListView.class, "Fill: #2B");
             String contentAltColorStr = Color.get("#2B").brighter().toColorString();
             setViewStyleStringForAlternate(ListView.class, "Fill: " + contentAltColorStr);
-            //setViewStyleStringForActive(ListView.class, "Fill: #DA");
-            //setViewStyleStringForHover(ListView.class, "Fill: #E6; TextColor: WHITE");
+            setViewStyleStringForActive(ListView.class, "Fill: #90");
+            setViewStyleStringForHover(ListView.class, "Fill: #80");
         }
     }
 
@@ -104,13 +102,6 @@ public class ViewThemes {
         @Override
         protected void initColors()
         {
-            // Reset Color constants
-            Color BASE = new Color(165, 179, 216).brighter();
-            BACK_FILL = BASE.blend(Color.WHITE, .8);
-            GUTTER_FILL = BASE.blend(Color.WHITE, .6);
-            SEL_FILL = BASE.blend(Color.WHITE, .6);
-            TARG_FILL = BASE.blend(Color.WHITE, .7);
-
             // Reset Button colors
             Color blue = Color.BLUE;
             double fract = .01;
@@ -126,6 +117,13 @@ public class ViewThemes {
         {
             super.initViewStyles();
 
+            // RootView
+            Color baseColor = new Color(165, 179, 216).brighter();
+            Color backColor = baseColor.blend(Color.WHITE, .8);
+            Color gutterColor = baseColor.blend(Color.WHITE, .6);
+            setViewStyleString(RootView.class, "Fill: " + backColor.toColorString());
+            setViewStyleStringForAlternate(RootView.class, "Fill: " + gutterColor.toColorString());
+
             // TextView
             Color contentColor = Color.WHITE.blend(Color.BLUE, .025);
             String contentColorStr = contentColor.toColorString();
@@ -137,6 +135,10 @@ public class ViewThemes {
             setViewStyleString(ListView.class, "Fill: " + contentColorStr);
             String contentAltColorStr = Color.get("#F8").blend(Color.BLUE, .075).toColorString();
             setViewStyleStringForAlternate(ListView.class, "Fill: " + contentAltColorStr);
+            String selectedColorStr = baseColor.blend(Color.WHITE, .6).toColorString();
+            String hoverColorString = baseColor.blend(Color.WHITE, .7).toColorString();
+            setViewStyleStringForActive(ListView.class, "Fill: " + selectedColorStr);
+            setViewStyleStringForHover(ListView.class, "Fill: " + hoverColorString);
         }
     }
 
@@ -148,12 +150,6 @@ public class ViewThemes {
         @Override
         protected void initColors()
         {
-            // Reset Color constants
-            BACK_FILL = Color.WHITE;
-            GUTTER_FILL = Color.WHITE;
-            SEL_FILL = new Color("#F0");
-            TARG_FILL = new Color("#F8");
-
             // Reset Button colors
             BUTTON_COLOR = Color.WHITE;
             BUTTON_BORDER_COLOR = Color.BLACK;
@@ -167,9 +163,17 @@ public class ViewThemes {
             setViewStyleString(View.class, "TextColor: WHITE");
             super.initViewStyles();
 
+            // RootView
+            setViewStyleString(RootView.class, "Fill: WHITE");
+            setViewStyleStringForAlternate(RootView.class, "Fill: WHITE");
+
             // TextView
             setViewStyleStringForActive(TextView.class, "TextColor: BLACK");
             setViewStyleStringForHover(TextView.class, "TextColor: WHITE");
+
+            // ListView
+            setViewStyleStringForActive(ListView.class, "Fill: #F0");
+            setViewStyleStringForHover(ListView.class, "Fill: #F8");
         }
     }
 }

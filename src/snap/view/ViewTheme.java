@@ -10,18 +10,6 @@ import java.util.*;
  */
 public class ViewTheme {
 
-    // Background fill
-    protected Color BACK_FILL = new Color("#FA");
-
-    // Far background fill, like gutters of scroll bar or tabview buttons
-    protected Color GUTTER_FILL = new Color("#F0"); // Color.LIGHTGRAY
-
-    // Selection fill, like list items
-    protected Color SEL_FILL = new Color("#DA"); // Color.LIGHTGRAY
-
-    // Targeted fill, like mouse over list items
-    protected Color TARG_FILL = new Color("#E6");
-
     // Main button color
     protected Color BUTTON_COLOR = Color.WHITE;
 
@@ -53,8 +41,7 @@ public class ViewTheme {
     {
         super();
 
-        // Create and initialize ViewStyles
-        _viewStyles = new HashMap<>();
+        // Initialize ViewStyles
         ViewStyle viewStyle = new ViewStyle();
         _viewStyles.put(View.class, viewStyle);
 
@@ -74,12 +61,20 @@ public class ViewTheme {
     /**
      * Returns the background fill.
      */
-    public Paint getBackFill()  { return BACK_FILL; }
+    public Paint getBackFill()
+    {
+        ViewStyle rootViewStyle = getViewStyleForClass(RootView.class);
+        return rootViewStyle.getFill();
+    }
 
     /**
      * Returns the fill for gutter areas like scrollbar background or tabview button bar background.
      */
-    public Paint getGutterFill()  { return GUTTER_FILL; }
+    public Paint getGutterFill()
+    {
+        ViewStyle rootViewAltStyle = getViewStyleForClassAndState(RootView.class, ViewStyle.State.Alternate);
+        return rootViewAltStyle.getFill();
+    }
 
     /**
      * Returns the color for content like text fields, text areas, list areas.
@@ -102,12 +97,20 @@ public class ViewTheme {
     /**
      * Returns the selection color.
      */
-    public Paint getSelectedFill()  { return SEL_FILL; }
+    public Paint getSelectedFill()
+    {
+        ViewStyle listViewActiveStyle = getViewStyleForClassAndState(ListView.class, ViewStyle.State.Active);
+        return listViewActiveStyle.getFill();
+    }
 
     /**
      * Returns the targeted color.
      */
-    public Paint getTargetedFill()  { return TARG_FILL; }
+    public Paint getTargetedFill()
+    {
+        ViewStyle listViewHoverStyle = getViewStyleForClassAndState(ListView.class, ViewStyle.State.Hover);
+        return listViewHoverStyle.getFill();
+    }
 
     /**
      * Returns the button color.
@@ -144,6 +147,10 @@ public class ViewTheme {
      */
     protected void initViewStyles()
     {
+        // RootView
+        setViewStyleString(RootView.class, "Fill: #FA");
+        setViewStyleStringForAlternate(RootView.class, "Fill: #F0");
+
         // Label, ButtonBase, RadioButton, CheckBox
         setViewStyleString(Label.class, "Align: CENTER_LEFT; Spacing: 4");
         setViewStyleString(ButtonBase.class, "Align: CENTER; Padding: 3; BorderRadius: 4");
