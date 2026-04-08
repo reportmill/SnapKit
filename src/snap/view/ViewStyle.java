@@ -97,9 +97,29 @@ public class ViewStyle implements Cloneable {
     public Color getTextColor()  { return _textColor; }
 
     /**
+     * Returns fill color.
+     */
+    public Color getFillColor()  { return _fill != null ? _fill.getColor() : null; }
+
+    /**
+     * Returns the border color.
+     */
+    public Color getBorderColor()  { return _border != null? _border.getColor() : null; }
+
+    /**
      * Returns the view style for given state.
      */
     public ViewStyle getStyleForState(State state)  { return getStyleForStateName(state.toString()); }
+
+    /**
+     * Returns the hover view style.
+     */
+    public ViewStyle getHoverStyle()  { return getStyleForStateName(State.Hover.toString()); }
+
+    /**
+     * Returns the active view style.
+     */
+    public ViewStyle getActiveStyle()  { return getStyleForStateName(State.Active.toString()); }
 
     /**
      * Returns the view style for given state name.

@@ -307,6 +307,11 @@ public class ButtonBase extends ParentView {
     /**
      * Paint Button.
      */
+    protected final void paintBack(Painter aPntr)  { }
+
+    /**
+     * Paint Button.
+     */
     protected final void paintFront(Painter aPntr)
     {
         paintButton(aPntr);

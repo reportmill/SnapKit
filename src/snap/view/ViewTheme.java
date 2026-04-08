@@ -10,21 +10,6 @@ import java.util.*;
  */
 public class ViewTheme {
 
-    // Main button color
-    protected Color BUTTON_COLOR = Color.WHITE;
-
-    // Button color when mouse over
-    protected Color BUTTON_OVER_COLOR = new Color("#F8F8F8");
-
-    // Button color when pressed
-    protected Color BUTTON_PRESSED_COLOR = new Color("#DFDFDF");
-
-    // Button border color
-    protected Color BUTTON_BORDER_COLOR = new Color("#BFBFBF");
-
-    // Button border pressed color
-    protected Color BUTTON_BORDER_PRESSED_COLOR = new Color("#87AFDA");
-
     // The ButtonPainter
     private ButtonPainter  _buttonPainter;
 
@@ -46,17 +31,11 @@ public class ViewTheme {
         _viewStyles.put(View.class, viewStyle);
 
         // Initialize styles
-        initColors();
         initViewStyles();
 
         // Create ButtonPainter
         _buttonPainter = new ButtonPainter(this);
     }
-
-    /**
-     * Initialize colors.
-     */
-    protected void initColors()  { }
 
     /**
      * Returns the background fill.
@@ -113,31 +92,6 @@ public class ViewTheme {
     }
 
     /**
-     * Returns the button color.
-     */
-    public Color getButtonColor()  { return BUTTON_COLOR; }
-
-    /**
-     * Returns the button over color.
-     */
-    public Color getButtonOverColor()  { return BUTTON_OVER_COLOR; }
-
-    /**
-     * Returns the button pressed color.
-     */
-    public Color getButtonPressedColor()  { return BUTTON_PRESSED_COLOR; }
-
-    /**
-     * Returns the button border color.
-     */
-    public Color getButtonBorderColor()  { return BUTTON_BORDER_COLOR; }
-
-    /**
-     * Returns the button border pressed color.
-     */
-    public Color getButtonBorderPressedColor()  { return BUTTON_BORDER_PRESSED_COLOR; }
-
-    /**
      * Returns the button painter.
      */
     public ButtonPainter getButtonPainter()  { return _buttonPainter; }
@@ -156,6 +110,11 @@ public class ViewTheme {
         setViewStyleString(ButtonBase.class, "Align: CENTER; Padding: 3; BorderRadius: 4");
         setViewStyleString(RadioButton.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
         setViewStyleString(CheckBox.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
+
+        // Button
+        setViewStyleString(Button.class, "Fill: WHITE; Border: #BF");
+        setViewStyleStringForHover(Button.class, "Fill: #F8");
+        setViewStyleStringForActive(Button.class, "Fill: #DF; Border: #87AFDA");
 
         // TextField
         setViewStyleString(TextField.class, "Align: CENTER_LEFT; Padding: 3; Fill: WHITE; Border: #C0; BorderRadius: 3");

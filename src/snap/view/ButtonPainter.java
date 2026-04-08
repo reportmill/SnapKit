@@ -12,9 +12,9 @@ public class ButtonPainter {
 
     // The Colors
     private Color BUTTON_COLOR;
+    private Color BUTTON_BORDER_COLOR;
     private Color BUTTON_OVER_COLOR;
     private Color BUTTON_PRESSED_COLOR;
-    private Color BUTTON_BORDER_COLOR;
     private Color BUTTON_BORDER_PRESSED_COLOR;
 
     // The center shape (RadioButton)
@@ -34,11 +34,12 @@ public class ButtonPainter {
     public ButtonPainter(ViewTheme aTheme)
     {
         super();
-        BUTTON_COLOR = aTheme.getButtonColor();
-        BUTTON_OVER_COLOR = aTheme.getButtonOverColor();
-        BUTTON_PRESSED_COLOR = aTheme.getButtonPressedColor();
-        BUTTON_BORDER_COLOR = aTheme.getButtonBorderColor();
-        BUTTON_BORDER_PRESSED_COLOR = aTheme.getButtonBorderPressedColor();
+        ViewStyle buttonStyle = aTheme.getViewStyleForClass(Button.class);
+        BUTTON_COLOR = buttonStyle.getFillColor();
+        BUTTON_BORDER_COLOR = buttonStyle.getBorderColor();
+        BUTTON_OVER_COLOR = buttonStyle.getHoverStyle().getFillColor();
+        BUTTON_PRESSED_COLOR = buttonStyle.getActiveStyle().getFillColor();
+        BUTTON_BORDER_PRESSED_COLOR = buttonStyle.getActiveStyle().getBorderColor();
     }
 
     /**

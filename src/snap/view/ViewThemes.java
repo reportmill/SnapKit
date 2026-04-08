@@ -58,16 +58,6 @@ public class ViewThemes {
     private static class DarkTheme extends ViewTheme {
 
         @Override
-        protected void initColors()
-        {
-            // Reset Button colors
-            BUTTON_COLOR = new Color("#45494A");
-            BUTTON_BORDER_COLOR = new Color("#BF");
-            BUTTON_OVER_COLOR = BUTTON_COLOR.brighter();
-            BUTTON_PRESSED_COLOR = BUTTON_OVER_COLOR.brighter();
-        }
-
-        @Override
         protected void initViewStyles()
         {
             setViewStyleString(View.class, "TextColor: WHITE");
@@ -76,6 +66,11 @@ public class ViewThemes {
             // RootView
             setViewStyleString(RootView.class, "Fill: #2B");
             setViewStyleStringForAlternate(RootView.class, "Fill: #15");
+
+            // Button
+            setViewStyleString(Button.class, "Fill: #45494A; Border: #BF");
+            setViewStyleStringForHover(Button.class, "Fill: #7D8080"); // button-fill.brighter
+            setViewStyleStringForActive(Button.class, "Fill: #A4A6A6; Border: #87AFDA"); // button-hover.brighter
 
             // TextField
             setViewStyleString(TextField.class, "Fill: #2B; TextColor: WHITE");
@@ -100,19 +95,6 @@ public class ViewThemes {
     private static class LightBlueTheme extends ViewTheme {
 
         @Override
-        protected void initColors()
-        {
-            // Reset Button colors
-            Color blue = Color.BLUE;
-            double fract = .01;
-            BUTTON_COLOR = Color.WHITE.blend(blue, fract);
-            BUTTON_BORDER_COLOR = new Color("#BFBFBF").blend(blue, fract);
-            BUTTON_OVER_COLOR = new Color("#F8F8F8").blend(blue, fract);
-            BUTTON_PRESSED_COLOR = new Color("#DFDFDF").blend(blue, fract);
-            BUTTON_BORDER_PRESSED_COLOR = new Color("#87AFDA").blend(blue, fract);
-        }
-
-        @Override
         protected void initViewStyles()
         {
             super.initViewStyles();
@@ -123,6 +105,11 @@ public class ViewThemes {
             Color gutterColor = baseColor.blend(Color.WHITE, .6);
             setViewStyleString(RootView.class, "Fill: " + backColor.toColorString());
             setViewStyleStringForAlternate(RootView.class, "Fill: " + gutterColor.toColorString());
+
+            // Button
+            setViewStyleString(Button.class, "Fill: #FCFCFF; Border: #BDBDC0");
+            setViewStyleStringForHover(Button.class, "Fill: #F6F6F8");
+            setViewStyleStringForActive(Button.class, "Fill: #DDDDDF; Border: #86ADDA");
 
             // TextView
             Color contentColor = Color.WHITE.blend(Color.BLUE, .025);
@@ -148,16 +135,6 @@ public class ViewThemes {
     private static class BlackAndWhiteTheme extends ViewTheme {
 
         @Override
-        protected void initColors()
-        {
-            // Reset Button colors
-            BUTTON_COLOR = Color.WHITE;
-            BUTTON_BORDER_COLOR = Color.BLACK;
-            BUTTON_OVER_COLOR = new Color("#F8");
-            BUTTON_PRESSED_COLOR = new Color("#F0");
-        }
-
-        @Override
         protected void initViewStyles()
         {
             setViewStyleString(View.class, "TextColor: WHITE");
@@ -166,6 +143,11 @@ public class ViewThemes {
             // RootView
             setViewStyleString(RootView.class, "Fill: WHITE");
             setViewStyleStringForAlternate(RootView.class, "Fill: WHITE");
+
+            // Button
+            setViewStyleString(Button.class, "Fill: WHITE; Border: BLACK");
+            setViewStyleStringForHover(Button.class, "Fill: #F8");
+            setViewStyleStringForActive(Button.class, "Fill: #F0");
 
             // TextView
             setViewStyleStringForActive(TextView.class, "TextColor: BLACK");

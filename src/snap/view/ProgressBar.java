@@ -25,14 +25,6 @@ public class ProgressBar extends View {
     public static final String Progress_Prop = "Progress";
     public static final String Indeterminate_Prop = "Indeterminate";
 
-    // ProgressBar fill normal
-    private static Color _pbc0 = Color.get("#efefef");
-    private static Color _pbc1 = Color.get("#fefefe");
-    private static Color _pbc2 = Color.get("#f7f7f7");
-    private static Color _pbc3 = Color.get("#e9e9e9");
-    private static GradientPaint.Stop[] _pbfStops = GradientPaint.getStops(0, _pbc0, .33, _pbc1, .66, _pbc2, 1, _pbc3);
-    public static Paint PROGRESS_BAR_FILL = new GradientPaint(.5, 0, .5, 1, _pbfStops);
-
     // ProgressBar fill for indeterminate
     private static Color _pb0 = Color.get("#008fbf");
     private static Color _pb1 = Color.get("#0096c9");
@@ -171,11 +163,12 @@ public class ProgressBar extends View {
         RoundRect pbarShape = new RoundRect(0, 0, pbarW, pbarH, getBorderRadius());
 
         // Paint fill
-        Color fillColor = ViewTheme.get().getButtonColor();
+        ViewStyle buttonStyle = ViewTheme.get().getViewStyleForClass(Button.class);
+        Color fillColor = buttonStyle.getFillColor();
         aPntr.fillWithPaint(pbarShape, fillColor);
 
         // Paint border
-        Color strokeColor = ViewTheme.get().getButtonBorderColor();
+        Color strokeColor = buttonStyle.getBorderColor();
         aPntr.drawWithPaint(pbarShape, strokeColor);
     }
 
