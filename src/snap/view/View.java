@@ -38,6 +38,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // The view scale from x and y
     private double  _scaleX, _scaleY;
 
+    // The style sheet for this view
+    private ViewStyle _style;
+
+    // The computed style for this view
+    private ComputedStyle _computedStyle;
+
     // The alignment of content in this view
     protected Pos  _align;
 
@@ -72,7 +78,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     private double  _prefWidth, _prefHeight;
 
     // The view fill
-    protected Paint _fill;
+    //protected Paint _fill;
 
     // The view border
     protected Border _border;
@@ -255,6 +261,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Initialize style props
         initStyleProps();
+        _style = new ViewStyle(this);
+        _computedStyle = new ComputedStyle(this);
     }
 
     /**
@@ -267,7 +275,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         _margin = viewStyle.getMargin();
         _padding = viewStyle.getPadding();
         _spacing = viewStyle.getSpacing();
-        _fill = viewStyle.getFill();
+        //_fill = viewStyle.getFill();
         _border = viewStyle.getBorder();
         _borderRadius = viewStyle.getBorderRadius();
         _font = viewStyle.getFont();
@@ -645,17 +653,29 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public ViewStyle getStyleForState(ViewStyle.State state)  { return getStyle().getStyleForState(state); }
 
     /**
+     * Returns the style for this view.
+     */
+    public ViewStyle getStyle2()  { return _style; }
+
+    /**
+     * Returns the computed style for this view.
+     */
+    protected ComputedStyle getComputedStyle()  { return _computedStyle; }
+
+    /**
      * Returns fill paint.
      */
-    public Paint getFill()  { return _fill; }
+    public Paint getFill()  { return _computedStyle.getFill(); }
 
     /**
      * Sets fill paint.
      */
     public void setFill(Paint aPaint)
     {
-        if (Objects.equals(aPaint, getFill())) return;
-        firePropChange(Fill_Prop, _fill, _fill = aPaint);
+        Paint oldFill = getFill();
+        if (Objects.equals(aPaint, oldFill)) return;
+        _style.setPropValue(Fill_Prop, aPaint);
+        firePropChange(Fill_Prop, oldFill, aPaint);
         repaint();
     }
 

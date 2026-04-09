@@ -22,7 +22,7 @@ public class PageView extends ChildView {
     public PageView()
     {
         super();
-        _fill = DEFAULT_PAGE_VIEW_FILL;
+        ViewTheme.get().getViewStyleForClass(getClass()).setPropValue(Fill_Prop, DEFAULT_PAGE_VIEW_FILL);
         _border = DEFAULT_PAGE_VIEW_BORDER;
         setEffect(new ShadowEffect().copySimple());
     }

@@ -14,6 +14,9 @@ import java.util.*;
  */
 public class ViewStyle implements Cloneable {
 
+    // The view that owns this style
+    private View _view;
+
     // The View class for this style
     private Class<? extends View> _viewClass;
 
@@ -49,6 +52,14 @@ public class ViewStyle implements Cloneable {
         _borderRadius = 0;
         _font = null;
         _textColor = Color.BLACK;
+    }
+
+    /**
+     * Constructor.
+     */
+    public ViewStyle(View aView)
+    {
+        _view = aView;
     }
 
     /**
@@ -170,6 +181,9 @@ public class ViewStyle implements Cloneable {
             case View.TextColor_Prop -> _textColor = Color.get(aValue);
             default -> System.out.println("ViewStyle.setPropValue: Unknown property name: " + propName);
         }
+
+        if (_view != null)
+            _view.getComputedStyle().resetStyleProp(propName);
     }
 
     /**
