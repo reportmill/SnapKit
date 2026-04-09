@@ -4,7 +4,6 @@
 package snap.viewx;
 import snap.geom.HPos;
 import snap.geom.Insets;
-import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Image;
 import snap.props.PropChange;
@@ -98,7 +97,12 @@ public class TextPane extends ViewController {
     /**
      * Creates the TextArea.
      */
-    protected TextArea createTextArea()  { return new TextArea(true); }
+    protected TextArea createTextArea()
+    {
+        TextArea textArea = new TextArea(true);
+        textArea.setFill(ViewTheme.get().getViewStyleForClass(TextView.class).getFill());
+        return textArea;
+    }
 
     /**
      * Shows the toolbar.
@@ -263,7 +267,6 @@ public class TextPane extends ViewController {
 
         // Create/config TextArea
         _textArea.setPadding(new Insets(5));
-        _textArea.setFill(Color.WHITE);
         _textArea.setGrowWidth(true);
         _textArea.setEditable(true);
         _textArea.setSyncTextFont(false);
