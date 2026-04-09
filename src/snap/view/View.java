@@ -633,7 +633,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         Paint oldFill = getFill();
         if (Objects.equals(aPaint, oldFill)) return;
-        _style.setPropValue(Fill_Prop, aPaint);
+        _style.setPropValue(Fill_Prop, aPaint != null ? aPaint : ComputedStyle.NULL_FILL);
         firePropChange(Fill_Prop, oldFill, aPaint);
         repaint();
     }
@@ -659,7 +659,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         Border oldBorder = getBorder();
         if (Objects.equals(aBorder, oldBorder)) return;
-        _style.setPropValue(Border_Prop, aBorder);
+        _style.setPropValue(Border_Prop, aBorder != null ? aBorder : ComputedStyle.NULL_BORDER);
         firePropChange(Border_Prop, oldBorder, aBorder);
         relayout();
         relayoutParent();

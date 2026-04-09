@@ -43,8 +43,9 @@ public class ComputedStyle {
     // Cached text color
     private Color _textColor;
 
-    // Constants
-    private static final Paint NULL_FILL = new Color(0, 0, 0);
+    // A placeholder for a null fill and border
+    public static final Color NULL_FILL = new Color(.92);
+    public static final Border NULL_BORDER = Border.createLineBorder(Color.PINK, 1);
 
     /**
      * Constructor.
@@ -81,12 +82,12 @@ public class ComputedStyle {
     /**
      * Returns the fill.
      */
-    public Paint getFill()  { return _fill; }
+    public Paint getFill()  { return _fill == NULL_FILL ? null : _fill; }
 
     /**
      * Returns the border.
      */
-    public Border getBorder()  { return _border; }
+    public Border getBorder()  { return _border == NULL_BORDER ? null : _border; }
 
     /**
      * Returns the border radius.
