@@ -4,7 +4,6 @@
 package snap.view;
 import java.util.*;
 import snap.geom.Insets;
-import snap.geom.Pos;
 import snap.util.*;
 
 /**
@@ -30,7 +29,6 @@ public class DocView extends ParentView {
     public DocView()
     {
         super();
-        _align = Pos.CENTER_LEFT;
     }
 
     /**

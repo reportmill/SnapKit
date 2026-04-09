@@ -24,10 +24,10 @@ public class ViewStyle implements Cloneable {
     protected Pos _align;
     protected Insets _margin;
     protected Insets _padding;
-    protected double _spacing;
+    protected Double _spacing;
     protected Paint _fill;
     protected Border _border;
-    protected double _borderRadius;
+    protected Double _borderRadius;
     protected Font _font;
     protected Color _textColor;
 
@@ -46,10 +46,10 @@ public class ViewStyle implements Cloneable {
         _align = Pos.TOP_LEFT;
         _margin = Insets.EMPTY;
         _padding = Insets.EMPTY;
-        _spacing = 0;
+        _spacing = 0d;
         _fill = null;
         _border = null;
-        _borderRadius = 0;
+        _borderRadius = 0d;
         _font = null;
         _textColor = Color.BLACK;
     }
@@ -95,7 +95,7 @@ public class ViewStyle implements Cloneable {
     /**
      * Returns the radius for border rounded corners.
      */
-    public double getBorderRadius()  { return _borderRadius; }
+    public Double getBorderRadius()  { return _borderRadius; }
 
     /**
      * Returns the font.
@@ -173,10 +173,10 @@ public class ViewStyle implements Cloneable {
             case View.Align_Prop -> _align = Pos.of(aValue);
             case View.Margin_Prop -> _margin = Insets.of(aValue);
             case View.Padding_Prop -> _padding = Insets.of(aValue);
-            case View.Spacing_Prop -> _spacing = Convert.doubleValue(aValue);
+            case View.Spacing_Prop -> _spacing = Convert.getDouble(aValue);
             case View.Fill_Prop -> _fill = Paint.of(aValue);
             case View.Border_Prop -> _border = Border.of(aValue);
-            case View.BorderRadius_Prop -> _borderRadius = Convert.doubleValue(aValue);
+            case View.BorderRadius_Prop -> _borderRadius = Convert.getDouble(aValue);
             case View.Font_Prop -> _font = Font.of(aValue);
             case View.TextColor_Prop -> _textColor = Color.get(aValue);
             default -> System.out.println("ViewStyle.setPropValue: Unknown property name: " + propName);

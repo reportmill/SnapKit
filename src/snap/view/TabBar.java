@@ -52,7 +52,6 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     {
         super();
         setActionable(true);
-        _padding = DEFAULT_PADDING;
 
         // Create and configure TabsBox
         _tabsBox = new TabRowView();

@@ -77,6 +77,7 @@ public class TextArea extends ParentView {
         // Create TextAdapter
         _textAdapter = createTextAdapter(_textModel);
         _textAdapter.setView(this);
+        _textAdapter.setTextColor(getTextColor());
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
         _textAdapter.addTextModelPropChangeListener(this::handleTextModelPropChange);
     }
@@ -266,21 +267,14 @@ public class TextArea extends ParentView {
     public void setTextFont(Font aFont)  { _textAdapter.setTextFont(aFont); }
 
     /**
-     * Returns the color of the current selection or cursor.
-     */
-    @Override
-    public Color getTextColor()  { return _textAdapter.getTextColor(); }
-
-    /**
      * Sets the color of the current selection or cursor.
      */
     @Override
     public void setTextColor(Color aColor)
     {
-        Color textColor = getTextColor();
-        if (Objects.equals(aColor, textColor)) return;
+        if (Objects.equals(aColor, getTextColor())) return;
+        super.setTextColor(aColor);
         _textAdapter.setTextColor(aColor);
-        firePropChange(TextColor_Prop, textColor, aColor);
     }
 
     /**

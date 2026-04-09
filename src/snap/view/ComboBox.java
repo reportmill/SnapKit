@@ -52,7 +52,6 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     public ComboBox()
     {
         super();
-        _align = Pos.CENTER_LEFT;
 
         setActionable(true);
         getButton();

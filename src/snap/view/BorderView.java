@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.geom.Pos;
 
 /**
  * A View subclass to manage subviews along edges (top, bottom, left, right) and center.
@@ -25,7 +24,6 @@ public class BorderView extends ParentView {
     public BorderView()
     {
         super();
-        _align = Pos.CENTER;
     }
 
     /**

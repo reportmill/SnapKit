@@ -6,7 +6,7 @@ import snap.geom.Rect;
 import snap.gfx.*;
 import snap.view.Label;
 import snap.view.ViewTheme;
-import snap.view.ViewUtils;
+import java.util.Objects;
 
 /**
  * This class holds a String and TextStyle and provides painting and sizing information.
@@ -107,6 +107,7 @@ public class StyledString implements Cloneable {
      */
     public void setTextColor(Color aColor)
     {
+        if (Objects.equals(aColor, getTextColor())) return;
         TextStyle textStyle = _textStyle.copyForStyleValue(aColor);
         setTextStyle(textStyle);
     }

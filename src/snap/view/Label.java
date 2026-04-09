@@ -45,6 +45,7 @@ public class Label extends ParentView {
         _textArea = new TextArea(TextModel.createDefaultTextModel(false));
         _textArea.setAlign(getAlign());
         _textArea.setVisible(false);
+        _textArea.setTextColor(getTextColor());
         _textArea.getTextAdapter().setScrollable(false);
         _textArea.getTextAdapter().addTextModelPropChangeListener(this::handleTextModelPropChange);
         addChild(_textArea);
@@ -119,16 +120,15 @@ public class Label extends ParentView {
     }
 
     /**
-     * Returns the text color.
-     */
-    @Override
-    public Color getTextColor()  { return _textArea.getTextColor(); }
-
-    /**
      * Sets the text color.
      */
     @Override
-    public void setTextColor(Color aColor)  { _textArea.setTextColor(aColor); }
+    public void setTextColor(Color aColor)
+    {
+        if (Objects.equals(aColor, getTextColor()))
+        super.setTextColor(aColor);
+        _textArea.setTextColor(aColor);
+    }
 
     /**
      * Sets the text style to style updated for style string.

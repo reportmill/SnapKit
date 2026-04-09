@@ -78,6 +78,7 @@ public class ButtonBase extends ParentView {
     {
         if (_label != null) return _label;
         _label = new Label();
+        _label.setTextColor(getTextColor());
         addChild(_label);
         return _label;
     }
@@ -133,16 +134,15 @@ public class ButtonBase extends ParentView {
     public void setGraphicAfter(View aGraphic)  { getLabel().setGraphicAfter(aGraphic); }
 
     /**
-     * Returns the text color.
-     */
-    @Override
-    public Color getTextColor()  { return getLabel().getTextColor(); }
-
-    /**
      * Sets the text color.
      */
     @Override
-    public void setTextColor(Color aColor)  { getLabel().setTextColor(aColor); }
+    public void setTextColor(Color aColor)
+    {
+        if (Objects.equals(aColor, getTextColor())) return;
+        super.setTextColor(aColor);
+        getLabel().setTextColor(aColor);
+    }
 
     /**
      * Returns the image name, if loaded from local resource.

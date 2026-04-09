@@ -25,7 +25,7 @@ public class MenuBar extends ParentView {
     public MenuBar()
     {
         super();
-        _font = DEFAULT_MENU_BAR_FONT;
+        //_font = DEFAULT_MENU_BAR_FONT;
     }
 
     /**

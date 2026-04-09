@@ -294,7 +294,7 @@ public class ParentView extends View {
     public void setFont(Font aFont)
     {
         // Do normal version
-        if (Objects.equals(aFont, _font)) return;
+        if (Objects.equals(aFont, getStyle().getFont())) return;
         super.setFont(aFont);
 
         // Notify children that inherit font

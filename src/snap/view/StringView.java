@@ -3,7 +3,6 @@
  */
 package snap.view;
 import snap.geom.Insets;
-import snap.geom.Pos;
 import snap.geom.Rect;
 import snap.geom.Transform;
 import snap.gfx.*;
@@ -42,11 +41,11 @@ public class StringView extends View implements Cloneable {
     public StringView()
     {
         super();
-        _align = Pos.CENTER_LEFT;
 
         // Create TextRun
         _styledString = new StyledString();
         _styledString.setFontSizing(DEFAULT_FONT_SIZING);
+        _styledString.setTextColor(getTextColor());
     }
 
     /**
@@ -101,23 +100,14 @@ public class StringView extends View implements Cloneable {
     }
 
     /**
-     * Returns the text color.
-     */
-    @Override
-    public Color getTextColor()
-    {
-        return _styledString.getTextColor();
-    }
-
-    /**
      * Sets the text color.
      */
     @Override
     public void setTextColor(Color aColor)
     {
         if (Objects.equals(aColor, getTextColor())) return;
-        TextStyle textStyle = getTextStyle().copyForStyleKeyValue(TextStyle.COLOR_KEY, aColor);
-        setTextStyle(textStyle);
+        super.setTextColor(aColor);
+        _styledString.setTextColor(aColor);
     }
 
     /**

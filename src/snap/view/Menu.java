@@ -35,7 +35,7 @@ public class Menu extends MenuItem {
     public Menu()
     {
         super();
-        _font = DEFAULT_MENU_FONT;
+        //_font = DEFAULT_MENU_FONT;
     }
 
     /**

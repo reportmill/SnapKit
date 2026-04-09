@@ -130,7 +130,7 @@ public class MenuItem extends ButtonBase implements Cloneable {
         super.setTargeted(aValue);
 
         // Update Fill/TextColor to show Targetted
-        ViewStyle style = aValue ? getStyleForState(ViewStyle.State.Hover) : getStyle();
+        ViewStyle style = aValue ? getClassStyleForState(ViewStyle.State.Hover) : getClassStyle();
         setFill(aValue ? style.getFill() : null);
         getLabel().setTextColor(style.getTextColor());
 

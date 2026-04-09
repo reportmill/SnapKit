@@ -1,6 +1,4 @@
 package snap.view;
-import snap.geom.Insets;
-import snap.geom.Pos;
 import snap.gfx.*;
 import snap.viewx.ColorDock;
 import java.util.*;
@@ -134,11 +132,12 @@ public class ViewTheme {
         setViewStyleStringForHover(ListView.class, "Fill: #E6; TextColor: WHITE");
 
         // MenuBar
-        setViewStyleString(MenuBar.class, "Padding: 2, 10, 2, 10");
+        setViewStyleString(MenuBar.class, "Padding: 2, 10, 2, 10; Font: Arial 13");
 
         // MenuItem
         setViewStyleString(MenuItem.class, "Align: CENTER_LEFT; Padding: 4, 8, 4, 6");
         setViewStyleStringForHover(MenuItem.class, "Fill: #E6; TextColor: WHITE");
+        setViewStyleString(Menu.class, "Font: Arial 13");
 
         // ScrollView
         setViewStyleString(ScrollView.class, "Border: #C0");
@@ -154,17 +153,30 @@ public class ViewTheme {
         setViewStyleString(TreeView.class, "Fill: WHITE; Border: #C0");
         setViewStyleString(TreeCol.class, "Fill: null; Border: null");
 
-        // BoxView, RowView, ColView, StackView, TitleView
+        // BoxView, RowView, ColView, StackView, TitleView, BorderView
         setViewStyleString(BoxView.class, "Align: CENTER");
         setViewStyleString(RowView.class, "Align: CENTER_LEFT");
         setViewStyleString(ColView.class, "Align: TOP_LEFT");
         setViewStyleString(StackView.class, "Align: CENTER");
         setViewStyleString(TitleView.class, "Padding: 2");
+        setViewStyleString(BorderView.class, "Align: CENTER");
 
         // ProgressBar, ThumbWheel, ColorDock
         setViewStyleString(ProgressBar.class, "BorderRadius: 4");
-        setViewStyleString(ThumbWheel.class, "Fill: getBackFill");
+        setViewStyleString(ThumbWheel.class, "Fill: #FA");
         setViewStyleString(ColorDock.class, "Border: bevel");
+
+        // TabBar
+        setViewStyleString(TabBar.class, "Padding: 3, 3, 3, 5");
+
+        // DocView, PageView
+        setViewStyleString(DocView.class, "Align: CENTER_LEFT");
+        setViewStyleString(PageView.class, "Fill: WHITE; Border: BLACK");
+
+        // ArrowView, StringView, WrapView
+        setViewStyleString(ArrowView.class, "Align: CENTER");
+        setViewStyleString(StringView.class, "Align: CENTER_LEFT");
+        setViewStyleString(WrapView.class, "Align: CENTER");
     }
 
     /**

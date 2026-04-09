@@ -44,18 +44,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // The computed style for this view
     private ComputedStyle _computedStyle;
 
-    // The alignment of content in this view
-    protected Pos  _align;
-
-    // The margin to be provided around this view
-    protected Insets  _margin;
-
-    // The padding between the border and content in this view
-    protected Insets  _padding;
-
-    // Spacing between children
-    protected double  _spacing;
-
     // The horizontal position this view would prefer to take when inside a pane
     private HPos  _leanX;
 
@@ -77,23 +65,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // The view preferred width and height
     private double  _prefWidth, _prefHeight;
 
-    // The view fill
-    //protected Paint _fill;
-
-    // The view border
-    protected Border _border;
-
-    // The radius for border rounded corners
-    protected double  _borderRadius;
-
     // The ViewEffect to manage effect rendering for this view and current effect
     private ViewEffect _effect;
 
     // The opacity
     private double  _opacity;
-
-    // The view font
-    protected Font  _font;
 
     // Whether view is disabled
     private boolean  _disabled;
@@ -259,26 +235,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         _opacity = 1;
         _overflow = Overflow.Visible;
 
-        // Initialize style props
-        initStyleProps();
+        // Create styles
         _style = new ViewStyle(this);
         _computedStyle = new ComputedStyle(this);
-    }
-
-    /**
-     * Initializes style props.
-     */
-    protected void initStyleProps()
-    {
-        ViewStyle viewStyle = ViewTheme.get().getViewStyleForClass(getClass());
-        _align = viewStyle.getAlign();
-        _margin = viewStyle.getMargin();
-        _padding = viewStyle.getPadding();
-        _spacing = viewStyle.getSpacing();
-        //_fill = viewStyle.getFill();
-        _border = viewStyle.getBorder();
-        _borderRadius = viewStyle.getBorderRadius();
-        _font = viewStyle.getFont();
     }
 
     /**
@@ -643,19 +602,19 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
-     * Returns the style for this view.
+     * Returns the class style for this view.
      */
-    public ViewStyle getStyle()  { return ViewTheme.get().getViewStyleForClass(getClass()); }
+    public ViewStyle getClassStyle()  { return ViewTheme.get().getViewStyleForClass(getClass()); }
+
+    /**
+     * Returns the class style for this view and given state.
+     */
+    public ViewStyle getClassStyleForState(ViewStyle.State state)  { return getClassStyle().getStyleForState(state); }
 
     /**
      * Returns the style for this view.
      */
-    public ViewStyle getStyleForState(ViewStyle.State state)  { return getStyle().getStyleForState(state); }
-
-    /**
-     * Returns the style for this view.
-     */
-    public ViewStyle getStyle2()  { return _style; }
+    public ViewStyle getStyle()  { return _style; }
 
     /**
      * Returns the computed style for this view.
@@ -691,15 +650,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the border.
      */
-    public Border getBorder()  { return _border; }
+    public Border getBorder()  { return _computedStyle.getBorder(); }
 
     /**
      * Sets the border.
      */
     public void setBorder(Border aBorder)
     {
-        if (Objects.equals(aBorder, getBorder())) return;
-        firePropChange(Border_Prop, _border, _border = aBorder);
+        Border oldBorder = getBorder();
+        if (Objects.equals(aBorder, oldBorder)) return;
+        _style.setPropValue(Border_Prop, aBorder);
+        firePropChange(Border_Prop, oldBorder, aBorder);
         relayout();
         relayoutParent();
         repaint();
@@ -717,15 +678,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the radius for border rounded corners.
      */
-    public double getBorderRadius()  { return _borderRadius; }
+    public double getBorderRadius()  { return _computedStyle.getBorderRadius(); }
 
     /**
      * Sets the radius for border rounded corners.
      */
     public void setBorderRadius(double aValue)
     {
-        if (aValue == getBorderRadius()) return;
-        firePropChange(BorderRadius_Prop, _borderRadius, _borderRadius = aValue);
+        double oldBorderRadius = getBorderRadius();
+        if (aValue == oldBorderRadius) return;
+        _style.setPropValue(BorderRadius_Prop, aValue);
+        firePropChange(BorderRadius_Prop, oldBorderRadius, aValue);
         repaint();
     }
 
@@ -780,14 +743,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether font has been explicitly set for this view.
      */
-    public boolean isFontSet()  { return _font != null; }
+    public boolean isFontSet()  { return _style.getFont() != null; }
 
     /**
      * Returns the font for the view (defaults to parent font).
      */
     public Font getFont()
     {
-        if (_font != null) return _font;
+        Font font = _computedStyle.getFont();
+        if (font != null) return font;
         return getDefaultFont();
     }
 
@@ -797,10 +761,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setFont(Font aFont)
     {
         // If already set, just return
-        if (Objects.equals(aFont, _font)) return;
+        Font oldFont = getFont();
+        if (Objects.equals(aFont, oldFont)) return;
 
         // Set, fire prop change, relayout parent, repaint
-        firePropChange(Font_Prop, _font, _font = aFont);
+        _style.setPropValue(Font_Prop, aFont);
+        firePropChange(Font_Prop, oldFont, aFont);
         relayoutParent();
         repaint();
     }
@@ -1891,15 +1857,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the alignment.
      */
-    public Pos getAlign()  { return _align; }
+    public Pos getAlign()  { return _computedStyle.getAlign(); }
 
     /**
      * Sets the alignment.
      */
     public void setAlign(Pos aPos)
     {
-        if (aPos == _align) return;
-        firePropChange(Align_Prop, _align, _align = aPos);
+        Pos oldAlign = getAlign();
+        if (aPos == getAlign()) return;
+        _style.setPropValue(Align_Prop, aPos);
+        firePropChange(Align_Prop, oldAlign, aPos);
         relayout();
     }
 
@@ -1938,7 +1906,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the spacing insets requested between parent/neighbors and the border of this view.
      */
-    public Insets getMargin()  { return _margin; }
+    public Insets getMargin()  { return _computedStyle.getMargin(); }
 
     /**
      * Sets the spacing insets requested between parent/neighbors and the border of this view.
@@ -1958,17 +1926,19 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             theIns = (Insets) getPropDefault(Margin_Prop);
 
         // If value already set, just return
-        if (Objects.equals(theIns, _margin)) return;
+        Insets oldMargin = getMargin();
+        if (Objects.equals(theIns, oldMargin)) return;
 
         // Set value, fire prop change, relayout parent
-        firePropChange(Margin_Prop, _margin, _margin = theIns);
+        _style.setPropValue(Margin_Prop, theIns);
+        firePropChange(Margin_Prop, oldMargin, theIns);
         relayoutParent();
     }
 
     /**
      * Returns the spacing insets between the border of this view and it's content.
      */
-    public Insets getPadding()  { return _padding; }
+    public Insets getPadding()  { return _computedStyle.getPadding(); }
 
     /**
      * Sets the spacing insets between the border of this view and it's content.
@@ -1988,10 +1958,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             theIns = (Insets) getPropDefault(Padding_Prop);
 
         // If value already set, just return
-        if (Objects.equals(theIns, _padding)) return;
+        Insets oldPadding = getPadding();
+        if (Objects.equals(theIns, oldPadding)) return;
 
         // Set value, fire prop change, relayout, relayout parent
-        firePropChange(Padding_Prop, _padding, _padding = theIns);
+        _style.setPropValue(Padding_Prop, theIns);
+        firePropChange(Padding_Prop, oldPadding, theIns);
         relayout();
         relayoutParent();
     }
@@ -1999,15 +1971,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the spacing for content (usually children).
      */
-    public double getSpacing()  { return _spacing; }
+    public double getSpacing()  { return _computedStyle.getSpacing(); }
 
     /**
      * Sets the spacing for content (usually children).
      */
     public void setSpacing(double aValue)
     {
-        if (aValue == _spacing) return;
-        firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
+        double oldSpacing = getSpacing();
+        if (aValue == oldSpacing) return;
+        _style.setPropValue(Spacing_Prop, aValue);
+        firePropChange(Spacing_Prop, oldSpacing, aValue);
         relayout();
         relayoutParent();
     }
@@ -2513,12 +2487,19 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the text color.
      */
-    public Color getTextColor()  { return getStyle().getTextColor(); }
+    public Color getTextColor()  { return _computedStyle.getTextColor(); }
 
     /**
      * Sets the text color.
      */
-    public void setTextColor(Color aColor)  { }
+    public void setTextColor(Color aColor)
+    {
+        Color oldTextColor = getTextColor();
+        if (Objects.equals(oldTextColor, aColor)) return;
+        _style.setPropValue(TextColor_Prop, aColor);
+        firePropChange(TextColor_Prop, oldTextColor, aColor);
+        repaint();
+    }
 
     /**
      * Returns the event adapter for view.

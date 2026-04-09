@@ -29,7 +29,6 @@ public class WrapView extends ParentView {
     public WrapView(View aView)
     {
         super();
-        _align = Pos.CENTER;
         _content = aView;
         addChild(aView);
     }

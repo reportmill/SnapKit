@@ -22,8 +22,6 @@ public class PageView extends ChildView {
     public PageView()
     {
         super();
-        ViewTheme.get().getViewStyleForClass(getClass()).setPropValue(Fill_Prop, DEFAULT_PAGE_VIEW_FILL);
-        _border = DEFAULT_PAGE_VIEW_BORDER;
         setEffect(new ShadowEffect().copySimple());
     }
 
