@@ -8,9 +8,6 @@ import java.util.*;
  */
 public class ViewTheme {
 
-    // The ButtonPainter
-    private ButtonPainter  _buttonPainter;
-
     // Map of class to style
     private Map<Class<?>, ViewStyle> _viewStyles = new HashMap<>();
 
@@ -30,9 +27,6 @@ public class ViewTheme {
 
         // Initialize styles
         initViewStyles();
-
-        // Create ButtonPainter
-        _buttonPainter = new ButtonPainter(this);
     }
 
     /**
@@ -88,11 +82,6 @@ public class ViewTheme {
         ViewStyle listViewHoverStyle = getViewStyleForClassAndState(ListView.class, PseudoClass.Hover);
         return listViewHoverStyle.getFill();
     }
-
-    /**
-     * Returns the button painter.
-     */
-    public ButtonPainter getButtonPainter()  { return _buttonPainter; }
 
     /**
      * Initialize ViewStyles.

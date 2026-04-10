@@ -349,10 +349,8 @@ public class ButtonBase extends ParentView {
     protected void paintButton(Painter aPntr)
     {
         // If ShowArea, use ButtonArea to paint actual button background
-        if (isShowArea()) {
-            ButtonPainter buttonPainter = ViewTheme.get().getButtonPainter();
-            buttonPainter.paintButton(aPntr, this);
-        }
+        if (isShowArea())
+            ButtonPainter.paintButton(aPntr, this);
 
         // If not ShowArea, paint rects for Selected, Pressed or Targeted
         else if (isPressed() || isSelected() || isTargeted()) {

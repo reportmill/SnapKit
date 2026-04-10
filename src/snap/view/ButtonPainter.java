@@ -7,9 +7,6 @@ import snap.gfx.*;
  */
 public class ButtonPainter {
 
-    // The center shape (RadioButton)
-    private Shape  _radioShape;
-
     // Button states
     public static final int BUTTON_NORMAL = ButtonBase.BUTTON_NORMAL;
     public static final int BUTTON_OVER = ButtonBase.BUTTON_OVER;
@@ -19,17 +16,9 @@ public class ButtonPainter {
     private static Color BUTTON_MOUSE_PRESSED_PAINT = Color.get("#0000001A");
 
     /**
-     * Constructor.
-     */
-    public ButtonPainter(ViewTheme aTheme)
-    {
-        super();
-    }
-
-    /**
      * Draws a button for the given rect with an option for pressed.
      */
-    public void paintButton(Painter aPntr, ButtonBase aButton)
+    public static void paintButton(Painter aPntr, ButtonBase aButton)
     {
         // Get button rect
         RoundRect buttonRect = getButtonRect(aButton);
@@ -47,36 +36,7 @@ public class ButtonPainter {
 
         // Paint selected
         if (aButton.isSelected())
-            paintButtonSelected(aPntr, aButton, buttonRect);
-    }
-
-    /**
-     * Draws a button for the given rect with an option for pressed.
-     */
-    private void paintButtonSelected(Painter aPntr, ButtonBase _button, RectBase buttonRect)
-    {
-        // Handle CheckBox
-        if (_button instanceof CheckBox || _button instanceof CheckBoxMenuItem) {
-            Stroke oldStroke = aPntr.getStroke();
-            int OFFSET = 5;
-            int SIZE = 11;
-            double x = buttonRect.x;
-            double y = buttonRect.y;
-            aPntr.setStroke(Stroke.Stroke2);
-            aPntr.drawLineWithPaint(x + OFFSET, y + OFFSET, x + SIZE, y + SIZE, Color.BLACK);
-            aPntr.drawLine(x + SIZE, y + OFFSET, x + OFFSET, y + SIZE);
-            aPntr.setStroke(oldStroke);
-        }
-
-        // Handle RadioButton
-        else if (_button instanceof RadioButton) {
-            if (_radioShape == null)
-                _radioShape = new Ellipse(3, 3, 10, 10);
-            aPntr.fillWithPaint(_radioShape, Color.DARKGRAY);
-        }
-
-        // Handle other
-        else aPntr.fillWithPaint(buttonRect, BUTTON_MOUSE_PRESSED_PAINT);
+            aPntr.fillWithPaint(buttonRect, BUTTON_MOUSE_PRESSED_PAINT);
     }
 
     /**
@@ -84,45 +44,13 @@ public class ButtonPainter {
      */
     private static RoundRect getButtonRect(ButtonBase aButton)
     {
-        // Declare round rect parts
-        double rectX = 0;
-        double rectY = 0;
+        // Create rect
         double rectW = aButton.getWidth();
         double rectH = aButton.getHeight();
         double rectRad = aButton.getBorderRadius();
-        Pos pos = aButton.getPosition();
-
-        // Handle CheckBoxMenuItem
-        if (aButton instanceof CheckBoxMenuItem) {
-            double SIZE = 16;
-            Insets ins = aButton.getInsetsAll();
-            rectX = ins.left;
-            rectY = ins.top + 2 + Math.round((rectH - ins.getHeight() - 2 - SIZE - 2) / 2);
-            rectW = rectH = SIZE;
-            rectRad = 3;
-            pos = null;
-        }
-
-        // Handle CheckBox
-        else if (aButton instanceof CheckBox) {
-            double SIZE = 16;
-            rectW = rectH = SIZE;
-            rectRad = 3;
-            pos = null;
-        }
-
-        // Handle RadioButton
-        else if (aButton instanceof RadioButton) {
-            double SIZE = 16;
-            rectW = rectH = SIZE;
-            rectRad = 8;
-            pos = null;
-        }
-
-        // Create rect
-        RoundRect rect = new RoundRect(rectX, rectY, rectW, rectH, rectRad);
-        if (pos != null)
-            rect = rect.copyForPosition(pos);
+        RoundRect rect = new RoundRect(0, 0, rectW, rectH, rectRad);
+        if (aButton.getPosition() != null)
+            rect = rect.copyForPosition(aButton.getPosition());
 
         // Return
         return rect;

@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.geom.Pos;
+import snap.geom.*;
 import snap.gfx.*;
 import snap.props.PropSet;
 
@@ -12,7 +12,11 @@ import snap.props.PropSet;
 public class RadioButton extends ToggleButton {
 
     // The placeholder view for actual checkbox bounds
-    private Label  _radio;
+    private Label _radio;
+
+    // The RadioButton rect
+    private static final RoundRect RADIO_BUTTON_RECT = new RoundRect(0, 0, 16, 16, 8);
+    private static final Ellipse RADIO_INTERIOR_SHAPE = new Ellipse(3, 3, 10, 10);
 
     // Constants for overridden defaults
     private static final boolean DEFAULT_RADIO_BUTTON_SHOW_AREA = false;
@@ -49,9 +53,27 @@ public class RadioButton extends ToggleButton {
         double buttonX = _radio.getX();
         double buttonY = _radio.getY();
         aPntr.translate(buttonX, buttonY);
-        ButtonPainter buttonPainter = ViewTheme.get().getButtonPainter();
-        buttonPainter.paintButton(aPntr, this);
+        paintRadioButton(aPntr);
         aPntr.translate(-buttonX, -buttonY);
+    }
+
+    /**
+     * Paints radio button.
+     */
+    private void paintRadioButton(Painter aPntr)
+    {
+        // Paint outside fill and stroke
+        Color fillColor = getFillColor();
+        if (fillColor != null)
+            aPntr.fillWithPaint(RADIO_BUTTON_RECT, fillColor);
+        Border border = getBorder();
+        Color strokeColor = border != null ? border.getColor() : null;
+        if (strokeColor != null)
+            aPntr.drawWithPaint(RADIO_BUTTON_RECT, strokeColor);
+
+        // Paint selected
+        if (isSelected())
+            aPntr.fillWithPaint(RADIO_INTERIOR_SHAPE, Color.DARKGRAY);
     }
 
     /**

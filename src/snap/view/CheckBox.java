@@ -3,6 +3,8 @@
  */
 package snap.view;
 import snap.geom.Pos;
+import snap.geom.RectBase;
+import snap.geom.RoundRect;
 import snap.gfx.*;
 import snap.props.PropSet;
 
@@ -13,6 +15,9 @@ public class CheckBox extends ToggleButton {
     
     // The placeholder view for actual checkbox bounds
     private Label  _check;
+
+    // Constant for CheckBox rect
+    private static final RoundRect CHECK_BOX_RECT = new RoundRect(0, 0, 16, 16, 3);
     
     // Constants for overridden defaults
     private static final boolean DEFAULT_CHECK_BOX_SHOW_AREA = false;
@@ -45,8 +50,7 @@ public class CheckBox extends ToggleButton {
         double buttonX = _check.getX();
         double buttonY = _check.getY();
         aPntr.translate(buttonX, buttonY);
-        ButtonPainter buttonPainter = ViewTheme.get().getButtonPainter();
-        buttonPainter.paintButton(aPntr, this);
+        paintCheckBoxButton(aPntr, this);
         aPntr.translate(-buttonX, -buttonY);
     }
 
@@ -86,5 +90,32 @@ public class CheckBox extends ToggleButton {
 
         // Override ShowArea
         aPropSet.getPropForName(ShowArea_Prop).setDefaultValue(DEFAULT_CHECK_BOX_SHOW_AREA);
+    }
+
+    /**
+     * Draws checkbox for given checkbox or checkbox menuitem.
+     */
+    public static void paintCheckBoxButton(Painter aPntr, ButtonBase aButton)
+    {
+        // Get fill color and paint fill
+        Color fillColor = aButton.getFillColor();
+        if (fillColor != null)
+            aPntr.fillWithPaint(CHECK_BOX_RECT, fillColor);
+
+        // Get stroke color and paint stroke
+        Border border = aButton.getBorder();
+        Color strokeColor = border != null ? border.getColor() : null;
+        if (strokeColor != null)
+            aPntr.drawWithPaint(CHECK_BOX_RECT, strokeColor);
+
+        // Paint selected
+        if (aButton.isSelected()) {
+            Stroke oldStroke = aPntr.getStroke();
+            int OFFSET = 5, SIZE = 11;
+            aPntr.setStroke(Stroke.Stroke2);
+            aPntr.drawLineWithPaint(OFFSET, OFFSET, SIZE, SIZE, Color.BLACK);
+            aPntr.drawLine(SIZE, OFFSET, OFFSET, SIZE);
+            aPntr.setStroke(oldStroke);
+        }
     }
 }
