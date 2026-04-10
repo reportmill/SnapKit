@@ -609,7 +609,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the class style for this view and given state.
      */
-    public ViewStyle getClassStyleForState(ViewStyle.State state)  { return getClassStyle().getStyleForState(state); }
+    public ViewStyle getClassStyleForState(PseudoClass pseudoClass)  { return getClassStyle().getStyleForState(pseudoClass); }
 
     /**
      * Returns the style for this view.

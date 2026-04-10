@@ -49,7 +49,7 @@ public class ViewTheme {
      */
     public Paint getGutterFill()
     {
-        ViewStyle rootViewAltStyle = getViewStyleForClassAndState(RootView.class, ViewStyle.State.Alternate);
+        ViewStyle rootViewAltStyle = getViewStyleForClassAndState(RootView.class, PseudoClass.Alternate);
         return rootViewAltStyle.getFill();
     }
 
@@ -67,7 +67,7 @@ public class ViewTheme {
      */
     public Color getContentAltColor()
     {
-        ViewStyle listViewAltStyle = getViewStyleForClassAndState(ListView.class, ViewStyle.State.Alternate);
+        ViewStyle listViewAltStyle = getViewStyleForClassAndState(ListView.class, PseudoClass.Alternate);
         return listViewAltStyle.getFill().getColor();
     }
 
@@ -76,7 +76,7 @@ public class ViewTheme {
      */
     public Paint getSelectedFill()
     {
-        ViewStyle listViewActiveStyle = getViewStyleForClassAndState(ListView.class, ViewStyle.State.Active);
+        ViewStyle listViewActiveStyle = getViewStyleForClassAndState(ListView.class, PseudoClass.Active);
         return listViewActiveStyle.getFill();
     }
 
@@ -85,7 +85,7 @@ public class ViewTheme {
      */
     public Paint getTargetedFill()
     {
-        ViewStyle listViewHoverStyle = getViewStyleForClassAndState(ListView.class, ViewStyle.State.Hover);
+        ViewStyle listViewHoverStyle = getViewStyleForClassAndState(ListView.class, PseudoClass.Hover);
         return listViewHoverStyle.getFill();
     }
 
@@ -196,9 +196,9 @@ public class ViewTheme {
     /**
      * Returns the ViewStyle for given class and state.
      */
-    public ViewStyle getViewStyleForClassAndState(Class<? extends View> viewClass, ViewStyle.State state)
+    public ViewStyle getViewStyleForClassAndState(Class<? extends View> viewClass, PseudoClass pseudoClass)
     {
-        return getViewStyleForClass(viewClass).getStyleForState(state);
+        return getViewStyleForClass(viewClass).getStyleForState(pseudoClass);
     }
 
     /**
@@ -215,7 +215,7 @@ public class ViewTheme {
      */
     public void setViewStyleStringForHover(Class<? extends View> viewClass, String styleString)
     {
-        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, ViewStyle.State.Hover);
+        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, PseudoClass.Hover);
         viewStyle.setStyleString(styleString);
     }
 
@@ -224,7 +224,7 @@ public class ViewTheme {
      */
     public void setViewStyleStringForActive(Class<? extends View> viewClass, String styleString)
     {
-        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, ViewStyle.State.Active);
+        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, PseudoClass.Active);
         viewStyle.setStyleString(styleString);
     }
 
@@ -233,16 +233,16 @@ public class ViewTheme {
      */
     public void setViewStyleStringForAlternate(Class<? extends View> viewClass, String styleString)
     {
-        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, ViewStyle.State.Alternate);
+        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, PseudoClass.Alternate);
         viewStyle.setStyleString(styleString);
     }
 
     /**
      * Sets a View style string for given class and style string.
      */
-    public void setViewStyleStringForClassAndState(Class<? extends View> viewClass, ViewStyle.State state, String styleString)
+    public void setViewStyleStringForClassAndState(Class<? extends View> viewClass, PseudoClass pseudoClass, String styleString)
     {
-        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, state);
+        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, pseudoClass);
         viewStyle.setStyleString(styleString);
     }
 

@@ -34,9 +34,6 @@ public class ViewStyle implements Cloneable {
     // The states available from this style
     private Map<String,ViewStyle> _states;
 
-    // States
-    public enum State { Hover, Active, Alternate, Link, Visited, Focus }
-
     /**
      * Constructor.
      */
@@ -120,17 +117,17 @@ public class ViewStyle implements Cloneable {
     /**
      * Returns the view style for given state.
      */
-    public ViewStyle getStyleForState(State state)  { return getStyleForStateName(state.toString()); }
+    public ViewStyle getStyleForState(PseudoClass pseudoClass)  { return getStyleForStateName(pseudoClass.toString()); }
 
     /**
      * Returns the hover view style.
      */
-    public ViewStyle getHoverStyle()  { return getStyleForStateName(State.Hover.toString()); }
+    public ViewStyle getHoverStyle()  { return getStyleForStateName(PseudoClass.Hover.toString()); }
 
     /**
      * Returns the active view style.
      */
-    public ViewStyle getActiveStyle()  { return getStyleForStateName(State.Active.toString()); }
+    public ViewStyle getActiveStyle()  { return getStyleForStateName(PseudoClass.Active.toString()); }
 
     /**
      * Returns the view style for given state name.
