@@ -44,6 +44,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // The computed style for this view
     private ComputedStyle _computedStyle;
 
+    // The current style state
+    private PseudoClass _styleState;
+
     // The horizontal position this view would prefer to take when inside a pane
     private HPos  _leanX;
 
@@ -236,6 +239,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         _overflow = Overflow.Visible;
 
         // Create styles
+        _styleState = PseudoClass.Normal;
         _style = new ViewStyle(this);
         _computedStyle = new ComputedStyle(this);
     }
@@ -620,6 +624,22 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      * Returns the computed style for this view.
      */
     protected ComputedStyle getComputedStyle()  { return _computedStyle; }
+
+    /**
+     * Returns the style state.
+     */
+    public PseudoClass getStyleState()  { return _styleState; }
+
+    /**
+     * Returns the style state.
+     */
+    protected void setStyleState(PseudoClass styleState)
+    {
+        if (styleState == getStyleState()) return;
+        _styleState = styleState;
+        _style = _style.getStyleForState(_styleState);
+        _computedStyle.resetAll();
+    }
 
     /**
      * Returns fill paint.

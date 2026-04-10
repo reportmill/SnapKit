@@ -1,21 +1,11 @@
 package snap.view;
 import snap.geom.*;
-import snap.gfx.Color;
-import snap.gfx.GradientPaint;
-import snap.gfx.Painter;
-import snap.gfx.Stroke;
+import snap.gfx.*;
 
 /**
  * This class has methods to paint a button.
  */
 public class ButtonPainter {
-
-    // The Colors
-    private Color BUTTON_COLOR;
-    private Color BUTTON_BORDER_COLOR;
-    private Color BUTTON_OVER_COLOR;
-    private Color BUTTON_PRESSED_COLOR;
-    private Color BUTTON_BORDER_PRESSED_COLOR;
 
     // The center shape (RadioButton)
     private Shape  _radioShape;
@@ -34,12 +24,6 @@ public class ButtonPainter {
     public ButtonPainter(ViewTheme aTheme)
     {
         super();
-        ViewStyle buttonStyle = aTheme.getViewStyleForClass(Button.class);
-        BUTTON_COLOR = buttonStyle.getFillColor();
-        BUTTON_BORDER_COLOR = buttonStyle.getBorderColor();
-        BUTTON_OVER_COLOR = buttonStyle.getHoverStyle().getFillColor();
-        BUTTON_PRESSED_COLOR = buttonStyle.getActiveStyle().getFillColor();
-        BUTTON_BORDER_PRESSED_COLOR = buttonStyle.getActiveStyle().getBorderColor();
     }
 
     /**
@@ -47,47 +31,23 @@ public class ButtonPainter {
      */
     public void paintButton(Painter aPntr, ButtonBase aButton)
     {
-        // Get button state
-        int state = aButton.isPressed() ? BUTTON_PRESSED : aButton.isTargeted() ? BUTTON_OVER : BUTTON_NORMAL;
-        boolean isSelected = aButton.isSelected();
-
         // Get button rect
         RoundRect buttonRect = getButtonRect(aButton);
 
-        // Paint button
-        paintButtonInShape(aPntr, buttonRect, state, isSelected);
+        // Get fill color and paint fill
+        Color fillColor = aButton.getFillColor();
+        if (fillColor != null)
+            aPntr.fillWithPaint(buttonRect, fillColor);
+
+        // Get stroke color and paint stroke
+        Border border = aButton.getBorder();
+        Color strokeColor = border != null ? border.getColor() : null;
+        if (strokeColor != null)
+            aPntr.drawWithPaint(buttonRect, strokeColor);
 
         // Paint selected
         if (aButton.isSelected())
             paintButtonSelected(aPntr, aButton, buttonRect);
-    }
-
-    /**
-     * Draws a button for the given rect with an option for pressed.
-     */
-    private void paintButtonInShape(Painter aPntr, RectBase buttonRect, int aState, boolean isSelected)
-    {
-        // Get fill color
-        Color fillColor = BUTTON_COLOR;
-        if (aState == BUTTON_OVER)
-            fillColor = BUTTON_OVER_COLOR;
-        else if (aState == BUTTON_PRESSED)
-            fillColor = BUTTON_PRESSED_COLOR;
-        else if (isSelected)
-            fillColor = BUTTON_PRESSED_COLOR;
-
-        // Get shape and paint fill
-        aPntr.fillWithPaint(buttonRect, fillColor);
-
-        // Get stroke color
-        Color strokeColor = BUTTON_BORDER_COLOR;
-        if (aState == BUTTON_OVER)
-            strokeColor = BUTTON_BORDER_PRESSED_COLOR;
-        else if (aState == BUTTON_PRESSED)
-            strokeColor = BUTTON_BORDER_PRESSED_COLOR;
-
-        // Draw outer ring
-        aPntr.drawWithPaint(buttonRect, strokeColor);
     }
 
     /**

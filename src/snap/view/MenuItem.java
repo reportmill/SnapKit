@@ -3,6 +3,7 @@
  */
 package snap.view;
 import snap.geom.HPos;
+import snap.geom.Shape;
 import snap.gfx.*;
 import snap.props.PropSet;
 import snap.util.*;
@@ -52,7 +53,8 @@ public class MenuItem extends ButtonBase implements Cloneable {
     public void setSelected(boolean aValue)
     {
         if (isSelected() == aValue) return;
-        firePropChange(Selected_Prop, _selected, _selected=aValue);
+        firePropChange(Selected_Prop, _selected, _selected = aValue);
+        resetStyleState();
     }
 
     /**
@@ -131,7 +133,6 @@ public class MenuItem extends ButtonBase implements Cloneable {
 
         // Update Fill/TextColor to show Targetted
         ViewStyle style = aValue ? getClassStyleForState(PseudoClass.Hover) : getClassStyle();
-        setFill(aValue ? style.getFill() : null);
         getLabel().setTextColor(style.getTextColor());
 
         // If targeting this menu item, hide any previous peer menu popups
@@ -148,6 +149,11 @@ public class MenuItem extends ButtonBase implements Cloneable {
     @Override
     protected void paintButton(Painter aPntr)
     {
+        if (isTargeted()) {
+            Shape shape = getBoundsShape();
+            Paint fill = getFill();
+            aPntr.fillWithPaint(shape, fill);
+        }
         if (isSeparator())
             paintSeparator(aPntr);
     }

@@ -103,16 +103,25 @@ public class ViewTheme {
         setViewStyleString(RootView.class, "Fill: #FA");
         setViewStyleStringForAlternate(RootView.class, "Fill: #F0");
 
-        // Label, ButtonBase, RadioButton, CheckBox
+        // Label, ButtonBase
         setViewStyleString(Label.class, "Align: CENTER_LEFT; Spacing: 4");
         setViewStyleString(ButtonBase.class, "Align: CENTER; Padding: 3; BorderRadius: 4");
-        setViewStyleString(RadioButton.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
-        setViewStyleString(CheckBox.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
 
         // Button
         setViewStyleString(Button.class, "Fill: WHITE; Border: #BF");
         setViewStyleStringForHover(Button.class, "Fill: #F8");
         setViewStyleStringForActive(Button.class, "Fill: #DF; Border: #87AFDA");
+        setViewStyleStringForSelected(Button.class, "Fill: #DF; Border: #87AFDA");
+
+        // ToggleButton
+        setViewStyleString(ToggleButton.class, "Fill: WHITE; Border: #BF");
+        setViewStyleStringForHover(ToggleButton.class, "Fill: #F8");
+        setViewStyleStringForActive(ToggleButton.class, "Fill: #DF; Border: #87AFDA");
+        setViewStyleStringForSelected(ToggleButton.class, "Fill: #DF; Border: #87AFDA");
+
+        // RadioButton, CheckBox
+        setViewStyleString(RadioButton.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
+        setViewStyleString(CheckBox.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
 
         // TextField
         setViewStyleString(TextField.class, "Align: CENTER_LEFT; Padding: 3; Fill: WHITE; Border: #C0; BorderRadius: 3");
@@ -225,6 +234,15 @@ public class ViewTheme {
     public void setViewStyleStringForActive(Class<? extends View> viewClass, String styleString)
     {
         ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, PseudoClass.Active);
+        viewStyle.setStyleString(styleString);
+    }
+
+    /**
+     * Sets a View active style string for given class and style string.
+     */
+    public void setViewStyleStringForSelected(Class<? extends View> viewClass, String styleString)
+    {
+        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, PseudoClass.Selected);
         viewStyle.setStyleString(styleString);
     }
 

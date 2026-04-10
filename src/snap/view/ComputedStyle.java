@@ -13,9 +13,6 @@ public class ComputedStyle {
     // The View
     private View _view;
 
-    // The view style
-    private ViewStyle _viewStyle;
-
     // Cached align
     private Pos _align;
 
@@ -47,16 +44,17 @@ public class ComputedStyle {
     public static final Color NULL_FILL = new Color(.92);
     public static final Border NULL_BORDER = Border.createLineBorder(Color.PINK, 1);
 
+    // All properties
+    private static List<String> ALL_PROPS = List.of(View.Align_Prop, View.Margin_Prop, View.Padding_Prop,
+            View.Spacing_Prop, View.Fill_Prop, View.Border_Prop, View.BorderRadius_Prop, View.Font_Prop, View.TextColor_Prop);
+
     /**
      * Constructor.
      */
     public ComputedStyle(View aView)
     {
         _view = aView;
-        _viewStyle = aView.getStyle();
-
-        List.of(View.Align_Prop, View.Margin_Prop, View.Padding_Prop, View.Spacing_Prop, View.Fill_Prop, View.Border_Prop,
-                View.BorderRadius_Prop, View.Font_Prop, View.TextColor_Prop).forEach(this::resetStyleProp);
+        resetAll();
     }
 
     /**
@@ -105,6 +103,14 @@ public class ComputedStyle {
     public Color getTextColor()  { return _textColor; }
 
     /**
+     * Resets all properties.
+     */
+    public void resetAll()
+    {
+        ALL_PROPS.forEach(this::resetStyleProp);
+    }
+
+    /**
      * Called to mark given prop dirty.
      */
     public void resetStyleProp(String propName)
@@ -127,9 +133,10 @@ public class ComputedStyle {
      */
     private Object computeValueForPropName(String propName)
     {
-        Object value = _viewStyle.getPropValue(propName);
+        ViewStyle viewStyle = _view.getStyle();
+        Object value = viewStyle.getPropValue(propName);
         if (value == null) {
-            ViewStyle classStyle = ViewTheme.get().getViewStyleForClass(_view.getClass());
+            ViewStyle classStyle = ViewTheme.get().getViewStyleForClassAndState(_view.getClass(), _view.getStyleState());
             value = classStyle.getPropValue(propName);
         }
         return value;

@@ -48,6 +48,7 @@ public class ToggleButton extends ButtonBase {
         if (aValue == isSelected()) return;
         firePropChange(Selected_Prop, _selected, _selected = aValue);
         repaint();
+        resetStyleState();
     }
 
     /**

@@ -20,6 +20,12 @@ public class ViewStyle implements Cloneable {
     // The View class for this style
     private Class<? extends View> _viewClass;
 
+    // The state of this style
+    private PseudoClass _state = PseudoClass.Normal;
+
+    // The normal style
+    private ViewStyle _normalStyle;
+
     // Properties
     protected Pos _align;
     protected Insets _margin;
@@ -40,6 +46,7 @@ public class ViewStyle implements Cloneable {
     public ViewStyle()
     {
         _viewClass = View.class;
+        _normalStyle = this;
         _align = Pos.TOP_LEFT;
         _margin = Insets.EMPTY;
         _padding = Insets.EMPTY;
@@ -57,6 +64,8 @@ public class ViewStyle implements Cloneable {
     public ViewStyle(View aView)
     {
         _view = aView;
+        _viewClass = aView.getClass();
+        _normalStyle = this;
     }
 
     /**
@@ -134,11 +143,17 @@ public class ViewStyle implements Cloneable {
      */
     public ViewStyle getStyleForStateName(String stateName)
     {
+        if (stateName.equals("Normal"))
+            return _normalStyle;
+        if (this != _normalStyle)
+            return _normalStyle.getStyleForStateName(stateName);
+
         if (_states == null) _states = new HashMap<>();
         ViewStyle style = _states.get(stateName);
         if (style != null)
             return style;
         _states.put(stateName, style = clone());
+        style._state = PseudoClass.valueOf(stateName);
         return style;
     }
 
@@ -280,7 +295,9 @@ public class ViewStyle implements Cloneable {
     @Override
     public String toString()
     {
-        return _viewClass.getSimpleName() + " Style";
+        if (_state == PseudoClass.Normal)
+            return _viewClass.getSimpleName() + " Style";
+        return _viewClass.getSimpleName() + ':' + _state + " Style";
     }
 
     /**
@@ -309,6 +326,7 @@ public class ViewStyle implements Cloneable {
             ViewStyle superClassStyle = getViewStyleForClassMapAndClass(viewStyles, (Class<? extends View>) superClass);
             ViewStyle viewClassStyle = superClassStyle.clone();
             viewClassStyle._viewClass = viewClass;
+            viewClassStyle._normalStyle = viewClassStyle;
             return viewClassStyle;
         }
 

@@ -214,6 +214,7 @@ public class ButtonBase extends ParentView {
         if (aValue == _pressed) return;
         firePropChange(Pressed_Prop, _pressed, _pressed = aValue);
         repaint();
+        resetStyleState();
     }
 
     /**
@@ -229,6 +230,7 @@ public class ButtonBase extends ParentView {
         if (aValue == _targeted) return;
         firePropChange(Targeted_Prop, _targeted, _targeted = aValue);
         repaint();
+        resetStyleState();
     }
 
     /**
@@ -305,6 +307,30 @@ public class ButtonBase extends ParentView {
     }
 
     /**
+     * Resets the style state.
+     */
+    protected void resetStyleState()
+    {
+        PseudoClass styleState = determineStyleState();
+        if (styleState != getStyleState())
+            setStyleState(styleState);
+    }
+
+    /**
+     * Returns the style state.
+     */
+    private PseudoClass determineStyleState()
+    {
+        if (isSelected())
+            return PseudoClass.Selected;
+        if (isPressed())
+            return PseudoClass.Active;
+        if (isTargeted())
+            return PseudoClass.Hover;
+        return PseudoClass.Normal;
+    }
+
+    /**
      * Paint Button.
      */
     protected final void paintBack(Painter aPntr)  { }
@@ -328,26 +354,13 @@ public class ButtonBase extends ParentView {
             buttonPainter.paintButton(aPntr, this);
         }
 
-        // If not ShowArea, paint rects for Pressed or Targeted
-        else {
-
-            // If pressed, paint background
-            if (isPressed() || isSelected()) {
-                Shape shape = getBoundsShape();
-                Paint fill = ViewUtils.getSelectFill();
-                aPntr.fillWithPaint(shape, fill);
-                if (getBorder() != null)
-                    getBorder().paint(aPntr, shape);
-            }
-
-            // If Targeted, paint border
-            else if (isTargeted()) {
-                Shape shape = getBoundsShape();
-                Paint fill = ViewUtils.getTargetFill();
-                aPntr.fillWithPaint(shape, fill);
-                if (getBorder() != null)
-                    getBorder().paint(aPntr, shape);
-            }
+        // If not ShowArea, paint rects for Selected, Pressed or Targeted
+        else if (isPressed() || isSelected() || isTargeted()) {
+            Shape shape = getBoundsShape();
+            Paint fill = isTargeted() ? ViewUtils.getTargetFill() : ViewUtils.getSelectFill();
+            aPntr.fillWithPaint(shape, fill);
+            if (getBorder() != null)
+                getBorder().paint(aPntr, shape);
         }
     }
 

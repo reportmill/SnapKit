@@ -1,4 +1,6 @@
 package snap.view;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class represents the name of a style state.
@@ -8,14 +10,18 @@ public class PseudoClass {
     // The name
     private final String _name;
 
+    // All instances map
+    private static Map<String,PseudoClass> _pseudoClasses = new HashMap<>();
+
     // Common classes
-    public static final PseudoClass Hover = new PseudoClass("Hover");
-    public static final PseudoClass Active = new PseudoClass("Active");
-    public static final PseudoClass Selected = new PseudoClass("Selected");
-    public static final PseudoClass Alternate = new PseudoClass("Alternate");
-    public static final PseudoClass Link = new PseudoClass("Link");
-    public static final PseudoClass Visited = new PseudoClass("Visited");
-    public static final PseudoClass Focus = new PseudoClass("Focus");
+    public static final PseudoClass Normal = valueOf("Normal");
+    public static final PseudoClass Hover = valueOf("Hover");
+    public static final PseudoClass Active = valueOf("Active");
+    public static final PseudoClass Selected = valueOf("Selected");
+    public static final PseudoClass Alternate = valueOf("Alternate");
+    public static final PseudoClass Link = valueOf("Link");
+    public static final PseudoClass Visited = valueOf("Visited");
+    public static final PseudoClass Focus = valueOf("Focus");
 
     /**
      * Constructor.
@@ -37,7 +43,14 @@ public class PseudoClass {
     public String toString()  { return _name; }
 
     /**
-     * Returns a pseudo class for given string.
+     * Returns the pseudo class for given string.
      */
-    public static PseudoClass valueOf(String name) { return new PseudoClass(name); }
+    public static PseudoClass valueOf(String name)
+    {
+        PseudoClass pseudoClass = _pseudoClasses.get(name);
+        if (pseudoClass != null)
+            return pseudoClass;
+        _pseudoClasses.put(name, pseudoClass = new PseudoClass(name));
+        return pseudoClass;
+    }
 }
