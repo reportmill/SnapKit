@@ -26,6 +26,9 @@ public class ViewStyle implements Cloneable {
     // The normal style
     private ViewStyle _normalStyle;
 
+    // The states available from this style
+    private Map<String,ViewStyle> _states;
+
     // Properties
     protected Pos _align;
     protected Insets _margin;
@@ -36,9 +39,6 @@ public class ViewStyle implements Cloneable {
     protected Double _borderRadius;
     protected Font _font;
     protected Color _textColor;
-
-    // The states available from this style
-    private Map<String,ViewStyle> _states;
 
     /**
      * Constructor.
@@ -285,8 +285,11 @@ public class ViewStyle implements Cloneable {
     @Override
     public ViewStyle clone()
     {
-        try { return (ViewStyle) super.clone(); }
+        ViewStyle clone;
+        try { clone = (ViewStyle) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
+        clone._states = null;
+        return clone;
     }
 
     /**

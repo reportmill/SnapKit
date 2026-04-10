@@ -124,7 +124,7 @@ public class ViewTheme {
         setViewStyleString(ImageView.class, "Align: CENTER");
 
         // ListView
-        setViewStyleString(ListView.class, "Fill: WHITE; Border: #CO");
+        setViewStyleString(ListView.class, "Fill: WHITE; Border: #C0");
         setViewStyleStringForAlternate(ListView.class, "Fill: #F8");
         setViewStyleStringForActive(ListView.class, "Fill: #DA");
         setViewStyleStringForHover(ListView.class, "Fill: #E6; TextColor: WHITE");
@@ -196,7 +196,8 @@ public class ViewTheme {
      */
     public ViewStyle getViewStyleForClassAndState(Class<? extends View> viewClass, PseudoClass pseudoClass)
     {
-        return getViewStyleForClass(viewClass).getStyleForState(pseudoClass);
+        ViewStyle viewStyle = getViewStyleForClass(viewClass);
+        return viewStyle.getStyleForState(pseudoClass);
     }
 
     /**
