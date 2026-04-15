@@ -14,6 +14,9 @@ public class ComputedStyle {
     // The View
     private View _view;
 
+    // The style state
+    private PseudoClass _viewState;
+
     // The computed values
     private Map<String,Object> _computedValues = new HashMap<>();
 
@@ -91,6 +94,26 @@ public class ComputedStyle {
     public Color getTextColor()  { return getComputedValue(View.TextColor_Prop, Color.class); }
 
     /**
+     * Returns the hover style.
+     */
+    public ComputedStyle getHoverStyle()  { return getStyleForState(PseudoClass.Hover); }
+
+    /**
+     * Returns the active style.
+     */
+    public ComputedStyle getActiveStyle()  { return getStyleForState(PseudoClass.Active); }
+
+    /**
+     * Returns the computed style for given state.
+     */
+    public ComputedStyle getStyleForState(PseudoClass viewSate)
+    {
+        ComputedStyle styleForState = new ComputedStyle(_view);
+        styleForState._viewState = viewSate;
+        return styleForState;
+    }
+
+    /**
      * Resets all properties.
      */
     public void resetAll()
@@ -133,9 +156,13 @@ public class ComputedStyle {
     private Object computeValueForPropName(String propName)
     {
         ViewStyle viewStyle = _view.getStyle();
+        if (_viewState != null)
+            viewStyle = viewStyle.getStyleForState(_viewState);
         Object value = viewStyle.getPropValue(propName);
         if (value == null) {
             ViewStyle classStyle = ViewTheme.get().getStyleForClassAndState(_view.getClass(), _view.getStyleState());
+            if (_viewState != null)
+                classStyle = classStyle.getStyleForState(_viewState);
             value = classStyle.getPropValue(propName);
         }
         return value;
