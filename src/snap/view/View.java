@@ -608,7 +608,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the class style for this view.
      */
-    public ViewStyle getClassStyle()  { return ViewTheme.get().getViewStyleForClass(getClass()); }
+    public ViewStyle getClassStyle()  { return ViewTheme.get().getStyleForClass(getClass()); }
 
     /**
      * Returns the class style for this view and given state.
@@ -2880,7 +2880,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         //aPropSet.addPropNamed(Showing_Prop, boolean.class, false).setSkipArchival(true);
 
         // Set style defaults from ViewTheme
-        ViewStyle viewStyle = ViewTheme.get().getViewStyleForClass(getClass());
+        ViewStyle viewStyle = ViewTheme.get().getStyleForClass(getClass());
         aPropSet.getPropForName(Align_Prop).setDefaultValue(viewStyle.getAlign());
         aPropSet.getPropForName(Margin_Prop).setDefaultValue(viewStyle.getMargin());
         aPropSet.getPropForName(Padding_Prop).setDefaultValue(viewStyle.getPadding());
@@ -3107,7 +3107,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             return getDefaultFont();
 
         // Forward to current style
-        ViewStyle viewStyle = ViewTheme.get().getViewStyleForClass(getClass());
+        ViewStyle viewStyle = ViewTheme.get().getStyleForClass(getClass());
         return viewStyle.getPropDefaultForView(this, aPropName);
     }
 

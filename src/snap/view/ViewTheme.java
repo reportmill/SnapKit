@@ -34,7 +34,7 @@ public class ViewTheme {
      */
     public Paint getBackFill()
     {
-        ViewStyle rootViewStyle = getViewStyleForClass(RootView.class);
+        ViewStyle rootViewStyle = getStyleForClass(RootView.class);
         return rootViewStyle.getFill();
     }
 
@@ -43,7 +43,7 @@ public class ViewTheme {
      */
     public Paint getGutterFill()
     {
-        ViewStyle rootViewAltStyle = getViewStyleForClassAndState(RootView.class, PseudoClass.Alternate);
+        ViewStyle rootViewAltStyle = getStyleForClassAndState(RootView.class, PseudoClass.Alternate);
         return rootViewAltStyle.getFill();
     }
 
@@ -52,7 +52,7 @@ public class ViewTheme {
      */
     public Color getContentColor()
     {
-        ViewStyle textViewStyle = getViewStyleForClass(TextView.class);
+        ViewStyle textViewStyle = getStyleForClass(TextView.class);
         return textViewStyle.getFill().getColor();
     }
 
@@ -61,7 +61,7 @@ public class ViewTheme {
      */
     public Color getContentAltColor()
     {
-        ViewStyle listViewAltStyle = getViewStyleForClassAndState(ListView.class, PseudoClass.Alternate);
+        ViewStyle listViewAltStyle = getStyleForClassAndState(ListView.class, PseudoClass.Alternate);
         return listViewAltStyle.getFill().getColor();
     }
 
@@ -70,7 +70,7 @@ public class ViewTheme {
      */
     public Paint getSelectedFill()
     {
-        ViewStyle listViewActiveStyle = getViewStyleForClassAndState(ListView.class, PseudoClass.Active);
+        ViewStyle listViewActiveStyle = getStyleForClassAndState(ListView.class, PseudoClass.Active);
         return listViewActiveStyle.getFill();
     }
 
@@ -79,7 +79,7 @@ public class ViewTheme {
      */
     public Paint getTargetedFill()
     {
-        ViewStyle listViewHoverStyle = getViewStyleForClassAndState(ListView.class, PseudoClass.Hover);
+        ViewStyle listViewHoverStyle = getStyleForClassAndState(ListView.class, PseudoClass.Hover);
         return listViewHoverStyle.getFill();
     }
 
@@ -178,9 +178,9 @@ public class ViewTheme {
     }
 
     /**
-     * Returns the ViewStyle for given class.
+     * Returns the style for given class.
      */
-    public ViewStyle getViewStyleForClass(Class<? extends View> viewClass)
+    public ViewStyle getStyleForClass(Class<? extends View> viewClass)
     {
         // Get style for class, just return if found
         ViewStyle viewStyle = _viewStyles.get(viewClass);
@@ -188,15 +188,15 @@ public class ViewTheme {
             return viewStyle;
 
         // Creates style for class, adds to given map and returns it
-        return ViewStyle.getViewStyleForClassMapAndClass(_viewStyles, viewClass);
+        return getStyleForClassMapAndClass(_viewStyles, viewClass);
     }
 
     /**
-     * Returns the ViewStyle for given class and state.
+     * Returns the style for given class and state.
      */
-    public ViewStyle getViewStyleForClassAndState(Class<? extends View> viewClass, PseudoClass pseudoClass)
+    public ViewStyle getStyleForClassAndState(Class<? extends View> viewClass, PseudoClass pseudoClass)
     {
-        ViewStyle viewStyle = getViewStyleForClass(viewClass);
+        ViewStyle viewStyle = getStyleForClass(viewClass);
         return viewStyle.getStyleForState(pseudoClass);
     }
 
@@ -205,7 +205,7 @@ public class ViewTheme {
      */
     public void setViewStyleString(Class<? extends View> viewClass, String styleString)
     {
-        ViewStyle viewStyle = getViewStyleForClass(viewClass);
+        ViewStyle viewStyle = getStyleForClass(viewClass);
         viewStyle.setStyleString(styleString);
     }
 
@@ -214,7 +214,7 @@ public class ViewTheme {
      */
     public void setViewStyleStringForHover(Class<? extends View> viewClass, String styleString)
     {
-        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, PseudoClass.Hover);
+        ViewStyle viewStyle = getStyleForClassAndState(viewClass, PseudoClass.Hover);
         viewStyle.setStyleString(styleString);
     }
 
@@ -223,7 +223,7 @@ public class ViewTheme {
      */
     public void setViewStyleStringForActive(Class<? extends View> viewClass, String styleString)
     {
-        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, PseudoClass.Active);
+        ViewStyle viewStyle = getStyleForClassAndState(viewClass, PseudoClass.Active);
         viewStyle.setStyleString(styleString);
     }
 
@@ -232,7 +232,7 @@ public class ViewTheme {
      */
     public void setViewStyleStringForSelected(Class<? extends View> viewClass, String styleString)
     {
-        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, PseudoClass.Selected);
+        ViewStyle viewStyle = getStyleForClassAndState(viewClass, PseudoClass.Selected);
         viewStyle.setStyleString(styleString);
     }
 
@@ -241,7 +241,7 @@ public class ViewTheme {
      */
     public void setViewStyleStringForAlternate(Class<? extends View> viewClass, String styleString)
     {
-        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, PseudoClass.Alternate);
+        ViewStyle viewStyle = getStyleForClassAndState(viewClass, PseudoClass.Alternate);
         viewStyle.setStyleString(styleString);
     }
 
@@ -250,7 +250,7 @@ public class ViewTheme {
      */
     public void setViewStyleStringForClassAndState(Class<? extends View> viewClass, PseudoClass pseudoClass, String styleString)
     {
-        ViewStyle viewStyle = getViewStyleForClassAndState(viewClass, pseudoClass);
+        ViewStyle viewStyle = getStyleForClassAndState(viewClass, pseudoClass);
         viewStyle.setStyleString(styleString);
     }
 
@@ -259,7 +259,7 @@ public class ViewTheme {
      */
     public void setViewStylePropValue(Class<? extends View> viewClass, String propName, Object aValue)
     {
-        ViewStyle viewStyle = getViewStyleForClass(viewClass);
+        ViewStyle viewStyle = getStyleForClass(viewClass);
         viewStyle.setPropValue(propName, aValue);
     }
 
@@ -283,8 +283,8 @@ public class ViewTheme {
      */
     protected void setThemeStyleDefaultsForViewAndOldTheme(View aView, ViewTheme oldTheme)
     {
-        ViewStyle newViewStyle = getViewStyleForClass(aView.getClass());
-        ViewStyle oldViewStyle = oldTheme.getViewStyleForClass(aView.getClass());
+        ViewStyle newViewStyle = getStyleForClass(aView.getClass());
+        ViewStyle oldViewStyle = oldTheme.getStyleForClass(aView.getClass());
         newViewStyle.setStyleDefaultsForViewAndOldStyle(aView, oldViewStyle);
     }
 
@@ -337,5 +337,35 @@ public class ViewTheme {
             viewControllers.add(viewController);
         if (aView instanceof ParentView parentView)
             parentView.getChildren().forEach(childView -> findViewControllersForView(childView, viewControllers));
+    }
+
+    /**
+     * Returns the style for given class.
+     */
+    protected static ViewStyle getStyleForClassMapAndClass(Map<Class<?>, ViewStyle> viewStyles, Class<? extends View> viewClass)
+    {
+        // Get style from class, just return if found
+        ViewStyle viewStyle = viewStyles.get(viewClass);
+        if (viewStyle != null)
+            return viewStyle;
+
+        // Create style, add to cache and return
+        viewStyle = getStyleForClassMapAndClassImpl(viewStyles, viewClass);
+        viewStyles.put(viewClass, viewStyle);
+        return viewStyle;
+    }
+
+    /**
+     * Returns the style for given class.
+     */
+    private static ViewStyle getStyleForClassMapAndClassImpl(Map<Class<?>, ViewStyle> viewStyles, Class<? extends View> viewClass)
+    {
+        Class<?> superClass = viewClass.getSuperclass();
+        if (superClass != null && View.class.isAssignableFrom(superClass)) {
+            ViewStyle superClassStyle = getStyleForClassMapAndClass(viewStyles, (Class<? extends View>) superClass);
+            return superClassStyle.copyForClass(viewClass);
+        }
+
+        return null;
     }
 }

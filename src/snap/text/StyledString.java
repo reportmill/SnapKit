@@ -96,7 +96,7 @@ public class StyledString implements Cloneable {
     public Color getTextColor()
     {
         Color color = _textStyle.getColor();
-        Color defColor = ViewTheme.get().getViewStyleForClass(Label.class).getTextColor();
+        Color defColor = ViewTheme.get().getStyleForClass(Label.class).getTextColor();
         if (defColor != Color.BLACK && color == Color.BLACK)
             color = defColor;
         return color;

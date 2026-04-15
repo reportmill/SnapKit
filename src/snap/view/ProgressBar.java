@@ -163,7 +163,7 @@ public class ProgressBar extends View {
         RoundRect pbarShape = new RoundRect(0, 0, pbarW, pbarH, getBorderRadius());
 
         // Paint fill
-        ViewStyle buttonStyle = ViewTheme.get().getViewStyleForClass(Button.class);
+        ViewStyle buttonStyle = ViewTheme.get().getStyleForClass(Button.class);
         Color fillColor = buttonStyle.getFillColor();
         aPntr.fillWithPaint(pbarShape, fillColor);
 

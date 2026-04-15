@@ -92,7 +92,7 @@ public class FontPicker extends ViewController {
         _sel = aFSV;
 
         // Set sample text color
-        ViewStyle selectedStyle = ViewTheme.get().getViewStyleForClassAndState(ListView.class, PseudoClass.Active);
+        ViewStyle selectedStyle = ViewTheme.get().getStyleForClassAndState(ListView.class, PseudoClass.Active);
         _sel.setFill(selectedStyle.getFill());
         _sel._label.setTextColor(selectedStyle.getTextColor());
         _sel._sampleLC.setTextColor(selectedStyle.getTextColor());

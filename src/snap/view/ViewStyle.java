@@ -280,6 +280,17 @@ public class ViewStyle implements Cloneable {
     }
 
     /**
+     * Returns a copy of this style for given class.
+     */
+    protected ViewStyle copyForClass(Class<? extends View> viewClass)
+    {
+        ViewStyle newStyle = clone();
+        newStyle._viewClass = viewClass;
+        newStyle._normalStyle = newStyle;
+        return newStyle;
+    }
+
+    /**
      * Standard clone implementation.
      */
     @Override
@@ -301,38 +312,5 @@ public class ViewStyle implements Cloneable {
         if (_state == PseudoClass.Normal)
             return _viewClass.getSimpleName() + " Style";
         return _viewClass.getSimpleName() + ':' + _state + " Style";
-    }
-
-    /**
-     * Returns the ViewStyle for given class.
-     */
-    protected static ViewStyle getViewStyleForClassMapAndClass(Map<Class<?>, ViewStyle> viewStyles, Class<? extends View> viewClass)
-    {
-        // Get style from class, just return if found
-        ViewStyle viewStyle = viewStyles.get(viewClass);
-        if (viewStyle != null)
-            return viewStyle;
-
-        // Create style, add to cache and return
-        viewStyle = getViewStyleForClassMapAndClassImpl(viewStyles, viewClass);
-        viewStyles.put(viewClass, viewStyle);
-        return viewStyle;
-    }
-
-    /**
-     * Returns the ViewStyle for given class.
-     */
-    private static ViewStyle getViewStyleForClassMapAndClassImpl(Map<Class<?>, ViewStyle> viewStyles, Class<? extends View> viewClass)
-    {
-        Class<?> superClass = viewClass.getSuperclass();
-        if (superClass != null && View.class.isAssignableFrom(superClass)) {
-            ViewStyle superClassStyle = getViewStyleForClassMapAndClass(viewStyles, (Class<? extends View>) superClass);
-            ViewStyle viewClassStyle = superClassStyle.clone();
-            viewClassStyle._viewClass = viewClass;
-            viewClassStyle._normalStyle = viewClassStyle;
-            return viewClassStyle;
-        }
-
-        return null;
     }
 }

@@ -136,7 +136,7 @@ public class ComputedStyle {
         ViewStyle viewStyle = _view.getStyle();
         Object value = viewStyle.getPropValue(propName);
         if (value == null) {
-            ViewStyle classStyle = ViewTheme.get().getViewStyleForClassAndState(_view.getClass(), _view.getStyleState());
+            ViewStyle classStyle = ViewTheme.get().getStyleForClassAndState(_view.getClass(), _view.getStyleState());
             value = classStyle.getPropValue(propName);
         }
         return value;

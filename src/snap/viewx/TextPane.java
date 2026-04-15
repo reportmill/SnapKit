@@ -100,7 +100,7 @@ public class TextPane extends ViewController {
     protected TextArea createTextArea()
     {
         TextArea textArea = new TextArea(true);
-        textArea.setFill(ViewTheme.get().getViewStyleForClass(TextView.class).getFill());
+        textArea.setFill(ViewTheme.get().getStyleForClass(TextView.class).getFill());
         return textArea;
     }
 
