@@ -3,7 +3,8 @@ import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.*;
 import snap.util.Convert;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class resolves the style properties for a view.
@@ -13,40 +14,12 @@ public class ComputedStyle {
     // The View
     private View _view;
 
-    // Cached align
-    private Pos _align;
-
-    // Cached margin
-    private Insets _margin;
-
-    // Cached padding
-    private Insets _padding;
-
-    // Cached spacing
-    private double _spacing;
-
-    // Cached fill
-    private Paint _fill;
-
-    // Cached border
-    private Border _border;
-
-    // Cached border radius
-    private double _borderRadius;
-
-    // Cached font
-    private Font _font;
-
-    // Cached text color
-    private Color _textColor;
+    // The computed values
+    private Map<String,Object> _computedValues = new HashMap<>();
 
     // A placeholder for a null fill and border
     public static final Color NULL_FILL = new Color(.92);
     public static final Border NULL_BORDER = Border.createLineBorder(Color.PINK, 1);
-
-    // All properties
-    private static List<String> ALL_PROPS = List.of(View.Align_Prop, View.Margin_Prop, View.Padding_Prop,
-            View.Spacing_Prop, View.Fill_Prop, View.Border_Prop, View.BorderRadius_Prop, View.Font_Prop, View.TextColor_Prop);
 
     /**
      * Constructor.
@@ -54,60 +27,75 @@ public class ComputedStyle {
     public ComputedStyle(View aView)
     {
         _view = aView;
-        resetAll();
     }
 
     /**
      * Returns the align.
      */
-    public Pos getAlign()  { return _align; }
+    public Pos getAlign()  { return getComputedValue(View.Align_Prop, Pos.class); }
 
     /**
      * Returns the margin.
      */
-    public Insets getMargin()  { return _margin; }
+    public Insets getMargin()  { return getComputedValue(View.Margin_Prop, Insets.class); }
 
     /**
      * Returns the padding.
      */
-    public Insets getPadding()  { return _padding; }
+    public Insets getPadding()  { return getComputedValue(View.Padding_Prop, Insets.class); }
 
     /**
      * Returns the spacing.
      */
-    public double getSpacing()  { return _spacing; }
+    public double getSpacing()
+    {
+        Double spacing = getComputedValue(View.Spacing_Prop, Double.class);
+        return spacing != null ? spacing : 0;
+    }
 
     /**
      * Returns the fill.
      */
-    public Paint getFill()  { return _fill == NULL_FILL ? null : _fill; }
+    public Paint getFill()
+    {
+        Paint fill = getComputedValue(View.Fill_Prop, Paint.class);
+        return fill == NULL_FILL ? null : fill;
+    }
 
     /**
      * Returns the border.
      */
-    public Border getBorder()  { return _border == NULL_BORDER ? null : _border; }
+    public Border getBorder()
+    {
+        Border border = getComputedValue(View.Border_Prop, Border.class);
+        return border == NULL_BORDER ? null : border;
+    }
 
     /**
      * Returns the border radius.
      */
-    public double getBorderRadius()  { return _borderRadius; }
+    public double getBorderRadius()
+    {
+        Double borderRadius = getComputedValue(View.BorderRadius_Prop, Double.class);
+        return borderRadius != null ? borderRadius : 0;
+    }
 
     /**
      * Returns the font.
      */
-    public Font getFont()  { return _font; }
+    public Font getFont()  { return getComputedValue(View.Font_Prop, Font.class); }
 
     /**
      * Returns the text color.
      */
-    public Color getTextColor()  { return _textColor; }
+    public Color getTextColor()  { return getComputedValue(View.TextColor_Prop, Color.class); }
 
     /**
      * Resets all properties.
      */
     public void resetAll()
     {
-        ALL_PROPS.forEach(this::resetStyleProp);
+        _computedValues.clear();
     }
 
     /**
@@ -115,17 +103,28 @@ public class ComputedStyle {
      */
     public void resetStyleProp(String propName)
     {
-        switch (propName) {
-            case View.Align_Prop -> _align = (Pos) computeValueForPropName(propName);
-            case View.Margin_Prop -> _margin = (Insets) computeValueForPropName(propName);
-            case View.Padding_Prop -> _padding = (Insets) computeValueForPropName(propName);
-            case View.Spacing_Prop -> _spacing = Convert.doubleValue(computeValueForPropName(propName));
-            case View.Fill_Prop -> _fill = (Paint) computeValueForPropName(propName);
-            case View.Border_Prop -> _border = (Border) computeValueForPropName(propName);
-            case View.BorderRadius_Prop -> _borderRadius = Convert.doubleValue(computeValueForPropName(propName));
-            case View.Font_Prop -> _font = (Font) computeValueForPropName(propName);
-            case View.TextColor_Prop -> _textColor = (Color) computeValueForPropName(propName);
-        }
+        _computedValues.remove(propName);
+    }
+
+    /**
+     * Returns value for given property name.
+     */
+    public <T> T getComputedValue(String propName, Class<T> valueClass)
+    {
+        // If computed value already set, just return
+        Object value = _computedValues.get(propName);
+        if (value != null)
+            return (T) value;
+
+        // Get raw style value
+        Object styleValue = computeValueForPropName(propName);
+        if (styleValue == null)
+            return null;
+
+        // Convert to class, add to cache and return
+        T computedValue = convertStyleValueToClass(styleValue, valueClass);
+        _computedValues.put(propName, computedValue);
+        return computedValue;
     }
 
     /**
@@ -140,5 +139,32 @@ public class ComputedStyle {
             value = classStyle.getPropValue(propName);
         }
         return value;
+    }
+
+    /**
+     * Converts value to class.
+     */
+    private <T> T convertStyleValueToClass(Object styleValue, Class<T> valueClass)
+    {
+        if (valueClass == Pos.class)
+            return (T) Pos.of(styleValue);
+        if (valueClass == Insets.class)
+            return (T) Insets.of(styleValue);
+        if (valueClass == Paint.class)
+            return (T) Paint.of(styleValue);
+        if (valueClass == Border.class)
+            return (T) Border.of(styleValue);
+        if (valueClass == Font.class)
+            return (T) Font.of(styleValue);
+        if (valueClass == Color.class)
+            return (T) Color.get(styleValue);
+        if (valueClass == Double.class)
+            return (T) Convert.getDouble(styleValue);
+        if (styleValue == null)
+            return null;
+
+        // If not known class, complain
+        System.out.println("ComputedStyle.convertStyleValueToClass: Unknown conversion for class: " + styleValue);
+        return valueClass.isInstance(styleValue) ? valueClass.cast(styleValue) : null;
     }
 }
