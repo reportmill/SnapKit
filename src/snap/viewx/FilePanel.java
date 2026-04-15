@@ -17,7 +17,7 @@ import java.util.function.Predicate;
 /**
  * A class to select a file to open or save.
  */
-public class FilePanel extends ViewController {
+public class FilePanel extends DefaultViewController {
 
     // Whether choosing file for save
     private boolean  _saving;

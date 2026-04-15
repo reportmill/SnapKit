@@ -7,7 +7,7 @@ import snap.web.WebURL;
 /**
  * The controller class for a GameView.
  */
-public class GameController extends ViewController {
+public class GameController extends DefaultViewController {
 
     // The frame rate
     private double _frameRate = 30;
