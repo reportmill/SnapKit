@@ -510,7 +510,7 @@ public class DialogBox extends FormBuilder {
         if (dialogImage != null) {
             ImageView dialogImageView = new ImageView(dialogImage);
             RowView rowView = new RowView();
-            rowView.setPropsString("Padding:15,0,0,20; Spacing:20; Align:TOP_CENTER;");
+            rowView.setStyleString("Padding:15,0,0,20; Spacing:20; Align:TOP_CENTER;");
             rowView.setChildren(dialogImageView, formView);
             formView = rowView;
         }

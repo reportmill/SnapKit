@@ -2878,17 +2878,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         //aPropSet.addPropNamed(Focused_Prop, boolean.class, true);
         //aPropSet.addPropNamed(Parent_Prop, ParentView.class, null).setSkipArchival(true);
         //aPropSet.addPropNamed(Showing_Prop, boolean.class, false).setSkipArchival(true);
-
-        // Set style defaults from ViewTheme
-        ViewStyle viewStyle = ViewTheme.get().getStyleForClass(getClass());
-        aPropSet.getPropForName(Align_Prop).setDefaultValue(viewStyle.getAlign());
-        aPropSet.getPropForName(Margin_Prop).setDefaultValue(viewStyle.getMargin());
-        aPropSet.getPropForName(Padding_Prop).setDefaultValue(viewStyle.getPadding());
-        aPropSet.getPropForName(Spacing_Prop).setDefaultValue(viewStyle.getSpacing());
-        aPropSet.getPropForName(Fill_Prop).setDefaultValue(viewStyle.getFill());
-        aPropSet.getPropForName(Border_Prop).setDefaultValue(viewStyle.getBorder());
-        aPropSet.getPropForName(BorderRadius_Prop).setDefaultValue(viewStyle.getBorderRadius());
-        aPropSet.getPropForName(TextColor_Prop).setDefaultValue(viewStyle.getTextColor());
     }
 
     /**

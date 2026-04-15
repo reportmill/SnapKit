@@ -434,7 +434,7 @@ public class MarkdownView extends ChildView {
         // Apply style string
         String styleString = codeNode.getOtherText();
         if (styleString != null)
-            codeBlockBox.setPropsString(styleString);
+            codeBlockBox.setStyleString(styleString);
 
         // Return
         return codeBlockBox;

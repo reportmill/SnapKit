@@ -146,10 +146,14 @@ public class ViewTheme {
         // TableView
         setViewStyleString(TableView.class, "Fill: WHITE; Border: #C0");
         setViewStyleString(TableCol.class, "Fill: null; Border: null");
+        setViewStyleStringForActive(TableCol.class, "Fill: #DA");
+        setViewStyleStringForHover(TableCol.class, "Fill: #E6; TextColor: WHITE");
 
         // TreeView
         setViewStyleString(TreeView.class, "Fill: WHITE; Border: #C0");
         setViewStyleString(TreeCol.class, "Fill: null; Border: null");
+        setViewStyleStringForActive(TreeCol.class, "Fill: #DA");
+        setViewStyleStringForHover(TreeCol.class, "Fill: #E6; TextColor: WHITE");
 
         // BoxView, RowView, ColView, StackView, TitleView, BorderView
         setViewStyleString(BoxView.class, "Align: CENTER");
