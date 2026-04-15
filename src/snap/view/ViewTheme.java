@@ -194,10 +194,10 @@ public class ViewTheme {
     /**
      * Returns the style for given class and state.
      */
-    public ViewStyle getStyleForClassAndState(Class<? extends View> viewClass, PseudoClass pseudoClass)
+    public ViewStyle getStyleForClassAndState(Class<? extends View> viewClass, PseudoClass viewState)
     {
         ViewStyle viewStyle = getStyleForClass(viewClass);
-        return viewStyle.getStyleForState(pseudoClass);
+        return viewStyle.getStyleForState(viewState);
     }
 
     /**

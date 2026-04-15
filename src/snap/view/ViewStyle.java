@@ -27,7 +27,7 @@ public class ViewStyle implements Cloneable {
     private ViewStyle _normalStyle;
 
     // The states available from this style
-    private Map<String,ViewStyle> _states;
+    private Map<PseudoClass,ViewStyle> _states;
 
     // Properties
     protected Pos _align;
@@ -124,37 +124,38 @@ public class ViewStyle implements Cloneable {
     public Color getBorderColor()  { return _border != null? _border.getColor() : null; }
 
     /**
-     * Returns the view style for given state.
-     */
-    public ViewStyle getStyleForState(PseudoClass pseudoClass)  { return getStyleForStateName(pseudoClass.toString()); }
-
-    /**
      * Returns the hover view style.
      */
-    public ViewStyle getHoverStyle()  { return getStyleForStateName(PseudoClass.Hover.toString()); }
+    public ViewStyle getHoverStyle()  { return getStyleForState(PseudoClass.Hover); }
 
     /**
      * Returns the active view style.
      */
-    public ViewStyle getActiveStyle()  { return getStyleForStateName(PseudoClass.Active.toString()); }
+    public ViewStyle getActiveStyle()  { return getStyleForState(PseudoClass.Active); }
 
     /**
-     * Returns the view style for given state name.
+     * Returns the view style for given state.
      */
-    public ViewStyle getStyleForStateName(String stateName)
+    public ViewStyle getStyleForState(PseudoClass viewState)
     {
-        if (stateName.equals("Normal"))
+        // If normal state requested, just return it
+        if (viewState == PseudoClass.Normal)
             return _normalStyle;
-        if (this != _normalStyle)
-            return _normalStyle.getStyleForStateName(stateName);
 
+        // If this isn't normal state, forward to normal state
+        if (this != _normalStyle)
+            return _normalStyle.getStyleForState(viewState);
+
+        // If state is in cache just return
         if (_states == null) _states = new HashMap<>();
-        ViewStyle style = _states.get(stateName);
+        ViewStyle style = _states.get(viewState);
         if (style != null)
             return style;
-        _states.put(stateName, style = clone());
-        style._state = PseudoClass.valueOf(stateName);
-        return style;
+
+        // Create state, add to cache map and return
+        ViewStyle newStyle = copyForState(viewState);
+        _states.put(viewState, newStyle);
+        return newStyle;
     }
 
     /**
@@ -287,6 +288,16 @@ public class ViewStyle implements Cloneable {
         ViewStyle newStyle = clone();
         newStyle._viewClass = viewClass;
         newStyle._normalStyle = newStyle;
+        return newStyle;
+    }
+
+    /**
+     * Returns a copy of this style for given state.
+     */
+    protected ViewStyle copyForState(PseudoClass newState)
+    {
+        ViewStyle newStyle = clone();
+        newStyle._state = newState;
         return newStyle;
     }
 
