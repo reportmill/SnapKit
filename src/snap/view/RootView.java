@@ -23,7 +23,6 @@ public class RootView extends ParentView {
         enableEvents(KeyEvents);
         setFocusable(true);
         setFocusPainted(false);
-        setFill(ViewUtils.getBackFill());
     }
 
     /**

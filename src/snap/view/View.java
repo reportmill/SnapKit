@@ -623,7 +623,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the computed style for this view.
      */
-    protected ComputedStyle getComputedStyle()  { return _computedStyle; }
+    public ComputedStyle getComputedStyle()  { return _computedStyle; }
 
     /**
      * Returns the style state.

@@ -163,13 +163,15 @@ public class ProgressBar extends View {
         RoundRect pbarShape = new RoundRect(0, 0, pbarW, pbarH, getBorderRadius());
 
         // Paint fill
-        ViewStyle buttonStyle = ViewTheme.get().getStyleForClass(Button.class);
-        Color fillColor = buttonStyle.getFillColor();
-        aPntr.fillWithPaint(pbarShape, fillColor);
+        Color fillColor = getFillColor();
+        if (fillColor != null)
+            aPntr.fillWithPaint(pbarShape, fillColor);
 
         // Paint border
-        Color strokeColor = buttonStyle.getBorderColor();
-        aPntr.drawWithPaint(pbarShape, strokeColor);
+        Border border = getBorder();
+        Color strokeColor = border != null ? border.getColor() : null;
+        if (strokeColor != null)
+            aPntr.drawWithPaint(pbarShape, strokeColor);
     }
 
     /**

@@ -14,6 +14,15 @@ public class ViewTheme {
     // Map of class to style
     private Map<Class<?>, ViewStyle> _viewStyles = new HashMap<>();
 
+    // A sample text view style for standard text styles
+    private ComputedStyle _sampleTextViewStyle;
+
+    // A sample list view style for standard selection/hover styles
+    private ComputedStyle _sampleListViewStyle;
+
+    // A sample root view style for standard root styles
+    private ComputedStyle _sampleRootViewStyle;
+
     // The current theme
     private static ViewTheme  _theme = getLight();
 
@@ -32,41 +41,41 @@ public class ViewTheme {
         _initializing = true;
         initViewStyles();
         _initializing = false;
+
+        // Set sample styles
+        ViewTheme oldTheme = _theme; _theme = this;
+        _sampleTextViewStyle = new TextView().getComputedStyle();
+        _sampleListViewStyle = new ListView<>().getComputedStyle();
+        _sampleRootViewStyle = new RootView().getComputedStyle();
+        _theme = oldTheme;
     }
 
     /**
      * Returns the background fill.
      */
-    public Paint getBackFill()
-    {
-        ViewStyle rootViewStyle = getStyleForClass(RootView.class);
-        return rootViewStyle.getFill();
-    }
+    public Paint getBackFill()  { return _sampleRootViewStyle.getFill(); }
 
     /**
      * Returns the fill for gutter areas like scrollbar background or tabview button bar background.
      */
     public Paint getGutterFill()
     {
-        ViewStyle rootViewAltStyle = getStyleForClassAndState(RootView.class, PseudoClass.Alternate);
+        ComputedStyle rootViewAltStyle = _sampleRootViewStyle.getStyleForState(PseudoClass.Alternate);
         return rootViewAltStyle.getFill();
     }
 
     /**
      * Returns the color for content like text fields, text areas, list areas.
      */
-    public Color getContentColor()
-    {
-        ViewStyle textViewStyle = getStyleForClass(TextView.class);
-        return textViewStyle.getFill().getColor();
-    }
+    public Color getContentColor()  { return _sampleTextViewStyle.getFill().getColor(); }
 
     /**
      * Returns the color for alternate content, like list area alternate rows.
      */
     public Color getContentAltColor()
     {
-        ViewStyle listViewAltStyle = getStyleForClassAndState(ListView.class, PseudoClass.Alternate);
+        if (_sampleListViewStyle == null) return Color.get("#F8");
+        ComputedStyle listViewAltStyle = _sampleListViewStyle.getStyleForState(PseudoClass.Alternate);
         return listViewAltStyle.getFill().getColor();
     }
 
@@ -75,7 +84,7 @@ public class ViewTheme {
      */
     public Paint getSelectedFill()
     {
-        ViewStyle listViewActiveStyle = getStyleForClassAndState(ListView.class, PseudoClass.Active);
+        ComputedStyle listViewActiveStyle = _sampleListViewStyle.getActiveStyle();
         return listViewActiveStyle.getFill();
     }
 
@@ -84,9 +93,19 @@ public class ViewTheme {
      */
     public Paint getTargetedFill()
     {
-        ViewStyle listViewHoverStyle = getStyleForClassAndState(ListView.class, PseudoClass.Hover);
+        ComputedStyle listViewHoverStyle = _sampleListViewStyle.getHoverStyle();
         return listViewHoverStyle.getFill();
     }
+
+    /**
+     * Returns the standard text color.
+     */
+    public Color getTextColor()  { return _sampleTextViewStyle.getTextColor(); }
+
+    /**
+     * Returns the standard selected text color.
+     */
+    public Color getSelectedTextColor()  { return _sampleListViewStyle.getActiveStyle().getTextColor(); }
 
     /**
      * Initialize ViewStyles.
@@ -169,7 +188,7 @@ public class ViewTheme {
         setViewStyleString(BorderView.class, "Align: CENTER");
 
         // ProgressBar, ThumbWheel, ColorDock
-        setViewStyleString(ProgressBar.class, "BorderRadius: 4");
+        setViewStyleString(ProgressBar.class, "Fill: WHITE; Border: #BF; BorderRadius: 4");
         setViewStyleString(ThumbWheel.class, "Fill: #FA");
         setViewStyleString(ColorDock.class, "Border: bevel");
 

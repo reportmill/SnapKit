@@ -11,16 +11,24 @@ import snap.viewx.DialogBox;
 public class FontPicker extends ViewController {
     
     // The DialogBox when running
-    private DialogBox  _dbox;
-    
-    // A box to hold labels
-    private ColView  _vbox;
-    
+    private DialogBox _dialogBox;
+
     // The currently selected font
-    private Font  _font;
+    private Font _font;
     
     // The currently selected FontSampleView
-    private FontSampleView  _sel;
+    private FontSampleView _selectedSampleView;
+
+    // Constants
+    private static Border FONT_SAMPLE_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
+
+    /**
+     * Constructor.
+     */
+    public FontPicker()
+    {
+        super();
+    }
 
     /**
      * Shows the FontPicker.
@@ -28,9 +36,32 @@ public class FontPicker extends ViewController {
     public Font showPicker(View aView, Font aFont)
     {
         _font = aFont;
-        _dbox = new DialogBox("Font Picker"); _dbox.setContent(getUI());
-        if (!_dbox.showConfirmDialog(aView)) return null;
+        _dialogBox = new DialogBox("Font Picker"); _dialogBox.setContent(getUI());
+        if (!_dialogBox.showConfirmDialog(aView)) return null;
         return _font;
+    }
+
+    /**
+     * Sets the selected FontSampleView.
+     */
+    public void setSelectedSampleView(FontSampleView sampleView)
+    {
+        if (_selectedSampleView != null) {
+            _selectedSampleView.setFill(_selectedSampleView._color);
+            Color textColor = ViewTheme.get().getTextColor();
+            _selectedSampleView._label.setTextColor(textColor);
+            _selectedSampleView._sampleLowerCase.setTextColor(textColor);
+            _selectedSampleView._sampleUpperCase.setTextColor(textColor);
+        }
+
+        _selectedSampleView = sampleView;
+
+        // Set sample text color
+        _selectedSampleView.setFill(ViewTheme.get().getSelectedFill());
+        Color textColor = ViewTheme.get().getSelectedTextColor();
+        _selectedSampleView._label.setTextColor(textColor);
+        _selectedSampleView._sampleLowerCase.setTextColor(textColor);
+        _selectedSampleView._sampleUpperCase.setTextColor(textColor);
     }
 
     /**
@@ -38,31 +69,44 @@ public class FontPicker extends ViewController {
      */
     protected View createUI()
     {
-        _vbox = new ColView();
-        _vbox.setFillWidth(true);
-        ScrollView scroll = new ScrollView(_vbox);
-        scroll.setPrefSize(720,540);
-        scroll.setGrowHeight(true);
-        return scroll;
+        // Create FontSamplesView
+        View fontSamplesView = createFontSamplesView();
+
+        // Create ScrollView for Font samples view
+        ScrollView scrollView = new ScrollView(fontSamplesView);
+        scrollView.setPrefSize(720,540);
+        scrollView.setGrowHeight(true);
+        return scrollView;
     }
 
     /**
-     * Initialze UI.
+     * Creates the font samples view.
      */
-    protected void initUI()
+    private View createFontSamplesView()
     {
+        // Create FontSamplesView
+        ColView fontSamplesView = new ColView();
+        fontSamplesView.setFillWidth(true);
+
+        // Get font names
         String[] familyNames = Font.getFamilyNames();
-        Color c1 = Color.WHITE, c2 = new Color("#F8F8F8"), c3 = c1;
-        Border border = Border.createLineBorder(Color.LIGHTGRAY,1);
+        Color BACKGROUND_COLOR_1 = Color.WHITE;
+        Color BACKGROUND_COLOR_2 = new Color("#F8F8F8");
+        Color backgroundColor = BACKGROUND_COLOR_1;
+
+        // Iterate over  font family names
         for (String familyName : familyNames) {
-            Font font = Font.getFont(familyName, 18);
-            FontSampleView fontSampleView = new FontSampleView(font, c3, border);
-            c3 = c3==c1? c2 : c1;
+            Font font = Font.getFont(familyName, 18); if (font == null) continue;
+            FontSampleView fontSampleView = new FontSampleView(font, backgroundColor);
+            backgroundColor = backgroundColor == BACKGROUND_COLOR_1 ? BACKGROUND_COLOR_2 : BACKGROUND_COLOR_1;
             fontSampleView.addEventHandler(this::handleFontSampleViewMousePress, MousePress);
-            _vbox.addChild(fontSampleView);
+            fontSamplesView.addChild(fontSampleView);
             if (familyName.equals(_font.getFamily()))
-                setSelected(fontSampleView);
+                setSelectedSampleView(fontSampleView);
         }
+
+        // Return
+        return fontSamplesView;
     }
 
     /**
@@ -70,33 +114,12 @@ public class FontPicker extends ViewController {
      */
     protected void handleFontSampleViewMousePress(ViewEvent anEvent)
     {
-        FontSampleView fview = anEvent.getView(FontSampleView.class);
-        _font = fview._font;
-        setSelected(fview);
+        FontSampleView fontSampleView = anEvent.getView(FontSampleView.class);
+        _font = fontSampleView._font;
+        setSelectedSampleView(fontSampleView);
 
-        if (anEvent.getClickCount()==2)
-            _dbox.confirm();
-    }
-
-    /**
-     * Sets the selected FontSampleView.
-     */
-    public void setSelected(FontSampleView aFSV)
-    {
-        if (_sel!=null) {
-            _sel.setFill(_sel._color);
-            _sel._label.setTextColor(Color.BLACK);
-            _sel._sampleLC.setTextColor(Color.BLACK);
-            _sel._sampleUC.setTextColor(Color.BLACK);
-        }
-        _sel = aFSV;
-
-        // Set sample text color
-        ViewStyle selectedStyle = ViewTheme.get().getStyleForClassAndState(ListView.class, PseudoClass.Active);
-        _sel.setFill(selectedStyle.getFill());
-        _sel._label.setTextColor(selectedStyle.getTextColor());
-        _sel._sampleLC.setTextColor(selectedStyle.getTextColor());
-        _sel._sampleUC.setTextColor(selectedStyle.getTextColor());
+        if (anEvent.getClickCount() == 2)
+            _dialogBox.confirm();
     }
 
     /**
@@ -105,19 +128,27 @@ public class FontPicker extends ViewController {
     public static class FontSampleView extends RowView {
 
         // The font and the UI elements
-        Font   _font; Color _color;
-        Label _label, _sampleLC, _sampleUC;
+        private Font _font;
+        private Color _color;
+        private Label _label, _sampleLowerCase, _sampleUpperCase;
 
         /** Creates a new FontSampleView. */
-        public FontSampleView(Font aFont, Color aColor, Border aBorder)
+        public FontSampleView(Font aFont, Color aColor)
         {
             _font = aFont; setFill(_color = aColor);
-            _label = new Label(aFont.getFamily() + ":"); _label.setPrefWidth(160);
-            _sampleLC = new Label("The quick brown fox jumped over the lazy dog?"); _sampleLC.setFont(aFont);
-            _sampleUC = new Label("THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG!"); _sampleUC.setFont(aFont);
-            ColView vbox = new ColView(); vbox.setChildren(_sampleLC, _sampleUC);
-            vbox.setGrowWidth(true); vbox.setFillWidth(true);
-            setChildren(_label, vbox); setPadding(5,5,5,5); setBorder(aBorder);
+            _label = new Label(aFont.getFamily() + ":");
+            _label.setPrefWidth(160);
+            _sampleLowerCase = new Label("The quick brown fox jumped over the lazy dog?");
+            _sampleLowerCase.setFont(aFont);
+            _sampleUpperCase = new Label("THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG!");
+            _sampleUpperCase.setFont(aFont);
+            ColView colView = new ColView();
+            colView.setChildren(_sampleLowerCase, _sampleUpperCase);
+            colView.setGrowWidth(true);
+            colView.setFillWidth(true);
+            setChildren(_label, colView);
+            setPadding(5,5,5,5);
+            setBorder(FONT_SAMPLE_VIEW_BORDER);
         }
     }
 }

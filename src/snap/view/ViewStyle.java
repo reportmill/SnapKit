@@ -69,59 +69,9 @@ public class ViewStyle implements Cloneable {
     }
 
     /**
-     * Returns the alignment.
-     */
-    public Pos getAlign()  { return _align; }
-
-    /**
-     * Returns the margin.
-     */
-    public Insets getMargin()  { return _margin; }
-
-    /**
-     * Returns the padding.
-     */
-    public Insets getPadding()  { return _padding; }
-
-    /**
-     * Returns the spacing.
-     */
-    public double getSpacing()  { return _spacing; }
-
-    /**
-     * Returns fill paint.
-     */
-    public Paint getFill()  { return _fill; }
-
-    /**
-     * Returns the border.
-     */
-    public Border getBorder()  { return _border; }
-
-    /**
-     * Returns the radius for border rounded corners.
-     */
-    public Double getBorderRadius()  { return _borderRadius; }
-
-    /**
      * Returns the font.
      */
     public Font getFont()  { return _font; }
-
-    /**
-     * Returns the text color.
-     */
-    public Color getTextColor()  { return _textColor; }
-
-    /**
-     * Returns fill color.
-     */
-    public Color getFillColor()  { return _fill != null ? _fill.getColor() : null; }
-
-    /**
-     * Returns the border color.
-     */
-    public Color getBorderColor()  { return _border != null? _border.getColor() : null; }
 
     /**
      * Returns the hover view style.
