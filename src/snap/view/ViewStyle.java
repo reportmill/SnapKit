@@ -294,9 +294,15 @@ public class ViewStyle implements Cloneable {
     /**
      * Returns a copy of this style for given state.
      */
-    protected ViewStyle copyForState(PseudoClass newState)
+    private ViewStyle copyForState(PseudoClass newState)
     {
-        ViewStyle newStyle = clone();
+        // Get class style for state
+        ViewStyle classStyle = this;
+        if (_view != null)
+            classStyle = _view.getClassStyleForState(newState);
+
+        // Copy style, set state and return
+        ViewStyle newStyle = classStyle.clone();
         newStyle._state = newState;
         return newStyle;
     }

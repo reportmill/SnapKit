@@ -8,6 +8,9 @@ import java.util.*;
  */
 public class ViewTheme {
 
+    // Whether theme is initializing
+    private boolean _initializing;
+
     // Map of class to style
     private Map<Class<?>, ViewStyle> _viewStyles = new HashMap<>();
 
@@ -26,7 +29,9 @@ public class ViewTheme {
         _viewStyles.put(View.class, viewStyle);
 
         // Initialize styles
+        _initializing = true;
         initViewStyles();
+        _initializing = false;
     }
 
     /**
@@ -191,8 +196,17 @@ public class ViewTheme {
         if (viewStyle != null)
             return viewStyle;
 
-        // Creates style for class, adds to given map and returns it
-        return getStyleForClassMapAndClass(_viewStyles, viewClass);
+        // Get view style for super class
+        Class<?> superClass = viewClass.getSuperclass();
+        ViewStyle superClassStyle = getStyleForClass((Class<? extends View>) superClass);
+
+        // If initializing, copy style for this class
+        if (_initializing)
+            superClassStyle = superClassStyle.copyForClass(viewClass);
+
+        // Add style to cache map and return
+        _viewStyles.put(viewClass, superClassStyle);
+        return superClassStyle;
     }
 
     /**
@@ -341,35 +355,5 @@ public class ViewTheme {
             viewControllers.add(viewController);
         if (aView instanceof ParentView parentView)
             parentView.getChildren().forEach(childView -> findViewControllersForView(childView, viewControllers));
-    }
-
-    /**
-     * Returns the style for given class.
-     */
-    protected static ViewStyle getStyleForClassMapAndClass(Map<Class<?>, ViewStyle> viewStyles, Class<? extends View> viewClass)
-    {
-        // Get style from class, just return if found
-        ViewStyle viewStyle = viewStyles.get(viewClass);
-        if (viewStyle != null)
-            return viewStyle;
-
-        // Create style, add to cache and return
-        viewStyle = getStyleForClassMapAndClassImpl(viewStyles, viewClass);
-        viewStyles.put(viewClass, viewStyle);
-        return viewStyle;
-    }
-
-    /**
-     * Returns the style for given class.
-     */
-    private static ViewStyle getStyleForClassMapAndClassImpl(Map<Class<?>, ViewStyle> viewStyles, Class<? extends View> viewClass)
-    {
-        Class<?> superClass = viewClass.getSuperclass();
-        if (superClass != null && View.class.isAssignableFrom(superClass)) {
-            ViewStyle superClassStyle = getStyleForClassMapAndClass(viewStyles, (Class<? extends View>) superClass);
-            return superClassStyle.copyForClass(viewClass);
-        }
-
-        return null;
     }
 }

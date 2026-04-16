@@ -155,17 +155,25 @@ public class ComputedStyle {
      */
     private Object computeValueForPropName(String propName)
     {
+        // Get view style - get state style if state provided
         ViewStyle viewStyle = _view.getStyle();
         if (_viewState != null)
             viewStyle = viewStyle.getStyleForState(_viewState);
+
+        // Get prop value and return if set
         Object value = viewStyle.getPropValue(propName);
-        if (value == null) {
-            ViewStyle classStyle = ViewTheme.get().getStyleForClassAndState(_view.getClass(), _view.getStyleState());
-            if (_viewState != null)
-                classStyle = classStyle.getStyleForState(_viewState);
-            value = classStyle.getPropValue(propName);
-        }
-        return value;
+        if (value != null)
+            return value;
+
+        // Get class style (or class state style if state provided)
+        ViewStyle classStyle = _view.getClassStyle(); //.getStyleForClassAndState(_view.getClass(), _view.getStyleState());
+        PseudoClass viewState = _viewState != null ? _viewState : _view.getStyleState();
+        if (_viewState != PseudoClass.Normal)
+            classStyle = classStyle.getStyleForState(viewState);
+
+        // Return value for class style
+        Object classStyleValue = classStyle.getPropValue(propName);
+        return classStyleValue;
     }
 
     /**
