@@ -168,7 +168,7 @@ public class ComputedStyle {
         // Get class style (or class state style if state provided)
         ViewStyle classStyle = _view.getClassStyle(); //.getStyleForClassAndState(_view.getClass(), _view.getStyleState());
         PseudoClass viewState = _viewState != null ? _viewState : _view.getStyleState();
-        if (_viewState != PseudoClass.Normal)
+        if (viewState != PseudoClass.Normal)
             classStyle = classStyle.getStyleForState(viewState);
 
         // Return value for class style

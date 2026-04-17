@@ -316,16 +316,6 @@ public class ViewTheme {
     public static ViewTheme getDark()  { return ViewThemes.getDark(); }
 
     /**
-     * Sets the style property values for given view if they were previously set to default of given old theme.
-     */
-    protected void setThemeStyleDefaultsForViewAndOldTheme(View aView, ViewTheme oldTheme)
-    {
-        ViewStyle newViewStyle = getStyleForClass(aView.getClass());
-        ViewStyle oldViewStyle = oldTheme.getStyleForClass(aView.getClass());
-        newViewStyle.setStyleDefaultsForViewAndOldStyle(aView, oldViewStyle);
-    }
-
-    /**
      * Sets the theme to theme for given name.
      */
     public static void setThemeForName(String aName)

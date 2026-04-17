@@ -763,7 +763,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether font has been explicitly set for this view.
      */
-    public boolean isFontSet()  { return _style.getFont() != null; }
+    public boolean isFontSet()  { return _style.isPropSet(View.Font_Prop); }
 
     /**
      * Returns the font for the view (defaults to parent font).
@@ -789,6 +789,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         firePropChange(Font_Prop, oldFont, aFont);
         relayoutParent();
         repaint();
+    }
+
+    /**
+     * Returns the default font.
+     */
+    public Font getDefaultFont()
+    {
+        View par = getParent();
+        return par != null ? par.getFont() : Font.Arial11;
     }
 
     /**
@@ -2007,15 +2016,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
-     * Returns the default font.
-     */
-    public Font getDefaultFont()
-    {
-        View par = getParent();
-        return par != null ? par.getFont() : Font.Arial11;
-    }
-
-    /**
      * Returns the insets due to border and/or padding.
      */
     public Insets getInsetsAll()
@@ -2687,7 +2687,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
     {
-        newTheme.setThemeStyleDefaultsForViewAndOldTheme(this, oldTheme);
+        ViewThemeUtils.setThemeStyleDefaultsForViewAndOldTheme(this, oldTheme, newTheme);
     }
 
     /**
@@ -3089,15 +3089,23 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      * Override property defaults for View.
      */
     @Override
-    public Object getPropDefault(String aPropName)
+    public Object getPropDefault(String propName)
     {
         // Handle Font special since default font changes depending on parent
-        if (aPropName.equals(Font_Prop))
+        if (propName.equals(Font_Prop))
             return getDefaultFont();
 
-        // Forward to current style
-        ViewStyle viewStyle = ViewTheme.get().getStyleForClass(getClass());
-        return viewStyle.getPropDefaultForView(this, aPropName);
+        // Forward style props to class style
+        switch (propName) {
+            case Align_Prop, Margin_Prop, Padding_Prop, Spacing_Prop,
+                 Fill_Prop, Border_Prop, BorderRadius_Prop, View.TextColor_Prop -> {
+                    ViewStyle classStyle = getClassStyle();
+                    return classStyle.getPropValue(propName);
+            }
+        }
+
+        // Do normal version
+        return super.getPropDefault(propName);
     }
 
     /**

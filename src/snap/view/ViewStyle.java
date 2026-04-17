@@ -1,12 +1,7 @@
 package snap.view;
 import snap.geom.Insets;
 import snap.geom.Pos;
-import snap.gfx.Border;
 import snap.gfx.Color;
-import snap.gfx.Font;
-import snap.gfx.Paint;
-import snap.props.Prop;
-import snap.util.Convert;
 import java.util.*;
 
 /**
@@ -23,22 +18,14 @@ public class ViewStyle implements Cloneable {
     // The state of this style
     private PseudoClass _state = PseudoClass.Normal;
 
+    // The style values
+    private Map<String,Object> _values = new HashMap<>();
+
     // The normal style
     private ViewStyle _normalStyle;
 
     // The states available from this style
     private Map<PseudoClass,ViewStyle> _states;
-
-    // Properties
-    protected Pos _align;
-    protected Insets _margin;
-    protected Insets _padding;
-    protected Double _spacing;
-    protected Paint _fill;
-    protected Border _border;
-    protected Double _borderRadius;
-    protected Font _font;
-    protected Color _textColor;
 
     /**
      * Constructor.
@@ -47,15 +34,12 @@ public class ViewStyle implements Cloneable {
     {
         _viewClass = View.class;
         _normalStyle = this;
-        _align = Pos.TOP_LEFT;
-        _margin = Insets.EMPTY;
-        _padding = Insets.EMPTY;
-        _spacing = 0d;
-        _fill = null;
-        _border = null;
-        _borderRadius = 0d;
-        _font = null;
-        _textColor = Color.BLACK;
+        setPropValue(View.Align_Prop, Pos.TOP_LEFT);
+        setPropValue(View.Margin_Prop, Insets.EMPTY);
+        setPropValue(View.Padding_Prop, Insets.EMPTY);
+        setPropValue(View.Spacing_Prop, 0d);
+        setPropValue(View.BorderRadius_Prop, 0d);
+        setPropValue(View.TextColor_Prop, Color.BLACK);
     }
 
     /**
@@ -69,9 +53,25 @@ public class ViewStyle implements Cloneable {
     }
 
     /**
-     * Returns the font.
+     * Returns whether style has given prop name set.
      */
-    public Font getFont()  { return _font; }
+    public boolean isPropSet(String propName)  { return _values.containsKey(propName); }
+
+    /**
+     * Returns value for given property name.
+     */
+    public Object getPropValue(String propName)  { return _values.get(propName); }
+
+    /**
+     * Sets value for given property name.
+     */
+    public void setPropValue(String propName, Object aValue)
+    {
+        _values.put(propName, aValue);
+
+        if (_view != null)
+            _view.getComputedStyle().resetStyleProp(propName);
+    }
 
     /**
      * Returns the hover view style.
@@ -109,74 +109,6 @@ public class ViewStyle implements Cloneable {
     }
 
     /**
-     * Returns value for given property name.
-     */
-    public Object getPropValue(String propName)
-    {
-        return switch (propName) {
-            case View.Align_Prop -> _align;
-            case View.Margin_Prop -> _margin;
-            case View.Padding_Prop -> _padding;
-            case View.Spacing_Prop -> _spacing;
-            case View.Fill_Prop -> _fill;
-            case View.Border_Prop -> _border;
-            case View.BorderRadius_Prop -> _borderRadius;
-            case View.Font_Prop -> _font;
-            case View.TextColor_Prop -> _textColor;
-            default -> { System.out.println("ViewStyle.getPropValue: Unknown property name: " + propName); yield null; }
-        };
-    }
-
-    /**
-     * Sets value for given property name.
-     */
-    public void setPropValue(String propName, Object aValue)
-    {
-        switch (propName) {
-            case View.Align_Prop -> _align = Pos.of(aValue);
-            case View.Margin_Prop -> _margin = Insets.of(aValue);
-            case View.Padding_Prop -> _padding = Insets.of(aValue);
-            case View.Spacing_Prop -> _spacing = Convert.getDouble(aValue);
-            case View.Fill_Prop -> _fill = Paint.of(aValue);
-            case View.Border_Prop -> _border = Border.of(aValue);
-            case View.BorderRadius_Prop -> _borderRadius = Convert.getDouble(aValue);
-            case View.Font_Prop -> _font = Font.of(aValue);
-            case View.TextColor_Prop -> _textColor = Color.get(aValue);
-            default -> System.out.println("ViewStyle.setPropValue: Unknown property name: " + propName);
-        }
-
-        if (_view != null)
-            _view.getComputedStyle().resetStyleProp(propName);
-    }
-
-    /**
-     * Returns the default prop value for view.
-     */
-    public Object getPropDefaultForView(View aView, String propName)
-    {
-        switch (propName) {
-            case View.Align_Prop: return _align;
-            case View.Margin_Prop: return _margin;
-            case View.Padding_Prop: return _padding;
-            case View.Spacing_Prop: return _spacing;
-            case View.Fill_Prop: return _fill;
-            case View.Border_Prop: return _border;
-            case View.BorderRadius_Prop: return _borderRadius;
-            case View.Font_Prop: return _font;
-            case View.TextColor_Prop: return _textColor;
-        }
-
-        // Get prop and return DefaultValue
-        Prop prop = aView.getPropForName(propName);
-        if (prop != null)
-            return prop.getDefaultValue();
-
-        // Complain and return null
-        System.err.println("ViewStyle.getPropDefaultForView: No default found for: " + propName);
-        return null;
-    }
-
-    /**
      * Sets style values for JSON/CSS style string, e.g.: "Fill: White; Margin: 4; Font: Arial 24;"
      */
     public void setStyleString(String styleString)
@@ -198,35 +130,6 @@ public class ViewStyle implements Cloneable {
 
             // If "name:value" parts not found, complain
             else System.err.println("ViewStyle.setStyleString: Invalid prop string: " + propString);
-        }
-    }
-
-    /**
-     * Sets the style property values for given view if they were previously set to default of given old style.
-     */
-    protected void setStyleDefaultsForViewAndOldStyle(View aView, ViewStyle oldViewStyle)
-    {
-        // Handle general style props
-        String[] styleProps = { View.Align_Prop, View.Margin_Prop, View.Padding_Prop, View.Spacing_Prop,
-                View.Fill_Prop, View.Border_Prop, View.BorderRadius_Prop };
-        for (String propName : styleProps)
-            setPropDefaultForView(aView, propName, oldViewStyle);
-
-        // Handle TextColor
-        if (aView.getPropForName(View.TextColor_Prop) != null)
-            setPropDefaultForView(aView, View.TextColor_Prop, oldViewStyle);
-    }
-
-    /**
-     * Sets the view prop value to this style default if current value matches old style default.
-     */
-    private void setPropDefaultForView(View aView, String propName, ViewStyle oldViewStyle)
-    {
-        Object viewPropValue = aView.getPropValue(propName);
-        Object oldDefaultPropValue = oldViewStyle.getPropDefaultForView(aView, propName);
-        if (Objects.equals(viewPropValue, oldDefaultPropValue)) {
-            Object newDefaultPropValue = getPropDefaultForView(aView, propName);
-            aView.setPropValue(propName, newDefaultPropValue);
         }
     }
 
@@ -266,6 +169,7 @@ public class ViewStyle implements Cloneable {
         ViewStyle clone;
         try { clone = (ViewStyle) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
+        clone._values = new HashMap<>(_values);
         clone._states = null;
         return clone;
     }
