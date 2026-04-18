@@ -112,12 +112,17 @@ public class ViewTheme {
      */
     protected void initViewStyles()
     {
+        // View
+        setViewStyleString(View.class, "Align: TOP_LEFT; Margin: 0; Padding: 0; Spacing: 0; BorderRadius: 0; TextColor: #00");
+
         // RootView
         setViewStyleString(RootView.class, "Fill: #FA");
         setViewStyleStringForAlternate(RootView.class, "Fill: #F0");
 
-        // Label, ButtonBase
+        // Label
         setViewStyleString(Label.class, "Align: CENTER_LEFT; Spacing: 4");
+
+        // ButtonBase
         setViewStyleString(ButtonBase.class, "Align: CENTER; Padding: 3; BorderRadius: 4");
 
         // Button

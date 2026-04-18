@@ -2,7 +2,6 @@ package snap.view;
 import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.*;
-import snap.util.Convert;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -139,67 +138,18 @@ public class ComputedStyle {
         if (value != null)
             return (T) value;
 
-        // Get raw style value
-        Object styleValue = computeValueForPropName(propName);
-        if (styleValue == null)
-            return null;
-
-        // Convert to class, add to cache and return
-        T computedValue = convertStyleValueToClass(styleValue, valueClass);
-        _computedValues.put(propName, computedValue);
-        return computedValue;
-    }
-
-    /**
-     * Returns computed value.
-     */
-    private Object computeValueForPropName(String propName)
-    {
         // Get view style - get state style if state provided
         ViewStyle viewStyle = _view.getStyle();
         if (_viewState != null)
             viewStyle = viewStyle.getStyleForState(_viewState);
 
-        // Get prop value and return if set
-        Object value = viewStyle.getPropValue(propName);
-        if (value != null)
-            return value;
-
-        // Get class style (or class state style if state provided)
-        ViewStyle classStyle = _view.getClassStyle(); //.getStyleForClassAndState(_view.getClass(), _view.getStyleState());
-        PseudoClass viewState = _viewState != null ? _viewState : _view.getStyleState();
-        if (viewState != PseudoClass.Normal)
-            classStyle = classStyle.getStyleForState(viewState);
-
-        // Return value for class style
-        Object classStyleValue = classStyle.getPropValue(propName);
-        return classStyleValue;
-    }
-
-    /**
-     * Converts value to class.
-     */
-    private <T> T convertStyleValueToClass(Object styleValue, Class<T> valueClass)
-    {
-        if (valueClass == Pos.class)
-            return (T) Pos.of(styleValue);
-        if (valueClass == Insets.class)
-            return (T) Insets.of(styleValue);
-        if (valueClass == Paint.class)
-            return (T) Paint.of(styleValue);
-        if (valueClass == Border.class)
-            return (T) Border.of(styleValue);
-        if (valueClass == Font.class)
-            return (T) Font.of(styleValue);
-        if (valueClass == Color.class)
-            return (T) Color.get(styleValue);
-        if (valueClass == Double.class)
-            return (T) Convert.getDouble(styleValue);
-        if (styleValue == null)
+        // Get computed value for prop name (just return if null)
+        T computedValue = viewStyle.getComputedValue(propName, valueClass);
+        if (computedValue == null)
             return null;
 
-        // If not known class, complain
-        System.out.println("ComputedStyle.convertStyleValueToClass: Unknown conversion for class: " + styleValue);
-        return valueClass.isInstance(styleValue) ? valueClass.cast(styleValue) : null;
+        // Add to cache and return
+        _computedValues.put(propName, computedValue);
+        return computedValue;
     }
 }

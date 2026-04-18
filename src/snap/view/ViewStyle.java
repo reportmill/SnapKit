@@ -1,7 +1,7 @@
 package snap.view;
-import snap.geom.Insets;
-import snap.geom.Pos;
-import snap.gfx.Color;
+import snap.geom.*;
+import snap.gfx.*;
+import snap.util.Convert;
 import java.util.*;
 
 /**
@@ -21,6 +21,9 @@ public class ViewStyle implements Cloneable {
     // The style values
     private Map<String,Object> _values = new HashMap<>();
 
+    // The parent style
+    private ViewStyle _parent;
+
     // The normal style
     private ViewStyle _normalStyle;
 
@@ -34,12 +37,6 @@ public class ViewStyle implements Cloneable {
     {
         _viewClass = View.class;
         _normalStyle = this;
-        setPropValue(View.Align_Prop, Pos.TOP_LEFT);
-        setPropValue(View.Margin_Prop, Insets.EMPTY);
-        setPropValue(View.Padding_Prop, Insets.EMPTY);
-        setPropValue(View.Spacing_Prop, 0d);
-        setPropValue(View.BorderRadius_Prop, 0d);
-        setPropValue(View.TextColor_Prop, Color.BLACK);
     }
 
     /**
@@ -51,6 +48,11 @@ public class ViewStyle implements Cloneable {
         _viewClass = aView.getClass();
         _normalStyle = this;
     }
+
+    /**
+     * Returns the parent style.
+     */
+    public ViewStyle getParent()  { return _parent; }
 
     /**
      * Returns whether style has given prop name set.
@@ -71,6 +73,86 @@ public class ViewStyle implements Cloneable {
 
         if (_view != null)
             _view.getComputedStyle().resetStyleProp(propName);
+    }
+
+    /**
+     * Returns value for given property name.
+     */
+    protected Object getPropValueDeep(String propName)
+    {
+        // Get prop value and return if set
+        Object value = getPropValue(propName);
+        if (value != null)
+            return value;
+
+        // Try view style parent
+        ViewStyle parentStyle = getParent();
+        if (parentStyle != null)
+            return parentStyle.getPropValueDeep(propName);
+
+        // Return not found
+        return  null;
+    }
+
+    /**
+     * Returns value for given property name.
+     */
+    public Object getComputedValue(String propName)
+    {
+        Class<?> valueClass = switch (propName) {
+            case View.Align_Prop -> Pos.class;
+            case View.Margin_Prop, View.Padding_Prop -> Insets.class;
+            case View.Spacing_Prop, View.BorderRadius_Prop -> Double.class;
+            case View.Fill_Prop -> Paint.class;
+            case View.Border_Prop -> Border.class;
+            case View.Font_Prop -> Font.class;
+            case View.TextColor_Prop -> Color.class;
+            default -> throw new RuntimeException("ViewStyle.getComputedValue: Unknown prop name: " + propName);
+        };
+        return getComputedValue(propName, valueClass);
+    }
+
+    /**
+     * Returns value for given property name.
+     */
+    public <T> T getComputedValue(String propName, Class<T> valueClass)
+    {
+        // If computed value already set, just return
+        //Object value = _computedValues.get(propName);
+        //if (value != null) return (T) value;
+
+        // Get raw style value
+        Object styleValue = computeValueForPropName(propName);
+        if (styleValue == null)
+            return null;
+
+        // Convert to class, add to cache and return
+        T computedValue = convertStyleValueToClass(styleValue, valueClass);
+        //_computedValues.put(propName, computedValue);
+        return computedValue;
+    }
+
+    /**
+     * Returns computed value.
+     */
+    private Object computeValueForPropName(String propName)
+    {
+        // Get prop value and return if set
+        Object value = getPropValueDeep(propName);
+        if (value != null)
+            return value;
+
+        // If this is class style, return not found
+        if (_view == null)
+            return  null;
+
+        // Get class style (or class state style if state provided)
+        ViewStyle classStyle = _view.getClassStyle();
+        if (_state != PseudoClass.Normal)
+            classStyle = classStyle.getStyleForState(_state);
+
+        // Return value for class style
+        return classStyle.getPropValueDeep(propName);
     }
 
     /**
@@ -149,14 +231,13 @@ public class ViewStyle implements Cloneable {
      */
     private ViewStyle copyForState(PseudoClass newState)
     {
-        // Get class style for state
-        ViewStyle classStyle = this;
-        if (_view != null)
-            classStyle = _view.getClassStyleForState(newState);
-
         // Copy style, set state and return
-        ViewStyle newStyle = classStyle.clone();
+        ViewStyle newStyle = new ViewStyle();
+        newStyle._view = _view;
+        newStyle._viewClass = _viewClass;
         newStyle._state = newState;
+        newStyle._normalStyle = _normalStyle;
+        newStyle._parent = this;
         return newStyle;
     }
 
@@ -183,5 +264,32 @@ public class ViewStyle implements Cloneable {
         if (_state == PseudoClass.Normal)
             return _viewClass.getSimpleName() + " Style";
         return _viewClass.getSimpleName() + ':' + _state + " Style";
+    }
+
+    /**
+     * Converts value to class.
+     */
+    private static <T> T convertStyleValueToClass(Object styleValue, Class<T> valueClass)
+    {
+        if (valueClass == Pos.class)
+            return (T) Pos.of(styleValue);
+        if (valueClass == Insets.class)
+            return (T) Insets.of(styleValue);
+        if (valueClass == Paint.class)
+            return (T) Paint.of(styleValue);
+        if (valueClass == Border.class)
+            return (T) Border.of(styleValue);
+        if (valueClass == Font.class)
+            return (T) Font.of(styleValue);
+        if (valueClass == Color.class)
+            return (T) Color.get(styleValue);
+        if (valueClass == Double.class)
+            return (T) Convert.getDouble(styleValue);
+        if (styleValue == null)
+            return null;
+
+        // If not known class, complain
+        System.out.println("ComputedStyle.convertStyleValueToClass: Unknown conversion for class: " + styleValue);
+        return valueClass.isInstance(styleValue) ? valueClass.cast(styleValue) : null;
     }
 }

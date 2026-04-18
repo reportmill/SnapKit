@@ -3100,7 +3100,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case Align_Prop, Margin_Prop, Padding_Prop, Spacing_Prop,
                  Fill_Prop, Border_Prop, BorderRadius_Prop, View.TextColor_Prop -> {
                     ViewStyle classStyle = getClassStyle();
-                    return classStyle.getPropValue(propName);
+                    return classStyle.getComputedValue(propName);
             }
         }
 
