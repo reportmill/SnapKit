@@ -689,14 +689,14 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     {
         // Handle Cell.Selected
         if (aCell.isSelected()) {
-            ComputedStyle selectedStyle = getComputedStyle().getActiveStyle();
+            ViewStyle selectedStyle = getStyle().getActiveStyle();
             aCell.setFill(selectedStyle.getFill());
             aCell.setTextColor(selectedStyle.getTextColor());
         }
 
         // Handle Targeting given cell
         else if (isTargeting() && aCell.getRow() == getTargetedIndex())  {
-            ComputedStyle hoverStyle = getComputedStyle().getHoverStyle();
+            ViewStyle hoverStyle = getStyle().getHoverStyle();
             aCell.setFill(hoverStyle.getFill());
             aCell.setTextColor(hoverStyle.getTextColor());
         }

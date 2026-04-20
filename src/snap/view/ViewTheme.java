@@ -15,13 +15,13 @@ public class ViewTheme {
     private Map<Class<?>, ViewStyle> _viewStyles = new HashMap<>();
 
     // A sample text view style for standard text styles
-    private ComputedStyle _sampleTextViewStyle;
+    private ViewStyle _sampleTextViewStyle;
 
     // A sample list view style for standard selection/hover styles
-    private ComputedStyle _sampleListViewStyle;
+    private ViewStyle _sampleListViewStyle;
 
     // A sample root view style for standard root styles
-    private ComputedStyle _sampleRootViewStyle;
+    private ViewStyle _sampleRootViewStyle;
 
     // The current theme
     private static ViewTheme  _theme = getLight();
@@ -44,9 +44,9 @@ public class ViewTheme {
 
         // Set sample styles
         ViewTheme oldTheme = _theme; _theme = this;
-        _sampleTextViewStyle = new TextView().getComputedStyle();
-        _sampleListViewStyle = new ListView<>().getComputedStyle();
-        _sampleRootViewStyle = new RootView().getComputedStyle();
+        _sampleTextViewStyle = new TextView().getStyle();
+        _sampleListViewStyle = new ListView<>().getStyle();
+        _sampleRootViewStyle = new RootView().getStyle();
         _theme = oldTheme;
     }
 
@@ -60,7 +60,7 @@ public class ViewTheme {
      */
     public Paint getGutterFill()
     {
-        ComputedStyle rootViewAltStyle = _sampleRootViewStyle.getStyleForState(PseudoClass.Alternate);
+        ViewStyle rootViewAltStyle = _sampleRootViewStyle.getStyleForState(PseudoClass.Alternate);
         return rootViewAltStyle.getFill();
     }
 
@@ -75,7 +75,7 @@ public class ViewTheme {
     public Color getContentAltColor()
     {
         if (_sampleListViewStyle == null) return Color.get("#F8");
-        ComputedStyle listViewAltStyle = _sampleListViewStyle.getStyleForState(PseudoClass.Alternate);
+        ViewStyle listViewAltStyle = _sampleListViewStyle.getStyleForState(PseudoClass.Alternate);
         return listViewAltStyle.getFill().getColor();
     }
 
@@ -84,7 +84,7 @@ public class ViewTheme {
      */
     public Paint getSelectedFill()
     {
-        ComputedStyle listViewActiveStyle = _sampleListViewStyle.getActiveStyle();
+        ViewStyle listViewActiveStyle = _sampleListViewStyle.getActiveStyle();
         return listViewActiveStyle.getFill();
     }
 
@@ -93,7 +93,7 @@ public class ViewTheme {
      */
     public Paint getTargetedFill()
     {
-        ComputedStyle listViewHoverStyle = _sampleListViewStyle.getHoverStyle();
+        ViewStyle listViewHoverStyle = _sampleListViewStyle.getHoverStyle();
         return listViewHoverStyle.getFill();
     }
 
@@ -302,7 +302,7 @@ public class ViewTheme {
     public void setViewStylePropValue(Class<? extends View> viewClass, String propName, Object aValue)
     {
         ViewStyle viewStyle = getStyleForClass(viewClass);
-        viewStyle.setPropValue(propName, aValue);
+        viewStyle.setStyleValue(propName, aValue);
     }
 
     /**

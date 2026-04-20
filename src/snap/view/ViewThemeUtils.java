@@ -38,9 +38,9 @@ public class ViewThemeUtils {
     private static void setPropDefaultForView(View aView, String propName, ViewStyle oldClassStyle, ViewStyle newClassStyle)
     {
         Object viewPropValue = aView.getPropValue(propName);
-        Object oldDefaultPropValue = oldClassStyle.getPropValue(propName);
+        Object oldDefaultPropValue = oldClassStyle.getStyleValue(propName);
         if (Objects.equals(viewPropValue, oldDefaultPropValue)) {
-            Object newDefaultPropValue = newClassStyle.getPropValue(propName);
+            Object newDefaultPropValue = newClassStyle.getStyleValue(propName);
             aView.setPropValue(propName, newDefaultPropValue);
         }
     }

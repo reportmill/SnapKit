@@ -30,6 +30,13 @@ public class ViewStyle implements Cloneable {
     // The states available from this style
     private Map<PseudoClass,ViewStyle> _states;
 
+    // The computed values
+    private Map<String,Object> _computedValues = new HashMap<>();
+
+    // A placeholder for a null fill and border
+    public static final Color NULL_FILL = new Color(.92);
+    public static final Border NULL_BORDER = Border.createLineBorder(Color.PINK, 1);
+
     /**
      * Constructor.
      */
@@ -62,33 +69,43 @@ public class ViewStyle implements Cloneable {
     /**
      * Returns value for given property name.
      */
-    public Object getPropValue(String propName)  { return _values.get(propName); }
+    public Object getStyleValue(String propName)  { return _values.get(propName); }
 
     /**
      * Sets value for given property name.
      */
-    public void setPropValue(String propName, Object aValue)
+    public void setStyleValue(String propName, Object aValue)
     {
         _values.put(propName, aValue);
-
-        if (_view != null)
-            _view.getComputedStyle().resetStyleProp(propName);
+        _computedValues.remove(propName);
     }
 
     /**
-     * Returns value for given property name.
+     * Returns the style value for given property name, forwarding to style hierarchy.
      */
-    protected Object getPropValueDeep(String propName)
+    private Object getStyleValueDeep(String propName)
     {
         // Get prop value and return if set
-        Object value = getPropValue(propName);
+        Object value = getStyleValue(propName);
         if (value != null)
             return value;
 
-        // Try view style parent
+        // Handle view style: forward to class style for state
+        if (_view != null) {
+
+            // Get class style (or class state style if state provided)
+            ViewStyle classStyle = _view.getClassStyle();
+            if (_state != PseudoClass.Normal)
+                classStyle = classStyle.getStyleForState(_state);
+
+            // Return value for class style
+            return classStyle.getStyleValueDeep(propName);
+        }
+
+        // Handle class style: Try view style parent
         ViewStyle parentStyle = getParent();
         if (parentStyle != null)
-            return parentStyle.getPropValueDeep(propName);
+            return parentStyle.getStyleValueDeep(propName);
 
         // Return not found
         return  null;
@@ -118,52 +135,20 @@ public class ViewStyle implements Cloneable {
     public <T> T getComputedValue(String propName, Class<T> valueClass)
     {
         // If computed value already set, just return
-        //Object value = _computedValues.get(propName);
-        //if (value != null) return (T) value;
+        Object value = _computedValues.get(propName);
+        if (value != null)
+            return (T) value;
 
-        // Get raw style value
-        Object styleValue = computeValueForPropName(propName);
+        // Get generic style value
+        Object styleValue = getStyleValueDeep(propName);
         if (styleValue == null)
             return null;
 
         // Convert to class, add to cache and return
         T computedValue = convertStyleValueToClass(styleValue, valueClass);
-        //_computedValues.put(propName, computedValue);
+        _computedValues.put(propName, computedValue);
         return computedValue;
     }
-
-    /**
-     * Returns computed value.
-     */
-    private Object computeValueForPropName(String propName)
-    {
-        // Get prop value and return if set
-        Object value = getPropValueDeep(propName);
-        if (value != null)
-            return value;
-
-        // If this is class style, return not found
-        if (_view == null)
-            return  null;
-
-        // Get class style (or class state style if state provided)
-        ViewStyle classStyle = _view.getClassStyle();
-        if (_state != PseudoClass.Normal)
-            classStyle = classStyle.getStyleForState(_state);
-
-        // Return value for class style
-        return classStyle.getPropValueDeep(propName);
-    }
-
-    /**
-     * Returns the hover view style.
-     */
-    public ViewStyle getHoverStyle()  { return getStyleForState(PseudoClass.Hover); }
-
-    /**
-     * Returns the active view style.
-     */
-    public ViewStyle getActiveStyle()  { return getStyleForState(PseudoClass.Active); }
 
     /**
      * Returns the view style for given state.
@@ -191,6 +176,16 @@ public class ViewStyle implements Cloneable {
     }
 
     /**
+     * Convenience method to return hover view style.
+     */
+    public ViewStyle getHoverStyle()  { return getStyleForState(PseudoClass.Hover); }
+
+    /**
+     * Convenience method to return active view style.
+     */
+    public ViewStyle getActiveStyle()  { return getStyleForState(PseudoClass.Active); }
+
+    /**
      * Sets style values for JSON/CSS style string, e.g.: "Fill: White; Margin: 4; Font: Arial 24;"
      */
     public void setStyleString(String styleString)
@@ -207,13 +202,74 @@ public class ViewStyle implements Cloneable {
             // If both prop/value parts found, get prop name and set value
             if (nameValueStrings.length == 2) {
                 String propName = nameValueStrings[0].trim();
-                setPropValue(propName, nameValueStrings[1]);
+                setStyleValue(propName, nameValueStrings[1]);
             }
 
             // If "name:value" parts not found, complain
             else System.err.println("ViewStyle.setStyleString: Invalid prop string: " + propString);
         }
     }
+
+    /**
+     * Convenience method to return computed align.
+     */
+    public Pos getAlign()  { return getComputedValue(View.Align_Prop, Pos.class); }
+
+    /**
+     * Convenience method to return computed margin.
+     */
+    public Insets getMargin()  { return getComputedValue(View.Margin_Prop, Insets.class); }
+
+    /**
+     * Convenience method to return computed padding.
+     */
+    public Insets getPadding()  { return getComputedValue(View.Padding_Prop, Insets.class); }
+
+    /**
+     * Convenience method to return computed spacing.
+     */
+    public double getSpacing()
+    {
+        Double spacing = getComputedValue(View.Spacing_Prop, Double.class);
+        return spacing != null ? spacing : 0;
+    }
+
+    /**
+     * Convenience method to return computed fill.
+     */
+    public Paint getFill()
+    {
+        Paint fill = getComputedValue(View.Fill_Prop, Paint.class);
+        return fill == NULL_FILL ? null : fill;
+    }
+
+    /**
+     * Convenience method to return computed border.
+     */
+    public Border getBorder()
+    {
+        Border border = getComputedValue(View.Border_Prop, Border.class);
+        return border == NULL_BORDER ? null : border;
+    }
+
+    /**
+     * Convenience method to return computed border radius.
+     */
+    public double getBorderRadius()
+    {
+        Double borderRadius = getComputedValue(View.BorderRadius_Prop, Double.class);
+        return borderRadius != null ? borderRadius : 0;
+    }
+
+    /**
+     * Convenience method to return computed font.
+     */
+    public Font getFont()  { return getComputedValue(View.Font_Prop, Font.class); }
+
+    /**
+     * Convenience method to return computed text color.
+     */
+    public Color getTextColor()  { return getComputedValue(View.TextColor_Prop, Color.class); }
 
     /**
      * Returns a copy of this style for given class.
