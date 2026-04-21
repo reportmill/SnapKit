@@ -21,9 +21,6 @@ public class ViewStyle implements Cloneable {
     // The style values
     private Map<String,Object> _values = new HashMap<>();
 
-    // The parent style
-    private ViewStyle _parent;
-
     // The normal style
     private ViewStyle _normalStyle;
 
@@ -57,9 +54,14 @@ public class ViewStyle implements Cloneable {
     }
 
     /**
-     * Returns the parent style.
+     * Returns whether this style is normal style (not pseudo style).
      */
-    public ViewStyle getParent()  { return _parent; }
+    public boolean isNormalStyle()  { return _normalStyle == this; }
+
+    /**
+     * Returns the normal style (if this style is for pseudo class).
+     */
+    public ViewStyle getNormalStyle()  { return _normalStyle; }
 
     /**
      * Returns whether style has given prop name set.
@@ -90,22 +92,34 @@ public class ViewStyle implements Cloneable {
         if (value != null)
             return value;
 
-        // Handle view style: forward to class style for state
-        if (_view != null) {
+        // Handle view + state style: try resolving with class style for state, then normal view style
+        if (_view != null && _state != PseudoClass.Normal) {
 
-            // Get class style (or class state style if state provided)
+            // Try resolving with class style for state
             ViewStyle classStyle = _view.getClassStyle();
-            if (_state != PseudoClass.Normal)
-                classStyle = classStyle.getStyleForState(_state);
+            ViewStyle classStyleForState = classStyle.getStyleForState(_state);
+            value = classStyleForState.getStyleValue(propName);
+            if (value != null)
+                return value;
 
-            // Return value for class style
-            return classStyle.getStyleValueDeep(propName);
+            // Forward to view normal style
+            ViewStyle viewNormalStyle = getNormalStyle();
+            return viewNormalStyle.getStyleValueDeep(propName);
         }
 
-        // Handle class style: Try view style parent
-        ViewStyle parentStyle = getParent();
-        if (parentStyle != null)
-            return parentStyle.getStyleValueDeep(propName);
+        // Handle view normal style: try resolving with class style
+        if (_view != null) {
+            ViewStyle classStyle = _view.getClassStyle();
+            value = classStyle.getStyleValue(propName);
+            if (value != null)
+                return value;
+        }
+
+        // Handle class + state style: Try class normal style
+        if (!isNormalStyle()) {
+            ViewStyle normalStyle = getNormalStyle();
+            return normalStyle.getStyleValueDeep(propName);
+        }
 
         // Return not found
         return  null;
@@ -293,7 +307,6 @@ public class ViewStyle implements Cloneable {
         newStyle._viewClass = _viewClass;
         newStyle._state = newState;
         newStyle._normalStyle = _normalStyle;
-        newStyle._parent = this;
         return newStyle;
     }
 
