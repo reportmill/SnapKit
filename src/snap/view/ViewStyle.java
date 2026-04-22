@@ -2,6 +2,7 @@ package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
 import snap.util.Convert;
+import snap.util.FormatUtils;
 import java.util.*;
 
 /**
@@ -19,7 +20,7 @@ public class ViewStyle implements Cloneable {
     private PseudoClass _state = PseudoClass.Normal;
 
     // The style values
-    private Map<String,Object> _values = new HashMap<>();
+    private Map<String,String> _values = new HashMap<>();
 
     // The normal style
     private ViewStyle _normalStyle;
@@ -71,24 +72,32 @@ public class ViewStyle implements Cloneable {
     /**
      * Returns value for given property name.
      */
-    public Object getStyleValue(String propName)  { return _values.get(propName); }
+    public String getStyleValue(String propName)  { return _values.get(propName); }
 
     /**
      * Sets value for given property name.
      */
     public void setStyleValue(String propName, Object aValue)
     {
-        _values.put(propName, aValue);
-        _computedValues.remove(propName);
+        if (aValue instanceof String valueStr) {
+            _values.put(propName, valueStr);
+            _computedValues.remove(propName);
+        }
+        else if (getClassForPropName(propName).isInstance(aValue))
+            setComputedValue(propName, aValue);
+        else if (aValue == null) {
+            _values.remove(propName);
+            _computedValues.remove(propName);
+        }
     }
 
     /**
      * Returns the style value for given property name, forwarding to style hierarchy.
      */
-    private Object getStyleValueDeep(String propName)
+    private String getStyleValueDeep(String propName)
     {
         // Get prop value and return if set
-        Object value = getStyleValue(propName);
+        String value = getStyleValue(propName);
         if (value != null)
             return value;
 
@@ -130,16 +139,7 @@ public class ViewStyle implements Cloneable {
      */
     public Object getComputedValue(String propName)
     {
-        Class<?> valueClass = switch (propName) {
-            case View.Align_Prop -> Pos.class;
-            case View.Margin_Prop, View.Padding_Prop -> Insets.class;
-            case View.Spacing_Prop, View.BorderRadius_Prop -> Double.class;
-            case View.Fill_Prop -> Paint.class;
-            case View.Border_Prop -> Border.class;
-            case View.Font_Prop -> Font.class;
-            case View.TextColor_Prop -> Color.class;
-            default -> throw new RuntimeException("ViewStyle.getComputedValue: Unknown prop name: " + propName);
-        };
+        Class<?> valueClass = getClassForPropName(propName);
         return getComputedValue(propName, valueClass);
     }
 
@@ -154,7 +154,7 @@ public class ViewStyle implements Cloneable {
             return (T) value;
 
         // Get generic style value
-        Object styleValue = getStyleValueDeep(propName);
+        String styleValue = getStyleValueDeep(propName);
         if (styleValue == null)
             return null;
 
@@ -162,6 +162,23 @@ public class ViewStyle implements Cloneable {
         T computedValue = convertStyleValueToClass(styleValue, valueClass);
         _computedValues.put(propName, computedValue);
         return computedValue;
+    }
+
+    /**
+     * Sets a computed value for given property name.
+     */
+    public void setComputedValue(String propName, Object value)
+    {
+        if (value != null) {
+            _computedValues.put(propName, value);
+            String styleString = convertComputedValueToString(value);
+            _values.put(propName, styleString);
+        }
+
+        else {
+            _computedValues.remove(propName);
+            _values.remove(propName);
+        }
     }
 
     /**
@@ -286,6 +303,23 @@ public class ViewStyle implements Cloneable {
     public Color getTextColor()  { return getComputedValue(View.TextColor_Prop, Color.class); }
 
     /**
+     * Returns value class for given property name.
+     */
+    public Class<?> getClassForPropName(String propName)
+    {
+        return switch (propName) {
+            case View.Align_Prop -> Pos.class;
+            case View.Margin_Prop, View.Padding_Prop -> Insets.class;
+            case View.Spacing_Prop, View.BorderRadius_Prop -> Double.class;
+            case View.Fill_Prop -> Paint.class;
+            case View.Border_Prop -> Border.class;
+            case View.Font_Prop -> Font.class;
+            case View.TextColor_Prop -> Color.class;
+            default -> throw new RuntimeException("ViewStyle.getComputedValue: Unknown prop name: " + propName);
+        };
+    }
+
+    /**
      * Returns a copy of this style for given class.
      */
     protected ViewStyle copyForClass(Class<? extends View> viewClass)
@@ -344,14 +378,22 @@ public class ViewStyle implements Cloneable {
             return (T) Pos.of(styleValue);
         if (valueClass == Insets.class)
             return (T) Insets.of(styleValue);
-        if (valueClass == Paint.class)
-            return (T) Paint.of(styleValue);
-        if (valueClass == Border.class)
-            return (T) Border.of(styleValue);
-        if (valueClass == Font.class)
-            return (T) Font.of(styleValue);
         if (valueClass == Color.class)
             return (T) Color.get(styleValue);
+        if (valueClass == Paint.class) {
+            Paint paint = Paint.of(styleValue);
+            if (paint == null && "null".equals(styleValue))
+                paint = NULL_FILL;
+            return (T) paint;
+        }
+        if (valueClass == Border.class) {
+            Border border = Border.of(styleValue);
+            if (border == null && "null".equals(styleValue))
+                border = NULL_BORDER;
+            return (T) border;
+        }
+        if (valueClass == Font.class)
+            return (T) Font.of(styleValue);
         if (valueClass == Double.class)
             return (T) Convert.getDouble(styleValue);
         if (styleValue == null)
@@ -360,5 +402,28 @@ public class ViewStyle implements Cloneable {
         // If not known class, complain
         System.out.println("ComputedStyle.convertStyleValueToClass: Unknown conversion for class: " + styleValue);
         return valueClass.isInstance(styleValue) ? valueClass.cast(styleValue) : null;
+    }
+
+    /**
+     * Converts a style value to string.
+     */
+    private static String convertComputedValueToString(Object styleValue)
+    {
+        if (styleValue instanceof Pos)
+            return styleValue.toString();
+        if (styleValue instanceof Insets insets)
+            return insets.getString();
+        if (styleValue instanceof Paint paint)
+            return paint == NULL_FILL ? "null" : paint.codeString();
+        if (styleValue instanceof Border border)
+            return border == NULL_BORDER ? "null" : border.codeString();
+        if (styleValue instanceof Font font)
+            return font.codeString();
+        if (styleValue instanceof Double doubleValue)
+            return FormatUtils.formatNum(doubleValue);
+
+        // If not known class, complain
+        System.out.println("ComputedStyle.convertComputedValueToString: Unknown conversion for class: " + styleValue.getClass());
+        return styleValue.toString();
     }
 }
