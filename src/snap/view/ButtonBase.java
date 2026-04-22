@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.geom.RoundRect;
 import snap.geom.Shape;
@@ -171,6 +170,18 @@ public class ButtonBase extends ParentView {
     {
         if (aValue == _showArea) return;
         firePropChange(ShowArea_Prop, _showArea, _showArea = aValue);
+
+        // Handle normal button: Clear view style Fill/Border
+        if (aValue) {
+            getStyle().setStyleValue(Fill_Prop, null);
+            getStyle().setStyleValue(Border_Prop, null);
+        }
+
+        // Handle tool-bar button: Override view style Fill/Border to be null
+        else {
+            setFill(null);
+            setBorder(null);
+        }
     }
 
     /**
@@ -393,18 +404,7 @@ public class ButtonBase extends ParentView {
     @Override
     protected ViewLayout getViewLayoutImpl()
     {
-        // Create layout with Label layout as Content
-        BoxViewLayout viewLayout = new BoxViewLayout(this);
-        ViewLayout labelProxy = getLabel().getViewLayout();
-        viewLayout.setContent(labelProxy);
-
-        // If ShowArea, add padding
-        if (isShowArea()) {
-            Insets padding = Insets.add(viewLayout.getPadding(), 2, 2, 2, 2);
-            viewLayout.setPadding(padding);
-        }
-
-        // Return
+        BoxViewLayout viewLayout = new BoxViewLayout(this, getLabel(), false, false);
         return viewLayout;
     }
 

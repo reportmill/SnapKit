@@ -41,7 +41,7 @@ public class Tab extends PropObject {
     private static final String Visible_Prop = "Visible";
 
     /**
-     * Creates a new Tab.
+     * Constructor.
      */
     public Tab()
     {
@@ -107,13 +107,13 @@ public class Tab extends PropObject {
             addCloseBoxToButton(button);
 
         // Set padding
-        button.setPadding(3,7,3,7);
+        button.setPadding(4,9,4,9);
 
         // If button is for TabView, configure as Tabs
         View tabBarParent = _tabBar != null ? _tabBar.getParent() : null;
         boolean isForClassicTabView = tabBarParent instanceof TabView && ((TabView) tabBarParent).isClassic();
         if (isForClassicTabView) {
-            button.setPadding(4,7,2,7);
+            button.setPadding(5,7,3,7);
             button.setAlign(Pos.TOP_CENTER);
             button.setPosition(Pos.TOP_CENTER);
         }

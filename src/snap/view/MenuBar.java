@@ -16,16 +16,12 @@ public class MenuBar extends ParentView {
     // Constants for properties
     public static final String Menus_Prop = "Menus";
 
-    // Constants for properties
-    protected static Font DEFAULT_MENU_BAR_FONT = new Font("Arial", 13);
-
     /**
      * Constructor.
      */
     public MenuBar()
     {
         super();
-        //_font = DEFAULT_MENU_BAR_FONT;
     }
 
     /**
@@ -144,9 +140,6 @@ public class MenuBar extends ParentView {
 
         // Menus
         aPropSet.addPropNamed(Menus_Prop, List.class);
-
-        // Reset defaults
-        aPropSet.getPropForName(Font_Prop).setDefaultValue(DEFAULT_MENU_BAR_FONT);
     }
 
     /**

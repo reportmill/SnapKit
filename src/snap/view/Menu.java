@@ -26,16 +26,12 @@ public class Menu extends MenuItem {
     // Constants for properties
     public static final String MenuItems_Prop = "MenuItems";
 
-    // Constants for property defaults
-    protected static Font DEFAULT_MENU_FONT = MenuBar.DEFAULT_MENU_BAR_FONT;
-
     /**
      * Constructor.
      */
     public Menu()
     {
         super();
-        //_font = DEFAULT_MENU_FONT;
     }
 
     /**
@@ -288,9 +284,6 @@ public class Menu extends MenuItem {
 
         // MenuItems
         aPropSet.addPropNamed(MenuItems_Prop, List.class);
-
-        // Reset defaults
-        aPropSet.getPropForName(Font_Prop).setDefaultValue(DEFAULT_MENU_FONT);
     }
 
     /**

@@ -123,7 +123,7 @@ public class ViewTheme {
         setViewStyleString(Label.class, "Align: CENTER_LEFT; Spacing: 4");
 
         // ButtonBase
-        setViewStyleString(ButtonBase.class, "Align: CENTER; Padding: 3; BorderRadius: 4");
+        setViewStyleString(ButtonBase.class, "Align: CENTER; Padding: 4; BorderRadius: 4");
 
         // Button
         setViewStyleString(Button.class, "Fill: WHITE; Border: #BF");
@@ -140,6 +140,13 @@ public class ViewTheme {
         // RadioButton, CheckBox
         setViewStyleString(RadioButton.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
         setViewStyleString(CheckBox.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
+
+        // MenuButton
+        setViewStyleString(MenuButton.class, "Fill: WHITE; Border: #BF");
+
+        // MenuItem
+        setViewStyleString(MenuItem.class, "Align: CENTER_LEFT; Padding: 4, 8, 4, 6; Font: Arial 13");
+        setViewStyleStringForHover(MenuItem.class, "Fill: #E6; TextColor: WHITE");
 
         // TextField
         setViewStyleString(TextField.class, "Align: CENTER_LEFT; Padding: 3; Fill: WHITE; Border: #C0; BorderRadius: 3");
@@ -160,11 +167,6 @@ public class ViewTheme {
 
         // MenuBar
         setViewStyleString(MenuBar.class, "Padding: 2, 10, 2, 10; Font: Arial 13");
-
-        // MenuItem
-        setViewStyleString(MenuItem.class, "Align: CENTER_LEFT; Padding: 4, 8, 4, 6");
-        setViewStyleStringForHover(MenuItem.class, "Fill: #E6; TextColor: WHITE");
-        setViewStyleString(Menu.class, "Font: Arial 13");
 
         // ScrollView
         setViewStyleString(ScrollView.class, "Border: #C0");

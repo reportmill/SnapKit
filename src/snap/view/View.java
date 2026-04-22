@@ -771,7 +771,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setFont(Font aFont)
     {
         // If already set, just return
-        Font oldFont = getFont();
+        Font oldFont = isFontSet() ? getFont() : null;
         if (Objects.equals(aFont, oldFont)) return;
 
         // Set, fire prop change, relayout parent, repaint
