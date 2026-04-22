@@ -133,13 +133,13 @@ public class ColorButton extends View {
         double areaW = getWidth() - 1;
         double areaH = getHeight() - 1;
         if (_armed) {
-            aPntr.setPaint(ViewUtils.getSelectFill());
+            aPntr.setPaint(ViewThemeUtils.getSelectFill());
             aPntr.fill(new RoundRect(0,0, areaW, areaH, 3));
         }
 
         // Paint border if targeted (under mouse)
         if (_targeted) {
-            aPntr.setPaint(ViewUtils.getTargetFill());
+            aPntr.setPaint(ViewThemeUtils.getTargetFill());
             aPntr.fill(new RoundRect(0,0, areaW, areaH, 3));
         }
 

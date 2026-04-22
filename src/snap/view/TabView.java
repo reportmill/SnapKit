@@ -72,7 +72,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
 
         // Create and configure content cradle
         _contentBox = new BoxView(null, true, true);
-        _contentBox.setFill(ViewUtils.getBackFill());
+        _contentBox.setFill(ViewThemeUtils.getBackFill());
         _contentBox.setGrowWidth(true);
         _contentBox.setGrowHeight(true);
         _contentBox.addPropChangeListener(pc -> handleContentBoxContentChange(), BoxView.Content_Prop);
@@ -360,7 +360,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
     {
         super.handleThemeChange(oldTheme, newTheme);
-        _contentBox.setFill(ViewUtils.getBackFill());
+        _contentBox.setFill(ViewThemeUtils.getBackFill());
         _tabBar.setFill(null);
     }
 

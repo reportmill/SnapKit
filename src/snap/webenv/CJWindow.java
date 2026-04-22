@@ -9,6 +9,8 @@ import snap.view.*;
 import snap.webapi.*;
 import snap.webapi.EventListener;
 
+import java.util.Objects;
+
 /**
  * A class to represent the WindowView in the browser page.
  */
@@ -106,8 +108,6 @@ public class CJWindow {
      */
     public void initWindow()
     {
-        if (_rootView.getFill() == null)
-            _rootView.setFill(ViewUtils.getBackFill());
         if (_rootView.getBorder() == null && _win.getType() != WindowView.Type.PLAIN)
             _rootView.setBorder(Color.GRAY, 1);
     }

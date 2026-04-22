@@ -313,19 +313,19 @@ public class ViewTheme {
     /**
      * Returns the light theme.
      */
-    public static ViewTheme getLight()  { return ViewThemes.getLight(); }
+    public static ViewTheme getLight()  { return ViewThemeUtils.getLight(); }
 
     /**
      * Returns the dark theme.
      */
-    public static ViewTheme getDark()  { return ViewThemes.getDark(); }
+    public static ViewTheme getDark()  { return ViewThemeUtils.getDark(); }
 
     /**
      * Sets the theme to theme for given name.
      */
     public static void setThemeForName(String aName)
     {
-        ViewTheme theme = ViewThemes.getThemeForName(aName);
+        ViewTheme theme = ViewThemeUtils.getThemeForName(aName);
         if (theme != null)
             setTheme(theme);
         else System.err.println("ViewTheme.setThemeForName: Not theme for name: " + aName);

@@ -355,7 +355,7 @@ public class ButtonBase extends ParentView {
         // If not ShowArea, paint rects for Selected, Pressed or Targeted
         else if (isPressed() || isSelected() || isTargeted()) {
             Shape shape = getBoundsShape();
-            Paint fill = isTargeted() ? ViewUtils.getTargetFill() : ViewUtils.getSelectFill();
+            Paint fill = isTargeted() ? ViewThemeUtils.getTargetFill() : ViewThemeUtils.getSelectFill();
             aPntr.fillWithPaint(shape, fill);
             if (getBorder() != null)
                 getBorder().paint(aPntr, shape);

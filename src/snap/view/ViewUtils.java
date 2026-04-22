@@ -61,21 +61,6 @@ public class ViewUtils {
     public static ViewEvent getMouseDown()  { return EventDispatcher.getLastMouseDown(); }
 
     /**
-     * Returns the background fill.
-     */
-    public static Paint getBackFill()  { return ViewTheme.get().getBackFill(); }
-
-    /**
-     * Returns the selection color.
-     */
-    public static Paint getSelectFill()  { return ViewTheme.get().getSelectedFill(); }
-
-    /**
-     * Returns the selection color.
-     */
-    public static Paint getTargetFill()  { return ViewTheme.get().getTargetedFill(); }
-
-    /**
      * Returns the area bounds for given view.
      */
     public static Rect getAreaBounds(View aView)

@@ -128,7 +128,7 @@ public class DrawerView extends ParentView {
 
             // Basic attributes
             setPadding(24, 8, 8, 8);
-            setFill(ViewUtils.getBackFill());
+            setFill(ViewThemeUtils.getBackFill());
             setBorder(Color.GRAY, 1);
             setBorderRadius(BORDER_RADIUS);
             setEffect(SHADOW_EFFECT);

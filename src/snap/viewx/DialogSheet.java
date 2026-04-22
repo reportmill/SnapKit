@@ -122,7 +122,7 @@ public class DialogSheet extends DialogBox {
 
         // Create box to hold/clip UI
         _sheetView = new BoxView(superUI);
-        _sheetView.setFill(ViewUtils.getBackFill());
+        _sheetView.setFill(ViewThemeUtils.getBackFill());
         _sheetView.setBorder(Color.GRAY, 1);
         _sheetView.setBorderRadius(BORDER_RADIUS);
         _sheetView.setEffect(SHADOW_EFFECT);
