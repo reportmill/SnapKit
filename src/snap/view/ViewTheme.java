@@ -137,9 +137,17 @@ public class ViewTheme {
         setViewStyleStringForActive(ToggleButton.class, "Fill: #DF; Border: #87AFDA");
         setViewStyleStringForSelected(ToggleButton.class, "Fill: #DF; Border: #87AFDA");
 
-        // RadioButton, CheckBox
+        // RadioButton
         setViewStyleString(RadioButton.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
+        setViewStyleStringForHover(RadioButton.class, "Fill: #F8");
+        setViewStyleStringForActive(RadioButton.class, "Fill: #DF; Border: #87AFDA");
+        setViewStyleStringForSelected(RadioButton.class, "Fill: #DF; Border: #87AFDA");
+
+        // CheckBox
         setViewStyleString(CheckBox.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
+        setViewStyleStringForHover(CheckBox.class, "Fill: #F8");
+        setViewStyleStringForActive(CheckBox.class, "Fill: #DF; Border: #87AFDA");
+        setViewStyleStringForSelected(CheckBox.class, "Fill: #DF; Border: #87AFDA");
 
         // MenuButton
         setViewStyleString(MenuButton.class, "Fill: WHITE; Border: #BF");
