@@ -7,17 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This JSValue subclass represents an array.
+ * This node subclass represents an array.
  */
-public class JSArray extends JSValue {
+public class JsonArray extends JsonNode {
 
     // The map to hold key/values
-    private List<JSValue>  _values = new ArrayList<>();
+    private List<JsonNode>  _values = new ArrayList<>();
 
     /**
      * Constructor.
      */
-    public JSArray()
+    public JsonArray()
     {
         super();
     }
@@ -25,19 +25,19 @@ public class JSArray extends JSValue {
     /**
      * Constructor.
      */
-    public JSArray(Object anArray)
+    public JsonArray(Object anArray)
     {
         int length = Array.getLength(anArray);
         for (int i = 0; i < length; i++) {
             Object item = Array.get(anArray, i);
-            addValue(new JSValue(item));
+            addValue(new JsonNode(item));
         }
     }
 
     /**
      * Returns the values.
      */
-    public List<JSValue> getValues()  { return _values; }
+    public List<JsonNode> getValues()  { return _values; }
 
     /**
      * Returns the number of values.
@@ -47,7 +47,7 @@ public class JSArray extends JSValue {
     /**
      * Returns a value at given index.
      */
-    public JSValue getValue(int anIndex)
+    public JsonNode getValue(int anIndex)
     {
         return _values.get(anIndex);
     }
@@ -55,7 +55,7 @@ public class JSArray extends JSValue {
     /**
      * Add a value for key.
      */
-    public void addValue(JSValue aValue)
+    public void addValue(JsonNode aValue)
     {
         addValue(aValue, _values.size());
     }
@@ -63,7 +63,7 @@ public class JSArray extends JSValue {
     /**
      * Add a value for key.
      */
-    public void addValue(JSValue aValue, int anIndex)
+    public void addValue(JsonNode aValue, int anIndex)
     {
         _values.add(anIndex, aValue);
     }
@@ -73,7 +73,7 @@ public class JSArray extends JSValue {
      */
     public void addNativeValue(Object aValue)
     {
-        JSValue valueJS = new JSValue(aValue);
+        JsonNode valueJS = new JsonNode(aValue);
         addValue(valueJS);
     }
 
@@ -86,8 +86,7 @@ public class JSArray extends JSValue {
         List<Object> list = new ArrayList<>(_values.size());
 
         // Iterate over items and replace with native
-        for (int i = 0, iMax = _values.size(); i < iMax; i++) {
-            JSValue item = _values.get(i);
+        for (JsonNode item : _values) {
             Object nativeItem = item.getNative();
             list.add(nativeItem);
         }

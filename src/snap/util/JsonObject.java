@@ -6,17 +6,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * This JSValue subclass represents an object.
+ * This node subclass represents an object.
  */
-public class JSObject extends JSValue {
+public class JsonObject extends JsonNode {
 
     // The map to hold key/values
-    private Map<String, JSValue>  _keyValues = new LinkedHashMap<>();
+    private Map<String, JsonNode>  _keyValues = new LinkedHashMap<>();
 
     /**
      * Constructor.
      */
-    public JSObject()
+    public JsonObject()
     {
         super();
     }
@@ -24,7 +24,7 @@ public class JSObject extends JSValue {
     /**
      * Returns the KeyValues.
      */
-    public Map<String,JSValue> getKeyValues()  { return _keyValues; }
+    public Map<String, JsonNode> getKeyValues()  { return _keyValues; }
 
     /**
      * Returns the number of key values.
@@ -34,7 +34,7 @@ public class JSObject extends JSValue {
     /**
      * Returns a value for a key.
      */
-    public JSValue getValue(String aKey)
+    public JsonNode getValue(String aKey)
     {
         return _keyValues.get(aKey);
     }
@@ -42,7 +42,7 @@ public class JSObject extends JSValue {
     /**
      * Sets a value for key.
      */
-    public void setValue(String aKey, JSValue aValue)
+    public void setValue(String aKey, JsonNode aValue)
     {
         if (aValue == null)
             _keyValues.remove(aKey);
@@ -54,7 +54,7 @@ public class JSObject extends JSValue {
      */
     public Object getNativeValue(String aKey)
     {
-        JSValue value = getValue(aKey);
+        JsonNode value = getValue(aKey);
         Object nativeValue = value != null ? value.getNative() : null;
         return nativeValue;
     }
@@ -64,7 +64,7 @@ public class JSObject extends JSValue {
      */
     public void setNativeValue(String aKey, Object aValue)
     {
-        JSValue valueJS = new JSValue(aValue);
+        JsonNode valueJS = new JsonNode(aValue);
         setValue(aKey, valueJS);
     }
 
@@ -87,9 +87,9 @@ public class JSObject extends JSValue {
         Map<String,Object> map = new LinkedHashMap<>(_keyValues.size());
 
         // Iterate over KeyValues map and replace JS with native
-        for (Map.Entry<String, JSValue> entry : _keyValues.entrySet()) {
+        for (Map.Entry<String, JsonNode> entry : _keyValues.entrySet()) {
             String key = entry.getKey();
-            JSValue value = entry.getValue();
+            JsonNode value = entry.getValue();
             Object nativeValue = value.getNative();
             map.put(key, nativeValue);
         }

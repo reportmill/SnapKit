@@ -7,14 +7,14 @@ import snap.web.*;
 import java.util.stream.Stream;
 
 /**
- * A JSONParser subclass (with handlers).
+ * A JSON parser.
  */
-public class JSParser extends Parser {
+public class JsonParser extends Parser {
     
     /**
      * Constructor.
      */
-    public JSParser()
+    public JsonParser()
     {
         super();
     }
@@ -36,10 +36,9 @@ public class JSParser extends Parser {
     /**
      * Reads JSON from a source.
      */
-    public JSValue readSource(Object aSource)
+    public JsonNode readSource(Object aSource)
     {
-        WebURL url = WebURL.getUrl(aSource);
-        assert (url != null);
+        WebURL url = WebURL.getUrl(aSource); assert (url != null);
         String urlText = url.getText();
         return readString(urlText);
     }
@@ -47,10 +46,10 @@ public class JSParser extends Parser {
     /**
      * Returns a KeyChain for given string.
      */
-    public JSValue readString(String aString)
+    public JsonNode readString(String aString)
     {
         // Parse string
-        try { return parse(aString).getCustomNode(JSValue.class); }
+        try { return parse(aString).getCustomNode(JsonNode.class); }
         catch(Throwable e) { e.printStackTrace(); }
         return null;
     }
@@ -64,15 +63,15 @@ public class JSParser extends Parser {
     /**
      * Object Handler.
      */
-    public static class ObjectHandler extends ParseHandler<JSObject> {
+    public static class ObjectHandler extends ParseHandler<JsonObject> {
 
         /** Returns the part class. */
-        protected Class<JSObject> getPartClass()  { return JSObject.class; }
+        protected Class<JsonObject> getPartClass()  { return JsonObject.class; }
 
         /** ParseHandler method. */
         public void parsedOne(ParseNode aNode, String anId)
         {
-            JSObject jsonObj = getPart();
+            JsonObject jsonObj = getPart();
 
             // Handle Pair
             if (anId == "Pair") {
@@ -102,36 +101,36 @@ public class JSParser extends Parser {
             // Handle Value
             else if (anId == "Value") {
                 Object value = aNode.getCustomNode();
-                if(value instanceof JSValue)
-                    jsonPair._value = (JSValue) value;
-                else jsonPair._value = new JSValue(value);
+                if(value instanceof JsonNode)
+                    jsonPair._value = (JsonNode) value;
+                else jsonPair._value = new JsonNode(value);
             }
         }
     }
 
     public static class JSPair {
         String  _key;
-        JSValue _value;
+        JsonNode _value;
     }
 
     /**
      * Array Handler.
      */
-    public static class ArrayHandler extends ParseHandler <JSArray> {
+    public static class ArrayHandler extends ParseHandler <JsonArray> {
 
         /** Returns the part class. */
-        protected Class<JSArray> getPartClass()  { return JSArray.class; }
+        protected Class<JsonArray> getPartClass()  { return JsonArray.class; }
 
         /** ParseHandler method. */
         public void parsedOne(ParseNode aNode, String anId)
         {
-            JSArray jsonArray = getPart();
+            JsonArray jsonArray = getPart();
 
             // Handle Value
             if (anId == "Value") {
                 Object value = aNode.getCustomNode();
-                if (value instanceof JSValue)
-                    jsonArray.addValue(((JSValue) value));
+                if (value instanceof JsonNode)
+                    jsonArray.addValue(((JsonNode) value));
                 else jsonArray.addNativeValue(value);
             }
         }
@@ -194,7 +193,7 @@ public class JSParser extends Parser {
 
     public static void main(String[] args)
     {
-        JSValue jnode = new JSParser().readSource(args[0]);
+        JsonNode jnode = new JsonParser().readSource(args[0]);
         System.out.println(jnode);
     }
 

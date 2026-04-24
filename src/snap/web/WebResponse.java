@@ -3,10 +3,9 @@
  */
 package snap.web;
 import snap.util.FilePathUtils;
-import snap.util.JSValue;
-import snap.util.JSParser;
+import snap.util.JsonNode;
+import snap.util.JsonParser;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -318,11 +317,11 @@ public class WebResponse {
     /**
      * Returns the JSON.
      */
-    public JSValue getJSON()
+    public JsonNode getJSON()
     {
         String text = getText(); if (text == null) return null;
-        JSParser parser = new JSParser();
-        JSValue json = parser.readString(text);
+        JsonParser parser = new JsonParser();
+        JsonNode json = parser.readString(text);
         return json;
     }
 

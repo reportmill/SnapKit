@@ -9,19 +9,19 @@ import java.util.Map;
 /**
  * Writes a JSON to string.
  */
-public class JSWriter {
+public class JsonWriter {
 
     // The current indent level
-    private int  _indentLevel = 0;
+    private int _indentLevel = 0;
     
     // The indent string
-    private String  _indent = "\t";
+    private String _indent = "\t";
 
     // Whether to quote keys
-    private boolean  _quoteKeys = true;
+    private boolean _quoteKeys = true;
     
     // Whether writer compacts JSON (no indent or newline)
-    private boolean  _compacted = false;
+    private boolean _compacted = false;
 
     // Constant for escape chars
     private static final char[] ESCAPE_CHARS = { '"', '\\', '\b', '\f', '\n', '\r', '\t' };
@@ -29,7 +29,7 @@ public class JSWriter {
     /**
      * Constructor.
      */
-    public JSWriter()
+    public JsonWriter()
     {
         super();
     }
@@ -42,7 +42,7 @@ public class JSWriter {
     /**
      * Sets the current indent string.
      */
-    public JSWriter setIndent(String anIndent)
+    public JsonWriter setIndent(String anIndent)
     {
         _indent = anIndent;
         return this;
@@ -77,25 +77,25 @@ public class JSWriter {
     /**
      * Returns a string for given JSON node.
      */
-    public String getString(JSValue aNode)
+    public String getString(JsonNode jsonNode)
     {
-        StringBuffer sb = getStringBuffer(aNode);
+        StringBuffer sb = getStringBuffer(jsonNode);
         return sb.toString();
     }
 
     /**
      * Returns a string buffer for given JSON node.
      */
-    public StringBuffer getStringBuffer(JSValue aNode)
+    public StringBuffer getStringBuffer(JsonNode jsonNode)
     {
         StringBuffer sb = new StringBuffer(1024);
-        return append(sb, null, aNode);
+        return append(sb, null, jsonNode);
     }
 
     /**
      * Returns a string buffer for given JSON node.
      */
-    protected StringBuffer append(StringBuffer aSB, String aKey, JSValue aNode)
+    protected StringBuffer append(StringBuffer aSB, String aKey, JsonNode jsonNode)
     {
         // Append key
         if (aKey != null) {
@@ -107,24 +107,24 @@ public class JSWriter {
         }
 
         // Handle Object
-        if (aNode instanceof JSObject)
-            return appendJSObject(aSB, (JSObject) aNode);
+        if (jsonNode instanceof JsonObject)
+            return appendJsonObject(aSB, (JsonObject) jsonNode);
 
         // Handle Array
-        if (aNode instanceof JSArray)
-            return appendJSArray(aSB, (JSArray) aNode);
+        if (jsonNode instanceof JsonArray)
+            return appendJsonArray(aSB, (JsonArray) jsonNode);
 
-        // Handle JSValue
-        return appendJSValue(aSB, aNode);
+        // Handle value
+        return appendJsonValue(aSB, jsonNode);
     }
 
     /**
-     * Appends the given JSObject to StringBuffer.
+     * Appends the given JSON object to StringBuffer.
      */
-    protected StringBuffer appendJSObject(StringBuffer aSB, JSObject objectJS)
+    protected StringBuffer appendJsonObject(StringBuffer aSB, JsonObject jsonObject)
     {
         // Get whether map is deep (not leaf)
-        boolean deep = _indentLevel == 0 || isDeep(objectJS);
+        boolean deep = _indentLevel == 0 || isDeep(jsonObject);
 
         // Append map opening
         aSB.append('{');
@@ -132,8 +132,8 @@ public class JSWriter {
             appendNewlineIndent(aSB, ++_indentLevel);
         else aSB.append(' ');
 
-        // Get JSObject KeyValues and Keys
-        Map<String, JSValue> keyValues = objectJS.getKeyValues();
+        // Get JSON object KeyValues and Keys
+        Map<String, JsonNode> keyValues = jsonObject.getKeyValues();
         String[] keys = keyValues.keySet().toArray(new String[0]);
 
         // Iterate over keys and append Key/Value for each
@@ -141,7 +141,7 @@ public class JSWriter {
 
             // Append child
             String key = keys[i];
-            JSValue child = keyValues.get(key);
+            JsonNode child = keyValues.get(key);
             append(aSB, key, child);
 
             // If has next, append separator and whitespace
@@ -160,12 +160,12 @@ public class JSWriter {
     }
 
     /**
-     * Appends the given JSArray to StringBuffer.
+     * Appends the given JSON array to StringBuffer.
      */
-    protected StringBuffer appendJSArray(StringBuffer aSB, JSArray arrayJS)
+    protected StringBuffer appendJsonArray(StringBuffer aSB, JsonArray jsonArray)
     {
         // Get whether list is deep (not leaf)
-        boolean deep = isDeep(arrayJS);
+        boolean deep = isDeep(jsonArray);
 
         // Append list opening
         aSB.append('[');
@@ -174,11 +174,11 @@ public class JSWriter {
         else aSB.append(' ');
 
         // Iterate over items to append items and separators
-        int count = arrayJS.getValueCount();
+        int count = jsonArray.getValueCount();
         for (int i = 0; i < count; i++) {
 
             // Append item
-            JSValue item = arrayJS.getValue(i);
+            JsonNode item = jsonArray.getValue(i);
             append(aSB, null, item);
 
             // If has next, append separator
@@ -198,15 +198,14 @@ public class JSWriter {
     }
 
     /**
-     * Appends the given JSValue to StringBuffer.
+     * Appends the given JSON value to StringBuffer.
      */
-    protected StringBuffer appendJSValue(StringBuffer aSB, JSValue valueJS)
+    protected StringBuffer appendJsonValue(StringBuffer aSB, JsonNode jsonNode)
     {
-        Object value = valueJS.getValue();
+        Object value = jsonNode.getValue();
 
         // Handle String
-        if (value instanceof String) {
-            String string = (String) value;
+        if (value instanceof String string) {
             aSB.append('"');
             for (int i = 0, iMax = string.length(); i < iMax; i++) {
                 char c = string.charAt(i);
@@ -218,15 +217,14 @@ public class JSWriter {
         }
 
         // Handle Number
-        else if (value instanceof Number) {
-            Number num = (Number) value;
+        else if (value instanceof Number num) {
             String str = FormatUtils.formatNum("#.##", num);
             aSB.append(str);
         }
 
         // Handle Boolean
-        else if (value instanceof Boolean)
-            aSB.append(((Boolean) value) ? "true" : "false");
+        else if (value instanceof Boolean boolValue)
+            aSB.append(boolValue);
 
             // Handle Null
         else if (value == null)
@@ -239,9 +237,9 @@ public class JSWriter {
     /**
      * Appends newline and indent.
      */
-    protected StringBuffer appendNewlineIndent(StringBuffer aSB)
+    protected void appendNewlineIndent(StringBuffer aSB)
     {
-        return appendNewlineIndent(aSB, _indentLevel);
+        appendNewlineIndent(aSB, _indentLevel);
     }
 
     /**
@@ -255,14 +253,14 @@ public class JSWriter {
 
         // Otherwise, append newline, indent and return
         aSB.append('\n');
-        for (int i = 0; i < aLevel; i++) aSB.append(_indent);
+        aSB.append(String.valueOf(_indent).repeat(Math.max(0, aLevel)));
         return aSB;
     }
 
     /**
      * Writes the given JSON object to given file path.
      */
-    public void writeJSON(JSValue aNode, String aPath)
+    public void writeJSON(JsonNode aNode, String aPath)
     {
         String json = getString(aNode);
         SnapUtils.writeBytes(StringUtils.getBytes(json), aPath);
@@ -271,22 +269,20 @@ public class JSWriter {
     /**
      * Returns whether given node has child Map or List of Map/List.
      */
-    protected boolean isDeep(JSValue aNode)
+    protected boolean isDeep(JsonNode aNode)
     {
-        // Handle JSObject
-        if (aNode instanceof JSObject) {
-            JSObject objectJS = (JSObject) aNode;
-            Collection<JSValue> valueSet = objectJS.getKeyValues().values();
-            for (JSValue node : valueSet)
-                if (node instanceof JSObject || node instanceof JSArray)
+        // Handle object
+        if (aNode instanceof JsonObject jsonObject) {
+            Collection<JsonNode> valueSet = jsonObject.getKeyValues().values();
+            for (JsonNode node : valueSet)
+                if (node instanceof JsonObject || node instanceof JsonArray)
                     return true;
         }
 
-        // Handle JSArray
-        if (aNode instanceof JSArray) {
-            JSArray arrayJS = (JSArray) aNode;
-            for (JSValue node : arrayJS.getValues())
-                if (node instanceof JSObject || node instanceof JSArray)
+        // Handle array
+        if (aNode instanceof JsonArray jsonArray) {
+            for (JsonNode node : jsonArray.getValues())
+                if (node instanceof JsonObject || node instanceof JsonArray)
                     return true;
         }
 
@@ -309,20 +305,21 @@ public class JSWriter {
      */
     private static String getEscapeCharString(char aChar)
     {
-        switch (aChar) {
-            case '"': return "\\\"";
-            case '\\': return "\\\\";
-            case '\b': return "\\b";
-            case '\f': return "\\f";
-            case '\n': return "\\n";
-            case '\r': return "\\r";
-            case '\t': return "\\t";
-            default:
+        return switch (aChar) {
+            case '"' -> "\\\"";
+            case '\\' -> "\\\\";
+            case '\b' -> "\\b";
+            case '\f' -> "\\f";
+            case '\n' -> "\\n";
+            case '\r' -> "\\r";
+            case '\t' -> "\\t";
+            default -> {
                 if (Character.isISOControl(aChar)) {
                     System.err.println("JSONWriter.append: Tried to print control char in string: " + aChar);
-                    return "";
+                    yield "";
                 }
-                return String.valueOf(aChar);
-        }
+                yield String.valueOf(aChar);
+            }
+        };
     }
 }

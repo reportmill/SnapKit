@@ -49,7 +49,7 @@ public class DropboxSite extends WebSite {
         addParamsToRequestAsJsonBody(httpReq, "path", aReq.getFilePath());
 
         // Get JSON response
-        JSObject jsonResp = getJsonResponse(httpReq, aResp);
+        JsonObject jsonResp = getJsonResponse(httpReq, aResp);
         if (jsonResp == null)
             return;
 
@@ -93,23 +93,23 @@ public class DropboxSite extends WebSite {
         addParamsToRequestAsJsonBody(httpReq, "path", aReq.getFilePath());
 
         // Get JSON response
-        JSObject jsonResp = getJsonResponse(httpReq, aResp);
+        JsonObject jsonResp = getJsonResponse(httpReq, aResp);
         if (jsonResp == null)
             return;
 
         // Get Entries Node, complain if not array
-        JSValue entriesNode = jsonResp.getValue("entries");
-        if (!(entriesNode instanceof JSArray)) {
+        JsonNode entriesNode = jsonResp.getValue("entries");
+        if (!(entriesNode instanceof JsonArray)) {
             aResp.setException(new Exception("DropboxSite.doGetDir: Unexpected response: " + entriesNode.getValueAsString()));
             return;
         }
 
         // Get json for entries
-        JSArray fileEntriesArray = (JSArray) jsonResp.getValue("entries");
-        List<JSValue> fileEntries = fileEntriesArray.getValues();
+        JsonArray fileEntriesArray = (JsonArray) jsonResp.getValue("entries");
+        List<JsonNode> fileEntries = fileEntriesArray.getValues();
 
         // Get file headers for JSON file entries and set in response
-        List<FileHeader> fileHeaders = ListUtils.map(fileEntries, e -> createFileHeaderForJSON((JSObject) e));
+        List<FileHeader> fileHeaders = ListUtils.map(fileEntries, e -> createFileHeaderForJSON((JsonObject) e));
         aResp.setFileHeaders(fileHeaders);
     }
 
@@ -139,7 +139,7 @@ public class DropboxSite extends WebSite {
         httpReq.setBytes(bytes);
 
         // Get JSON response
-        JSObject jsonResp = getJsonResponse(httpReq, aResp);
+        JsonObject jsonResp = getJsonResponse(httpReq, aResp);
         if (jsonResp == null)
             return;
 
@@ -162,7 +162,7 @@ public class DropboxSite extends WebSite {
         addParamsToRequestAsJsonBody(httpReq, "path", aReq.getFilePath());
 
         // Get JSON response
-        JSObject jsonResp = getJsonResponse(httpReq, aResp);
+        JsonObject jsonResp = getJsonResponse(httpReq, aResp);
         if (jsonResp != null)
             aResp.setLastModTime(System.currentTimeMillis()); //System.out.println(jsonResp);
     }
@@ -206,7 +206,7 @@ public class DropboxSite extends WebSite {
                 return null;
             }
 
-            JSObject jsonResp = (JSObject) httpResp.getJSON();
+            JsonObject jsonResp = (JsonObject) httpResp.getJSON();
             return _atok = jsonResp.getStringValue("access_token");
         }
 
@@ -219,7 +219,7 @@ public class DropboxSite extends WebSite {
     private static void addParamsToRequestAsJsonHeader(HTTPRequest httpReq, String ... thePairs)
     {
         // Create JSON Request and add pairs
-        JSObject jsonReq = new JSObject();
+        JsonObject jsonReq = new JsonObject();
         for (int i = 0; i < thePairs.length; i += 2)
             jsonReq.setNativeValue(thePairs[i], thePairs[i + 1]);
 
@@ -236,7 +236,7 @@ public class DropboxSite extends WebSite {
     private static void addParamsToRequestAsJsonBody(HTTPRequest httpReq, String ... thePairs)
     {
         // Create JSON Request and add pairs
-        JSObject jsonReq = new JSObject();
+        JsonObject jsonReq = new JsonObject();
         for (int i = 0; i < thePairs.length; i += 2)
             jsonReq.setNativeValue(thePairs[i], thePairs[i + 1]);
 
@@ -248,7 +248,7 @@ public class DropboxSite extends WebSite {
     /**
      * Sends the HTTP request and loads results into WebResponse and returns the JSON response.
      */
-    private static JSObject getJsonResponse(HTTPRequest httpReq, WebResponse aResp)
+    private static JsonObject getJsonResponse(HTTPRequest httpReq, WebResponse aResp)
     {
         // Get HTTP Response
         HTTPResponse httpResp = getHttpResponse(httpReq, aResp);
@@ -256,7 +256,7 @@ public class DropboxSite extends WebSite {
             return null;
 
         // Get JSON response
-        JSObject jsonResp = (JSObject) httpResp.getJSON();
+        JsonObject jsonResp = (JsonObject) httpResp.getJSON();
         if (jsonResp == null)
             aResp.setException(new Exception("DropboxSite.getJsonResponse: null response"));
 
@@ -282,7 +282,7 @@ public class DropboxSite extends WebSite {
     /**
      * Returns a FileHeader for Dropbox File Entry JSONNode.
      */
-    private static FileHeader createFileHeaderForJSON(JSObject fileEntry)
+    private static FileHeader createFileHeaderForJSON(JsonObject fileEntry)
     {
         // Get attributes
         String filePath = fileEntry.getStringValue("path_display");

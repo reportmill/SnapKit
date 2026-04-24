@@ -3,8 +3,8 @@
  */
 package snap.web;
 import java.util.*;
-import snap.util.JSValue;
-import snap.util.JSParser;
+import snap.util.JsonNode;
+import snap.util.JsonParser;
 import snap.web.HTTPRequest.Header;
 
 /**
@@ -150,13 +150,13 @@ public class HTTPResponse {
     /**
      * Returns the JSON.
      */
-    public JSValue getJSON()
+    public JsonNode getJSON()
     {
         String text = getText();
         if (text == null)
             return null;
-        JSParser parser = new JSParser();
-        JSValue json = parser.readString(text);
+        JsonParser parser = new JsonParser();
+        JsonNode json = parser.readString(text);
         return json;
     }
 

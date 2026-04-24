@@ -7,40 +7,35 @@ import java.util.*;
 /**
  * An archiver to read/write objects from/to JSON.
  */
-public class JSArchiver {
+public class JsonArchiver {
+
+    // Root object
+    private Object _rootObj;
 
     // The list of imports
-    List <String>        _imports = new ArrayList();
+    private List <String> _imports = new ArrayList<>();
     
     // The map of previously encountered class strings and their evaluated classpaths
-    Map <String,Object>  _classPaths = new HashMap();
+    private Map <String,Object> _classPaths = new HashMap<>();
     
     // Objects that have been processed
-    List                 _objects = new ArrayList();
+    private List<Object> _objects = new ArrayList<>();
     
     // The String used to indicate the Class attribute of JSON node
-    String               _classId = "Class";
+    private String _classId = "Class";
     
     // The string used to indicate a reference to a previously read/written object
-    String               _jsonRefString = "JSON-Ref:";
+    private String _jsonRefString = "JSON-Ref:";
 
     // The string used to indicate a date value embedded in a String node
-    String               _jsonDateString = "JSON-Date:";
+    private String _jsonDateString = "JSON-Date:";
 
     /**
-     * Creates a new archiver.
+     * Constructor.
      */
-    public JSArchiver()
+    public JsonArchiver()
     {
         addImport("java.util.*", "snap.web.*", "snap.websites.*");
-    }
-
-    /**
-     * Creates a new archiver for given import(s).
-     */
-    public JSArchiver(String ... theImports)
-    {
-        addImport(theImports);
     }
 
     /**
@@ -51,7 +46,7 @@ public class JSArchiver {
     /**
      * Sets the object to be loaded into (null by default).
      */
-    public JSArchiver setRootObject(Object anObj)  { _rootObj = anObj; return this; } Object _rootObj;
+    public void setRootObject(Object anObj)  { _rootObj = anObj; }
 
     /**
      * Returns the class string.
@@ -61,51 +56,40 @@ public class JSArchiver {
     /**
      * Read an object from JSON.
      */
-    public Object readSource(Object aSource)
-    {
-        JSValue node = aSource instanceof JSValue ? (JSValue)aSource :
-            new JSParser().readSource(aSource);
-        return readNode(node);
-    }
-
-    /**
-     * Read an object from JSON.
-     */
     public Object readString(String aString)
     {
-        JSValue node = new JSParser().readString(aString);
+        JsonNode node = new JsonParser().readString(aString);
         return readNode(node);
     }
 
     /**
      * Read an object from JSON.
      */
-    public Object readNode(JSValue aNode)
+    public Object readNode(JsonNode aNode)
     {
         // Handle Object
-        if (aNode instanceof JSObject) {
+        if (aNode instanceof JsonObject objectJS) {
 
             // Get class
-            JSObject objectJS = (JSObject) aNode;
-            JSValue classNode = objectJS.getValue(getClassId());
+            JsonNode classNode = objectJS.getValue(getClassId());
             String className = classNode != null ? classNode.getValueAsString() : null;
-            Class classs = className != null ? getClassForName(className) : null;
+            Class<?> classs = className != null ? getClassForName(className) : null;
 
             // Create object
             Object intoObj = _rootObj; _rootObj = null;
             Object object = intoObj != null ? intoObj : classs != null ? ClassUtils.newInstance(classs) : null;
             if (object == null)
-                object = new HashMap();
+                object = new HashMap<>();
 
             // Add to objects
             if (!(object instanceof Date))
                 _objects.add(object);
 
             // Get values
-            Map<String, JSValue> keyValues = objectJS.getKeyValues();
-            for (Map.Entry<String, JSValue> entry : keyValues.entrySet()) {
+            Map<String, JsonNode> keyValues = objectJS.getKeyValues();
+            for (Map.Entry<String, JsonNode> entry : keyValues.entrySet()) {
                 String key = entry.getKey();
-                JSValue valueJS = entry.getValue();
+                JsonNode valueJS = entry.getValue();
                 if (!key.equals(getClassId())) {
                     Object value = readNode(valueJS);
                     setValue(object, key, value);
@@ -117,16 +101,15 @@ public class JSArchiver {
         }
 
             // Handle Array: Create list, get values and return list
-        if (aNode instanceof JSArray) {
+        if (aNode instanceof JsonArray arrayJS) {
 
             // Get array
-            JSArray arrayJS = (JSArray) aNode;
             int count = arrayJS.getValueCount();
-            List list = new ArrayList();
+            List<Object> list = new ArrayList<>();
 
             // Iterate over nodes, read and add to new list
             for (int i = 0; i < count; i++) {
-                JSValue itemJS = arrayJS.getValue(i);
+                JsonNode itemJS = arrayJS.getValue(i);
                 Object item = readNode(itemJS);
                 list.add(item);
             }
@@ -138,8 +121,7 @@ public class JSArchiver {
         Object value = aNode.getValue();
 
         // Handle String JSON Reference
-        if (value instanceof String) {
-            String string = (String) value;
+        if (value instanceof String string) {
             if (string.startsWith(_jsonRefString)) {
                 int index = Convert.intValue(string.substring(_jsonRefString.length()));
                 return _objects.get(index);
@@ -157,7 +139,7 @@ public class JSArchiver {
     /**
      * Write an object to JSON.
      */
-    public JSValue writeObject(Object anObj)
+    public JsonNode writeObject(Object anObj)
     {
         // If POJO or Map, add to read objects list
         if (anObj instanceof GetKeys || anObj instanceof Map) {
@@ -165,18 +147,17 @@ public class JSArchiver {
             // If already read, return ref
             int index = ListUtils.indexOfId(_objects, anObj);
             if (index >= 0)
-                return new JSValue(_jsonRefString + index);
+                return new JsonNode(_jsonRefString + index);
 
             // Otherwise add to ref
             _objects.add(anObj);
         }
 
         // Handle GetJSONKeys Object
-        if (anObj instanceof GetKeys) {
+        if (anObj instanceof GetKeys getKeys) {
 
             // Get object and objectJS
-            GetKeys getKeys = (GetKeys) anObj;
-            JSObject objectJS = new JSObject();
+            JsonObject objectJS = new JsonObject();
 
             // Put class
             String classPath = getClassPath(anObj);
@@ -196,7 +177,7 @@ public class JSArchiver {
 
                 // If not default value, write and add
                 if (!Objects.equals(value, dvalue)) {
-                    JSValue valueJS = writeObject(value);
+                    JsonNode valueJS = writeObject(value);
                     objectJS.setValue(key, valueJS);
                 }
             }
@@ -209,13 +190,13 @@ public class JSArchiver {
         if (anObj instanceof Map) {
 
             // Get map and mapJS
-            Map<String,Object> map = (Map) anObj;
-            JSObject mapJS = new JSObject();
+            Map<String,Object> map = (Map<String,Object>) anObj;
+            JsonObject mapJS = new JsonObject();
 
             // Iterate over keys, write and add for each
             for (String key : map.keySet()) {
                 Object value = getValue(map, key);
-                JSValue valueJS = writeObject(value);
+                JsonNode valueJS = writeObject(value);
                 mapJS.setValue(key, valueJS);
             }
 
@@ -227,12 +208,12 @@ public class JSArchiver {
         if (anObj instanceof List) {
 
             // Get array and arrayJS
-            List list = (List) anObj;
-            JSArray arrayJS = new JSArray();
+            List<Object> list = (List<Object>) anObj;
+            JsonArray arrayJS = new JsonArray();
 
             // Iterate over items, write and add for each
             for (Object item : list) {
-                JSValue itemJS = writeObject(item);
+                JsonNode itemJS = writeObject(item);
                 arrayJS.addValue(itemJS);
             }
 
@@ -242,17 +223,15 @@ public class JSArchiver {
 
         // Handle String, Enum, Number, Boolean, Null
         if (anObj instanceof String || anObj instanceof Enum || anObj instanceof Number || anObj instanceof Boolean || anObj == null)
-            return new JSValue(anObj);
+            return new JsonNode(anObj);
 
         // Handle Date (was: aNode.addValue(getClassId(),getClassPath(anObj));aNode.addValue("Time",date.getTime()); )
-        if (anObj instanceof Date) {
-            Date date = (Date)anObj;
-            return new JSValue(_jsonDateString + date.getTime());
-        }
+        if (anObj instanceof Date date)
+            return new JsonNode(_jsonDateString + date.getTime());
 
         // Otherwise complain
         System.err.println("JSONArchiver.writeObject: Can't write object of class: " + anObj.getClass().getName());
-        return new JSValue();
+        return new JsonNode();
     }
 
     /**
@@ -263,7 +242,7 @@ public class JSArchiver {
         if (anObj instanceof GetValue)
             return ((GetValue)anObj).getJSONValue(aKey);
         if (anObj instanceof Map)
-            return ((Map)anObj).get(aKey);
+            return ((Map<String,Object>) anObj).get(aKey);
         return Key.getValue(anObj, aKey);
     }
 
@@ -275,18 +254,17 @@ public class JSArchiver {
         if (anObj instanceof SetValue)
             ((SetValue)anObj).setJSONValue(aKey, aValue);
         else if (anObj instanceof Map)
-            ((Map)anObj).put(aKey, aValue);
+            ((Map<String,Object>) anObj).put(aKey, aValue);
         else Key.setValueSafe(anObj, aKey, aValue);
     }
 
     /**
      * Adds an import.
      */
-    public JSArchiver addImport(String ... theImports)
+    public void addImport(String ... theImports)
     {
         for (String imp : theImports)
             _imports.add(0, imp);
-        return this;
     }
 
     /**
@@ -357,16 +335,16 @@ public class JSArchiver {
     /**
      * Returns a class for name.
      */
-    protected Class getClassForName(String aClassName)
+    protected Class<?> getClassForName(String aClassName)
     {
         // If class name in cache, return class
-        Class classs = (Class)_classPaths.get(aClassName);
+        Class<?> classs = (Class<?>) _classPaths.get(aClassName);
         if (classs!=null)
             return classs;
 
         // Otherwise, get class by doing real lookup
         classs = getClassForNameImpl(aClassName);
-        if (classs!=null)
+        if (classs != null)
             _classPaths.put(aClassName, classs);
 
         // If class not found, complain
@@ -379,13 +357,14 @@ public class JSArchiver {
     /**
      * Returns a class for name.
      */
-    protected Class getClassForNameImpl(String aClassName)
+    protected Class<?> getClassForNameImpl(String aClassName)
     {
         // If has class path, try to just find class
-        Class classs = aClassName.contains(".") ? getClassForNameReal(aClassName) : null;
+        Class<?> classs = aClassName.contains(".") ? getClassForNameReal(aClassName) : null;
+        if (classs != null)
+            return classs;
 
         // Iterate over imports
-        if (classs==null)
         for (String imp : _imports) {
 
             // If import ends with .ClassName, try it and break if found
@@ -404,23 +383,22 @@ public class JSArchiver {
         }
 
         // If still null, just try it
-        if (classs==null)
+        if (classs == null)
             classs = getClassForNameReal(aClassName);
 
-        // Return class
+        // Return
         return classs;
     }
 
     /**
      * Returns a class for name.
      */
-    private static Class getClassForNameReal(String aClassName)
+    private static Class<?> getClassForNameReal(String aClassName)
     {
-        ClassLoader classLoader = JSArchiver.class.getClassLoader();
+        ClassLoader classLoader = JsonArchiver.class.getClassLoader();
         try { return Class.forName(aClassName, false, classLoader); }
         catch(ClassNotFoundException e) { return null; }
-        catch(NoClassDefFoundError t) { System.err.println("JSArchiver.getClassForNameReal: " + t); return null; }
-        catch(Throwable t) { System.err.println("JSArchiver.getClassForNameReal: " + t); return null; }
+        catch(Throwable t) { System.err.println("JsonArchiver.getClassForNameReal: " + t); return null; }
     }
 
     /**

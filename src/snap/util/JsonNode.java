@@ -8,20 +8,20 @@ import snap.web.WebURL;
 /**
  * Represents a node in a JSON tree.
  */
-public class JSValue {
+public class JsonNode {
     
     // The value
     private Object  _value;
     
     /**
-     * Creates a new node.
+     * Constructor.
      */
-    public JSValue()  { }
+    public JsonNode()  { }
 
     /**
-     * Creates a new node.
+     * Constructor.
      */
-    public JSValue(Object anObj)
+    public JsonNode(Object anObj)
     {
         setValue(anObj);
     }
@@ -64,10 +64,11 @@ public class JSValue {
     /**
      * Standard equals implementation.
      */
+    @Override
     public boolean equals(Object anObj)
     {
         if (anObj == this) return true;
-        JSValue other = anObj instanceof JSValue ? (JSValue) anObj : null; if (other == null) return false;
+        JsonNode other = anObj instanceof JsonNode ? (JsonNode) anObj : null; if (other == null) return false;
         if (!Objects.equals(other._value, _value)) return false;
         return true;
     }
@@ -75,6 +76,7 @@ public class JSValue {
     /**
      * Standard hashCode implementation.
      */
+    @Override
     public int hashCode()
     {
         int hc = _value != null ? _value.hashCode() : 0;
@@ -84,9 +86,10 @@ public class JSValue {
     /**
      * Returns a string representation of node (as JSON, of course).
      */
+    @Override
     public String toString()
     {
-        JSWriter writer = new JSWriter();
+        JsonWriter writer = new JsonWriter();
         return writer.getString(this);
     }
 
@@ -95,7 +98,7 @@ public class JSValue {
      */
     public String toStringCompacted()
     {
-        JSWriter writer = new JSWriter();
+        JsonWriter writer = new JsonWriter();
         writer.setCompacted(true);
         return writer.getString(this);
     }
@@ -103,10 +106,10 @@ public class JSValue {
     /**
      * Reads JSON from a source.
      */
-    public static JSValue readSource(Object aSource)
+    public static JsonNode readSource(Object aSource)
     {
-        WebURL url = WebURL.getUrl(aSource);
-        JSParser parser = new JSParser();
+        WebURL url = WebURL.createUrl(aSource);
+        JsonParser parser = new JsonParser();
         String text = url.getText();
         return parser.readString(text);
     }
