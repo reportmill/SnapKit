@@ -1,6 +1,7 @@
 package snap.view;
 import snap.gfx.*;
-import snap.viewx.ColorDock;
+import snap.util.StyleSheet;
+import snap.util.StyleSheetParser;
 import java.util.*;
 
 /**
@@ -113,111 +114,95 @@ public class ViewTheme {
     protected void initViewStyles()
     {
         // View
-        setViewStyleString(View.class, "Align: TOP_LEFT; Margin: 0; Padding: 0; Spacing: 0; BorderRadius: 0; TextColor: #00");
+        String styleSheetStr = """
+        
+            View { Align: TOP_LEFT; Margin: 0; Padding: 0; Spacing: 0; BorderRadius: 0; TextColor: #00 }
+    
+            RootView { Fill: #FA}
+            RootView:Alternate { Fill: #F0 }
+    
+            Label { Align: CENTER_LEFT; Spacing: 4 }
+    
+            ButtonBase { Align: CENTER; Padding: 4; BorderRadius: 4 }
+    
+            Button { Fill: WHITE; Border: #BF }
+            Button:Hover { Fill: #F8 }
+            Button:Active { Fill: #DF; Border: #87AFDA }
+            Button:Selected { Fill: #DF; Border: #87AFDA }
+    
+            ToggleButton { Fill: WHITE; Border: #BF }
+            ToggleButton:Hover { Fill: #F8 }
+            ToggleButton:Active { Fill: #DF; Border: #87AFDA }
+            ToggleButton:Selected { Fill: #DF; Border: #87AFDA }
+    
+            RadioButton { Align: CENTER_LEFT; Padding: 2; Spacing: 5 }
+            RadioButton:Hover { Fill: #F8 }
+            RadioButton:Active { Fill: #DF; Border: #87AFDA }
+            RadioButton:Selected { Fill: #DF; Border: #87AFDA }
+    
+            CheckBox { Align: CENTER_LEFT; Padding: 2; Spacing: 5 }
+            CheckBox:Hover { Fill: #F8 }
+            CheckBox:Active { Fill: #DF; Border: #87AFDA }
+            CheckBox:Selected { Fill: #DF; Border: #87AFDA }
+    
+            MenuButton { Fill: WHITE; Border: #BF }
+    
+            MenuItem { Align: CENTER_LEFT; Padding: 4, 8, 4, 6; Font: Arial 13 }
+            MenuItem:Hover { Fill: #E6; TextColor: WHITE }
+    
+            TextField { Align: CENTER_LEFT; Padding: 3; Fill: WHITE; Border: #C0; BorderRadius: 3 }
+    
+            TextView { Padding: 4; Fill: WHITE; Border: #C0; BorderRadius: 4 }
+            TextView:Hover { TextColor: WHITE }
+    
+            ComboBox { Align: CENTER_LEFT }
+            ImageView { Align: CENTER }
+    
+            ListView { Fill: WHITE; Border: #C0 }
+            ListView:Alternate { Fill: #F8 }
+            ListView:Active { Fill: #DA }
+            ListView:Hover { Fill: #E6; TextColor: WHITE }
+    
+            MenuBar { Padding: 2, 10, 2, 10; Font: Arial 13 }
+    
+            ScrollView { Border: #C0 }
+    
+            SplitView { Border: #C0 }
+    
+            TableView { Fill: WHITE; Border: #C0 }
+            TableCol { Fill: null; Border: null }
+            TableCol:Active { Fill: #DA }
+            TableCol:Hover { Fill: #E6; TextColor: WHITE }
+    
+            TreeView { Fill: WHITE; Border: #C0 }
+            TreeCol { Fill: null; Border: null }
+            TreeCol:Active { Fill: #DA }
+            TreeCol:Hover { Fill: #E6; TextColor: WHITE }
+    
+            BoxView { Align: CENTER }
+            RowView { Align: CENTER_LEFT }
+            ColView { Align: TOP_LEFT }
+            StackView { Align: CENTER }
+            TitleView { Padding: 2 }
+            BorderView { Align: CENTER }
+    
+            ProgressBar { Fill: WHITE; Border: #BF; BorderRadius: 4 }
+            ThumbWheel { Fill: #FA }
+            ColorDock { Border: bevel }
+    
+            TabBar { Padding: 3, 3, 3, 5 }
+    
+            DocView { Align: CENTER_LEFT }
+            PageView { Fill: WHITE; Border: BLACK }
+    
+            ArrowView { Align: CENTER }
+            StringView { Align: CENTER_LEFT }
+            WrapView { Align: CENTER }
+            """;
 
-        // RootView
-        setViewStyleString(RootView.class, "Fill: #FA");
-        setViewStyleStringForAlternate(RootView.class, "Fill: #F0");
-
-        // Label
-        setViewStyleString(Label.class, "Align: CENTER_LEFT; Spacing: 4");
-
-        // ButtonBase
-        setViewStyleString(ButtonBase.class, "Align: CENTER; Padding: 4; BorderRadius: 4");
-
-        // Button
-        setViewStyleString(Button.class, "Fill: WHITE; Border: #BF");
-        setViewStyleStringForHover(Button.class, "Fill: #F8");
-        setViewStyleStringForActive(Button.class, "Fill: #DF; Border: #87AFDA");
-        setViewStyleStringForSelected(Button.class, "Fill: #DF; Border: #87AFDA");
-
-        // ToggleButton
-        setViewStyleString(ToggleButton.class, "Fill: WHITE; Border: #BF");
-        setViewStyleStringForHover(ToggleButton.class, "Fill: #F8");
-        setViewStyleStringForActive(ToggleButton.class, "Fill: #DF; Border: #87AFDA");
-        setViewStyleStringForSelected(ToggleButton.class, "Fill: #DF; Border: #87AFDA");
-
-        // RadioButton
-        setViewStyleString(RadioButton.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
-        setViewStyleStringForHover(RadioButton.class, "Fill: #F8");
-        setViewStyleStringForActive(RadioButton.class, "Fill: #DF; Border: #87AFDA");
-        setViewStyleStringForSelected(RadioButton.class, "Fill: #DF; Border: #87AFDA");
-
-        // CheckBox
-        setViewStyleString(CheckBox.class, "Align: CENTER_LEFT; Padding: 2; Spacing: 5");
-        setViewStyleStringForHover(CheckBox.class, "Fill: #F8");
-        setViewStyleStringForActive(CheckBox.class, "Fill: #DF; Border: #87AFDA");
-        setViewStyleStringForSelected(CheckBox.class, "Fill: #DF; Border: #87AFDA");
-
-        // MenuButton
-        setViewStyleString(MenuButton.class, "Fill: WHITE; Border: #BF");
-
-        // MenuItem
-        setViewStyleString(MenuItem.class, "Align: CENTER_LEFT; Padding: 4, 8, 4, 6; Font: Arial 13");
-        setViewStyleStringForHover(MenuItem.class, "Fill: #E6; TextColor: WHITE");
-
-        // TextField
-        setViewStyleString(TextField.class, "Align: CENTER_LEFT; Padding: 3; Fill: WHITE; Border: #C0; BorderRadius: 3");
-
-        // TextView
-        setViewStyleString(TextView.class, "Padding: 4; Fill: WHITE; Border: #C0; BorderRadius: 4");
-        setViewStyleStringForHover(TextView.class, "TextColor: WHITE");
-
-        // ComboBox, ImageView
-        setViewStyleString(ComboBox.class, "Align: CENTER_LEFT");
-        setViewStyleString(ImageView.class, "Align: CENTER");
-
-        // ListView
-        setViewStyleString(ListView.class, "Fill: WHITE; Border: #C0");
-        setViewStyleStringForAlternate(ListView.class, "Fill: #F8");
-        setViewStyleStringForActive(ListView.class, "Fill: #DA");
-        setViewStyleStringForHover(ListView.class, "Fill: #E6; TextColor: WHITE");
-
-        // MenuBar
-        setViewStyleString(MenuBar.class, "Padding: 2, 10, 2, 10; Font: Arial 13");
-
-        // ScrollView
-        setViewStyleString(ScrollView.class, "Border: #C0");
-
-        // SplitView
-        setViewStyleString(SplitView.class, "Border: #C0");
-
-        // TableView
-        setViewStyleString(TableView.class, "Fill: WHITE; Border: #C0");
-        setViewStyleString(TableCol.class, "Fill: null; Border: null");
-        setViewStyleStringForActive(TableCol.class, "Fill: #DA");
-        setViewStyleStringForHover(TableCol.class, "Fill: #E6; TextColor: WHITE");
-
-        // TreeView
-        setViewStyleString(TreeView.class, "Fill: WHITE; Border: #C0");
-        setViewStyleString(TreeCol.class, "Fill: null; Border: null");
-        setViewStyleStringForActive(TreeCol.class, "Fill: #DA");
-        setViewStyleStringForHover(TreeCol.class, "Fill: #E6; TextColor: WHITE");
-
-        // BoxView, RowView, ColView, StackView, TitleView, BorderView
-        setViewStyleString(BoxView.class, "Align: CENTER");
-        setViewStyleString(RowView.class, "Align: CENTER_LEFT");
-        setViewStyleString(ColView.class, "Align: TOP_LEFT");
-        setViewStyleString(StackView.class, "Align: CENTER");
-        setViewStyleString(TitleView.class, "Padding: 2");
-        setViewStyleString(BorderView.class, "Align: CENTER");
-
-        // ProgressBar, ThumbWheel, ColorDock
-        setViewStyleString(ProgressBar.class, "Fill: WHITE; Border: #BF; BorderRadius: 4");
-        setViewStyleString(ThumbWheel.class, "Fill: #FA");
-        setViewStyleString(ColorDock.class, "Border: bevel");
-
-        // TabBar
-        setViewStyleString(TabBar.class, "Padding: 3, 3, 3, 5");
-
-        // DocView, PageView
-        setViewStyleString(DocView.class, "Align: CENTER_LEFT");
-        setViewStyleString(PageView.class, "Fill: WHITE; Border: BLACK");
-
-        // ArrowView, StringView, WrapView
-        setViewStyleString(ArrowView.class, "Align: CENTER");
-        setViewStyleString(StringView.class, "Align: CENTER_LEFT");
-        setViewStyleString(WrapView.class, "Align: CENTER");
+        // Create style sheet for string and apply
+        StyleSheet styleSheet = StyleSheet.createStyleSheetForString(styleSheetStr);
+        applyStyleSheet(styleSheet);
     }
 
     /**
@@ -282,15 +267,6 @@ public class ViewTheme {
     /**
      * Sets a View active style string for given class and style string.
      */
-    public void setViewStyleStringForSelected(Class<? extends View> viewClass, String styleString)
-    {
-        ViewStyle viewStyle = getStyleForClassAndState(viewClass, PseudoClass.Selected);
-        viewStyle.setStyleString(styleString);
-    }
-
-    /**
-     * Sets a View active style string for given class and style string.
-     */
     public void setViewStyleStringForAlternate(Class<? extends View> viewClass, String styleString)
     {
         ViewStyle viewStyle = getStyleForClassAndState(viewClass, PseudoClass.Alternate);
@@ -298,21 +274,35 @@ public class ViewTheme {
     }
 
     /**
-     * Sets a View style string for given class and style string.
+     * Applies rules for given style sheet.
      */
-    public void setViewStyleStringForClassAndState(Class<? extends View> viewClass, PseudoClass pseudoClass, String styleString)
+    public void applyStyleSheet(StyleSheet styleSheet)
     {
-        ViewStyle viewStyle = getStyleForClassAndState(viewClass, pseudoClass);
-        viewStyle.setStyleString(styleString);
+        List<StyleSheet.Rule> rules = styleSheet.getRules();
+        rules.forEach(this::applyStyleRule);
     }
 
     /**
-     * Sets a View property value for given class, property name and value.
+     * Applies rule for given style sheet rule.
      */
-    public void setViewStylePropValue(Class<? extends View> viewClass, String propName, Object aValue)
+    public void applyStyleRule(StyleSheet.Rule styleRule)
     {
-        ViewStyle viewStyle = getStyleForClass(viewClass);
-        viewStyle.setStyleValue(propName, aValue);
+        // Get class for rule
+        String className = styleRule.selector().name();
+        Class<? extends View> viewClass = getViewClassForName(className);
+        if (viewClass == null) {
+            System.err.println("ViewTheme.applyStyleRule: Unkown selector class: " + className);
+            return;
+        }
+
+        // Get view style for class and state
+        String pseudoClassStr = styleRule.selector().pseudoClass();
+        PseudoClass pseudoClass = pseudoClassStr != null ? PseudoClass.valueOf(pseudoClassStr) : PseudoClass.Normal;
+        ViewStyle viewStyle = getStyleForClassAndState(viewClass, pseudoClass);
+
+        // Get declarations and apply to style
+        List<StyleSheet.Declaration> declarations = styleRule.declarations();
+        declarations.forEach(decl -> viewStyle.setStyleValue(decl.key(), decl.value()));
     }
 
     /**
@@ -379,5 +369,20 @@ public class ViewTheme {
             viewControllers.add(viewController);
         if (aView instanceof ParentView parentView)
             parentView.getChildren().forEach(childView -> findViewControllersForView(childView, viewControllers));
+    }
+
+    /**
+     * Returns view class for given name.
+     */
+    private static Class<? extends View> getViewClassForName(String className)
+    {
+        // Try 'snap.view.' + className
+        try { return (Class<? extends View>) Class.forName("snap.view." + className); }
+        catch (ClassNotFoundException ignore) { }
+
+        // Try 'snap.viewx.' + className
+        try { return (Class<? extends View>) Class.forName("snap.viewx." + className); }
+        catch (ClassNotFoundException e) { return null; }
+
     }
 }
