@@ -280,7 +280,8 @@ public class ButtonBase extends ParentView {
         else if (anEvent.isMouseRelease()) {
             if (_pressed)
                 fireActionEvent(anEvent);
-            _pressed = _tracked = false;
+            setPressed(false);
+            _tracked = false;
             repaint();
         }
 
