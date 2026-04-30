@@ -73,7 +73,7 @@ public class ViewArchiver extends XMLArchiver {
         Map<String,Class<?>> cmap = new HashMap<>();
 
         // View classes
-        cmap.put("Actor", snap.games.Actor.class);
+        cmap.put("ActorView", snap.games.ActorView.class);
         cmap.put("BorderView", BorderView.class);
         cmap.put("BoxView", BoxView.class);
         cmap.put("BrowserView", BrowserView.class);
@@ -85,7 +85,7 @@ public class ViewArchiver extends XMLArchiver {
         cmap.put("CheckBox", CheckBox.class);
         cmap.put("CheckBoxMenuItem", CheckBoxMenuItem.class);
         cmap.put("ComboBox", ComboBox.class);
-        cmap.put("GameView", snap.games.GameView.class);
+        cmap.put("StageView", snap.games.StageView.class);
         cmap.put("ImageView", ImageView.class);
         cmap.put("Label", Label.class);
         cmap.put("ListView", ListView.class);

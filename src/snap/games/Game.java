@@ -21,7 +21,7 @@ public class Game {
     private static final List<String> IMAGE_FILE_TYPES = List.of(".png", ".jpg", ".jpeg", ".gif");
 
     /**
-     * Shows a game in window for given GameView or GameController class.
+     * Shows a game in window for given StageView or GameController class.
      */
     public static void showGameForClass(Class<?> gameClass)
     {
@@ -29,14 +29,14 @@ public class Game {
     }
 
     /**
-     * Shows a game in window for given GameView or GameController class.
+     * Shows a game in window for given StageView or GameController class.
      */
     private static void showGameForClassImpl(Class<?> gameClass)
     {
-        // Handle GameView
-        if (GameView.class.isAssignableFrom(gameClass)) {
-            GameView gameView = (GameView) ClassUtils.newInstance(gameClass);
-            GameController gameController = gameView.getController();
+        // Handle StageView
+        if (StageView.class.isAssignableFrom(gameClass)) {
+            StageView stageView = (StageView) ClassUtils.newInstance(gameClass);
+            GameController gameController = stageView.getController();
             gameController.setWindowVisible(true);
         }
 
@@ -48,7 +48,7 @@ public class Game {
     }
 
     /**
-     * Shows a game in developer console for given GameView or GameController class.
+     * Shows a game in developer console for given StageView or GameController class.
      */
     public static void showDevConsoleForClass(Class<?> gameClass)
     {
@@ -56,14 +56,14 @@ public class Game {
     }
 
     /**
-     * Shows a game in window for given GameView or GameController class.
+     * Shows a game in window for given StageView or GameController class.
      */
     private static void showDevConsoleForClassImpl(Class<?> gameClass)
     {
-        // Handle GameView
-        if (GameView.class.isAssignableFrom(gameClass)) {
-            GameView gameView = (GameView) ClassUtils.newInstance(gameClass);
-            GameController gameController = gameView.getController();
+        // Handle StageView
+        if (StageView.class.isAssignableFrom(gameClass)) {
+            StageView stageView = (StageView) ClassUtils.newInstance(gameClass);
+            GameController gameController = stageView.getController();
             DevConsole devConsole = new DevConsole(gameController);
             devConsole.setWindowVisible(true);
         }

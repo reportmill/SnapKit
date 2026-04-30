@@ -18,8 +18,8 @@ public class BoardActor extends Actor {
      */
     public int getCellX()
     {
-        BoardGameView gameView = getGameView(BoardGameView.class);
-        double cellW = gameView != null ? gameView.getCellWidth() : 1;
+        BoardStageView stageView = getStageView(BoardStageView.class);
+        double cellW = stageView != null ? stageView.getCellWidth() : 1;
         return (int) Math.floor(getX() / cellW);
     }
 
@@ -28,8 +28,8 @@ public class BoardActor extends Actor {
      */
     public int getCellY()
     {
-        BoardGameView gameView = getGameView(BoardGameView.class);
-        double cellH = gameView != null ? gameView.getCellHeight() : 1;
+        BoardStageView stageView = getStageView(BoardStageView.class);
+        double cellH = stageView != null ? stageView.getCellHeight() : 1;
         return (int) Math.floor(getY() / cellH);
     }
 }

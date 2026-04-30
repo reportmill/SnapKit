@@ -16,7 +16,7 @@ import java.util.Set;
 /**
  * This class is the main view for games and manages Actors.
  */
-public class GameView extends ChildView {
+public class StageView extends ChildView {
 
     // The controller
     protected GameController _controller;
@@ -51,12 +51,12 @@ public class GameView extends ChildView {
     /**
      * Constructor.
      */
-    public GameView()  { this(800, 600); }
+    public StageView()  { this(800, 600); }
 
     /**
      * Constructor.
      */
-    public GameView(double width, double height)
+    public StageView(double width, double height)
     {
         super();
         setPrefSize(width, height);
@@ -146,7 +146,8 @@ public class GameView extends ChildView {
     public List<Actor> getActors()
     {
         if (_actors != null) return _actors;
-        return _actors = ListUtils.filterByClass(getChildren(), Actor.class);
+        List<ActorView> actorViews = ListUtils.filterByClass(getChildren(), ActorView.class);
+        return _actors = ListUtils.map(actorViews, ActorView::getActor);
     }
 
     /**
@@ -159,12 +160,12 @@ public class GameView extends ChildView {
     }
 
     /**
-     * Adds a new actor to game view at given XY point.
+     * Adds a new actor to stage view at given XY point.
      */
     public void addActorAtXY(Actor anActor, double anX, double aY)
     {
         anActor.setXY(anX, aY);
-        addChild(anActor);
+        addChild(anActor.getActorView());
     }
 
     /**
@@ -206,30 +207,30 @@ public class GameView extends ChildView {
     {
         if (aClass != null && !aClass.isInstance(anActor))
             return false;
-        Point point = anActor.parentToLocal(aX, aY, this);
-        return anActor.contains(point.x, point.y);
+        Point point = anActor.getActorView().parentToLocal(aX, aY, this);
+        return anActor.getActorView().contains(point.x, point.y);
     }
 
     /**
      * Removes an actor.
      */
-    public Actor removeActor(int anIndex)
+    public void removeActor(int anIndex)
     {
-        return (Actor) removeChild(anIndex);
+        removeChild(anIndex);
     }
 
     /**
      * Removes an actor.
      */
-    public int removeActor(Actor anActor)
+    public void removeActor(Actor anActor)
     {
-        int index = indexOfChild(anActor);
-        if (index >= 0) removeActor(index);
-        return index;
+        int index = indexOfChild(anActor.getActorView());
+        if (index >= 0)
+            removeActor(index);
     }
 
     /**
-     * Sets the game view fill color for given color string.
+     * Sets the stage view fill color for given color string.
      */
     public void setFillColor(String aString)
     {
@@ -310,7 +311,7 @@ public class GameView extends ChildView {
         try {
             List<Actor> actors = getActors();
             for (Actor actor : actors)
-                if (actor.getParent() != null)
+                if (actor.getActorView().getParent() != null)
                     actor.act();
             _mouseClicked = null;
             _keyClicks.clear();
@@ -323,7 +324,7 @@ public class GameView extends ChildView {
     }
 
     /**
-     * Paints the game view.
+     * Paints the stage view.
      */
     @Override
     protected void paintFront(Painter aPntr)
@@ -333,7 +334,7 @@ public class GameView extends ChildView {
             paintGrid(aPntr);
 
         // Iterate over children and paint pen paths
-        for (View child : getActors()) {
+        for (Actor child : getActors()) {
             if (child instanceof PenActor penActor) {
                 penActor.paintPen(aPntr);
                 aPntr.setStroke(Stroke.Stroke1);

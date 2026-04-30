@@ -365,12 +365,12 @@ classes are great for educational and recreational purposes.
   - Models individual game entities like a spaceship, asteroid, bullet, etc.
   - Manages location, size, rotation and movement
   - Manages painting, user input, frame behavior and collision detection
-- **GameView**
+- **StageView**
   - Manages a list of actors
   - Manages the game timer (play, pause, stop, framerate)
   - Manages background painting, user input and collision detection
 - **GameController**
-  - Manages top level UI and the current game view
+  - Manages top level UI and the current stage view
 - **DevConsole**
   - Shows the game controller with ability to play, pause, step, set frame speed, etc.
 - **PenActor**

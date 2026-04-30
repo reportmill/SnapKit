@@ -3,12 +3,12 @@ package snap.games;
 /**
  *
  */
-public class BoardGameView extends GameView {
+public class BoardStageView extends StageView {
 
     /**
      * Constructor.
      */
-    public BoardGameView()
+    public BoardStageView()
     {
         super();
     }

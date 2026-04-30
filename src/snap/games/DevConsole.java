@@ -23,9 +23,9 @@ public class DevConsole extends ViewController {
     }
 
     /**
-     * Returns the game view.
+     * Returns the stage view.
      */
-    public GameView getGameView()  { return _gameController.getGameView(); }
+    public StageView getStageView()  { return _gameController.getStageView(); }
 
     /**
      * Returns whether game is playing.
@@ -110,7 +110,7 @@ public class DevConsole extends ViewController {
             case "PauseButton" -> pauseGame();
 
             // Handle ResetButton
-            case "ResetButton" -> _gameController.resetGameView();
+            case "ResetButton" -> _gameController.resetStageView();
 
             // Handle SpeedSlider, SpeedText
             case "SpeedSlider" -> _gameController.setFrameRate(anEvent.getFloatValue() * 100);
@@ -118,7 +118,7 @@ public class DevConsole extends ViewController {
         }
 
         // Shouldn't need this
-        getGameView().requestFocus();
+        getStageView().requestFocus();
     }
 
     /**

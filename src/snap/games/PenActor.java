@@ -2,6 +2,7 @@ package snap.games;
 import snap.geom.Path2D;
 import snap.geom.Point;
 import snap.gfx.*;
+import snap.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class PenActor extends Actor {
     public PenActor()
     {
         super();
+        _actorView.addPropChangeListener(pc -> handleShowingChange(), View.Showing_Prop);
     }
 
     /**
@@ -95,21 +97,21 @@ public class PenActor extends Actor {
      */
     public Point getPenPoint()
     {
-        return localToParent(getWidth() / 2, getHeight() / 2);
+        return _actorView.localToParent(getWidth() / 2, getHeight() / 2);
     }
 
     /**
      * Override to update pen path.
      */
     @Override
-    public void moveBy(double aCount)
+    public void moveBy(double aDistance)
     {
         // Create new path if needed
         if (_penPath == null && _penDown)
             _penPath = createPenPath();
 
         // Do normal version
-        super.moveBy(aCount);
+        super.moveBy(aDistance);
 
         // If pen not down, just return
         if (!_penDown) return;
@@ -122,12 +124,9 @@ public class PenActor extends Actor {
     /**
      * Override to update pen location.
      */
-    @Override
-    protected void setShowing(boolean aValue)
+    private void handleShowingChange()
     {
-        if (aValue == isShowing()) return;
-        super.setShowing(aValue);
-        if (isPenDown())
+        if (_actorView.isShowing() && isPenDown())
             penDown();
     }
 

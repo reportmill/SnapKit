@@ -5,27 +5,27 @@ import snap.view.*;
 import snap.web.WebURL;
 
 /**
- * The controller class for a GameView.
+ * The controller class for a StageView.
  */
 public class GameController extends ViewController {
 
     // The frame rate
     private double _frameRate = 30;
 
-    // The GameView
-    protected GameView _gameView;
+    // The StageView
+    protected StageView _stageView;
 
     // Whether to auto-play game when shown
     private boolean _autoPlay = true;
 
-    // The GameView box
-    private BoxView _gameBox;
+    // The StageView box
+    private BoxView _stageViewBox;
 
     // The animation timer
     private ViewTimer _timer = new ViewTimer(this::stepGameFrame, getFrameDelay());
 
     // Constants for properties
-    public static final String GameView_Prop = "GameView";
+    public static final String StageView_Prop = "StageView";
     public static final String Playing_Prop = "Playing";
 
     /**
@@ -33,37 +33,37 @@ public class GameController extends ViewController {
      */
     public GameController()
     {
-        this(new GameView());
+        this(new StageView());
     }
 
     /**
-     * Constructor for given GameView.
+     * Constructor for given StageView.
      */
-    public GameController(GameView gameView)
+    public GameController(StageView stageView)
     {
         super();
-        setGameView(gameView);
+        setStageView(stageView);
         addPropChangeListener(pc -> handleShowingChange(), Showing_Prop);
     }
 
     /**
-     * Returns the GameView.
+     * Returns the StageView.
      */
-    public GameView getGameView()  { return _gameView; }
+    public StageView getStageView()  { return _stageView; }
 
     /**
-     * Sets the GameView.
+     * Sets the StageView.
      */
-    public void setGameView(GameView gameView)
+    public void setStageView(StageView stageView)
     {
-        if (gameView == _gameView) return;
-        batchPropChange(GameView_Prop, _gameView, _gameView = gameView);
-        _gameView._controller = this;
-        if (_gameBox != null)
-            _gameBox.setContent(_gameView);
+        if (stageView == _stageView) return;
+        batchPropChange(StageView_Prop, _stageView, _stageView = stageView);
+        _stageView._controller = this;
+        if (_stageViewBox != null)
+            _stageViewBox.setContent(_stageView);
         if (isShowing())
-            _gameView.requestFocus();
-        setFirstFocus(_gameView);
+            _stageView.requestFocus();
+        setFirstFocus(_stageView);
         fireBatchPropChanges();
     }
 
@@ -131,21 +131,21 @@ public class GameController extends ViewController {
      */
     public void stepGameFrame()
     {
-        _gameView.stepGameFrame();
+        _stageView.stepGameFrame();
     }
 
     /**
-     * Reset GameView.
+     * Reset StageView.
      */
-    public void resetGameView()
+    public void resetStageView()
     {
-        getGameView().stop();
-        GameView gameView = ClassUtils.newInstance(_gameView.getClass());
-        setGameView(gameView);
+        getStageView().stop();
+        StageView stageView = ClassUtils.newInstance(_stageView.getClass());
+        setStageView(stageView);
     }
 
     /**
-     * Called when game view has showing change.
+     * Called when stage view has showing change.
      */
     protected void handleShowingChange()
     {
@@ -169,24 +169,24 @@ public class GameController extends ViewController {
     @Override
     protected View createUI()
     {
-        if (_gameView == null || _gameView.getClass() == GameView.class) {
+        if (_stageView == null || _stageView.getClass() == StageView.class) {
             WebURL snapFileUrl = UILoader.getSnapUrlForClass(getClass());
             if (snapFileUrl != null && snapFileUrl.getFile().getExists())
-                _gameView = (GameView) UILoader.loadViewForControllerAndUrl(this, snapFileUrl);
+                _stageView = (StageView) UILoader.loadViewForControllerAndUrl(this, snapFileUrl);
         }
 
-        // Create BoxView to hold game view
-        _gameBox = new BoxView(_gameView, true, true);
+        // Create BoxView to hold stage view
+        _stageViewBox = new BoxView(_stageView, true, true);
 
         // If browser, wrap in ScaleBox to fit smaller spaces
         if (SnapEnv.isWebVM) {
-            ScaleBox scaleBox = new ScaleBox(_gameBox);
+            ScaleBox scaleBox = new ScaleBox(_stageViewBox);
             scaleBox.setPadding(5, 5, 5, 5);
             return scaleBox;
         }
 
         // Return
-        return _gameBox;
+        return _stageViewBox;
     }
 
     /**
