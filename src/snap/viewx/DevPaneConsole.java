@@ -6,16 +6,14 @@ import snap.text.TextLineStyle;
 import snap.text.TextStyle;
 import snap.util.Convert;
 import snap.util.KeyChain;
-import snap.view.BoxView;
-import snap.view.ScrollView;
-import snap.view.View;
-import snap.view.ViewController;
+import snap.view.*;
+
 import java.io.PrintStream;
 
 /**
  * A DevPane to show the console.
  */
-public class DevPaneConsole extends ViewController {
+public class DevPaneConsole extends DefaultViewController {
 
     // The ConsoleView
     private static ConsoleTextArea _consoleTextArea;

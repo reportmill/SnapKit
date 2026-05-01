@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * This class is a real implementation of Console.
  */
-public class DefaultConsole extends ViewController implements Console {
+public class DefaultConsole extends DefaultViewController implements Console {
 
     // The Console view
     private ColView _consoleView;
