@@ -2,11 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.games;
+import snap.geom.Shape;
 import snap.gfx.Image;
-import snap.util.XMLArchiver;
-import snap.util.XMLAttribute;
-import snap.util.XMLElement;
+import snap.util.*;
 import snap.view.*;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * This class represents a game character in a StageView.
@@ -156,6 +157,98 @@ public class ActorView extends ParentView {
         _imageView.setPickable(false);
         addChild(_imageView);
         return _imageView;
+    }
+
+    /**
+     * Returns whether this actor intersects given actor.
+     */
+    public boolean intersectsActor(ActorView actorView)
+    {
+        if (!getBounds().intersectsShape(actorView.getBounds()))
+            return false;
+        Shape thisBoundsInParent = localToParent(getBoundsShape());
+        Shape otherBoundsInParent = actorView.localToParent(actorView.getBoundsShape());
+        return thisBoundsInParent.intersectsShape(otherBoundsInParent);
+    }
+
+    /**
+     * Returns the actors intersecting this actor that match given class (class can be null).
+     */
+    public boolean isIntersectingActor(Class<? extends ActorView> aClass)  { return getIntersectingActor(aClass) != null; }
+
+    /**
+     * Returns the actors intersecting this actor that match given class (class can be null).
+     */
+    public <T extends ActorView> T getIntersectingActor(Class<T> aClass)
+    {
+        List<? extends View> actorViews = getStageView().getChildren();
+        Stream<T> actorStream = (Stream<T>) actorViews.stream();
+        if (aClass != null)
+            actorStream = actorStream.filter(aClass::isInstance);
+        return actorStream.filter(this::intersectsActor).findFirst().orElse(null);
+    }
+
+    /**
+     * Returns the actors intersecting this actor that match given class (class can be null).
+     */
+    public <T extends ActorView> List<T> getIntersectingActors(Class<T> aClass)
+    {
+        List<? extends View> actorViews = getStageView().getChildren();
+        Stream<T> actorStream = (Stream<T>) actorViews.stream();
+        if (aClass != null)
+            actorStream = actorStream.filter(aClass::isInstance);
+        return actorStream.filter(this::intersectsActor).toList();
+    }
+
+    /**
+     * Moves this actor to given XY from current location, stopping if it hits actor of given class.
+     */
+    public void moveByXyNoCollision(double moveX, double moveY, Class<? extends ActorView> hitClass)
+    {
+        if (moveX != 0 || moveY != 0)
+            moveToXyNoCollision(getX() + moveX, getY() + moveY, hitClass);
+    }
+
+    /**
+     * Moves this actor to given XY from current location, stopping if it hits actor of given class.
+     */
+    public void moveToXyNoCollision(double newX, double newY, Class<? extends ActorView> hitClass)
+    {
+        // Store previous XY, try new XY and return if no collision
+        double prevX = getX();
+        double prevY = getY();
+        setXY(newX, newY);
+        if (!isIntersectingActor(hitClass))
+            return;
+
+        // Get values
+        double dx = newX - prevX;
+        double dy = newY - prevY;
+        double distX = Math.abs(dx);
+        double distY = Math.abs(dy);
+        int signX = MathUtils.sign(dx);
+        int signY = MathUtils.sign(dy);
+
+        // Restore XY
+        setXY(prevX, prevY);
+
+        // Move to new X incrementally as long as no hit
+        for (double incr = 0; incr < distX; incr++) {
+            setX(getX() + signX);
+            if (isIntersectingActor(hitClass)) {
+                setX(getX() - signX);
+                break;
+            }
+        }
+
+        // Move to new Y incrementally as long as no hit
+        for (int incr = 0; incr < distY; incr++) {
+            setY(getY() + signY);
+            if (isIntersectingActor(hitClass)) {
+                setY(getY() - signY);
+                break;
+            }
+        }
     }
 
     /**

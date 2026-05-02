@@ -1,10 +1,11 @@
 package snap.games;
 import snap.geom.Point;
 import snap.geom.Rect;
-import snap.geom.Shape;
 import snap.geom.Vector;
 import snap.util.ListUtils;
+import snap.util.MathUtils;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * This actor subclass provides advanced functionality like velocity, hit detection, edge wrapping.
@@ -89,44 +90,36 @@ public class SkilledActor extends Actor {
      */
     public boolean intersectsActor(Actor anActor)
     {
-        if (!getBounds().intersectsShape(anActor._actorView.getBounds()))
-            return false;
-        Shape thisBoundsInParent = _actorView.localToParent(_actorView.getBoundsShape());
-        Shape otherBoundsInParent = anActor._actorView.localToParent(anActor._actorView.getBoundsShape());
-        return thisBoundsInParent.intersectsShape(otherBoundsInParent);
+        return _actorView.intersectsActor(anActor._actorView);
     }
 
     /**
      * Returns the actors intersecting this actor that match given class (class can be null).
      */
-    public boolean isIntersectingActor(Class<?> aClass)  { return getIntersectingActor(aClass) != null; }
+    public boolean isIntersectingActor(Class<? extends Actor> aClass)  { return getIntersectingActor(aClass) != null; }
 
     /**
      * Returns the actors intersecting this actor that match given class (class can be null).
      */
-    public <T> T getIntersectingActor(Class<T> aClass)
+    public <T extends Actor> T getIntersectingActor(Class<T> aClass)
     {
         List<Actor> actors = getStageView().getActors();
-        return (T) ListUtils.findMatch(actors, actor -> isIntersectingActor(actor, aClass));
+        Stream<T> actorStream = (Stream<T>) actors.stream();
+        if (aClass != null)
+            actorStream = actorStream.filter(aClass::isInstance);
+        return actorStream.filter(this::intersectsActor).findFirst().orElse(null);
     }
 
     /**
      * Returns the actors intersecting this actor that match given class (class can be null).
      */
-    public <T> List<T> getIntersectingActors(Class<T> aClass)
+    public <T extends Actor> List<T> getIntersectingActors(Class<T> aClass)
     {
         List<Actor> actors = getStageView().getActors();
-        return (List<T>) ListUtils.filter(actors, actor -> isIntersectingActor(actor, aClass));
-    }
-
-    /**
-     * Returns whether given actor is intersecting and of matching class (class can be null).
-     */
-    protected boolean isIntersectingActor(Actor anActor, Class<?> aClass)
-    {
-        if (aClass != null && !aClass.isInstance(anActor))
-            return false;
-        return intersectsActor(anActor);
+        Stream<T> actorStream = (Stream<T>) actors.stream();
+        if (aClass != null)
+            actorStream = actorStream.filter(aClass::isInstance);
+        return actorStream.filter(this::intersectsActor).toList();
     }
 
     /**
@@ -180,14 +173,54 @@ public class SkilledActor extends Actor {
     }
 
     /**
-     * Returns whether at edge.
+     * Moves this actor to given XY from current location, stopping if it hits actor of given class.
      */
-    public boolean isAtStageEdge()
+    public void moveByXyNoCollision(double moveX, double moveY, Class<? extends Actor> hitClass)
     {
-        StageView stageView = getStageView();
-        Rect actorBounds = _actorView.localToParent(_actorView.getBoundsShape(), stageView).getBounds();
-        return actorBounds.x <= 0 || actorBounds.y <= 0 ||
-                actorBounds.getMaxX() >= stageView.getWidth() || actorBounds.getMaxY() >= stageView.getHeight();
+        if (moveX != 0 || moveY != 0)
+            moveToXyNoCollision(getX() + moveX, getY() + moveY, hitClass);
+    }
+
+    /**
+     * Moves this actor to given XY from current location, stopping if it hits actor of given class.
+     */
+    public void moveToXyNoCollision(double newX, double newY, Class<? extends Actor> hitClass)
+    {
+        // Store previous XY, try new XY and return if no collision
+        double prevX = getX();
+        double prevY = getY();
+        setXY(newX, newY);
+        if (!isIntersectingActor(hitClass))
+            return;
+
+        // Get values
+        double dx = newX - prevX;
+        double dy = newY - prevY;
+        double distX = Math.abs(dx);
+        double distY = Math.abs(dy);
+        int signX = MathUtils.sign(dx);
+        int signY = MathUtils.sign(dy);
+
+        // Restore XY
+        setXY(prevX, prevY);
+
+        // Move to new X incrementally as long as no hit
+        for (double incr = 0; incr < distX; incr++) {
+            setX(getX() + signX);
+            if (isIntersectingActor(hitClass)) {
+                setX(getX() - signX);
+                break;
+            }
+        }
+
+        // Move to new Y incrementally as long as no hit
+        for (int incr = 0; incr < distY; incr++) {
+            setY(getY() + signY);
+            if (isIntersectingActor(hitClass)) {
+                setY(getY() - signY);
+                break;
+            }
+        }
     }
 
     /**
