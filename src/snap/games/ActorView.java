@@ -49,11 +49,6 @@ public class ActorView extends ParentView {
 
         // Initialize name to simple class name
         setName(getClass().getSimpleName());
-
-        // Get default image for class and set
-        Image defaultClassImage = Game.getImageForClass(getClass());
-        if (defaultClassImage != null)
-            setImage(defaultClassImage);
     }
 
     /**
@@ -95,8 +90,10 @@ public class ActorView extends ParentView {
                 anImage.waitForImageLoad();
 
             // If no actor size, set to image size
-            if (getSize().isEmpty())
+            if (getSize().isEmpty()) {
                 setSize(anImage.getWidth(), anImage.getHeight());
+                setXY(getX() - anImage.getWidth() / 2, getY() - anImage.getHeight() / 2);
+            }
 
             // If pref width not set, set width to image width maintaining center x
             if (!isPrefWidthSet() && getWidth() != anImage.getWidth()) {
@@ -256,6 +253,23 @@ public class ActorView extends ParentView {
      */
     @Override
     protected ViewLayout getViewLayoutImpl()  { return new StackViewLayout(this); }
+
+    /**
+     * Override to look for default image if empty when shown.
+     */
+    @Override
+    protected void setShowing(boolean aValue)
+    {
+        // If showing empty, look for default image for class and set
+        if (aValue && getWidth() == 0 && getHeight() == 0 && getImage() == null) {
+            Class<?> actorClass = getClass(); if (actorClass == ActorView.class) actorClass = _actor.getClass();
+            Image defaultClassImage = Game.getImageForClass(actorClass);
+            if (defaultClassImage != null)
+                setImage(defaultClassImage);
+        }
+
+        super.setShowing(aValue);
+    }
 
     /**
      * Override to archive X/Y and ImageName.
