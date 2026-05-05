@@ -28,10 +28,7 @@ public class StageView extends ChildView {
     private String _imageName;
 
     // The current list of actors
-    private List<Actor> _actors;
-
-    // The current list of actors reversed
-    private List<Actor> _actorsReversed;
+    private List<ActorView> _actors;
 
     // Whether mouse is down
     private ViewEvent _mouseDown;
@@ -143,51 +140,16 @@ public class StageView extends ChildView {
     /**
      * Returns the actors.
      */
-    public List<Actor> getActors()
+    public List<ActorView> getActors()
     {
         if (_actors != null) return _actors;
-        List<ActorView> actorViews = ListUtils.filterByClass(getChildren(), ActorView.class);
-        return _actors = ListUtils.map(actorViews, ActorView::getActor);
-    }
-
-    /**
-     * Returns the actors reversed.
-     */
-    public List<Actor> getActorsReversed()
-    {
-        if (_actorsReversed != null) return _actorsReversed;
-        return _actorsReversed = ListUtils.getReverse(getActors());
-    }
-
-    /**
-     * Adds a new actor to stage view at given XY point.
-     */
-    public void addActorAtXY(Actor anActor, double anX, double aY)
-    {
-        anActor.setXY(anX, aY);
-        addChild(anActor.getActorView());
-    }
-
-    /**
-     * Returns the actor with given name.
-     */
-    public Actor getActorForName(String aName)
-    {
-        return ListUtils.findMatch(getActors(), actor -> actor.getName().equals(aName));
-    }
-
-    /**
-     * Returns the actors for given class.
-     */
-    public <T> List<T> getActorsForClass(Class<T> aClass)
-    {
-        return ListUtils.filterByClass(getActors(), aClass);
+        return _actors = ListUtils.filterByClass(getChildren(), ActorView.class);
     }
 
     /**
      * Returns the first actor hit by given point in local coords.
      */
-    public <T extends Actor> T getActorAtXY(double aX, double aY, Class<T> aClass)
+    public <T extends ActorView> T getActorAtXY(double aX, double aY, Class<T> aClass)
     {
         return (T) ListUtils.findMatch(getActors(), actor -> isActorAtXY(actor, aX, aY, aClass));
     }
@@ -195,7 +157,7 @@ public class StageView extends ChildView {
     /**
      * Returns the actors hit by given point in local coords.
      */
-    public <T extends Actor> List<T> getActorsAtXY(double aX, double aY, Class<T> aClass)
+    public <T extends ActorView> List<T> getActorsAtXY(double aX, double aY, Class<T> aClass)
     {
         return (List<T>) ListUtils.filter(getActors(), actor -> isActorAtXY(actor, aX, aY, aClass));
     }
@@ -203,41 +165,12 @@ public class StageView extends ChildView {
     /**
      * Returns whether given actor is at given XY and of matching class.
      */
-    protected boolean isActorAtXY(Actor anActor, double aX, double aY, Class<?> aClass)
+    private boolean isActorAtXY(ActorView actorView, double aX, double aY, Class<?> aClass)
     {
-        if (aClass != null && !aClass.isInstance(anActor))
+        if (aClass != null && !aClass.isInstance(actorView))
             return false;
-        Point point = anActor.getActorView().parentToLocal(aX, aY, this);
-        return anActor.getActorView().contains(point.x, point.y);
-    }
-
-    /**
-     * Removes an actor.
-     */
-    public void removeActor(int anIndex)
-    {
-        removeChild(anIndex);
-    }
-
-    /**
-     * Removes an actor.
-     */
-    public void removeActor(Actor anActor)
-    {
-        int index = indexOfChild(anActor.getActorView());
-        if (index >= 0)
-            removeActor(index);
-    }
-
-    /**
-     * Sets the stage view fill color for given color string.
-     */
-    public void setFillColor(String aString)
-    {
-        Color color = Color.get(aString);
-        if (color != null)
-            setFill(color);
-        else System.err.println("SetColor: Don't recognize color: " + aString);
+        Point point = actorView.parentToLocal(aX, aY, this);
+        return actorView.contains(point.x, point.y);
     }
 
     /**
@@ -309,10 +242,10 @@ public class StageView extends ChildView {
     protected void stepGameFrame()
     {
         try {
-            List<Actor> actors = getActors();
-            for (Actor actor : actors)
-                if (actor.getActorView().getParent() != null)
-                    actor.act();
+            List<ActorView> actors = getActors();
+            for (ActorView actorView : actors)
+                if (actorView.getParent() != null)
+                    actorView.act();
             _mouseClicked = null;
             _keyClicks.clear();
         }
@@ -332,14 +265,6 @@ public class StageView extends ChildView {
         // Paint grid
         if (getShowCoords())
             paintGrid(aPntr);
-
-        // Iterate over children and paint pen paths
-        for (Actor child : getActors()) {
-            if (child instanceof PenActor penActor) {
-                penActor.paintPen(aPntr);
-                aPntr.setStroke(Stroke.Stroke1);
-            }
-        }
     }
 
     /**

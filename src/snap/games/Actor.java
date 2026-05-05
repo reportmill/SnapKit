@@ -20,7 +20,7 @@ public class Actor {
     public Actor()
     {
         super();
-        _actorView = new ActorView(this);
+        _actorView = new ProxyActorView(this);
     }
 
     /**
@@ -29,14 +29,18 @@ public class Actor {
     public ActorView getActorView()  { return _actorView; }
 
     /**
-     * Returns the StageView.
+     * Returns the Stage.
      */
-    public StageView getStageView()  { return _actorView.getStageView(); }
+    public Stage getStage()  { return _actorView.getStageView() instanceof ProxyStageView stageView ? stageView.getStage() : null; }
 
     /**
      * Returns the StageView as given class.
      */
-    public <T extends StageView> T getStageView(Class<? extends StageView> aClass)  { return _actorView.getStageView(aClass); }
+    public <T extends Stage> T getStage(Class<? extends Stage> aClass)
+    {
+        Stage stage = getStage();
+        return aClass.isInstance(stage) ? (T) stage : null;
+    }
 
     /**
      * Returns the actor name.
@@ -212,8 +216,8 @@ public class Actor {
      */
     public double getAngleToMouse()
     {
-        StageView stageView = getStageView();
-        return Point.getAngle(getMidX(), getMidY(), stageView.getMouseX(), stageView.getMouseY());
+        Stage stage = getStage();
+        return Point.getAngle(getMidX(), getMidY(), stage.getMouseX(), stage.getMouseY());
     }
 
     /**

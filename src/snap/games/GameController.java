@@ -172,7 +172,13 @@ public class GameController extends ViewController {
         if (_stageView == null || _stageView.getClass() == StageView.class) {
             WebURL snapFileUrl = UILoader.getSnapUrlForClass(getClass());
             if (snapFileUrl != null && snapFileUrl.getFile().getExists())
-                _stageView = (StageView) UILoader.loadViewForControllerAndUrl(this, snapFileUrl);
+                _stageView = loadStageViewForUrl(this, snapFileUrl);
+        }
+
+        else if (_stageView instanceof ProxyStageView proxyStageView) {
+            WebURL snapFileUrl = UILoader.getSnapUrlForClass(proxyStageView.getStage().getClass());
+            if (snapFileUrl != null && snapFileUrl.getFile().getExists())
+                _stageView = loadStageViewForUrl(this, snapFileUrl);
         }
 
         // Create BoxView to hold stage view
@@ -197,5 +203,17 @@ public class GameController extends ViewController {
     {
         if (SnapEnv.isWebVM)
             aWindow.setMaximized(true);
+    }
+
+    /**
+     * Loads a stage view for given URL.
+     */
+    public static StageView loadStageViewForUrl(ViewController viewController, WebURL snapFileUrl)
+    {
+        ViewArchiver archiver = new ViewArchiver();
+        archiver.setOwner(viewController);
+        archiver.getClassMap().put("StageView", snap.games.ProxyStageView.class);
+        archiver.getClassMap().put("ActorView", snap.games.ProxyActorView.class);
+        return (StageView) archiver.readXmlFromUrl(snapFileUrl);
     }
 }

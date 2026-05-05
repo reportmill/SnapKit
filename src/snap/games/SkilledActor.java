@@ -73,7 +73,7 @@ public class SkilledActor extends Actor {
      */
     public void turnToActor(Actor anActor)
     {
-        StageView stageView = getStageView();
+        StageView stageView = getStage().getStageView();
         ActorView otherActorView = anActor._actorView;
         Point otherCenterInParent = otherActorView.localToParent(otherActorView.getMidX(), otherActorView.getMidY(), stageView);
         Point otherCenterInLocal = _actorView.parentToLocal(otherCenterInParent.x, otherCenterInParent.y, stageView);
@@ -103,7 +103,7 @@ public class SkilledActor extends Actor {
      */
     public <T extends Actor> T getIntersectingActor(Class<T> aClass)
     {
-        List<Actor> actors = getStageView().getActors();
+        List<Actor> actors = getStage().getActors();
         Stream<T> actorStream = (Stream<T>) actors.stream();
         if (aClass != null)
             actorStream = actorStream.filter(aClass::isInstance);
@@ -115,7 +115,7 @@ public class SkilledActor extends Actor {
      */
     public <T extends Actor> List<T> getIntersectingActors(Class<T> aClass)
     {
-        List<Actor> actors = getStageView().getActors();
+        List<Actor> actors = getStage().getActors();
         Stream<T> actorStream = (Stream<T>) actors.stream();
         if (aClass != null)
             actorStream = actorStream.filter(aClass::isInstance);
@@ -127,7 +127,7 @@ public class SkilledActor extends Actor {
      */
     public <T> T getActorInRange(double aRadius, Class<T> aClass)
     {
-        List<Actor> actors = getStageView().getActors();
+        List<Actor> actors = getStage().getActors();
         return (T) ListUtils.findMatch(actors, actor -> isActorInRange(actor, aRadius, aClass));
     }
 
@@ -136,7 +136,7 @@ public class SkilledActor extends Actor {
      */
     public <T> List<T> getActorsInRange(double aRadius, Class<T> aClass)
     {
-        List<Actor> actors = getStageView().getActors();
+        List<Actor> actors = getStage().getActors();
         return (List<T>) ListUtils.filter(actors, actor -> isActorInRange(actor, aRadius, aClass));
     }
 
@@ -155,10 +155,11 @@ public class SkilledActor extends Actor {
      */
     public <T> T getActorAtXY(double aX, double aY, Class<T> aClass)
     {
-        StageView stageView = getStageView();
+        Stage stage = getStage();
+        StageView stageView = stage.getStageView();
         Point gameXY = _actorView.localToParent(aX, aY, stageView);
-        List<Actor> actors = getStageView().getActors();
-        return (T) ListUtils.findMatch(actors, actor -> actor != this && stageView.isActorAtXY(actor, gameXY.x, gameXY.y, aClass));
+        List<Actor> actors = stage.getActors();
+        return (T) ListUtils.findMatch(actors, actor -> actor != this && stage.isActorAtXY(actor, gameXY.x, gameXY.y, aClass));
     }
 
     /**
@@ -166,10 +167,11 @@ public class SkilledActor extends Actor {
      */
     public <T> List<T> getActorsAtXY(double aX, double aY, Class<T> aClass)
     {
-        StageView stageView = getStageView();
+        Stage stage = getStage();
+        StageView stageView = stage.getStageView();
         Point gameXY = _actorView.localToParent(aX, aY, stageView);
-        List<Actor> actors = getStageView().getActors();
-        return (List<T>) ListUtils.filter(actors, actor -> actor != this && stageView.isActorAtXY(actor, gameXY.x, gameXY.y, aClass));
+        List<Actor> actors = stage.getActors();
+        return (List<T>) ListUtils.filter(actors, actor -> actor != this && stage.isActorAtXY(actor, gameXY.x, gameXY.y, aClass));
     }
 
     /**
@@ -255,9 +257,9 @@ public class SkilledActor extends Actor {
 
         // Wrap to opposite edge if out of bounds
         if (isWrapAtEdges()) {
-            StageView stageView = getStageView();
-            double gameW = stageView.getWidth();
-            double gameH = stageView.getHeight();
+            Stage stage = getStage();
+            double gameW = stage.getWidth();
+            double gameH = stage.getHeight();
             if (newX >= gameW) newX = 0;
             if (newX < 0) newX = gameW - 1;
             if (newY >= gameH) newY = 0;

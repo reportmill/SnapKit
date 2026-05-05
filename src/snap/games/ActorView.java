@@ -14,12 +14,6 @@ import java.util.stream.Stream;
  */
 public class ActorView extends ParentView {
 
-    // The actor
-    private Actor _actor;
-
-    // The actor class name
-    private String _actorClassName;
-
     // Image name set in archival
     private String _imageName;
 
@@ -35,26 +29,7 @@ public class ActorView extends ParentView {
     public ActorView()
     {
         super();
-        _actor = new Actor();
-        _actor._actorView = this;
     }
-
-    /**
-     * Constructor.
-     */
-    public ActorView(Actor anActor)
-    {
-        super();
-        _actor = anActor;
-
-        // Initialize name to simple class name
-        setName(getClass().getSimpleName());
-    }
-
-    /**
-     * Returns the actor.
-     */
-    public Actor getActor()  { return _actor; }
 
     /**
      * Returns the StageView.
@@ -65,6 +40,11 @@ public class ActorView extends ParentView {
      * Returns the StageView as given class.
      */
     public <T extends StageView> T getStageView(Class<? extends StageView> aClass)  { return (T) getParent(aClass); }
+
+    /**
+     * The act method.
+     */
+    protected void act()  { }
 
     /**
      * Returns the image.
@@ -262,7 +242,7 @@ public class ActorView extends ParentView {
     {
         // If showing empty, look for default image for class and set
         if (aValue && getWidth() == 0 && getHeight() == 0 && getImage() == null) {
-            Class<?> actorClass = getClass(); if (actorClass == ActorView.class) actorClass = _actor.getClass();
+            Class<?> actorClass = getClass();
             Image defaultClassImage = Game.getImageForClass(actorClass);
             if (defaultClassImage != null)
                 setImage(defaultClassImage);
@@ -288,10 +268,6 @@ public class ActorView extends ParentView {
         if (_imageName != null && !_imageName.isEmpty())
             xml.add("ImageName", _imageName);
 
-        // Archive Actor class name
-        if (_actorClassName != null && !_actorClassName.equals(Actor.class.getName()))
-            xml.add("ActorClass", _actor.getClass().getName());
-
         // Return
         return xml;
     }
@@ -302,29 +278,10 @@ public class ActorView extends ParentView {
     @Override
     protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     {
-        // Create Actor class
-        _actorClassName = anElement.getAttributeValue("ActorClass");
-        if (_actorClassName != null) {
-            _actor = getActorForClassName(anArchiver.getOwnerClass(), _actorClassName);
-            _actor._actorView = this;
-        }
-
         super.fromXMLView(anArchiver, anElement);
         if (anElement.hasAttribute("ImageName")) {
             String imageName = anElement.getAttributeValue("ImageName");
             setImageForName(imageName);
         }
-    }
-
-    /**
-     * Returns an actor instance for given class name.
-     */
-    private static Actor getActorForClassName(Class<?> ownerClass, String className)
-    {
-        ClassLoader classLoader = ownerClass != null ? ownerClass.getClassLoader() : ViewArchiver.class.getClassLoader();
-        try { return (Actor) Class.forName(className, false, classLoader).getConstructor().newInstance(); }
-        catch (Exception ignored) { }
-        try { return (Actor) Class.forName("snap.games." + className, false, classLoader).getConstructor().newInstance(); }
-        catch (Exception e) { System.err.println("ActorView: Can't find actor class: " + className); return new Actor(); }
     }
 }

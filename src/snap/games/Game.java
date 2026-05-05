@@ -33,6 +33,13 @@ public class Game {
      */
     private static void showGameForClassImpl(Class<?> gameClass)
     {
+        // Handle Stage
+        if (Stage.class.isAssignableFrom(gameClass)) {
+            Stage stage = (Stage) ClassUtils.newInstance(gameClass);
+            GameController gameController = stage.getController();
+            gameController.setWindowVisible(true);
+        }
+
         // Handle StageView
         if (StageView.class.isAssignableFrom(gameClass)) {
             StageView stageView = (StageView) ClassUtils.newInstance(gameClass);
