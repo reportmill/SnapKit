@@ -5,9 +5,7 @@ package snap.games;
 import snap.geom.Point;
 import snap.geom.Size;
 import snap.gfx.*;
-import snap.props.PropChange;
 import snap.util.ListUtils;
-import snap.view.*;
 import java.util.List;
 
 /**
@@ -95,7 +93,7 @@ public class Stage {
     /**
      * Returns whether to draw coordinate grid.
      */
-    public boolean isShowCoords()  { return _stageView.getShowCoords(); }
+    public boolean isShowCoords()  { return _stageView.isShowCoords(); }
 
     /**
      * Sets whether to draw coordinate grid.

@@ -47,6 +47,16 @@ public class GameController extends ViewController {
     }
 
     /**
+     * Returns the Stage.
+     */
+    public Stage getStage()  { return _stageView instanceof ProxyStageView proxyStageView ? proxyStageView.getStage() : null; }
+
+    /**
+     * Sets the Stage.
+     */
+    public void setStage(Stage stage)  { setStageView(stage.getStageView());}
+
+    /**
      * Returns the StageView.
      */
     public StageView getStageView()  { return _stageView; }

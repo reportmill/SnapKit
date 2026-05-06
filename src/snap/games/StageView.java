@@ -126,7 +126,7 @@ public class StageView extends ChildView {
     /**
      * Returns whether to draw coordinate grid.
      */
-    public boolean getShowCoords()  { return _showCoords; }
+    public boolean isShowCoords()  { return _showCoords; }
 
     /**
      * Sets whether to draw coordinate grid.
@@ -263,7 +263,7 @@ public class StageView extends ChildView {
     protected void paintFront(Painter aPntr)
     {
         // Paint grid
-        if (getShowCoords())
+        if (isShowCoords())
             paintGrid(aPntr);
     }
 
@@ -308,7 +308,7 @@ public class StageView extends ChildView {
                 _mouseDown = null;
             else if (anEvent.isMouseClick())
                 _mouseClicked = anEvent;
-            else if (anEvent.isMouseMove() && getShowCoords())
+            else if (anEvent.isMouseMove() && isShowCoords())
                 repaint(Rect.getRectForPoints(anEvent.getPoint(), new Point(_mouseX, _mouseY)).getInsetRect(-80, -25));
             _mouseX = anEvent.getX();
             _mouseY = anEvent.getY();
