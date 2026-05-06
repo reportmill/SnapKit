@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * This actor subclass provides advanced functionality like velocity, hit detection, edge wrapping.
+ * This actor subclass provides extended functionality like velocity, hit detection, edge wrapping.
  */
-public class SkilledActor extends Actor {
+public class ActorX extends Actor {
 
     // Whether this actor wraps at stage view edges
     protected boolean _wrapAtEdges;
@@ -21,7 +21,7 @@ public class SkilledActor extends Actor {
     /**
      * Constructor.
      */
-    public SkilledActor()
+    public ActorX()
     {
         super();
         _velocity = Vector.ZERO;
@@ -103,8 +103,7 @@ public class SkilledActor extends Actor {
      */
     public <T extends Actor> T getIntersectingActor(Class<T> aClass)
     {
-        List<Actor> actors = getStage().getActors();
-        Stream<T> actorStream = (Stream<T>) actors.stream();
+        Stream<T> actorStream = (Stream<T>) getStage().getActors().stream();
         if (aClass != null)
             actorStream = actorStream.filter(aClass::isInstance);
         return actorStream.filter(this::intersectsActor).findFirst().orElse(null);
@@ -115,8 +114,7 @@ public class SkilledActor extends Actor {
      */
     public <T extends Actor> List<T> getIntersectingActors(Class<T> aClass)
     {
-        List<Actor> actors = getStage().getActors();
-        Stream<T> actorStream = (Stream<T>) actors.stream();
+        Stream<T> actorStream = (Stream<T>) getStage().getActors().stream();
         if (aClass != null)
             actorStream = actorStream.filter(aClass::isInstance);
         return actorStream.filter(this::intersectsActor).toList();
@@ -125,53 +123,49 @@ public class SkilledActor extends Actor {
     /**
      * Returns the first actor in given range radius that match given class (class can be null).
      */
-    public <T> T getActorInRange(double aRadius, Class<T> aClass)
+    public <T extends Actor> T getActorInRange(double aRadius, Class<T> aClass)
     {
-        List<Actor> actors = getStage().getActors();
-        return (T) ListUtils.findMatch(actors, actor -> isActorInRange(actor, aRadius, aClass));
+        Stream<T> actorStream = (Stream<T>) getStage().getActors().stream();
+        if (aClass != null)
+            actorStream = actorStream.filter(aClass::isInstance);
+        return actorStream.filter(actor -> getDistanceToActor(actor) <= aRadius).findFirst().orElse(null);
     }
 
     /**
      * Returns the actors in given range radius that match given class (class can be null).
      */
-    public <T> List<T> getActorsInRange(double aRadius, Class<T> aClass)
+    public <T extends Actor> List<T> getActorsInRange(double aRadius, Class<T> aClass)
     {
-        List<Actor> actors = getStage().getActors();
-        return (List<T>) ListUtils.filter(actors, actor -> isActorInRange(actor, aRadius, aClass));
-    }
-
-    /**
-     * Returns whether given actor is in range and of matching class (class can be null).
-     */
-    protected boolean isActorInRange(Actor anActor, double aRadius, Class<?> aClass)
-    {
-        if (aClass != null && !aClass.isInstance(anActor))
-            return false;
-        return getDistanceToActor(anActor) <= aRadius;
+        Stream<T> actorStream = (Stream<T>) getStage().getActors().stream();
+        if (aClass != null)
+            actorStream = actorStream.filter(aClass::isInstance);
+        return actorStream.filter(actor -> getDistanceToActor(actor) <= aRadius).toList();
     }
 
     /**
      * Returns the first actor hit by given point that match given class (class can be null).
      */
-    public <T> T getActorAtXY(double aX, double aY, Class<T> aClass)
+    public <T extends Actor> T getActorAtXY(double aX, double aY, Class<T> aClass)
     {
         Stage stage = getStage();
-        StageView stageView = stage.getStageView();
-        Point gameXY = _actorView.localToParent(aX, aY, stageView);
-        List<Actor> actors = stage.getActors();
-        return (T) ListUtils.findMatch(actors, actor -> actor != this && stage.isActorAtXY(actor, gameXY.x, gameXY.y, aClass));
+        Point stageXY = _actorView.localToParent(aX, aY, stage.getStageView());
+        Stream<T> actorStream = (Stream<T>) getStage().getActors().stream();
+        if (aClass != null)
+            actorStream = actorStream.filter(aClass::isInstance);
+        return actorStream.filter(actor -> actor != this && stage.isActorAtXY(actor, stageXY.x, stageXY.y)).findFirst().orElse(null);
     }
 
     /**
      * Returns the actors hit by given point that match given class (class can be null).
      */
-    public <T> List<T> getActorsAtXY(double aX, double aY, Class<T> aClass)
+    public <T extends Actor> List<T> getActorsAtXY(double aX, double aY, Class<T> aClass)
     {
         Stage stage = getStage();
-        StageView stageView = stage.getStageView();
-        Point gameXY = _actorView.localToParent(aX, aY, stageView);
-        List<Actor> actors = stage.getActors();
-        return (List<T>) ListUtils.filter(actors, actor -> actor != this && stage.isActorAtXY(actor, gameXY.x, gameXY.y, aClass));
+        Point stageXY = _actorView.localToParent(aX, aY, stage.getStageView());
+        Stream<T> actorStream = (Stream<T>) getStage().getActors().stream();
+        if (aClass != null)
+            actorStream = actorStream.filter(aClass::isInstance);
+        return actorStream.filter(actor -> actor != this && stage.isActorAtXY(actor, stageXY.x, stageXY.y)).toList();
     }
 
     /**

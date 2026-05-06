@@ -7,6 +7,7 @@ import snap.geom.Size;
 import snap.gfx.*;
 import snap.util.ListUtils;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * This class is the main view for games and manages Actors.
@@ -34,6 +35,7 @@ public class Stage {
     {
         super();
         _stageView = new ProxyStageView(this);
+        setSize(width, height);
     }
 
     /**
@@ -149,7 +151,10 @@ public class Stage {
      */
     public <T extends Actor> T getActorAtXY(double aX, double aY, Class<T> aClass)
     {
-        return (T) ListUtils.findMatch(getActors(), actor -> isActorAtXY(actor, aX, aY, aClass));
+        Stream<T> actorStream = (Stream<T>) getActors().stream();
+        if (aClass != null)
+            actorStream = actorStream.filter(aClass::isInstance);
+        return actorStream.filter(actor -> isActorAtXY(actor, aX, aY)).findFirst().orElse(null);
     }
 
     /**
@@ -157,18 +162,19 @@ public class Stage {
      */
     public <T extends Actor> List<T> getActorsAtXY(double aX, double aY, Class<T> aClass)
     {
-        return (List<T>) ListUtils.filter(getActors(), actor -> isActorAtXY(actor, aX, aY, aClass));
+        Stream<T> actorStream = (Stream<T>) getActors().stream();
+        if (aClass != null)
+            actorStream = actorStream.filter(aClass::isInstance);
+        return actorStream.filter(actor -> isActorAtXY(actor, aX, aY)).toList();
     }
 
     /**
-     * Returns whether given actor is at given XY and of matching class.
+     * Returns whether given actor is at given stage XY.
      */
-    protected boolean isActorAtXY(Actor anActor, double aX, double aY, Class<?> aClass)
+    protected boolean isActorAtXY(Actor anActor, double aX, double aY)
     {
-        if (aClass != null && !aClass.isInstance(anActor))
-            return false;
-        Point point = anActor.getActorView().parentToLocal(aX, aY, _stageView);
-        return anActor.getActorView().contains(point.x, point.y);
+        Point actorXY = anActor.getActorView().parentToLocal(aX, aY, _stageView);
+        return anActor.getActorView().contains(actorXY.x, actorXY.y);
     }
 
     /**
