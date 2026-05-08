@@ -66,9 +66,9 @@ public class ProxyStageView extends StageView {
      * Override to forward to stage.
      */
     @Override
-    protected void stepGameFrame()
+    protected void stepFrameForward()
     {
-        super.stepGameFrame();
+        super.stepFrameForward();
         _stage.stepGameFrame();
     }
 

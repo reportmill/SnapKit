@@ -8,8 +8,6 @@ import snap.util.SnapUtils;
 import snap.util.StringUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Represents an Image, such as JPEG, PNG, GIF, TIFF, BMP.
@@ -443,21 +441,6 @@ public abstract class Image implements Loadable {
         Painter pntr = cloneImage.getPainter();
         pntr.drawImage(this, imageX, imageY);
         return cloneImage;
-    }
-
-    /**
-     * Returns an image with ImageSet for given number of frames (assumes this is horizontal sprite sheet).
-     */
-    public Image getSpriteSheetFrames(int aCount)
-    {
-        List<Image> images = new ArrayList<>(aCount);
-        int w = getPixWidth() / aCount;
-        for (int i = 0; i < aCount; i++) {
-            Image img = copyForCropRect(i * w, 0, w, getPixHeight());
-            images.add(img);
-        }
-        ImageSet iset = new ImageSet(images);
-        return iset.getImage(0);
     }
 
     /**

@@ -103,7 +103,7 @@ public class DevConsole extends ViewController {
         switch (anEvent.getName()) {
 
             // Handle StepButton
-            case "StepButton" -> _gameController.stepGameFrame();
+            case "StepButton" -> _gameController.stepFrameForward();
 
             // Handle PlayButton, PauseButton
             case "PlayButton" -> playGame();

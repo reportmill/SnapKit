@@ -239,13 +239,13 @@ public class StageView extends ChildView {
     /**
      * Steps the game forward a frame.
      */
-    protected void stepGameFrame()
+    protected void stepFrameForward()
     {
         try {
             List<ActorView> actors = getActors();
             for (ActorView actorView : actors)
                 if (actorView.getParent() != null)
-                    actorView.act();
+                    actorView.stepFrameForward();
             _mouseClicked = null;
             _keyClicks.clear();
         }

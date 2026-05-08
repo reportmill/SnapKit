@@ -17,6 +17,12 @@ public class ActorView extends ParentView {
     // Image name set in archival
     private String _imageName;
 
+    // The sprite to hold multiframe images
+    private Sprite _sprite;
+
+    // The time the sprite was last started
+    private int _spriteStartTime;
+
     // The ImageView
     private ImageView _imageView;
 
@@ -40,6 +46,23 @@ public class ActorView extends ParentView {
      * Returns the StageView as given class.
      */
     public <T extends StageView> T getStageView(Class<? extends StageView> aClass)  { return (T) getParent(aClass); }
+
+    /**
+     * Tells the actor to step forward a frame.
+     */
+    protected void stepFrameForward()
+    {
+        // If actor has sprite with frames, get sprite frame image for current time and set in actor
+        if (_sprite != null && _sprite.getFrameCount() > 1) {
+            GameController gameController = getStageView().getController();
+            int spriteFrameDelay = 1000 / _sprite.getFramesPerSecond();
+            int spriteFrameIndex = (gameController.getTime() - _spriteStartTime) / spriteFrameDelay % _sprite.getFrameCount();
+            Image spriteFrameImage = _sprite.getFrameImageForIndex(spriteFrameIndex);
+            setImage(spriteFrameImage);
+        }
+
+        act();
+    }
 
     /**
      * The act method.
@@ -72,21 +95,22 @@ public class ActorView extends ParentView {
             // If no actor size, set to image size
             if (getSize().isEmpty()) {
                 setSize(anImage.getWidth(), anImage.getHeight());
-                setXY(getX() - anImage.getWidth() / 2, getY() - anImage.getHeight() / 2);
+                setX(Math.round(getX() - anImage.getWidth() / 2));
+                setY(Math.round(getY() - anImage.getHeight() / 2));
             }
 
             // If pref width not set, set width to image width maintaining center x
             if (!isPrefWidthSet() && getWidth() != anImage.getWidth()) {
                 double dx = (anImage.getWidth() - getWidth()) / 2;
                 setWidth(anImage.getWidth());
-                setX(getX() + dx);
+                setX(Math.round(getX() + dx));
             }
 
             // If pref height not set, set height to image height maintaining center y
             if (!isPrefHeightSet() && getHeight() != anImage.getHeight()) {
                 double dy = (anImage.getHeight() - getHeight()) / 2;
                 setHeight(anImage.getHeight());
-                setY(getY() + dy);
+                setY(Math.round(getY() + dy));
             }
         }
 
@@ -118,6 +142,24 @@ public class ActorView extends ParentView {
         Image image = getImageForName(imageName);
         if (image != null)
             setImage(image);
+    }
+
+    /**
+     * Returns the sprite.
+     */
+    public Sprite getSprite()  { return _sprite; }
+
+    /**
+     * Sets the sprite.
+     */
+    public void setSprite(Sprite aSprite)
+    {
+        if (aSprite == _sprite) return;
+        _sprite = aSprite;
+        StageView stageView = getStageView();
+        GameController gameController = stageView != null ? stageView.getController() : null;
+        _spriteStartTime = gameController != null ? gameController.getTime() : 0;
+        setImage(aSprite.getFrameImageForIndex(0));
     }
 
     /**

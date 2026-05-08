@@ -22,7 +22,7 @@ public class GameController extends ViewController {
     private BoxView _stageViewBox;
 
     // The animation timer
-    private ViewTimer _timer = new ViewTimer(this::stepGameFrame, getFrameDelay());
+    private ViewTimer _timer = new ViewTimer(this::stepFrameForward, getFrameDelay());
 
     // Constants for properties
     public static final String StageView_Prop = "StageView";
@@ -139,10 +139,15 @@ public class GameController extends ViewController {
     /**
      * Steps the game forward a frame.
      */
-    public void stepGameFrame()
+    public void stepFrameForward()
     {
-        _stageView.stepGameFrame();
+        _stageView.stepFrameForward();
     }
+
+    /**
+     * Returns the timer elapsed time.
+     */
+    public int getTime()  { return _timer.getTime(); }
 
     /**
      * Reset StageView.

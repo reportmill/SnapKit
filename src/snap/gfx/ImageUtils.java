@@ -1,7 +1,10 @@
 package snap.gfx;
+import snap.geom.Transform;
 import snap.util.ArrayUtils;
 import snap.util.ByteArray;
 import snap.web.WebURL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Some Image utility methods.
@@ -51,6 +54,26 @@ public class ImageUtils {
     }
 
     /**
+     * Returns a flipped version of given image.
+     */
+    public static Image getImageFlippedX(Image anImage)
+    {
+        if (!anImage.isLoaded())
+            anImage.waitForImageLoad();
+
+        double imageW = (int) Math.round(anImage.getWidth());
+        double imageH = (int) Math.round(anImage.getHeight());
+        Image flippedImage = Image.getImageForSize(imageW, imageH, anImage.hasAlpha());
+        Painter pntr = flippedImage.getPainter();
+        Transform xfm = new Transform(imageW / 2, imageH / 2);
+        xfm.scale(-1, 1);
+        xfm.translate(-imageW / 2, -imageH / 2);
+        pntr.transform(xfm);
+        pntr.drawImage(anImage, 0, 0);
+        return flippedImage;
+    }
+
+    /**
      * Returns an image for string and font.
      */
     public static Image getImageForStringAndFont(String aStr, Font aFont)
@@ -68,6 +91,25 @@ public class ImageUtils {
 
         // Return
         return image;
+    }
+
+    /**
+     * Returns a list of images for given sprite strip image and frame count.
+     */
+    public static List<Image> getFrameImagesForSpriteStripImageAndFrameCount(Image spriteStripImage, int frameCount)
+    {
+        if (!spriteStripImage.isLoaded())
+            spriteStripImage.waitForImageLoad();
+
+        List<Image> frameImages = new ArrayList<>(frameCount);
+        int frameW = spriteStripImage.getPixWidth() / frameCount;
+        for (int i = 0; i < frameCount; i++) {
+            Image img = spriteStripImage.copyForCropRect(i * frameW, 0, frameW, spriteStripImage.getPixHeight());
+            frameImages.add(img);
+        }
+
+        // Return
+        return frameImages;
     }
 
     /**
