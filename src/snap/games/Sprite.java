@@ -91,7 +91,40 @@ public class Sprite {
     {
         if (_flippedX != null) return _flippedX;
         Sprite flippedSprite = new Sprite(getSourceURL());
-        flippedSprite._sourceImage = ImageUtils.getImageFlippedX(_sourceImage);
+        flippedSprite._sourceImage = ImageUtils.getImageFlippedX(getSourceImage());
         return _flippedX = flippedSprite;
+    }
+
+    /**
+     * Returns a sprite with max frame size.
+     */
+    public Sprite getSpriteWithMaxFrameSize(double maxFrameW, double maxFrameH)
+    {
+        // Get source image and frame size
+        Image sourceImage = getSourceImage();
+        sourceImage.waitForImageLoad();
+        int oldFrameW = sourceImage.getPixWidth() / getFrameCount();
+        int oldFrameH = sourceImage.getPixHeight();
+
+        // Get scale factor needed to shrink source image to max frame size
+        double scale = 1;
+        if (oldFrameW > maxFrameW)
+            scale = maxFrameW / oldFrameW;
+        if (oldFrameH > maxFrameH)
+            scale = Math.min(scale, maxFrameH / oldFrameH);
+
+        // If this sprite already within max frame size, just return
+        if (scale == 1)
+            return this;
+
+        // Calculate new frame size for scale and get new sprite image
+        int newFrameW = (int) (oldFrameW * scale);
+        int newFrameH = (int) (oldFrameH * scale);
+        Image newSpriteImage = sourceImage.copyForSize(newFrameW * getFrameCount(), newFrameH);
+
+        // Create new sprite for new source image and return
+        Sprite newSprite = new Sprite(getSourceURL());
+        newSprite._sourceImage = newSpriteImage;
+        return newSprite;
     }
 }
