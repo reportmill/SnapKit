@@ -92,7 +92,7 @@ public class Sprite {
     {
         if (_flippedX != null) return _flippedX;
         Sprite flippedSprite = new Sprite(getSourceURL());
-        flippedSprite._sourceImage = getSourceImage().copyFlippedX();
+        flippedSprite._frameImages = getFrameImages().stream().map(Image::copyFlippedX).toList();
         return _flippedX = flippedSprite;
     }
 
