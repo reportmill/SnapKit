@@ -277,6 +277,21 @@ public class ActorView extends ParentView {
     protected ViewLayout getViewLayoutImpl()  { return new StackViewLayout(this); }
 
     /**
+     * Override to return image bounds.
+     */
+    @Override
+    public Shape getBoundsShape()
+    {
+        Sprite sprite = getSprite();
+        if (sprite != null)
+            return sprite.getFrameImageForIndex(0).getVisibleBounds();
+        Image image = getImage();
+        if (image != null)
+            return image.getVisibleBounds();
+        return super.getBoundsShape();
+    }
+
+    /**
      * Override to look for default image if empty when shown.
      */
     @Override

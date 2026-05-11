@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
+import snap.geom.Rect;
 import snap.util.FormatUtils;
 import snap.util.Loadable;
 import snap.util.SnapUtils;
@@ -49,6 +50,9 @@ public abstract class Image implements Loadable {
 
     // The decoded bytes with alpha
     private byte[]  _bytesRGBA;
+
+    // The visible bounds of image
+    private Rect _visibleBounds;
 
     // The image set, if animated image
     private ImageSet  _imgSet;
@@ -315,6 +319,18 @@ public abstract class Image implements Loadable {
      * Returns the PNG bytes for image.
      */
     public abstract byte[] getBytesPNG();
+
+    /**
+     * Returns the visible bounds of the image.
+     */
+    public Rect getVisibleBounds()
+    {
+        if (_visibleBounds != null) return _visibleBounds;
+        byte[] bytesRGBA = _bytesRGBA;
+        _visibleBounds = ImageUtils.getVisibleBounds(this);
+        _bytesRGBA = bytesRGBA; // Only hold on to RGBA bytes if they were previously cached
+        return _visibleBounds;
+    }
 
     /**
      * Returns a painter to mark up image.

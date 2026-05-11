@@ -1,4 +1,5 @@
 package snap.gfx;
+import snap.geom.Rect;
 import snap.util.ArrayUtils;
 import snap.util.ByteArray;
 import snap.web.WebURL;
@@ -50,6 +51,51 @@ public class ImageUtils {
 
         // If file type not recognized, return null
         return null;
+    }
+
+    /**
+     * Returns the bounds of the non-transparent pixels in the given image.
+     */
+    public static Rect getVisibleBounds(Image anImage)
+    {
+        if (!anImage.hasAlpha())
+            return new Rect(0, 0, anImage.getWidth(), anImage.getHeight());
+        if (!anImage.isLoaded())
+            anImage.waitForImageLoad();
+
+        // Get rgba bytes and iterate over pixels to find visible bounds
+        byte[] bytesRGBA = anImage.getBytesRGBA();
+        int pixW = anImage.getPixWidth();
+        int pixH = anImage.getPixHeight();
+        int minX = pixW, minY = pixH, maxX = 0, maxY = 0;
+
+        // Iterate over pixels
+        for (int y = 0; y < pixH; y++) {
+            for (int x = 0; x < pixW; x++) {
+                int alpha = bytesRGBA[(y * pixW + x) * 4 + 3] & 0xff;
+                if (alpha != 0) {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+        }
+
+        // If no visible pixels found, return empty rect
+        if (minX > maxX || minY > maxY)
+            return new Rect(0, 0, 0, 0);
+
+        // If image has DPI, scale bounds to DPI
+        if (anImage.getDpiX() != 72 || anImage.getDpiY() != 72) {
+            double scaleX = anImage.getDpiX() / 72;
+            double scaleY = anImage.getDpiY() / 72;
+            minX = (int) (minX / scaleX); maxX = (int) (maxX / scaleX);
+            minY = (int) (minY / scaleY); maxY = (int) (maxY / scaleY);
+        }
+
+        // Return rect
+        return new Rect(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
 
     /**
