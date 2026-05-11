@@ -17,11 +17,11 @@ import snap.web.*;
  */
 public class AWTEnv extends GFXEnv {
 
-    // The current screen scale (1 = normal, 2 = HiDPI/Retina)
-    private static double  _screenScale = -1;
+    // The current screen DPI scale (1 = normal, 2 = HiDPI/Retina)
+    private static double _screenDpiScale = -1;
 
     // The shared AWTEnv
-    private static AWTEnv     _shared;
+    private static AWTEnv _shared;
 
     /**
      * Creates a new AWTEnv.
@@ -80,7 +80,7 @@ public class AWTEnv extends GFXEnv {
     public Image getImageForSizeAndDpiScale(double aWidth, double aHeight, boolean hasAlpha, double dpiScale)
     {
         if (dpiScale <= 0)
-            dpiScale = getScreenScale();
+            dpiScale = getScreenDpiScale();
         return new J2DImage(aWidth, aHeight, hasAlpha, dpiScale);
     }
 
@@ -167,16 +167,16 @@ public class AWTEnv extends GFXEnv {
     /**
      * Returns the screen scale. Usually 1, but could be 2 for HiDPI/Retina displays.
      */
-    public double getScreenScale()
+    public double getScreenDpiScale()
     {
-        if (_screenScale >= 0) return _screenScale;
-        return _screenScale = getScreenScaleImpl();
+        if (_screenDpiScale >= 0) return _screenDpiScale;
+        return _screenDpiScale = getScreenDpiScaleImpl();
     }
 
     /**
      * Returns the screen scale. Usually 1, but could be 2 for HiDPI/Retina displays.
      */
-    private double getScreenScaleImpl()
+    private double getScreenDpiScaleImpl()
     {
         // Get graphics configuration
         GraphicsEnvironment graphicsEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -190,7 +190,7 @@ public class AWTEnv extends GFXEnv {
             return defaultScale;
 
         // Complain and return 1 since other methods failed
-        System.err.println("AWTEnv.getScreenScale: Unexpected value: " + defaultScale);
+        System.err.println("AWTEnv.getScreenDpiScale: Unexpected value: " + defaultScale);
         return 1;
     }
 

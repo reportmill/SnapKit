@@ -102,7 +102,7 @@ public class CJEnv extends GFXEnv {
     public Image getImageForSizeAndDpiScale(double aWidth, double aHeight, boolean hasAlpha, double dpiScale)
     {
         if (dpiScale <= 0)
-            dpiScale = getScreenScale();
+            dpiScale = getScreenDpiScale();
         return new CJImage(aWidth, aHeight, hasAlpha, dpiScale);
     }
 
@@ -138,7 +138,7 @@ public class CJEnv extends GFXEnv {
     /**
      * Returns the screen scale. Usually 1, but could be 2 for HiDPI/Retina displays.
      */
-    public double getScreenScale()  { return Window.getDevicePixelRatio(); }
+    public double getScreenDpiScale()  { return Window.getDevicePixelRatio(); }
 
     /**
      * Tries to open the given file name with the platform reader.

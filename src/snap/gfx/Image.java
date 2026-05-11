@@ -350,8 +350,7 @@ public abstract class Image implements Loadable {
      */
     public Image copyForSize(double newW, double newH)
     {
-        double dpiScale = getDpiScale();
-        return copyForSizeAndDpiScale(newW, newH, dpiScale);
+        return copyForSizeAndDpiScale(newW, newH, getDpiScale());
     }
 
     /**
@@ -359,9 +358,7 @@ public abstract class Image implements Loadable {
      */
     public Image copyForDpiScale(double dpiScale)
     {
-        double imageW = getWidth();
-        double imageH = getHeight();
-        return copyForSizeAndDpiScale(imageW, imageH, dpiScale);
+        return copyForSizeAndDpiScale(getWidth(), getHeight(), dpiScale);
     }
 
     /**
@@ -369,6 +366,8 @@ public abstract class Image implements Loadable {
      */
     public Image copyForSizeAndDpiScale(double newW, double newH, double dpiScale)
     {
+        if (!isLoaded())
+            waitForImageLoad();
         Image cloneImage = Image.getImageForSizeAndDpiScale(newW, newH, hasAlpha(), dpiScale);
         Painter pntr = cloneImage.getPainter();
         pntr.setImageQuality(1);
@@ -381,7 +380,9 @@ public abstract class Image implements Loadable {
      */
     public Image copyForCropRect(double aX, double aY, double newW, double newH)
     {
-        Image cloneImage = Image.getImageForSize(Math.round(newW), Math.round(newH), hasAlpha());
+        if (!isLoaded())
+            waitForImageLoad();
+        Image cloneImage = Image.getImageForSizeAndDpiScale(newW, newH, hasAlpha(), getDpiScale());
         Painter pntr = cloneImage.getPainter();
         pntr.drawImage(this, aX, aY, newW, newH, 0, 0, newW, newH);
         return cloneImage;
@@ -390,12 +391,13 @@ public abstract class Image implements Loadable {
     /**
      * Returns a copy of this image flipped horizontally.
      */
-    public Image copyflippedX()
+    public Image copyFlippedX()
     {
-        if (!isLoaded()) waitForImageLoad();
+        if (!isLoaded())
+            waitForImageLoad();
         double imageW = getWidth();
         double imageH = getHeight();
-        Image flippedImage = Image.getImageForSize(imageW, imageH, true);
+        Image flippedImage = Image.getImageForSizeAndDpiScale(imageW, imageH, hasAlpha(), getDpiScale());
         Painter pntr = flippedImage.getPainter();
         pntr.scaleAround(-1, 1, imageW / 2, imageH / 2);
         pntr.drawImage(this, 0, 0);
@@ -405,12 +407,13 @@ public abstract class Image implements Loadable {
     /**
      * Returns a copy of this image flipped vertically.
      */
-    public Image copyflippedY()
+    public Image copyFlippedY()
     {
-        if (!isLoaded()) waitForImageLoad();
+        if (!isLoaded())
+            waitForImageLoad();
         double imageW = getWidth();
         double imageH = getHeight();
-        Image flippedImage = Image.getImageForSize(imageW, imageH, true);
+        Image flippedImage = Image.getImageForSizeAndDpiScale(imageW, imageH, hasAlpha(), getDpiScale());
         Painter pntr = flippedImage.getPainter();
         pntr.scaleAround(1, -1, imageW / 2, imageH / 2);
         pntr.drawImage(this, 0, 0);
@@ -422,10 +425,11 @@ public abstract class Image implements Loadable {
      */
     public Image copyRotatedBy(int theDeg)
     {
-        if (!isLoaded()) waitForImageLoad();
+        if (!isLoaded())
+            waitForImageLoad();
         double imageW = getWidth();
         double imageH = getHeight();
-        Image rotatedImage = Image.getImageForSize(imageW, imageH, true);
+        Image rotatedImage = Image.getImageForSizeAndDpiScale(imageW, imageH, hasAlpha(), getDpiScale());
         Painter pntr = rotatedImage.getPainter();
         pntr.rotateAround(theDeg, imageW / 2, imageH / 2);
         pntr.drawImage(this, 0, 0);
@@ -437,6 +441,8 @@ public abstract class Image implements Loadable {
      */
     public Image getFramedImage(int newW, int newH, double imageX, double imageY)
     {
+        if (!isLoaded())
+            waitForImageLoad();
         Image cloneImage = Image.getImageForSize(newW, newH, hasAlpha());
         Painter pntr = cloneImage.getPainter();
         pntr.drawImage(this, imageX, imageY);

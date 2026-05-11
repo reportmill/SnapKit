@@ -1,4 +1,5 @@
 package snap.games;
+import snap.gfx.GFXEnv;
 import snap.gfx.Image;
 import snap.gfx.ImageUtils;
 import snap.util.Convert;
@@ -91,7 +92,7 @@ public class Sprite {
     {
         if (_flippedX != null) return _flippedX;
         Sprite flippedSprite = new Sprite(getSourceURL());
-        flippedSprite._sourceImage = ImageUtils.getImageFlippedX(getSourceImage());
+        flippedSprite._sourceImage = getSourceImage().copyFlippedX();
         return _flippedX = flippedSprite;
     }
 
@@ -120,7 +121,14 @@ public class Sprite {
         // Calculate new frame size for scale and get new sprite image
         int newFrameW = (int) (oldFrameW * scale);
         int newFrameH = (int) (oldFrameH * scale);
-        Image newSpriteImage = sourceImage.copyForSize(newFrameW * getFrameCount(), newFrameH);
+
+        // Get image dpi scale and increase it if screen supports it and there was significant shrinkage
+        double dpiScale = sourceImage.getDpiScale();
+        if (dpiScale < GFXEnv.getEnv().getScreenDpiScale())
+            dpiScale = GFXEnv.getEnv().getScreenDpiScale();
+
+        // Get sprite image at new frame size
+        Image newSpriteImage = sourceImage.copyForSizeAndDpiScale(newFrameW * getFrameCount(), newFrameH, dpiScale);
 
         // Create new sprite for new source image and return
         Sprite newSprite = new Sprite(getSourceURL());

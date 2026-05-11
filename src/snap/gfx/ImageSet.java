@@ -1,6 +1,4 @@
 package snap.gfx;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,7 +7,7 @@ import java.util.List;
 public class ImageSet {
 
     // The list of images
-    private List<Image>  _images = Collections.EMPTY_LIST;
+    private List<Image>  _images;
     
     /**
      * Constructor.
@@ -19,6 +17,11 @@ public class ImageSet {
         _images = theImages;
         for(Image img : _images) img.setImageSet(this);
     }
+
+    /**
+     * Returns the image set images.
+     */
+    public List<Image> getImages()  { return _images; }
 
     /**
      * Returns the number of images.
@@ -52,13 +55,9 @@ public class ImageSet {
      */
     public Image getImageScaled(double aRatio)
     {
-        List<Image> images = new ArrayList<>();
-        for(Image img : _images) {
-            img = img.copyForScale(aRatio);
-            images.add(img);
-        }
-        ImageSet iset = new ImageSet(images);
-        return iset.getImage(0);
+        List<Image> scaledImages = _images.stream().map(img -> img.copyForScale(aRatio)).toList();
+        ImageSet scaledImageSet = new ImageSet(scaledImages);
+        return scaledImageSet.getImage(0);
     }
 
     /**

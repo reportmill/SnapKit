@@ -181,16 +181,22 @@ public class J2DPainter extends Painter {
     /**
      * Draw image in rect.
      */
-    public void drawImage(Image img, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh)
+    public void drawImage(Image img, double srcX, double srcY, double srcW, double srcH, double dstX, double dstY, double dstW, double dstH)
     {
-        // Correct source width/height for image dpi
-        if (img.getDpiX() != 72) sw *= img.getDpiX()/72;
-        if (img.getDpiY() != 72) sh *= img.getDpiY()/72;
+        // Correct source bounds for image dpi
+        if (img.getDpiX() != 72 || img.getDpiY() != 72) {
+            double scaleX = img.getDpiX() / 72;
+            double scaleY = img.getDpiY() / 72;
+            srcX *= scaleX; srcW *= scaleX;
+            srcY *= scaleY; srcH *= scaleY;
+        }
 
         // Get points for corner as ints and draw image
-        int sx1 = rnd(sx), sy1 = rnd(sy), sx2 = sx1 + rnd(sw), sy2 = sy1 + rnd(sh);
-        int dx1 = rnd(dx), dy1 = rnd(dy), dx2 = dx1 + rnd(dw), dy2 = dy1 + rnd(dh);
-        _gfx.drawImage(AWT.snapToAwtImage(img), dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
+        int srcX1 = rnd(srcX), srcY1 = rnd(srcY);
+        int srcX2 = srcX1 + rnd(srcW), srcY2 = srcY1 + rnd(srcH);
+        int dstX1 = rnd(dstX), dstY1 = rnd(dstY);
+        int dstX2 = dstX1 + rnd(dstW), dstY2 = dstY1 + rnd(dstH);
+        _gfx.drawImage(AWT.snapToAwtImage(img), dstX1, dstY1, dstX2, dstY2, srcX1, srcY1, srcX2, srcY2, null);
     }
 
     /**

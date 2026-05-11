@@ -105,7 +105,7 @@ public abstract class GFXEnv {
     /**
      * Returns the screen scale. Usually 1, but could be 2 for HiDPI/Retina displays.
      */
-    public abstract double getScreenScale();
+    public abstract double getScreenDpiScale();
 
     /**
      * Returns the screen bounds inset to usable area.
