@@ -61,6 +61,9 @@ public class RoughPainter extends Painter {
     // Whether to skip the second slightly-offset stroke pass
     private boolean _disableMultiStroke = false;
 
+    // Minimum font size to paint rough text
+    private double _minRoughTextSize = 24;
+
     // Flatness for bezier curve flattening during intersection detection
     private static final double FLATNESS = 0.5;
 
@@ -207,7 +210,13 @@ public class RoughPainter extends Painter {
     @Override
     public void drawString(String aStr, double aX, double aY, double charSpacing)
     {
-        _pntr.drawString(aStr, aX, aY, charSpacing);
+        if (getFont().getSize() >= _minRoughTextSize) {
+            Color color = getPaint().getColor();
+            Shape outline = getFont().getOutline(aStr, aX, aY, charSpacing);
+            fillWithPaint(outline, color.blend(Color.WHITE, 0.75));
+            drawWithPaint(outline, color);
+        }
+        else _pntr.drawString(aStr, aX, aY, charSpacing);
     }
 
     /**
@@ -216,7 +225,11 @@ public class RoughPainter extends Painter {
     @Override
     public void strokeString(String aStr, double aX, double aY, double charSpacing)
     {
-        _pntr.strokeString(aStr, aX, aY, charSpacing);
+        if (getFont().getSize() >= _minRoughTextSize) {
+            Shape outline = getFont().getOutline(aStr, aX, aY, charSpacing);
+            draw(outline);
+        }
+        else _pntr.strokeString(aStr, aX, aY, charSpacing);
     }
 
     @Override
@@ -352,7 +365,10 @@ public class RoughPainter extends Painter {
         // Always paint a solid background first so the fill color shows correctly.
         // Without this, gaps between texture lines expose whatever is behind the shape.
         if (_fillStyle != RoughPainter.FillStyle.SOLID) {
-            _pntr.fill(shape);
+            Color color = getPaint().getColor();
+            _pntr.fillWithPaint(shape, color.blend(Color.WHITE, 0.5));
+            setPaint(color);
+            //_pntr.fill(shape);
             if (getPaint().equals(Color.WHITE))
                 return;
         }
