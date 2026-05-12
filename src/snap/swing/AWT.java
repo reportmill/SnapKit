@@ -145,7 +145,10 @@ public class AWT {
     {
         if (aSP == null) return null;
         if (aSP instanceof java.awt.Color) return awtToSnapColor((java.awt.Color) aSP);
-        //if(aSP instanceof GradientPaintX) return get((GradientPaintX)aSP);
+        if(aSP instanceof GradientPaintX) {
+            System.out.println("AWT.awtToSnapPaint: Gradient paint conversion not implemented yet.");
+            return Color.LIGHTGRAY;
+        }
         //if(aSP instanceof java.awt.TexturePaint) return get((java.awt.TexturePaint)aSP);
         throw SnapUtils.notImpl(new AWT(), "Can't convert paint " + aSP);
     }

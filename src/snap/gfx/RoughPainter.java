@@ -353,6 +353,8 @@ public class RoughPainter extends Painter {
         // Without this, gaps between texture lines expose whatever is behind the shape.
         if (_fillStyle != RoughPainter.FillStyle.SOLID) {
             _pntr.fill(shape);
+            if (getPaint().equals(Color.WHITE))
+                return;
         }
 
         switch (_fillStyle) {
@@ -364,7 +366,7 @@ public class RoughPainter extends Painter {
             case DASHED      -> drawHachureFill(shape, _hachureAngle, true);
             case DOTS        -> drawDotFill(shape);
             case ZIGZAG      -> drawZigzagFill(shape);
-            case SOLID       -> { _pntr.fill(shape); }
+            case SOLID       -> _pntr.fill(shape);
         }
     }
 
