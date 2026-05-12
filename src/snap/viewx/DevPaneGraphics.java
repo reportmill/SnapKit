@@ -50,9 +50,10 @@ public class DevPaneGraphics extends ViewController {
     @Override
     protected void resetUI()
     {
-        // Update ShowFlashButton, ShowFrameRateButton
-        setViewValue("ShowFlashButton", ViewUpdater.isPaintDebug());
-        setViewValue("ShowFrameRateButton", ViewUpdater.isShowFrameRate());
+        // Update ShowFlashCheckBox, ShowFrameRateCheckBox
+        setViewValue("ShowFlashCheckBox", ViewUpdater.isPaintDebug());
+        setViewValue("ShowFrameRateCheckBox", ViewUpdater.isShowFrameRate());
+        setViewValue("PaintRoughCheckBox", getWindow().getRootView().isPaintRough());
 
         // Update ThemesListView
         String themeName = ViewTheme.get().getClass().getSimpleName().replace("Theme", "");
@@ -70,24 +71,28 @@ public class DevPaneGraphics extends ViewController {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle ShowFlashButton
-        if (anEvent.equals("ShowFlashButton"))
-            ViewUpdater.setPaintDebug(anEvent.getBoolValue());
+        switch (anEvent.getName()) {
 
-        // Handle ShowFrameRateButton
-        if (anEvent.equals("ShowFrameRateButton"))
-            ViewUpdater.setShowFrameRate(anEvent.getBoolValue());
+            // Handle ShowFlashCheckBox
+            case "ShowFlashCheckBox" -> ViewUpdater.setPaintDebug(anEvent.getBoolValue());
 
-        // Handle ThemesListView
-        if (anEvent.equals("ThemesListView")) {
-            String themeName = anEvent.getStringValue();
-            ViewTheme.setThemeForName(themeName);
-        }
+            // Handle ShowFrameRateCheckBox
+            case "ShowFrameRateCheckBox" -> ViewUpdater.setShowFrameRate(anEvent.getBoolValue());
 
-        // Handle RenderersListView
-        if (anEvent.equals("RenderersListView")) {
-            RendererFactory rendererFactory = (RendererFactory) anEvent.getSelItem();
-            RendererFactory.setDefaultFactory(rendererFactory);
+            // Handle PaintRoughCheckBox
+            case "PaintRoughCheckBox" -> getWindow().getRootView().setPaintRough(anEvent.getBoolValue());
+
+            // Handle ThemesListView
+            case "ThemesListView" -> {
+                String themeName = anEvent.getStringValue();
+                ViewTheme.setThemeForName(themeName);
+            }
+
+            // Handle RenderersListView
+            case "RenderersListView" -> {
+                RendererFactory rendererFactory = (RendererFactory) anEvent.getSelItem();
+                RendererFactory.setDefaultFactory(rendererFactory);
+            }
         }
     }
 }

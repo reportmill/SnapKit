@@ -3,6 +3,8 @@
  */
 package snap.view;
 import snap.geom.Rect;
+import snap.gfx.Painter;
+import snap.gfx.RoughPainter;
 
 /**
  * The top level View in a window.
@@ -11,6 +13,9 @@ public class RootView extends ParentView {
     
     // The content
     private View  _content;
+
+    // Whether to paint rough
+    private boolean _paintRough;
     
     // Constants for properties
     public static final String Content_Prop = "Content";
@@ -45,8 +50,24 @@ public class RootView extends ParentView {
     }
 
     /**
+     * Returns whether to paint rough.
+     */
+    public boolean isPaintRough()  { return _paintRough; }
+
+    /**
+     * Sets whether to paint rough.
+     */
+    public void setPaintRough(boolean aValue)
+    {
+        if (aValue == isPaintRough()) return;
+        _paintRough = aValue;
+        repaint();
+    }
+
+    /**
      * Override to return this RootView.
      */
+    @Override
     public RootView getRootView()  { return this; }
 
     /**
@@ -59,6 +80,21 @@ public class RootView extends ParentView {
         ViewUpdater updater = getUpdater();
         if (updater != null)
             updater.relayoutLater();
+    }
+
+    /**
+     * Override to handle PaintRough.
+     */
+    @Override
+    protected void paintAll(Painter aPntr)
+    {
+        if (_paintRough) {
+            RoughPainter roughPainter = new RoughPainter(aPntr);
+            roughPainter.setFillStyle(RoughPainter.FillStyle.CROSS_HATCH);
+            super.paintAll(roughPainter);
+        }
+
+        else super.paintAll(aPntr);
     }
 
     /**

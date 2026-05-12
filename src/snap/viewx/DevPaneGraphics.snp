@@ -2,8 +2,9 @@
 <RowView Padding="25" Spacing="8" FillHeight="true">
   <TitleView MinWidth="120" MinHeight="60" Text="Debug Options">
     <ColView Padding="8" Spacing="7" Font="Arial 13" FillWidth="true">
-      <CheckBox Name="ShowFlashButton" PrefHeight="22" Padding="2,6,2,6" Text="Flash Painted Areas" />
-      <CheckBox Name="ShowFrameRateButton" PrefHeight="22" Padding="2,6,2,6" Text="Show Frame rate" />
+      <CheckBox Name="ShowFlashCheckBox" PrefHeight="22" Padding="2,6,2,6" Text="Flash Painted Areas" />
+      <CheckBox Name="ShowFrameRateCheckBox" PrefHeight="22" Padding="2,6,2,6" Text="Show Frame rate" />
+      <CheckBox Name="PaintRoughCheckBox" PrefHeight="22" Padding="2,6,2,6" Text="Paint Rough" />
     </ColView>
   </TitleView>
   <ColView Padding="4" Spacing="4" GrowHeight="true">
