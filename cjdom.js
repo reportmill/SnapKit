@@ -938,6 +938,7 @@ function setShape()
         switch (op) {
             case 0: _cntx.moveTo(getDouble(), getDouble()); break;
             case 1: _cntx.lineTo(getDouble(), getDouble()); break;
+            case 4: _cntx.quadraticCurveTo(getDouble(), getDouble(), getDouble(), getDouble()); break;
             case 2: _cntx.bezierCurveTo(getDouble(), getDouble(), getDouble(), getDouble(), getDouble(), getDouble()); break;
             case 3: _cntx.closePath(); break;
         }

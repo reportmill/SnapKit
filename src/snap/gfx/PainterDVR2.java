@@ -269,25 +269,23 @@ public class PainterDVR2 extends PainterImpl {
     }
 
     /** Draw image in rect. */
-    public void drawImage(Image image, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh)
+    public void drawImage(Image image, double srcX, double srcY, double srcW, double srcH, double dstX, double dstY, double dstW, double dstH)
     {
         // Correct source width/height for image dpi
-        if (SnapEnv.isWebVM) {
+        if (SnapEnv.isWebVM && (image.getDpiX() != 72 || image.getDpiY() != 72)) {
             double scaleX = image.getDpiX() / 72;
             double scaleY = image.getDpiY() / 72;
-            if (scaleX != 1 || scaleY != 1) {
-                sx *= scaleX; sy *= scaleX;
-                sw *= scaleY; sh *= scaleY;
-            }
+            srcX *= scaleX; srcW *= scaleX;
+            srcY *= scaleY; srcH *= scaleY;
         }
 
         //super.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
         addInstruction(DRAW_IMAGE);
         addNative(image);
-        addDouble(sx); addDouble(sy);
-        addDouble(sw); addDouble(sh);
-        addDouble(dx); addDouble(dy);
-        addDouble(dw); addDouble(dh);
+        addDouble(srcX); addDouble(srcY);
+        addDouble(srcW); addDouble(srcH);
+        addDouble(dstX); addDouble(dstY);
+        addDouble(dstW); addDouble(dstH);
     }
 
     /** Draw string at location with char spacing. */
@@ -403,8 +401,7 @@ public class PainterDVR2 extends PainterImpl {
     private void addShape(Shape aShape)
     {
         // If rect, handle special: Add special op count and bounds values
-        if (aShape instanceof Rect) {
-            Rect rect = (Rect) aShape;
+        if (aShape instanceof Rect rect) {
             addInt(-1);
             addDouble(rect.getX()); addDouble(rect.getY());
             addDouble(rect.getWidth()); addDouble(rect.getHeight());
@@ -421,6 +418,7 @@ public class PainterDVR2 extends PainterImpl {
             switch (pathIter.getNext(pnts)) {
                 case MoveTo: addInt(0); addDouble(pnts[0]); addDouble(pnts[1]); break;
                 case LineTo: addInt(1); addDouble(pnts[0]); addDouble(pnts[1]); break;
+                case QuadTo: addInt(4); addDouble(pnts[0]); addDouble(pnts[1]); addDouble(pnts[2]); addDouble(pnts[3]); break;
                 case CubicTo: addInt(2); addDouble(pnts[0]); addDouble(pnts[1]); addDouble(pnts[2]); addDouble(pnts[3]); addDouble(pnts[4]); addDouble(pnts[5]); break;
                 case Close: addInt(3); break;
             }
@@ -437,7 +435,6 @@ public class PainterDVR2 extends PainterImpl {
         private Painter _painter;
 
         // The stack indexes
-        private int _instructionIndex = 0;
         private int _intIndex = 0;
         private int _doubleIndex = 0;
         private int _stringIndex = 0;

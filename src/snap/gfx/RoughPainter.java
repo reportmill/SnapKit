@@ -59,7 +59,7 @@ public class RoughPainter extends PainterProxy {
     private boolean _disableMultiStroke = false;
 
     // Minimum font size to paint rough text
-    private double _minRoughTextSize = 24;
+    private double _minRoughTextSize = 32;
 
     // Flatness for bezier curve flattening during intersection detection
     private static final double FLATNESS = 0.5;
