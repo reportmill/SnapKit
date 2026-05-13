@@ -58,12 +58,7 @@ public class StringBox extends RoundRect {
     /**
      * Returns the string.
      */
-    public String getSvgString()  { return _string; }
-
-    /**
-     * Returns the length of the string.
-     */
-    public int length()  { return _string!=null ? _string.length() : 0; }
+    public String getString()  { return _string; }
 
     /**
      * Sets the string.
@@ -210,7 +205,7 @@ public class StringBox extends RoundRect {
     /**
      * Returns whether this run has a hyphen at the end.
      */
-    public boolean isHyphenated()  { return getSvgString().endsWith("-"); }
+    public boolean isHyphenated()  { return getString().endsWith("-"); }
 
     /**
      * Sets whether this run has a hyphen at the end.
@@ -218,7 +213,7 @@ public class StringBox extends RoundRect {
     public void setHyphenated(boolean aFlag)
     {
         if (aFlag == isHyphenated()) return;
-        String str = getSvgString();
+        String str = getString();
         String str2 = aFlag ? (str + '-') : (str.substring(0, str.length() - 1));
         setString(str2);
     }
@@ -319,8 +314,8 @@ public class StringBox extends RoundRect {
     {
         // Get exact bounds around string glyphs for font
         Font font = getFont();
-        String str = getSvgString();
-        Rect bnds = str != null && str.length() > 0 ? font.getGlyphBounds(str) : Rect.ZeroRect;
+        String str = getString();
+        Rect bnds = str != null && !str.isEmpty() ? font.getGlyphBounds(str) : Rect.ZeroRect;
 
         // Get StringWidth from GlyphBounds
         _strWidth = Math.ceil(bnds.width);
@@ -344,7 +339,7 @@ public class StringBox extends RoundRect {
     private void loadMetricsForFontSizing()
     {
         // Get StringWidth for string + font (aka Advance)
-        String str = getSvgString();
+        String str = getString();
         Font font = getFont();
         _strWidth = Math.ceil(font.getStringAdvance(str));
 
@@ -421,13 +416,13 @@ public class StringBox extends RoundRect {
     public void drawString(Painter aPntr)
     {
         // If no string, just bail
-        if (length() == 0) return;
+        if (_string == null || _string.isBlank()) return;
 
         // If NeverBeenSized, sizeToFit
         if (_needsResize) resize();
 
         // Get info
-        String str = getSvgString();
+        String str = getString();
         double strX = getStringX();
         double strY = getStringY();
         Font font = getFont();
@@ -517,7 +512,7 @@ public class StringBox extends RoundRect {
     public String toString()
     {
         String cname = getClass().getSimpleName();
-        return cname + " { String='" + _string + '\'' + ", Style=" + _textStyle + ", Rect=[" + super.getSvgString() + ']' +
+        return cname + " { String='" + _string + '\'' + ", Style=" + _textStyle + ", Rect=[" + getAsString() + ']' +
             ", Padding=" + _padding + ", Border=" + _border +
             ", Ascent=" + getAscent() + ", Descent=" + getDescent() + ", LineHeight=" + _strHeight +
             ", Advance=" + _strWidth + " }";

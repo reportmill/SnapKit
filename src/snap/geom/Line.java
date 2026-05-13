@@ -52,7 +52,7 @@ public class Line extends Segment {
     /**
      * Returns the shape in rect.
      */
-    public Shape copyFor(Rect aRect)
+    public Shape copyForBounds(Rect aRect)
     {
         double x = Math.min(x0, x1), y = Math.min(y0, y1);
         double w = Math.max(x0, x1) - x, h = Math.max(y0, y1) - y;

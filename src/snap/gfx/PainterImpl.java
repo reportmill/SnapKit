@@ -74,7 +74,7 @@ public abstract class PainterImpl extends Painter {
     /** Draw image with transform. */
     public void drawImage(Image image, Transform aTrans)
     {
-        Shape imageBounds = new Rect(0,0, image.getWidth(), image.getHeight()).copyFor(aTrans);
+        Shape imageBounds = new Rect(0,0, image.getWidth(), image.getHeight()).copyForTransform(aTrans);
         updateMarkedBounds(imageBounds, !image.hasAlpha());
     }
 
@@ -111,7 +111,7 @@ public abstract class PainterImpl extends Painter {
     private void updateMarkedBounds(Shape aShape, boolean isOpaque)
     {
         // Get marked shape in world coords
-        Shape mshp = aShape.copyFor(_gfxState.xform);
+        Shape mshp = aShape.copyForTransform(_gfxState.xform);
 
         // If shape not in clip, clip
         if (!_gfxState.clip.contains(mshp) && _gfxState.clip.intersectsShape(mshp))
@@ -156,17 +156,17 @@ public abstract class PainterImpl extends Painter {
     public void setTransform(Transform aTrans)
     {
         // Transform clip & mark shape back to world coords
-        _gfxState.clip = _gfxState.clip.copyFor(_gfxState.xform);
+        _gfxState.clip = _gfxState.clip.copyForTransform(_gfxState.xform);
         if (_markedShape != null)
-            _markedShape = _markedShape.copyFor(_gfxState.xform.getInverse());
+            _markedShape = _markedShape.copyForTransform(_gfxState.xform.getInverse());
 
         // Set new transform
         _gfxState.xform = aTrans;
 
         // Transform clip and mark shape back to local coords
-        _gfxState.clip = _gfxState.clip.copyFor(aTrans.getInverse());
+        _gfxState.clip = _gfxState.clip.copyForTransform(aTrans.getInverse());
         if (_markedShape != null)
-            _markedShape = _markedShape.copyFor(aTrans);
+            _markedShape = _markedShape.copyForTransform(aTrans);
     }
 
     /**
@@ -175,9 +175,9 @@ public abstract class PainterImpl extends Painter {
     public void transform(Transform aTrans)
     {
         _gfxState.xform.concat(aTrans);
-        _gfxState.clip = _gfxState.clip.copyFor(aTrans.getInverse());
+        _gfxState.clip = _gfxState.clip.copyForTransform(aTrans.getInverse());
         if (_markedShape != null)
-            _markedShape = _markedShape.copyFor(aTrans);
+            _markedShape = _markedShape.copyForTransform(aTrans);
     }
 
     /**

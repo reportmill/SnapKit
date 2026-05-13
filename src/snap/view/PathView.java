@@ -78,7 +78,7 @@ public class PathView extends View {
     {
         Shape path = getPath();
         Rect boundsLocal = getBoundsLocal();
-        return path.copyFor(boundsLocal);
+        return path.copyForBounds(boundsLocal);
     }
 
     /**

@@ -164,7 +164,7 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
         t.rotateAround(-_roll, aRect.getMidX(), aRect.getMidY());
 
         // Get bounds of transformed rect
-        Rect r2 = aRect.copyFor(t).getBounds();
+        Rect r2 = aRect.copyForTransform(t).getBounds();
         Point p1 = new Point(r2.getX(), r2.getMidY());
         Point p2 = new Point(r2.getMaxX(), r2.getMidY());
 

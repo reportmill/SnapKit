@@ -209,7 +209,8 @@ public abstract class RectBase extends Shape implements Cloneable {
     /**
      * Returns the shape in rect.
      */
-    public Shape copyFor(Rect aRect)
+    @Override
+    public Shape copyForBounds(Rect aRect)
     {
         RectBase clone = clone();
         clone.setRect(aRect);
@@ -219,7 +220,8 @@ public abstract class RectBase extends Shape implements Cloneable {
     /**
      * Returns a copy of this shape transformed by given transform.
      */
-    public Shape copyFor(Transform aTrans)
+    @Override
+    public Shape copyForTransform(Transform aTrans)
     {
         // If just translation, return cloned offset rect
         if (aTrans.isSimple()) {
@@ -239,18 +241,17 @@ public abstract class RectBase extends Shape implements Cloneable {
         }
 
         // Otherwise do full version
-        return super.copyFor(aTrans);
+        return super.copyForTransform(aTrans);
     }
 
     /**
-     * Returns a String reprsentation of this rect.
+     * Returns a String representation of this rect.
      */
-    public String getSvgString()
+    public String getAsString()
     {
-        StringBuffer sb = new StringBuffer();
-        sb.append(StringUtils.toString(x)).append(' ').append(StringUtils.toString(y)).append(' ');
-        sb.append(StringUtils.toString(width)).append(' ').append(StringUtils.toString(height));
-        return sb.toString();
+        String sb = StringUtils.toString(x) + ' ' + StringUtils.toString(y) + ' ' +
+                StringUtils.toString(width) + ' ' + StringUtils.toString(height);
+        return sb;
     }
 
     /**
@@ -278,7 +279,7 @@ public abstract class RectBase extends Shape implements Cloneable {
      */
     public String toString()
     {
-        return getClass().getSimpleName() + " [" + getSvgString() + "]";
+        return getClass().getSimpleName() + " [" + getAsString() + "]";
     }
 
     /**

@@ -346,7 +346,7 @@ public class RoughPainter extends PainterProxy {
         // Rotate shape so hachure lines become horizontal
         Transform toFlat = Transform.getRotate(-angleDeg);
         Transform toLocal = Transform.getRotate(angleDeg);
-        Shape rotShape = shape.copyFor(toFlat);
+        Shape rotShape = shape.copyForTransform(toFlat);
         Rect bounds = rotShape.getBounds();
 
         // Flatten the rotated shape boundary for fast scan-line intersection
@@ -420,7 +420,7 @@ public class RoughPainter extends PainterProxy {
 
         Transform toFlat = Transform.getRotate(-_hachureAngle);
         Transform toLocal = Transform.getRotate(_hachureAngle);
-        Shape rotShape = shape.copyFor(toFlat);
+        Shape rotShape = shape.copyForTransform(toFlat);
         Rect bounds = rotShape.getBounds();
         PolygonPath polygonPath = new PolygonPath(rotShape, FLATNESS);
 

@@ -646,7 +646,7 @@ public abstract class Shape {
     /**
      * Returns the shape in rect.
      */
-    public Shape copyFor(Rect aRect)
+    public Shape copyForBounds(Rect aRect)
     {
         return copyForBounds(aRect.x, aRect.y, aRect.width, aRect.height);
     }
@@ -676,7 +676,7 @@ public abstract class Shape {
     /**
      * Returns a copy of this shape transformed by given transform.
      */
-    public Shape copyFor(Transform aTrans)
+    public Shape copyForTransform(Transform aTrans)
     {
         PathIter pathIter = getPathIter(aTrans);
         return new Path2D(pathIter);
@@ -722,7 +722,7 @@ public abstract class Shape {
      */
     public String toString()
     {
-        return getClass().getSimpleName() + " [" + getBounds().getSvgString() + "] " + getSvgString();
+        return getClass().getSimpleName() + " [" + getBounds().getAsString() + "] " + getSvgString();
     }
 
     /**

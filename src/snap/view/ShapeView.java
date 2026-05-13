@@ -119,7 +119,7 @@ public class ShapeView extends View {
     {
         Shape shape = getShape();
         if (isFillSize())
-            shape = shape.copyFor(getBoundsLocal());
+            shape = shape.copyForBounds(getBoundsLocal());
         return shape;
     }
 

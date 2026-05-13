@@ -1,4 +1,5 @@
 package snap.games;
+import snap.geom.Rect;
 import snap.gfx.GFXEnv;
 import snap.gfx.Image;
 import snap.gfx.ImageUtils;
@@ -25,6 +26,9 @@ public class Sprite {
 
     // The frame per second
     private int _framesPerSecond = 15;
+
+    // The visible bounds of frame images
+    private Rect _visibleBounds;
 
     // The cached version of this sprite flipped horizontally
     private Sprite _flippedX;
@@ -84,6 +88,18 @@ public class Sprite {
      * Sets the frames per second.
      */
     public void setFramesPerSecond(int aValue)  { _framesPerSecond = aValue; }
+
+    /**
+     * Returns the visible bounds of the image.
+     */
+    public Rect getVisibleBounds()
+    {
+        if (_visibleBounds != null) return _visibleBounds;
+        Rect visibleBounds = getFrameImageForIndex(0).getVisibleBounds();
+        for (int i = 1, iMax = getFrameCount(); i < iMax; i++)
+            visibleBounds.union(getFrameImageForIndex(i).getVisibleBounds());
+        return _visibleBounds = visibleBounds;
+    }
 
     /**
      * Returns this sprite flipped horizontally.

@@ -1076,7 +1076,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Shape localToParent(Shape aShape)
     {
         Transform localToParent = getLocalToParent();
-        return aShape.copyFor(localToParent);
+        return aShape.copyForTransform(localToParent);
     }
 
     /**
@@ -1085,7 +1085,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Shape localToParent(Shape aShape, View aPar)
     {
         Transform localToParent = getLocalToParent(aPar);
-        return aShape.copyFor(localToParent);
+        return aShape.copyForTransform(localToParent);
     }
 
     /**
@@ -1139,7 +1139,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Shape parentToLocal(Shape aShape)
     {
         Transform parentToLocal = getParentToLocal();
-        return aShape.copyFor(parentToLocal);
+        return aShape.copyForTransform(parentToLocal);
     }
 
     /**
@@ -1148,7 +1148,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Shape parentToLocal(Shape aShape, View aView)
     {
         Transform parentToLocal = getParentToLocal(aView);
-        return aShape.copyFor(parentToLocal);
+        return aShape.copyForTransform(parentToLocal);
     }
 
     /**

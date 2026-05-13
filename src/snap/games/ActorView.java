@@ -284,7 +284,7 @@ public class ActorView extends ParentView {
     {
         Sprite sprite = getSprite();
         if (sprite != null)
-            return sprite.getFrameImageForIndex(0).getVisibleBounds();
+            return sprite.getVisibleBounds();
         Image image = getImage();
         if (image != null)
             return image.getVisibleBounds();
