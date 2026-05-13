@@ -12,124 +12,135 @@ import snap.geom.Transform;
 public class PainterProxy extends Painter {
 
     // The real painter
-    protected Painter       _pntr;
+    protected Painter _pntr;
 
     /**
-     * Creates a new PainterProxy for given painter.
+     * Constructor for given painter.
      */
     public PainterProxy(Painter aPntr)  { _pntr = aPntr; }
 
-    /** Returns the actual painter. */
-    public Painter getPntr()  { return _pntr; }
+    /**
+     * Returns the actual painter.
+     */
+    public Painter getPainter()  { return _pntr; }
 
-    /** Returns the font. */
+    @Override
     public Font getFont()  { return _pntr.getFont(); }
 
-    /** Sets the font. */
+    @Override
     public void setFont(Font font)  { _pntr.setFont(font); }
 
-    /** Returns the paint. */
+    @Override
     public Paint getPaint()  { return _pntr.getPaint(); }
 
-    /** Sets the paint. */
+    @Override
     public void setPaint(Paint paint)  { _pntr.setPaint(paint); }
 
-    /** Returns the stroke. */
+    @Override
     public Stroke getStroke()  { return _pntr.getStroke(); }
 
-    /** Sets the stroke. */
+    @Override
     public void setStroke(Stroke s)  { _pntr.setStroke( s); }
 
-    /** Returns the opacity. */
+    @Override
     public double getOpacity()  { return _pntr.getOpacity(); }
 
-    /** Sets the opacity. */
+    @Override
     public void setOpacity(double aValue)  { _pntr.setOpacity(aValue); }
 
-    /** Clears a rect. */
+    @Override
     public void clearRect(double aX, double aY, double aW, double aH) { _pntr.clearRect(aX,aY,aW,aH); }
 
-    /** Stroke the given shape. */
+    @Override
     public void draw(Shape s)  { _pntr.draw(s); }
 
-    /** Fill the given shape. */
+    @Override
     public void fill(Shape s)  { _pntr.fill(s); }
 
-    /** Draw the given line. */
+    @Override
     public void drawLine(double x1, double y1, double x2, double y2)  { _pntr.drawLine(x1, y1, x2, y2); }
 
-    /** Fill the given rect. */
+    @Override
     public void fillRect(double x, double y, double w, double h)  { _pntr.fillRect(x, y, w, h); }
 
-    /** Draw the given rect. */
+    @Override
     public void drawRect(double x, double y, double w, double h)  { _pntr.drawRect(x, y, w, h); }
 
-    /** Paints a 3D rect. */
-    public void fill3DRect(double x, double y, double w, double h, boolean isRsd)  { _pntr.fill3DRect(x,y,w,h,isRsd); }
-
-    /** Draws a button for the given rect with an option for pressed. */
+    @Override
     public void drawButton(double x, double y, double w, double h, boolean isPrsd)  { _pntr.drawButton(x,y,w,h,isPrsd); }
 
-    /** Draw image with transform. */
+    @Override
     public void drawImage(Image img, Transform xform)  { _pntr.drawImage(img, xform); }
 
-    /** Draw image in rect. */
+    @Override
     public void drawImage(Image img, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh)
     {
         _pntr.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
     }
 
-    /** Draw string at location with char spacing. */
+    @Override
     public void drawString(String str, double x, double y, double cs)  { _pntr.drawString(str, x, y, cs); }
 
-    /** Stroke string at location with char spacing. */
+    @Override
     public void strokeString(String str, double x, double y, double cs)  { _pntr.strokeString(str, x, y, cs); }
 
-    /** Transform by transform. */
+    @Override
     public Transform getTransform()  { return _pntr.getTransform(); }
 
-    /** Transform by transform. */
+    @Override
     public void setTransform(Transform aTrans)  { _pntr.setTransform(aTrans); }
 
-    /** Transform by transform. */
+    @Override
     public void transform(Transform Tx)  { _pntr.transform(Tx); }
 
-    /** Return clip shape. */
+    @Override
     public Shape getClip()  { return _pntr.getClip(); }
 
-    /** Return clip bounds. */
+    @Override
     public Rect getClipBounds()  { return _pntr.getClipBounds(); }
 
-    /** Clip by shape. */
+    @Override
     public void clip(Shape s)  { _pntr.clip(s); }
 
-    /** Sets the composite mode. */
+    @Override
+    public Composite getComposite()  { return _pntr.getComposite(); }
+
+    @Override
     public void setComposite(Composite aComp) { _pntr.setComposite(aComp); }
 
-    /** Sets whether antialiasing. */
+    @Override
     public boolean setAntialiasing(boolean aValue)  { return _pntr.setAntialiasing(aValue); }
 
-    /** Sets image rendering quality. */
+    @Override
+    public double getImageQuality()  { return _pntr.getImageQuality(); }
+
+    @Override
     public void setImageQuality(double aValue)  { _pntr.setImageQuality(aValue); }
 
-    /** Returns whether shape painting is really printing. */
+    @Override
+    public boolean isStrokePure()  { return _pntr.isStrokePure(); }
+
+    @Override
+    public void setStrokePure(boolean aValue)  { _pntr.setStrokePure(aValue); }
+
+    @Override
     public boolean isPrinting()  { return _pntr.isPrinting(); }
 
-    /** Returns whether shape painting is really printing. */
+    @Override
     public void setPrinting(boolean aValue)  { _pntr.setPrinting(aValue); }
 
-    /** Standard clone implementation. */
+    @Override
     public void save()  { _pntr.save(); }
 
-    /** Disposes this painter. */
+    @Override
     public void restore()  { _pntr.restore(); }
 
-    /** Flush any buffered paint operations. */
+    @Override
     public void flush()  { _pntr.flush(); }
+
+    @Override
+    public Object getNative()  { return _pntr.getNative(); }
 
     /** Standard toString implementation. */
     public String toString() { return getClass().getSimpleName() + ": " + _pntr.toString(); }
-
-    /** Return native helper for painter, if available. */
-    public Object getNative()  { return _pntr.getNative(); }
 }

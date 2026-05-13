@@ -35,10 +35,7 @@ import java.util.Random;
  *   rough.draw(new Rect(50, 50, 200, 100));
  * </pre>
  */
-public class RoughPainter extends Painter {
-
-    // Delegate painter for actual pixel rendering
-    private final Painter _pntr;
+public class RoughPainter extends PainterProxy {
 
     // Roughness level: 0 = smooth, 3+ = very rough
     private double _roughness = 1.5;
@@ -90,17 +87,13 @@ public class RoughPainter extends Painter {
         ZIGZAG
     }
 
-    // -------- Constructor --------
-
     /**
-     * Creates a RoughPainter that delegates actual pixel rendering to the given Painter.
+     * Constructor.
      */
     public RoughPainter(Painter aPainter)
     {
-        _pntr = aPainter;
+        super(aPainter);
     }
-
-    // -------- Properties --------
 
     /** Returns the roughness level (0 = smooth, 3+ = very rough). */
     public double getRoughness()  { return _roughness; }
@@ -144,32 +137,6 @@ public class RoughPainter extends Painter {
     /** Sets whether to disable the double-stroke effect. */
     public void setDisableMultiStroke(boolean aValue)  { _disableMultiStroke = aValue; }
 
-    // -------- PainterImpl Overrides: draw / fill --------
-
-    @Override
-    public Font getFont()  { return _pntr.getFont(); }
-
-    @Override
-    public void setFont(Font font)  { _pntr.setFont(font); }
-
-    @Override
-    public Paint getPaint()  { return _pntr.getPaint(); }
-
-    @Override
-    public void setPaint(Paint paint)  { _pntr.setPaint(paint); }
-
-    @Override
-    public Stroke getStroke()  { return _pntr.getStroke(); }
-
-    @Override
-    public void setStroke(Stroke s)  { _pntr.setStroke(s); }
-
-    @Override
-    public double getOpacity()  { return _pntr.getOpacity(); }
-
-    @Override
-    public void setOpacity(double aValue)  { _pntr.setOpacity(aValue); }
-
     /**
      * Draws a rough hand-drawn outline of the given shape.
      * Strokes it twice with slightly different wobble for a natural sketch look.
@@ -195,16 +162,6 @@ public class RoughPainter extends Painter {
     }
 
     /**
-     * Draws an image — delegates directly to underlying painter with no roughness applied.
-     */
-    @Override
-    public void drawImage(Image anImage, double sx, double sy, double sw, double sh,
-                           double dx, double dy, double dw, double dh)
-    {
-        _pntr.drawImage(anImage, sx, sy, sw, sh, dx, dy, dw, dh);
-    }
-
-    /**
      * Draws a string — delegates directly to underlying painter with no roughness applied.
      */
     @Override
@@ -216,7 +173,7 @@ public class RoughPainter extends Painter {
             fillWithPaint(outline, color.blend(Color.WHITE, 0.75));
             drawWithPaint(outline, color);
         }
-        else _pntr.drawString(aStr, aX, aY, charSpacing);
+        else super.drawString(aStr, aX, aY, charSpacing);
     }
 
     /**
@@ -229,29 +186,8 @@ public class RoughPainter extends Painter {
             Shape outline = getFont().getOutline(aStr, aX, aY, charSpacing);
             draw(outline);
         }
-        else _pntr.strokeString(aStr, aX, aY, charSpacing);
+        else super.strokeString(aStr, aX, aY, charSpacing);
     }
-
-    @Override
-    public Transform getTransform()  { return _pntr.getTransform(); }
-
-    @Override
-    public void setTransform(Transform aTrans)  { _pntr.setTransform(aTrans);}
-
-    @Override
-    public void transform(Transform aTrans)  { _pntr.transform(aTrans); }
-
-    @Override
-    public Shape getClip()  { return _pntr.getClip(); }
-
-    @Override
-    public void clip(Shape s)  { _pntr.clip(s); }
-
-    @Override
-    public void save()  { _pntr.save();}
-
-    @Override
-    public void restore()  { _pntr.restore(); }
 
     // -------- Rough Outline Generation --------
 
@@ -658,7 +594,4 @@ public class RoughPainter extends Painter {
 
     /** Returns a small random offset scaled by roughness. */
     private double roughOff()  { return randomNeg() * _roughness * 0.5; }
-
-    /** Returns the delegate painter. */
-    public Painter getPainter()  { return _pntr; }
 }
