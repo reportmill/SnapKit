@@ -144,10 +144,10 @@ public class RoughPainter extends PainterProxy {
     @Override
     public void draw(Shape aShape)
     {
-        Shape rough1 = aShape instanceof Ellipse e ? createRoughEllipse(e) : createRoughOutline(aShape);
+        Shape rough1 = createRoughOutline(aShape);
         _pntr.draw(rough1);
         if (!_disableMultiStroke) {
-            Shape rough2 = aShape instanceof Ellipse e ? createRoughEllipse(e) : createRoughOutline(aShape);
+            Shape rough2 = createRoughOutline(aShape);
             _pntr.draw(rough2);
         }
     }
@@ -197,6 +197,9 @@ public class RoughPainter extends PainterProxy {
      */
     private Shape createRoughOutline(Shape shape)
     {
+        if (shape instanceof Ellipse ellipse)
+            return createRoughEllipse(ellipse);
+
         Path2D path = new Path2D();
         PathIter pi = shape.getPathIter(null);
         double[] c = new double[6];
@@ -347,7 +350,7 @@ public class RoughPainter extends PainterProxy {
         Rect bounds = rotShape.getBounds();
 
         // Flatten the rotated shape boundary for fast scan-line intersection
-        List<double[]> flatSegs = flattenShape(rotShape);
+        PolygonPath polygonPath = new PolygonPath(rotShape, FLATNESS);
 
         double startY = bounds.y - gap;
         double endY   = bounds.y + bounds.height + gap;
@@ -355,7 +358,7 @@ public class RoughPainter extends PainterProxy {
         // Collect all fill line segments in local coordinates
         List<double[]> fillSegs = new ArrayList<>();
         for (double y = startY; y <= endY; y += gap) {
-            List<Double> xs = getXIntersections(flatSegs, y);
+            List<Double> xs = getXIntersections(polygonPath, y);
             Collections.sort(xs);
             for (int i = 0; i + 1 < xs.size(); i += 2) {
                 // Points in rotated space
@@ -419,7 +422,7 @@ public class RoughPainter extends PainterProxy {
         Transform toLocal = Transform.getRotate(_hachureAngle);
         Shape rotShape = shape.copyFor(toFlat);
         Rect bounds = rotShape.getBounds();
-        List<double[]> flatSegs = flattenShape(rotShape);
+        PolygonPath polygonPath = new PolygonPath(rotShape, FLATNESS);
 
         double startY = bounds.y - gap;
         double endY   = bounds.y + bounds.height + gap;
@@ -427,8 +430,8 @@ public class RoughPainter extends PainterProxy {
         _pntr.setStroke(Stroke.getStrokeRound(fillW));
 
         for (double y = startY; y <= endY; y += gap) {
-            List<Double> xs1 = getXIntersections(flatSegs, y);
-            List<Double> xs2 = getXIntersections(flatSegs, y + gap / 2);
+            List<Double> xs1 = getXIntersections(polygonPath, y);
+            List<Double> xs2 = getXIntersections(polygonPath, y + gap / 2);
             Collections.sort(xs1);
             Collections.sort(xs2);
             int pairs = Math.min(xs1.size(), xs2.size()) / 2 * 2;
@@ -436,101 +439,9 @@ public class RoughPainter extends PainterProxy {
                 Point a = toLocal.transformXY(xs1.get(i), y);
                 Point b = toLocal.transformXY(xs2.get(i), y + gap / 2);
                 Point d = toLocal.transformXY(xs1.get(i + 1), y);
-                Path2D zPath = new Path2D();
-                zPath.moveTo(a.x, a.y);
-                zPath.lineTo(b.x, b.y);
-                zPath.lineTo(d.x, d.y);
-                _pntr.draw(zPath);
+                _pntr.drawLine(a.x, a.y, b.x, b.y);
+                _pntr.drawLine(b.x, b.y, d.x, d.y);
             }
-        }
-    }
-
-    // -------- Bezier Flattening --------
-
-    /**
-     * Flattens all bezier segments of a shape to an array of line segments {x1,y1,x2,y2}.
-     * Uses adaptive subdivision to stay within FLATNESS tolerance.
-     */
-    private List<double[]> flattenShape(Shape shape)
-    {
-        List<double[]> segs = new ArrayList<>();
-        PathIter pi = shape.getPathIter(null);
-        double[] c = new double[6];
-        double lastX = 0, lastY = 0, moveX = 0, moveY = 0;
-
-        while (pi.hasNext()) {
-            Seg seg = pi.getNext(c);
-            switch (seg) {
-                case MoveTo -> { moveX = lastX = c[0]; moveY = lastY = c[1]; }
-                case LineTo -> {
-                    segs.add(new double[]{lastX, lastY, c[0], c[1]});
-                    lastX = c[0]; lastY = c[1];
-                }
-                case QuadTo -> {
-                    flattenQuad(segs, lastX, lastY, c[0], c[1], c[2], c[3]);
-                    lastX = c[2]; lastY = c[3];
-                }
-                case CubicTo -> {
-                    flattenCubic(segs, lastX, lastY, c[0], c[1], c[2], c[3], c[4], c[5]);
-                    lastX = c[4]; lastY = c[5];
-                }
-                case Close -> {
-                    if (lastX != moveX || lastY != moveY)
-                        segs.add(new double[]{lastX, lastY, moveX, moveY});
-                    lastX = moveX; lastY = moveY;
-                }
-            }
-        }
-        return segs;
-    }
-
-    /**
-     * Recursively flattens a quadratic bezier to line segments via de Casteljau subdivision.
-     */
-    private void flattenQuad(List<double[]> segs,
-                              double x0, double y0, double cx, double cy, double x1, double y1)
-    {
-        // Deviation: distance from midpoint of chord to midpoint of curve
-        double mx = (x0 + 2 * cx + x1) / 4;
-        double my = (y0 + 2 * cy + y1) / 4;
-        double lmx = (x0 + x1) / 2, lmy = (y0 + y1) / 2;
-        double dev = Math.abs(mx - lmx) + Math.abs(my - lmy);
-
-        if (dev <= FLATNESS) {
-            segs.add(new double[]{x0, y0, x1, y1});
-        } else {
-            double cx0 = (x0 + cx) / 2, cy0 = (y0 + cy) / 2;
-            double cx1 = (cx + x1) / 2, cy1 = (cy + y1) / 2;
-            double xm  = (cx0 + cx1) / 2, ym = (cy0 + cy1) / 2;
-            flattenQuad(segs, x0, y0, cx0, cy0, xm, ym);
-            flattenQuad(segs, xm, ym, cx1, cy1, x1, y1);
-        }
-    }
-
-    /**
-     * Recursively flattens a cubic bezier to line segments via de Casteljau subdivision.
-     */
-    private void flattenCubic(List<double[]> segs,
-                               double x0, double y0,
-                               double c1x, double c1y, double c2x, double c2y,
-                               double x1, double y1)
-    {
-        // Deviation using control point distances
-        double dev = Math.abs(c1x - x0) + Math.abs(c1y - y0)
-                   + Math.abs(c2x - x1) + Math.abs(c2y - y1);
-
-        if (dev <= FLATNESS * 4) {
-            segs.add(new double[]{x0, y0, x1, y1});
-        } else {
-            // de Casteljau at t = 0.5
-            double m1x = (x0 + c1x) / 2,  m1y = (y0 + c1y) / 2;
-            double m2x = (c1x + c2x) / 2, m2y = (c1y + c2y) / 2;
-            double m3x = (c2x + x1) / 2,  m3y = (c2y + y1) / 2;
-            double m4x = (m1x + m2x) / 2, m4y = (m1y + m2y) / 2;
-            double m5x = (m2x + m3x) / 2, m5y = (m2y + m3y) / 2;
-            double m6x = (m4x + m5x) / 2, m6y = (m4y + m5y) / 2;
-            flattenCubic(segs, x0, y0, m1x, m1y, m4x, m4y, m6x, m6y);
-            flattenCubic(segs, m6x, m6y, m5x, m5y, m3x, m3y, x1, y1);
         }
     }
 
@@ -541,16 +452,35 @@ public class RoughPainter extends PainterProxy {
      * the boundary of the flattened shape. Uses a half-open interval [y1, y2) on each
      * segment to avoid double-counting shared vertices.
      */
-    private List<Double> getXIntersections(List<double[]> segments, double scanY)
+    private static List<Double> getXIntersections(PolygonPath polygonPath, double scanY)
+    {
+        List<Double> xs = getXIntersections(polygonPath.getPolygon(0), scanY);
+        for (int i = 1; i < polygonPath.getPolygonCount(); i++)
+            xs.addAll(getXIntersections(polygonPath.getPolygon(i), scanY));
+        return xs;
+    }
+
+    /**
+     * Returns the x-coordinates where the horizontal line {@code y = scanY} crosses
+     * the boundary of the flattened shape. Uses a half-open interval [y1, y2) on each
+     * segment to avoid double-counting shared vertices.
+     */
+    private static List<Double> getXIntersections(Polygon polygon, double scanY)
     {
         List<Double> xs = new ArrayList<>();
-        for (double[] seg : segments) {
-            double x1 = seg[0], y1 = seg[1], x2 = seg[2], y2 = seg[3];
+        double[] points = polygon.getPointArray();
+        int pointCount = polygon.getPointCount();
+        double x1 = points[0], y1 = points[1];
+
+        for (int i = 1; i < pointCount; i++) {
+            double x2 = points[i * 2], y2 = points[i * 2 + 1];
             if ((y1 <= scanY && y2 > scanY) || (y2 <= scanY && y1 > scanY)) {
                 double t = (scanY - y1) / (y2 - y1);
                 xs.add(x1 + t * (x2 - x1));
             }
+            x1 = x2; y1 = y2;
         }
+
         return xs;
     }
 
