@@ -191,13 +191,26 @@ public abstract class PropObject implements PropChange.DoChange {
 
     /**
      * Sets prop key values - might be an improper convenience.
+     * @deprecated Replaced with {@link #setPropValues(Map)}
+     * @see #setPropValues(Map) 
      */
+    @Deprecated(since="2026.05.26")
     public void setPropValues(Object ... keyValues)
     {
         for (int i = 0; i < keyValues.length; i++) {
             String key = (String) keyValues[i];
             Object value = keyValues[++i];
             setPropValue(key, value);
+        }
+    }
+
+    /**
+     * Sets prop key values according to the provided map. Will overwrite any existing values that have matching keys.
+     */
+    public void setPropValues(Map<String, Object> keyValues)
+    {
+        for (String key : keyValues.keySet()) {
+            setPropValue(key, keyValues.get(key));
         }
     }
 
