@@ -6,10 +6,8 @@ import snap.text.TextLineStyle;
 import snap.text.TextStyle;
 import snap.util.Convert;
 import snap.util.KeyChain;
-import snap.view.BoxView;
-import snap.view.ScrollView;
-import snap.view.View;
-import snap.view.ViewController;
+import snap.view.*;
+
 import java.io.PrintStream;
 
 /**
@@ -63,6 +61,33 @@ public class DevPaneConsole extends ViewController {
             _consoleTextArea.addCharsWithStyle(_stdOut._sb.toString(), _stdOut._textStyle);
             _consoleTextArea.addCharsWithStyle(_stdErr._sb.toString(), _stdErr._textStyle);
         }
+    }
+
+    /**
+     * Called automatically by SnapKit after a user reacts with a UI component, this method allows the resetting of
+     * the UI. It will not cause accidental {@code respondUI(ViewEvent)} calls. It allows the user to reset or change
+     * aspects of the UI after an interaction, such as might be required for an animation or image draw.
+     * <br> <br>
+     * This method is overridable with no default implementation.
+     */
+    @Override
+    protected void resetUI() {
+
+    }
+
+    /**
+     * Called automatically by SnapKit when it detects a ViewEvent. This method should be overridden to respond to UI
+     * controls, and provide feedback to user interactions.
+     * <br>
+     * If you are coming from a Swing environment, this class serves the same purposes as the action listeners attached
+     * to each individual component. In this case, all of the events are funnelled into the same method, making it
+     * easier to keep track of interactions. Everything is managed from the same location.
+     *
+     * @param anEvent
+     */
+    @Override
+    protected void respondUI(ViewEvent anEvent) {
+
     }
 
     /**

@@ -88,7 +88,7 @@ class ActivityMonitorPanel {
     /**
      * This view controller class shows UI for ActivityMonitorPanel.
      */
-    private class ActivityMonitorPanelViewOwner extends ViewController {
+    private class ActivityMonitorPanelViewOwner extends SNPViewController {
 
         // The dialog box
         private DialogBox _dialogBox;
@@ -155,6 +155,18 @@ class ActivityMonitorPanel {
         }
 
         /**
+         * Initializes the UI panel. This method provides the ability to alter any settings or components of the View that
+         * were not set by {@link #createUI()}.
+         * <br><br>
+         * This method is called automatically by SnapKit after the view has been initialized, and does not need to be
+         * called inside of an implementation.
+         */
+        @Override
+        protected void initUI() {
+
+        }
+
+        /**
          * Reset UI controls.
          */
         @Override
@@ -172,6 +184,21 @@ class ActivityMonitorPanel {
             if (taskProgress > 0)
                 _progressBar.getAnimCleared(500).setValue(ProgressBar.Progress_Prop, taskProgress).play();
             else _progressBar.setProgress(0);
+        }
+
+        /**
+         * Called automatically by SnapKit when it detects a ViewEvent. This method should be overridden to respond to UI
+         * controls, and provide feedback to user interactions.
+         * <br>
+         * If you are coming from a Swing environment, this class serves the same purposes as the action listeners attached
+         * to each individual component. In this case, all of the events are funnelled into the same method, making it
+         * easier to keep track of interactions. Everything is managed from the same location.
+         *
+         * @param anEvent
+         */
+        @Override
+        protected void respondUI(ViewEvent anEvent) {
+
         }
     }
 }

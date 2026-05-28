@@ -16,7 +16,7 @@ import snap.view.*;
  *   er.setInfo("MyApp Version X, Build Date: " + MyUtils.getBuildDate());
  *   Thread.setDefaultUncaughtExceptionHandler(er);
  */
-public class ExceptionReporter extends ViewController implements Thread.UncaughtExceptionHandler {
+public class ExceptionReporter extends SNPViewController implements Thread.UncaughtExceptionHandler {
     
     // Backtrace text
     private String _backtraceText;
@@ -36,6 +36,22 @@ public class ExceptionReporter extends ViewController implements Thread.Uncaught
     public ExceptionReporter()
     {
         super();
+    }
+
+    /**
+     * Initializes the UI panel. This method provides the ability to alter any settings or components of the View that
+     * were not set by {@link #createUI()}.
+     * <br><br>
+     * This method is called automatically by SnapKit after the view has been initialized, and does not need to be
+     * called inside of an implementation.
+     * <br><br>
+     * Implementation note: It is not always necessary to implement this method, especially if the {@code createUI()}
+     * method was written by hand. It provides a way to add more initialization logic when the class has been loaded
+     * from a .snp file.
+     */
+    @Override
+    protected void initUI() {
+
     }
 
     /**

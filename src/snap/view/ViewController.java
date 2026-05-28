@@ -8,9 +8,39 @@ import snap.props.PropObject;
 import snap.util.*;
 
 /**
- * A base controller class that manages a UI View (usually loaded from a snp UI file).
+ * A base controller class that manages a UI View.
+ * <br><br>
+ * A standard ViewController works around five simple methods:
+ * <ol>
+ *     <li>{@link #createUI()}</li>
+ *     <li>{@link #initUI()}</li>
+ *     <li>{@link #resetUI()}</li>
+ *     <li>{@link #respondUI(ViewEvent)}</li>
+ * </ol>
+ * <br>
+ * <b>createUI()</b><br>
+ * Called by SnapKit when the View is initialized, this method is responsible for the creation of the view, and all of
+ * its components. The view can be created by hand, or loaded from a .snp file through the use of
+ * {@link UILoader#loadViewForController(ViewController)}.
+ * <br><br>
+ * <b>initUI()</b><br>
+ * Similar to {@code createUI()}, this method is also called during initialization, after {@code createUI()} has been
+ * run. This method is responsible for any additional initialization that needs to take place after the view has been
+ * created, such as setting settings.
+ * <br><br>
+ * <b>resetUI()</b><br>
+ * resetUI() is called automatically by SnapKit whenever the user reacts with any UI component, but will not cause
+ * accidental {@code respondUI(ViewEvent)} calls. It allows the user to reset or change aspects of the UI after an
+ * interaction, such as might be required for an animation or image draw.
+ * <br><br>
+ * <b>respondUI(ViewEvent)</b><br>
+ * Called automatically by SnapKit whenever a ViewEvent/user event has been detected. Use this method to provide
+ * interactions and feedback to buttons and other user tools. In Swing, the listeners are attached to individual
+ * components, but in SnapKit all of the controls are provided in a single place, allowing pieces to be swapped in
+ * and out as necessary.
+ * <br><br>
  */
-public class ViewController extends PropObject {
+public abstract class ViewController extends PropObject {
 
     // The UI View
     private View  _ui;
@@ -124,14 +154,30 @@ public class ViewController extends PropObject {
     public <T extends View> T getUI(Class <T> aClass)  { return aClass.cast(getUI()); }
 
     /**
-     * Creates the top level view for this controller.
+     * Creates the top level view for this controller.  
+     * <br><br>
+     * This method is called automatically by SnapKit at initialization, and does not need to be called inside an
+     * implementation.
+     * <br><br>
+     * Implementation Note: This is where all components and members of the view should be composed and initialized. 
+     * This can be done by hand, or through use of the {@link UILoader#loadViewForController(ViewController)} loader
+     * method.
+     * @see UILoader#loadViewForController(ViewController) 
      */
-    protected View createUI()  { return UILoader.loadViewForController(this); }
+    abstract protected View createUI();
 
     /**
-     * Initializes the UI panel.
+     * Initializes the UI panel. This method provides the ability to alter any settings or components of the View that
+     * were not set by {@link #createUI()}.
+     * <br><br>
+     * This method is called automatically by SnapKit after the view has been initialized, and does not need to be
+     * called inside of an implementation.
+     * <br><br>
+     * Implementation note: It is not always necessary to implement this method, especially if the {@code createUI()}
+     * method was written by hand. It provides a way to add more initialization logic when the class has been loaded
+     * from a .snp file.
      */
-    protected void initUI()  { }
+    abstract protected void initUI();
 
     /**
      * Returns the first focus UI view for when window/dialog is made visible.
@@ -468,14 +514,23 @@ public class ViewController extends PropObject {
     }
 
     /**
-     * Reset UI controls.
+     * Called automatically by SnapKit after a user reacts with a UI component, this method allows the resetting of
+     * the UI. It will not cause accidental {@code respondUI(ViewEvent)} calls. It allows the user to reset or change
+     * aspects of the UI after an interaction, such as might be required for an animation or image draw.
+     * <br> <br>
+     * This method is overridable with no default implementation.
      */
-    protected void resetUI()  { }
+    abstract protected void resetUI();
 
     /**
-     * Respond to UI controls.
+     * Called automatically by SnapKit when it detects a ViewEvent. This method should be overridden to respond to UI
+     * controls, and provide feedback to user interactions.
+     * <br>
+     * If you are coming from a Swing environment, this class serves the same purposes as the action listeners attached
+     * to each individual component. In this case, all of the events are funnelled into the same method, making it
+     * easier to keep track of interactions. Everything is managed from the same location.
      */
-    protected void respondUI(ViewEvent anEvent)  { }
+    abstract protected void respondUI(ViewEvent anEvent);
 
     /**
      * Resets UI later.
