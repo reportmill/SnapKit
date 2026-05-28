@@ -6,7 +6,7 @@ import snap.view.*;
 /**
  * A class to provide developer controls to a GameController.
  */
-public class DevConsole extends DefaultViewController {
+public class DevConsole extends SNPViewController {
 
     // The GameController
     private GameController _gameController;
@@ -61,6 +61,18 @@ public class DevConsole extends DefaultViewController {
 
         // Return
         return colView;
+    }
+
+    /**
+     * Initializes the UI panel. This method provides the ability to alter any settings or components of the View that
+     * were not set by {@link #createUI()}.
+     * <br><br>
+     * This method is called automatically by SnapKit after the view has been initialized, and does not need to be
+     * called inside of an implementation.
+     */
+    @Override
+    protected void initUI() {
+
     }
 
     /**

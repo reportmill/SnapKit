@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * A view to allow inspection of View hierarchy.
  */
-public class DevPane extends DefaultViewController {
+public class DevPane extends ViewController {
 
     // The RootView
     private RootView  _rootView;
@@ -196,6 +196,18 @@ public class DevPane extends DefaultViewController {
     protected void initShowing()
     {
         runLater(() -> showTabView());
+    }
+
+    /**
+     * Called automatically by SnapKit after a user reacts with a UI component, this method allows the resetting of
+     * the UI. It will not cause accidental {@code respondUI(ViewEvent)} calls. It allows the user to reset or change
+     * aspects of the UI after an interaction, such as might be required for an animation or image draw.
+     * <br> <br>
+     * This method is overridable with no default implementation.
+     */
+    @Override
+    protected void resetUI() {
+
     }
 
     /**

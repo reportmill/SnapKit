@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * A DevPane tab for inspecting the view tree.
  */
-public class DevPaneViews extends DefaultViewController {
+public class DevPaneViews extends SNPViewController {
 
     // The DevPane
     private DevPane  _devPane;
