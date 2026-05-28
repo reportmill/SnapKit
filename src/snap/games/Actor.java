@@ -5,6 +5,9 @@ package snap.games;
 import snap.geom.*;
 import snap.gfx.Image;
 import snap.gfx.Paint;
+import snap.util.MathUtils;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * This class represents a game character in a StageView.
@@ -13,6 +16,9 @@ public class Actor {
 
     // The ActorView
     protected ActorView _actorView;
+
+    // A class that this actor can collide with
+    protected Class<? extends Actor> _hitClass;
 
     /**
      * Constructor.
@@ -189,18 +195,49 @@ public class Actor {
     {
         double newX = getX() + distX;
         double newY = getY() + distY;
-        setXY(newX, newY);
+        moveToXY(newX, newY);
     }
 
     /**
-     * Move actor to a point using setRotation and moveBy (so pen drawing works).
+     * Moves this actor to given XY from current location, stopping if it hits collidable actor.
      */
-    public void moveToXY(double aX, double aY)
+    public void moveToXY(double newX, double newY)
     {
-        double angleToXY = Point.getAngle(getMidX(), getMidY(), aX, aY);
-        double distanceToXY = Point.getDistance(getMidX(), getMidY(), aX, aY);
-        setRotate(angleToXY);
-        moveBy(distanceToXY);
+        // Store previous XY, try new XY and return if no collision
+        double prevX = getX();
+        double prevY = getY();
+        setXY(newX, newY);
+        if (!isHitActor())
+            return;
+
+        // Get values
+        double dx = newX - prevX;
+        double dy = newY - prevY;
+        double distX = Math.abs(dx);
+        double distY = Math.abs(dy);
+        int signX = MathUtils.sign(dx);
+        int signY = MathUtils.sign(dy);
+
+        // Restore XY
+        setXY(prevX, prevY);
+
+        // Move to new X incrementally as long as no hit
+        for (double incr = 0; incr < distX; incr++) {
+            setX(getX() + signX);
+            if (isHitActor()) {
+                setX(getX() - signX);
+                break;
+            }
+        }
+
+        // Move to new Y incrementally as long as no hit
+        for (int incr = 0; incr < distY; incr++) {
+            setY(getY() + signY);
+            if (isHitActor()) {
+                setY(getY() - signY);
+                break;
+            }
+        }
     }
 
     /**
@@ -218,6 +255,61 @@ public class Actor {
     {
         Stage stage = getStage();
         return Point.getAngle(getMidX(), getMidY(), stage.getMouseX(), stage.getMouseY());
+    }
+
+    /**
+     * Returns the class that this actor can collide with.
+     */
+    public Class<? extends Actor> getHitClass()  { return _hitClass; }
+
+    /**
+     * Sets the class that this actor can collide with.
+     */
+    public void setHitClass(Class<? extends Actor> aClass)  { _hitClass = aClass; }
+
+    /**
+     * Returns whether this actor hits another actor of configured hit class.
+     */
+    public boolean isHitActor()  { return _hitClass != null && isHitActorForClass(_hitClass); }
+
+    /**
+     * Returns the first actor of configured hit class hit by this actor.
+     */
+    public Actor getHitActor()  { return _hitClass != null ? getHitActorForClass(_hitClass) : null; }
+
+    /**
+     * Returns whether this actor hits another actor of given class (class can be null for any actor).
+     */
+    public boolean isHitActorForClass(Class<? extends Actor> aClass)  { return getHitActorForClass(aClass) != null; }
+
+    /**
+     * Returns the actors intersecting this actor that match given class (class can be null for any actor).
+     */
+    public <T extends Actor> T getHitActorForClass(Class<T> aClass)
+    {
+        Stream<T> actorStream = (Stream<T>) getStage().getActors().stream().filter(actor -> actor != this);
+        if (aClass != null)
+            actorStream = actorStream.filter(aClass::isInstance);
+        return actorStream.filter(this::intersectsActor).findFirst().orElse(null);
+    }
+
+    /**
+     * Returns the actors intersecting this actor that match given class (class can be null for any actor).
+     */
+    public <T extends Actor> List<T> getHitActorsForClass(Class<T> aClass)
+    {
+        Stream<T> actorStream = (Stream<T>) getStage().getActors().stream();
+        if (aClass != null)
+            actorStream = actorStream.filter(aClass::isInstance);
+        return actorStream.filter(this::intersectsActor).toList();
+    }
+    
+    /**
+     * Returns whether this actor intersects given actor.
+     */
+    public boolean intersectsActor(Actor anActor)
+    {
+        return _actorView.intersectsActor(anActor._actorView);
     }
 
     /**

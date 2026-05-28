@@ -2,8 +2,6 @@ package snap.games;
 import snap.geom.Point;
 import snap.geom.Rect;
 import snap.geom.Vector;
-import snap.util.ListUtils;
-import snap.util.MathUtils;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -86,41 +84,6 @@ public class ActorX extends Actor {
     public Rect getBounds()  { return _actorView.getBounds(); }
 
     /**
-     * Returns whether this actor intersects given actor.
-     */
-    public boolean intersectsActor(Actor anActor)
-    {
-        return _actorView.intersectsActor(anActor._actorView);
-    }
-
-    /**
-     * Returns the actors intersecting this actor that match given class (class can be null).
-     */
-    public boolean isIntersectingActor(Class<? extends Actor> aClass)  { return getIntersectingActor(aClass) != null; }
-
-    /**
-     * Returns the actors intersecting this actor that match given class (class can be null).
-     */
-    public <T extends Actor> T getIntersectingActor(Class<T> aClass)
-    {
-        Stream<T> actorStream = (Stream<T>) getStage().getActors().stream();
-        if (aClass != null)
-            actorStream = actorStream.filter(aClass::isInstance);
-        return actorStream.filter(this::intersectsActor).findFirst().orElse(null);
-    }
-
-    /**
-     * Returns the actors intersecting this actor that match given class (class can be null).
-     */
-    public <T extends Actor> List<T> getIntersectingActors(Class<T> aClass)
-    {
-        Stream<T> actorStream = (Stream<T>) getStage().getActors().stream();
-        if (aClass != null)
-            actorStream = actorStream.filter(aClass::isInstance);
-        return actorStream.filter(this::intersectsActor).toList();
-    }
-
-    /**
      * Returns the first actor in given range radius that match given class (class can be null).
      */
     public <T extends Actor> T getActorInRange(double aRadius, Class<T> aClass)
@@ -166,57 +129,6 @@ public class ActorX extends Actor {
         if (aClass != null)
             actorStream = actorStream.filter(aClass::isInstance);
         return actorStream.filter(actor -> actor != this && stage.isActorAtXY(actor, stageXY.x, stageXY.y)).toList();
-    }
-
-    /**
-     * Moves this actor to given XY from current location, stopping if it hits actor of given class.
-     */
-    public void moveByXyNoCollision(double moveX, double moveY, Class<? extends Actor> hitClass)
-    {
-        if (moveX != 0 || moveY != 0)
-            moveToXyNoCollision(getX() + moveX, getY() + moveY, hitClass);
-    }
-
-    /**
-     * Moves this actor to given XY from current location, stopping if it hits actor of given class.
-     */
-    public void moveToXyNoCollision(double newX, double newY, Class<? extends Actor> hitClass)
-    {
-        // Store previous XY, try new XY and return if no collision
-        double prevX = getX();
-        double prevY = getY();
-        setXY(newX, newY);
-        if (!isIntersectingActor(hitClass))
-            return;
-
-        // Get values
-        double dx = newX - prevX;
-        double dy = newY - prevY;
-        double distX = Math.abs(dx);
-        double distY = Math.abs(dy);
-        int signX = MathUtils.sign(dx);
-        int signY = MathUtils.sign(dy);
-
-        // Restore XY
-        setXY(prevX, prevY);
-
-        // Move to new X incrementally as long as no hit
-        for (double incr = 0; incr < distX; incr++) {
-            setX(getX() + signX);
-            if (isIntersectingActor(hitClass)) {
-                setX(getX() - signX);
-                break;
-            }
-        }
-
-        // Move to new Y incrementally as long as no hit
-        for (int incr = 0; incr < distY; incr++) {
-            setY(getY() + signY);
-            if (isIntersectingActor(hitClass)) {
-                setY(getY() - signY);
-                break;
-            }
-        }
     }
 
     /**

@@ -12,6 +12,14 @@ public abstract class PropObjectProxy<T> extends PropObject {
     protected T  _real;
 
     /**
+     * Constructor.
+     */
+    public PropObjectProxy()
+    {
+        super();
+    }
+
+    /**
      * Returns the real object.
      */
     public T getReal()
@@ -40,8 +48,7 @@ public abstract class PropObjectProxy<T> extends PropObject {
     protected void initProps(PropSet aPropSet)
     {
         // If Real is set and is PropObject, use its props (should probably add copies).
-        if (_real instanceof PropObject) {
-            PropObject realPropObj = (PropObject) _real;
+        if (_real instanceof PropObject realPropObj) {
             Prop[] dataSetProps = realPropObj.getPropSet().getProps();
             for (Prop prop : dataSetProps)
                 aPropSet.addProp(prop);
@@ -58,10 +65,8 @@ public abstract class PropObjectProxy<T> extends PropObject {
     public Prop[] getPropsForArchivalExtra()
     {
         // If Real is set and is PropObject, forward on.
-        if (_real instanceof PropObject) {
-            PropObject realPropObj = (PropObject) _real;
+        if (_real instanceof PropObject realPropObj)
             return realPropObj.getPropsForArchivalExtra();
-        }
 
         // Do normal version
         return super.getPropsForArchivalExtra();
@@ -74,10 +79,8 @@ public abstract class PropObjectProxy<T> extends PropObject {
     public Object getPropValue(String aPropName)
     {
         // If Real is set and is PropObject, forward on.
-        if (_real instanceof PropObject) {
-            PropObject realPropObj = (PropObject) _real;
+        if (_real instanceof PropObject realPropObj)
             return realPropObj.getPropValue(aPropName);
-        }
 
         // Do normal version
         return super.getPropValue(aPropName);
