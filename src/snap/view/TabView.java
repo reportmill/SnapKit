@@ -176,6 +176,11 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     public int getTabCount()  { return _tabBar.getTabCount(); }
 
     /**
+     * Returns the tabs currently attached to the TabView.
+     */
+    public List<Tab> getTabs()  { return _tabBar.getTabs(); }
+
+    /**
      * Returns the tab at given index.
      */
     public Tab getTab(int anIndex)  { return _tabBar.getTab(anIndex); }
