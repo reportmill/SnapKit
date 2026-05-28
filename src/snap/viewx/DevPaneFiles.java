@@ -10,7 +10,7 @@ import java.util.Objects;
 /**
  * A DevPane tab for inspecting Graphics.
  */
-public class DevPaneFiles extends DefaultViewController {
+public class DevPaneFiles extends SNPViewController {
 
     // The root URL string
     private String _rootUrlString;

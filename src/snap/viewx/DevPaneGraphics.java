@@ -6,7 +6,7 @@ import snap.view.*;
 /**
  * A DevPane tab for inspecting Graphics.
  */
-public class DevPaneGraphics extends DefaultViewController {
+public class DevPaneGraphics extends SNPViewController {
 
     // The DevPane
     private DevPane  _devPane;

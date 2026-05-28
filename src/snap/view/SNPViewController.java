@@ -9,16 +9,16 @@ package snap.view;
  * <br>
  * All abstract methods of this class can be implemented or left empty depending on your needs.
  */
-public abstract class SimpleViewController extends ViewController {
+public abstract class SNPViewController extends ViewController {
 
     /**
      * Constructor.
      */
-    public SimpleViewController()  {super();}
+    public SNPViewController()  {super();}
     /**
      * Constructor with given View for UI.
      */
-    public SimpleViewController(View aView) {super(aView);}
+    public SNPViewController(View aView) {super(aView);}
 
     /**
      * Creates the top level view for this controller by loading the UI from a .snp file in the 'resources' directory.
