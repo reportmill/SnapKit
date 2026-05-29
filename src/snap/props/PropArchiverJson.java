@@ -24,7 +24,7 @@ public class PropArchiverJson extends PropArchiver {
     public JsonObject writePropObjectToJSON(PropObject aPropObject)
     {
         // Convert native to node
-        PropMap propMap = convertNativeToPropMap(aPropObject, null);
+        PropMap propMap = convertPropObjectToPropMap(aPropObject, null);
 
         // Convert node to JSON
         JsonObject objectJS = convertPropMapToJson(propMap);
@@ -94,7 +94,7 @@ public class PropArchiverJson extends PropArchiver {
 
         // Convert PropMap (graph) to PropObject
         PropObject rootObject = getRootObject();
-        PropObject propObject = convertNodeToNative(propMap, null, rootObject);
+        PropObject propObject = convertPropMapToPropObject(propMap, null, rootObject);
 
         // Return
         return propObject;
@@ -124,7 +124,7 @@ public class PropArchiverJson extends PropArchiver {
     /**
      * Converts a given PropMap to JSON object.
      */
-    public static JsonObject convertPropMapToJson(PropMap propMap)
+    private static JsonObject convertPropMapToJson(PropMap propMap)
     {
         // Create JSONObject for PropMap
         JsonObject jsonObj = new JsonObject();
@@ -154,10 +154,9 @@ public class PropArchiverJson extends PropArchiver {
             else if (isRelation) {
 
                 // Handle array
-                if (isArray) {
-                    PropMap[] arrayNodes = (PropMap[]) nodeValue;
+                if (isArray && nodeValue instanceof PropMap[] arrayPropMaps) {
                     JsonArray jsonArray = new JsonArray();
-                    for (PropMap arrayNode : arrayNodes) {
+                    for (PropMap arrayNode : arrayPropMaps) {
                         JsonObject jsonNode = convertPropMapToJson(arrayNode);
                         jsonArray.addValue(jsonNode);
                     }
@@ -165,8 +164,7 @@ public class PropArchiverJson extends PropArchiver {
                 }
 
                 // Handle simple relation
-                else {
-                    PropMap relNode = (PropMap) nodeValue;
+                else if (nodeValue instanceof PropMap relNode) {
                     JsonObject jsonNode = convertPropMapToJson(relNode);
                     jsonObj.setValue(propName, jsonNode);
                 }
@@ -191,7 +189,7 @@ public class PropArchiverJson extends PropArchiver {
     /**
      * Converts a given JSON object to PropMap.
      */
-    public static PropMap convertJsonToPropMap(JsonObject jsonObject)
+    private static PropMap convertJsonToPropMap(JsonObject jsonObject)
     {
         // Create PropMap for JSON object
         PropMap propMap = new PropMap();

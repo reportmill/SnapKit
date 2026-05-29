@@ -52,7 +52,7 @@ public class PropArchiver {
     /**
      * Returns a PropMap for given PropObject.
      */
-    protected PropMap convertNativeToPropMap(PropObject aPropObj, Prop aProp)
+    protected PropMap convertPropObjectToPropMap(PropObject aPropObj, Prop aProp)
     {
         // Create new PropMap
         PropMap propMap = new PropMap();
@@ -126,7 +126,7 @@ public class PropArchiver {
             PropMap[] propMaps = new PropMap[array.length];
             for (int i = 0; i < array.length; i++) {
                 PropObject propObject = (PropObject) array[i];
-                propMaps[i] = convertNativeToPropMap(propObject, aProp);
+                propMaps[i] = convertPropObjectToPropMap(propObject, aProp);
             }
 
             // Return
@@ -140,7 +140,7 @@ public class PropArchiver {
 
         // Handle PropObject
         PropObject propObject = (PropObject) nativeValue;
-        PropMap propMap = convertNativeToPropMap(propObject, aProp);
+        PropMap propMap = convertPropObjectToPropMap(propObject, aProp);
 
         // Return
         return propMap;
@@ -149,7 +149,7 @@ public class PropArchiver {
     /**
      * Converts a PropMap (graph) to PropObject.
      */
-    protected PropObject convertNodeToNative(PropMap propMap, Prop aProp, PropObject aPropObject)
+    protected PropObject convertPropMapToPropObject(PropMap propMap, Prop aProp, PropObject aPropObject)
     {
         // Get PropObject
         PropObject propObject = aPropObject;
@@ -205,7 +205,7 @@ public class PropArchiver {
 
                         // Get array node and array object
                         PropMap relationNode = relationNodeArray[i];
-                        Object relationNative = convertNodeToNative(relationNode, prop, null);
+                        Object relationNative = convertPropMapToPropObject(relationNode, prop, null);
 
                         // If proxy, swap in real
                         if (relationNative instanceof PropObjectProxy)
@@ -227,7 +227,7 @@ public class PropArchiver {
                         relationObjPreexisting = (PropObject) propObject.getPropValue(propName);
 
                     // Convert to native (if PropObjectProxy, swap for real)
-                    nativeValue = convertNodeToNative(relationNode, prop, relationObjPreexisting);
+                    nativeValue = convertPropMapToPropObject(relationNode, prop, relationObjPreexisting);
                     if (nativeValue instanceof PropObjectProxy)
                         nativeValue = ((PropObjectProxy<?>) nativeValue).getReal();
                 }
@@ -372,12 +372,12 @@ public class PropArchiver {
     public <T extends PropObject> T copyPropObject(T aPropObject)
     {
         // Convert PropObject to PropMap
-        PropMap propMap = convertNativeToPropMap(aPropObject, null);
+        PropMap propMap = convertPropObjectToPropMap(aPropObject, null);
 
         // Convert back - not sure I need to create prop
         Class<?> propObjClass = aPropObject.getClass();
         Prop prop = new Prop(propObjClass.getSimpleName(), propObjClass, null);
-        T copy = (T) convertNodeToNative(propMap, prop, null);
+        T copy = (T) convertPropMapToPropObject(propMap, prop, null);
 
         // Return
         return copy;
