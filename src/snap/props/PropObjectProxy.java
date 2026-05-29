@@ -62,20 +62,6 @@ public abstract class PropObjectProxy<T> extends PropObject {
      * Override to forward to Real.
      */
     @Override
-    public Prop[] getPropsForArchivalExtra()
-    {
-        // If Real is set and is PropObject, forward on.
-        if (_real instanceof PropObject realPropObj)
-            return realPropObj.getPropsForArchivalExtra();
-
-        // Do normal version
-        return super.getPropsForArchivalExtra();
-    }
-
-    /**
-     * Override to forward to Real.
-     */
-    @Override
     public Object getPropValue(String aPropName)
     {
         // If Real is set and is PropObject, forward on.

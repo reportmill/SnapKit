@@ -49,40 +49,15 @@ public abstract class PropObject implements PropChange.DoChange {
     /**
      * Returns the prop for given name.
      */
-    public Prop getPropForName(String aPropName)
-    {
-        // Look for prop in standard prop set
-        PropSet propSet = getPropSet();
-        Prop prop = propSet.getPropForName(aPropName);
-        if (prop != null)
-            return prop;
-
-        // Look for prop in extra prop set
-        Prop[] extraProps = getPropsForArchivalExtra();
-        if (extraProps != null) {
-            for (Prop extraProp : extraProps)
-                if (extraProp.getName().equals(aPropName))
-                    return extraProp;
-        }
-
-        // Return not found
-        return null;
-    }
+    public Prop getPropForName(String aPropName)  { return getPropSet().getPropForName(aPropName); }
 
     /**
      * Returns the props for archival.
      */
     public Prop[] getPropsForArchival()
     {
-        PropSet propSet = getPropSet();
-        Prop[] props = propSet.getArchivalProps();
-        return props;
+        return getPropSet().getArchivalProps();
     }
-
-    /**
-     * Returns extra props for archival.
-     */
-    public Prop[] getPropsForArchivalExtra()  { return null; }
 
     /**
      * Returns the parent PropObject (if available).

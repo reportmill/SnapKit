@@ -64,21 +64,9 @@ public class PropArchiver {
         if (needsClassDeclaration)
             propMap.setNeedsClassDeclaration(true);
 
-        // Get props for archival and iterate
+        // Get props for archival and add values for each to PropMap
         Prop[] props = aPropObj.getPropsForArchival();
-
-        // Get PropChanger Props
-        //Prop[] propChangerProps = Stream.of(props).filter(prop -> prop.isPropChanger()).toArray(size -> new Prop[size]);
-        //if (propChangerProps.length > 0)
-        //    convertNativeToPropMapForProps(aPropObj, propMap, propChangerProps);
-
-        // Iterate over props and add native/node values for each to PropMap
         convertNativeToPropMapForProps(aPropObj, propMap, props);
-
-        // Handle optional extra props for archival - hook to allow additional props based on main props
-        Prop[] propsExtra = aPropObj.getPropsForArchivalExtra();
-        if (propsExtra != null)
-            convertNativeToPropMapForProps(aPropObj, propMap, propsExtra);
 
         // Return
         return propMap;

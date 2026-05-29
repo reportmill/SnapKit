@@ -35,9 +35,6 @@ public class Prop {
     // Whether prop value already exists in parent (should be used in place during unarchival)
     private boolean  _preexisting;
 
-    // Whether this prop can change an object's props (ArchivalPropsExtra)
-    private boolean  _propChanger;
-
     /**
      * Constructor.
      */
@@ -152,19 +149,6 @@ public class Prop {
     public void setPreexisting(boolean aValue)
     {
         _preexisting = aValue;
-    }
-
-    /**
-     * Returns whether this prop can change an object's props (ArchivalPropsExtra).
-     */
-    public boolean isPropChanger()  { return _propChanger; }
-
-    /**
-     * Sets whether this prop can change an object's props (ArchivalPropsExtra).
-     */
-    public void setPropChanger(boolean aValue)
-    {
-        _propChanger = aValue;
     }
 
     /**

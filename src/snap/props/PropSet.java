@@ -91,10 +91,7 @@ public class PropSet {
     /**
      * Returns a prop for given name.
      */
-    public Prop getPropForName(String aName)
-    {
-        return _propsMap.get(aName);
-    }
+    public Prop getPropForName(String aName)  { return _propsMap.get(aName); }
 
     /**
      * Adds new property for given name and class.
