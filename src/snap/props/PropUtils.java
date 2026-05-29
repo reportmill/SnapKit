@@ -9,7 +9,7 @@ package snap.props;
 public class PropUtils {
 
     /**
-     * Returns whether given PropNode needs class declaration when referenced via given prop.
+     * Returns whether given PropMap needs class declaration when referenced via given prop.
      */
     public static boolean isClassDeclarationNeededForObjectAndProp(PropObject propObject, Prop prop)
     {

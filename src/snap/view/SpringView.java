@@ -8,7 +8,7 @@ import snap.geom.HPos;
 import snap.geom.VPos;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
-import snap.props.PropNode;
+import snap.props.PropMap;
 import snap.util.*;
 
 /**
@@ -151,15 +151,15 @@ public class SpringView extends ChildView {
     }
 
     /**
-     * A hook to provide opportunity to modify archived PropNode.
+     * A hook to provide opportunity to modify archived PropMap.
      */
     @Override
-    protected void processArchivedNode(PropNode propNode)
+    protected void processArchivedMap(PropMap propMap)
     {
-        PropNode[] childNodes = (PropNode[]) propNode.getPropValue(Children_Prop);
+        PropMap[] childNodes = (PropMap[]) propMap.getPropValue(Children_Prop);
         if (childNodes == null) return;
         for (int i = 0; i < childNodes.length; i++) {
-            PropNode childNode = childNodes[i];
+            PropMap childNode = childNodes[i];
             View childView = getChild(i);
             if (childView.getX() != 0) childNode.setPropValue("X", childView.getX());
             if (childView.getY() != 0) childNode.setPropValue("Y", childView.getY());

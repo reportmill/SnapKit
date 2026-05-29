@@ -8,7 +8,7 @@ import snap.geom.Pos;
 import snap.geom.Side;
 import snap.gfx.*;
 import snap.props.PropChange;
-import snap.props.PropNode;
+import snap.props.PropMap;
 import snap.util.*;
 
 import java.util.List;
@@ -428,17 +428,17 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     }
 
     /**
-     * A hook to provide opportunity to modify archived PropNode.
+     * A hook to provide opportunity to modify archived PropMap.
      */
     @Override
-    protected void processArchivedNode(PropNode propNode)
+    protected void processArchivedMap(PropMap propMap)
     {
-        PropNode[] childNodes = (PropNode[]) propNode.getPropValue(Children_Prop);
+        PropMap[] childNodes = (PropMap[]) propMap.getPropValue(Children_Prop);
         if (childNodes == null)
             return;
 
         for (int i = 0; i < childNodes.length; i++) {
-            PropNode childNode = childNodes[i];
+            PropMap childNode = childNodes[i];
             childNode.setPropValue("Title", getTab(i).getTitle());
         }
     }
@@ -446,27 +446,28 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     /**
      * A hook to provide opportunity to modify un archived object.
      */
-    protected void processUnarchivedNode(PropNode propNode)
+    @Override
+    protected void processUnarchivedMap(PropMap propMap)
     {
-        Object childrenNodeObj = propNode.getPropValue(Children_Prop);
-        PropNode[] childNodes = getPropNodes(childrenNodeObj);
+        Object childrenNodeObj = propMap.getPropValue(Children_Prop);
+        PropMap[] childNodes = getPropMaps(childrenNodeObj);
         if (childNodes == null)
             return;
 
         // Get set title for child nodes
         for (int i = 0; i < childNodes.length; i++) {
-            PropNode childNode = childNodes[i];
+            PropMap childNode = childNodes[i];
             String title = childNode.getPropValueAsString("Title");
             getTab(i).setTitle(title);
         }
     }
 
-    private static PropNode[] getPropNodes(Object propNodeObj)
+    private static PropMap[] getPropMaps(Object propMapObj)
     {
-        if (propNodeObj instanceof PropNode[])
-            return (PropNode[]) propNodeObj;
-        if (propNodeObj instanceof PropNode)
-            return ((PropNode) propNodeObj).getPropValuesAsArray();
+        if (propMapObj instanceof PropMap[])
+            return (PropMap[]) propMapObj;
+        if (propMapObj instanceof PropMap)
+            return ((PropMap) propMapObj).getPropValuesAsArray();
         return null;
     }
 

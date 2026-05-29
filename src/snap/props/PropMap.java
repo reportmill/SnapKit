@@ -9,7 +9,7 @@ import java.util.*;
  * A class to represent a PropObject and its property values as both native and String values. This middle ground
  * greatly facilitates conversion of PropObjects to/from XML, JSON, etc.
  */
-public class PropNode {
+public class PropMap {
 
     // The ClassName, if available
     private String  _className;
@@ -17,7 +17,7 @@ public class PropNode {
     // The XML name of node if from XML
     private String  _xmlName;
 
-    // Whether this PropNode needs to declare actual class name
+    // Whether this PropMap needs to declare actual class name
     private boolean  _needsClassDeclaration;
 
     // A map of prop names to PropObject values as strings
@@ -26,7 +26,7 @@ public class PropNode {
     /**
      * Constructor.
      */
-    public PropNode()
+    public PropMap()
     {
         super();
     }
@@ -52,12 +52,12 @@ public class PropNode {
     public void setXmlName(String aValue)  { _xmlName = aValue; }
 
     /**
-     * Returns whether this PropNode needs to declare actual class name
+     * Returns whether this PropMap needs to declare actual class name
      */
     public boolean isNeedsClassDeclaration()  { return _needsClassDeclaration; }
 
     /**
-     * Sets whether this PropNode needs to declare actual class name
+     * Sets whether this PropMap needs to declare actual class name
      */
     public void setNeedsClassDeclaration(boolean aValue)
     {
@@ -65,12 +65,12 @@ public class PropNode {
     }
 
     /**
-     * Returns a node value (String, PropNode, PropNode[]) for given prop name.
+     * Returns a node value (String, PropMap, PropMap[]) for given prop name.
      */
     public Object getPropValue(String propName)  { return _propValues.get(propName); }
 
     /**
-     * Sets a node value (String, PropNode, PropNode[]) for given prop name.
+     * Sets a node value (String, PropMap, PropMap[]) for given prop name.
      */
     public void setPropValue(String aPropName, Object nodeValue)
     {
@@ -88,19 +88,19 @@ public class PropNode {
     }
 
     /**
-     * Returns all values as PropNode array.
+     * Returns all values as PropMap array.
      */
-    public PropNode[] getPropValuesAsArray()
+    public PropMap[] getPropValuesAsArray()
     {
-        // Return all values as PropNode array
+        // Return all values as PropMap array
         Collection<Object> values = _propValues.values();
-        boolean allPropNodes = values.stream().allMatch(obj -> obj instanceof PropNode);
-        if (allPropNodes)
-            return values.toArray(new PropNode[0]);
+        boolean allPropMaps = values.stream().allMatch(obj -> obj instanceof PropMap);
+        if (allPropMaps)
+            return values.toArray(new PropMap[0]);
 
         // Should never happen
-        System.err.println("PropNode.getPropValuesAsArray: Not all children are PropNodes");
-        return new PropNode[0];
+        System.err.println("PropMap.getPropValuesAsArray: Not all children are PropMaps");
+        return new PropMap[0];
     }
 
     /**

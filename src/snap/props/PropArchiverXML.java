@@ -24,11 +24,11 @@ public class PropArchiverXML extends PropArchiver {
     public XMLElement writePropObjectToXml(PropObject aPropObject)
     {
         // Convert native to node
-        PropNode propNode = convertNativeToNode(aPropObject, null);
+        PropMap propMap = convertNativeToPropMap(aPropObject, null);
 
         // Convert node to XML
         String className = aPropObject.getClass().getSimpleName();
-        XMLElement xml = PropNodeXML.convertPropNodeToXML(propNode, className);
+        XMLElement xml = PropMapXML.convertPropMapToXML(propMap, className);
 
         // Archive resources
         for (Resource resource : getResources()) {
@@ -81,14 +81,14 @@ public class PropArchiverXML extends PropArchiver {
         // Read resources
         readResources(anElement);
 
-        // Read PropNode from XML
-        PropNode propNode = PropNodeXML.convertXMLToPropNode(anElement);
-        propNode.setXmlName(anElement.getName());
+        // Read PropMap from XML
+        PropMap propMap = PropMapXML.convertXMLToPropMap(anElement);
+        propMap.setXmlName(anElement.getName());
 
-        // Convert PropNode (graph) to PropObject
+        // Convert PropMap (graph) to PropObject
         Prop prop = new Prop(anElement.getName(), Object.class, null);
         PropObject rootObject = getRootObject();
-        PropObject propObject = convertNodeToNative(propNode, prop, rootObject);
+        PropObject propObject = convertNodeToNative(propMap, prop, rootObject);
 
         // Return
         return propObject;

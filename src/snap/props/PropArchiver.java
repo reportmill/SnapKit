@@ -10,23 +10,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class primarily converts a PropObject (graph) to/from a PropNode (graph).
+ * This class primarily converts a PropObject (graph) to/from a PropMap (graph).
  *
- * The graph of PropNodes can easily be converted to/from XML, JSON, etc.
+ * The graph of PropMaps can easily be converted to/from XML, JSON, etc.
  */
 public class PropArchiver {
 
     // A map of names to Class names, for unarchival
-    private Map<String,Class<?>>  _classMap;
+    private Map<String,Class<?>> _classMap;
 
     // The root object (for unarchival, optional)
     private PropObject _rootObject;
 
     // Resources
-    private Resource[]  _resources = new Resource[0];
+    private Resource[] _resources = new Resource[0];
 
     // A helper class to archive common SnapKit classes (Font, Color, etc.)
-    protected PropArchiverHpr  _helper;
+    protected PropArchiverHpr _helper;
 
     // Constant for special Class key
     public static final String CLASS_KEY = "Class";
@@ -50,19 +50,19 @@ public class PropArchiver {
     public void setRootObject(PropObject rootObject)  { _rootObject = rootObject; }
 
     /**
-     * Returns a PropNode for given PropObject.
+     * Returns a PropMap for given PropObject.
      */
-    protected PropNode convertNativeToNode(PropObject aPropObj, Prop aProp)
+    protected PropMap convertNativeToPropMap(PropObject aPropObj, Prop aProp)
     {
-        // Create new PropNode
-        PropNode propNode = new PropNode();
+        // Create new PropMap
+        PropMap propMap = new PropMap();
         String className = aPropObj.getClass().getSimpleName();
-        propNode.setClassName(className);
+        propMap.setClassName(className);
 
-        // Configure PropNode.NeedsClassDeclaration
+        // Configure PropMap.NeedsClassDeclaration
         boolean needsClassDeclaration = PropUtils.isClassDeclarationNeededForObjectAndProp(aPropObj, aProp);
         if (needsClassDeclaration)
-            propNode.setNeedsClassDeclaration(true);
+            propMap.setNeedsClassDeclaration(true);
 
         // Get props for archival and iterate
         Prop[] props = aPropObj.getPropsForArchival();
@@ -70,26 +70,26 @@ public class PropArchiver {
         // Get PropChanger Props
         //Prop[] propChangerProps = Stream.of(props).filter(prop -> prop.isPropChanger()).toArray(size -> new Prop[size]);
         //if (propChangerProps.length > 0)
-        //    convertNativeToNodeForProps(aPropObj, propNode, propChangerProps);
+        //    convertNativeToPropMapForProps(aPropObj, propMap, propChangerProps);
 
-        // Iterate over props and add native/node values for each to PropNode
-        convertNativeToNodeForProps(aPropObj, propNode, props);
+        // Iterate over props and add native/node values for each to PropMap
+        convertNativeToPropMapForProps(aPropObj, propMap, props);
 
         // Handle optional extra props for archival - hook to allow additional props based on main props
         Prop[] propsExtra = aPropObj.getPropsForArchivalExtra();
         if (propsExtra != null)
-            convertNativeToNodeForProps(aPropObj, propNode, propsExtra);
+            convertNativeToPropMapForProps(aPropObj, propMap, propsExtra);
 
         // Return
-        return propNode;
+        return propMap;
     }
 
     /**
-     * Returns a PropNode for given PropObject.
+     * Returns a PropMap for given PropObject.
      */
-    protected void convertNativeToNodeForProps(PropObject aPropObj, PropNode aPropNode, Prop[] theProps)
+    protected void convertNativeToPropMapForProps(PropObject aPropObj, PropMap propMap, Prop[] theProps)
     {
-        // Iterate over props and add node value for each to PropNode
+        // Iterate over props and add node value for each to PropMap
         for (Prop prop : theProps) {
 
             // If prop hasn't changed, just skip
@@ -105,29 +105,28 @@ public class PropArchiver {
             if (prop.isRelation()) {
 
                 // Convert relation
-                nodeValue = convertNativeToNodeForPropRelation(prop, nativeValue);
+                nodeValue = convertNativeToPropMapForPropRelation(prop, nativeValue);
 
-                // Handle Prop.Default EMPTY_OBJECT: If nodeValue is empty PropNode, clear value
-                if (prop.getDefaultValue() == PropObject.EMPTY_OBJECT && nodeValue instanceof PropNode) {
-                    PropNode propNode = (PropNode) nodeValue;
-                    if (propNode.isEmpty())
+                // Handle Prop.Default EMPTY_OBJECT: If nodeValue is empty PropMap, clear value
+                if (prop.getDefaultValue() == PropObject.EMPTY_OBJECT && nodeValue instanceof PropMap childPropMap) {
+                    if (childPropMap.isEmpty())
                         nodeValue = null;
                 }
             }
 
-            // If nodeValue, add to PropNode
+            // If nodeValue, add to PropMap
             if (nodeValue != null)
-                aPropNode.setPropValue(prop.getName(), nodeValue);
+                propMap.setPropValue(prop.getName(), nodeValue);
         }
 
-        // Call hook to provide opportunity for PropObject to modify PropNode
-        aPropObj.processArchivedNode(aPropNode);
+        // Call hook to provide opportunity for PropObject to modify PropMap
+        aPropObj.processArchivedMap(propMap);
     }
 
     /**
-     * Converts given native relation object to PropNode/PropNode[].
+     * Converts given native relation object to PropMap/PropMap[].
      */
-    protected Object convertNativeToNodeForPropRelation(Prop aProp, Object nativeValue)
+    protected Object convertNativeToPropMapForPropRelation(Prop aProp, Object nativeValue)
     {
         // Handle null
         if (nativeValue == null)
@@ -144,15 +143,15 @@ public class PropArchiver {
             }
             else array = (Object[]) nativeValue;
 
-            // Iterate over native array objects and try to create/set PropNode for each
-            PropNode[] propNodes = new PropNode[array.length];
+            // Iterate over native array objects and try to create/set PropMap for each
+            PropMap[] propMaps = new PropMap[array.length];
             for (int i = 0; i < array.length; i++) {
                 PropObject propObject = (PropObject) array[i];
-                propNodes[i] = convertNativeToNode(propObject, aProp);
+                propMaps[i] = convertNativeToPropMap(propObject, aProp);
             }
 
             // Return
-            return propNodes;
+            return propMaps;
         }
 
         // Swap in PropObjectProxy if needed
@@ -162,24 +161,24 @@ public class PropArchiver {
 
         // Handle PropObject
         PropObject propObject = (PropObject) nativeValue;
-        PropNode propNode = convertNativeToNode(propObject, aProp);
+        PropMap propMap = convertNativeToPropMap(propObject, aProp);
 
         // Return
-        return propNode;
+        return propMap;
     }
 
     /**
-     * Converts a PropNode (graph) to PropObject.
+     * Converts a PropMap (graph) to PropObject.
      */
-    protected PropObject convertNodeToNative(PropNode propNode, Prop aProp, PropObject aPropObject)
+    protected PropObject convertNodeToNative(PropMap propMap, Prop aProp, PropObject aPropObject)
     {
         // Get PropObject
         PropObject propObject = aPropObject;
         if (propObject == null)
-            propObject = createPropObjectForPropNode(propNode, aProp);
+            propObject = createPropObjectForPropMap(propMap, aProp);
 
-        // Get PropNode props
-        String[] propNames = propNode.getPropNames();
+        // Get PropMap props
+        String[] propNames = propMap.getPropNames();
 
         // Iterate over props and convert each to native
         for (String propName : propNames) {
@@ -190,7 +189,7 @@ public class PropArchiver {
             // Get node value
             Prop prop = propObject.getPropForName(propName);
             if (prop == null) { System.err.println("PropArchiver.convertNodeToNative: Unknown prop: " + propName); continue; }
-            Object nodeValue = propNode.getPropValue(propName);
+            Object nodeValue = propMap.getPropValue(propName);
 
             // Get native value
             Object nativeValue = null;
@@ -201,17 +200,17 @@ public class PropArchiver {
                 // Handle Relation array
                 if (prop.isArray()) {
 
-                    // If nodeValue is PropNode, get PropNode values as array (since XML can't differentiate lists)
-                    if (nodeValue instanceof PropNode)
-                        nodeValue = ((PropNode) nodeValue).getPropValuesAsArray();
+                    // If nodeValue is PropMap, get values as array (since XML can't differentiate lists)
+                    if (nodeValue instanceof PropMap)
+                        nodeValue = ((PropMap) nodeValue).getPropValuesAsArray();
 
-                    // If node is empty array string, replace with empty PropNode array (since JSON can't differentiate empty lists)
+                    // If node is empty array string, replace with empty PropMap array (since JSON can't differentiate empty lists)
                     else if (nodeValue instanceof String && ((String) nodeValue).replace(" ", "").equals("[]"))
-                        nodeValue = new PropNode[0];
+                        nodeValue = new PropMap[0];
 
                     // Get relation node array
-                    assert (nodeValue instanceof PropNode[]);
-                    PropNode[] relationNodeArray = (PropNode[]) nodeValue;
+                    assert (nodeValue instanceof PropMap[]);
+                    PropMap[] relationNodeArray = (PropMap[]) nodeValue;
 
                     // Create native list or array for prop
                     Class<?> nativeArrayClass = prop.getPropClass();
@@ -226,7 +225,7 @@ public class PropArchiver {
                     for (int i = 0; i < relationNodeArray.length; i++) {
 
                         // Get array node and array object
-                        PropNode relationNode = relationNodeArray[i];
+                        PropMap relationNode = relationNodeArray[i];
                         Object relationNative = convertNodeToNative(relationNode, prop, null);
 
                         // If proxy, swap in real
@@ -241,10 +240,10 @@ public class PropArchiver {
                 }
 
                 // Handle Relation
-                else if (nodeValue instanceof PropNode) {
+                else if (nodeValue instanceof PropMap) {
 
                     // Get relation node
-                    PropNode relationNode = (PropNode) nodeValue;
+                    PropMap relationNode = (PropMap) nodeValue;
 
                     // If Prop.Preexisting, use preexisting object
                     PropObject relationObjPreexisting = null;
@@ -276,8 +275,8 @@ public class PropArchiver {
                 propObject.setPropValue(prop.getName(), nativeValue);
         }
 
-        // Call hook to provide opportunity to modify unarchived PropObject for PropNode
-        propObject.processUnarchivedNode(propNode);
+        // Call hook to provide opportunity to modify unarchived PropObject for PropMap
+        propObject.processUnarchivedMap(propMap);
 
         // Return
         return propObject;
@@ -320,27 +319,27 @@ public class PropArchiver {
     }
 
     /**
-     * Creates a PropObject for PropNode.
+     * Creates a PropObject for PropMap.
      */
-    protected PropObject createPropObjectForPropNode(PropNode aPropNode, Prop aProp)
+    protected PropObject createPropObjectForPropMap(PropMap propMap, Prop aProp)
     {
         // Get PropObject class
-        Class<?> propObjClass = getPropObjectClassForPropNode(aPropNode, aProp);
+        Class<?> propObjClass = getPropObjectClassForPropMap(propMap, aProp);
         if (propObjClass != null)
             return createPropObjectForClass(propObjClass);
 
         // Complain and return
-        System.err.println("PropArchiver.createPropObjectForPropNode: Undetermined class for node: " + aPropNode);
+        System.err.println("PropArchiver.createPropObjectForPropMap: Undetermined class for node: " + propMap);
         return null;
     }
 
     /**
-     * Returns a PropObject class for PropNode.
+     * Returns a PropObject class for PropMap.
      */
-    protected Class<?> getPropObjectClassForPropNode(PropNode aPropNode, Prop aProp)
+    protected Class<?> getPropObjectClassForPropMap(PropMap propMap, Prop aProp)
     {
         // If Class prop set, try that
-        String className = aPropNode.getPropValueAsString(CLASS_KEY);
+        String className = propMap.getPropValueAsString(CLASS_KEY);
         if (className != null) {
             Class<?> cls = getClassForName(className);
             if (cls != null)
@@ -348,7 +347,7 @@ public class PropArchiver {
         }
 
         // Try XML name
-        String xmlName = aPropNode.getXmlName();
+        String xmlName = propMap.getXmlName();
         if (xmlName != null) {
             Class<?> propClass = getClassForName(xmlName);
             if (propClass != null)
@@ -396,13 +395,13 @@ public class PropArchiver {
      */
     public <T extends PropObject> T copyPropObject(T aPropObject)
     {
-        // Convert PropObject to PropNode
-        PropNode propNode = convertNativeToNode(aPropObject, null);
+        // Convert PropObject to PropMap
+        PropMap propMap = convertNativeToPropMap(aPropObject, null);
 
         // Convert back - not sure I need to create prop
         Class<?> propObjClass = aPropObject.getClass();
         Prop prop = new Prop(propObjClass.getSimpleName(), propObjClass, null);
-        T copy = (T) convertNodeToNative(propNode, prop, null);
+        T copy = (T) convertNodeToNative(propMap, prop, null);
 
         // Return
         return copy;

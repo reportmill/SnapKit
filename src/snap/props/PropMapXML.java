@@ -4,38 +4,38 @@ import snap.util.XMLElement;
 import java.util.List;
 
 /**
- * This utility class converts PropNode to/from XMLElement.
+ * This utility class converts PropMap to/from XMLElement.
  */
-public class PropNodeXML {
+public class PropMapXML {
 
     /**
-     * Converts a given PropNode to XML element.
+     * Converts a given PropMap to XML element.
      */
-    public static XMLElement convertPropNodeToXML(PropNode aPropNode, String aNodeKey)
+    public static XMLElement convertPropMapToXML(PropMap propMap, String aNodeKey)
     {
-        // Create XML for PropNode
+        // Create XML for PropMap
         XMLElement xml = new XMLElement(aNodeKey);
 
-        // If PropNode.NeedsClassDeclaration, add Class attribute to XML
-        if (aPropNode.isNeedsClassDeclaration()) {
-            String className = aPropNode.getClassName();
+        // If PropMap.NeedsClassDeclaration, add Class attribute to XML
+        if (propMap.isNeedsClassDeclaration()) {
+            String className = propMap.getClassName();
             if (!className.equals(aNodeKey))
                 xml.add(PropArchiver.CLASS_KEY, className);
         }
 
         // Get configured Props
-        String[] propNames = aPropNode.getPropNames();
+        String[] propNames = propMap.getPropNames();
 
         // Iterate over PropNames and add XML for each
         for (String propName : propNames) {
 
-            // Get Node value and whether it is node and/or array
-            Object nodeValue = aPropNode.getPropValue(propName);
-            boolean isRelation = nodeValue instanceof PropNode || nodeValue instanceof PropNode[];
-            boolean isArray = nodeValue != null && nodeValue.getClass().isArray();
+            // Get map value and whether it is prop map and/or array
+            Object mapValue = propMap.getPropValue(propName);
+            boolean isRelation = mapValue instanceof PropMap || mapValue instanceof PropMap[];
+            boolean isArray = mapValue != null && mapValue.getClass().isArray();
 
             // Handle null
-            if (nodeValue == null)
+            if (mapValue == null)
                 xml.add(propName, "null");
 
             // Handle Relation prop
@@ -43,11 +43,11 @@ public class PropNodeXML {
 
                 // Handle array
                 if (isArray) {
-                    PropNode[] arrayNodes = (PropNode[]) nodeValue;
+                    PropMap[] arrayNodes = (PropMap[]) mapValue;
                     XMLElement arrayXML = new XMLElement(propName);
-                    for (PropNode arrayNode : arrayNodes) {
+                    for (PropMap arrayNode : arrayNodes) {
                         String className = arrayNode.getClassName();
-                        XMLElement arrayNodeXML = convertPropNodeToXML(arrayNode, className);
+                        XMLElement arrayNodeXML = convertPropMapToXML(arrayNode, className);
                         arrayXML.addElement(arrayNodeXML);
                     }
                     xml.addElement(arrayXML);
@@ -55,15 +55,15 @@ public class PropNodeXML {
 
                 // Handle simple relation
                 else {
-                    PropNode relNode = (PropNode) nodeValue;
-                    XMLElement nodeXML = convertPropNodeToXML(relNode, propName);
+                    PropMap relNode = (PropMap) mapValue;
+                    XMLElement nodeXML = convertPropMapToXML(relNode, propName);
                     xml.addElement(nodeXML);
                 }
             }
 
             // Handle primitive array
             else if (isArray) {
-                String arrayStr = aPropNode.getPropValueAsString(propName);
+                String arrayStr = propMap.getPropValueAsString(propName);
                 XMLElement arrayXML = new XMLElement(propName);
                 arrayXML.setValue(arrayStr);
                 xml.addElement(arrayXML);
@@ -71,7 +71,7 @@ public class PropNodeXML {
 
             // Handle String (non-Node) prop
             else {
-                String stringValue = aPropNode.getPropValueAsString(propName);
+                String stringValue = propMap.getPropValueAsString(propName);
                 xml.add(propName, stringValue);
             }
         }
@@ -81,33 +81,33 @@ public class PropNodeXML {
     }
 
     /**
-     * Converts a given XML element to PropNode.
+     * Converts a given XML element to PropMap.
      */
-    public static PropNode convertXMLToPropNode(XMLElement anElement)
+    public static PropMap convertXMLToPropMap(XMLElement anElement)
     {
-        // Create PropNode for XML element
-        PropNode propNode = new PropNode();
+        // Create PropMap for XML element
+        PropMap propMap = new PropMap();
 
         // Get attributes
         List<XMLAttribute> attributes = anElement.getAttributes();
 
-        // Iterate over attributes and add to PropNode
+        // Iterate over attributes and add to PropMap
         for (XMLAttribute attribute : attributes) {
 
             String propName = attribute.getName();
-            propNode.setPropValue(propName, attribute.getValue());
+            propMap.setPropValue(propName, attribute.getValue());
         }
 
         // Get elements
         List<XMLElement> elements = anElement.getElements();
 
-        // Iterate over elements and add to PropNode
+        // Iterate over elements and add to PropMap
         for (XMLElement element : elements) {
 
-            // If child element is definitely an array element, convert to PropNode array and set that
+            // If child element is definitely an array element, convert to PropMap array and set that
             if (isDefinitelyArrayElement(element)) {
-                PropNode[] arrayNodes = convertXMLToPropNodeArray(element);
-                propNode.setPropValue(element.getName(), arrayNodes);
+                PropMap[] arrayNodes = convertXMLToPropMapArray(element);
+                propMap.setPropValue(element.getName(), arrayNodes);
                 continue;
             }
 
@@ -115,18 +115,18 @@ public class PropNodeXML {
             String propName = element.getName();
             String xmlValue = element.getValue();
             if (xmlValue != null) {
-                propNode.setPropValue(propName, xmlValue);
+                propMap.setPropValue(propName, xmlValue);
                 continue;
             }
 
-            // Get child xml as PropNode and set in parent
-            PropNode relation = convertXMLToPropNode(element);
+            // Get child xml as PropMap and set in parent
+            PropMap relation = convertXMLToPropMap(element);
             relation.setXmlName(propName);
-            propNode.setPropValue(propName, relation);
+            propMap.setPropValue(propName, relation);
         }
 
         // Return xml
-        return propNode;
+        return propMap;
     }
 
     /**
@@ -146,29 +146,29 @@ public class PropNodeXML {
     }
 
     /**
-     * Returns an array of propNodes
+     * Returns an array of PropMaps
      */
-    private static PropNode[] convertXMLToPropNodeArray(XMLElement anElement)
+    private static PropMap[] convertXMLToPropMapArray(XMLElement anElement)
     {
-        // Get elements and create PropNodes array
+        // Get elements and create PropMaps array
         List<XMLElement> elements = anElement.getElements();
         int elementCount = elements.size();
-        PropNode[] propNodes = new PropNode[elementCount];
+        PropMap[] propMaps = new PropMap[elementCount];
 
-        // Iterate over elements, convert each and add to PropNode array
+        // Iterate over elements, convert each and add to PropMap array
         for (int i = 0; i < elementCount; i++) {
 
-            // Get child xml as PropNode and set in parent
+            // Get child xml as PropMap and set in parent
             XMLElement element = elements.get(i);
-            PropNode relation = convertXMLToPropNode(element);
+            PropMap relation = convertXMLToPropMap(element);
             String propName = element.getName();
             relation.setXmlName(propName);
 
             // Add relation to array
-            propNodes[i] = relation;
+            propMaps[i] = relation;
         }
 
         // Return
-        return propNodes;
+        return propMaps;
     }
 }

@@ -24,10 +24,10 @@ public class PropArchiverJson extends PropArchiver {
     public JsonObject writePropObjectToJSON(PropObject aPropObject)
     {
         // Convert native to node
-        PropNode propNode = convertNativeToNode(aPropObject, null);
+        PropMap propMap = convertNativeToPropMap(aPropObject, null);
 
         // Convert node to JSON
-        JsonObject objectJS = convertPropNodeToJson(propNode);
+        JsonObject objectJS = convertPropMapToJson(propMap);
 
         // Archive resources
         /*for (Resource resource : getResources()) {
@@ -89,12 +89,12 @@ public class PropArchiverJson extends PropArchiver {
         // Read resources
         readResources(objectJS);
 
-        // Read PropNode from JSON
-        PropNode propNode = convertJsonToPropNode(objectJS);
+        // Read PropMap from JSON
+        PropMap propMap = convertJsonToPropMap(objectJS);
 
-        // Convert PropNode (graph) to PropObject
+        // Convert PropMap (graph) to PropObject
         PropObject rootObject = getRootObject();
-        PropObject propObject = convertNodeToNative(propNode, null, rootObject);
+        PropObject propObject = convertNodeToNative(propMap, null, rootObject);
 
         // Return
         return propObject;
@@ -122,28 +122,28 @@ public class PropArchiverJson extends PropArchiver {
     }
 
     /**
-     * Converts a given PropNode to JSON object.
+     * Converts a given PropMap to JSON object.
      */
-    public static JsonObject convertPropNodeToJson(PropNode aPropNode)
+    public static JsonObject convertPropMapToJson(PropMap propMap)
     {
-        // Create JSONObject for PropNode
+        // Create JSONObject for PropMap
         JsonObject jsonObj = new JsonObject();
 
-        // If PropNode.NeedsClassDeclaration, add Class property to JSON object
-        if (aPropNode.isNeedsClassDeclaration()) {
-            String className = aPropNode.getClassName();
+        // If PropMap.NeedsClassDeclaration, add Class property to JSON object
+        if (propMap.isNeedsClassDeclaration()) {
+            String className = propMap.getClassName();
             jsonObj.setNativeValue(CLASS_KEY, className);
         }
 
         // Get configured Props
-        String[] propNames = aPropNode.getPropNames();
+        String[] propNames = propMap.getPropNames();
 
         // Iterate over PropNames and add JSON for each
         for (String propName : propNames) {
 
             // Get Node value and whether it is node and/or array
-            Object nodeValue = aPropNode.getPropValue(propName);
-            boolean isRelation = nodeValue instanceof PropNode || nodeValue instanceof PropNode[];
+            Object nodeValue = propMap.getPropValue(propName);
+            boolean isRelation = nodeValue instanceof PropMap || nodeValue instanceof PropMap[];
             boolean isArray = nodeValue != null && nodeValue.getClass().isArray();
 
             // Handle null
@@ -155,10 +155,10 @@ public class PropArchiverJson extends PropArchiver {
 
                 // Handle array
                 if (isArray) {
-                    PropNode[] arrayNodes = (PropNode[]) nodeValue;
+                    PropMap[] arrayNodes = (PropMap[]) nodeValue;
                     JsonArray jsonArray = new JsonArray();
-                    for (PropNode arrayNode : arrayNodes) {
-                        JsonObject jsonNode = convertPropNodeToJson(arrayNode);
+                    for (PropMap arrayNode : arrayNodes) {
+                        JsonObject jsonNode = convertPropMapToJson(arrayNode);
                         jsonArray.addValue(jsonNode);
                     }
                     jsonObj.setValue(propName, jsonArray);
@@ -166,8 +166,8 @@ public class PropArchiverJson extends PropArchiver {
 
                 // Handle simple relation
                 else {
-                    PropNode relNode = (PropNode) nodeValue;
-                    JsonObject jsonNode = convertPropNodeToJson(relNode);
+                    PropMap relNode = (PropMap) nodeValue;
+                    JsonObject jsonNode = convertPropMapToJson(relNode);
                     jsonObj.setValue(propName, jsonNode);
                 }
             }
@@ -189,17 +189,17 @@ public class PropArchiverJson extends PropArchiver {
     }
 
     /**
-     * Converts a given JSON object to PropNode.
+     * Converts a given JSON object to PropMap.
      */
-    public static PropNode convertJsonToPropNode(JsonObject jsonObject)
+    public static PropMap convertJsonToPropMap(JsonObject jsonObject)
     {
-        // Create PropNode for JSON object
-        PropNode propNode = new PropNode();
+        // Create PropMap for JSON object
+        PropMap propMap = new PropMap();
 
         // Get attributes
         Set<String> propNames = jsonObject.getKeyValues().keySet();
 
-        // Iterate over properties and add to PropNode
+        // Iterate over properties and add to PropMap
         for (String propName : propNames) {
 
             // Get property value
@@ -209,42 +209,42 @@ public class PropArchiverJson extends PropArchiver {
             if (propValue instanceof JsonArray jsonArray) {
                 int count = jsonArray.getValueCount();
 
-                // Handle array of JSON object: Convert objects to PropNode array and set
+                // Handle array of JSON object: Convert objects to PropMap array and set
                 if (count > 0 && jsonArray.getValue(0) instanceof JsonObject) {
 
                     // Convert array
-                    PropNode[] nodeArray = new PropNode[count];
+                    PropMap[] nodeArray = new PropMap[count];
                     for (int i = 0; i < count; i++) {
                         JsonObject jsonObj = (JsonObject) jsonArray.getValue(i);
-                        PropNode node = convertJsonToPropNode(jsonObj);
+                        PropMap node = convertJsonToPropMap(jsonObj);
                         nodeArray[i] = node;
                     }
 
                     // Set node array
-                    propNode.setPropValue(propName, nodeArray);
+                    propMap.setPropValue(propName, nodeArray);
                 }
 
                 // Handle simple array
                 else {
                     String arrayStr = jsonArray.getValueAsString();
-                    propNode.setPropValue(propName, arrayStr);
+                    propMap.setPropValue(propName, arrayStr);
                 }
             }
 
             // Handle Object
             else if (propValue instanceof JsonObject jsonObj) {
-                PropNode childNode = convertJsonToPropNode(jsonObj);
-                propNode.setPropValue(propName, childNode);
+                PropMap childNode = convertJsonToPropMap(jsonObj);
+                propMap.setPropValue(propName, childNode);
             }
 
             // Handle value
             else {
                 Object nativeValue = propValue.getNative();
-                propNode.setPropValue(propName, nativeValue);
+                propMap.setPropValue(propName, nativeValue);
             }
         }
 
         // Return
-        return propNode;
+        return propMap;
     }
 }
