@@ -5,6 +5,7 @@ import snap.geom.RoundRect;
 import snap.geom.Shape;
 import snap.gfx.GFXEnv;
 import snap.gfx.Painter;
+import snap.props.PropUtils;
 import snap.util.ArrayUtils;
 import snap.util.Convert;
 import snap.util.StringUtils;
@@ -315,7 +316,7 @@ public class DevPaneViews extends ViewController {
     {
         View selView = getSelView(); if (selView == null) return;
         String propsStr = anEvent.getStringValue();
-        selView.setPropsString(propsStr);
+        PropUtils.setPropsString(selView, propsStr);
         repaintAll();
     }
 

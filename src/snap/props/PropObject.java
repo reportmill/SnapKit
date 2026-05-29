@@ -52,45 +52,25 @@ public abstract class PropObject implements PropChange.DoChange {
     public Prop getPropForName(String aPropName)  { return getPropSet().getPropForName(aPropName); }
 
     /**
-     * Returns the props for archival.
-     */
-    public Prop[] getPropsForArchival()
-    {
-        return getPropSet().getArchivalProps();
-    }
-
-    /**
-     * Returns the parent PropObject (if available).
-     */
-    public PropObject getPropParent()  { return null; }
-
-    /**
      * Initialize Props. Override to support props for this class.
      */
-    protected void initProps(PropSet aPropSet)
-    { /*
-        // Do normal version
+    protected void initProps(PropSet propSet)
+    {
+        /*
         super.initProps(aPropSet);
-
-        // Add props for this class
         aPropSet.addPropNamed(Something_Prop, double.class, DEFAULT_SOMETHING_VALUE);
-    */
+        */
     }
 
     /**
      * Returns the value for given prop name.
      */
-    public Object getPropValue(String aPropName)
-    { /*
-        switch (aPropName) {
-
-            // Something
-            case Something_Prop: return getSomething();
-
-            // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
-    */
+    public Object getPropValue(String propName)
+    {
+        /* return switch (propName) {
+            case Something_Prop -> getSomething();
+            default -> return super.getPropValue(aPropName);
+        }; */
 
         return null;
     }
@@ -98,70 +78,12 @@ public abstract class PropObject implements PropChange.DoChange {
     /**
      * Sets the value for given prop name.
      */
-    public void setPropValue(String aPropName, Object aValue)
-    { /*
-        switch (aPropName) {
-
-            // Something
-            case Something_Prop: setSomething(aValue); break;
-
-            // Do normal version
-            default: super.setPropValue(aPropName, aValue);
-        }
-    */
-    }
-
-    /**
-     * Returns the props string.
-     */
-    public String getPropsString()
+    public void setPropValue(String propName, Object aValue)
     {
-        // Get props
-        Prop[] props = getPropSet().getArchivalProps();
-        StringBuilder sb = new StringBuilder();
-
-        // Iterate over props and append string if changed
-        for (Prop prop : props) {
-            if (!prop.isRelation() && !prop.isArray() && !isPropDefault(prop.getName())) {
-                Object propValue = getPropValue(prop.getName());
-                String propValueStr = StringCodec.SHARED.codeString(propValue);
-                if (!sb.isEmpty()) sb.append("; ");
-                sb.append(prop.getName()).append(": ").append(propValueStr);
-            }
-        }
-
-        // Return string
-        return sb.toString();
-    }
-
-    /**
-     * Sets prop values for JSON/CSS style string, e.g.: "Name: AgeText; Margin: 4; PrefWidth: 24;"
-     */
-    public void setPropsString(String propsString)
-    {
-        // Get individual prop/value strings (separated by semi-colons)
-        String[] propStrings = propsString.split("\\s*;\\s*");
-
-        // Iterate over prop strings and add each
-        for (String propString : propStrings) {
-
-            // Get "name:value" string parts
-            String[] nameValueStrings = propString.split("\\s*:\\s*");
-
-            // If both prop/value parts found, get prop name and set value
-            if (nameValueStrings.length == 2) {
-                String propName = nameValueStrings[0].trim();
-                Prop prop = getPropForName(propName);
-                if (prop != null)
-                    setPropValue(prop.getName(), nameValueStrings[1]);
-
-                // If prop not found for name, complain
-                else System.err.println("PropObject.setPropsString: Unknown prop name: " + propName);
-            }
-
-            // If "name:value" parts not found, complain
-            else System.err.println("PropObject.setPropsString: Invalid prop string: " + propString);
-        }
+        /* switch (aPropName) {
+            case Something_Prop -> setSomething(aValue);
+            default -> super.setPropValue(aPropName, aValue);
+        } */
     }
 
     /**
@@ -391,30 +313,8 @@ public abstract class PropObject implements PropChange.DoChange {
     /**
      * Standard toStringProps implementation.
      */
-    public String toStringProps()
+    protected String toStringProps()
     {
-        // Get props
-        Prop[] props = getPropsForArchival();
-        StringBuilder sb = new StringBuilder();
-
-        // Iterate over props and add to string
-        for (Prop prop : props) {
-
-            // Skip relations and arrays
-            if (prop.isRelation()) continue;
-            if (prop.isArray()) continue;
-            if (isPropDefault(prop.getName())) continue;
-
-            // If not default value, add to string
-            String propName = prop.getName();
-            Object propValue = getPropValue(propName);
-            String stringValue = StringCodec.SHARED.codeString(propValue);
-            if (!sb.isEmpty())
-                sb.append(", ");
-            sb.append(propName).append('=').append(stringValue);
-        }
-
-        // Return
-        return sb.toString();
+        return PropUtils.getPropsString(this, ", ", "=");
     }
 }

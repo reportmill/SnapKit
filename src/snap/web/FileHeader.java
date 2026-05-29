@@ -164,7 +164,7 @@ public class FileHeader extends PropObject {
      * Returns a string representation of file.
      */
     @Override
-    public String toStringProps()
+    protected String toStringProps()
     {
         StringBuilder sb = new StringBuilder();
         sb.append("Path=").append(isDir() ? getDirPath() : getPath());

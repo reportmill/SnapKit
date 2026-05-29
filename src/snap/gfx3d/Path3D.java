@@ -442,7 +442,7 @@ public class Path3D extends FacetShape implements Cloneable {
      * Standard toStringProps implementation.
      */
     @Override
-    public String toStringProps()
+    protected String toStringProps()
     {
         String superProps = super.toStringProps();
         return superProps + ", PointCount=" + getPointCount();

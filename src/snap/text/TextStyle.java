@@ -9,6 +9,7 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.props.PropObject;
 import snap.props.PropSet;
+import snap.props.PropUtils;
 import snap.util.Convert;
 
 /**
@@ -246,7 +247,7 @@ public class TextStyle extends PropObject implements Cloneable {
     public TextStyle copyForStyleString(String styleString)
     {
         TextStyle clone = clone();
-        clone.setPropsString(styleString);
+        PropUtils.setPropsString(clone, styleString);
         return clone;
     }
 
@@ -277,21 +278,21 @@ public class TextStyle extends PropObject implements Cloneable {
     public Object getPropValue(String aPropName)
     {
         // Handle properties
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Font, Color, Underline, Border, Scripting, CharSpacing, Format, Link
-            case Font_Prop: return getFont();
-            case Color_Prop: return getColor();
-            case Underline_Prop: return getUnderlineStyle();
-            case Border_Prop: return getBorder();
-            case Scripting_Prop: return getScripting();
-            case CharSpacing_Prop: return getCharSpacing();
-            case Format_Prop: return getFormat();
-            case Link_Prop: return getLink();
+            case Font_Prop -> getFont();
+            case Color_Prop -> getColor();
+            case Underline_Prop -> getUnderlineStyle();
+            case Border_Prop -> getBorder();
+            case Scripting_Prop -> getScripting();
+            case CharSpacing_Prop -> getCharSpacing();
+            case Format_Prop -> getFormat();
+            case Link_Prop -> getLink();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -304,21 +305,21 @@ public class TextStyle extends PropObject implements Cloneable {
         switch (aPropName) {
 
             // Font, Color, Underline, Border, Scripting, CharSpacing, Format, Link
-            case Font_Prop: _font = Font.of(aValue); break;
-            case Color_Prop: _color = Color.get(aValue); break;
-            case Underline_Prop: _underline = Convert.intValue(aValue); break;
-            case Border_Prop: _border = Border.of(aValue); break;
-            case Scripting_Prop: _scripting = Convert.intValue(aValue); break;
-            case CharSpacing_Prop: _charSpacing = Convert.doubleValue(aValue); break;
-            case Format_Prop: _format = (TextFormat) aValue; break;
-            case Link_Prop:
+            case Font_Prop -> _font = Font.of(aValue);
+            case Color_Prop -> _color = Color.get(aValue);
+            case Underline_Prop -> _underline = Convert.intValue(aValue);
+            case Border_Prop -> _border = Border.of(aValue);
+            case Scripting_Prop -> _scripting = Convert.intValue(aValue);
+            case CharSpacing_Prop -> _charSpacing = Convert.doubleValue(aValue);
+            case Format_Prop -> _format = (TextFormat) aValue;
+            case Link_Prop -> {
                 _link = TextLink.of(aValue);
                 _color = DEFAULT_LINK_STYLE.getColor();
                 _underline = DEFAULT_LINK_STYLE.getUnderlineStyle();
-                break;
+            }
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 

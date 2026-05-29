@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
+import java.util.List;
 
 /**
  * This class is meant to stand in for archival objects that aren't PropObject.
@@ -49,9 +50,8 @@ public abstract class PropObjectProxy<T> extends PropObject {
     {
         // If Real is set and is PropObject, use its props (should probably add copies).
         if (_real instanceof PropObject realPropObj) {
-            Prop[] dataSetProps = realPropObj.getPropSet().getProps();
-            for (Prop prop : dataSetProps)
-                aPropSet.addProp(prop);
+            List<Prop> dataSetProps = realPropObj.getPropSet().getProps();
+            dataSetProps.forEach(aPropSet::addProp);
         }
 
         // Do normal version

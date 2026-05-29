@@ -7,6 +7,7 @@ import snap.geom.*;
 import snap.gfx.*;
 import snap.props.PropObject;
 import snap.props.PropSet;
+import snap.props.PropUtils;
 import snap.props.StringCodec;
 import snap.text.StringBox;
 import snap.util.*;
@@ -2788,7 +2789,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Sets style properties for given string, e.g., "Margin:20; Fill:Red; Border:#00 1;".
      */
-    public void setStyleString(String styleString)  { setPropsString(styleString); }
+    public void setStyleString(String styleString)  { PropUtils.setPropsString(this, styleString); }
 
     /**
      * Returns a mapped property name.
@@ -3361,7 +3362,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      * Standard toString implementation.
      */
     @Override
-    public String toStringProps()
+    protected String toStringProps()
     {
         // Append Name
         StringBuffer sb = new StringBuffer();

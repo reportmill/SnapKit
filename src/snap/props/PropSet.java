@@ -2,8 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
-import snap.util.ArrayUtils;
 import snap.util.ClassUtils;
+import snap.util.ListUtils;
 import java.util.*;
 
 /**
@@ -15,19 +15,16 @@ public class PropSet {
     private Class<? extends PropObject> _propObjectClass;
 
     // An array of all known properties for class
-    private Prop[]  _props = new Prop[0];
+    private List<Prop> _props = new ArrayList<>(0);
 
     // A map of props by name
-    private Map<String,Prop>  _propsMap = new HashMap<>();
+    private Map<String,Prop> _propsMap = new HashMap<>();
 
     // A default instance of PropObject class
     private PropObject _defaultInstance;
 
-    // An array of all known prop names for class
-    private String[]  _propNames;
-
     // A cached array of archival props (Prop.SkipArchival = false)
-    private Prop[]  _archivalProps;
+    private List<Prop> _archivalProps;
 
     // A Map of PropSets for Classes
     private static final Map<Class<? extends PropObject>, PropSet>  _propSets = new HashMap<>();
@@ -49,16 +46,14 @@ public class PropSet {
     /**
      * Returns the props.
      */
-    public Prop[] getProps()  { return _props; }
+    public List<Prop> getProps()  { return _props; }
 
     /**
      * Adds a Prop.
      */
     public void addProp(Prop aProp)
     {
-        int length = _props.length;
-        _props = Arrays.copyOf(_props, length + 1);
-        _props[length] = aProp;
+        _props.add(aProp);
         _propsMap.put(aProp.getName(), aProp);
         _propsMap.put(aProp.getName().toLowerCase(), aProp);
 
@@ -71,10 +66,7 @@ public class PropSet {
      */
     public void removeProp(int anIndex)
     {
-        // Remove prop
-        _props = ArrayUtils.remove(_props, anIndex);
-
-        // Clear caches
+        _props.remove(anIndex);
         clearCaches();
     }
 
@@ -83,7 +75,7 @@ public class PropSet {
      */
     public void removeProp(Prop aProp)
     {
-        int index = ArrayUtils.indexOfId(_props, aProp);
+        int index = _props.indexOf(aProp);
         if (index >= 0)
             removeProp(index);
     }
@@ -137,35 +129,12 @@ public class PropSet {
     }
 
     /**
-     * Returns all known property names.
-     */
-    public String[] getPropNames()
-    {
-        // If already set, just return
-        if (_propNames != null) return _propNames;
-
-        // Stream props to propNames via map
-        Prop[] props = getProps();
-        String[] propNames = ArrayUtils.map(props, prop -> prop.getName(), String.class);
-
-        // Set/return
-        return _propNames = propNames;
-    }
-
-    /**
      * Returns array of archival props (Prop.SkipArchival is false).
      */
-    public Prop[] getArchivalProps()
+    public List<Prop> getArchivalProps()
     {
-        // If already set, just return
         if (_archivalProps != null) return _archivalProps;
-
-        // Stream props to archivalProps via filter
-        Prop[] props = getProps();
-        Prop[] archivalProps = ArrayUtils.filter(props, prop -> !prop.isSkipArchival());
-
-        // Set/return
-        return _archivalProps = archivalProps;
+        return _archivalProps = getProps().stream().filter(prop -> !prop.isSkipArchival()).toList();
     }
 
     /**
@@ -173,7 +142,6 @@ public class PropSet {
      */
     protected void clearCaches()
     {
-        _propNames = null;
         _archivalProps = null;
     }
 
@@ -184,7 +152,7 @@ public class PropSet {
     public String toString()
     {
         String name = getClass().getSimpleName();
-        String propNames = Arrays.toString(getPropNames());
+        String propNames = ListUtils.joinStrings(getProps(), ", ");
         return name + "{ " + propNames + " }";
     }
 

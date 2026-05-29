@@ -225,7 +225,7 @@ public class Tab extends PropObject {
      * Standard toString implementation.
      */
     @Override
-    public String toStringProps()
+    protected String toStringProps()
     {
         StringBuilder sb = new StringBuilder();
         sb.append(Title_Prop).append(':').append(getTitle());

@@ -781,7 +781,7 @@ public class TextArea extends ParentView {
      * Standard toStringProps implementation.
      */
     @Override
-    public String toStringProps()
+    protected String toStringProps()
     {
         String text = _textAdapter != null ? getText() : "";
         if (text.length() > 40) text = text.substring(0, 40) + "...";

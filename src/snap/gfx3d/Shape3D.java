@@ -243,7 +243,8 @@ public abstract class Shape3D extends PropObject {
     /**
      * Standard toStringProps implementation.
      */
-    public String toStringProps()
+    @Override
+    protected String toStringProps()
     {
         StringBuilder sb = new StringBuilder();
         String name = getName();

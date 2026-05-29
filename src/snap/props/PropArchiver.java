@@ -65,20 +65,10 @@ public class PropArchiver {
             propMap.setNeedsClassDeclaration(true);
 
         // Get props for archival and add values for each to PropMap
-        Prop[] props = aPropObj.getPropsForArchival();
-        convertNativeToPropMapForProps(aPropObj, propMap, props);
+        List<Prop> props = aPropObj.getPropSet().getArchivalProps();
 
-        // Return
-        return propMap;
-    }
-
-    /**
-     * Returns a PropMap for given PropObject.
-     */
-    protected void convertNativeToPropMapForProps(PropObject aPropObj, PropMap propMap, Prop[] theProps)
-    {
         // Iterate over props and add node value for each to PropMap
-        for (Prop prop : theProps) {
+        for (Prop prop : props) {
 
             // If prop hasn't changed, just skip
             String propName = prop.getName();
@@ -109,6 +99,9 @@ public class PropArchiver {
 
         // Call hook to provide opportunity for PropObject to modify PropMap
         aPropObj.processArchivedMap(propMap);
+
+        // Return
+        return propMap;
     }
 
     /**
@@ -125,10 +118,8 @@ public class PropArchiver {
 
             // Get array
             Object[] array;
-            if (nativeValue instanceof List) {
-                List<?> list = (List<?>) nativeValue;
+            if (nativeValue instanceof List<?> list)
                 array = list.toArray();
-            }
             else array = (Object[]) nativeValue;
 
             // Iterate over native array objects and try to create/set PropMap for each
@@ -228,10 +219,7 @@ public class PropArchiver {
                 }
 
                 // Handle Relation
-                else if (nodeValue instanceof PropMap) {
-
-                    // Get relation node
-                    PropMap relationNode = (PropMap) nodeValue;
+                else if (nodeValue instanceof PropMap relationNode) {
 
                     // If Prop.Preexisting, use preexisting object
                     PropObject relationObjPreexisting = null;

@@ -359,7 +359,7 @@ public class Label extends ParentView {
      * Standard toString implementation.
      */
     @Override
-    public String toStringProps()
+    protected String toStringProps()
     {
         String text = _textArea != null ? getText() : "";
         if (text.length() > 40) text = text.substring(0, 40) + "...";
