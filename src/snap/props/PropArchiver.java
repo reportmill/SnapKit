@@ -52,49 +52,49 @@ public class PropArchiver {
     /**
      * Returns a PropMap for given PropObject.
      */
-    protected PropMap convertPropObjectToPropMap(PropObject aPropObj, Prop aProp)
+    protected PropMap convertPropObjectToPropMap(PropObject aPropObj)
     {
         // Create new PropMap
         PropMap propMap = new PropMap();
         String className = aPropObj.getClass().getSimpleName();
         propMap.setClassName(className);
 
-        // Configure PropMap.NeedsClassDeclaration
-        boolean needsClassDeclaration = PropUtils.isClassDeclarationNeededForObjectAndProp(aPropObj, aProp);
-        if (needsClassDeclaration)
-            propMap.setNeedsClassDeclaration(true);
-
         // Get props for archival and add values for each to PropMap
-        List<Prop> props = aPropObj.getPropSet().getArchivalProps();
+        List<Prop> childProps = aPropObj.getPropSet().getArchivalProps();
 
         // Iterate over props and add node value for each to PropMap
-        for (Prop prop : props) {
+        for (Prop childProp : childProps) {
 
             // If prop hasn't changed, just skip
-            String propName = prop.getName();
+            String propName = childProp.getName();
             if (aPropObj.isPropDefault(propName))
                 continue;
 
             // Get object value from PropObject.PropName
             Object nativeValue = aPropObj.getPropValue(propName);
-            Object nodeValue = nativeValue;
+            if (nativeValue == null)
+                continue;
 
             // Handle relation
-            if (prop.isRelation()) {
+            if (childProp.isRelation()) {
 
-                // Convert relation
-                nodeValue = convertNativeToPropMapForPropRelation(prop, nativeValue);
+                // Handle relation array: Convert to PropMap[] and add to PropMap
+                if (childProp.isArray()) {
+                    Object[] array = nativeValue instanceof List<?> list ? list.toArray() : (Object[]) nativeValue;
+                    PropMap[] relPropMaps = ArrayUtils.map(array, relObj -> convertPropObjectRelationObjectToPropMap(relObj, childProp), PropMap.class);
+                    propMap.setPropValue(childProp.getName(), relPropMaps);
+                }
 
-                // Handle Prop.Default EMPTY_OBJECT: If nodeValue is empty PropMap, clear value
-                if (prop.getDefaultValue() == PropObject.EMPTY_OBJECT && nodeValue instanceof PropMap childPropMap) {
-                    if (childPropMap.isEmpty())
-                        nodeValue = null;
+                // Handle relation object: Convert to prop map and add to PropMap if not null or EMPTY_OBJECT
+                else {
+                    PropMap relationPropMap = convertPropObjectRelationObjectToPropMap(nativeValue, childProp);
+                    if (childProp.getDefaultValue() != PropObject.EMPTY_OBJECT || !relationPropMap.isEmpty())
+                        propMap.setPropValue(childProp.getName(), relationPropMap);
                 }
             }
 
-            // If nodeValue, add to PropMap
-            if (nodeValue != null)
-                propMap.setPropValue(prop.getName(), nodeValue);
+            // Handle simple value: Just add to PropMap
+            else propMap.setPropValue(childProp.getName(), nativeValue);
         }
 
         // Call hook to provide opportunity for PropObject to modify PropMap
@@ -105,42 +105,23 @@ public class PropArchiver {
     }
 
     /**
-     * Converts given native relation object to PropMap/PropMap[].
+     * Converts given prop object relation object to PropMap.
      */
-    protected Object convertNativeToPropMapForPropRelation(Prop aProp, Object nativeValue)
+    private PropMap convertPropObjectRelationObjectToPropMap(Object relationObj, Prop relationProp)
     {
-        // Handle null
-        if (nativeValue == null)
-            return null;
-
-        // Handle Array
-        if (aProp.isArray()) {
-
-            // Get array
-            Object[] array;
-            if (nativeValue instanceof List<?> list)
-                array = list.toArray();
-            else array = (Object[]) nativeValue;
-
-            // Iterate over native array objects and try to create/set PropMap for each
-            PropMap[] propMaps = new PropMap[array.length];
-            for (int i = 0; i < array.length; i++) {
-                PropObject propObject = (PropObject) array[i];
-                propMaps[i] = convertPropObjectToPropMap(propObject, aProp);
-            }
-
-            // Return
-            return propMaps;
-        }
-
         // Swap in PropObjectProxy if needed
-        PropObject proxy = _helper.getProxyForObject(nativeValue);
+        PropObject proxy = _helper.getProxyForObject(relationObj);
         if (proxy != null)
-            nativeValue = proxy;
+            relationObj = proxy;
 
         // Handle PropObject
-        PropObject propObject = (PropObject) nativeValue;
-        PropMap propMap = convertPropObjectToPropMap(propObject, aProp);
+        PropObject propObject = (PropObject) relationObj;
+        PropMap propMap = convertPropObjectToPropMap(propObject);
+
+        // Configure PropMap.NeedsClassDeclaration
+        boolean needsClassDeclaration = PropUtils.isClassDeclarationNeededForObjectAndProp(propObject, relationProp);
+        if (needsClassDeclaration)
+            propMap.setNeedsClassDeclaration(true);
 
         // Return
         return propMap;
@@ -372,7 +353,7 @@ public class PropArchiver {
     public <T extends PropObject> T copyPropObject(T aPropObject)
     {
         // Convert PropObject to PropMap
-        PropMap propMap = convertPropObjectToPropMap(aPropObject, null);
+        PropMap propMap = convertPropObjectToPropMap(aPropObject);
 
         // Convert back - not sure I need to create prop
         Class<?> propObjClass = aPropObject.getClass();

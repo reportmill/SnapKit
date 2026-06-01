@@ -26,7 +26,7 @@ public class PropArchiverXML extends PropArchiver {
     public XMLElement writePropObjectToXml(PropObject aPropObject)
     {
         // Convert native to node
-        PropMap propMap = convertPropObjectToPropMap(aPropObject, null);
+        PropMap propMap = convertPropObjectToPropMap(aPropObject);
 
         // Convert node to XML
         String className = aPropObject.getClass().getSimpleName();

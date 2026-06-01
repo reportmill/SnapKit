@@ -24,7 +24,7 @@ public class PropArchiverJson extends PropArchiver {
     public JsonObject writePropObjectToJSON(PropObject aPropObject)
     {
         // Convert native to node
-        PropMap propMap = convertPropObjectToPropMap(aPropObject, null);
+        PropMap propMap = convertPropObjectToPropMap(aPropObject);
 
         // Convert node to JSON
         JsonObject objectJS = convertPropMapToJson(propMap);
