@@ -140,6 +140,22 @@ public abstract class PropObject implements PropChange.DoChange {
     }
 
     /**
+     * Returns a PropMap for this object using given PropArchiver.
+     */
+    protected PropMap getPropMapForArchiver(PropArchiver propArchiver)
+    {
+        return propArchiver.convertPropObjectToPropMap(this);
+    }
+
+    /**
+     * Sets a PropMap for this object using given PropArchiver.
+     */
+    protected void setPropMapForArchiver(PropArchiver propArchiver, PropMap propMap)
+    {
+        propArchiver.setPropMapForPropObject(propMap, this);
+    }
+
+    /**
      * Add listener.
      */
     public void addPropChangeListener(PropChangeListener aPCL)
@@ -278,16 +294,6 @@ public abstract class PropObject implements PropChange.DoChange {
     {
         setPropValue(aPC.getPropName(), newVal);
     }
-
-    /**
-     * A hook to provide opportunity to modify archived PropMap.
-     */
-    protected void processArchivedMap(PropMap propMap)  { }
-
-    /**
-     * A hook to provide opportunity to modify un archived object.
-     */
-    protected void processUnarchivedMap(PropMap propMap)  { }
 
     /**
      * Standard clone implementation.

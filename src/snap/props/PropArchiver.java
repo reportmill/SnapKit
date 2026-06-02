@@ -97,9 +97,6 @@ public class PropArchiver {
             else propMap.setPropValue(childProp.getName(), nativeValue);
         }
 
-        // Call hook to provide opportunity for PropObject to modify PropMap
-        aPropObj.processArchivedMap(propMap);
-
         // Return
         return propMap;
     }
@@ -137,6 +134,16 @@ public class PropArchiver {
         if (propObject == null)
             propObject = createPropObjectForPropMap(propMap, aProp);
 
+        // Call set prop map and return
+        propObject.setPropMapForArchiver(this, propMap);
+        return propObject;
+    }
+
+    /**
+     * Converts a PropMap (graph) to PropObject.
+     */
+    protected void setPropMapForPropObject(PropMap propMap, PropObject propObject)
+    {
         // Get PropMap props
         String[] propNames = propMap.getPropNames();
 
@@ -231,12 +238,6 @@ public class PropArchiver {
             if (!prop.isPreexisting())
                 propObject.setPropValue(prop.getName(), nativeValue);
         }
-
-        // Call hook to provide opportunity to modify unarchived PropObject for PropMap
-        propObject.processUnarchivedMap(propMap);
-
-        // Return
-        return propObject;
     }
 
     /**

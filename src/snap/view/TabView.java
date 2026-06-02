@@ -7,10 +7,10 @@ import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.geom.Side;
 import snap.gfx.*;
+import snap.props.PropArchiver;
 import snap.props.PropChange;
 import snap.props.PropMap;
 import snap.util.*;
-
 import java.util.List;
 
 /**
@@ -428,47 +428,39 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     }
 
     /**
-     * A hook to provide opportunity to modify archived PropMap.
+     * Override to add titles to children.
      */
     @Override
-    protected void processArchivedMap(PropMap propMap)
+    protected PropMap getPropMapForArchiver(PropArchiver propArchiver)
+    {
+        PropMap propMap = super.getPropMapForArchiver(propArchiver);
+
+        // Add titles for children
+        PropMap[] childNodes = (PropMap[]) propMap.getPropValue(Children_Prop);
+        if (childNodes != null) {
+            for (int i = 0; i < childNodes.length; i++)
+                childNodes[i].setPropValue(Tab.Title_Prop, getTab(i).getTitle());
+        }
+
+        // Return
+        return propMap;
+    }
+
+    /**
+     * Override to add titles to children.
+     */
+    @Override
+    protected void setPropMapForArchiver(PropArchiver propArchiver, PropMap propMap)
     {
         PropMap[] childNodes = (PropMap[]) propMap.getPropValue(Children_Prop);
         if (childNodes == null)
             return;
 
-        for (int i = 0; i < childNodes.length; i++) {
-            PropMap childNode = childNodes[i];
-            childNode.setPropValue("Title", getTab(i).getTitle());
-        }
-    }
-
-    /**
-     * A hook to provide opportunity to modify un archived object.
-     */
-    @Override
-    protected void processUnarchivedMap(PropMap propMap)
-    {
-        Object childrenNodeObj = propMap.getPropValue(Children_Prop);
-        PropMap[] childNodes = getPropMaps(childrenNodeObj);
-        if (childNodes == null)
-            return;
-
         // Get set title for child nodes
         for (int i = 0; i < childNodes.length; i++) {
-            PropMap childNode = childNodes[i];
-            String title = childNode.getPropValueAsString("Title");
+            String title = childNodes[i].getPropValueAsString(Tab.Title_Prop);
             getTab(i).setTitle(title);
         }
-    }
-
-    private static PropMap[] getPropMaps(Object propMapObj)
-    {
-        if (propMapObj instanceof PropMap[])
-            return (PropMap[]) propMapObj;
-        if (propMapObj instanceof PropMap)
-            return ((PropMap) propMapObj).getPropValuesAsArray();
-        return null;
     }
 
     /**
@@ -494,7 +486,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
             View tabContent = tab.getContent();
             String tabTitle = tab.getTitle();
             XMLElement childXML = anArchiver.toXML(tabContent, this);
-            childXML.add("title", tabTitle);
+            childXML.add(Tab.Title_Prop, tabTitle);
             anElement.add(childXML);
         }
     }
@@ -513,7 +505,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
             // If child class is View, unarchive and add
             if (childClass != null && View.class.isAssignableFrom(childClass)) {
                 View shape = (View) anArchiver.fromXML(cxml, this);
-                String title = cxml.getAttributeValue("title"); if (title == null) title = "";
+                String title = cxml.getAttributeValue(Tab.Title_Prop); if (title == null) title = "";
                 addTab(title, shape);
             }
         }

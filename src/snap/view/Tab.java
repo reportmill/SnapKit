@@ -36,9 +36,9 @@ public class Tab extends PropObject {
     private ViewController _contentController;
 
     // Constants for properties
-    private static final String Title_Prop = "Title";
-    private static final String Closable_Prop = "Closable";
-    private static final String Visible_Prop = "Visible";
+    public static final String Title_Prop = "Title";
+    public static final String Closable_Prop = "Closable";
+    public static final String Visible_Prop = View.Visible_Prop;
 
     /**
      * Constructor.

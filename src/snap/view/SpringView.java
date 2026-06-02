@@ -6,6 +6,7 @@ import java.util.*;
 
 import snap.geom.HPos;
 import snap.geom.VPos;
+import snap.props.PropArchiver;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropMap;
@@ -151,21 +152,29 @@ public class SpringView extends ChildView {
     }
 
     /**
-     * A hook to provide opportunity to modify archived PropMap.
+     * Override to add bounds info to prop map.
      */
     @Override
-    protected void processArchivedMap(PropMap propMap)
+    protected PropMap getPropMapForArchiver(PropArchiver propArchiver)
     {
+        // Do normal version and get child prop maps
+        PropMap propMap = super.getPropMapForArchiver(propArchiver);
         PropMap[] childNodes = (PropMap[]) propMap.getPropValue(Children_Prop);
-        if (childNodes == null) return;
+        if (childNodes == null)
+            return propMap;
+
+        // Add titles for children
         for (int i = 0; i < childNodes.length; i++) {
             PropMap childNode = childNodes[i];
             View childView = getChild(i);
-            if (childView.getX() != 0) childNode.setPropValue("X", childView.getX());
-            if (childView.getY() != 0) childNode.setPropValue("Y", childView.getY());
-            if (childView.getWidth() != 0) childNode.setPropValue("Width", childView.getWidth());
-            if (childView.getHeight() != 0) childNode.setPropValue("Height", childView.getHeight());
+            if (childView.getX() != 0) childNode.setPropValue(X_Prop, childView.getX());
+            if (childView.getY() != 0) childNode.setPropValue(Y_Prop, childView.getY());
+            if (childView.getWidth() != 0) childNode.setPropValue(Width_Prop, childView.getWidth());
+            if (childView.getHeight() != 0) childNode.setPropValue(Height_Prop, childView.getHeight());
         }
+
+        // Return
+        return propMap;
     }
 
     /**
