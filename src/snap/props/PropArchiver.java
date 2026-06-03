@@ -113,7 +113,7 @@ public class PropArchiver {
 
         // Handle PropObject
         PropObject propObject = (PropObject) relationObj;
-        PropMap propMap = convertPropObjectToPropMap(propObject);
+        PropMap propMap = propObject.getPropMapForArchiver(this);
 
         // Configure PropMap.NeedsClassDeclaration
         boolean needsClassDeclaration = PropUtils.isClassDeclarationNeededForObjectAndProp(propObject, relationProp);
@@ -354,7 +354,7 @@ public class PropArchiver {
     public <T extends PropObject> T copyPropObject(T aPropObject)
     {
         // Convert PropObject to PropMap
-        PropMap propMap = convertPropObjectToPropMap(aPropObject);
+        PropMap propMap = aPropObject.getPropMapForArchiver(this);
 
         // Convert back - not sure I need to create prop
         Class<?> propObjClass = aPropObject.getClass();

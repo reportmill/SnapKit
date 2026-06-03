@@ -5,10 +5,7 @@ package snap.view;
 import java.util.*;
 import snap.geom.*;
 import snap.gfx.*;
-import snap.props.PropObject;
-import snap.props.PropSet;
-import snap.props.PropUtils;
-import snap.props.StringCodec;
+import snap.props.*;
 import snap.text.StringBox;
 import snap.util.*;
 
@@ -3104,10 +3101,27 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
+     * Override to make sure view is in normal style state.
+     */
+    @Override
+    protected PropMap getPropMapForArchiver(PropArchiver propArchiver)
+    {
+        PseudoClass styleState = getStyleState();
+        setStyleState(PseudoClass.Normal);
+        PropMap propMap = super.getPropMapForArchiver(propArchiver);
+        setStyleState(styleState);
+        return propMap;
+    }
+
+    /**
      * XML Archival.
      */
     public XMLElement toXML(XMLArchiver anArchiver)
     {
+        // Make sure view is in normal state
+        PseudoClass styleState = getStyleState();
+        setStyleState(PseudoClass.Normal);
+
         // Get new element with class name
         String className = getClass().getSimpleName();
         XMLElement e = new XMLElement(className);
@@ -3216,6 +3230,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             e.add("Class", runtimeClassName);
 
         // Return the element
+        setStyleState(styleState);
         return e;
     }
 
