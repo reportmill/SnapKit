@@ -1,7 +1,6 @@
 package snap.view;
 import snap.gfx.*;
 import snap.util.StyleSheet;
-import snap.util.StyleSheetParser;
 import java.util.*;
 
 /**
@@ -118,7 +117,7 @@ public class ViewTheme {
         
             View { Align: TOP_LEFT; Margin: 0; Padding: 0; Spacing: 0; BorderRadius: 0; TextColor: #00 }
     
-            RootView { Fill: #FA}
+            RootView { Fill: #FA }
             RootView:Alternate { Fill: #F0 }
     
             Label { Align: CENTER_LEFT; Spacing: 4 }

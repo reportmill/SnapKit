@@ -787,6 +787,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Font getDefaultFont()
     {
+        // If font is defined by class style, return class style font
+        ViewStyle classStyle = getClassStyle();
+        Font classStyleFont = (Font) classStyle.getComputedValue(Font_Prop);
+        if (classStyleFont != null)
+            return classStyleFont;
+
+        // Otherwise, return parent or hard coded default
         View par = getParent();
         return par != null ? par.getFont() : Font.Arial11;
     }
@@ -2809,10 +2816,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         aPropSet.addPropNamed(Name_Prop, String.class, null);
 
         // X, Y, Width, Height
-        aPropSet.addPropNamed(X_Prop, double.class, 0d);
-        aPropSet.addPropNamed(Y_Prop, double.class, 0d);
-        aPropSet.addPropNamed(Width_Prop, double.class, 0d);
-        aPropSet.addPropNamed(Height_Prop, double.class, 0d);
+        aPropSet.addPropNamed(X_Prop, double.class, 0d).setSkipArchival(true);
+        aPropSet.addPropNamed(Y_Prop, double.class, 0d).setSkipArchival(true);
+        aPropSet.addPropNamed(Width_Prop, double.class, 0d).setSkipArchival(true);
+        aPropSet.addPropNamed(Height_Prop, double.class, 0d).setSkipArchival(true);
 
         // Rotate, ScaleX, ScaleY, TransX, TransY
         aPropSet.addPropNamed(Rotate_Prop, double.class, 0d);
@@ -3082,21 +3089,18 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     @Override
     public Object getPropDefault(String propName)
     {
-        // Handle Font special since default font changes depending on parent
-        if (propName.equals(Font_Prop))
-            return getDefaultFont();
+        return switch (propName) {
 
-        // Forward style props to class style
-        switch (propName) {
+            // Handle style props special
+            case Fill_Prop -> getClassStyle().getFill();
+            case Border_Prop -> getClassStyle().getBorder();
+            case Font_Prop -> getDefaultFont();
             case Align_Prop, Margin_Prop, Padding_Prop, Spacing_Prop,
-                 Fill_Prop, Border_Prop, BorderRadius_Prop, View.TextColor_Prop -> {
-                    ViewStyle classStyle = getClassStyle();
-                    return classStyle.getComputedValue(propName);
-            }
-        }
+                 BorderRadius_Prop, TextColor_Prop -> getClassStyle().getComputedValue(propName);
 
-        // Do normal version
-        return super.getPropDefault(propName);
+            // Do normal version
+            default -> super.getPropDefault(propName);
+        };
     }
 
     /**

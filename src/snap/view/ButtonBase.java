@@ -170,18 +170,6 @@ public class ButtonBase extends ParentView {
     {
         if (aValue == _showArea) return;
         firePropChange(ShowArea_Prop, _showArea, _showArea = aValue);
-
-        // Handle normal button: Clear view style Fill/Border
-        if (aValue) {
-            getStyle().setStyleValue(Fill_Prop, null);
-            getStyle().setStyleValue(Border_Prop, null);
-        }
-
-        // Handle tool-bar button: Override view style Fill/Border to be null
-        else {
-            setFill(null);
-            setBorder(null);
-        }
     }
 
     /**

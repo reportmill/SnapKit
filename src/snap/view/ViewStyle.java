@@ -354,6 +354,7 @@ public class ViewStyle implements Cloneable {
         try { clone = (ViewStyle) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
         clone._values = new HashMap<>(_values);
+        clone._computedValues = new HashMap<>();
         clone._states = null;
         return clone;
     }

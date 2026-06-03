@@ -88,7 +88,7 @@ public class RowView extends ChildView {
 
             // FillHeight, Hugging
             case FillHeight_Prop -> isFillHeight();
-            case Hugging_Prop -> isFillHeight();
+            case Hugging_Prop -> isHugging();
 
             // Do normal version
             default -> super.getPropValue(aPropName);
@@ -105,7 +105,7 @@ public class RowView extends ChildView {
 
             // FillHeight, Hugging
             case FillHeight_Prop -> setFillHeight(Convert.boolValue(aValue));
-            case Hugging_Prop -> setFillHeight(Convert.boolValue(aValue));
+            case Hugging_Prop -> setHugging(Convert.boolValue(aValue));
 
             // Do normal version
             default -> super.setPropValue(aPropName, aValue);

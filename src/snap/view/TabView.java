@@ -452,7 +452,10 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     @Override
     protected void setPropMapForArchiver(PropArchiver propArchiver, PropMap propMap)
     {
-        PropMap[] childNodes = (PropMap[]) propMap.getPropValue(Children_Prop);
+        super.setPropMapForArchiver(propArchiver, propMap);
+
+        Object childrenObj = propMap.getPropValue(Children_Prop);
+        PropMap[] childNodes = childrenObj == null ? null : childrenObj instanceof PropMap[] propMaps ? propMaps : new PropMap[] { (PropMap) childrenObj };
         if (childNodes == null)
             return;
 
