@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.props.PropSet;
 
 /**
  * This view subclass wraps a TextArea in a ScrollView.
@@ -25,6 +26,16 @@ public class TextView extends TextArea {
         setEditable(true);
         setUndoActivated(true);
         setOverflow(Overflow.Scroll);
+    }
+
+    /**
+     * Override to set default editable value.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        super.initProps(aPropSet);
+        aPropSet.getPropForName(Editable_Prop).setDefaultValue(true);
     }
 
     /**

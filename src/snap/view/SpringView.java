@@ -157,20 +157,25 @@ public class SpringView extends ChildView {
     @Override
     protected PropMap getPropMapForArchiver(PropArchiver propArchiver)
     {
-        // Do normal version and get child prop maps
         PropMap propMap = super.getPropMapForArchiver(propArchiver);
-        PropMap[] childNodes = (PropMap[]) propMap.getPropValue(Children_Prop);
-        if (childNodes == null)
+
+        // Add size properties
+        if (getWidth() != 0) propMap.setPropValue(Width_Prop, getWidth());
+        if (getHeight() != 0) propMap.setPropValue(Height_Prop, getHeight());
+
+        // Get child prop maps
+        PropMap[] childMaps = (PropMap[]) propMap.getPropValue(Children_Prop);
+        if (childMaps == null)
             return propMap;
 
-        // Add titles for children
-        for (int i = 0; i < childNodes.length; i++) {
-            PropMap childNode = childNodes[i];
+        // Add bounds properties for children
+        for (int i = 0; i < childMaps.length; i++) {
+            PropMap childMap = childMaps[i];
             View childView = getChild(i);
-            if (childView.getX() != 0) childNode.setPropValue(X_Prop, childView.getX());
-            if (childView.getY() != 0) childNode.setPropValue(Y_Prop, childView.getY());
-            if (childView.getWidth() != 0) childNode.setPropValue(Width_Prop, childView.getWidth());
-            if (childView.getHeight() != 0) childNode.setPropValue(Height_Prop, childView.getHeight());
+            if (childView.getX() != 0) childMap.setPropValue(X_Prop, childView.getX());
+            if (childView.getY() != 0) childMap.setPropValue(Y_Prop, childView.getY());
+            if (childView.getWidth() != 0) childMap.setPropValue(Width_Prop, childView.getWidth());
+            if (childView.getHeight() != 0) childMap.setPropValue(Height_Prop, childView.getHeight());
         }
 
         // Return
