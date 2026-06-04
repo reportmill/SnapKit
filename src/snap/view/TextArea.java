@@ -593,7 +593,7 @@ public class TextArea extends ParentView {
     @Override
     public void setFont(Font aFont)
     {
-        if (Objects.equals(aFont, getFont())) return;
+        if (isFontSet() && Objects.equals(aFont, getFont())) return;
         super.setFont(aFont);
 
         // If SyncTextFont, forward to TextModel
@@ -668,7 +668,7 @@ public class TextArea extends ParentView {
     {
         // Handle DefaultTextStyle and SyncTextFont
         String propName = propChange.getPropName();
-        if (propName == TextModel.DefaultTextStyle_Prop && isSyncTextFont()) {
+        if (propName == TextModel.DefaultTextStyle_Prop && isSyncTextFont() && isFontSet()) {
             Font font = _textModel.getDefaultFont();
             setFont(font);
         }

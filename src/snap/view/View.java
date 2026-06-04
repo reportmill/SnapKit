@@ -3076,6 +3076,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case MaxHeight_Prop -> !isMaxHeightSet();
             case PrefWidth_Prop -> !isPrefWidthSet();
             case PrefHeight_Prop -> !isPrefHeightSet();
+            case Font_Prop -> !isFontSet() || super.isPropDefault(Font_Prop);
             default -> super.isPropDefault(propName);
         };
     }
@@ -3298,46 +3299,20 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Unarchive Border, BorderRadius
         if (anElement.hasAttribute(Border_Prop))
             setBorder(Border.of(anElement.getAttributeValue(Border_Prop)));
-        else {
-            int borderIndex = anArchiver.indexOf(anElement, Border.class);
-            if (borderIndex >= 0) {
-                Border border = (Border) anArchiver.fromXML(anElement.get(borderIndex), this);
-                setBorder(border);
-            }
-        }
         if (anElement.hasAttribute(BorderRadius_Prop))
             setBorderRadius(anElement.getAttributeFloatValue(BorderRadius_Prop));
 
         // Unarchive Fill
         if (anElement.hasAttribute(Fill_Prop))
             setFill(Paint.of(anElement.getAttributeValue(Fill_Prop)));
-        else {
-            XMLElement fillXML = anElement.getElement("color");
-            if (fillXML == null)
-                fillXML = anElement.getElement("fill");
-            if (fillXML != null) {
-                Paint fill = (Paint) anArchiver.fromXML(fillXML, this);
-                setFill(fill);
-            }
-        }
 
         // Unarchive Effect
         if (anElement.hasAttribute(Effect_Prop))
             setEffect(Effect.of(anElement.getAttributeValue(Effect_Prop)));
-        else {
-            int effectIndex = anArchiver.indexOf(anElement, Effect.class);
-            if (effectIndex >= 0) {
-                Effect eff = (Effect) anArchiver.fromXML(anElement.get(effectIndex), this);
-                setEffect(eff);
-            }
-        }
 
         // Unarchive font
         if (anElement.hasAttribute(Font_Prop))
             setFont(Font.of(anElement.getAttributeValue(Font_Prop)));
-        XMLElement fontXML = anElement.getElement(Font_Prop);
-        if (fontXML != null)
-            setFont((Font) anArchiver.fromXML(fontXML, this));
 
         // Unarchive TextColor
         if (anElement.hasAttribute(TextColor_Prop))

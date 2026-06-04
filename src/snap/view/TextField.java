@@ -156,8 +156,11 @@ public class TextField extends TextArea {
         firePropChange(Multiline_Prop, _multiline, _multiline = aValue);
 
         // This can't be good
-        if (getAlign() == getPropDefault(Align_Prop) && isPrefHeightSet())
+        Pos defaultAlign = getClassStyle().getComputedValue(Align_Prop, Pos.class);
+        if (aValue && getAlign() == defaultAlign)
             setAlign(Pos.TOP_LEFT);
+        else if (!aValue && getAlign() == Pos.TOP_LEFT)
+            setAlign(defaultAlign);
     }
 
     /**
@@ -455,6 +458,17 @@ public class TextField extends TextArea {
             // Do normal version
             default -> super.setPropValue(aPropName, aValue);
         }
+    }
+
+    /**
+     * Override to support alternate Align default for multiline.
+     */
+    @Override
+    public Object getPropDefault(String propName)
+    {
+        if (propName == View.Align_Prop && isMultiline())
+            return Pos.TOP_LEFT;
+        return super.getPropDefault(propName);
     }
 
     /**
