@@ -210,8 +210,8 @@ public class XMLArchiver {
         // Archive resources
         for (XMLArchiver.Resource resource : getResources()) {
             XMLElement resourceXML = new XMLElement("resource");
-            resourceXML.add("name", resource.getName());
-            resourceXML.setValueBytes(resource.getBytes());
+            resourceXML.add("name", resource.name());
+            resourceXML.setValueBytes(resource.bytes());
             xml.add(resourceXML);
         }
 
@@ -528,8 +528,8 @@ public class XMLArchiver {
     public byte[] getResource(String aName)
     {
         for (int i = 0, iMax = _resources.size(); i < iMax; i++)
-            if (getResource(i)._name.equals(aName))
-                return getResource(i)._bytes;
+            if (getResource(i).name.equals(aName))
+                return getResource(i).bytes;
         return null;
     }
 
@@ -539,12 +539,12 @@ public class XMLArchiver {
     public String addResource(byte[] bytes, String aName)
     {
         // If resource has already been added, just return it's name
-        for (int i = 0, iMax = _resources.size(); i < iMax; i++)
-            if (getResource(i).equals(bytes))
-                return getResource(i).getName();
+        for (Resource resource: _resources)
+            if (Arrays.equals(resource.bytes, bytes))
+                return resource.name;
 
         // If new resource, add it
-        _resources.add(new Resource(bytes, aName));
+        _resources.add(new Resource(aName, bytes));
 
         // Return given name
         return aName;
@@ -599,30 +599,7 @@ public class XMLArchiver {
     }
 
     /**
-     * This inner class represents a named resource associated with an archiver.
+     * This record represents a named resource associated with an archiver.
      */
-    public static class Resource {
-
-        // The resource bytes
-        byte[] _bytes;
-
-        // The resource name
-        String _name;
-
-        /** Constructor. */
-        public Resource(byte[] bytes, String aName)
-        {
-            _bytes = bytes;
-            _name = aName;
-        }
-
-        // Returns resource bytes
-        public byte[] getBytes()  { return _bytes; }
-
-        // Returns resource name
-        public String getName()  { return _name; }
-
-        // Standard equals implementation
-        public boolean equals(byte[] bytes)  { return Arrays.equals(bytes, _bytes); }
-    }
+    private record Resource(String name, byte[] bytes) { }
 }

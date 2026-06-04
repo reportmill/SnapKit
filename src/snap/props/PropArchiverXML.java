@@ -35,8 +35,8 @@ public class PropArchiverXML extends PropArchiver {
         // Archive resources
         for (Resource resource : getResources()) {
             XMLElement resourceXML = new XMLElement("Resource");
-            resourceXML.add("Name", resource.getName());
-            resourceXML.setValueBytes(resource.getBytes());
+            resourceXML.add("Name", resource.name());
+            resourceXML.setValueBytes(resource.bytes());
             xml.add(resourceXML);
         }
 

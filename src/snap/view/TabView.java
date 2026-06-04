@@ -394,17 +394,12 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     /**
      * ViewHost method: Returns the number of guest views.
      */
-    public int getGuestCount()  { return getTabCount() + 1; }
+    public int getGuestCount()  { return getTabCount(); }
 
     /**
      * ViewHost method: Returns the guest view at given index.
      */
-    public View getGuest(int anIndex)
-    {
-        if (anIndex == getTabCount())
-            return _contentBox;
-        return getTab(anIndex).getContent();
-    }
+    public View getGuest(int anIndex)  { return getTab(anIndex).getContent(); }
 
     /**
      * ViewHost method: Adds the given view to this host's guest (children) list at given index.
@@ -455,7 +450,8 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
         super.setPropMapForArchiver(propArchiver, propMap);
 
         Object childrenObj = propMap.getPropValue(Children_Prop);
-        PropMap[] childNodes = childrenObj == null ? null : childrenObj instanceof PropMap[] propMaps ? propMaps : new PropMap[] { (PropMap) childrenObj };
+        PropMap[] childNodes = childrenObj instanceof PropMap childPropMap ? childPropMap.getPropValuesAsArray() :
+                childrenObj instanceof PropMap[] propMaps ? propMaps : null;
         if (childNodes == null)
             return;
 

@@ -3,11 +3,9 @@
  */
 package snap.props;
 import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class primarily converts a PropObject (graph) to/from a PropMap (graph).
@@ -23,7 +21,7 @@ public class PropArchiver {
     private PropObject _rootObject;
 
     // Resources
-    private Resource[] _resources = new Resource[0];
+    private List<Resource> _resources = new ArrayList<>();
 
     // A helper class to archive common SnapKit classes (Font, Color, etc.)
     protected PropArchiverHpr _helper;
@@ -153,12 +151,13 @@ public class PropArchiver {
             // Skip special Class key
             if (propName.equals(CLASS_KEY)) continue;
 
-            // Get node value
+            // Get prop object property for name (just skip if not found)
             Prop prop = propObject.getPropForName(propName);
-            if (prop == null) { System.err.println("PropArchiver.convertNodeToNative: Unknown prop: " + propName); continue; }
-            Object nodeValue = propMap.getPropValue(propName);
+            if (prop == null)
+                continue;
 
-            // Get native value
+            // Get prop value
+            Object propValue = propMap.getPropValue(propName);
             Object nativeValue = null;
 
             // Handle Relation
@@ -167,37 +166,28 @@ public class PropArchiver {
                 // Handle Relation array
                 if (prop.isArray()) {
 
-                    // If nodeValue is PropMap, get values as array (since XML can't differentiate lists)
-                    if (nodeValue instanceof PropMap)
-                        nodeValue = ((PropMap) nodeValue).getPropValuesAsArray();
-
-                    // If node is empty array string, replace with empty PropMap array (since JSON can't differentiate empty lists)
-                    else if (nodeValue instanceof String && ((String) nodeValue).replace(" ", "").equals("[]"))
-                        nodeValue = new PropMap[0];
-
                     // Get relation node array
-                    assert (nodeValue instanceof PropMap[]);
-                    PropMap[] relationNodeArray = (PropMap[]) nodeValue;
+                    PropMap[] propValueArray = getPropMapArrayForPropMapValue(propValue);
 
                     // Create native list or array for prop
-                    Class<?> nativeArrayClass = prop.getPropClass();
-                    if (List.class.isAssignableFrom(nativeArrayClass))
-                        nativeValue = new ArrayList<>(relationNodeArray.length);
+                    Class<?> propArrayClass = prop.getPropClass();
+                    if (List.class.isAssignableFrom(propArrayClass))
+                        nativeValue = new ArrayList<>(propValueArray.length);
                     else {
-                        Class<?> nativeCompClass = nativeArrayClass.getComponentType();
-                        nativeValue = Array.newInstance(nativeCompClass, relationNodeArray.length);
+                        Class<?> nativeCompClass = propArrayClass.getComponentType();
+                        nativeValue = Array.newInstance(nativeCompClass, propValueArray.length);
                     }
 
                     // Fill native array
-                    for (int i = 0; i < relationNodeArray.length; i++) {
+                    for (int i = 0; i < propValueArray.length; i++) {
 
                         // Get array node and array object
-                        PropMap relationNode = relationNodeArray[i];
+                        PropMap relationNode = propValueArray[i];
                         Object relationNative = convertPropMapToPropObject(relationNode, prop, null);
 
                         // If proxy, swap in real
-                        if (relationNative instanceof PropObjectProxy)
-                            relationNative = ((PropObjectProxy<?>) relationNative).getReal();
+                        if (relationNative instanceof PropObjectProxy<?> propObjProxy)
+                            relationNative = propObjProxy.getReal();
 
                         // Set in nativeValue array
                         if (nativeValue instanceof List)
@@ -207,7 +197,7 @@ public class PropArchiver {
                 }
 
                 // Handle Relation
-                else if (nodeValue instanceof PropMap relationNode) {
+                else if (propValue instanceof PropMap relationNode) {
 
                     // If Prop.Preexisting, use preexisting object
                     PropObject relationObjPreexisting = null;
@@ -216,8 +206,8 @@ public class PropArchiver {
 
                     // Convert to native (if PropObjectProxy, swap for real)
                     nativeValue = convertPropMapToPropObject(relationNode, prop, relationObjPreexisting);
-                    if (nativeValue instanceof PropObjectProxy)
-                        nativeValue = ((PropObjectProxy<?>) nativeValue).getReal();
+                    if (nativeValue instanceof PropObjectProxy<?> propObjProxy)
+                        nativeValue = propObjProxy.getReal();
                 }
             }
 
@@ -225,12 +215,12 @@ public class PropArchiver {
             else {
 
                 // Set native value
-                nativeValue = nodeValue;
+                nativeValue = propValue;
 
                 // If string, see if it needs to be decoded
-                if (nodeValue instanceof String) {
+                if (propValue instanceof String) {
                     Class<?> propClass = prop.getPropClass();
-                    nativeValue = StringCodec.SHARED.decodeString((String) nodeValue, propClass);
+                    nativeValue = StringCodec.SHARED.decodeString((String) propValue, propClass);
                 }
             }
 
@@ -368,81 +358,52 @@ public class PropArchiver {
     /**
      * Returns the list of optional resources associated with this archiver.
      */
-    public Resource[] getResources()  { return _resources; }
+    public List<Resource> getResources()  { return _resources; }
 
     /**
-     * Returns an individual resource associated with this archiver, by index.
+     * Adds a byte array resource to this archiver (only if absent).
      */
-    public Resource getResource(int anIndex)  { return _resources[anIndex]; }
+    public void addResource(String aName, byte[] theBytes)
+    {
+        // If resource bytes have already been added, just return
+        if (ListUtils.hasMatch(_resources, res -> Arrays.equals(res.bytes, theBytes)))
+            return;
+
+        // Add new resource
+        _resources.add(new Resource(aName, theBytes));
+    }
 
     /**
      * Returns an individual resource associated with this archiver, by name.
      */
     public Resource getResourceForName(String aName)
     {
-        // Iterate over resources and return resource matching name
-        for (Resource resource : _resources)
-            if (resource.getName().equals(aName))
-                return resource;
-
-        // Return not found
-        return null;
+        return ListUtils.findMatch(_resources, res -> res.name.equals(aName));
     }
 
     /**
-     * Adds a byte array resource to this archiver (only if absent).
+     * Returns a prop map array for given prop map value.
      */
-    public String addResource(String aName, byte[] theBytes)
+    private static PropMap[] getPropMapArrayForPropMapValue(Object propValue)
     {
-        // If resource has already been added, just return its name
-        for (Resource resource : _resources)
-            if (resource.equalsBytes(theBytes))
-                return resource.getName();
+        if (propValue instanceof PropMap[])
+            return (PropMap[]) propValue;
 
-        // Add new resource
-        _resources = ArrayUtils.add(_resources, new Resource(aName, theBytes));
+        // If nodeValue is PropMap, get values as array (since XML can't differentiate lists)
+        if (propValue instanceof PropMap propMap)
+            return propMap.getPropValuesAsArray();
 
-        // Return name
-        return aName;
+        // If node is empty array string, replace with empty PropMap array (since JSON can't differentiate empty lists)
+        if (propValue instanceof String valueStr && valueStr.matches("\\[\\s*]"))
+            return new PropMap[0];
+
+        // Complain and return null
+        System.err.println("PropArchiver.getPropMapArrayForPropMapValue: Expected PropMap[] or empty array string, got: " + propValue);
+        return new PropMap[0];
     }
 
     /**
-     * This inner class represents a named resource associated with an archiver.
+     * This record represents a named resource associated with an archiver.
      */
-    public static class Resource {
-
-        // The resource name
-        private String  _name;
-
-        // The resource bytes
-        private byte[]  _bytes;
-
-        // Creates new resource for given bytes and name
-        public Resource(String aName, byte[] theBytes)
-        {
-            _name = aName;
-            _bytes = theBytes;
-        }
-
-        // Returns resource name
-        public String getName()  { return _name; }
-
-        // Returns resource bytes
-        public byte[] getBytes()  { return _bytes; }
-
-        // Standard equals implementation
-        public boolean equalsBytes(byte[] bytes)
-        {
-            // Check length
-            if (bytes.length != _bytes.length) return false;
-
-            // Check bytes
-            for (int i = 0, iMax = bytes.length; i < iMax; i++)
-                if (bytes[i] != _bytes[i])
-                    return false;
-
-            // Return true
-            return true;
-        }
-    }
+    public record Resource(String name, byte[] bytes) { }
 }

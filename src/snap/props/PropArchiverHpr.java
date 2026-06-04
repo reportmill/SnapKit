@@ -278,7 +278,7 @@ public class PropArchiverHpr {
             }
 
             // Get byte and image
-            byte[] bytes = resource.getBytes();
+            byte[] bytes = resource.bytes();
             Image image = Image.getImageForBytes(bytes);
 
             // Return
