@@ -14,11 +14,17 @@ import java.util.*;
  */
 public class PropArchiver {
 
+    // The owner class that initated archival/unarchival
+    private Object _owner;
+
     // A map of names to Class names, for unarchival
     private Map<String,Class<?>> _classMap;
 
     // The root object (for unarchival, optional)
     private PropObject _rootObject;
+
+    // Whether to use real classes
+    private boolean _useRealClass = true;
 
     // Resources
     private List<Resource> _resources = new ArrayList<>();
@@ -38,6 +44,21 @@ public class PropArchiver {
     }
 
     /**
+     * Returns the owner.
+     */
+    public Object getOwner()  { return _owner; }
+
+    /**
+     * Sets the owner.
+     */
+    public void setOwner(Object anOwner)  { _owner = anOwner; }
+
+    /**
+     * Returns the owner class.
+     */
+    public Class<?> getOwnerClass()  { return _owner != null ? _owner.getClass() : null; }
+
+    /**
      * Returns the object to read properties into.
      */
     public PropObject getRootObject()  { return _rootObject; }
@@ -46,6 +67,16 @@ public class PropArchiver {
      * Sets the object to read properties into.
      */
     public void setRootObject(PropObject rootObject)  { _rootObject = rootObject; }
+
+    /**
+     * Returns whether to use real classes.
+     */
+    public boolean isUseRealClass()  { return _useRealClass; }
+
+    /**
+     * Sets whether to use real classes.
+     */
+    public void setUseRealClass(boolean aFlag)  { _useRealClass = aFlag; }
 
     /**
      * Returns a PropMap for given PropObject.
@@ -258,15 +289,6 @@ public class PropArchiver {
     }
 
     /**
-     * Returns a class for name.
-     */
-    public Class<?> getClassForName(String aName)
-    {
-        Map<String,Class<?>> classMap = getClassMap();
-        return classMap.get(aName);
-    }
-
-    /**
      * Creates a PropObject for PropMap.
      */
     protected PropObject createPropObjectForPropMap(PropMap propMap, Prop aProp)
@@ -287,7 +309,7 @@ public class PropArchiver {
     protected Class<?> getPropObjectClassForPropMap(PropMap propMap, Prop aProp)
     {
         // If Class prop set, try that
-        String className = propMap.getPropValueAsString(CLASS_KEY);
+        String className = isUseRealClass() ? propMap.getPropValueAsString(CLASS_KEY) : null;
         if (className != null) {
             Class<?> cls = getClassForName(className);
             if (cls != null)
@@ -318,6 +340,25 @@ public class PropArchiver {
 
         // Return not found
         return null;
+    }
+
+    /**
+     * Returns a class for name.
+     */
+    private Class<?> getClassForName(String aName)
+    {
+        // Look in class map first
+        Map<String,Class<?>> classMap = getClassMap();
+        Class<?> knownClass = classMap.get(aName);
+        if (knownClass != null)
+            return knownClass;
+
+        // Otherwise try to load class for name
+        Class<?> ownerClass = getOwnerClass();
+        ClassLoader classLoader = ownerClass != null ? ownerClass.getClassLoader() : PropArchiver.class.getClassLoader();
+        try { return Class.forName(aName, false, classLoader); }
+        catch (ClassNotFoundException e) { return null; }
+        catch (NoClassDefFoundError t) { System.err.println("PropArchiver.getClassForName: " + t); return null; }
     }
 
     /**

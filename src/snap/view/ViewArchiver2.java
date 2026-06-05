@@ -1,26 +1,16 @@
 package snap.view;
-import snap.gfx.BlurEffect;
-import snap.gfx.EmbossEffect;
-import snap.gfx.ReflectEffect;
-import snap.gfx.ShadowEffect;
-import snap.props.Prop;
 import snap.props.PropArchiverXML;
-import snap.props.PropMap;
 import snap.props.PropObject;
 import snap.util.XMLElement;
 import snap.viewx.ColorButton;
 import snap.viewx.ColorDock;
 import snap.viewx.ColorWell;
-
 import java.util.List;
 
 /**
  * This prop archiver subclass archives views and friends to .snp file.
  */
 public class ViewArchiver2 extends PropArchiverXML {
-
-    // Whether to use real classes
-    private boolean _useRealClass = true;
 
     /**
      * Constructor.
@@ -29,16 +19,6 @@ public class ViewArchiver2 extends PropArchiverXML {
     {
         VIEW_CLASSES.forEach(this::addClassMapClass);
     }
-
-    /**
-     * Returns whether to use real classes.
-     */
-    public boolean isUseRealClass()  { return _useRealClass; }
-
-    /**
-     * Sets whether to use real classes.
-     */
-    public void setUseRealClass(boolean aFlag)  { _useRealClass = aFlag; }
 
     /**
      * Override to move children inline.
@@ -56,28 +36,6 @@ public class ViewArchiver2 extends PropArchiverXML {
     {
         groupViewChildren(anElement);
         return super.readPropObjectFromXml(anElement);
-    }
-
-    /**
-     * Override to use real classes if set.
-     */
-    @Override
-    protected Class<?> getPropObjectClassForPropMap(PropMap propMap, Prop aProp)
-    {
-        if (isUseRealClass()) {
-            String runtimeClassName = propMap.getPropValueAsString("RuntimeClass");
-            if (runtimeClassName != null) {
-                ClassLoader classLoader = ViewArchiver.class.getClassLoader();
-                try { return Class.forName(runtimeClassName, false, classLoader); }
-                catch (ClassNotFoundException e) { return null; }
-                catch (NoClassDefFoundError t) {
-                    System.err.println("ViewArchiver.getClassForName: " + t);
-                    return null;
-                }
-            }
-        }
-
-        return super.getPropObjectClassForPropMap(propMap, aProp);
     }
 
     /**
@@ -121,9 +79,7 @@ public class ViewArchiver2 extends PropArchiverXML {
             ToggleButton.class,
             TreeView.class,
             TextField.class, TextArea.class, TextView.class,
-
-            PathView.class,
-            ShadowEffect.class, EmbossEffect.class, BlurEffect.class, ReflectEffect.class
+            PathView.class
     );
 
     /**
@@ -160,6 +116,9 @@ public class ViewArchiver2 extends PropArchiverXML {
             xml.getAttribute("Class").setFullName(View.RuntimeClassName_Prop);
     }
 
+    /**
+     * Returns the children property name for the given XML element.
+     */
     private static String getChildrenPropNameForXml(XMLElement xml)
     {
         return switch (xml.getName()) {
