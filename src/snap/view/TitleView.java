@@ -396,10 +396,10 @@ public class TitleView extends ParentView implements ViewHost {
     {
         super.initProps(aPropSet);
 
-        // Collapsible, Expanded, TitleStyle
+        // TitleStyle, Collapsible, Expanded
+        aPropSet.addPropNamed(TitleStyle_Prop, TitleStyle.class, TitleStyle.EtchBorder);
         aPropSet.addPropNamed(Collapsible_Prop, boolean.class);
         aPropSet.addPropNamed(Expanded_Prop, boolean.class, true);
-        aPropSet.addPropNamed(TitleStyle_Prop, TitleStyle.class, TitleStyle.EtchBorder);
     }
 
     /**
@@ -410,10 +410,10 @@ public class TitleView extends ParentView implements ViewHost {
     {
         return switch (propName) {
 
-            // Collapsible, Expanded, TitleStyle
+            // TitleStyle, Collapsible, Expanded
+            case TitleStyle_Prop -> getTitleStyle();
             case Collapsible_Prop -> isCollapsible();
             case Expanded_Prop, "Value" -> isExpanded();
-            case TitleStyle_Prop -> getTitleStyle();
 
             // Do normal version
             default -> super.getPropValue(propName);
@@ -428,10 +428,10 @@ public class TitleView extends ParentView implements ViewHost {
     {
         switch (propName) {
 
-            // Collapsible, Expanded, TitleStyle
+            // TitleStyle, Collapsible, Expanded
+            case TitleStyle_Prop: setTitleStyle(titleStyleOf(aValue)); break;
             case Collapsible_Prop: setCollapsible(Convert.boolValue(aValue)); break;
             case Expanded_Prop: case "Value": setExpanded(Convert.boolValue(aValue)); break;
-            case TitleStyle_Prop: setTitleStyle(titleStyleOf(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(propName, aValue); break;

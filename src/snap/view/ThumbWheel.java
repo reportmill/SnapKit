@@ -584,12 +584,12 @@ public class ThumbWheel extends View {
         super.initProps(aPropSet);
 
         // Type, Min, Max, AbsMin, AbsMax, Round
-        aPropSet.addPropNamed(Type_Prop, byte.class, TYPE_RADIAL);
+        aPropSet.addPropNamed(Type_Prop, String.class, "radial");
         aPropSet.addPropNamed(Min_Prop, double.class, 0d);
         aPropSet.addPropNamed(Max_Prop, double.class, 100d);
         aPropSet.addPropNamed(AbsMin_Prop, double.class, (double) -Float.MAX_VALUE);
         aPropSet.addPropNamed(AbsMax_Prop, double.class, (double) Float.MAX_VALUE);
-        aPropSet.addPropNamed(Round_Prop, double.class, 1);
+        aPropSet.addPropNamed(Round_Prop, double.class, 0d);
     }
 
     /**
@@ -598,20 +598,20 @@ public class ThumbWheel extends View {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Type, Min, Max, AbsMin, AbsMax, Round, Value
-            case Type_Prop: return getType();
-            case Min_Prop: return getVisibleMin();
-            case Max_Prop: return getVisibleMax();
-            case AbsMin_Prop: return getAbsoluteMin();
-            case AbsMax_Prop: return getAbsoluteMax();
-            case Round_Prop: return getRound();
-            case Value_Prop: return getValue();
+            case Type_Prop -> getType() == 0 ? "radial" : "linear";
+            case Min_Prop -> getVisibleMin();
+            case Max_Prop -> getVisibleMax();
+            case AbsMin_Prop -> getAbsoluteMin();
+            case AbsMax_Prop -> getAbsoluteMax();
+            case Round_Prop -> getRound();
+            case Value_Prop -> getValue();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -623,16 +623,16 @@ public class ThumbWheel extends View {
         switch (aPropName) {
 
             // Type, Min, Max, AbsMin, AbsMax, Round, Value
-            case Type_Prop: setType((byte) Convert.intValue(aValue)); break;
-            case Min_Prop: setVisibleMin(Convert.doubleValue(aValue)); break;
-            case Max_Prop: setVisibleMax(Convert.doubleValue(aValue)); break;
-            case AbsMin_Prop: setAbsoluteMin(Convert.doubleValue(aValue)); break;
-            case AbsMax_Prop: setAbsoluteMax(Convert.doubleValue(aValue)); break;
-            case Round_Prop: setRound(Convert.doubleValue(aValue)); break;
-            case Value_Prop: setValue(Convert.doubleValue(aValue)); break;
+            case Type_Prop -> setType("linear".equals(Convert.stringValue(aValue)) ? TYPE_LINEAR : TYPE_RADIAL);
+            case Min_Prop -> setVisibleMin(Convert.doubleValue(aValue));
+            case Max_Prop -> setVisibleMax(Convert.doubleValue(aValue));
+            case AbsMin_Prop -> setAbsoluteMin(Convert.doubleValue(aValue));
+            case AbsMax_Prop -> setAbsoluteMax(Convert.doubleValue(aValue));
+            case Round_Prop -> setRound(Convert.doubleValue(aValue));
+            case Value_Prop -> setValue(Convert.doubleValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 

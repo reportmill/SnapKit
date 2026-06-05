@@ -8,7 +8,7 @@ import java.util.*;
 /**
  * This class provides values for view style properties.
  */
-public class ViewStyle implements Cloneable {
+public class ViewStyle {
 
     // The view that owns this style
     private View _view;
@@ -324,7 +324,7 @@ public class ViewStyle implements Cloneable {
      */
     protected ViewStyle copyForClass(Class<? extends View> viewClass)
     {
-        ViewStyle newStyle = clone();
+        ViewStyle newStyle = copyStyle();
         newStyle._viewClass = viewClass;
         newStyle._normalStyle = newStyle;
         return newStyle;
@@ -336,27 +336,24 @@ public class ViewStyle implements Cloneable {
     private ViewStyle copyForState(PseudoClass newState)
     {
         // Copy style, set state and return
-        ViewStyle newStyle = new ViewStyle();
-        newStyle._view = _view;
-        newStyle._viewClass = _viewClass;
+        ViewStyle newStyle = copyStyle();
+        newStyle._values.clear();
         newStyle._state = newState;
-        newStyle._normalStyle = _normalStyle;
         return newStyle;
     }
 
     /**
-     * Standard clone implementation.
+     * Returns a copy of this style.
      */
-    @Override
-    public ViewStyle clone()
+    private ViewStyle copyStyle()
     {
-        ViewStyle clone;
-        try { clone = (ViewStyle) super.clone(); }
-        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
-        clone._values = new HashMap<>(_values);
-        clone._computedValues = new HashMap<>();
-        clone._states = null;
-        return clone;
+        ViewStyle styleCopy = new ViewStyle();
+        styleCopy._view = _view;
+        styleCopy._viewClass = _viewClass;
+        styleCopy._state = _state;
+        styleCopy._values = new HashMap<>(_values);
+        styleCopy._normalStyle = _normalStyle;
+        return styleCopy;
     }
 
     /**

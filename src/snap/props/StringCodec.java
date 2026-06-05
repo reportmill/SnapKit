@@ -217,6 +217,8 @@ public class StringCodec {
             return (T) Border.blackBorder().decodeString(aString);
         if (aClass == Paint.class)
             return (T) Color.BLACK.decodeString(aString);
+        if (aClass == Effect.class)
+            return (T) Effect.DEFAULT_SHADOW.decodeString(aString);
 
         // Handle Codeable
         if (Codeable.class.isAssignableFrom(aClass)) {

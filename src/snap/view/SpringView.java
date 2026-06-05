@@ -162,6 +162,7 @@ public class SpringView extends ChildView {
         // Add size properties
         if (getWidth() != 0) propMap.setPropValue(Width_Prop, getWidth());
         if (getHeight() != 0) propMap.setPropValue(Height_Prop, getHeight());
+        propMap.resortForPropSet(getPropSet());
 
         // Get child prop maps
         PropMap[] childMaps = (PropMap[]) propMap.getPropValue(Children_Prop);
@@ -176,6 +177,7 @@ public class SpringView extends ChildView {
             if (childView.getY() != 0) childMap.setPropValue(Y_Prop, childView.getY());
             if (childView.getWidth() != 0) childMap.setPropValue(Width_Prop, childView.getWidth());
             if (childView.getHeight() != 0) childMap.setPropValue(Height_Prop, childView.getHeight());
+            childMap.resortForPropSet(childView.getPropSet());
         }
 
         // Return

@@ -420,10 +420,10 @@ public class ButtonBase extends ParentView {
     {
         super.initProps(aPropSet);
 
-        // ShowArea, Position, ImageName
+        // ImageName, ShowArea, Position
+        aPropSet.addPropNamed(ImageName_Prop, String.class, PropObject.EMPTY_OBJECT);
         aPropSet.addPropNamed(ShowArea_Prop, boolean.class, DEFAULT_SHOW_AREA);
         aPropSet.addPropNamed(Position_Prop, Pos.class);
-        aPropSet.addPropNamed(ImageName_Prop, String.class, PropObject.EMPTY_OBJECT);
     }
 
     /**
@@ -434,10 +434,10 @@ public class ButtonBase extends ParentView {
     {
         return switch (aPropName) {
 
-            // ShowArea, Position, ImageName
+            // ImageName, ShowArea, Position
+            case ImageName_Prop -> getImageName();
             case ShowArea_Prop -> isShowArea();
             case Position_Prop -> getPosition();
-            case ImageName_Prop -> getImageName();
 
             // Do normal version
             default -> super.getPropValue(aPropName);
@@ -452,10 +452,10 @@ public class ButtonBase extends ParentView {
     {
         switch (aPropName) {
 
-            // ShowArea, Position, ImageName
+            // ImageName, ShowArea, Position
+            case ImageName_Prop -> setImageName(Convert.stringValue(aValue));
             case ShowArea_Prop -> setShowArea(Convert.boolValue(aValue));
             case Position_Prop -> setPosition(Pos.of(aValue));
-            case ImageName_Prop -> setImageName(Convert.stringValue(aValue));
 
             // Do normal version
             default -> super.setPropValue(aPropName, aValue);

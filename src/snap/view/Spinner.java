@@ -243,11 +243,11 @@ public class Spinner <T> extends ParentView {
         // Do normal version
         super.initProps(aPropSet);
 
-        // Min, Max, Step
-        aPropSet.addPropNamed(Min_Prop, double.class, Integer.MAX_VALUE);
-        aPropSet.addPropNamed(Max_Prop, double.class, Integer.MIN_VALUE);
-        aPropSet.addPropNamed(Step_Prop, double.class, 1);
-        aPropSet.addPropNamed(Value_Prop, double.class, 0);
+        // Min, Max, Step, Value
+        aPropSet.addPropNamed(Min_Prop, double.class, (double) Integer.MIN_VALUE);
+        aPropSet.addPropNamed(Max_Prop, double.class, (double) Integer.MAX_VALUE);
+        aPropSet.addPropNamed(Step_Prop, double.class, 1d);
+        aPropSet.addPropNamed(Value_Prop, double.class, 0d).setSkipArchival(true);
     }
 
     /**
@@ -256,17 +256,17 @@ public class Spinner <T> extends ParentView {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Min, Max, Step, Value
-            case Min_Prop: return getMin();
-            case Max_Prop: return getMax();
-            case Step_Prop: return getStep();
-            case Value_Prop: return getValue();
+            case Min_Prop -> getMin();
+            case Max_Prop -> getMax();
+            case Step_Prop -> getStep();
+            case Value_Prop -> getValue();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -277,14 +277,14 @@ public class Spinner <T> extends ParentView {
     {
         switch (aPropName) {
 
-            // Min, Max, Step
-            case Min_Prop: setMin(Convert.doubleValue(aValue)); break;
-            case Max_Prop: setMax(Convert.doubleValue(aValue)); break;
-            case Step_Prop: setStep(Convert.doubleValue(aValue)); break;
-            case Value_Prop: setValue((T) (Double) Convert.doubleValue(aValue)); break;
+            // Min, Max, Step, Value
+            case Min_Prop -> setMin(Convert.doubleValue(aValue));
+            case Max_Prop -> setMax(Convert.doubleValue(aValue));
+            case Step_Prop -> setStep(Convert.doubleValue(aValue));
+            case Value_Prop -> setValue((T) (Double) Convert.doubleValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 

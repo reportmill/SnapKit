@@ -199,7 +199,7 @@ public class ProgressBar extends View {
         super.initProps(aPropSet);
 
         // Add properties for this subclass
-        aPropSet.addPropNamed(Progress_Prop, double.class, 0);
+        aPropSet.addPropNamed(Progress_Prop, double.class, 0).setSkipArchival(true);
         aPropSet.addPropNamed(Indeterminate_Prop, boolean.class, false);
 
         // Override defaults

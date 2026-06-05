@@ -2825,7 +2825,16 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         aPropSet.addPropNamed(TransX_Prop, double.class, 0d);
         aPropSet.addPropNamed(TransY_Prop, double.class, 0d);
 
-        // Style: Align, Margin, Padding, Spacing, Fill, Border, BorderRadius, Font, TextColor
+        // MinWidth, MinHeight, MaxWidth, MaxHeight, PrefWidth, PrefHeight, Vertical
+        aPropSet.addPropNamed(MinWidth_Prop, double.class, 0d);
+        aPropSet.addPropNamed(MinHeight_Prop, double.class, 0d);
+        aPropSet.addPropNamed(MaxWidth_Prop, double.class, 0d);
+        aPropSet.addPropNamed(MaxHeight_Prop, double.class, 0d);
+        aPropSet.addPropNamed(PrefWidth_Prop, double.class, 0d);
+        aPropSet.addPropNamed(PrefHeight_Prop, double.class, 0d);
+        aPropSet.addPropNamed(Vertical_Prop, boolean.class);
+
+        // Style: Align, Margin, Padding, Spacing, Fill, Border, BorderRadius, Effect, Font, TextColor
         aPropSet.addPropNamed(Align_Prop, Pos.class);
         aPropSet.addPropNamed(Margin_Prop, Insets.class);
         aPropSet.addPropNamed(Padding_Prop, Insets.class);
@@ -2833,39 +2842,28 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         aPropSet.addPropNamed(Fill_Prop, Paint.class);
         aPropSet.addPropNamed(Border_Prop, Border.class);
         aPropSet.addPropNamed(BorderRadius_Prop, double.class);
+        aPropSet.addPropNamed(Effect_Prop, Effect.class);
         aPropSet.addPropNamed(Font_Prop, Font.class, null);
         aPropSet.addPropNamed(TextColor_Prop, Color.class);
 
-        // LeanX, LeanY, GrowWidth, GrowHeight, Vertical, Managed
-        aPropSet.addPropNamed(LeanX_Prop, HPos.class, null);
-        aPropSet.addPropNamed(LeanY_Prop, VPos.class, null);
+        // GrowWidth, GrowHeight, LeanX, LeanY, Managed
         aPropSet.addPropNamed(GrowWidth_Prop, boolean.class, false);
         aPropSet.addPropNamed(GrowHeight_Prop, boolean.class, false);
-        aPropSet.addPropNamed(Vertical_Prop, boolean.class);
+        aPropSet.addPropNamed(LeanX_Prop, HPos.class, null);
+        aPropSet.addPropNamed(LeanY_Prop, VPos.class, null);
         aPropSet.addPropNamed(Managed_Prop, boolean.class);
 
-        // MinWidth, MinHeight, MaxWidth, MaxHeight, PrefWidth, PrefHeight
-        aPropSet.addPropNamed(MinWidth_Prop, double.class, 0d);
-        aPropSet.addPropNamed(MinHeight_Prop, double.class, 0d);
-        aPropSet.addPropNamed(MaxWidth_Prop, double.class, 0d);
-        aPropSet.addPropNamed(MaxHeight_Prop, double.class, 0d);
-        aPropSet.addPropNamed(PrefWidth_Prop, double.class, 0d);
-        aPropSet.addPropNamed(PrefHeight_Prop, double.class, 0d);
-
-        // Effect, Opacity
-        aPropSet.addPropNamed(Effect_Prop, Effect.class, null);
-        aPropSet.addPropNamed(Opacity_Prop, double.class, 1d);
-
-        // Text, ToolTip, RuntimeClassName
-        aPropSet.addPropNamed(Text_Prop, String.class, EMPTY_OBJECT);
-        aPropSet.addPropNamed(ToolTip_Prop, String.class, EMPTY_OBJECT);
-        aPropSet.addPropNamed(RuntimeClassName_Prop, String.class, EMPTY_OBJECT);
-
-        // Disabled, Visible, Pickable, Paintable
+        // Disabled, Visible, Opacity, Pickable, Paintable
         aPropSet.addPropNamed(Disabled_Prop, boolean.class, false);
         aPropSet.addPropNamed(Visible_Prop, boolean.class, true);
-        aPropSet.addPropNamed(Pickable_Prop, boolean.class, true);
-        aPropSet.addPropNamed(Paintable_Prop, boolean.class, true);
+        aPropSet.addPropNamed(Opacity_Prop, double.class, 1d);
+        aPropSet.addPropNamed(Pickable_Prop, boolean.class, true).setSkipArchival(true);
+        aPropSet.addPropNamed(Paintable_Prop, boolean.class, true).setSkipArchival(true);
+
+        // ToolTip, Text, RuntimeClassName
+        aPropSet.addPropNamed(ToolTip_Prop, String.class, EMPTY_OBJECT);
+        aPropSet.addPropNamed(Text_Prop, String.class, EMPTY_OBJECT);
+        aPropSet.addPropNamed(RuntimeClassName_Prop, String.class, EMPTY_OBJECT);
 
         // Focusable, FocusWhenPressed, Focused, Parent, Showing
         //aPropSet.addPropNamed(Focusable_Prop, boolean.class, false);
@@ -2903,7 +2901,16 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case TransX_Prop -> getTransX();
             case TransY_Prop -> getTransY();
 
-            // Style: Align, Margin, Padding, Spacing, Fill, Border, BorderRadius, Font, TextColor
+            // MinWidth, MinHeight, MaxWidth, MaxHeight, PrefWidth, PrefHeight, Vertical
+            case View.MinWidth_Prop -> getMinWidth();
+            case View.MinHeight_Prop -> getMinHeight();
+            case View.MaxWidth_Prop -> getMaxWidth();
+            case View.MaxHeight_Prop -> getMaxHeight();
+            case View.PrefWidth_Prop -> getPrefWidth();
+            case View.PrefHeight_Prop -> getPrefHeight();
+            case Vertical_Prop -> isVertical();
+
+            // Style: Align, Margin, Padding, Spacing, Fill, Border, BorderRadius, Effect, Font, TextColor
             case Align_Prop -> getAlign();
             case Margin_Prop -> getMargin();
             case Padding_Prop -> getPadding();
@@ -2911,41 +2918,30 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case Fill_Prop -> getFill();
             case Border_Prop -> getBorder();
             case BorderRadius_Prop -> getBorderRadius();
+            case Effect_Prop -> getEffect();
             case Font_Prop -> getFont();
             case TextColor_Prop -> getTextColor();
 
-            // LeanX, LeanY, GrowWidth, GrowHeight, Vertical, Managed
-            case LeanX_Prop -> getLeanX();
-            case LeanY_Prop -> getLeanY();
+            // LeanX, GrowWidth, GrowHeight, LeanY, Managed
             case GrowWidth_Prop -> isGrowWidth();
             case GrowHeight_Prop -> isGrowHeight();
-            case Vertical_Prop -> isVertical();
+            case LeanX_Prop -> getLeanX();
+            case LeanY_Prop -> getLeanY();
             case Managed_Prop -> isManaged();
 
-            // MinWidth, MinHeight, MaxWidth, MaxHeight, PrefWidth, PrefHeight
-            case View.MinWidth_Prop -> getMinWidth();
-            case View.MinHeight_Prop -> getMinHeight();
-            case View.MaxWidth_Prop -> getMaxWidth();
-            case View.MaxHeight_Prop -> getMaxHeight();
-            case View.PrefWidth_Prop -> getPrefWidth();
-            case View.PrefHeight_Prop -> getPrefHeight();
-
-            // Effect, Opacity
-            case Effect_Prop -> getEffect();
+            // Disabled, Visible, Opacity, Pickable, Paintable
+            case Disabled_Prop -> isDisabled();
+            case Visible_Prop -> isVisible();
             case Opacity_Prop -> getOpacity();
+            case Pickable_Prop -> isPickable();
+            case Paintable_Prop -> isPaintable();
 
-            // Text, ToolTip, RuntimeClassName, Cursor, Clip
-            case Text_Prop -> getText();
+            // ToolTip, Text, RuntimeClassName, Cursor, Clip
             case ToolTip_Prop -> getToolTip();
+            case Text_Prop -> getText();
             case RuntimeClassName_Prop -> getRuntimeClassName();
             case Cursor_Prop -> getCursor();
             case Overflow_Prop -> getOverflow();
-
-            // Disabled, Visible, Pickable, Paintable
-            case Disabled_Prop -> isDisabled();
-            case Visible_Prop -> isVisible();
-            case Pickable_Prop -> isPickable();
-            case Paintable_Prop -> isPaintable();
 
             // Focusable, FocusWhenPressed, Focused
             case Focusable_Prop -> isFocusable();
@@ -2997,49 +2993,47 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case TransX_Prop -> setTransX(Convert.doubleValue(aValue));
             case TransY_Prop -> setTransY(Convert.doubleValue(aValue));
 
-            // Style: Align, Margin, Padding, Spacing, Fill, Border, BorderRadius, Font, TextColor
-            case Align_Prop -> setAlign(Pos.of(aValue));
-            case Margin_Prop -> setMargin(Insets.of(aValue));
-            case Padding_Prop -> setPadding(Insets.of(aValue));
-            case Spacing_Prop -> setSpacing(Convert.doubleValue(aValue));
-            case Border_Prop -> setBorder(Border.of(aValue));
-            case BorderRadius_Prop -> setBorderRadius(Convert.doubleValue(aValue));
-            case Fill_Prop -> setFill(Paint.of(aValue));
-            case Font_Prop -> setFont(Font.of(aValue));
-            case TextColor_Prop -> setTextColor(Color.get(aValue));
-
-            // Alignment: LeanX, LeanY, GrowWidth, GrowHeight, Vertical, Managed
-            case LeanX_Prop -> setLeanX(HPos.of(aValue));
-            case LeanY_Prop -> setLeanY(VPos.of(aValue));
-            case GrowWidth_Prop -> setGrowWidth(Convert.boolValue(aValue));
-            case GrowHeight_Prop -> setGrowHeight(Convert.boolValue(aValue));
-            case Vertical_Prop -> setVertical(Convert.boolValue(aValue));
-            case Managed_Prop -> setManaged(Convert.boolValue(aValue));
-
-            // MinWidth, MinHeight, MaxWidth, MaxHeight, PrefWidth, PrefHeight
+            // MinWidth, MinHeight, MaxWidth, MaxHeight, PrefWidth, PrefHeight, Vertical
             case MinWidth_Prop -> setMinWidth(Convert.doubleValue(aValue));
             case MinHeight_Prop -> setMinHeight(Convert.doubleValue(aValue));
             case MaxWidth_Prop -> setMaxWidth(Convert.doubleValue(aValue));
             case MaxHeight_Prop -> setMaxHeight(Convert.doubleValue(aValue));
             case PrefWidth_Prop -> setPrefWidth(Convert.doubleValue(aValue));
             case PrefHeight_Prop -> setPrefHeight(Convert.doubleValue(aValue));
+            case Vertical_Prop -> setVertical(Convert.boolValue(aValue));
 
-            // Effect, Opacity
+            // Style: Align, Margin, Padding, Spacing, Fill, Border, BorderRadius, Effect, Font, TextColor
+            case Align_Prop -> setAlign(Pos.of(aValue));
+            case Margin_Prop -> setMargin(Insets.of(aValue));
+            case Padding_Prop -> setPadding(Insets.of(aValue));
+            case Spacing_Prop -> setSpacing(Convert.doubleValue(aValue));
+            case Fill_Prop -> setFill(Paint.of(aValue));
+            case Border_Prop -> setBorder(Border.of(aValue));
+            case BorderRadius_Prop -> setBorderRadius(Convert.doubleValue(aValue));
             case Effect_Prop -> setEffect(Effect.of(aValue));
-            case Opacity_Prop -> setOpacity(Convert.doubleValue(aValue));
+            case Font_Prop -> setFont(Font.of(aValue));
+            case TextColor_Prop -> setTextColor(Color.get(aValue));
 
-            // Font, Text, ToolTip, RuntimeClassName, Cursor, Clip
-            case Text_Prop -> setText(Convert.stringValue(aValue));
+            // Alignment: GrowWidth, GrowHeight, LeanX, LeanY, Managed
+            case GrowWidth_Prop -> setGrowWidth(Convert.boolValue(aValue));
+            case GrowHeight_Prop -> setGrowHeight(Convert.boolValue(aValue));
+            case LeanX_Prop -> setLeanX(HPos.of(aValue));
+            case LeanY_Prop -> setLeanY(VPos.of(aValue));
+            case Managed_Prop -> setManaged(Convert.boolValue(aValue));
+
+            // Disabled, Visible, Opacity, Pickable, Paintable
+            case Disabled_Prop -> setDisabled(Convert.boolValue(aValue));
+            case Visible_Prop -> setVisible(Convert.boolValue(aValue));
+            case Opacity_Prop -> setOpacity(Convert.doubleValue(aValue));
+            case Pickable_Prop -> setPickable(Convert.boolValue(aValue));
+            case Paintable_Prop -> setPaintable(Convert.boolValue(aValue));
+
+            // ToolTip, Text, RuntimeClassName, Cursor, Clip
             case ToolTip_Prop -> setToolTip(Convert.stringValue(aValue));
+            case Text_Prop -> setText(Convert.stringValue(aValue));
             case RuntimeClassName_Prop -> setRuntimeClassName(Convert.stringValue(aValue));
             case Cursor_Prop -> setCursor((Cursor) aValue);
             case Overflow_Prop -> setOverflow((Overflow) aValue);
-
-            // Disabled, Visible, Pickable, Paintable
-            case Disabled_Prop -> setDisabled(Convert.boolValue(aValue));
-            case Visible_Prop -> setVisible(Convert.boolValue(aValue));
-            case Pickable_Prop -> setPickable(Convert.boolValue(aValue));
-            case Paintable_Prop -> setPaintable(Convert.boolValue(aValue));
 
             // Focusable, FocusWhenPressed, Focused
             case Focusable_Prop -> setFocusable(Convert.boolValue(aValue));

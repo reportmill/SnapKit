@@ -123,6 +123,19 @@ public class PropMap {
     public boolean isEmpty()  { return _propValues.isEmpty(); }
 
     /**
+     * Resorts the map.
+     */
+    public void resortForPropSet(PropSet propSet)
+    {
+        Map<String,Object> copy = new HashMap<>(_propValues);
+        _propValues.clear();
+        for (Prop prop : propSet.getProps()) {
+            if (copy.containsKey(prop.getName()))
+                _propValues.put(prop.getName(), copy.get(prop.getName()));
+        }
+    }
+
+    /**
      * Standard toString implementation.
      */
     public String toString()

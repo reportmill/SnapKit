@@ -13,13 +13,13 @@ import snap.util.*;
 public class Slider extends View {
     
     // The slider value
-    private double  _value;
+    private double  _value = 50;
 
     // The slider min value
     private double  _min = 0;
     
     // The slider max value
-    private double  _max = 1;
+    private double  _max = 100;
     
     // Constants for properties
     public static final String Min_Prop = "Min";
@@ -242,9 +242,9 @@ public class Slider extends View {
         super.initProps(aPropSet);
 
         // Min, Max, Value
-        aPropSet.addPropNamed(Min_Prop, double.class, 0);
-        aPropSet.addPropNamed(Max_Prop, double.class, 1);
-        aPropSet.addPropNamed(Value_Prop, double.class, 0);
+        aPropSet.addPropNamed(Min_Prop, double.class, 0d);
+        aPropSet.addPropNamed(Max_Prop, double.class, 100d);
+        aPropSet.addPropNamed(Value_Prop, double.class, 50d);
     }
 
     /**
@@ -253,16 +253,16 @@ public class Slider extends View {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Min, Max, Value
-            case Min_Prop: return getMin();
-            case Max_Prop: return getMax();
-            case Value_Prop: return getValue();
+            case Min_Prop -> getMin();
+            case Max_Prop -> getMax();
+            case Value_Prop -> getValue();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -274,12 +274,12 @@ public class Slider extends View {
         switch (aPropName) {
 
             // Min, Max, Value
-            case Min_Prop: setMin(Convert.doubleValue(aValue)); break;
-            case Max_Prop: setMax(Convert.doubleValue(aValue)); break;
-            case Value_Prop: setValue(Convert.doubleValue(aValue)); break;
+            case Min_Prop -> setMin(Convert.doubleValue(aValue));
+            case Max_Prop -> setMax(Convert.doubleValue(aValue));
+            case Value_Prop -> setValue(Convert.doubleValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 
