@@ -125,7 +125,7 @@ public class Label extends ParentView {
     @Override
     public void setTextColor(Color aColor)
     {
-        if (Objects.equals(aColor, getTextColor()))
+        if (Objects.equals(aColor, getTextColor())) return;
         super.setTextColor(aColor);
         _textArea.setTextColor(aColor);
     }

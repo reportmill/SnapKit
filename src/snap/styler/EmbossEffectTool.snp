@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SpringView X="1" Y="1" Width="275" Height="175" PrefWidth="275" PrefHeight="175">
+<SpringView Width="275" Height="175" PrefWidth="275" PrefHeight="175">
   <Label X="92" Y="2" Width="91" Height="22" Align="CENTER" Text="Light Source" />
   <Separator X="10" Y="13" Width="85" Height="2" />
   <Separator X="170" Y="13" Width="85" Height="2" />

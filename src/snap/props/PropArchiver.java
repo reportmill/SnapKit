@@ -71,7 +71,7 @@ public class PropArchiver {
             // Get object value from PropObject.PropName
             Object nativeValue = aPropObj.getPropValue(propName);
             if (nativeValue == null)
-                continue;
+                nativeValue = "null";
 
             // Handle relation
             if (childProp.isRelation()) {

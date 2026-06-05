@@ -13,10 +13,10 @@
   </RowView>
   <ColView Margin="10,5,5,5" Spacing="5" GrowWidth="true" GrowHeight="true">
     <Label Text="Please describe how to reproduce this exception:" />
-    <TextView Name="ScenarioText" PrefHeight="100" Font="Arial 12" GrowWidth="true" GrowHeight="true" Border="#C0 1" BorderRadius="3" />
+    <TextView Name="ScenarioText" PrefHeight="100" BorderRadius="3" Font="Arial 12" GrowWidth="true" GrowHeight="true" />
   </ColView>
   <ColView Margin="10,5,5,5" Spacing="5" GrowWidth="true" GrowHeight="true">
     <Label Text="Exception Content:" />
-    <TextView Name="BacktraceText" PrefHeight="230" Font="Arial 12" GrowWidth="true" GrowHeight="true" Border="#C0 1" BorderRadius="3" />
+    <TextView Name="BacktraceText" PrefHeight="230" BorderRadius="3" Font="Arial 12" GrowWidth="true" GrowHeight="true" />
   </ColView>
 </ColView>

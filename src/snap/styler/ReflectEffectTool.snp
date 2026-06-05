@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SpringView X="1" Y="1" Width="275" Height="140" PrefWidth="275" PrefHeight="140">
+<SpringView Width="275" Height="140" PrefWidth="275" PrefHeight="140">
   <Label X="35" Y="28" Width="91" Height="22" Align="CENTER_RIGHT" Text="Reflection Height:" />
   <Spinner Name="ReflectionHeightSpinner" X="137" Y="28" Width="88" Height="22" Min="0" />
   <Label X="35" Y="63" Width="91" Height="22" Align="CENTER_RIGHT" Text="Fade Height:" />

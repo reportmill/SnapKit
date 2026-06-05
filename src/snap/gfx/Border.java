@@ -168,8 +168,7 @@ public abstract class Border extends PropObject implements Cloneable, StringCode
         if (this instanceof Borders.EtchBorder)
             return "etch";
         String fillStr = getColor().toColorString();
-        String strokeStr = FormatUtils.formatNum(getWidth());
-        return fillStr + ' ' + strokeStr;
+        return getWidth() == 1 ? fillStr : fillStr + ' ' + FormatUtils.formatNum(getWidth());
     }
 
     /**
