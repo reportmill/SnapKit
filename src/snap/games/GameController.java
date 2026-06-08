@@ -229,6 +229,6 @@ public class GameController extends ViewController {
         archiver.setOwner(viewController);
         archiver.getClassMap().put("StageView", snap.games.ProxyStageView.class);
         archiver.getClassMap().put("ActorView", snap.games.ProxyActorView.class);
-        return (StageView) archiver.readXmlFromUrl(snapFileUrl);
+        return (StageView) archiver.readObjectFromXmlUrl(snapFileUrl);
     }
 }

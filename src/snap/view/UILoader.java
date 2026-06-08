@@ -25,9 +25,9 @@ public class UILoader {
      */
     public static ParentView loadViewForControllerAndUrl(ViewController viewController, WebURL snapUrl)
     {
-        ViewArchiver2 archiver = new ViewArchiver2();
+        ViewArchiver archiver = new ViewArchiver();
         archiver.setOwner(viewController);
-        return (ParentView) archiver.readPropObjectFromXmlUrl(snapUrl);
+        return (ParentView) archiver.readObjectFromXmlUrl(snapUrl);
     }
 
     /**
@@ -65,9 +65,9 @@ public class UILoader {
      */
     public static View loadViewForControllerAndString(ViewController viewController, String snapString)
     {
-        ViewArchiver2 archiver = new ViewArchiver2();
+        ViewArchiver archiver = new ViewArchiver();
         archiver.setOwner(viewController);
-        return (View) archiver.readPropObjectFromXmlString(snapString);
+        return (View) archiver.readObjectFromXmlString(snapString);
     }
 
     /**
@@ -75,8 +75,8 @@ public class UILoader {
      */
     public static View loadViewForBytes(byte[] fileBytes)
     {
-        ViewArchiver2 archiver = new ViewArchiver2();
-        return (View) archiver.readPropObjectFromXmlBytes(fileBytes);
+        ViewArchiver archiver = new ViewArchiver();
+        return (View) archiver.readObjectFromXmlBytes(fileBytes);
     }
 
     /**
@@ -105,10 +105,10 @@ public class UILoader {
     /**
      * Returns whether to use real classes.
      */
-    public static boolean isUseRealClassDefault()  { return ViewArchiver2.isUseRealClassDefault(); }
+    public static boolean isUseRealClassDefault()  { return ViewArchiver.isUseRealClassDefault(); }
 
     /**
      * Sets whether to use real classes.
      */
-    public static void setUseRealClassDefault(boolean aValue)  { ViewArchiver2.setUseRealClassDefault(aValue);}
+    public static void setUseRealClassDefault(boolean aValue)  { ViewArchiver.setUseRealClassDefault(aValue);}
 }

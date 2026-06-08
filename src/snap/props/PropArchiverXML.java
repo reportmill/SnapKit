@@ -23,7 +23,7 @@ public class PropArchiverXML extends PropArchiver {
     /**
      * Converts a PropObject to XML.
      */
-    public XMLElement writePropObjectToXml(PropObject aPropObject)
+    public XMLElement writeObjectToXml(PropObject aPropObject)
     {
         // Convert native to node
         PropMap propMap = aPropObject.getPropMapForArchiver(this);
@@ -47,9 +47,9 @@ public class PropArchiverXML extends PropArchiver {
     /**
      * Converts a PropObject to XML.
      */
-    public byte[] writePropObjectToXmlBytes(PropObject aPropObject)
+    public byte[] writeObjectToXmlBytes(PropObject aPropObject)
     {
-        XMLElement xml = writePropObjectToXml(aPropObject);
+        XMLElement xml = writeObjectToXml(aPropObject);
         byte[] xmlBytes = xml.getBytes();
         return xmlBytes;
     }
@@ -57,35 +57,35 @@ public class PropArchiverXML extends PropArchiver {
     /**
      * Reads a PropObject from XML source URL.
      */
-    public Object readPropObjectFromXmlUrl(WebURL sourceUrl)
+    public Object readObjectFromXmlUrl(WebURL sourceUrl)
     {
         setSourceURL(sourceUrl);
         XMLElement xml = XMLElement.readXmlFromUrl(sourceUrl);
-        return readPropObjectFromXml(xml);
+        return readObjectFromXml(xml);
     }
 
     /**
      * Reads a PropObject from XML.
      */
-    public Object readPropObjectFromXmlString(String xmlString)
+    public Object readObjectFromXmlString(String xmlString)
     {
         XMLElement xml = XMLElement.readXmlFromString(xmlString);
-        return readPropObjectFromXml(xml);
+        return readObjectFromXml(xml);
     }
 
     /**
      * Reads a PropObject from XML.
      */
-    public Object readPropObjectFromXmlBytes(byte[] xmlBytes)
+    public Object readObjectFromXmlBytes(byte[] xmlBytes)
     {
         XMLElement xml = XMLElement.readXmlFromBytes(xmlBytes);
-        return readPropObjectFromXml(xml);
+        return readObjectFromXml(xml);
     }
 
     /**
      * Reads a PropObject from XML.
      */
-    public PropObject readPropObjectFromXml(XMLElement anElement)
+    public PropObject readObjectFromXml(XMLElement anElement)
     {
         // Probably not helpful
         anElement.setIgnoreCase(true);

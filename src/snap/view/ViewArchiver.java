@@ -1,124 +1,43 @@
-/*
- * Copyright (c) 2010, ReportMill Software. All rights reserved.
- */
 package snap.view;
-import java.util.*;
-import snap.gfx.*;
-import snap.util.*;
+import snap.gfx.Image;
+import snap.props.PropArchiverXML;
+import snap.props.PropObject;
+import snap.util.XMLElement;
+import snap.viewx.ColorButton;
+import snap.viewx.ColorDock;
+import snap.viewx.ColorWell;
 import snap.web.WebURL;
+import java.util.List;
 
 /**
- * This class handles Snap View archival.
+ * This prop archiver subclass archives views and friends to .snp file.
  */
-public class ViewArchiver extends XMLArchiver {
+public class ViewArchiver extends PropArchiverXML {
 
     /**
-     * Creates a new ViewArchiver.
+     * Constructor.
      */
     public ViewArchiver()
     {
-        setIgnoreCase(true);
+        VIEW_CLASSES.forEach(this::addClassMapClass);
     }
 
     /**
-     * Returns a View for source.
-     */
-    public View getViewForBytes(byte[] theBytes)
-    {
-        return (View) readXmlFromBytes(theBytes);
-    }
-
-    /**
-     * Returns the class for a given element.
+     * Override to move children inline.
      */
     @Override
-    protected Class<?> getClassForXML(XMLElement anElement)
+    public XMLElement writeObjectToXml(PropObject aPropObject)
     {
-        Class<?> classForXML = super.getClassForXML(anElement);
-
-        // If real class name is present, try to evaluate it
-        String realClassName = anElement.getAttributeValue("Class");
-        if (realClassName != null && isUseRealClass()) {
-            Class<?> realClass = getRealClassForName(realClassName);
-            if (realClass != null && View.class.isAssignableFrom(realClass))
-                classForXML = realClass;
-        }
-
-        // Return
-        return classForXML;
+        XMLElement xml = super.writeObjectToXml(aPropObject);
+        inlineViewChildren(xml);
+        return xml;
     }
 
-    /**
-     * Returns a class for name.
-     */
-    private Class<?> getRealClassForName(String aClassName)
-    {
-        Class<?> ownerClass = getOwnerClass();
-        ClassLoader classLoader = ownerClass != null ? ownerClass.getClassLoader() : ViewArchiver.class.getClassLoader();
-        try { return Class.forName(aClassName, false, classLoader); }
-        catch (ClassNotFoundException e) { return null; }
-        catch (NoClassDefFoundError t) { System.err.println("ViewArchiver.getClassForName: " + t); return null; }
-    }
-
-    /**
-     * Creates the class map.
-     */
     @Override
-    protected Map<String, Class<?>> createClassMap()
+    public PropObject readObjectFromXml(XMLElement anElement)
     {
-        // Create class map and add classes
-        Map<String,Class<?>> cmap = new HashMap<>();
-
-        // View classes
-        cmap.put("ActorView", snap.games.ActorView.class);
-        cmap.put("BorderView", BorderView.class);
-        cmap.put("BoxView", BoxView.class);
-        cmap.put("BrowserView", BrowserView.class);
-        cmap.put("Button", Button.class);
-        cmap.put("ColorButton", snap.viewx.ColorButton.class);
-        cmap.put("ColorDock", snap.viewx.ColorDock.class);
-        cmap.put("ColorWell", snap.viewx.ColorWell.class);
-        cmap.put("ColView", ColView.class);
-        cmap.put("CheckBox", CheckBox.class);
-        cmap.put("CheckBoxMenuItem", CheckBoxMenuItem.class);
-        cmap.put("ComboBox", ComboBox.class);
-        cmap.put("StageView", snap.games.StageView.class);
-        cmap.put("ImageView", ImageView.class);
-        cmap.put("Label", Label.class);
-        cmap.put("ListView", ListView.class);
-        cmap.put("Menu", Menu.class);
-        cmap.put("MenuBar", MenuBar.class);
-        cmap.put("MenuButton", MenuButton.class);
-        cmap.put("MenuItem", MenuItem.class);
-        cmap.put("PathView", PathView.class);
-        cmap.put("PenActor", snap.games.PenActor.class);
-        cmap.put("ProgressBar", ProgressBar.class);
-        cmap.put("RadioButton", RadioButton.class);
-        cmap.put("RectView", RectView.class);
-        cmap.put("RowView", RowView.class);
-        cmap.put("ScaleBox", ScaleBox.class);
-        cmap.put("ScrollView", ScrollView.class);
-        cmap.put("Separator", Separator.class);
-        cmap.put("Slider", Slider.class);
-        cmap.put("Spinner", Spinner.class);
-        cmap.put("SplitView", SplitView.class);
-        cmap.put("SpringView", SpringView.class);
-        cmap.put("StackView", StackView.class);
-        cmap.put("SwitchView", SwitchView.class);
-        cmap.put("TableView", TableView.class);
-        cmap.put("TableCol", TableCol.class);
-        cmap.put("TabView", TabView.class);
-        cmap.put("TextArea", TextArea.class);
-        cmap.put("TextView", TextView.class);
-        cmap.put("TextField", TextField.class);
-        cmap.put("ThumbWheel", ThumbWheel.class);
-        cmap.put("ToggleButton", ToggleButton.class);
-        cmap.put("TreeView", TreeView.class);
-        cmap.put("TitleView", TitleView.class);
-        cmap.put("View", View.class);
-
-        // Return
-        return cmap;
+        groupViewChildren(anElement);
+        return super.readObjectFromXml(anElement);
     }
 
     /**
@@ -140,17 +59,93 @@ public class ViewArchiver extends XMLArchiver {
     }
 
     /**
-     * Returns whether to use real classes.
+     * An array of all View Classes
      */
-    public static boolean isUseRealClass()  { return ViewArchiver2.isUseRealClassDefault(); }
+    private static List<Class<? extends PropObject>> VIEW_CLASSES = List.of(
+            View.class,
+            BoxView.class,
+            Button.class,
+            BrowserView.class,
+            CheckBox.class,
+            CheckBoxMenuItem.class,
+            ColorButton.class,
+            ColorDock.class,
+            ColorWell.class,
+            ColView.class,
+            ComboBox.class,
+            ImageView.class,
+            Label.class,
+            ListView.class,
+            Menu.class, MenuBar.class, MenuButton.class, MenuItem.class,
+            ProgressBar.class,
+            RadioButton.class,
+            RectView.class,
+            RowView.class,
+            ScaleBox.class,
+            Scroller.class,
+            ScrollView.class,
+            Separator.class,
+            Slider.class,
+            Spinner.class,
+            SplitView.class,
+            SpringView.class,
+            StackView.class,
+            SwitchView.class,
+            TableCol.class,
+            TableView.class,
+            TabView.class,
+            ThumbWheel.class,
+            TitleView.class,
+            ToggleButton.class,
+            TreeView.class,
+            TextField.class, TextArea.class, TextView.class,
+            PathView.class
+    );
 
     /**
-     * Returns an image for given name/path.
+     * Recurses into XML element and moves children inline.
      */
-    public static Image getImage(XMLArchiver anArchiver, String aPath)
+    private static void inlineViewChildren(XMLElement xml)
     {
-        if (anArchiver instanceof ViewArchiver)
-            return ((ViewArchiver) anArchiver).getImage(aPath);
-        return null;
+        String childrenPropName = getChildrenPropNameForXml(xml);
+        XMLElement childrenXML = xml.getElement(childrenPropName);
+        if (childrenXML != null) {
+            xml.removeElement(childrenXML);
+            childrenXML.getElements().forEach(xml::add);
+            childrenXML.getElements().forEach(ViewArchiver::inlineViewChildren);
+        }
+        if (xml.hasAttribute(View.RuntimeClassName_Prop))
+            xml.getAttribute(View.RuntimeClassName_Prop).setFullName("Class");
+    }
+
+    /**
+     * Recurses into XML element and moves child elements into Children element.
+     */
+    private static void groupViewChildren(XMLElement xml)
+    {
+        if (xml.getElementCount() > 0) {
+            List<XMLElement> childXMLs = List.copyOf(xml.getElements());
+            childXMLs.forEach(xml::removeElement);
+            String childrenPropName = getChildrenPropNameForXml(xml);
+            XMLElement childrenXML = new XMLElement(childrenPropName);
+            childXMLs.forEach(childrenXML::add);
+            xml.add(childrenXML);
+            childXMLs.forEach(ViewArchiver::groupViewChildren);
+        }
+        if (!isUseRealClassDefault() && xml.hasAttribute("Class"))
+            xml.getAttribute("Class").setFullName(View.RuntimeClassName_Prop);
+    }
+
+    /**
+     * Returns the children property name for the given XML element.
+     */
+    private static String getChildrenPropNameForXml(XMLElement xml)
+    {
+        return switch (xml.getName()) {
+            case "MenuButton", "Menu" -> Menu.MenuItems_Prop;
+            case "MenuBar" -> MenuBar.Menus_Prop;
+            case "TableView" -> TableView.TableCols_Prop;
+            default -> ParentView.Children_Prop;
+        };
     }
 }

@@ -461,7 +461,7 @@ public class ImageView extends View {
 
         // If image set
         String imageName = getImageName();
-        if (imageName != null && propArchiver instanceof ViewArchiver2 viewArchiver) {
+        if (imageName != null && propArchiver instanceof ViewArchiver viewArchiver) {
             Image image = viewArchiver.getImage(imageName);
             if (image != null)
                 setImage(image);
@@ -498,10 +498,10 @@ public class ImageView extends View {
         super.fromXML(anArchiver, anElement);
 
         // Unarchive ImageName
-        if (anElement.hasAttribute(ImageName_Prop)) {
+        if (anElement.hasAttribute(ImageName_Prop) && anArchiver instanceof ViewArchiverOld viewArchiver) {
             String imageName = anElement.getAttributeValue(ImageName_Prop);
             setImageName(imageName);
-            Image image = ViewArchiver.getImage(anArchiver, imageName);
+            Image image = viewArchiver.getImage(imageName);
             if (image != null)
                 setImage(image);
         }

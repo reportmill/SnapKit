@@ -21,7 +21,7 @@ public class PropArchiverJson extends PropArchiver {
     /**
      * Converts a PropObject to JSON.
      */
-    public JsonObject writePropObjectToJSON(PropObject aPropObject)
+    public JsonObject writeObjectToJSON(PropObject aPropObject)
     {
         // Convert native to node
         PropMap propMap = aPropObject.getPropMapForArchiver(this);
@@ -44,29 +44,29 @@ public class PropArchiverJson extends PropArchiver {
     /**
      * Reads a PropObject from JSON source.
      */
-    public Object readPropObjectFromJSONSource(Object aSource)
+    public Object readObjectFromJsonSource(Object aSource)
     {
         // Get bytes from source - if not found or empty, complain
         byte[] jsonBytes = SnapUtils.getBytes(aSource);
         if (jsonBytes == null || jsonBytes.length == 0)
-            throw new RuntimeException("PropArchiverJS.readPropObjectFromJSONSource: Cannot read source: " + aSource);
+            throw new RuntimeException("PropArchiverJS.readObjectFromJSONSource: Cannot read source: " + aSource);
 
         // Try to get SourceURL from source
         //if (getSourceURL() == null) { WebURL surl = WebURL.getURL(aSource); setSourceURL(surl); }
 
         // Read from bytes and return
-        return readPropObjectFromJSONBytes(jsonBytes);
+        return readObjectFromJsonBytes(jsonBytes);
     }
 
     /**
      * Reads a PropObject from JSON String.
      */
-    public Object readPropObjectFromJSONString(String jsonString)
+    public Object readObjectFromJsonString(String jsonString)
     {
         try {
             JsonParser parser = new JsonParser();
             JsonObject json = (JsonObject) parser.readString(jsonString);
-            return readPropObjectFromJSON(json);
+            return readObjectFromJSON(json);
         }
 
         catch (Exception e) { throw new RuntimeException(e); }
@@ -75,16 +75,16 @@ public class PropArchiverJson extends PropArchiver {
     /**
      * Reads a PropObject from JSON.
      */
-    public Object readPropObjectFromJSONBytes(byte[] theBytes)
+    public Object readObjectFromJsonBytes(byte[] theBytes)
     {
         String string = new String(theBytes);
-        return readPropObjectFromJSONString(string);
+        return readObjectFromJsonString(string);
     }
 
     /**
      * Reads a PropObject from JSON.
      */
-    public PropObject readPropObjectFromJSON(JsonObject objectJS)
+    public PropObject readObjectFromJSON(JsonObject objectJS)
     {
         // Read resources
         readResources(objectJS);

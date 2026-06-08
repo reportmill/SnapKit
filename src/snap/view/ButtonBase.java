@@ -471,7 +471,7 @@ public class ButtonBase extends ParentView {
 
         // If image set
         String imageName = getImageName();
-        if (imageName != null && propArchiver instanceof ViewArchiver2 viewArchiver) {
+        if (imageName != null && propArchiver instanceof ViewArchiver viewArchiver) {
             Image image = viewArchiver.getImage(imageName);
             if (image != null)
                 setImage(image);
@@ -512,7 +512,7 @@ public class ButtonBase extends ParentView {
         if (anElement.hasAttribute(ImageName_Prop)) {
             String imageName = anElement.getAttributeValue(ImageName_Prop);
             setImageName(imageName);
-            Image image = anArchiver instanceof ViewArchiver viewArchiver ? viewArchiver.getImage(imageName) : null;
+            Image image = anArchiver instanceof ViewArchiverOld viewArchiver ? viewArchiver.getImage(imageName) : null;
             if (image != null)
                 setImage(image);
         }

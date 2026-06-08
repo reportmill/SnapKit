@@ -139,7 +139,7 @@ public class DevPaneViewOwners extends ViewController {
 
         // Otherwise, just get XML from SelView
         View selView = getSelView(); if (selView == null) return "";
-        String xml = new ViewArchiver().writeToXML(selView).getString();
+        String xml = new ViewArchiver().writeObjectToXml(selView).getString();
         return xml;
     }
 

@@ -239,7 +239,7 @@ public class DevPaneViews extends ViewController {
     {
         // Get XML for selected view
         View selView = getSelView();
-        String viewXML = selView != null && !isTargeting() ? new ViewArchiver().writeToXML(selView).getString() : "";
+        String viewXML = selView != null && !isTargeting() ? new ViewArchiver().writeObjectToXml(selView).getString() : "";
 
         // Strip header line
         int xmlHeader = viewXML.indexOf('\n');
