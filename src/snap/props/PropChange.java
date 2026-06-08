@@ -96,7 +96,9 @@ public class PropChange {
     protected void doChange(Object oldVal, Object newVal)
     {
         Object source = getSource();
-        if (source instanceof DoChange doChange)
+        if (source instanceof PropObject propObject)
+            propObject.processPropChange(this, oldVal, newVal);
+        else if (source instanceof DoChange doChange)
             doChange.processPropChange(this, oldVal, newVal);
         else doChange(source, getPropName(), oldVal, newVal, getIndex());
     }

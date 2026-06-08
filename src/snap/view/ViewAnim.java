@@ -711,7 +711,7 @@ public class ViewAnim {
     {
         StringBuilder sb = new StringBuilder();
         writeAnimToStringBuilder(this, sb);
-        if (sb.length() > 0 && sb.charAt(sb.length() - 1) == ' ') sb.setLength(sb.length() - 1);
+        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) == ' ') sb.setLength(sb.length() - 1);
         return sb.toString().replace("Time:", "T:").replace("Rotate:", "R:")
                 .replace("TransX:", "TX:").replace("TransY:", "TY:")
                 .replace("ScaleX:", "SX:").replace("ScaleY:", "SY:");
@@ -761,7 +761,7 @@ public class ViewAnim {
 
                 // Handle prop
                 else {
-                    Prop prop = _view.getPropForName(propName);
+                    Prop prop = _view.getPropSet().getPropForName(propName);
                     if (prop != null) {
                         Object value = nameValueStrings[1];
                         Class<?> propClass = prop.getPropClass();
@@ -773,12 +773,12 @@ public class ViewAnim {
                     }
 
                     // If prop not found for name, complain
-                    else System.err.println("PropObject.setPropsString: Unknown prop name: " + propName);
+                    else System.err.println("ViewAnim.setPropsString: Unknown prop name: " + propName);
                 }
             }
 
             // If "name:value" parts not found, complain
-            else System.err.println("PropObject.setPropsString: Invalid prop string: " + propString);
+            else System.err.println("ViewAnim.setPropsString: Invalid prop string: " + propString);
         }
     }
 
@@ -880,11 +880,8 @@ public class ViewAnim {
         if (anim != null) anim.play();
 
         // If view is ParentView, forward for children
-        if (aView instanceof ParentView) {
-            ParentView par = (ParentView) aView;
-            for (View child : par.getChildren())
-                playDeep(child);
-        }
+        if (aView instanceof ParentView parentView)
+            parentView.getChildren().forEach(ViewAnim::playDeep);
     }
 
     /**
@@ -898,11 +895,8 @@ public class ViewAnim {
             anim.stop();
 
         // If view is ParentView, forward for children
-        if (aView instanceof ParentView) {
-            ParentView par = (ParentView) aView;
-            for (View child : par.getChildren())
-                stopDeep(child);
-        }
+        if (aView instanceof ParentView parentView)
+            parentView.getChildren().forEach(ViewAnim::stopDeep);
     }
 
     /**
@@ -916,9 +910,8 @@ public class ViewAnim {
             return anim.getTime();
 
         // If view is ParentView, forward for children
-        if (aView instanceof ParentView) {
-            ParentView par = (ParentView) aView;
-            for (View child : par.getChildren())
+        if (aView instanceof ParentView parentView) {
+            for (View child : parentView.getChildren())
                 if (child.getAnim(-1) != null)
                     return child.getAnim(-1).getTime();
         }
@@ -938,10 +931,7 @@ public class ViewAnim {
             anim.setTime(aValue);
 
         // If view is ParentView, forward for children
-        if (aView instanceof ParentView) {
-            ParentView par = (ParentView) aView;
-            for (View child : par.getChildren())
-                setTimeDeep(child, aValue);
-        }
+        if (aView instanceof ParentView parentView)
+            parentView.getChildren().forEach(child -> setTimeDeep(child, aValue));
     }
 }

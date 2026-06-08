@@ -45,6 +45,7 @@ public class PropUtils {
     {
         // Get individual prop/value strings (separated by semi-colons)
         String[] propStrings = propsString.split("\\s*;\\s*");
+        PropSet propSet = propObject.getPropSet();
 
         // Iterate over prop strings and add each
         for (String propString : propStrings) {
@@ -55,7 +56,7 @@ public class PropUtils {
             // If both prop/value parts found, get prop name and set value
             if (nameValueStrings.length == 2) {
                 String propName = nameValueStrings[0].trim();
-                Prop prop = propObject.getPropForName(propName);
+                Prop prop = propSet.getPropForName(propName);
                 if (prop != null)
                     propObject.setPropValue(prop.getName(), nameValueStrings[1]);
 

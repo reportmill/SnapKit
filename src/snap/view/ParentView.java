@@ -586,7 +586,7 @@ public class ParentView extends View {
      * Override to handle ParentView changes.
      */
     @Override
-    public void processPropChange(PropChange aPC, Object oldVal, Object newVal)
+    protected void processPropChange(PropChange aPC, Object oldVal, Object newVal)
     {
         String propName = aPC.getPropName();
         if (propName == Children_Prop) {

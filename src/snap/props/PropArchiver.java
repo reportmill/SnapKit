@@ -192,6 +192,7 @@ public class PropArchiver {
     {
         // Get PropMap props
         String[] propNames = propMap.getPropNames();
+        PropSet propSet = propObject.getPropSet();
 
         // Iterate over props and convert each to native
         for (String propName : propNames) {
@@ -200,7 +201,7 @@ public class PropArchiver {
             if (propName.equals(CLASS_KEY)) continue;
 
             // Get prop object property for name (just skip if not found)
-            Prop prop = propObject.getPropForName(propName);
+            Prop prop = propSet.getPropForName(propName);
             if (prop == null)
                 continue;
 

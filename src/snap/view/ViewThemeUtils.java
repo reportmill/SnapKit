@@ -86,7 +86,7 @@ public class ViewThemeUtils {
             setPropDefaultForView(aView, propName, oldClassStyle, newClassStyle);
 
         // Handle TextColor
-        if (aView.getPropForName(View.TextColor_Prop) != null)
+        if (aView.getPropSet().getPropForName(View.TextColor_Prop) != null)
             setPropDefaultForView(aView, View.TextColor_Prop, oldClassStyle, newClassStyle);
     }
 

@@ -8,7 +8,7 @@ import java.util.*;
 /**
  * A base class for anything that wants to work with props.
  */
-public abstract class PropObject implements PropChange.DoChange {
+public abstract class PropObject {
 
     // The PropSet to hold prop info
     private PropSet _propSet;
@@ -45,11 +45,6 @@ public abstract class PropObject implements PropChange.DoChange {
         PropSet propSet = PropSet.getPropSetForPropObject(this);
         return _propSet = propSet;
     }
-
-    /**
-     * Returns the prop for given name.
-     */
-    public Prop getPropForName(String aPropName)  { return getPropSet().getPropForName(aPropName); }
 
     /**
      * Initialize Props. Override to support props for this class.
@@ -130,7 +125,7 @@ public abstract class PropObject implements PropChange.DoChange {
     public Object getPropDefault(String aPropName)
     {
         // Get prop and return DefaultValue
-        Prop prop = getPropForName(aPropName);
+        Prop prop = getPropSet().getPropForName(aPropName);
         if (prop != null)
             return prop.getDefaultValue();
 
@@ -290,7 +285,7 @@ public abstract class PropObject implements PropChange.DoChange {
     /**
      * PropChange.DoChange method.
      */
-    public void processPropChange(PropChange aPC, Object oldVal, Object newVal)
+    protected void processPropChange(PropChange aPC, Object oldVal, Object newVal)
     {
         setPropValue(aPC.getPropName(), newVal);
     }
