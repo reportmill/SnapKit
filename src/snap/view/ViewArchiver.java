@@ -12,9 +12,6 @@ import snap.web.WebURL;
  */
 public class ViewArchiver extends XMLArchiver {
 
-    // Whether to use real class
-    static boolean  _useRealClass = true;
-
     /**
      * Creates a new ViewArchiver.
      */
@@ -120,25 +117,6 @@ public class ViewArchiver extends XMLArchiver {
         cmap.put("TitleView", TitleView.class);
         cmap.put("View", View.class);
 
-        // Graphics
-        cmap.put("Fill", Color.class);
-        cmap.put("Color", Color.class);
-        cmap.put("Font", Font.class);
-        cmap.put("BevelBorder", Borders.BevelBorder.class);
-        cmap.put("EtchBorder", Borders.EtchBorder.class);
-        cmap.put("LineBorder", Borders.LineBorder.class);
-        cmap.put("GradientPaint", GradientPaint.class);
-        cmap.put("ImagePaint", ImagePaint.class);
-        cmap.put("BlurEffect", BlurEffect.class);
-        cmap.put("ShadowEffect", ShadowEffect.class);
-        cmap.put("ReflectEffect", ReflectEffect.class);
-        cmap.put("EmbossEffect", EmbossEffect.class);
-
-        // Some case issues
-        cmap.put("color", Color.class);
-        cmap.put("font", Font.class);
-        cmap.put("fill", Color.class); //RMFill.class
-
         // Return
         return cmap;
     }
@@ -164,12 +142,7 @@ public class ViewArchiver extends XMLArchiver {
     /**
      * Returns whether to use real classes.
      */
-    public static boolean isUseRealClass()  { return _useRealClass; }
-
-    /**
-     * Sets whether to use real classes.
-     */
-    public static void setUseRealClass(boolean aFlag)  { _useRealClass = aFlag; }
+    public static boolean isUseRealClass()  { return ViewArchiver2.isUseRealClassDefault(); }
 
     /**
      * Returns an image for given name/path.

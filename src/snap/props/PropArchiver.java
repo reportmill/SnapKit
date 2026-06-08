@@ -28,13 +28,16 @@ public class PropArchiver {
     private PropObject _rootObject;
 
     // Whether to use real classes
-    private boolean _useRealClass = true;
+    private boolean _useRealClass = _useRealClassDefault;
 
     // Resources
     private List<Resource> _resources = new ArrayList<>();
 
     // A helper class to archive common SnapKit classes (Font, Color, etc.)
     protected PropArchiverHpr _helper;
+
+    // Whether to use real classes
+    private static boolean _useRealClassDefault = true;
 
     // Constant for special Class key
     public static final String CLASS_KEY = "Class";
@@ -323,11 +326,18 @@ public class PropArchiver {
     protected Class<?> getPropObjectClassForPropMap(PropMap propMap, Prop aProp)
     {
         // If Class prop set, try that
-        String className = isUseRealClass() ? propMap.getPropValueAsString(CLASS_KEY) : null;
-        if (className != null) {
+        if (isUseRealClass() && propMap.getPropValue(CLASS_KEY) instanceof String className) {
             Class<?> cls = getClassForName(className);
             if (cls != null)
                 return cls;
+        }
+
+        // Try class name
+        String className = propMap.getClassName();
+        if (className != null) {
+            Class<?> propClass = getClassForName(className);
+            if (propClass != null)
+                return propClass;
         }
 
         // Try XML name
@@ -434,6 +444,20 @@ public class PropArchiver {
     public Resource getResourceForName(String aName)
     {
         return ListUtils.findMatch(_resources, res -> res.name.equals(aName));
+    }
+
+    /**
+     * Returns whether to use real classes.
+     */
+    public static boolean isUseRealClassDefault()  { return _useRealClassDefault; }
+
+    /**
+     * Sets whether to use real classes.
+     */
+    public static void setUseRealClassDefault(boolean aValue)
+    {
+        if (aValue == isUseRealClassDefault()) return;
+        _useRealClassDefault = aValue;
     }
 
     /**

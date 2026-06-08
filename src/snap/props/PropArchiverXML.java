@@ -55,7 +55,7 @@ public class PropArchiverXML extends PropArchiver {
     }
 
     /**
-     * Reads a PropObject from XML source.
+     * Reads a PropObject from XML source URL.
      */
     public Object readPropObjectFromXmlUrl(WebURL sourceUrl)
     {
@@ -67,9 +67,18 @@ public class PropArchiverXML extends PropArchiver {
     /**
      * Reads a PropObject from XML.
      */
-    public Object readPropObjectFromXmlBytes(byte[] theBytes)
+    public Object readPropObjectFromXmlString(String xmlString)
     {
-        XMLElement xml = XMLElement.readXmlFromBytes(theBytes);
+        XMLElement xml = XMLElement.readXmlFromString(xmlString);
+        return readPropObjectFromXml(xml);
+    }
+
+    /**
+     * Reads a PropObject from XML.
+     */
+    public Object readPropObjectFromXmlBytes(byte[] xmlBytes)
+    {
+        XMLElement xml = XMLElement.readXmlFromBytes(xmlBytes);
         return readPropObjectFromXml(xml);
     }
 

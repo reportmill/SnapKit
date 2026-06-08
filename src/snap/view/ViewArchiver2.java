@@ -132,7 +132,7 @@ public class ViewArchiver2 extends PropArchiverXML {
             xml.add(childrenXML);
             childXMLs.forEach(ViewArchiver2::groupViewChildren);
         }
-        if (xml.hasAttribute("Class"))
+        if (!isUseRealClassDefault() && xml.hasAttribute("Class"))
             xml.getAttribute("Class").setFullName(View.RuntimeClassName_Prop);
     }
 
