@@ -1,10 +1,12 @@
 package snap.view;
+import snap.gfx.Image;
 import snap.props.PropArchiverXML;
 import snap.props.PropObject;
 import snap.util.XMLElement;
 import snap.viewx.ColorButton;
 import snap.viewx.ColorDock;
 import snap.viewx.ColorWell;
+import snap.web.WebURL;
 import java.util.List;
 
 /**
@@ -36,6 +38,24 @@ public class ViewArchiver2 extends PropArchiverXML {
     {
         groupViewChildren(anElement);
         return super.readPropObjectFromXml(anElement);
+    }
+
+    /**
+     * Returns an image for given name/path.
+     */
+    public Image getImage(String aPath)
+    {
+        // If there is an Archiver.Owner, look for image as class resource
+        Class<?> ownerClass = getOwnerClass();
+        for (Class<?> cls = ownerClass; cls != null && cls != ViewController.class; cls = cls.getSuperclass()) {
+            Image image = Image.getImageForClassResource(cls, aPath);
+            if (image != null)
+                return image;
+        }
+
+        // Otherwise, try to find image name as path relative to Archiver.SourceURL
+        WebURL url = getSourceURL();
+        return Image.getImageForUrlResource(url, aPath);
     }
 
     /**

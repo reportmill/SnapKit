@@ -6,8 +6,7 @@ import snap.geom.Pos;
 import snap.geom.RoundRect;
 import snap.geom.Shape;
 import snap.gfx.*;
-import snap.props.PropObject;
-import snap.props.PropSet;
+import snap.props.*;
 import snap.util.*;
 import java.util.Objects;
 
@@ -463,6 +462,23 @@ public class ButtonBase extends ParentView {
     }
 
     /**
+     * Override to look for image.
+     */
+    @Override
+    protected void setPropMapForArchiver(PropArchiver propArchiver, PropMap propMap)
+    {
+        super.setPropMapForArchiver(propArchiver, propMap);
+
+        // If image set
+        String imageName = getImageName();
+        if (imageName != null && propArchiver instanceof ViewArchiver2 viewArchiver) {
+            Image image = viewArchiver.getImage(imageName);
+            if (image != null)
+                setImage(image);
+        }
+    }
+
+    /**
      * XML archival.
      */
     protected XMLElement toXMLView(XMLArchiver anArchiver)
@@ -496,7 +512,7 @@ public class ButtonBase extends ParentView {
         if (anElement.hasAttribute(ImageName_Prop)) {
             String imageName = anElement.getAttributeValue(ImageName_Prop);
             setImageName(imageName);
-            Image image = ViewArchiver.getImage(anArchiver, imageName);
+            Image image = anArchiver instanceof ViewArchiver viewArchiver ? viewArchiver.getImage(imageName) : null;
             if (image != null)
                 setImage(image);
         }

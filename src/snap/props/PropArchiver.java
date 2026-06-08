@@ -4,6 +4,7 @@
 package snap.props;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
+import snap.web.WebURL;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -13,6 +14,9 @@ import java.util.*;
  * The graph of PropMaps can easily be converted to/from XML, JSON, etc.
  */
 public class PropArchiver {
+
+    // The URL of the source the archiver is reading from
+    private WebURL _sourceUrl;
 
     // The owner class that initated archival/unarchival
     private Object _owner;
@@ -42,6 +46,16 @@ public class PropArchiver {
     {
         _helper = new PropArchiverHpr(this);
     }
+
+    /**
+     * Returns the WebURL of the currently loading archive.
+     */
+    public WebURL getSourceURL()  { return _sourceUrl; }
+
+    /**
+     * Sets the WebURL of the currently loading archive.
+     */
+    public void setSourceURL(WebURL aURL)  { _sourceUrl = aURL; }
 
     /**
      * Returns the owner.

@@ -4,8 +4,7 @@
 package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
-import snap.props.PropChange;
-import snap.props.PropSet;
+import snap.props.*;
 import snap.text.TextModel;
 import snap.util.*;
 import java.util.List;
@@ -318,6 +317,23 @@ public class Label extends ParentView {
 
             // Do normal version
             default -> super.setPropValue(aPropName, aValue);
+        }
+    }
+
+    /**
+     * Override to look for image.
+     */
+    @Override
+    protected void setPropMapForArchiver(PropArchiver propArchiver, PropMap propMap)
+    {
+        super.setPropMapForArchiver(propArchiver, propMap);
+
+        // If image set
+        String imageName = getImageName();
+        if (imageName != null && propArchiver instanceof ViewArchiver2 viewArchiver) {
+            Image image = viewArchiver.getImage(imageName);
+            if (image != null)
+                setImage(image);
         }
     }
 

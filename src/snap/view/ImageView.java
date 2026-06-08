@@ -6,7 +6,7 @@ import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.geom.Rect;
 import snap.gfx.*;
-import snap.props.PropSet;
+import snap.props.*;
 import snap.util.*;
 import java.util.Objects;
 
@@ -406,24 +406,24 @@ public class ImageView extends View {
      */
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Image, ImageName
-            case Image_Prop: return getImage();
-            case ImageName_Prop: return getImageName();
+            case Image_Prop -> getImage();
+            case ImageName_Prop -> getImageName();
 
             // FillWidth, FillHeight, KeepAspect, AllowBleed
-            case FillWidth_Prop: return isFillWidth();
-            case FillHeight_Prop: return isFillHeight();
-            case KeepAspect_Prop: return isKeepAspect();
-            case AllowBleed_Prop: return isAllowBleed();
+            case FillWidth_Prop -> isFillWidth();
+            case FillHeight_Prop -> isFillHeight();
+            case KeepAspect_Prop -> isKeepAspect();
+            case AllowBleed_Prop -> isAllowBleed();
 
             // Frame
-            case Frame_Prop: return getFrame();
+            case Frame_Prop -> getFrame();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -434,20 +434,37 @@ public class ImageView extends View {
         switch (aPropName) {
 
             // Image, ImageName
-            case Image_Prop: setImage((Image) aValue); break;
-            case ImageName_Prop: setImageName(Convert.stringValue(aValue)); break;
+            case Image_Prop -> setImage((Image) aValue);
+            case ImageName_Prop -> setImageName(Convert.stringValue(aValue));
 
             // FillWidth, FillHeight, KeepAspect, AllowBleed
-            case FillWidth_Prop: setFillWidth(Convert.boolValue(aValue)); break;
-            case FillHeight_Prop: setFillHeight(Convert.boolValue(aValue)); break;
-            case KeepAspect_Prop: setKeepAspect(Convert.boolValue(aValue)); break;
-            case AllowBleed_Prop: setAllowBleed(Convert.boolValue(aValue)); break;
+            case FillWidth_Prop -> setFillWidth(Convert.boolValue(aValue));
+            case FillHeight_Prop -> setFillHeight(Convert.boolValue(aValue));
+            case KeepAspect_Prop -> setKeepAspect(Convert.boolValue(aValue));
+            case AllowBleed_Prop -> setAllowBleed(Convert.boolValue(aValue));
 
             // Frame
-            case Frame_Prop: setFrame(Convert.intValue(aValue)); break;
+            case Frame_Prop -> setFrame(Convert.intValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue); break;
+            default -> super.setPropValue(aPropName, aValue);
+        }
+    }
+
+    /**
+     * Override to look for image.
+     */
+    @Override
+    protected void setPropMapForArchiver(PropArchiver propArchiver, PropMap propMap)
+    {
+        super.setPropMapForArchiver(propArchiver, propMap);
+
+        // If image set
+        String imageName = getImageName();
+        if (imageName != null && propArchiver instanceof ViewArchiver2 viewArchiver) {
+            Image image = viewArchiver.getImage(imageName);
+            if (image != null)
+                setImage(image);
         }
     }
 

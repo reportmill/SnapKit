@@ -59,6 +59,7 @@ public class PropArchiverXML extends PropArchiver {
      */
     public Object readPropObjectFromXmlUrl(WebURL sourceUrl)
     {
+        setSourceURL(sourceUrl);
         XMLElement xml = XMLElement.readXmlFromUrl(sourceUrl);
         return readPropObjectFromXml(xml);
     }
