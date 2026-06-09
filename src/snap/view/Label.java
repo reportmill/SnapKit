@@ -268,7 +268,7 @@ public class Label extends ParentView {
     public String getValuePropName()  { return "Text"; }
 
     /**
-     * Initialize Props. Override to provide custom defaults.
+     * Override to support properties for this class.
      */
     @Override
     protected void initProps(PropSet aPropSet)
@@ -283,12 +283,11 @@ public class Label extends ParentView {
     }
 
     /**
-     * Returns the value for given prop name.
+     * Override to support properties for this class.
      */
     @Override
     public Object getPropValue(String aPropName)
     {
-        // Handle properties
         return switch (aPropName) {
 
             // ImageName, Graphic, GraphicAfter
@@ -302,12 +301,11 @@ public class Label extends ParentView {
     }
 
     /**
-     * Sets the value for given prop name.
+     * Override to support properties for this class.
      */
     @Override
     public void setPropValue(String aPropName, Object aValue)
     {
-        // Handle properties
         switch (aPropName) {
 
             // ImageName, Graphic, GraphicAfter

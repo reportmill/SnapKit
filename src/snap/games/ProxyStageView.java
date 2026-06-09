@@ -1,8 +1,7 @@
 package snap.games;
 import snap.gfx.Painter;
 import snap.gfx.Stroke;
-import snap.util.XMLArchiver;
-import snap.util.XMLElement;
+import snap.props.*;
 import snap.view.View;
 
 /**
@@ -90,36 +89,29 @@ public class ProxyStageView extends StageView {
     }
 
     /**
-     * Override to handle stage.
+     * Override to support Stage class name.
      */
-//    @Override
-//    protected XMLElement toXMLView(XMLArchiver anArchiver)
-//    {
-//        XMLElement xml = super.toXMLView(anArchiver);
-//        xml.setName("StageView");
-//
-//        // Archive stage class name
-//        if (_stageClassName != null && !_stageClassName.equals(Stage.class.getName()))
-//            xml.add("StageClass", _stageClassName);
-//
-//        // Return
-//        return xml;
-//    }
+    @Override
+    protected PropMap getPropMapForArchiver(PropArchiver propArchiver)
+    {
+        PropMap propMap = super.getPropMapForArchiver(propArchiver);
+        if (_stageClassName != null && !_stageClassName.equals(Stage.class.getName()))
+            propMap.setPropValue("StageClass", _stageClassName);
+        return propMap;
+    }
 
     /**
-     * Override to handle stage.
+     * Override to support Stage class name.
      */
-//    @Override
-//    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-//    {
-//        // Create Actor class
-//        _stageClassName = anElement.getAttributeValue("StageClass");
-//        if (_stageClassName != null) {
-//            _stage = (Stage) ProxyActorView.getInstanceForClassName(anArchiver.getOwnerClass(), _stageClassName);
-//            if (_stage == null) _stage = new Stage();
-//            _stage._stageView = this;
-//        }
-//
-//        super.fromXMLView(anArchiver, anElement);
-//    }
+    @Override
+    protected void setPropMapForArchiver(PropArchiver propArchiver, PropMap propMap)
+    {
+        super.setPropMapForArchiver(propArchiver, propMap);
+        _stageClassName = (String) propMap.getPropValue("StageClass");
+        if (_stageClassName != null) {
+            _stage = (Stage) ProxyActorView.getInstanceForClassName(propArchiver.getOwnerClass(), _stageClassName);
+            if (_stage == null) _stage = new Stage();
+            _stage._stageView = this;
+        }
+    }
 }

@@ -4,6 +4,7 @@
 package snap.games;
 import snap.geom.Shape;
 import snap.gfx.Image;
+import snap.props.*;
 import snap.util.*;
 import snap.view.*;
 import java.util.List;
@@ -28,6 +29,7 @@ public class ActorView extends ParentView {
 
     // Constants for properties
     public static final String Image_Prop = ImageView.Image_Prop;
+    private static final String ImageName_Prop = "ImageName";
 
     /**
      * Constructor.
@@ -309,36 +311,68 @@ public class ActorView extends ParentView {
     }
 
     /**
-     * Override to archive X/Y and ImageName.
+     * Override to support properties for this class.
      */
-//    @Override
-//    protected XMLElement toXMLView(XMLArchiver anArchiver)
-//    {
-//        XMLElement xml = super.toXMLView(anArchiver);
-//
-//        // Archive X,Y
-//        int attrIndex = xml.hasAttribute(Name_Prop) ? 1 : 0;
-//        if (getY() != 0) xml.addAttribute(new XMLAttribute(Y_Prop, getY()), attrIndex);
-//        if (getX() != 0) xml.addAttribute(new XMLAttribute(X_Prop, getX()), attrIndex);
-//
-//        // Archive ImageName
-//        if (_imageName != null && !_imageName.isEmpty())
-//            xml.add("ImageName", _imageName);
-//
-//        // Return
-//        return xml;
-//    }
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        super.initProps(aPropSet);
+        aPropSet.addPropNamed(ImageName_Prop, String.class, EMPTY_OBJECT);
+    }
 
     /**
-     * Override to support image name.
+     * Override to support properties for this class.
      */
-//    @Override
-//    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-//    {
-//        super.fromXMLView(anArchiver, anElement);
-//        if (anElement.hasAttribute("ImageName")) {
-//            String imageName = anElement.getAttributeValue("ImageName");
-//            setImageForName(imageName);
-//        }
-//    }
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        if (aPropName.equals(ImageName_Prop))
+            return getImageName();
+        return super.getPropValue(aPropName);
+    }
+
+    /**
+     * Override to support properties for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        if (aPropName.equals(ImageName_Prop))
+            setImageForName(Convert.stringValue(aValue));
+        else super.setPropValue(aPropName, aValue);
+    }
+
+    /**
+     * Override to add location info to prop map.
+     */
+    @Override
+    protected PropMap getPropMapForArchiver(PropArchiver propArchiver)
+    {
+        PropMap propMap = super.getPropMapForArchiver(propArchiver);
+
+        // Add size properties
+        if (getWidth() != 0) propMap.setPropValue(Width_Prop, getWidth());
+        if (getHeight() != 0) propMap.setPropValue(Height_Prop, getHeight());
+        propMap.resortForPropSet(getPropSet());
+
+        // Return
+        return propMap;
+    }
+
+    /**
+     * Override to look for image.
+     */
+    @Override
+    protected void setPropMapForArchiver(PropArchiver propArchiver, PropMap propMap)
+    {
+        super.setPropMapForArchiver(propArchiver, propMap);
+
+        // If image set
+        String imageName = getImageName();
+        if (imageName != null && propArchiver instanceof ViewArchiver viewArchiver) {
+            Image image = viewArchiver.getImage(imageName);
+            if (image != null)
+                setImage(image);
+        }
+    }
 }
