@@ -61,7 +61,7 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
         _tabBar = new TabBar();
         _tabBar.setPadding(CLASSIC_TAB_BAR_INSETS);
         _tabBar.getTabsBox().setSpacing(CLASSIC_TAB_BAR_SPACING);
-        _tabBar.addPropChangeListener(this::handleTabBarPropChange);
+        _tabBar.addPropChangeListener(this::handleTabBarSelIndexChange, TabBar.SelIndex_Prop);
         _tabBar.addEventHandler(this::handleTabBarActionEvent, Action);
 
         // Create separator
@@ -307,19 +307,14 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     }
 
     /**
-     * Called when TabBar does prop change.
+     * Called when TabBar SelIndex changes.
      */
-    private void handleTabBarPropChange(PropChange aPC)
+    private void handleTabBarSelIndexChange(PropChange propChange)
     {
-        String propName = aPC.getPropName();
-
-        // Handle SelIndex
-        if (propName == TabBar.SelIndex_Prop) {
-            Tab tab = _tabBar.getSelItem();
-            View content = tab != null ? tab.getContent() : null;
-            setContent(content);
-            firePropChange(SelIndex_Prop, aPC.getOldValue(), aPC.getNewValue());
-        }
+        Tab tab = _tabBar.getSelItem();
+        View content = tab != null ? tab.getContent() : null;
+        setContent(content);
+        firePropChange(SelIndex_Prop, propChange.getOldValue(), propChange.getNewValue());
     }
 
     /**
