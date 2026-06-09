@@ -272,9 +272,12 @@ public class ButtonBase extends ParentView {
             repaint();
         }
 
-        // Handle KeyPress + Enter
-        if (anEvent.isKeyPress() && anEvent.getKeyCode() == KeyCode.SPACE)
-            fireActionEvent(anEvent);
+        // Handle KeyPress + Enter/Space
+        else if (anEvent.isKeyPress()) {
+            int keyCode = anEvent.getKeyCode();
+            if (keyCode == KeyCode.ENTER || keyCode == KeyCode.SPACE)
+                fireActionEvent(anEvent);
+        }
     }
 
     /**
