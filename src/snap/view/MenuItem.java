@@ -266,34 +266,4 @@ public class MenuItem extends ButtonBase implements Cloneable {
             default -> super.setPropValue(aPropName, aValue);
         }
     }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive Shortcut
-        if (!isPropDefault(Shortcut_Prop))
-            e.add(Shortcut_Prop, getShortcut());
-
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive Shortcut
-        if (anElement.hasAttribute(Shortcut_Prop)) // Archival legacy: Key
-            setShortcut(anElement.getAttributeValue(Shortcut_Prop));
-        else if (anElement.hasAttribute("Key"))
-            setShortcut(anElement.getAttributeValue("Key"));
-    }
 }

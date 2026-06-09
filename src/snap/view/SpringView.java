@@ -185,16 +185,6 @@ public class SpringView extends ChildView {
     }
 
     /**
-     * XML Archival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-        setPrefSize(getWidth(), getHeight());
-    }
-
-    /**
      * Returns the autosizing settings as a string with hyphens for struts and tilde for sprints (horiz,vert).
      */
     public static String getAutosizing(View aView)

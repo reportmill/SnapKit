@@ -1,6 +1,4 @@
 package snap.games;
-import snap.util.XMLArchiver;
-import snap.util.XMLElement;
 import snap.view.ViewArchiver;
 
 /**
@@ -49,36 +47,36 @@ public class ProxyActorView extends ActorView {
     /**
      * Override to archive X/Y and ImageName.
      */
-    @Override
-    protected XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        XMLElement xml = super.toXMLView(anArchiver);
-        xml.setName("ActorView");
-
-        // Archive Actor class name
-        if (_actorClassName != null && !_actorClassName.equals(Actor.class.getName()))
-            xml.add("ActorClass", _actorClassName);
-
-        // Return
-        return xml;
-    }
+//    @Override
+//    protected XMLElement toXMLView(XMLArchiver anArchiver)
+//    {
+//        XMLElement xml = super.toXMLView(anArchiver);
+//        xml.setName("ActorView");
+//
+//        // Archive Actor class name
+//        if (_actorClassName != null && !_actorClassName.equals(Actor.class.getName()))
+//            xml.add("ActorClass", _actorClassName);
+//
+//        // Return
+//        return xml;
+//    }
 
     /**
      * Override to support image name.
      */
-    @Override
-    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Create Actor class
-        _actorClassName = anElement.getAttributeValue("ActorClass");
-        if (_actorClassName != null) {
-            _actor = (Actor) getInstanceForClassName(anArchiver.getOwnerClass(), _actorClassName);
-            if (_actor == null) _actor = new Actor();
-            _actor._actorView = this;
-        }
-
-        super.fromXMLView(anArchiver, anElement);
-    }
+//    @Override
+//    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+//    {
+//        // Create Actor class
+//        _actorClassName = anElement.getAttributeValue("ActorClass");
+//        if (_actorClassName != null) {
+//            _actor = (Actor) getInstanceForClassName(anArchiver.getOwnerClass(), _actorClassName);
+//            if (_actor == null) _actor = new Actor();
+//            _actor._actorView = this;
+//        }
+//
+//        super.fromXMLView(anArchiver, anElement);
+//    }
 
     /**
      * Returns an actor instance for given class name.

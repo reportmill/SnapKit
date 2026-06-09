@@ -472,38 +472,6 @@ public class TextField extends TextArea {
     }
 
     /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Do normal version
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive ColCount, PromptText, Multiline
-        if (!isPropDefault(ColCount_Prop)) e.add(ColCount_Prop, getColCount());
-        if (!isPropDefault(PromptText_Prop)) e.add(PromptText_Prop, getPromptText());
-        if (!isPropDefault(Multiline_Prop)) e.add(Multiline_Prop, isMultiline());
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Do normal version
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive ColCount, PromptText, Multiline
-        if (anElement.hasAttribute(ColCount_Prop))
-            setColCount(anElement.getAttributeIntValue(ColCount_Prop));
-        if (anElement.hasAttribute(PromptText_Prop))
-            setPromptText(anElement.getAttributeValue(PromptText_Prop));
-        if (anElement.hasAttribute(Multiline_Prop))
-            setMultiline(anElement.getAttributeBoolValue(Multiline_Prop));
-    }
-
-    /**
      * A TextAdapter for TextField.
      */
     private class TextFieldTextAdapter extends TextAdapter {

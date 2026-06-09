@@ -111,33 +111,4 @@ public class RowView extends ChildView {
             default -> super.setPropValue(aPropName, aValue);
         }
     }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive FillHeight, Hugging
-        if (isFillHeight()) e.add(FillHeight_Prop, true);
-        if (isHugging()) e.add(Hugging_Prop, true);
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive FillHeight, Hugging
-        if (anElement.hasAttribute(FillHeight_Prop))
-            setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop, false));
-        if (anElement.hasAttribute(Hugging_Prop))
-            setHugging(anElement.getAttributeBoolValue(Hugging_Prop, false));
-    }
 }

@@ -467,49 +467,4 @@ public class ImageView extends View {
                 setImage(image);
         }
     }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        // Archive basic shape attributes
-        XMLElement e = super.toXML(anArchiver);
-
-        // Archive ImageName
-        if (!isPropDefault(ImageName_Prop))
-            e.add(ImageName_Prop, getImageName());
-
-        // Archive FillWidth, FillHeight, KeepAspect
-        if (!isPropDefault(FillWidth_Prop)) e.add(FillWidth_Prop, true);
-        if (!isPropDefault(FillHeight_Prop)) e.add(FillHeight_Prop, true);
-        if (!isPropDefault(KeepAspect_Prop)) e.add(KeepAspect_Prop, true);
-
-        // Return
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic shape attributes
-        super.fromXML(anArchiver, anElement);
-
-        // Unarchive ImageName
-        if (anElement.hasAttribute(ImageName_Prop) && anArchiver instanceof ViewArchiverOld viewArchiver) {
-            String imageName = anElement.getAttributeValue(ImageName_Prop);
-            setImageName(imageName);
-            Image image = viewArchiver.getImage(imageName);
-            if (image != null)
-                setImage(image);
-        }
-
-        // Unarchive FillWidth, FillHeight, KeepAspect
-        if (anElement.hasAttribute(FillWidth_Prop)) setFillWidth(anElement.getAttributeBooleanValue(FillWidth_Prop));
-        if (anElement.hasAttribute(FillHeight_Prop)) setFillHeight(anElement.getAttributeBooleanValue(FillHeight_Prop));
-        if (anElement.hasAttribute(KeepAspect_Prop)) setKeepAspect(anElement.getAttributeBooleanValue(KeepAspect_Prop));
-        return this;
-    }
 }

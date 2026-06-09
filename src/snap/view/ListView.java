@@ -1064,35 +1064,4 @@ public class ListView <T> extends ParentView implements Selectable<T> {
             default -> super.setPropValue(aPropName, aValue);
         }
     }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive RowHeight, ItemKey
-        if (isRowHeightSet()) e.add(RowHeight_Prop, getRowHeight());
-        if (!isPropDefault(ItemKey_Prop)) e.add(ItemKey_Prop, getItemKey());
-
-        // Return element
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive RowHeight, ItemKey
-        if (anElement.hasAttribute(RowHeight_Prop))
-            setRowHeight(anElement.getAttributeIntValue(RowHeight_Prop));
-        if (anElement.hasAttribute(ItemKey_Prop))
-            setItemKey(anElement.getAttributeValue(ItemKey_Prop));
-    }
 }

@@ -350,29 +350,29 @@ public class StageView extends ChildView {
     /**
      * Override to archive ImageName.
      */
-    @Override
-    protected XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        XMLElement xml = super.toXMLView(anArchiver);
-
-        // Archive ImageName
-        if (_imageName != null && !_imageName.isEmpty())
-            xml.add("ImageName", _imageName);
-
-        // Return
-        return xml;
-    }
+//    @Override
+//    protected XMLElement toXMLView(XMLArchiver anArchiver)
+//    {
+//        XMLElement xml = super.toXMLView(anArchiver);
+//
+//        // Archive ImageName
+//        if (_imageName != null && !_imageName.isEmpty())
+//            xml.add("ImageName", _imageName);
+//
+//        // Return
+//        return xml;
+//    }
 
     /**
      * Override to support image name.
      */
-    @Override
-    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        super.fromXMLView(anArchiver, anElement);
-        if (anElement.hasAttribute("ImageName")) {
-            String imageName = anElement.getAttributeValue("ImageName");
-            setImageForName(imageName);
-        }
-    }
+//    @Override
+//    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+//    {
+//        super.fromXMLView(anArchiver, anElement);
+//        if (anElement.hasAttribute("ImageName")) {
+//            String imageName = anElement.getAttributeValue("ImageName");
+//            setImageForName(imageName);
+//        }
+//    }
 }

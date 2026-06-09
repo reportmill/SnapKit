@@ -143,25 +143,4 @@ public class SwitchView extends ChildView implements Selectable<View> {
             child.setVisible(i == getSelIndex());
         }
     }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-        if (getSelIndex()>0) e.add(SelIndex_Prop, getSelIndex());
-        return e;
-    }
-
-    /**
-     * XML unarchival for children.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-        setSelIndex(anElement.getAttributeIntValue(SelIndex_Prop, 0));
-    }
 }

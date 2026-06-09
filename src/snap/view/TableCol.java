@@ -165,15 +165,15 @@ public class TableCol <T> extends ListView <T> {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // HeaderText, Resizable
-            case HeaderText_Prop: return getHeaderText();
-            case Resizable_Prop: return isResizable();
+            case HeaderText_Prop -> getHeaderText();
+            case Resizable_Prop -> isResizable();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -185,40 +185,11 @@ public class TableCol <T> extends ListView <T> {
         switch (aPropName) {
 
             // HeaderText, Resizable
-            case HeaderText_Prop: setHeaderText(Convert.stringValue(aValue)); break;
-            case Resizable_Prop: setResizable(Convert.boolValue(aValue)); break;
+            case HeaderText_Prop -> setHeaderText(Convert.stringValue(aValue));
+            case Resizable_Prop -> setResizable(Convert.boolValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
-    }
-
-    /**
-     * XML archival - table columns.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Create xml for column
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive HeaderText, Resizable
-        if (!isPropDefault(HeaderText_Prop)) e.add(HeaderText_Prop, getHeaderText());
-        if (!isPropDefault(Resizable_Prop)) e.add(Resizable_Prop, false);
-
-        // Return column xml
-        return e;
-    }
-
-    /**
-     * XML unarchival - table columns.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Do normal version
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive HeaderText, Resizable
-        if (anElement.hasAttribute(HeaderText_Prop)) setHeaderText(anElement.getAttributeValue(HeaderText_Prop));
-        if (anElement.hasAttribute(Resizable_Prop)) setResizable(anElement.getAttributeBoolValue(Resizable_Prop));
     }
 }

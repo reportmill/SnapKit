@@ -244,35 +244,4 @@ public class BoxView extends ParentView implements ViewHost {
             default -> super.setPropValue(aPropName, aValue);
         }
     }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive FillWidth, FillHeight
-        if (isFillWidth())
-            e.add(FillWidth_Prop, true);
-        if (isFillHeight())
-            e.add(FillHeight_Prop, true);
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive FillWidth, FillHeight
-        if (anElement.hasAttribute(FillWidth_Prop))
-            setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
-        if (anElement.hasAttribute(FillHeight_Prop))
-            setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop));
-    }
 }

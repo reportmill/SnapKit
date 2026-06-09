@@ -311,34 +311,34 @@ public class ActorView extends ParentView {
     /**
      * Override to archive X/Y and ImageName.
      */
-    @Override
-    protected XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        XMLElement xml = super.toXMLView(anArchiver);
-
-        // Archive X,Y
-        int attrIndex = xml.hasAttribute(Name_Prop) ? 1 : 0;
-        if (getY() != 0) xml.addAttribute(new XMLAttribute(Y_Prop, getY()), attrIndex);
-        if (getX() != 0) xml.addAttribute(new XMLAttribute(X_Prop, getX()), attrIndex);
-
-        // Archive ImageName
-        if (_imageName != null && !_imageName.isEmpty())
-            xml.add("ImageName", _imageName);
-
-        // Return
-        return xml;
-    }
+//    @Override
+//    protected XMLElement toXMLView(XMLArchiver anArchiver)
+//    {
+//        XMLElement xml = super.toXMLView(anArchiver);
+//
+//        // Archive X,Y
+//        int attrIndex = xml.hasAttribute(Name_Prop) ? 1 : 0;
+//        if (getY() != 0) xml.addAttribute(new XMLAttribute(Y_Prop, getY()), attrIndex);
+//        if (getX() != 0) xml.addAttribute(new XMLAttribute(X_Prop, getX()), attrIndex);
+//
+//        // Archive ImageName
+//        if (_imageName != null && !_imageName.isEmpty())
+//            xml.add("ImageName", _imageName);
+//
+//        // Return
+//        return xml;
+//    }
 
     /**
      * Override to support image name.
      */
-    @Override
-    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        super.fromXMLView(anArchiver, anElement);
-        if (anElement.hasAttribute("ImageName")) {
-            String imageName = anElement.getAttributeValue("ImageName");
-            setImageForName(imageName);
-        }
-    }
+//    @Override
+//    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+//    {
+//        super.fromXMLView(anArchiver, anElement);
+//        if (anElement.hasAttribute("ImageName")) {
+//            String imageName = anElement.getAttributeValue("ImageName");
+//            setImageForName(imageName);
+//        }
+//    }
 }

@@ -338,40 +338,6 @@ public class Label extends ParentView {
     }
 
     /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive ImageName
-        if (!isPropDefault(ImageName_Prop))
-            e.add(ImageName_Prop, getImageName());
-
-        // Return element
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive ImageName
-        if (anElement.hasAttribute(ImageName_Prop) && anArchiver instanceof ViewArchiverOld viewArchiver) {
-            String imageName = anElement.getAttributeValue(ImageName_Prop);
-            setImageName(imageName);
-            Image image = viewArchiver.getImage(imageName);
-            if (image != null)
-                setImage(image);
-        }
-    }
-
-    /**
      * Standard toString implementation.
      */
     @Override

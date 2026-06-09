@@ -439,41 +439,6 @@ public class TitleView extends ParentView implements ViewHost {
     }
 
     /**
-     * XML archival.
-     */
-    protected XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Do normal archival
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive TitleStyle
-        if (getTitleStyle() != TitleStyle.EtchBorder) e.add(TitleStyle_Prop, getTitleStyle());
-
-        // Archive Expandable, Expanded
-        if (isCollapsible()) e.add(Collapsible_Prop, true);
-        if (isCollapsible() && !isExpanded()) e.add(Expanded_Prop, false);
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Do normal version
-        super.fromXMLView(anArchiver,anElement);
-
-        // Unrchive TitleStyle
-        String tstr = anElement.getAttributeValue(TitleStyle_Prop);
-        TitleStyle tstyl = tstr!=null? TitleStyle.valueOf(tstr) : null;
-        if (tstyl!=null) setTitleStyle(tstyl);
-
-        // Unrchive Expandable, Expanded
-        if (anElement.hasAttribute(Collapsible_Prop)) setCollapsible(anElement.getAttributeBoolValue(Collapsible_Prop));
-        if (anElement.hasAttribute(Expanded_Prop)) setExpanded(anElement.getAttributeBoolValue(Expanded_Prop));
-    }
-
-    /**
      * Returns a TitleStyle for given object.
      */
     private static TitleStyle titleStyleOf(Object aValue)

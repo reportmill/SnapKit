@@ -205,7 +205,7 @@ public class Spinner <T> extends ParentView {
     public void textChanged()
     {
         // Get Text value based as same current type of spinner
-        Object oval = getValue(), nval = null;
+        Object oval = getValue(), nval;
         String str = _text.getText();
         if (oval instanceof Integer) nval = Convert.intValue(str);
         else if (oval instanceof Long) nval = Convert.longValue(str);
@@ -215,7 +215,7 @@ public class Spinner <T> extends ParentView {
         else if (oval instanceof Double) nval = Convert.doubleValue(str);
         else { System.err.println("Spinner: Unsupported value type: " + getValueClass()); return; }
 
-        setValue((T)nval);
+        setValue((T) nval);
         fireActionEvent(null);
     }
 
@@ -286,42 +286,5 @@ public class Spinner <T> extends ParentView {
             // Do normal version
             default -> super.setPropValue(aPropName, aValue);
         }
-    }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive Min, Max, Step, Value
-        if (getMin()!=Integer.MIN_VALUE) e.add(Min_Prop, getMin());
-        if (getMax()!=Integer.MAX_VALUE) e.add(Max_Prop, getMax());
-        if (getStep()!=1) e.add(Step_Prop, getStep());
-        if (getValue() != null && !getValue().equals(0d)) e.add(Value_Prop, getValue());
-
-        // Return element
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive Min, Max, Step, Value
-        if (anElement.hasAttribute(Min_Prop))
-            setMin(anElement.getAttributeFloatValue(Min_Prop));
-        if (anElement.hasAttribute(Max_Prop))
-            setMax(anElement.getAttributeFloatValue(Max_Prop));
-        if (anElement.hasAttribute(Step_Prop))
-            setStep(anElement.getAttributeFloatValue(Step_Prop));
-        if (anElement.hasAttribute(Value_Prop))
-            setValue((T) (Double) anElement.getAttributeDoubleValue(Value_Prop));
     }
 }

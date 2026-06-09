@@ -289,15 +289,15 @@ public class ColorWell extends View {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Selectable, Color
-            case Selectable_Prop: return isSelectable();
-            case Color_Prop: case "Value": return getColor();
+            case Selectable_Prop -> isSelectable();
+            case Color_Prop, "Value" -> getColor();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -309,34 +309,11 @@ public class ColorWell extends View {
         switch (aPropName) {
 
             // Selectable, Color
-            case Selectable_Prop: setSelectable(Convert.boolValue(aValue)); break;
-            case Color_Prop: case "Value": setColor(Color.get(aValue)); break;
+            case Selectable_Prop -> setSelectable(Convert.boolValue(aValue));
+            case Color_Prop, "Value" -> setColor(Color.get(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
-    }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXML(anArchiver);
-        if (!isSelectable())
-            e.add(Selectable_Prop, false);
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        super.fromXML(anArchiver, anElement);
-        if (anElement.hasAttribute(Selectable_Prop))
-            setSelectable(anElement.getAttributeBoolValue(Selectable_Prop));
-        return this;
     }
 }

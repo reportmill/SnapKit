@@ -115,31 +115,4 @@ public class ColView extends ChildView {
             default -> super.setPropValue(aPropName, aValue);
         }
     }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive FillWidth, Hugging
-        if (isFillWidth()) e.add(FillWidth_Prop, true);
-        if (isHugging()) e.add(Hugging_Prop, true);
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive FillWidth, Hugging
-        if (anElement.hasAttribute(FillWidth_Prop)) setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
-        if (anElement.hasAttribute(Hugging_Prop)) setHugging(anElement.getAttributeBoolValue(Hugging_Prop));
-    }
 }

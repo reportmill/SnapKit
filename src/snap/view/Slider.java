@@ -282,37 +282,4 @@ public class Slider extends View {
             default -> super.setPropValue(aPropName, aValue);
         }
     }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXML(anArchiver);
-
-        // Archive Min, Max, Value
-        if (getMin() != 0)
-            e.add(Min_Prop, getMin());
-        if (getMax() != 100)
-            e.add(Max_Prop, getMax());
-        if (getValue() != 50)
-            e.add(Value_Prop, getValue());
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXML(anArchiver, anElement);
-
-        // Unarchive Min, Max, Value
-        setMin(anElement.getAttributeIntValue(Min_Prop, 0));
-        setMax(anElement.getAttributeIntValue(Max_Prop, 100));
-        setValue(anElement.getAttributeIntValue(Value_Prop, 50));
-        return this;
-    }
 }

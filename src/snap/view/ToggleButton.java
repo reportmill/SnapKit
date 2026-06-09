@@ -129,16 +129,15 @@ public class ToggleButton extends ButtonBase {
     @Override
     public Object getPropValue(String aPropName)
     {
-        // Handle properties
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Selected, Group
-            case Selected_Prop: case "Value": return isSelected();
-            case GroupName_Prop: return getGroupName();
+            case Selected_Prop, "Value" -> isSelected();
+            case GroupName_Prop -> getGroupName();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -147,47 +146,14 @@ public class ToggleButton extends ButtonBase {
     @Override
     public void setPropValue(String aPropName, Object aValue)
     {
-        // Handle properties
         switch (aPropName) {
 
             // Selected, Group
-            case Selected_Prop: case "Value": setSelected(Convert.boolValue(aValue)); break;
-            case GroupName_Prop: setGroupName(Convert.stringValue(aValue)); break;
+            case Selected_Prop, "Value" -> setSelected(Convert.boolValue(aValue));
+            case GroupName_Prop -> setGroupName(Convert.stringValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
-    }
-
-    /**
-     * XML archival.
-     */
-    protected XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive Selected, GroupName
-        if (!isPropDefault(Selected_Prop))
-            e.add(Selected_Prop, true);
-        if (!isPropDefault(GroupName_Prop))
-            e.add(GroupName_Prop, getGroupName());
-
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive Selected, GroupName
-        if (anElement.hasAttribute(Selected_Prop))
-            setSelected(anElement.getAttributeBoolValue(Selected_Prop));
-        if (anElement.hasAttribute(GroupName_Prop)) // Archival legacy: Group or ToggleGroup
-            setGroupName(anElement.getAttributeValue(GroupName_Prop));
     }
 }

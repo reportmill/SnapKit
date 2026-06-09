@@ -599,16 +599,16 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // ShowTextField, ShowButton, FilterList
-            case ShowTextField_Prop: return isShowTextField();
-            case ShowButton_Prop: return isShowButton();
-            case FilterList_Prop: return isFilterList();
+            case ShowTextField_Prop -> isShowTextField();
+            case ShowButton_Prop -> isShowButton();
+            case FilterList_Prop -> isFilterList();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -620,47 +620,13 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         switch (aPropName) {
 
             // ShowTextField, ShowButton, FilterList
-            case ShowTextField_Prop: setShowTextField(Convert.boolValue(aValue)); break;
-            case ShowButton_Prop: setShowButton(Convert.boolValue(aValue)); break;
-            case FilterList_Prop: setFilterList(Convert.boolValue(aValue)); break;
+            case ShowTextField_Prop -> setShowTextField(Convert.boolValue(aValue));
+            case ShowButton_Prop -> setShowButton(Convert.boolValue(aValue));
+            case FilterList_Prop -> setFilterList(Convert.boolValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue); break;
+            default -> super.setPropValue(aPropName, aValue);
         }
-    }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive ShowTextField, ShowButton, FilterList
-        if (isShowTextField()) e.add(ShowTextField_Prop, true);
-        if (isShowButton()!=isPopup()) e.add(ShowButton_Prop, isShowButton());
-        if (isFilterList()) e.add(FilterList_Prop, true);
-
-        // Return element
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive ShowTextField, ShowButton, FilterList
-        if (anElement.hasAttribute(ShowTextField_Prop))
-            setShowTextField(anElement.getAttributeBooleanValue(ShowTextField_Prop));
-        if (anElement.hasAttribute(ShowButton_Prop))
-            setShowButton(anElement.getAttributeBooleanValue(ShowButton_Prop));
-        if (anElement.hasAttribute(FilterList_Prop))
-            setFilterList(anElement.getAttributeBooleanValue(FilterList_Prop));
     }
 
     /**

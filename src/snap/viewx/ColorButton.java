@@ -325,15 +325,15 @@ public class ColorButton extends View {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Title, Color
-            case Title_Prop: return getTitle();
-            case Color_Prop: case "Value": getColor();
+            case Title_Prop -> getTitle();
+            case Color_Prop, "Value" -> getColor();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -345,34 +345,12 @@ public class ColorButton extends View {
         switch (aPropName) {
 
             // Title, Color
-            case Title_Prop: setTitle(Convert.stringValue(aValue)); break;
-            case Color_Prop: case "Value": setColor(Color.get(aValue)); break;
+            case Title_Prop -> setTitle(Convert.stringValue(aValue));
+            case Color_Prop, "Value" -> setColor(Color.get(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
-    }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        XMLElement e = super.toXML(anArchiver);
-        if (getTitle() != null && !getTitle().isEmpty())
-            e.add("Title", getTitle());
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        super.fromXML(anArchiver, anElement);
-        if (anElement.hasAttribute("Title"))
-            setTitle(anElement.getAttributeValue("Title"));
-        return this;
     }
 
     /**

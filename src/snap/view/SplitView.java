@@ -491,14 +491,12 @@ public class SplitView extends ParentView implements ViewHost {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        // DividerSpan
+        if (aPropName.equals(DividerSpan_Prop))
+            return getDividerSpan();
 
-            // DividerSpan
-            case DividerSpan_Prop: return getDividerSpan();
-
-            // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+        // Do normal version
+        return super.getPropValue(aPropName);
     }
 
     /**
@@ -507,71 +505,12 @@ public class SplitView extends ParentView implements ViewHost {
     @Override
     public void setPropValue(String aPropName, Object aValue)
     {
-        switch (aPropName) {
+        // DividerSpan
+        if (aPropName.equals(DividerSpan_Prop))
+            setDividerSpan(Convert.doubleValue(aValue));
 
-            // DividerSpan
-            case DividerSpan_Prop: setDividerSpan(Convert.doubleValue(aValue)); break;
-
-            // Do normal version
-            default: super.setPropValue(aPropName, aValue);
-        }
-    }
-
-    /**
-     * XML Archival of basic view.
-     */
-    protected XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive DividerSpan
-        if (!isPropDefault(DividerSpan_Prop))
-            e.add(DividerSpan_Prop, getDividerSpan());
-
-        // Return
-        return e;
-    }
-
-    /**
-     * XML unarchival of basic view.
-     */
-    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive DividerSpan
-        if(anElement.hasAttribute(DividerSpan_Prop))
-            setDividerSpan(anElement.getAttributeFloatValue(DividerSpan_Prop));
-    }
-
-    /**
-     * XML archival deep.
-     */
-    public void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Archive items
-        for (View item : getItems()) {
-            XMLElement cxml = anArchiver.toXML(item, this);
-            anElement.add(cxml);
-        }
-    }
-
-    /**
-     * XML unarchival for shape children.
-     */
-    protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Iterate over child elements and unarchive as child nodes
-        for (int i = 0, iMax = anElement.size(); i < iMax; i++) {
-            XMLElement childXML = anElement.get(i);
-            Class<?> cls = anArchiver.getClassForName(childXML.getName());
-            if (cls != null && View.class.isAssignableFrom(cls)) {
-                View view = (View) anArchiver.fromXML(childXML, this);
-                addItem(view);
-            }
-        }
+        // Do normal version
+        else super.setPropValue(aPropName, aValue);
     }
 
     /**

@@ -92,34 +92,34 @@ public class ProxyStageView extends StageView {
     /**
      * Override to handle stage.
      */
-    @Override
-    protected XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        XMLElement xml = super.toXMLView(anArchiver);
-        xml.setName("StageView");
-
-        // Archive stage class name
-        if (_stageClassName != null && !_stageClassName.equals(Stage.class.getName()))
-            xml.add("StageClass", _stageClassName);
-
-        // Return
-        return xml;
-    }
+//    @Override
+//    protected XMLElement toXMLView(XMLArchiver anArchiver)
+//    {
+//        XMLElement xml = super.toXMLView(anArchiver);
+//        xml.setName("StageView");
+//
+//        // Archive stage class name
+//        if (_stageClassName != null && !_stageClassName.equals(Stage.class.getName()))
+//            xml.add("StageClass", _stageClassName);
+//
+//        // Return
+//        return xml;
+//    }
 
     /**
      * Override to handle stage.
      */
-    @Override
-    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Create Actor class
-        _stageClassName = anElement.getAttributeValue("StageClass");
-        if (_stageClassName != null) {
-            _stage = (Stage) ProxyActorView.getInstanceForClassName(anArchiver.getOwnerClass(), _stageClassName);
-            if (_stage == null) _stage = new Stage();
-            _stage._stageView = this;
-        }
-
-        super.fromXMLView(anArchiver, anElement);
-    }
+//    @Override
+//    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+//    {
+//        // Create Actor class
+//        _stageClassName = anElement.getAttributeValue("StageClass");
+//        if (_stageClassName != null) {
+//            _stage = (Stage) ProxyActorView.getInstanceForClassName(anArchiver.getOwnerClass(), _stageClassName);
+//            if (_stage == null) _stage = new Stage();
+//            _stage._stageView = this;
+//        }
+//
+//        super.fromXMLView(anArchiver, anElement);
+//    }
 }

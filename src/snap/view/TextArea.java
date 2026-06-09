@@ -749,35 +749,6 @@ public class TextArea extends ParentView {
     }
 
     /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        XMLElement xml = super.toXML(anArchiver);
-
-        // Archive Editable, WrapLines
-        if (!isPropDefault(Editable_Prop)) xml.add(Editable_Prop, isEditable());
-        if (!isPropDefault(WrapLines_Prop)) xml.add(WrapLines_Prop, isWrapLines());
-        return xml;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public TextArea fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        super.fromXML(anArchiver, anElement);
-
-        // Unarchive Editable, WrapLines
-        if (anElement.hasAttribute(Editable_Prop))
-            setEditable(anElement.getAttributeBoolValue(Editable_Prop));
-        if (anElement.hasAttribute(WrapLines_Prop))
-            setWrapLines(anElement.getAttributeBoolValue(WrapLines_Prop));
-
-        return this;
-    }
-
-    /**
      * Standard toStringProps implementation.
      */
     @Override

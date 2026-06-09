@@ -635,47 +635,4 @@ public class ThumbWheel extends View {
             default -> super.setPropValue(aPropName, aValue);
         }
     }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXML(anArchiver);
-
-        // Archive Type, VisibleMin, VisibleMax, AbsoluteMin, AbsoluteMax and Round
-        if (getType() != TYPE_RADIAL) e.add("Type", "linear");
-        if (getVisibleMin() != 0) e.add("Min", getVisibleMin());
-        if (getVisibleMax() != 100) e.add("Max", getVisibleMax());
-        if (getAbsoluteMin()!=-Float.MAX_VALUE) e.add("AbsMin", getAbsoluteMin());
-        if (getAbsoluteMax()!=Float.MAX_VALUE) e.add("AbsMax", getAbsoluteMax());
-        if (getRound()!=0) e.add("Round", getRound());
-
-        // Return element
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXML(anArchiver, anElement);
-
-        // Unarchive Type
-        if (anElement.getAttributeValue("Type", "radial").equals("linear"))
-            setType(TYPE_LINEAR);
-
-        // Unarchive VisibleMin, VisibleMax, AbsoluteMin, AbsoluteMax and Round
-        setVisibleMin(anElement.getAttributeDoubleValue("Min", getVisibleMin()));
-        setVisibleMax(anElement.getAttributeDoubleValue("Max", getVisibleMax()));
-        setAbsoluteMin(anElement.getAttributeDoubleValue("AbsMin", getAbsoluteMin()));
-        setAbsoluteMax(anElement.getAttributeDoubleValue("AbsMax", getAbsoluteMax()));
-        setRound(anElement.getAttributeDoubleValue("Round"));
-
-        // Return
-        return this;
-    }
 }

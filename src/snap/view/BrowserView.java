@@ -670,37 +670,6 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         }
     }
 
-    /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive PrefColCount, PrefColWidth
-        if (getPrefColCount() != 2) e.add(PrefColCount_Prop, getPrefColCount());
-        if (getPrefColWidth() != 150) e.add(PrefColWidth_Prop, getPrefColWidth());
-
-        // Archive
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Archive PrefColCount, PrefColWidth
-        if (anElement.hasAttribute(PrefColCount_Prop))
-            setPrefColCount(anElement.getAttributeIntValue(PrefColCount_Prop));
-        if (anElement.hasAttribute(PrefColWidth_Prop))
-            setPrefColWidth(anElement.getAttributeIntValue(PrefColWidth_Prop));
-    }
-
     // Convenience resolver methods
     private boolean isParent(T anItem)  { return _resolver.isParent(anItem); }
     private T getParent(T anItem)  { return _resolver.getParent(anItem); }

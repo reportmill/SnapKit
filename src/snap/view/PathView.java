@@ -143,36 +143,4 @@ public class PathView extends View {
         Insets ins = getInsetsAll();
         return pathBounds.getMaxY() + ins.getHeight();
     }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        // Do normal version
-        XMLElement e = super.toXML(anArchiver);
-
-        // Archive path
-        if (!isPropDefault(SvgString_Prop))
-            e.add(SvgString_Prop, getSvgString());
-
-        // Return
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Do normal version
-        super.fromXML(anArchiver, anElement);
-
-        // Unarchive path
-        if (anElement.hasAttribute(SvgString_Prop))
-            setSvgString(anElement.getAttributeValue(SvgString_Prop));
-
-        // Return
-        return this;
-    }
 }
