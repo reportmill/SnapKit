@@ -98,7 +98,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         setFocusable(true);
         setFocusWhenPressed(true);
         setOverflow(Overflow.Scroll);
-        enableEvents(MousePress, MouseDrag, MouseRelease);
+        enableEvents(MousePress, MouseDrag, MouseRelease, KeyPress);
 
         // Create/set PickList
         setPickList(new PickList<>());
@@ -848,7 +848,19 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      */
     protected void processEvent(ViewEvent anEvent)
     {
-        _selector.processEvent(anEvent);
+        // Handle MouseEvent
+        if (anEvent.isMouseEvent())
+            _selector.processMouseEvent(anEvent);
+
+        // Handle KeyPress
+        else if (anEvent.isKeyPress()) {
+            int keyCode = anEvent.getKeyCode();
+            switch (keyCode) {
+                case KeyCode.UP -> { selectUp(); anEvent.consume(); }
+                case KeyCode.DOWN -> { selectDown(); anEvent.consume(); }
+                case KeyCode.ENTER -> processEnterAction(anEvent);
+            }
+        }
     }
 
     /**

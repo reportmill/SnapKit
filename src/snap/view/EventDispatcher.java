@@ -356,6 +356,14 @@ public class EventDispatcher {
             else _debugTrigger = 0;
         }
 
+        // If popup is set and has focused view, forward to it
+        PopupWindow popupWin = getPopup();
+        if (popupWin != null && popupWin.getFocusedView() != null) {
+            popupWin.dispatchEventToWindow(anEvent);
+            if (anEvent.isConsumed())
+                return;
+        }
+
         // Get current focused view and array of parents
         View focusedView = _win.getFocusedView();
         if (focusedView == null)

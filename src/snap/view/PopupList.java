@@ -117,11 +117,16 @@ public class PopupList<T> extends ListView<T> {
         boolean showing = popupWindow.isShowing();
 
         // If showing, add EventListener, otherwise, remove
-        if (showing)
-            _clientView.addEventFilter(_clientViewKeyPressLsnr, KeyPress);
+        if (showing) {
+            if (_clientView.isFocused())
+                _clientView.addEventFilter(_clientViewKeyPressLsnr, KeyPress);
+            else requestFocus();
+        }
 
         // Otherwise remove listener
         else {
+            if (_clientView.isFocusable())
+                _clientView.requestFocus();
             _clientView.removeEventFilter(_clientViewKeyPressLsnr, KeyPress);
             _clientView = null;
         }

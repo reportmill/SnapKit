@@ -4,10 +4,10 @@ import snap.util.ListSel;
 /**
  * A class to handle ListView selection.
  */
-class ListViewSelector {
+class ListViewSelector<T> {
 
     // This ListView
-    private final ListView<?> _listView;
+    private final ListView<T> _listView;
 
     // Whether selection allowed on MouseDrag
     protected boolean _dragSelect;
@@ -24,29 +24,9 @@ class ListViewSelector {
     /**
      * Constructor.
      */
-    public ListViewSelector(ListView<?> listView)
+    public ListViewSelector(ListView<T> listView)
     {
         _listView = listView;
-    }
-
-    /**
-     * Process events.
-     */
-    protected void processEvent(ViewEvent anEvent)
-    {
-        // Handle MouseEvent
-        if (anEvent.isMouseEvent())
-            processMouseEvent(anEvent);
-
-        // Handle KeyPress
-        else if (anEvent.isKeyPress()) {
-            int kcode = anEvent.getKeyCode();
-            switch(kcode) {
-                case KeyCode.UP: _listView.selectUp(); anEvent.consume(); break;
-                case KeyCode.DOWN: _listView.selectDown(); anEvent.consume(); break;
-                case KeyCode.ENTER: _listView.processEnterAction(anEvent); break;
-            }
-        }
     }
 
     /**
@@ -158,7 +138,7 @@ class ListViewSelector {
 
         // Start editing if needed
         if (anEvent.isMouseClick() && anEvent.getClickCount()>1 && _listView.isEditable()) {
-            ListCell cell = _listView.getCellForY(anEvent.getY());
+            ListCell<T> cell = _listView.getCellForY(anEvent.getY());
             if (cell != null)
                 _listView.editCell(cell);
         }
