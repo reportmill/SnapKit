@@ -232,6 +232,15 @@ public class MenuButton extends ButtonBase {
             if (isPressed)
                 fireActionEvent(anEvent);
         }
+
+        // Handle KeyPress + Enter/Space/Up/Down
+        else if (anEvent.isKeyPress()) {
+            int keyCode = anEvent.getKeyCode();
+            if (keyCode == KeyCode.ENTER || keyCode == KeyCode.SPACE || keyCode == KeyCode.UP || keyCode == KeyCode.DOWN) {
+                showMenu();
+                anEvent.consume();
+            }
+        }
     }
 
     /**

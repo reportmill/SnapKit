@@ -53,9 +53,11 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     {
         super();
 
+        setFocusable(true);
         setActionable(true);
+        enableEvents(KeyPress);
         getButton();
-        comboChanged();
+        handleShowTextFieldChange();
     }
 
     /**
@@ -115,6 +117,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         if (_button != null) return _button;
         _button = new Button();
         _button.setAlign(getAlign());
+        _button.setFocusable(false);
         _button.addEventHandler(e -> showPopup(), MousePress);
         addChild(_button);
         return _button;
@@ -139,8 +142,8 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         _listView = aListView;
 
         // Start listening to Action and SelIndex changes
-        _listView.addEventHandler(e -> listViewFiredAction(), Action);
-        _listView.addPropChangeListener(pce -> listViewSelectionChanged(), ListView.Sel_Prop);
+        _listView.addEventHandler(e -> handleListViewFiredAction(), Action);
+        _listView.addPropChangeListener(pc -> handleListViewSelChange(), ListView.Sel_Prop);
 
         // If not PopupList, turn off button and start listening to TextField KeyType events
         if (!(aListView instanceof PopupList))
@@ -173,7 +176,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         if (aValue)
             addChild(getTextField());
         else removeChild(getTextField());
-        comboChanged();
+        handleShowTextFieldChange();
     }
 
     /**
@@ -219,7 +222,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Called when Button/TextField changes.
      */
-    protected void comboChanged()
+    private void handleShowTextFieldChange()
     {
         // If ShowTextField, configure small popup button
         if (isShowTextField()) {
@@ -515,7 +518,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Called when ListView fires action.
      */
-    protected void listViewFiredAction()
+    private void handleListViewFiredAction()
     {
         if (getListView() instanceof PopupList)
             fireActionEvent(null);
@@ -524,17 +527,21 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Called when referenced PopupList selection changes.
      */
-    protected void listViewSelectionChanged()
+    protected void handleListViewSelChange()
     {
         T item = getSelItem();
         String str = getText(item);
-        if (isShowTextField()) { _textField.setText(str); _textField.selectAll(); }
+        if (isShowTextField()) {
+            _textField.setText(str);
+            _textField.selectAll();
+        }
         else _button.setText(str);
     }
 
     /**
      * Override to send to text/button.
      */
+    @Override
     public void setAlign(Pos aPos)
     {
         super.setAlign(aPos);
@@ -546,6 +553,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Override to send to button.
      */
+    @Override
     public void setDisabled(boolean aValue)
     {
         super.setDisabled(aValue);
@@ -557,11 +565,8 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Returns Value property name.
      */
-    public String getValuePropName()
-    {
-        T item = getSelItem();
-        return item != null ? SelItem_Prop : Text_Prop;
-    }
+    @Override
+    public String getValuePropName()  { return getSelItem() != null ? SelItem_Prop : Text_Prop; }
 
     /**
      * Override to return row layout.
@@ -570,13 +575,28 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     protected ViewLayout getViewLayoutImpl()  { return new RowViewLayout(this, true); }
 
     /**
+     * Override to support key activation.
+     */
+    @Override
+    protected void processEvent(ViewEvent anEvent)
+    {
+        if (anEvent.isKeyPress()) {
+            int keyCode = anEvent.getKeyCode();
+            if (keyCode == KeyCode.ENTER || keyCode == KeyCode.SPACE || keyCode == KeyCode.UP || keyCode == KeyCode.DOWN) {
+                showPopup();
+                anEvent.consume();
+            }
+        }
+    }
+
+    /**
      * Override to focus text or button.
      */
+    @Override
     public void requestFocus()
     {
         if (isShowTextField())
             getTextField().requestFocus();
-        else getButton().requestFocus();
     }
 
     /**

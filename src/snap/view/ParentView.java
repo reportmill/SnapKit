@@ -252,13 +252,11 @@ public class ParentView extends View {
             if (child.isFocusable())
                 return child;
 
-            ParentView par = child instanceof ParentView? (ParentView) child : null;
-            if (par == null)
-                continue;
-
-            View focusNext = par.getFocusNext(null);
-            if (focusNext != null)
-                return focusNext;
+            if (child instanceof ParentView parentView && parentView instanceof ViewHost) {
+                View focusNext = parentView.getFocusNext(null);
+                if (focusNext != null)
+                    return focusNext;
+            }
         }
 
         return getFocusNext();
@@ -276,13 +274,11 @@ public class ParentView extends View {
             if (child.isFocusable())
                 return child;
 
-            ParentView par = child instanceof ParentView ? (ParentView) child : null;
-            if (par == null)
-                continue;
-
-            View focusPrev = par.getFocusPrev(null);
-            if (focusPrev != null)
-                return focusPrev;
+            if (child instanceof ParentView parentView && parentView instanceof ViewHost) {
+                View focusPrev = parentView.getFocusPrev(null);
+                if (focusPrev != null)
+                    return focusPrev;
+            }
         }
 
         return getFocusPrev();
