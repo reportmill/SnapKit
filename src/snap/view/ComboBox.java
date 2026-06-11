@@ -102,7 +102,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         _textField.addEventFilter(this::handleTextFieldKeyPressEvent, KeyPress);
         _textField.addEventFilter(this::handleTextFieldKeyTypeEvent, KeyType);
         _textField.addEventHandler(this::handleTextFieldActionEvent, Action);
-        _textField.addPropChangeListener(pc -> handleTextFieldFocusChange(), View.Focused_Prop);
+        _textField.addPropChangeListener(pc -> handleTextFieldFocusChange(), Focused_Prop);
         return _textField;
     }
 
@@ -354,7 +354,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         }
 
         // On focus lost: Restore list items after delay (twice, in case textFieldFiredAction with scrollSelToVisible)
-        else getEnv().runLater(() -> getEnv().runLater(() -> { _listView.setItems(_items); _items = null; }));
+        else runLater(() -> runLater(() -> { _listView.setItems(_items); _items = null; }));
     }
 
     /**
@@ -561,6 +561,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     {
         if (isShowTextField())
             getTextField().requestFocus();
+        else super.requestFocus();
     }
 
     /**

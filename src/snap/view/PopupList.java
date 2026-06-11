@@ -52,7 +52,7 @@ public class PopupList<T> extends ListView<T> {
         // Create/configure PopupWindow
         PopupWindow popup = new PopupWindow();
         popup.setContent(scrollView);
-        popup.addPropChangeListener(pc -> handlePopupWindowShowingChanged(), Showing_Prop);
+        popup.addPropChangeListener(pc -> handlePopupWindowShowingChange(), Showing_Prop);
 
         // Set and return
         return _popup = popup;
@@ -82,6 +82,7 @@ public class PopupList<T> extends ListView<T> {
     /**
      * Override to resize if showing.
      */
+    @Override
     public void setItems(java.util.List<T> theItems)
     {
         super.setItems(theItems);
@@ -101,6 +102,7 @@ public class PopupList<T> extends ListView<T> {
     /**
      * Override to hide popup window.
      */
+    @Override
     protected void fireActionEvent(ViewEvent anEvent)
     {
         super.fireActionEvent(anEvent);
@@ -110,7 +112,7 @@ public class PopupList<T> extends ListView<T> {
     /**
      * Called when PopupWindow is shown/hidden.
      */
-    protected void handlePopupWindowShowingChanged()
+    protected void handlePopupWindowShowingChange()
     {
         if (_clientView == null) return;
         PopupWindow popupWindow = getPopup();
@@ -125,8 +127,6 @@ public class PopupList<T> extends ListView<T> {
 
         // Otherwise remove listener
         else {
-            if (_clientView.isFocusable())
-                _clientView.requestFocus();
             _clientView.removeEventFilter(_clientViewKeyPressLsnr, KeyPress);
             _clientView = null;
         }
