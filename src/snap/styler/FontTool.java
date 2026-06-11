@@ -53,7 +53,7 @@ public class FontTool extends StylerOwner {
 
         // Reset FontFaceComboBox, FontSizeComboBox
         _fontFaceComboBox.setSelItem(font.getFamily());
-        String fstext = _fontSizeComboBox.getText(font.getSize());
+        String fstext = _fontSizeComboBox.getTextForItem(font.getSize());
         _fontSizeComboBox.setText(fstext);
 
         // Reset TextColorButton

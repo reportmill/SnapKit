@@ -15,23 +15,20 @@ import snap.util.*;
 public class Spinner <T> extends ParentView {
 
     // The current value of spinner
-    private T  _value;
+    private T _value;
     
     // The step size of spinner
-    private double  _step = 1;
+    private double _step = 1;
     
     // The min of spinner
-    private double  _min = Integer.MIN_VALUE;
+    private double _min = Integer.MIN_VALUE;
 
     // The max of spinner
     private double _max = Integer.MAX_VALUE;
     
     // The text field
-    private TextField  _text;
-    
-    // The up down buttons
-    private ArrowView  _arrowView;
-    
+    private TextField _textField;
+
     // Constants for properties
     public static final String Min_Prop = "Min";
     public static final String Max_Prop = "Max";
@@ -49,23 +46,23 @@ public class Spinner <T> extends ParentView {
         // Enable Action event
         setActionable(true);
 
-        // Create/configure Text
-        _text = new TextField();
-        _text.setAlign(Pos.CENTER);
-        _text.setGrowWidth(true);
-        _text.addEventHandler(e -> textChanged(), Action);
-        addChild(_text);
+        // Create/configure TextField
+        _textField = new TextField();
+        _textField.setAlign(Pos.CENTER);
+        _textField.setGrowWidth(true);
+        _textField.addEventHandler(this::handleTextFieldActionEvent, Action);
+        addChild(_textField);
 
         // Create/configure arrow view
-        _arrowView = new ArrowView();
-        _arrowView.addEventHandler(e -> handleAarrowViewActionEvent(), Action);
-        addChild(_arrowView);
+        ArrowView arrowView = new ArrowView();
+        arrowView.addEventHandler(this::handleArrowViewActionEvent, Action);
+        addChild(arrowView);
     }
 
     /**
      * Returns the text field.
      */
-    public TextField getTextField()  { return _text; }
+    public TextField getTextField()  { return _textField; }
 
     /**
      * Returns the spinner value.
@@ -79,7 +76,7 @@ public class Spinner <T> extends ParentView {
     {
         if (Objects.equals(aValue,getValue())) return;
         firePropChange(Value_Prop, _value, _value = aValue);
-        _text.setText(getValueAsString());
+        _textField.setText(getValueAsString());
     }
 
     /**
@@ -151,15 +148,6 @@ public class Spinner <T> extends ParentView {
     }
 
     /**
-     * Called when ArrowView fires action.
-     */
-    protected void handleAarrowViewActionEvent()
-    {
-        if (_arrowView.isUp()) increment();
-        else if (_arrowView.isDown()) decrement();
-    }
-
-    /**
      * Increments spinner.
      */
     public void increment()
@@ -200,23 +188,35 @@ public class Spinner <T> extends ParentView {
     }
 
     /**
-     * Called when text changes.
+     * Called when textfield fires action.
      */
-    public void textChanged()
+    private void handleTextFieldActionEvent(ViewEvent anEvent)
     {
         // Get Text value based as same current type of spinner
-        Object oval = getValue(), nval;
-        String str = _text.getText();
-        if (oval instanceof Integer) nval = Convert.intValue(str);
-        else if (oval instanceof Long) nval = Convert.longValue(str);
-        else if (oval instanceof Byte) nval = (byte) Convert.intValue(str);
-        else if (oval instanceof Short) nval = (short) Convert.intValue(str);
-        else if (oval instanceof Float) nval = Convert.floatValue(str);
-        else if (oval instanceof Double) nval = Convert.doubleValue(str);
+        Object oldVal = getValue(), newVal;
+        String str = _textField.getText();
+        if (oldVal instanceof Integer) newVal = Convert.intValue(str);
+        else if (oldVal instanceof Long) newVal = Convert.longValue(str);
+        else if (oldVal instanceof Byte) newVal = (byte) Convert.intValue(str);
+        else if (oldVal instanceof Short) newVal = (short) Convert.intValue(str);
+        else if (oldVal instanceof Float) newVal = Convert.floatValue(str);
+        else if (oldVal instanceof Double) newVal = Convert.doubleValue(str);
         else { System.err.println("Spinner: Unsupported value type: " + getValueClass()); return; }
 
-        setValue((T) nval);
-        fireActionEvent(null);
+        setValue((T) newVal);
+        fireActionEvent(anEvent);
+    }
+
+    /**
+     * Called when ArrowView fires action.
+     */
+    private void handleArrowViewActionEvent(ViewEvent anEvent)
+    {
+        ArrowView arrowView = anEvent.getView(ArrowView.class);
+        if (arrowView.isUp())
+            increment();
+        else if (arrowView.isDown())
+            decrement();
     }
 
     /**
@@ -231,7 +231,7 @@ public class Spinner <T> extends ParentView {
     public void setAlign(Pos aPos)
     {
         super.setAlign(aPos);
-        _text.setAlignX(getAlignX());
+        _textField.setAlignX(getAlignX());
     }
 
     /**

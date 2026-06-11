@@ -710,32 +710,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Returns text for item.
-     */
-    public String getText(T anItem)
-    {
-        // If ItemTextFunc, just apply
-        String text;
-        if (_itemTextFunc != null)
-            text = anItem != null ? _itemTextFunc.apply(anItem) : null;
-
-            // If CellConfigure, create cell and call
-        else if (getCellConfigure() != null) {
-            Consumer<ListCell<T>> cconf = getCellConfigure();
-            ListCell<T> cell = new ListCell<>(this, anItem, 0, 0, false);
-            cell.setText(anItem != null ? anItem.toString() : null);
-            cconf.accept(cell);
-            text = cell.getText();
-        }
-
-        // Otherwise just get string
-        else text = anItem != null ? anItem.toString() : null;
-
-        // Return text
-        return text;
-    }
-
-    /**
      * Returns the column index.
      */
     protected int getColIndex()  { return 0; }
@@ -941,7 +915,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     public String getText()
     {
         T item = getSelItem();
-        return item != null ? getText(item) : null;
+        return item != null ? getTextForItem(item) : null;
     }
 
     /**
@@ -955,13 +929,37 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
+     * Returns text for given list item.
+     */
+    public String getTextForItem(T anItem)
+    {
+        if (anItem == null)
+            return null;
+
+        // If CellConfigure, create cell and call
+        if (_cellConf != null) {
+            ListCell<T> cell = new ListCell<>(this, anItem, 0, 0, false);
+            cell.setText(anItem.toString());
+            _cellConf.accept(cell);
+            return cell.getText();
+        }
+
+        // If ItemTextFunc, just apply
+        if (_itemTextFunc != null)
+            return _itemTextFunc.apply(anItem);
+
+        // Otherwise just get string
+        return anItem.toString();
+    }
+
+    /**
      * Return list item that matches string.
      */
     public T getItemForText(String aString)
     {
         // Iterate over items and if item text is exact match for string, return it
         for (T item : getItems()) {
-            String str = getText(item);
+            String str = getTextForItem(item);
             if (Objects.equals(aString, str))
                 return item;
         }
