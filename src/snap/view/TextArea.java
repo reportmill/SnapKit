@@ -22,9 +22,6 @@ public class TextArea extends ParentView {
     // The text being edited
     private TextModel _textModel;
 
-    // Whether to synchronize text area font with text model
-    private boolean _syncTextFont = true;
-
     // Whether as-you-type spell checking is enabled
     public static boolean isSpellChecking = Prefs.getDefaultPrefs().getBoolean("SpellChecking", false);
 
@@ -80,6 +77,11 @@ public class TextArea extends ParentView {
         _textAdapter.setTextColor(getTextColor());
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
         _textAdapter.addTextModelPropChangeListener(this::handleTextModelPropChange);
+
+        // If rich text, set default font
+        if (_textModel.isRichText() || !TextStyle.DEFAULT.getFont().equals(_textModel.getDefaultFont()))
+            setFont(_textModel.getDefaultFont());
+        else _textModel.setDefaultFont(getFont());
     }
 
     /**
@@ -155,16 +157,6 @@ public class TextArea extends ParentView {
      * Called to activate undo.
      */
     public void setUndoActivated(boolean aValue)  { _textAdapter.setUndoActivated(aValue); }
-
-    /**
-     * Returns whether to synchronize text area font with text model.
-     */
-    public boolean isSyncTextFont()  { return _syncTextFont; }
-
-    /**
-     * Sets whether to synchronize text area font with text model.
-     */
-    public void setSyncTextFont(boolean aValue)  { _syncTextFont = aValue; }
 
     /**
      * Returns whether editor is doing check-as-you-type spelling.
@@ -588,34 +580,24 @@ public class TextArea extends ParentView {
     }
 
     /**
-     * Sets the font of the current selection or cursor.
+     * Override to update text model default font.
      */
     @Override
     public void setFont(Font aFont)
     {
         if (isFontSet() && Objects.equals(aFont, getFont())) return;
         super.setFont(aFont);
-
-        // If SyncTextFont, forward to TextModel
-        if (isSyncTextFont())
-            setTextFont(getFont());
+        _textModel.setDefaultFont(getFont());
     }
 
     /**
-     * Override to update font.
+     * Override to update text model default font.
      */
     @Override
     protected void handleParentFontChange()
     {
-        // Handle RichText: Just return
-        if (isRichText()) return;
-
-        // Do normal version
         super.handleParentFontChange();
-
-        // If SyncTextFont, forward to TextModel
-        if (isSyncTextFont())
-            setTextFont(getFont());
+        _textModel.setDefaultFont(getFont());
     }
 
     /**
@@ -668,9 +650,10 @@ public class TextArea extends ParentView {
     {
         // Handle DefaultTextStyle and SyncTextFont
         String propName = propChange.getPropName();
-        if (propName == TextModel.DefaultTextStyle_Prop && isSyncTextFont() && isFontSet()) {
-            Font font = _textModel.getDefaultFont();
-            setFont(font);
+        if (propName == TextModel.DefaultTextStyle_Prop) {
+            Font textModelDefaultFont = _textModel.getDefaultFont();
+            if (!textModelDefaultFont.equals(getFont()))
+                setFont(textModelDefaultFont);
         }
 
         // Relayout and repaint

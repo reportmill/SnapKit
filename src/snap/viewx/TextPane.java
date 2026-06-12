@@ -269,7 +269,6 @@ public class TextPane extends ViewController {
         _textArea.setPadding(new Insets(5));
         _textArea.setGrowWidth(true);
         _textArea.setEditable(true);
-        _textArea.setSyncTextFont(false);
         _textArea.setUndoActivated(true);
 
         // Wrap TextArea in ScrollPane
