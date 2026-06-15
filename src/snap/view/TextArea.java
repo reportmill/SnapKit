@@ -417,7 +417,6 @@ public class TextArea extends ParentView {
             case KeyPress -> keyPressed(anEvent);
             case KeyType -> keyTyped(anEvent);
             case KeyRelease -> keyReleased(anEvent);
-            case Action -> processActionEvent(anEvent);
         }
 
         // Consume all mouse events
@@ -448,28 +447,6 @@ public class TextArea extends ParentView {
      * Called when a key is released.
      */
     protected void keyReleased(ViewEvent anEvent)  { _textAdapter.handleKeyReleaseEvent(anEvent); }
-
-    /**
-     * Called when action event is received.
-     */
-    protected void processActionEvent(ViewEvent anEvent)
-    {
-        // Get shared action name
-        SharedAction action = anEvent.getSharedAction();
-        String actionName = action !=  null ? action.getName() : null;
-        if (actionName == null)
-            return;
-
-        // Handle shared actions
-        switch (action.getName()) {
-            case SharedAction.Cut_Action_Name: cut(); anEvent.consume(); break;
-            case SharedAction.Copy_Action_Name: copy(); anEvent.consume(); break;
-            case SharedAction.Paste_Action_Name: paste(); anEvent.consume(); break;
-            case SharedAction.SelectAll_Action_Name: selectAll(); anEvent.consume(); break;
-            case SharedAction.Undo_Action_Name: undo(); anEvent.consume(); break;
-            case SharedAction.Redo_Action_Name: redo(); anEvent.consume(); break;
-        }
-    }
 
     /**
      * Returns the font scale of the text.

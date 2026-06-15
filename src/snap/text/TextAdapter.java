@@ -111,6 +111,7 @@ public class TextAdapter extends PropObject {
         if (textArea == getTextArea()) return;
         _textArea = textArea;
         _textArea.addPropChangeListener(this::handleViewPropChange);
+        _textArea.addEventHandler(this::handleTextAreaActionEvent, View.Action);
     }
 
     /**
@@ -1634,7 +1635,29 @@ public class TextAdapter extends PropObject {
      */
     private void handleViewWindowFocusedChange()
     {
-        ViewUtils.runLater(this::updateCaretAnim);
+        if (isEditable() || isCaretAnim())
+            ViewUtils.runLater(this::updateCaretAnim);
+    }
+
+    /**
+     * Called when text area gets action event to handle shared actions
+     */
+    private void handleTextAreaActionEvent(ViewEvent anEvent)
+    {
+        // Get shared action (just return if not available)
+        SharedAction sharedAction = anEvent.getSharedAction();
+        if (sharedAction == null)
+            return;
+
+        // Handle shared actions
+        switch (sharedAction.getName()) {
+            case SharedAction.Cut_Action_Name: cut(); anEvent.consume(); break;
+            case SharedAction.Copy_Action_Name: copy(); anEvent.consume(); break;
+            case SharedAction.Paste_Action_Name: paste(); anEvent.consume(); break;
+            case SharedAction.SelectAll_Action_Name: selectAll(); anEvent.consume(); break;
+            case SharedAction.Undo_Action_Name: undo(); anEvent.consume(); break;
+            case SharedAction.Redo_Action_Name: redo(); anEvent.consume(); break;
+        }
     }
 
     /**

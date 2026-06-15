@@ -38,4 +38,13 @@ public class SharedAction {
      * Returns the name.
      */
     public String getName()  { return _name; }
+
+    /**
+     * Standard toString implementation.
+     */
+    @Override
+    public String toString()
+    {
+        return _name;
+    }
 }
