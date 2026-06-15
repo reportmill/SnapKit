@@ -73,7 +73,7 @@ public class TextArea extends ParentView {
 
         // Create TextAdapter
         _textAdapter = createTextAdapter(_textModel);
-        _textAdapter.setView(this);
+        _textAdapter.setTextArea(this);
         _textAdapter.setTextColor(getTextColor());
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
         _textAdapter.addTextModelPropChangeListener(this::handleTextModelPropChange);

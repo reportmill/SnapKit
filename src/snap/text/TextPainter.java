@@ -161,16 +161,13 @@ public class TextPainter {
      */
     public void paintTextAdapterTextSel(Painter aPntr, TextAdapter textAdapter)
     {
-        // If not editable, just return
-        if (!textAdapter.isEditable()) return;
-
         // Get selection path
         TextSel textSel = textAdapter.getSel();
-        Shape selPath = textSel.getPath();
 
         // If empty selection, paint carat
         if (textSel.isEmpty()) {
             if (textAdapter.isShowCaret()) {
+                Shape selPath = textSel.getPath();
                 aPntr.setPaint(Color.BLACK);
                 aPntr.setStroke(Stroke.Stroke1);
                 aPntr.draw(selPath);
@@ -179,6 +176,7 @@ public class TextPainter {
 
         // Otherwise
         else {
+            Shape selPath = textSel.getPath();
             aPntr.setPaint(TEXT_SEL_COLOR);
             aPntr.fill(selPath);
         }

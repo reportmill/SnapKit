@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 /**
- * This class acts as an intermediary between a 'text view' and a text model, handling selection, editing, cursor
+ * This class acts as an intermediary between a text area and a text model, handling selection, editing, cursor
  * input events, etc.
  */
 public class TextAdapter extends PropObject {
 
-    // The view
-    protected View _view;
+    // The text area
+    protected TextArea _textArea;
 
     // The text being edited
     protected TextModel _textModel;
@@ -99,18 +99,18 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Returns the view.
+     * Returns the text area.
      */
-    public View getView()  { return _view; }
+    public View getTextArea()  { return _textArea; }
 
     /**
-     * Sets the view.
+     * Sets the text area.
      */
-    public void setView(View aView)
+    public void setTextArea(TextArea textArea)
     {
-        if (aView == getView()) return;
-        _view = aView;
-        _view.addPropChangeListener(this::handleViewPropChange);
+        if (textArea == getTextArea()) return;
+        _textArea = textArea;
+        _textArea.addPropChangeListener(this::handleViewPropChange);
     }
 
     /**
@@ -137,10 +137,10 @@ public class TextAdapter extends PropObject {
         _textModel.addPropChangeListener(_textModelPropChangeLsnr);
 
         // Relayout parent, repaint
-        if (_view != null) {
-            _view.relayoutParent();
-            _view.relayout();
-            _view.repaint();
+        if (_textArea != null) {
+            _textArea.relayoutParent();
+            _textArea.relayout();
+            _textArea.repaint();
         }
 
         // Make sure text layout matches text model
@@ -169,10 +169,10 @@ public class TextAdapter extends PropObject {
         batchPropChange(TextLayout_Prop, _textLayout, _textLayout = textLayout);
 
         // Relayout parent, repaint
-        if (_view != null) {
-            _view.relayoutParent();
-            _view.relayout();
-            _view.repaint();
+        if (_textArea != null) {
+            _textArea.relayoutParent();
+            _textArea.relayout();
+            _textArea.repaint();
         }
 
         // Make sure text model matches layout text model
@@ -443,7 +443,7 @@ public class TextAdapter extends PropObject {
             return;
 
         // Repaint old selection
-        if (_view != null && _view.isShowing())
+        if (_textArea != null && _textArea.isShowing())
             repaintSel();
 
         // Set new values
@@ -462,11 +462,11 @@ public class TextAdapter extends PropObject {
         TextModelUtils.setMouseY(_textModel, 0);
 
         // Repaint selection and scroll to visible (after delay)
-        if (_view != null && _view.isShowing()) {
+        if (_textArea != null && _textArea.isShowing()) {
             repaintSel();
             updateCaretAnim();
             if (isScrollable())
-                _view.runLater(this::scrollSelToVisible);
+                _textArea.runLater(this::scrollSelToVisible);
         }
     }
 
@@ -507,7 +507,7 @@ public class TextAdapter extends PropObject {
         Shape selPath = sel.getPath();
         Rect rect = selPath.getBounds();
         rect.inset(-1);
-        _view.repaint(rect);
+        _textArea.repaint(rect);
     }
 
     /**
@@ -516,9 +516,9 @@ public class TextAdapter extends PropObject {
     protected void scrollSelToVisible()
     {
         // Get visible bounds - if no reason to scroll, just return
-        Rect visibleBounds = _view.getVisibleBounds();
-        double viewW = _view.getWidth();
-        double viewH = _view.getHeight();
+        Rect visibleBounds = _textArea.getVisibleBounds();
+        double viewW = _textArea.getWidth();
+        double viewH = _textArea.getHeight();
         if (visibleBounds.isEmpty() || visibleBounds.width == viewW && visibleBounds.height == viewH)
             return;
 
@@ -539,7 +539,7 @@ public class TextAdapter extends PropObject {
 
         // If selection rect not fully contained in visible bounds, scrollRectToVisible
         if (!visibleBounds.contains(selRect))
-            _view.scrollToVisible(selRect);
+            _textArea.scrollToVisible(selRect);
     }
 
     /**
@@ -698,8 +698,8 @@ public class TextAdapter extends PropObject {
         else {
             _textModel.setTextStyleValue(aKey, aValue, getSelStart(), getSelEnd());
             _selStyle = null;
-            if (_view != null)
-                _view.repaint();
+            if (_textArea != null)
+                _textArea.repaint();
         }
     }
 
@@ -1084,7 +1084,7 @@ public class TextAdapter extends PropObject {
     {
         TextLink textLink = getTextLinkForXY(anEvent.getX(), anEvent.getY());
         if (textLink != null)
-            _view.setCursor(Cursor.HAND);
+            _textArea.setCursor(Cursor.HAND);
         else showCursor();
     }
 
@@ -1250,8 +1250,8 @@ public class TextAdapter extends PropObject {
      */
     public void showCursor()
     {
-        if (_view != null)
-            _view.setCursor(Cursor.TEXT);
+        if (_textArea != null)
+            _textArea.setCursor(Cursor.TEXT);
     }
 
     /**
@@ -1259,8 +1259,8 @@ public class TextAdapter extends PropObject {
      */
     public void hideCursor()
     {
-        if (_view != null)
-            _view.setCursor(Cursor.NONE);
+        if (_textArea != null)
+            _textArea.setCursor(Cursor.NONE);
     }
 
     /**
@@ -1275,7 +1275,7 @@ public class TextAdapter extends PropObject {
     {
         if (aValue == _showCaret) return;
         _showCaret = aValue;
-        if (_view != null)
+        if (_textArea != null)
             repaintSel();
     }
 
@@ -1284,15 +1284,15 @@ public class TextAdapter extends PropObject {
      */
     protected boolean isCaretNeeded()
     {
-        if (_view == null || !_view.isShowing())
+        if (_textArea == null || !_textArea.isShowing() || !_textArea.isEditable())
             return false;
-        if (!_view.isFocused())
+        if (!_textArea.isFocused())
             return false;
         if (!getSel().isEmpty())
             return false;
 
         // If there is a window, it should be focused: It is possible to be set Showing, but not in Window
-        WindowView window = _view.getWindow();
+        WindowView window = _textArea.getWindow();
         if (window != null && !window.isFocused()) {
             PopupWindow popupWindow = window.getPopup();
             if (popupWindow == null || popupWindow.isFocused())
@@ -1328,13 +1328,13 @@ public class TextAdapter extends PropObject {
         // If setting
         if (aValue) {
             _caretRun = () -> setShowCaret(!isShowCaret());
-            _view.runIntervals(_caretRun, 500);
+            _textArea.runIntervals(_caretRun, 500);
             setShowCaret(true);
         }
 
         // If stopping
         else {
-            _view.stopIntervals(_caretRun);
+            _textArea.stopIntervals(_caretRun);
             _caretRun = null;
             setShowCaret(false);
         }
@@ -1361,8 +1361,8 @@ public class TextAdapter extends PropObject {
         if (_textLayout instanceof TextModelX)
             ((TextModelX) _textLayout).setFontScale(aValue);
         else System.out.println("TextAdapter.setFontScale not supported on this text");
-        if (_view != null)
-            _view.relayoutParent();
+        if (_textArea != null)
+            _textArea.relayoutParent();
     }
 
     /**
@@ -1373,8 +1373,8 @@ public class TextAdapter extends PropObject {
         if (_textLayout instanceof TextModelX)
             ((TextModelX) _textLayout).scaleTextToFit();
         else System.out.println("TextAdapter.scaleTextToFit not supported on this text");
-        if (_view != null)
-            _view.relayoutParent();
+        if (_textArea != null)
+            _textArea.relayoutParent();
     }
 
     /**
@@ -1562,9 +1562,9 @@ public class TextAdapter extends PropObject {
             propChangeLsnr.handlePropChange(propChange);
 
         // Relayout and repaint
-        if (_view != null) {
-            _view.relayoutParent();
-            _view.repaint();
+        if (_textArea != null) {
+            _textArea.relayoutParent();
+            _textArea.repaint();
         }
     }
 
@@ -1585,12 +1585,12 @@ public class TextAdapter extends PropObject {
     private void handleViewShowingChange()
     {
         // If focused, update CaretAnim
-        if (_view.isFocused()) {
+        if (_textArea.isFocused()) {
             updateCaretAnim();
 
             // If Showing, make sure selection is visible
-            if (isScrollable() && _view.isShowing() && getSelStart() != 0)
-                _view.runDelayed(this::scrollSelToVisible, 200);
+            if (isScrollable() && _textArea.isShowing() && getSelStart() != 0)
+                _textArea.runDelayed(this::scrollSelToVisible, 200);
         }
 
         // Manage listener for Window.Focus changes
@@ -1603,8 +1603,8 @@ public class TextAdapter extends PropObject {
     private void updateWindowFocusChangedLsnr()
     {
         // Handle Showing: Set ShowingWindow, add WindowFocusChangedLsnr and reset caret
-        if (_view.isShowing()) {
-            _showingWindow = _view.getWindow();
+        if (_textArea.isShowing()) {
+            _showingWindow = _textArea.getWindow();
             if (_showingWindow != null) {
                 _windowFocusedChangedLsnr = pc -> handleViewWindowFocusedChange();
                 _showingWindow.addPropChangeListener(_windowFocusedChangedLsnr, View.Focused_Prop);
