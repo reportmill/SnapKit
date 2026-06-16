@@ -32,7 +32,7 @@ public class ConsoleTextArea extends TextArea {
     {
         super(true);
         setFill(Color.WHITE);
-        setEditable(true);
+        _textAdapter.setEditable(true);
     }
 
     /**

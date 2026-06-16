@@ -30,7 +30,6 @@ public class TextArea extends ParentView {
 
     // Constants for properties
     public static final String RichText_Prop = TextAdapter.RichText_Prop;
-    public static final String Editable_Prop = TextAdapter.Editable_Prop;
     public static final String WrapLines_Prop = TextAdapter.WrapLines_Prop;
     public static final String Selection_Prop = TextAdapter.Selection_Prop;
     public static final String TextModel_Prop = TextAdapter.TextModel_Prop;
@@ -127,16 +126,6 @@ public class TextArea extends ParentView {
         if (aString == null) aString = "";
         _textAdapter.setString(aString);
     }
-
-    /**
-     * Returns whether Text shape is editable.
-     */
-    public boolean isEditable()  { return _textAdapter.isEditable(); }
-
-    /**
-     * Sets whether Text shape is editable.
-     */
-    public void setEditable(boolean aValue)  { _textAdapter.setEditable(aValue); }
 
     /**
      * Returns whether to wrap lines that overrun bounds.
@@ -410,28 +399,11 @@ public class TextArea extends ParentView {
     public void processEvent(ViewEvent anEvent)
     {
         switch (anEvent.getType()) {
-            case MousePress -> mousePressed(anEvent);
-            case MouseDrag -> _textAdapter.mouseDragged(anEvent);
-            case MouseRelease -> _textAdapter.mouseReleased(anEvent);
-            case MouseMove -> mouseMoved(anEvent);
             case KeyPress -> keyPressed(anEvent);
             case KeyType -> keyTyped(anEvent);
             case KeyRelease -> keyReleased(anEvent);
         }
-
-        // Consume all mouse events
-        if (anEvent.isMouseEvent()) anEvent.consume();
     }
-
-    /**
-     * Handles mouse pressed.
-     */
-    protected void mousePressed(ViewEvent anEvent)  { _textAdapter.mousePressed(anEvent); }
-
-    /**
-     * Handle MouseMoved.
-     */
-    protected void mouseMoved(ViewEvent anEvent)  { _textAdapter.mouseMoved(anEvent); }
 
     /**
      * Called when a key is pressed.
@@ -589,31 +561,29 @@ public class TextArea extends ParentView {
             case TextAdapter.TextModel_Prop -> firePropChange(TextModel_Prop, propChange.getOldValue(), propChange.getNewValue());
             case TextAdapter.WrapLines_Prop -> firePropChange(WrapLines_Prop, propChange.getOldValue(), propChange.getNewValue());
 
-            // Handle Editable
-            case TextAdapter.Editable_Prop -> handleTextAdapterEditableChanged();
+            // Handle Selectable, Editable
+            case TextAdapter.Selectable_Prop -> handleTextAdapterSelectableChange();
+            case TextAdapter.Editable_Prop -> {
+                if (_textAdapter.isEditable())
+                    enableEvents(KeyEvents);
+                else disableEvents(KeyEvents);
+            }
         }
     }
 
     /**
-     * Called when TextAdapter.Editable changes to repost and configure.
+     * Called when TextAdapter.Selectable changes to configure focus.
      */
-    private void handleTextAdapterEditableChanged()
+    private void handleTextAdapterSelectableChange()
     {
-        boolean editable = isEditable();
-        firePropChange(Editable_Prop, !editable, editable);
-
         // If editable, set some related attributes
-        if (editable) {
-            enableEvents(MouseEvents);
-            enableEvents(KeyEvents);
+        if (_textAdapter.isSelectable()) {
             setFocusable(true);
             setFocusWhenPressed(true);
             setFocusKeysEnabled(false);
         }
 
         else {
-            disableEvents(MouseEvents);
-            disableEvents(KeyEvents);
             setFocusable(false);
             setFocusWhenPressed(false);
             setFocusKeysEnabled(true);
@@ -666,9 +636,8 @@ public class TextArea extends ParentView {
     {
         super.initProps(aPropSet);
 
-        // RichText, Editable, WrapLines
+        // RichText, WrapLines
         //aPropSet.addPropNamed(RichText_Prop, boolean.class, false);
-        aPropSet.addPropNamed(Editable_Prop, boolean.class, false);
         aPropSet.addPropNamed(WrapLines_Prop, boolean.class, false);
     }
 
@@ -676,17 +645,16 @@ public class TextArea extends ParentView {
      * Override to support properties for this class.
      */
     @Override
-    public Object getPropValue(String aPropName)
+    public Object getPropValue(String propName)
     {
-        return switch (aPropName) {
+        return switch (propName) {
 
-            // RichText, Editable, WrapLines
+            // RichText, WrapLines
             case RichText_Prop -> isRichText();
-            case Editable_Prop -> isEditable();
             case WrapLines_Prop -> isWrapLines();
 
             // Do normal version
-            default -> super.getPropValue(aPropName);
+            default -> super.getPropValue(propName);
         };
     }
 
@@ -694,17 +662,16 @@ public class TextArea extends ParentView {
      * Override to support properties for this class.
      */
     @Override
-    public void setPropValue(String aPropName, Object aValue)
+    public void setPropValue(String propName, Object aValue)
     {
-        switch (aPropName) {
+        switch (propName) {
 
-            // RichText, Editable, WrapLines_Prop
+            // RichText, WrapLines_Prop
             case RichText_Prop -> setRichText(Convert.boolValue(aValue));
-            case Editable_Prop -> setEditable(Convert.boolValue(aValue));
             case WrapLines_Prop -> setWrapLines(Convert.boolValue(aValue));
 
             // Do normal version
-            default -> super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(propName, aValue);
         }
     }
 

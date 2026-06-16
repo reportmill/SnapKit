@@ -20,7 +20,6 @@ class DefaultConsoleUtils {
 
     // Constants
     public static final Font DEFAULT_FONT = Font.Arial14;
-    private static final Color DEFAULT_TEXTAREA_FILL = Color.WHITE;
     private static final Color DEFAULT_TEXTAREA_TEXTCOLOR = Color.GRAY2;
 
     /**
@@ -95,8 +94,8 @@ class DefaultConsoleUtils {
         // Create and configure TextArea
         TextArea textArea = new TextArea(textModel);
         textArea.setBorderRadius(4);
-        textArea.setFill(DEFAULT_TEXTAREA_FILL);
-        textArea.setEditable(true);
+        textArea.setFill(ViewTheme.get().getContentColor());
+        textArea.getTextAdapter().setEditable(true);
 
         // Configure TextArea Sizing
         textArea.setGrowWidth(true);

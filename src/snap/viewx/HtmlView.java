@@ -299,8 +299,6 @@ public class HtmlView extends ChildView {
         textView.setBorder(BLOCK_BORDER);
         textView.setBorderRadius(8);
         textView.setFill(BLOCK_COLOR);
-        textView.setEditable(true);
-        textView.setFocusPainted(true);
 
         TextStyle codeStyle = MarkdownUtils.getCodeStyle();
         TextModel textModel = textView.getTextModel();
@@ -456,8 +454,6 @@ public class HtmlView extends ChildView {
                     String text = element.getValue();
                     if (text == null || text.isEmpty()) text = href;
                     textModel.addCharsWithStyle(text, linkStyle);
-                    textArea.setEditable(true);
-                    textArea.setFocusable(false);
                     textArea.getTextAdapter().setLinkHandler((e, url) -> handleLinkClick(url));
                 }
             }

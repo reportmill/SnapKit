@@ -26,6 +26,9 @@ public class TextAdapter extends PropObject {
     // The text being displayed
     protected TextLayout _textLayout;
 
+    // Whether text is selectable
+    private boolean _selectable;
+
     // Whether text is editable
     private boolean _editable;
 
@@ -71,6 +74,9 @@ public class TextAdapter extends PropObject {
     // The PropChangeListener to catch TextModel PropChanges.
     private PropChangeListener _textModelPropChangeLsnr = this::handleTextModelPropChange;
 
+    // An event listener to catch text area mouse events
+    private EventListener _textAreaMouseLsnr = this::processEvent;
+
     // A PropChangeListener to enable/disable caret when window loses focus
     private PropChangeListener  _windowFocusedChangedLsnr;
 
@@ -81,6 +87,7 @@ public class TextAdapter extends PropObject {
     public static final String SNAP_RICHTEXT_TYPE = "reportmill/xstring";
 
     // Constants for properties
+    public static final String Selectable_Prop = "Selectable";
     public static final String Editable_Prop = "Editable";
     public static final String RichText_Prop = "RichText";
     public static final String Selection_Prop = "Selection";
@@ -203,6 +210,27 @@ public class TextAdapter extends PropObject {
     }
 
     /**
+     * Returns whether Text is selectable.
+     */
+    public boolean isSelectable()  { return _selectable; }
+
+    /**
+     * Sets whether Text is selectable.
+     */
+    public void setSelectable(boolean aValue)
+    {
+        if (aValue == isSelectable()) return;
+
+        firePropChange(Selectable_Prop, _selectable, _selectable = aValue);
+
+        if (_textArea != null) {
+            if (aValue)
+                _textArea.addEventHandler(_textAreaMouseLsnr, View.MousePress, View.MouseDrag, View.MouseRelease, View.MouseMove);
+            else _textArea.removeEventHandler(_textAreaMouseLsnr);
+        }
+    }
+
+    /**
      * Returns whether Text is editable.
      */
     public boolean isEditable()  { return _editable; }
@@ -213,7 +241,8 @@ public class TextAdapter extends PropObject {
     public void setEditable(boolean aValue)
     {
         if (aValue == isEditable()) return;
-
+        if (aValue)
+            setSelectable(true);
         firePropChange(Editable_Prop, _editable, _editable = aValue);
     }
 
@@ -340,6 +369,8 @@ public class TextAdapter extends PropObject {
     {
         if (linkHandler == getLinkHandler()) return;
         _linkHandler = linkHandler;
+        if (linkHandler != null)
+            setSelectable(true);
     }
 
     /**
@@ -993,10 +1024,10 @@ public class TextAdapter extends PropObject {
     public void processEvent(ViewEvent anEvent)
     {
         switch (anEvent.getType()) {
-            case MousePress -> mousePressed(anEvent);
-            case MouseDrag -> mouseDragged(anEvent);
-            case MouseRelease -> mouseReleased(anEvent);
-            case MouseMove -> mouseMoved(anEvent);
+            case MousePress -> handleMousePressEvent(anEvent);
+            case MouseDrag -> handleMouseDragEvent(anEvent);
+            case MouseRelease -> handleMouseReleaseEvent(anEvent);
+            case MouseMove -> handleMouseMoveEvent(anEvent);
             case KeyPress -> handleKeyPressEvent(anEvent);
             case KeyType -> handleKeyTypeEvent(anEvent);
             case KeyRelease -> handleKeyReleaseEvent(anEvent);
@@ -1009,7 +1040,7 @@ public class TextAdapter extends PropObject {
     /**
      * Handles mouse pressed.
      */
-    public void mousePressed(ViewEvent anEvent)
+    protected void handleMousePressEvent(ViewEvent anEvent)
     {
         // Stop caret animation
         setCaretAnim(false);
@@ -1045,7 +1076,7 @@ public class TextAdapter extends PropObject {
     /**
      * Handles mouse dragged.
      */
-    public void mouseDragged(ViewEvent anEvent)
+    protected void handleMouseDragEvent(ViewEvent anEvent)
     {
         // Get selected range for down point and drag point
         TextSel sel = new TextSel(_textLayout, _downX, _downY, anEvent.getX(), anEvent.getY(), _wordSel, _pgraphSel);
@@ -1066,7 +1097,7 @@ public class TextAdapter extends PropObject {
     /**
      * Handles mouse released.
      */
-    public void mouseReleased(ViewEvent anEvent)
+    protected void handleMouseReleaseEvent(ViewEvent anEvent)
     {
         updateCaretAnim();
         _downX = _downY = 0;
@@ -1081,7 +1112,7 @@ public class TextAdapter extends PropObject {
     /**
      * Handle MouseMoved.
      */
-    public void mouseMoved(ViewEvent anEvent)
+    protected void handleMouseMoveEvent(ViewEvent anEvent)
     {
         TextLink textLink = getTextLinkForXY(anEvent.getX(), anEvent.getY());
         if (textLink != null)
@@ -1285,7 +1316,7 @@ public class TextAdapter extends PropObject {
      */
     protected boolean isCaretNeeded()
     {
-        if (_textArea == null || !_textArea.isShowing() || !_textArea.isEditable())
+        if (_textArea == null || !_textArea.isShowing() || !isEditable())
             return false;
         if (!_textArea.isFocused())
             return false;
@@ -1575,9 +1606,20 @@ public class TextAdapter extends PropObject {
     private void handleViewPropChange(PropChange propChange)
     {
         switch (propChange.getPropName()) {
+            case View.Focusable_Prop -> handleTextAreaFocusableChange();
             case View.Showing_Prop -> handleViewShowingChange();
             case View.Focused_Prop -> handleViewFocusedChange();
         }
+    }
+
+    /**
+     * Called when text area focusable property changes.
+     */
+    private void handleTextAreaFocusableChange()
+    {
+        if (_textArea.isFocusable())
+            _textArea.addEventHandler(_textAreaMouseLsnr, View.MousePress, View.MouseDrag, View.MouseRelease, View.MouseMove);
+        else _textArea.removeEventHandler(_textAreaMouseLsnr);
     }
 
     /**

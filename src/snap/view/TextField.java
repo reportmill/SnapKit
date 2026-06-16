@@ -70,7 +70,7 @@ public class TextField extends TextArea {
         setActionable(true);
 
         // Make editable
-        setEditable(true);
+        _textAdapter.setEditable(true);
         setFocusKeysEnabled(true);
         getTextLayout().setAlignY(getAlignY());
 
@@ -412,9 +412,6 @@ public class TextField extends TextArea {
     {
         // Do normal version
         super.initProps(aPropSet);
-
-        // Override Editable
-        aPropSet.getPropForName(Editable_Prop).setDefaultValue(true);
 
         // ColCount, PromptText, Multiline
         aPropSet.addPropNamed(ColCount_Prop, int.class, DEFAULT_COL_COUNT);

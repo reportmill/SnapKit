@@ -100,7 +100,8 @@ public class TextPane extends ViewController {
     protected TextArea createTextArea()
     {
         TextArea textArea = new TextArea(true);
-        textArea.setFill(ViewTheme.get().getTextColor());
+        textArea.setFill(ViewTheme.get().getContentColor());
+        _textArea.getTextAdapter().setEditable(true);
         return textArea;
     }
 
@@ -268,7 +269,6 @@ public class TextPane extends ViewController {
         // Create/config TextArea
         _textArea.setPadding(new Insets(5));
         _textArea.setGrowWidth(true);
-        _textArea.setEditable(true);
         _textArea.setUndoActivated(true);
 
         // Wrap TextArea in ScrollPane

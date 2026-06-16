@@ -243,6 +243,7 @@ public class MarkdownView extends ChildView {
     {
         TextArea textArea = new TextArea();
         textArea.setMargin(MarkdownUtils.getHeaderLevel(headerNode) == 1 ? HEADER1_MARGIN : HEADER2_MARGIN);
+        textArea.getTextAdapter().setSelectable(true);
 
         // Reset style
         int headerLevel = MarkdownUtils.getHeaderLevel(headerNode);
@@ -392,28 +393,27 @@ public class MarkdownView extends ChildView {
      */
     protected TextArea createViewForCodeBlockNode(MarkdownNode codeNode)
     {
-        TextArea textView = new TextView();
-        textView.setMargin(GENERAL_MARGIN);
-        textView.setPadding(GENERAL_PADDING);
-        textView.setBorder(BLOCK_BORDER);
-        textView.setBorderRadius(8);
-        textView.setFill(BLOCK_COLOR);
-        textView.setEditable(true);
-        textView.setFocusPainted(true);
+        TextArea textArea = new TextArea();
+        textArea.setFill(BLOCK_COLOR);
+        textArea.setBorder(BLOCK_BORDER);
+        textArea.setBorderRadius(8);
+        textArea.setMargin(GENERAL_MARGIN);
+        textArea.setPadding(GENERAL_PADDING);
+        textArea.getTextAdapter().setSelectable(true);
 
         // Reset style
         TextStyle textStyle = MarkdownUtils.getCodeStyle();
-        TextModel textModel = textView.getTextModel();
+        TextModel textModel = textArea.getTextModel();
         textModel.setDefaultTextStyle(textStyle);
 
         // Set text
         textModel.addChars(codeNode.getText());
 
         // Add listener to select code block
-        textView.addEventFilter(e -> _selCodeBlockNode = codeNode, MousePress);
+        textArea.addEventFilter(e -> _selCodeBlockNode = codeNode, MousePress);
 
         // Return
-        return textView;
+        return textArea;
     }
 
     /**
@@ -502,6 +502,7 @@ public class MarkdownView extends ChildView {
         TextArea textArea = new TextArea(true);
         textArea.setWrapLines(true);
         textArea.setMargin(GENERAL_MARGIN);
+        textArea.getTextAdapter().setSelectable(true);
 
         // Reset style
         TextStyle textStyle = MarkdownUtils.getContentStyle();
@@ -545,8 +546,6 @@ public class MarkdownView extends ChildView {
             }
 
             // Enable events
-            textArea.setEditable(true);
-            textArea.setFocusable(false);
             textArea.getTextAdapter().setLinkHandler((e,url) -> handleLinkClick(url));
         }
 
