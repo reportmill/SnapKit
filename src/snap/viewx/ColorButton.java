@@ -230,13 +230,13 @@ public class ColorButton extends View {
         MenuItem noneMenu = new MenuItem();
         noneMenu.setName("NoneMenu");
         noneMenu.setText("None");
-        noneMenu.addEventHandler(e -> handlePopupMenuEvent(e), Action);
+        noneMenu.addEventHandler(this::handlePopupMenuActionEvent, Action);
 
         // Create/configure "More..." menu
         MenuItem moreMenu = new MenuItem();
         moreMenu.setName("MoreMenu");
         moreMenu.setText("More...");
-        moreMenu.addEventHandler(e -> handlePopupMenuEvent(e), Action);
+        moreMenu.addEventHandler(this::handlePopupMenuActionEvent, Action);
 
         // Create/configure main content view (ColView)
         ColView content = new ColView();
@@ -260,7 +260,7 @@ public class ColorButton extends View {
     /**
      * Handles popup menu item events.
      */
-    protected void handlePopupMenuEvent(ViewEvent anEvent)
+    private void handlePopupMenuActionEvent(ViewEvent anEvent)
     {
         // Handle None: Set null color and fireActionEvent for ColorButton
         if (anEvent.equals("NoneMenu")) {

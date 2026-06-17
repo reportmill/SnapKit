@@ -154,7 +154,7 @@ public class RecentFilesSitePane extends WebSitePane {
         // Add button to clear item from recent files
         CloseBox closeBox = new CloseBox();
         closeBox.setMargin(0, 4, 0, 4);
-        closeBox.addEventHandler(e -> handleCloseBoxClicked(closeBox), View.Action);
+        closeBox.addEventHandler(this::handleCloseBoxActionEvent, View.Action);
         aCell.setGraphic(closeBox);
     }
 
@@ -185,10 +185,11 @@ public class RecentFilesSitePane extends WebSitePane {
     /**
      * Called when FilesTable.ListCell close box is clicked.
      */
-    private void handleCloseBoxClicked(View aView)
+    private void handleCloseBoxActionEvent(ViewEvent anEvent)
     {
         // Get FilesTable ListCell holding given view
-        ListCell<?> listCell = aView.getParent(ListCell.class);
+        View closeBox = anEvent.getView();
+        ListCell<?> listCell = closeBox.getParent(ListCell.class);
         if (listCell == null)
             return;
 

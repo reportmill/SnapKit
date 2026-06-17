@@ -174,15 +174,6 @@ public class ArrowView extends ParentView {
     public boolean isRight()  { return _lastButton == _rightButton; }
 
     /**
-     * Called when button fires.
-     */
-    protected void buttonDidFire(Button aBtn)
-    {
-        _lastButton = aBtn;
-        fireActionEvent(null);
-    }
-
-    /**
      * Returns an image of a up arrow.
      */
     public static Image getUpArrowImage()
@@ -233,8 +224,17 @@ public class ArrowView extends ParentView {
         button.setMinSize(buttonW, buttonH);
         button.setPadding(0, 0, 0,0);
         button.setBorderRadius(3);
-        button.addEventHandler(e -> buttonDidFire(button), Action);
+        button.addEventHandler(this::handleArrowButtonActionEvent, Action);
         return button;
+    }
+
+    /**
+     * Called when button fires.
+     */
+    private void handleArrowButtonActionEvent(ViewEvent anEvent)
+    {
+        _lastButton = anEvent.getView(Button.class);
+        fireActionEvent(null);
     }
 
     /**

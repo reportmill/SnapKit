@@ -5,9 +5,7 @@ package snap.viewx;
 import java.util.*;
 import snap.geom.Insets;
 import snap.geom.Point;
-import snap.geom.Rect;
 import snap.gfx.*;
-import snap.props.PropSet;
 import snap.util.Prefs;
 import snap.util.StringUtils;
 import snap.view.*;
@@ -52,7 +50,7 @@ public class ColorDock extends View {
 
         // Create ColorWell
         _colorWell = new ColorWell();
-        _colorWell.addEventHandler(e -> colorWellDidFireAction(e), Action);
+        _colorWell.addEventHandler(this::handleColorWellActionEvent, Action);
     }
 
     /**
@@ -407,7 +405,7 @@ public class ColorDock extends View {
     /**
      * Called when color well fires action event.
      */
-    protected void colorWellDidFireAction(ViewEvent anEvent)
+    private void handleColorWellActionEvent(ViewEvent anEvent)
     {
         // Get color from hidden ColorWell and set in current swatch
         Color color = _colorWell.getColor();

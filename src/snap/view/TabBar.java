@@ -35,7 +35,7 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     private RowView  _tabsBox;
 
     // A shared listener for tab button action
-    private EventListener  _buttonActionLsnr = e -> tabButtonDidFireAction(e);
+    private EventListener  _buttonActionLsnr = this::handleTabButtonActionEvent;
 
     // Constants for properties
     public static final String Tabs_Prop = "Tabs";
@@ -289,15 +289,12 @@ public class TabBar extends ParentView implements Selectable<Tab> {
      * Override to return box layout.
      */
     @Override
-    protected ViewLayout getViewLayoutImpl()
-    {
-        return new BoxViewLayout(this, _tabsBox, true, true);
-    }
+    protected ViewLayout getViewLayoutImpl()  { return new BoxViewLayout(this, _tabsBox, true, true); }
 
     /**
      * Called when tab button fires action.
      */
-    protected void tabButtonDidFireAction(ViewEvent anEvent)
+    private void handleTabButtonActionEvent(ViewEvent anEvent)
     {
         // Get index for button
         View button = anEvent.getView();

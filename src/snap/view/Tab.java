@@ -200,7 +200,7 @@ public class Tab extends PropObject {
     {
         // Create close box ShapeView
         CloseBox closeBox = new CloseBox();
-        closeBox.addEventHandler(e -> tabCloseBoxDidFireAction(e), View.Action);
+        closeBox.addEventHandler(this::handleTabCloseBoxActionEvent, View.Action);
 
         // Add to FileTab
         tabButton.setGraphicAfter(closeBox);
@@ -209,7 +209,7 @@ public class Tab extends PropObject {
     /**
      * Called when tab button close box is triggered.
      */
-    protected void tabCloseBoxDidFireAction(ViewEvent anEvent)
+    private void handleTabCloseBoxActionEvent(ViewEvent anEvent)
     {
         // Forward to TabBar.TabCloseActionHandler
         BiConsumer<ViewEvent,Tab> closeActionHandler = _tabBar.getTabCloseActionHandler();

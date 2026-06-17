@@ -117,7 +117,7 @@ public class TextAdapter extends PropObject {
     {
         if (textArea == getTextArea()) return;
         _textArea = textArea;
-        _textArea.addPropChangeListener(this::handleViewPropChange);
+        _textArea.addPropChangeListener(this::handleTextAreaPropChange);
         _textArea.addEventHandler(this::handleTextAreaActionEvent, View.Action);
     }
 
@@ -1617,14 +1617,14 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Called when view has prop change.
+     * Called when text area has prop change.
      */
-    private void handleViewPropChange(PropChange propChange)
+    private void handleTextAreaPropChange(PropChange propChange)
     {
         switch (propChange.getPropName()) {
             case View.Focusable_Prop -> handleTextAreaFocusableChange();
-            case View.Showing_Prop -> handleViewShowingChange();
-            case View.Focused_Prop -> handleViewFocusedChange();
+            case View.Showing_Prop -> handleTextAreaShowingChange();
+            case View.Focused_Prop -> handleTextAreaFocusedChange();
         }
     }
 
@@ -1639,9 +1639,9 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Called when View.Showing changes.
+     * Called when text area Showing changes.
      */
-    private void handleViewShowingChange()
+    private void handleTextAreaShowingChange()
     {
         // If focused, update CaretAnim
         if (_textArea.isFocused()) {
@@ -1665,7 +1665,7 @@ public class TextAdapter extends PropObject {
         if (_textArea.isShowing()) {
             _showingWindow = _textArea.getWindow();
             if (_showingWindow != null) {
-                _windowFocusedChangedLsnr = pc -> handleViewWindowFocusedChange();
+                _windowFocusedChangedLsnr = pc -> handleTextAreaWindowFocusedChange();
                 _showingWindow.addPropChangeListener(_windowFocusedChangedLsnr, View.Focused_Prop);
             }
         }
@@ -1680,9 +1680,9 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Called when view focus property changes to update caret anim.
+     * Called when text area focus property changes to update caret anim.
      */
-    private void handleViewFocusedChange()
+    private void handleTextAreaFocusedChange()
     {
         setShowCaret(false);
         updateCaretAnim();
@@ -1691,7 +1691,7 @@ public class TextAdapter extends PropObject {
     /**
      * Called when view window focus property changes to update caret anim.
      */
-    private void handleViewWindowFocusedChange()
+    private void handleTextAreaWindowFocusedChange()
     {
         if (isEditable() || isCaretAnim())
             ViewUtils.runLater(this::updateCaretAnim);

@@ -547,7 +547,7 @@ public class TitleView extends ParentView implements ViewHost {
             addChild(_label);
 
             // Listen for Label MousePress to trigger expand
-            _label.addEventHandler(e -> fireActionEvent(e), MousePress);
+            _label.addEventHandler(this::fireActionEvent, MousePress);
         }
     }
 
@@ -614,7 +614,7 @@ public class TitleView extends ParentView implements ViewHost {
             addChild(_button);
 
             // Listen for Button click to trigger expand
-            _button.addEventHandler(e -> fireActionEvent(e), Action);
+            _button.addEventHandler(this::fireActionEvent, Action);
 
             // Get label
             _label = _button.getLabel();
