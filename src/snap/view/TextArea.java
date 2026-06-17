@@ -394,33 +394,6 @@ public class TextArea extends ParentView {
     }
 
     /**
-     * Process event. Make this public so TextArea can be used to edit text outside of normal Views.
-     */
-    public void processEvent(ViewEvent anEvent)
-    {
-        switch (anEvent.getType()) {
-            case KeyPress -> keyPressed(anEvent);
-            case KeyType -> keyTyped(anEvent);
-            case KeyRelease -> keyReleased(anEvent);
-        }
-    }
-
-    /**
-     * Called when a key is pressed.
-     */
-    protected void keyPressed(ViewEvent anEvent)  { _textAdapter.handleKeyPressEvent(anEvent); }
-
-    /**
-     * Called when a key is typed.
-     */
-    protected void keyTyped(ViewEvent anEvent)  { _textAdapter.handleKeyTypeEvent(anEvent); }
-
-    /**
-     * Called when a key is released.
-     */
-    protected void keyReleased(ViewEvent anEvent)  { _textAdapter.handleKeyReleaseEvent(anEvent); }
-
-    /**
      * Returns the font scale of the text.
      */
     public double getFontScale()  { return _textAdapter.getFontScale(); }
@@ -561,13 +534,8 @@ public class TextArea extends ParentView {
             case TextAdapter.TextModel_Prop -> firePropChange(TextModel_Prop, propChange.getOldValue(), propChange.getNewValue());
             case TextAdapter.WrapLines_Prop -> firePropChange(WrapLines_Prop, propChange.getOldValue(), propChange.getNewValue());
 
-            // Handle Selectable, Editable
+            // Handle Selectable
             case TextAdapter.Selectable_Prop -> handleTextAdapterSelectableChange();
-            case TextAdapter.Editable_Prop -> {
-                if (_textAdapter.isEditable())
-                    enableEvents(KeyEvents);
-                else disableEvents(KeyEvents);
-            }
         }
     }
 

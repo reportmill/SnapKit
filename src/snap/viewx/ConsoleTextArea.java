@@ -4,7 +4,7 @@
 package snap.viewx;
 import java.util.*;
 import snap.gfx.Color;
-import snap.text.TextStyle;
+import snap.text.*;
 import snap.util.*;
 import snap.view.*;
 
@@ -36,6 +36,12 @@ public class ConsoleTextArea extends TextArea {
     }
 
     /**
+     * Override to return custom text adapter.
+     */
+    @Override
+    protected TextAdapter createTextAdapter(TextModel textModel)  { return new ConsoleTextAdapter(textModel); }
+
+    /**
      * Returns the prompt.
      */
     public String getPrompt()  { return _prompt; }
@@ -54,60 +60,6 @@ public class ConsoleTextArea extends TextArea {
      * Returns the location of the end of the last text appended to console.
      */
     public int getInputCharIndex()  { return _inputCharIndex; }
-
-    /**
-     * Handles key events.
-     */
-    @Override
-    protected void keyPressed(ViewEvent anEvent)
-    {
-        // Get key info
-        int keyCode = anEvent.getKeyCode();
-        int inputLoc = getInputCharIndex();
-
-        // Handle delete at or before input location
-        if ((keyCode == KeyCode.BACK_SPACE || keyCode == KeyCode.DELETE) && getSelStart() <= inputLoc) {
-            ViewUtils.beep();
-            return;
-        }
-
-        // Handle command-k
-        if (keyCode == KeyCode.K && anEvent.isShortcutDown()) {
-            clearConsole();
-            return;
-        }
-
-        // Handle special keys
-        else switch (keyCode) {
-            case KeyCode.UP -> { setCommandHistoryPrevious(); anEvent.consume(); }
-            case KeyCode.DOWN -> { setCommandHistoryNext(); anEvent.consume(); }
-            default -> super.keyPressed(anEvent);
-        }
-
-        // Reset input location
-        _inputCharIndex = inputLoc;
-
-        // Handle Enter action
-        if (keyCode == KeyCode.ENTER)
-            handleEnterAction();
-    }
-
-    /**
-     * Called when a key is typed.
-     */
-    @Override
-    protected void keyTyped(ViewEvent anEvent)
-    {
-        // Get keyCode and input location
-        int inputLoc = getInputCharIndex();
-
-        // Handle cursor out of range
-        if (getSelStart() < inputLoc)
-            setSel(length());
-
-        super.keyTyped(anEvent);
-        _inputCharIndex = inputLoc;
-    }
 
     /**
      * Called when enter is hit.
@@ -254,5 +206,73 @@ public class ConsoleTextArea extends TextArea {
         _cmdHistoryIndex = MathUtils.clamp(_cmdHistoryIndex+1, 0, _cmdHistory.size());
         String command = _cmdHistoryIndex<_cmdHistory.size() ? _cmdHistory.get(_cmdHistoryIndex) : "";
         replaceCharsWithStyle(command, null, getInputCharIndex(), length());
+    }
+
+    /**
+     * Custom TextAdapter for ConsoleText.
+     */
+    private class ConsoleTextAdapter extends TextAdapter {
+
+        /**
+         * Constructor for given text.
+         */
+        public ConsoleTextAdapter(TextLayout textLayout)
+        {
+            super(textLayout);
+        }
+
+        /**
+         * Handles key events.
+         */
+        @Override
+        protected void handleKeyPressEvent(ViewEvent anEvent)
+        {
+            // Get key info
+            int keyCode = anEvent.getKeyCode();
+            int inputLoc = getInputCharIndex();
+
+            // Handle delete at or before input location
+            if ((keyCode == KeyCode.BACK_SPACE || keyCode == KeyCode.DELETE) && getSelStart() <= inputLoc) {
+                ViewUtils.beep();
+                return;
+            }
+
+            // Handle command-k
+            if (keyCode == KeyCode.K && anEvent.isShortcutDown()) {
+                clearConsole();
+                return;
+            }
+
+            // Handle special keys
+            else switch (keyCode) {
+                case KeyCode.UP -> { setCommandHistoryPrevious(); anEvent.consume(); }
+                case KeyCode.DOWN -> { setCommandHistoryNext(); anEvent.consume(); }
+                default -> super.handleKeyPressEvent(anEvent);
+            }
+
+            // Reset input location
+            _inputCharIndex = inputLoc;
+
+            // Handle Enter action
+            if (keyCode == KeyCode.ENTER)
+                handleEnterAction();
+        }
+
+        /**
+         * Called when a key is typed.
+         */
+        @Override
+        protected void handleKeyTypeEvent(ViewEvent anEvent)
+        {
+            // Get keyCode and input location
+            int inputLoc = getInputCharIndex();
+
+            // Handle cursor out of range
+            if (getSelStart() < inputLoc)
+                setSel(length());
+
+            super.handleKeyTypeEvent(anEvent);
+            _inputCharIndex = inputLoc;
+        }
     }
 }

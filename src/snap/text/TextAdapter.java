@@ -75,7 +75,7 @@ public class TextAdapter extends PropObject {
     private PropChangeListener _textModelPropChangeLsnr = this::handleTextModelPropChange;
 
     // An event listener to catch text area mouse events
-    private EventListener _textAreaMouseLsnr = this::processEvent;
+    private EventListener _textAreaEventLsnr = this::processEvent;
 
     // A PropChangeListener to enable/disable caret when window loses focus
     private PropChangeListener  _windowFocusedChangedLsnr;
@@ -224,9 +224,11 @@ public class TextAdapter extends PropObject {
         firePropChange(Selectable_Prop, _selectable, _selectable = aValue);
 
         if (_textArea != null) {
-            if (aValue)
-                _textArea.addEventHandler(_textAreaMouseLsnr, View.MousePress, View.MouseDrag, View.MouseRelease, View.MouseMove);
-            else _textArea.removeEventHandler(_textAreaMouseLsnr);
+            if (aValue) {
+                _textArea.addEventHandler(_textAreaEventLsnr, View.MousePress, View.MouseDrag, View.MouseRelease, View.MouseMove);
+                _textArea.addEventHandler(_textAreaEventLsnr, View.KeyEvents);
+            }
+            else _textArea.removeEventHandler(_textAreaEventLsnr);
         }
     }
 
@@ -827,6 +829,7 @@ public class TextAdapter extends PropObject {
      */
     public void delete()
     {
+        if (!isEditable()) return;
         int selStart = getSelStart();
         int selEnd = getSelEnd();
         removeChars(selStart, selEnd);
@@ -913,6 +916,8 @@ public class TextAdapter extends PropObject {
      */
     public void deleteBackward()
     {
+        if (!isEditable()) return;
+
         if (!isSelEmpty()) {
             delete();
             return;
@@ -931,6 +936,8 @@ public class TextAdapter extends PropObject {
      */
     public void deleteForward()
     {
+        if (!isEditable()) return;
+
         if (!isSelEmpty()) {
             delete();
             return;
@@ -949,6 +956,8 @@ public class TextAdapter extends PropObject {
      */
     public void deleteToLineEnd()
     {
+        if (!isEditable()) return;
+
         // If there is a current selection, just delete it
         if (!isSelEmpty())
             delete();
@@ -1123,7 +1132,7 @@ public class TextAdapter extends PropObject {
     /**
      * Called when a key is pressed.
      */
-    public void handleKeyPressEvent(ViewEvent anEvent)
+    protected void handleKeyPressEvent(ViewEvent anEvent)
     {
         // Get event info
         boolean emacsDown = SnapEnv.isWindows ? anEvent.isAltDown() : anEvent.isControlDown();
@@ -1225,8 +1234,11 @@ public class TextAdapter extends PropObject {
     /**
      * Called when a key is typed.
      */
-    public void handleKeyTypeEvent(ViewEvent anEvent)
+    protected void handleKeyTypeEvent(ViewEvent anEvent)
     {
+        if (!isEditable())
+            return;
+
         // Get event info
         String keyChars = anEvent.getKeyString();
         char keyChar = !keyChars.isEmpty() ? keyChars.charAt(0) : 0;
@@ -1245,7 +1257,7 @@ public class TextAdapter extends PropObject {
     /**
      * Called when a key is released.
      */
-    public void handleKeyReleaseEvent(ViewEvent anEvent)
+    protected void handleKeyReleaseEvent(ViewEvent anEvent)
     {
         updateCaretAnim();
     }
@@ -1255,6 +1267,7 @@ public class TextAdapter extends PropObject {
      */
     protected void handleEnterKeyPressEvent(ViewEvent anEvent)
     {
+        if (!isEditable()) return;
         replaceChars("\n");
         anEvent.consume();
     }
@@ -1273,6 +1286,7 @@ public class TextAdapter extends PropObject {
      */
     protected void handleTabKeyPressEvent(ViewEvent anEvent)
     {
+        if (!isEditable()) return;
         replaceChars("\t");
         anEvent.consume();
     }
@@ -1451,6 +1465,8 @@ public class TextAdapter extends PropObject {
      */
     public void paste()
     {
+        if (!isEditable()) return;
+
         // Get clipboard - if not loaded, come back loaded
         Clipboard clipboard = Clipboard.get();
         if (!clipboard.isLoaded()) {
@@ -1618,8 +1634,8 @@ public class TextAdapter extends PropObject {
     private void handleTextAreaFocusableChange()
     {
         if (_textArea.isFocusable())
-            _textArea.addEventHandler(_textAreaMouseLsnr, View.MousePress, View.MouseDrag, View.MouseRelease, View.MouseMove);
-        else _textArea.removeEventHandler(_textAreaMouseLsnr);
+            _textArea.addEventHandler(_textAreaEventLsnr, View.MousePress, View.MouseDrag, View.MouseRelease, View.MouseMove);
+        else _textArea.removeEventHandler(_textAreaEventLsnr);
     }
 
     /**
