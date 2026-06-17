@@ -530,6 +530,8 @@ public class HtmlView extends ChildView {
 
         HtmlView htmlView = new HtmlView();
         htmlView.setHtml(htmlElement.getString());
-        new ViewController(new ScrollView(htmlView)).setWindowVisible(true);
+        WindowView window = new WindowView();
+        window.setContent(new ScrollView(htmlView));
+        window.setVisible(true);
     }
 }
