@@ -43,6 +43,7 @@ public class CheckBoxMenuItem extends MenuItem {
     @Override
     protected void paintButton(Painter aPntr)
     {
+        super.paintButton(aPntr);
         double SIZE = 16;
         Insets ins = getInsetsAll();
         double buttonX = ins.left;

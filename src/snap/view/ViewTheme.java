@@ -148,6 +148,11 @@ public class ViewTheme {
     
             MenuItem { Align: CENTER_LEFT; Padding: 4, 8, 4, 6; Font: Arial 13 }
             MenuItem:Hover { Fill: #E6; TextColor: WHITE }
+            
+            CheckBoxMenuItem { Fill: WHITE; Border: #BF }
+            CheckBoxMenuItem:Hover { Fill: #E6; TextColor: WHITE }
+            CheckBoxMenuItem:Active { Fill: #DA; TextColor: WHITE }
+            CheckBoxMenuItem:Selected { Fill: WHITE }
     
             TextField { Align: CENTER_LEFT; Padding: 3; Fill: WHITE; Border: #C0; BorderRadius: 3 }
     
