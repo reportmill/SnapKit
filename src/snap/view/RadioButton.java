@@ -18,16 +18,13 @@ public class RadioButton extends ToggleButton {
     private static final RoundRect RADIO_BUTTON_RECT = new RoundRect(0, 0, 16, 16, 8);
     private static final Ellipse RADIO_INTERIOR_SHAPE = new Ellipse(3, 3, 10, 10);
 
-    // Constants for overridden defaults
-    private static final boolean DEFAULT_RADIO_BUTTON_SHOW_AREA = false;
-
     /**
      * Constructor.
      */
     public RadioButton()
     {
         super();
-        _showArea = DEFAULT_RADIO_BUTTON_SHOW_AREA;
+        _plain = true;
 
         // Create/add radio
         _radio = new Label();
@@ -100,17 +97,4 @@ public class RadioButton extends ToggleButton {
      */
     @Override
     protected ViewLayout getViewLayoutImpl()  { return new RowViewLayout(this, false); }
-
-    /**
-     * Initialize Props. Override to provide custom defaults.
-     */
-    @Override
-    protected void initProps(PropSet aPropSet)
-    {
-        // Do normal version
-        super.initProps(aPropSet);
-
-        // Override ShowArea
-        aPropSet.getPropForName(ShowArea_Prop).setDefaultValue(DEFAULT_RADIO_BUTTON_SHOW_AREA);
-    }
 }

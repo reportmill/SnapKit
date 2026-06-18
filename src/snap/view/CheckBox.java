@@ -3,10 +3,8 @@
  */
 package snap.view;
 import snap.geom.Pos;
-import snap.geom.RectBase;
 import snap.geom.RoundRect;
 import snap.gfx.*;
-import snap.props.PropSet;
 
 /**
  * A View subclass for CheckBox.
@@ -19,16 +17,13 @@ public class CheckBox extends ToggleButton {
     // Constant for CheckBox rect
     private static final RoundRect CHECK_BOX_RECT = new RoundRect(0, 0, 16, 16, 3);
     
-    // Constants for overridden defaults
-    private static final boolean DEFAULT_CHECK_BOX_SHOW_AREA = false;
-
     /**
      * Constructor.
      */
     public CheckBox()
     {
         super();
-        _showArea = DEFAULT_CHECK_BOX_SHOW_AREA;
+        _plain = true;
 
         // Create/add check
         _check = new Label();
@@ -78,19 +73,6 @@ public class CheckBox extends ToggleButton {
      */
     @Override
     protected ViewLayout getViewLayoutImpl()  { return new RowViewLayout(this, false); }
-
-    /**
-     * Initialize Props. Override to provide custom defaults.
-     */
-    @Override
-    protected void initProps(PropSet aPropSet)
-    {
-        // Do normal version
-        super.initProps(aPropSet);
-
-        // Override ShowArea
-        aPropSet.getPropForName(ShowArea_Prop).setDefaultValue(DEFAULT_CHECK_BOX_SHOW_AREA);
-    }
 
     /**
      * Draws checkbox for given checkbox or checkbox menuitem.

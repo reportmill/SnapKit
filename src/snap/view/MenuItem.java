@@ -30,16 +30,13 @@ public class MenuItem extends ButtonBase implements Cloneable {
     public static final String Selected_Prop = "Selected";
     public static final String Shortcut_Prop = "Shortcut";
 
-    // Custom property defaults
-    private static boolean DEFAULT_MENU_ITEM_SHOW_AREA = false;
-
     /**
      * Constructor.
      */
     public MenuItem()
     {
         super();
-        _showArea = DEFAULT_MENU_ITEM_SHOW_AREA;
+        _plain = true;
     }
 
     /**
@@ -228,9 +225,6 @@ public class MenuItem extends ButtonBase implements Cloneable {
 
         // Shortcut
         aPropSet.addPropNamed(Shortcut_Prop, String.class, EMPTY_OBJECT);
-
-        // Reset ShowArea default
-        aPropSet.getPropForName(ShowArea_Prop).setDefaultValue(DEFAULT_MENU_ITEM_SHOW_AREA);
     }
 
     /**

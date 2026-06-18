@@ -4,7 +4,7 @@
   <RowView Align="CENTER" Spacing="15">
     <ColView Align="CENTER" Padding="4" Spacing="15">
       <ComboBox Name="TypeComboBox" PrefWidth="95" PrefHeight="22" />
-      <Button Name="ReverseStopsButton" PrefWidth="31" PrefHeight="35" ToolTip="reverse colors" ImageName="Reverse.png" ShowArea="false" />
+      <Button Name="ReverseStopsButton" PrefWidth="31" PrefHeight="35" ToolTip="reverse colors" ImageName="Reverse.png" Plain="true" />
     </ColView>
     <View Name="RadialPicker" PrefWidth="80" PrefHeight="80" Class="snap.styler.GradientAxisPicker" />
     <ColView Name="LinearControls" PrefWidth="90" PrefHeight="80" Align="CENTER" FillWidth="true">

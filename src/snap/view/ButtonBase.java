@@ -18,8 +18,8 @@ public class ButtonBase extends ParentView {
     // The button label
     private Label  _label;
     
-    // Whether button displays the standard background area
-    protected boolean _showArea;
+    // Whether button displays in plain style with no background fill/border
+    protected boolean _plain;
     
     // The position of the button when in a group (determines corner rendering)
     private Pos _position;
@@ -40,7 +40,7 @@ public class ButtonBase extends ParentView {
     private boolean  _tracked;
     
     // Constants for properties
-    public static final String ShowArea_Prop = "ShowArea";
+    public static final String Plain_Prop = "Plain";
     public static final String Position_Prop = "Position";
     public static final String ImageName_Prop = "ImageName";
     public static final String Pressed_Prop = "Pressed";
@@ -51,16 +51,12 @@ public class ButtonBase extends ParentView {
     public static final int BUTTON_OVER = 1;
     public static final int BUTTON_PRESSED = 2;
 
-    // Constants for property defaults
-    private static final boolean DEFAULT_SHOW_AREA = true;
-
     /**
      * Constructor.
      */
     public ButtonBase()
     {
         super();
-        _showArea = DEFAULT_SHOW_AREA;
 
         // Config
         setFocusable(true);
@@ -158,28 +154,28 @@ public class ButtonBase extends ParentView {
     }
 
     /**
-     * Returns whether button displays the standard background area.
+     * Returns whether button displays in plain style with no background fill/border.
      */
-    public boolean isShowArea()  { return _showArea; }
+    public boolean isPlain()  { return _plain; }
 
     /**
-     * Sets whether button displays the standard background area.
+     * Sets whether button displays in plain style with no background fill/border.
      */
-    public void setShowArea(boolean aValue)
+    public void setPlain(boolean aValue)
     {
-        if (aValue == _showArea) return;
-        firePropChange(ShowArea_Prop, _showArea, _showArea = aValue);
-
-        // Handle normal button: Clear view style Fill/Border
-        if (aValue) {
-            getStyle().setStyleValue(Fill_Prop, null);
-            getStyle().setStyleValue(Border_Prop, null);
-        }
+        if (aValue == _plain) return;
+        firePropChange(Plain_Prop, _plain, _plain = aValue);
 
         // Handle plain button: Override view style Fill/Border to be null
-        else {
+        if (aValue) {
             setFill(null);
             setBorder(null);
+        }
+
+        // Handle normal button: Clear view style Fill/Border
+        else {
+            getStyle().setStyleValue(Fill_Prop, null);
+            getStyle().setStyleValue(Border_Prop, null);
         }
     }
 
@@ -362,11 +358,11 @@ public class ButtonBase extends ParentView {
      */
     protected void paintButton(Painter aPntr)
     {
-        // If ShowArea, use ButtonArea to paint actual button background
-        if (isShowArea())
+        // If normal, paint actual button background
+        if (!isPlain())
             ButtonPainter.paintButton(aPntr, this);
 
-        // If not ShowArea, paint rects for Selected, Pressed or Targeted
+        // If plain, paint rects for Selected, Pressed or Targeted
         else if (isPressed() || isSelected() || isTargeted()) {
             Shape shape = getBoundsShape();
             Paint fill = isTargeted() ? ViewThemeUtils.getTargetFill() : ViewThemeUtils.getSelectFill();
@@ -434,9 +430,9 @@ public class ButtonBase extends ParentView {
     {
         super.initProps(aPropSet);
 
-        // ImageName, ShowArea, Position
+        // ImageName, Plain, Position
         aPropSet.addPropNamed(ImageName_Prop, String.class, PropObject.EMPTY_OBJECT);
-        aPropSet.addPropNamed(ShowArea_Prop, boolean.class, DEFAULT_SHOW_AREA);
+        aPropSet.addPropNamed(Plain_Prop, boolean.class);
         aPropSet.addPropNamed(Position_Prop, Pos.class);
     }
 
@@ -448,9 +444,9 @@ public class ButtonBase extends ParentView {
     {
         return switch (aPropName) {
 
-            // ImageName, ShowArea, Position
+            // ImageName, Plain, Position
             case ImageName_Prop -> getImageName();
-            case ShowArea_Prop -> isShowArea();
+            case Plain_Prop -> isPlain();
             case Position_Prop -> getPosition();
 
             // Do normal version
@@ -466,9 +462,9 @@ public class ButtonBase extends ParentView {
     {
         switch (aPropName) {
 
-            // ImageName, ShowArea, Position
+            // ImageName, Plain, Position
             case ImageName_Prop -> setImageName(Convert.stringValue(aValue));
-            case ShowArea_Prop -> setShowArea(Convert.boolValue(aValue));
+            case Plain_Prop -> setPlain(Convert.boolValue(aValue));
             case Position_Prop -> setPosition(Pos.of(aValue));
 
             // Do normal version
@@ -483,7 +479,7 @@ public class ButtonBase extends ParentView {
     protected PropMap getPropMapForArchiver(PropArchiver propArchiver)
     {
         PropMap propMap = super.getPropMapForArchiver(propArchiver);
-        if (!isShowArea()) {
+        if (isPlain()) {
             if (getFill() == null)
                 propMap.setPropValue(Fill_Prop, null);
             if (getBorder() == null)

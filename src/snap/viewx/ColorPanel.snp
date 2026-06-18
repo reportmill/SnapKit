@@ -7,7 +7,7 @@
     <ToggleButton Name="SwatchPickerButton" PrefWidth="40" PrefHeight="27" ImageName="swatches-icon.png" GroupName="bg1" />
     <Label PrefWidth="20" PrefHeight="8" />
     <ColorWell Name="DisplayColorWell" PrefWidth="40" PrefHeight="27" Selectable="false" />
-    <MenuButton Name="HistoryMenuButton" PrefWidth="16" PrefHeight="11" ToolTip="Recent Colors" ShowArea="false" />
+    <MenuButton Name="HistoryMenuButton" PrefWidth="16" PrefHeight="11" ToolTip="Recent Colors" Plain="true" />
   </RowView>
   <SwitchView Name="PickerPanel" PrefHeight="198">
     <ColView Name="ImagePicker" Spacing="4" FillWidth="true">

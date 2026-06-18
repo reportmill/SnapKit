@@ -52,8 +52,8 @@ public class Button extends ButtonBase {
     @Override
     protected void paintButton(Painter aPntr)
     {
-        // Handle ShowArea + DefaultButton
-        if (isShowArea() && isDefaultButton())
+        // Handle DefaultButton
+        if (isDefaultButton() && !isPlain())
             ButtonPainter.paintDefaultButton(aPntr, this);
 
         // Otherwise, do normal version
