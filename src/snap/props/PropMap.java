@@ -72,9 +72,11 @@ public class PropMap {
     /**
      * Sets a node value (String, PropMap, PropMap[]) for given prop name.
      */
-    public void setPropValue(String aPropName, Object nodeValue)
+    public void setPropValue(String propName, Object nodeValue)
     {
-        _propValues.put(aPropName, nodeValue);
+        _propValues.put(propName, nodeValue);
+        if (nodeValue == null) // Null is usually archived as "null"
+            _propValues.remove(propName);
     }
 
     /**

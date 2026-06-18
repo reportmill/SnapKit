@@ -169,6 +169,18 @@ public class ButtonBase extends ParentView {
     {
         if (aValue == _showArea) return;
         firePropChange(ShowArea_Prop, _showArea, _showArea = aValue);
+
+        // Handle normal button: Clear view style Fill/Border
+        if (aValue) {
+            getStyle().setStyleValue(Fill_Prop, null);
+            getStyle().setStyleValue(Border_Prop, null);
+        }
+
+        // Handle plain button: Override view style Fill/Border to be null
+        else {
+            setFill(null);
+            setBorder(null);
+        }
     }
 
     /**
@@ -462,6 +474,22 @@ public class ButtonBase extends ParentView {
             // Do normal version
             default -> super.setPropValue(aPropName, aValue);
         }
+    }
+
+    /**
+     * Override to handle plain buttons (remove unnecessary null fill/border)
+     */
+    @Override
+    protected PropMap getPropMapForArchiver(PropArchiver propArchiver)
+    {
+        PropMap propMap = super.getPropMapForArchiver(propArchiver);
+        if (!isShowArea()) {
+            if (getFill() == null)
+                propMap.setPropValue(Fill_Prop, null);
+            if (getBorder() == null)
+                propMap.setPropValue(Border_Prop, null);
+        }
+        return propMap;
     }
 
     /**
