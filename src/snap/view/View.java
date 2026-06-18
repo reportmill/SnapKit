@@ -2393,11 +2393,6 @@ public class View extends PropObject {
     public void setFocusPainted(boolean aValue)  { _focusPainted = aValue; }
 
     /**
-     * Sets whether view can generate action events in response to certain user interactions.
-     */
-    public void setActionable(boolean aValue)  { }
-
-    /**
      * Tells view to request focus.
      */
     public void requestFocus()
