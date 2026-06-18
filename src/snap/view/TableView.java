@@ -77,7 +77,6 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         super();
         setFocusable(true);
         setFocusWhenPressed(true);
-        setActionable(true);
         enableEvents(MousePress, MouseDrag, MouseRelease, KeyPress);
 
         // Create/configure Columns SplitView and ScrollView and add

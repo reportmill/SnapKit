@@ -59,15 +59,13 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     public static final int MAX_VISIBLE_COL_COUNT = 4;
 
     /**
-     * Creates a new BrowserView.
+     * Constructor.
      */
     public BrowserView()
     {
-        // Basic config
         super();
         setFocusable(true);
         setFocusWhenPressed(true);
-        setActionable(true);
         enableEvents(KeyEvents);
 
         // Set default values

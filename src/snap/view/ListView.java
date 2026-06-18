@@ -67,7 +67,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     private PropChangeListener _pickListPropChangeLsnr;
 
     // A helper object to handle list selection
-    private ListViewSelector _selector;
+    private ListViewSelector<T> _selector;
 
     // Whether list needs to scroll selection to visible after next layout or show
     private boolean _needsScrollSelToVisible;
@@ -91,10 +91,9 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         super();
         _altRowColor = ViewTheme.get().getContentAltColor();
         _pickListPropChangeLsnr = this::handlePickListPropChange;
-        _selector = new ListViewSelector(this);
+        _selector = new ListViewSelector<>(this);
 
         // Events
-        setActionable(true);
         setFocusable(true);
         setFocusWhenPressed(true);
         setOverflow(Overflow.Scroll);

@@ -21,14 +21,11 @@ public class ArrowView extends ParentView {
     private static Image _upImage, _downImage, _leftImage, _rightImage;
 
     /**
-     * Creates a new ArrowView.
+     * Constructor.
      */
     public ArrowView()
     {
         super();
-
-        // Enable Action event
-        setActionable(true);
 
         // Create/configure Col view to hold up/down buttons
         _col = new ColView();

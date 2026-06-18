@@ -37,14 +37,11 @@ public class ColorDock extends View {
     private static int  SWATCH_SIZE = 13;
     
     /**
-     * Creates a new color dock.
+     * Constructor.
      */
     public ColorDock()
     {
         super();
-
-        // Configure this view
-        setActionable(true);
         enableEvents(MousePress, MouseRelease);
         enableEvents(ViewEvent.Type.DragGesture, ViewEvent.Type.DragSourceEnd); enableEvents(DragEvents);
 

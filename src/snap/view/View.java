@@ -87,9 +87,6 @@ public class View extends PropObject {
     // Whether view should paint focus ring when focused
     private boolean  _focusPainted;
 
-    // Whether view can generate action events in response to certain user interactions
-    private boolean  _actionable;
-
     // Whether view is visible
     private boolean  _visible;
 
@@ -2396,14 +2393,9 @@ public class View extends PropObject {
     public void setFocusPainted(boolean aValue)  { _focusPainted = aValue; }
 
     /**
-     * Returns whether view can generate action events in response to certain user interactions.
-     */
-    public boolean isActionable()  { return _actionable; }
-
-    /**
      * Sets whether view can generate action events in response to certain user interactions.
      */
-    public void setActionable(boolean aValue)  { _actionable = aValue; }
+    public void setActionable(boolean aValue)  { }
 
     /**
      * Tells view to request focus.

@@ -177,7 +177,6 @@ public class TitleView extends ParentView implements ViewHost {
         // Do normal setter
         if (aValue == _collapsible) return;
         firePropChange(Collapsible_Prop, _collapsible, _collapsible = aValue);
-        setActionable(aValue);
 
         // If collapsible: Enable action event and listen for label click
         if (aValue) {

@@ -50,7 +50,6 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     {
         super();
         setFocusable(true);
-        setActionable(true);
         enableEvents(KeyPress);
 
         // Create button and add

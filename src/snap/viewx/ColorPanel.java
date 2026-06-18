@@ -403,11 +403,11 @@ public class ColorPanel extends ViewController {
         Color _color = Color.WHITE;
 
         /**
-         * Creates new ImagePicker.
+         * Constructor.
          */
         public ImagePicker()
         {
-            setActionable(true);
+            super();
             enableEvents(MousePress, MouseDrag, MouseRelease);
             setCursor(Cursor.CROSSHAIR);
         }
@@ -490,11 +490,11 @@ public class ColorPanel extends ViewController {
         int WIDTH = 16, HEIGHT = 14, SIZE = 12;
 
         /**
-         * Creates new SwatchPanel.
+         * Constructor.
          */
         public SwatchPanel()
         {
-            setActionable(true);
+            super();
             enableEvents(MouseRelease);
             setName("SwatchPanel");
             setBounds(30, 10, WIDTH * SIZE, HEIGHT * SIZE);

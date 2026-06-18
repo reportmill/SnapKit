@@ -33,11 +33,11 @@ public class ColorWell extends View {
     public static final String Selectable_Prop = "Selectable";
 
     /**
-     * Creates a new ColorWell.
+     * Constructor.
      */
     public ColorWell()
     {
-        setActionable(true);
+        super();
         enableEvents(MouseRelease, ViewEvent.Type.DragGesture, ViewEvent.Type.DragSourceEnd);
         enableEvents(DragEvents);
     }

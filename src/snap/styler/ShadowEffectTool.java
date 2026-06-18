@@ -81,11 +81,11 @@ public class ShadowEffectTool extends StylerOwner {
         int _x2, _y2;
 
         /**
-         * Creates offset panel.
+         * Constructor.
          */
         public OffsetPanel()
         {
-            setActionable(true);
+            super();
             enableEvents(MousePress, MouseDrag, MouseRelease);
         }
 

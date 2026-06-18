@@ -54,7 +54,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     public TreeView()
     {
         super();
-        setActionable(true);
         setFocusable(true);
         setFocusWhenPressed(true);
         setFocusPainted(false);

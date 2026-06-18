@@ -44,11 +44,11 @@ public class ColorButton extends View {
     public static final String Color_Prop = "Color";
 
     /**
-     * Creates a new ColorButton.
+     * Constructor.
      */
     public ColorButton()
     {
-        setActionable(true);
+        super();
         enableEvents(MouseEvents);
         setPrefSize(32,22);
     }

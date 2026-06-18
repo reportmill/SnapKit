@@ -70,11 +70,11 @@ public class Trackball extends ParentView {
     static Color SCUFF_COLOR = new Color(.2f,.2f,.2f,.5f);
 
     /**
-     * Creates a Trackball.
+     * Constructor.
      */
     public Trackball()
     {
-        // Set size
+        super();
         setPrefSize(IMAGE_SIZE, IMAGE_SIZE);
 
         // Fix image sizes
@@ -102,7 +102,6 @@ public class Trackball extends ParentView {
         _camera.setPrefGimbalRadius(_camera.getFocalLength());
 
         // Enable mouse/action events
-        setActionable(true);
         enableEvents(MousePress, MouseDrag, MouseRelease);
         _mouseHandler = new MouseHandler(_camera);
     }

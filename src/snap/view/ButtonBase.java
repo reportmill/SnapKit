@@ -57,10 +57,7 @@ public class ButtonBase extends ParentView {
     public ButtonBase()
     {
         super();
-
-        // Config
         setFocusable(true);
-        setActionable(true);
         enableEvents(MouseEvents);
         enableEvents(KeyPress);
     }

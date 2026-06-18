@@ -22,11 +22,11 @@ public class GradientAxisPicker extends View {
     private ImagePaint  _background;
 
     /**
-     * Creates new GradientAxisPicker.
+     * Constructor.
      */
     public GradientAxisPicker()
     {
-        setActionable(true);
+        super();
         enableEvents(MousePress, MouseDrag, MouseRelease);
         setBorder(Border.createLoweredBevelBorder());
     }

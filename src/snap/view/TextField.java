@@ -63,11 +63,8 @@ public class TextField extends TextArea {
         super();
         _colCount = DEFAULT_COL_COUNT;
         _fireActionOnFocusLost = DEFAULT_FIRE_ACTION_ON_FOCUS_LOST;
-
-        // Override default properties
         setFocusPainted(true);
         setOverflow(Overflow.Scroll);
-        setActionable(true);
 
         // Make editable
         _textAdapter.setEditable(true);

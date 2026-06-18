@@ -31,11 +31,11 @@ public class Slider extends View {
     private static final int HSIZE = 8;
 
     /**
-     * Creates a new Slider.
+     * Constructor.
      */
     public Slider()
     {
-        setActionable(true);
+        super();
         enableEvents(MousePress, MouseDrag);
     }
 

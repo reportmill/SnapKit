@@ -74,12 +74,11 @@ public class ThumbWheel extends View {
     public static final String Value_Prop = "Value";
 
     /**
-     * Creates a new thumbwheel.
+     * Constructor.
      */
     public ThumbWheel()
     {
         super();
-        setActionable(true);
         enableEvents(MousePress, MouseDrag, MouseRelease);
     }
 

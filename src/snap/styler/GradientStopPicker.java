@@ -54,11 +54,11 @@ public class GradientStopPicker extends ParentView {
     public static final int KNOB_BASELINE = 11;
 
     /**
-     * Creates new GradientStopPicker.
+     * Constructor.
      */
     public GradientStopPicker()
     {
-        setActionable(true);
+        super();
         enableEvents(MousePress, MouseDrag, MouseMove);
         enableEvents(DragEvents);
     }

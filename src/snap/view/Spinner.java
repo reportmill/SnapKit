@@ -43,8 +43,7 @@ public class Spinner <T> extends ParentView {
      */
     public Spinner()
     {
-        // Enable Action event
-        setActionable(true);
+        super();
 
         // Create/configure TextField
         _textField = new TextField();

@@ -52,8 +52,6 @@ public class TabView extends ParentView implements Selectable<Tab>, ViewHost {
     {
         super();
         _vertical = true;
-
-        setActionable(true);
         _tabSide = Side.TOP;
         _classic = true;
 
