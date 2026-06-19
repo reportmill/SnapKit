@@ -101,7 +101,7 @@ public class TextPane extends ViewController {
     {
         TextArea textArea = new TextArea(true);
         textArea.setFill(ViewTheme.get().getContentColor());
-        _textArea.getTextAdapter().setEditable(true);
+        textArea.getTextAdapter().setEditable(true);
         return textArea;
     }
 
