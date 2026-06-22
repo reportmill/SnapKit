@@ -1578,6 +1578,15 @@ public class TextAdapter extends PropObject {
     }
 
     /**
+     * Called to detach adapter from text model.
+     */
+    public void detachAdapterFromTextModel()
+    {
+        if (_textModel == null) return;
+        _textModel.removePropChangeListener(_textModelPropChangeLsnr);
+    }
+
+    /**
      * Returns the width needed to display all characters.
      */
     public double getPrefWidth()  { return _textLayout.getPrefWidth(); }

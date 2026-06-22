@@ -556,11 +556,6 @@ public abstract class WebSite {
     }
 
     /**
-     * Flushes any unsaved changes to backing store.
-     */
-    public void flush() throws Exception  { }
-
-    /**
      * Resets the given file (provides a hook for subclasses).
      */
     protected void resetFile(WebFile aFile)  { aFile.resetImpl(); }
