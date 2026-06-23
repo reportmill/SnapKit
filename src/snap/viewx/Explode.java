@@ -9,20 +9,15 @@ import snap.util.Interpolator;
 import snap.view.*;
 
 /**
- * A demo to show explosions.
- * <p>
- * Things to do:
- * - Change rotation animation to be zero
- * - Declare variable for PIECE_COUNT and replace occurances of constant "10"
- * - Add Slider with bounds 220,220,220,20
+ * This class implements an effect that makes a view look like it explodes.
  */
-public class Explode extends View {
+public class Explode {
 
     // The view to be exploded
-    private View _view;
+    private View _clientView;
 
     // The parent to hold explosion
-    private ParentView _host;
+    private ParentView _hostView;
 
     // The image to be exploded
     private Image _image;
@@ -44,6 +39,9 @@ public class Explode extends View {
 
     // Whether to reverse (construct)
     private boolean _reverse;
+
+    // The explode view
+    private View _explodeView;
 
     // Width/height of image/view pieces
     private double _iw, _ih, _vw, _vh;
@@ -74,11 +72,12 @@ public class Explode extends View {
      */
     public Explode(View aView, int aGridWidth, int aGridHeight, Runnable aRun)
     {
-        _view = aView;
+        _clientView = aView;
         _gridW = aGridWidth;
         _gridH = aGridHeight;
         _onDone = aRun;
-        setHostView(_view.getParent());
+        if (_clientView.getParent() != null)
+            setHostView(_clientView.getParent());
     }
 
     /**
@@ -103,28 +102,16 @@ public class Explode extends View {
     /**
      * Sets the view that to holds this view for display.
      */
-    public Explode setHostView(ParentView aView)
+    public void setHostView(ParentView hostView)
     {
-        // Just return if null
-        if (aView == null) return this;
-
-        // Set host
-        _host = aView;
+        _hostView = hostView;
 
         // Calculate offset from host view to victim view
         _offset = Point.ZERO;
-        for (View v = _view; v != _host; v = v.getParent())
+        for (View v = _clientView; v != _hostView; v = v.getParent())
             _offset = _offset.addXY(v.getX(), v.getY());
-        for (View v = _view; v != _host; v = v.getParent())
+        for (View v = _clientView; v != _hostView; v = v.getParent())
             _scale *= v.getScaleX();
-
-        // Other stuff
-        setManaged(false);
-        setPickable(false);
-        setScale(_scale);
-        setSize(_host.getWidth(), _host.getHeight());
-        setPrefSize(_host.getWidth(), _host.getHeight());
-        return this;
     }
 
     /**
@@ -147,53 +134,13 @@ public class Explode extends View {
     }
 
     /**
-     * Configures explosion animation.
-     */
-    public void configure()
-    {
-        // Create image if needed
-        if (_image == null) {
-            _view.setOpacity(1);
-            _image = ViewUtils.getImageForScale(_view, 1);
-        }
-
-        // Set sizes for image/view pieces
-        _iw = _image.getWidth() / _gridW;
-        _ih = _image.getHeight() / _gridH;
-        _vw = _view.getWidth() / _gridW;
-        _vh = _view.getHeight() / _gridH;
-
-        // Create explode pieces
-        _frags = new Frag[_gridW][_gridH];
-        for (int i = 0; i < _gridW; i++)
-            for (int j = 0; j < _gridH; j++)
-                _frags[i][j] = getFrag(i * _iw, j * _ih, i * _vw + _offset.x, j * _vh + _offset.y);
-
-        // Configure this view and add to parent
-        ViewUtils.addChild(_host, this);
-
-        // Start animation with hooks to call animFrame and animFinish
-        ViewAnim anim0 = getAnim(0);
-        anim0.setOnFrame(() -> animDidFrame());
-        anim0.setOnFinish(() -> animDidFinish());
-        getAnim(_runTime).play();
-
-        // Hide view
-        _view.setOpacity(0);
-
-        // If reversed, configure frags exploded
-        if (_reverse)
-            animDidFrame();
-    }
-
-    /**
      * Plays explosion animation.
      */
     public void play()
     {
-        if (getParent() == null)
+        if (_explodeView == null || _explodeView.getParent() == null)
             configure();
-        getAnim(0).play();
+        _explodeView.getAnim(0).play();
     }
 
     /**
@@ -203,7 +150,7 @@ public class Explode extends View {
     {
         _restoreOnDone = true;
         configure();
-        getAnim(0).play();
+        _explodeView.getAnim(0).play();
     }
 
     /**
@@ -211,14 +158,55 @@ public class Explode extends View {
      */
     public void playDelayed(int aDelay)
     {
-        if (aDelay > 0) ViewUtils.runDelayed(() -> play(), aDelay);
+        if (aDelay > 0) ViewUtils.runDelayed(this::play, aDelay);
         else play();
     }
 
     /**
-     * Returns a frag for given rect of image.
+     * Configures explosion animation.
      */
-    Frag getFrag(double aX, double aY, double dX, double dY)
+    private void configure()
+    {
+        // Create image if needed
+        if (_image == null) {
+            _clientView.setOpacity(1);
+            _image = ViewUtils.getImageForScale(_clientView, 1);
+        }
+
+        // Set sizes for image/view pieces
+        _iw = _image.getWidth() / _gridW;
+        _ih = _image.getHeight() / _gridH;
+        _vw = _clientView.getWidth() / _gridW;
+        _vh = _clientView.getHeight() / _gridH;
+
+        // Create explode pieces
+        _frags = new Frag[_gridW][_gridH];
+        for (int i = 0; i < _gridW; i++)
+            for (int j = 0; j < _gridH; j++)
+                _frags[i][j] = createFrag(i * _iw, j * _ih, i * _vw + _offset.x, j * _vh + _offset.y);
+
+        // Configure explode view and add to parent
+        _explodeView = new ExplodeView();
+        ViewUtils.addChild(_hostView, _explodeView);
+
+        // Start animation with hooks to call animFrame and animFinish
+        ViewAnim anim0 = _explodeView.getAnim(0);
+        anim0.setOnFrame(this::handleAnimFrameFinished);
+        anim0.setOnFinish(this::handleAnimFinished);
+        _explodeView.getAnim(_runTime).play();
+
+        // Hide view
+        _clientView.setOpacity(0);
+
+        // If reversed, configure frags exploded
+        if (_reverse)
+            handleAnimFrameFinished();
+    }
+
+    /**
+     * Creates a frag for given rect of image.
+     */
+    private Frag createFrag(double aX, double aY, double dX, double dY)
     {
         // Create random destination for piece
         double angle = Math.toRadians(_rand.nextDouble() * 360);
@@ -248,36 +236,37 @@ public class Explode extends View {
     }
 
     /**
-     * Called on each frame.
+     * Called when each animation frame is finished.
      */
-    void animDidFrame()
+    private void handleAnimFrameFinished()
     {
         // Get current anim time
-        int time = getAnim(0).getTime();
-        if (_reverse) time = Math.max(_runTime - time, 0);
+        int time = _explodeView.getAnim(0).getTime();
+        if (_reverse)
+            time = Math.max(_runTime - time, 0);
 
         // Update frags and paint
         Rect rect = updateFrags(time);
-        repaint(rect);
+        _explodeView.repaint(rect);
     }
 
     /**
-     * Called when finished.
+     * Called when animation is finished.
      */
-    void animDidFinish()
+    private void handleAnimFinished()
     {
         // Remove original view from parent
-        if (_removeOnDone && _view.getParent() != null) {
-            ViewUtils.removeChild(_view.getParent(), _view);
-            _view.setOpacity(1);
+        if (_removeOnDone && _clientView.getParent() != null) {
+            ViewUtils.removeChild(_clientView.getParent(), _clientView);
+            _clientView.setOpacity(1);
         }
 
         // Restore original view
         if (_restoreOnDone)
-            _view.setOpacity(1);
+            _clientView.setOpacity(1);
 
         // Remove this view from parent
-        ViewUtils.removeChild(getParent(), this);
+        ViewUtils.removeChild(_explodeView.getParent(), _explodeView);
 
         // Call OnDone
         if (_onDone != null)
@@ -290,22 +279,24 @@ public class Explode extends View {
     private Rect updateFrags(double aTime)
     {
         // Create vars to track repaint rect
-        double x0 = Float.MAX_VALUE, y0 = Float.MAX_VALUE, x1 = -x0, y1 = -y0;
+        double x0 = Float.MAX_VALUE, y0 = Float.MAX_VALUE;
+        double x1 = -x0, y1 = -y0;
 
         // Iterate over frags and update
         for (int i = 0; i < _gridW; i++)
             for (int j = 0; j < _gridH; j++) {
-                Frag f = _frags[i][j];
-                updateFrag(f, aTime);
-                x0 = Math.min(x0, f.x - _vw);
-                y0 = Math.min(y0, f.y - _vh);
-                x1 = Math.max(x1, f.x + _vw);
-                y1 = Math.max(y1, f.y + _vh);
+                Frag frag = _frags[i][j];
+                updateFrag(frag, aTime);
+                x0 = Math.min(x0, frag.x - _vw);
+                y0 = Math.min(y0, frag.y - _vh);
+                x1 = Math.max(x1, frag.x + _vw);
+                y1 = Math.max(y1, frag.y + _vh);
             }
 
         // Return repaint rect
         Rect rect = new Rect(x0, y0, x1 - x0, y1 - y0);
-        if (_reverse) rect.inset(-10);
+        if (_reverse)
+            rect.inset(-10);
         return rect;
     }
 
@@ -323,33 +314,50 @@ public class Explode extends View {
     }
 
     /**
-     * Override to paint frags.
+     * This view class actually renders the explosion.
      */
-    protected void paintFront(Painter aPntr)
-    {
-        for (int i = 0; i < _gridW; i++)
-            for (int j = 0; j < _gridH; j++) {
-                Frag f = _frags[i][j];
-                paintFrag(aPntr, f);
-            }
-        aPntr.setOpacity(1);
-    }
+    private class ExplodeView extends View {
 
-    /**
-     * Paints a given frag.
-     */
-    private void paintFrag(Painter aPntr, Frag aFrag)
-    {
-        double ix = aFrag.ix, iy = aFrag.iy;
-        double vx = aFrag.x, vy = aFrag.y;
-        Transform xfm = new Transform(vx + _iw / 2, vy + _ih / 2);
-        xfm.rotate(aFrag.rot);
-        xfm.translate(-_iw / 2, -_ih / 2);
-        aPntr.save();
-        aPntr.setOpacity(aFrag.op);
-        aPntr.transform(xfm);
-        aPntr.drawImage(_image, ix, iy, _iw, _ih, 0, 0, _vw, _vh);
-        aPntr.restore();
+        /**
+         * Constructor.
+         */
+        public ExplodeView()
+        {
+            super();
+            setManaged(false);
+            setPickable(false);
+            setScale(_scale);
+            setSize(_hostView.getWidth(), _hostView.getHeight());
+            setPrefSize(_hostView.getWidth(), _hostView.getHeight());
+        }
+
+        /**
+         * Override to paint frags.
+         */
+        @Override
+        protected void paintFront(Painter aPntr)
+        {
+            for (int i = 0; i < _gridW; i++)
+                for (int j = 0; j < _gridH; j++) {
+                    Frag f = _frags[i][j];
+                    paintFrag(aPntr, f);
+                }
+            aPntr.setOpacity(1);
+        }
+
+        /**
+         * Paints a given frag.
+         */
+        private void paintFrag(Painter aPntr, Frag aFrag)
+        {
+            Transform xfm = new Transform(aFrag.x, aFrag.y);
+            xfm.rotateAround(aFrag.rot, _iw / 2, _ih / 2);
+            aPntr.save();
+            aPntr.setOpacity(aFrag.op);
+            aPntr.transform(xfm);
+            aPntr.drawImage(_image, aFrag.ix, aFrag.iy, _iw, _ih, 0, 0, _vw, _vh);
+            aPntr.restore();
+        }
     }
 
     /**
