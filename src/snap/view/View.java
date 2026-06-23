@@ -434,48 +434,6 @@ public class View extends PropObject {
     }
 
     /**
-     * Sets the view bounds with given rect in current local coords such that it will have that rect as new local bounds.
-     */
-    public void setBoundsLocal(double aX, double aY, double aW, double aH)
-    {
-        setXYLocal(aX, aY);
-        setSizeLocal(aW, aH);
-    }
-
-    /**
-     * Sets the view x/y with given point in current local coords such that new origin will be at that point.
-     */
-    public void setXYLocal(double aX, double aY)
-    {
-        if (isLocalToParentSimple()) {
-            setXY(getX() + aX, getY() + aY);
-            return;
-        }
-        Point p0 = localToParent(0, 0);
-        Point p1 = localToParent(aX, aY);
-        double p2x = Math.round(getX() + p1.x - p0.x);
-        double p2y = Math.round(getY() + p1.y - p0.y);
-        setXY(p2x, p2y);
-    }
-
-    /**
-     * Sets the view size such that it maintains it's location in parent.
-     */
-    public void setSizeLocal(double aW, double aH)
-    {
-        if (isLocalToParentSimple()) {
-            setSize(aW, aH);
-            return;
-        }
-        Point p0 = localToParent(0, 0);
-        setSize(aW, aH);
-        Point p1 = localToParent(0, 0);
-        double p2x = Math.round(getX() - (p1.x - p0.x));
-        double p2y = Math.round(getY() - (p1.y - p0.y));
-        setXY(Math.round(p2x), p2y);
-    }
-
-    /**
      * Returns the bounds in parent coords.
      */
     public Rect getBoundsParent()

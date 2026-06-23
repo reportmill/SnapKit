@@ -60,20 +60,9 @@ public class PathView extends View {
     }
 
     /**
-     * Replace the polygon's current path with a new path, adjusting the shape's bounds to match the new path.
-     */
-    public void resetPathAndBounds(Shape aShape)
-    {
-        // Set the new path and new size
-        Path2D newPath = new Path2D(aShape);
-        setPath(newPath);
-        Rect bounds = newPath.getBounds();
-        setSizeLocal(bounds.getWidth(), bounds.getHeight());
-    }
-
-    /**
      * Override to return path as bounds shape.
      */
+    @Override
     public Shape getBoundsShape()
     {
         Shape path = getPath();
