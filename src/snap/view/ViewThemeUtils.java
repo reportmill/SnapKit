@@ -9,6 +9,9 @@ import java.util.Objects;
  */
 public class ViewThemeUtils {
 
+    // The Focused color
+    private static Color FOCUSED_COLOR = Color.get("#039ed3");
+
     // Cached themes
     private static ViewTheme _light;
     private static ViewTheme _dark;
@@ -27,6 +30,11 @@ public class ViewThemeUtils {
      * Returns the selection color.
      */
     public static Paint getTargetFill()  { return ViewTheme.get().getTargetedFill(); }
+
+    /**
+     * Returns the focus color.
+     */
+    public static Color getFocusColor()  { return FOCUSED_COLOR; }
 
     /**
      * Returns the light theme.

@@ -63,8 +63,8 @@ public class View extends PropObject {
     // The view preferred width and height
     private double  _prefWidth, _prefHeight;
 
-    // The ViewEffect to manage effect rendering for this view and current effect
-    private ViewEffect _effect;
+    // The ViewEffectPainter to facilitate effect rendering for this view and current effect
+    private ViewEffectPainter _effectPainter;
 
     // The opacity
     private double  _opacity;
@@ -658,24 +658,21 @@ public class View extends PropObject {
     /**
      * Returns effect.
      */
-    public Effect getEffect()
-    {
-        return _effect != null ? _effect._eff : null;
-    }
+    public Effect getEffect()  { return _effectPainter != null ? _effectPainter._effect : null; }
 
     /**
      * Sets paint.
      */
-    public void setEffect(Effect anEff)
+    public void setEffect(Effect anEffect)
     {
         // If already set, just return
         Effect old = getEffect();
-        if (Objects.equals(anEff, getEffect())) return;
+        if (Objects.equals(anEffect, getEffect())) return;
 
         // Set new ViewEffect, fire prop change and repaint
         repaintInParent(null);
-        _effect = anEff != null ? new ViewEffect(this, anEff) : null;
-        firePropChange(Effect_Prop, old, anEff);
+        _effectPainter = anEffect != null ? new ViewEffectPainter(this, anEffect) : null;
+        firePropChange(Effect_Prop, old, anEffect);
     }
 
     /**
@@ -1996,17 +1993,12 @@ public class View extends PropObject {
             aPntr.setOpacity(opacity);
         }
 
-        // If focused, render focused
-        if (isFocused() && isFocusPainted()) {
-            ViewEffect focusViewEffect = ViewEffect.getFocusViewEffect(this);
-            focusViewEffect.paintAll(aPntr);
-        }
+        // If view has effect or is focused, get effect painter and have it paint
+        ViewEffectPainter effectPainter = isFocused() && isFocusPainted() ? ViewEffectPainter.getFocusEffectPainterForView(this) : _effectPainter;
+        if (effectPainter != null)
+            effectPainter.paintAll(aPntr);
 
-        // If view has effect, get/create effect painter to speed up successive paints
-        else if (_effect != null)
-            _effect.paintAll(aPntr);
-
-        // Otherwise, do normal draw
+        // Otherwise, do normal paint
         else {
             paintBack(aPntr);
             paintFront(aPntr);
@@ -2016,8 +2008,8 @@ public class View extends PropObject {
         if (opacity != 1)
             aPntr.setOpacity(opacityOld);
 
-        // Paint children and above children
-        if (_effect == null) {
+        // If no effect, paint children and paint above
+        if (effectPainter == null) {
             paintChildren(aPntr);
             paintAbove(aPntr);
         }
@@ -2252,7 +2244,7 @@ public class View extends PropObject {
         // If focused, combine with focus bounds
         Rect expandedRepaintRect = aRect;
         if (isFocused() && isFocusPainted()) {
-            Effect focusEffect = ViewEffect.getFocusEffect();
+            Effect focusEffect = ViewEffectPainter.getFocusEffect();
             expandedRepaintRect = focusEffect.getBounds(expandedRepaintRect);
         }
 
@@ -2289,7 +2281,7 @@ public class View extends PropObject {
 
         // Register for repaint (use focus effect bounds)
         if (isFocusPainted()) {
-            Effect focusEffect = ViewEffect.getFocusEffect();
+            Effect focusEffect = ViewEffectPainter.getFocusEffect();
             Rect bounds = getBoundsLocal();
             Rect repaintRect = focusEffect.getBounds(bounds);
             repaint(repaintRect);

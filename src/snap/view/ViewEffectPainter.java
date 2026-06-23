@@ -3,38 +3,38 @@ import snap.geom.RectBase;
 import snap.gfx.*;
 
 /**
- * A class to manage an effect for a view.
+ * A class to manage painting an effect for a view.
  */
-class ViewEffect {
+class ViewEffectPainter {
     
     // The View
-    private View  _view;
+    private View _view;
     
     // The Effect
-    protected Effect  _eff;
+    protected Effect _effect;
 
-    // A PainterDVR to hold cached effect render from last pass (and one to hold plain render for compare)
-    private PainterDVR  _pdvr, _pdvrX;
+    // A PainterDVR to hold cached effect render from last pass
+    private PainterDVR _pdvr;
     
+    // A PainterDVR to hold plain render for compare
+    private PainterDVR _pdvrX;
+
     // The view size when DVR was cached
-    private double  _viewW, _viewH;
+    private double _viewW, _viewH;
     
     // The Focus Effect
-    private static Effect  _focEff;
+    private static Effect _focusEffect;
     
     // The Focus ViewEffect
-    private static ViewEffect  _focVEff;
-    
-    // The Focused color
-    public static Color  FOCUSED_COLOR = Color.get("#039ed3");
+    private static ViewEffectPainter _focusEffectPainter;
     
     /**
-     * Creates a ViewEffect for a given view and effect.
+     * Constructor for a given view and effect.
      */
-    public ViewEffect(View aView, Effect anEff)
+    public ViewEffectPainter(View aView, Effect anEff)
     {
         _view = aView;
-        _eff = anEff;
+        _effect = anEff;
     }
 
     /**
@@ -57,22 +57,23 @@ class ViewEffect {
     /**
      * Returns whether cache is dirty.
      */
-    boolean isCacheValid()
+    private boolean isCacheValid()
     {
         // If no cache, return false
-        if (_pdvr==null) return false;
+        if (_pdvr == null) return false;
 
         // If view size has changed, return false
         double viewW = _view.getWidth();
         double viewH = _view.getHeight();
-        if (viewW!= _viewW || viewH!= _viewH) return false;
+        if (viewW != _viewW || viewH != _viewH)
+            return false;
 
         // If simple shadow and size hasn't changed, return true
-        if (isShadow() && getShadow().isSimple())
+        if (_effect instanceof ShadowEffect shadowEffect && shadowEffect.isSimple())
             return true;
 
         // If there have been paint changes to view, return false
-        if (_view.isNeedsRepaint() || isNeedsRepaintDeep(_view))
+        if (_view.isNeedsRepaint() || _view instanceof ParentView parentView && parentView.isNeedsRepaintDeep())
             return false;
 
         // Return true since view hasn't changed size or needed repaint
@@ -82,7 +83,7 @@ class ViewEffect {
     /**
      * Updates the PainterDVR that draws the effect and provides caching.
      */
-    void updateCache()
+    private void updateCache()
     {
         if (isShadow())
             updateCacheShadow();
@@ -92,7 +93,7 @@ class ViewEffect {
     /**
      * Updates the PainterDVR that draws the effect and provides caching.
      */
-    void updateCacheGeneric()
+    private void updateCacheGeneric()
     {
         // Do normal painting to new PainterDVR
         PainterDVR pdvr = new PainterDVR();
@@ -101,12 +102,12 @@ class ViewEffect {
         // If painting hasn't changed since last cache, just return
         double viewW = _view.getWidth();
         double viewH = _view.getHeight();
-        if (viewW== _viewW && viewH== _viewH && pdvr.equals(_pdvrX))
+        if (viewW == _viewW && viewH == _viewH && pdvr.equals(_pdvrX))
             return;
 
         // Render and cache effect of painting to second PainterDVR
         _pdvr = new PainterDVR();
-        _eff.applyEffect(pdvr, _pdvr, _view.getBoundsLocal());
+        _effect.applyEffect(pdvr, _pdvr, _view.getBoundsLocal());
         _viewW = viewW;
         _viewH = viewH;
         _pdvrX = pdvr;
@@ -115,7 +116,7 @@ class ViewEffect {
     /**
      * Updates the PainterDVR that draws the effect and provides caching.
      */
-    void updateCacheShadow()
+    private void updateCacheShadow()
     {
         // Get new PainterDVR and shadow and view size
         PainterDVR pdvr = new PainterDVR();
@@ -125,8 +126,8 @@ class ViewEffect {
 
         // If simple, no shadow needed - otherwise if view covers bounds, just paint bounds, otherwise paint all
         if (!shadow.isSimple()) {
-            if (_view.getFill()!=null && _view.getBoundsShape() instanceof RectBase)
-                pdvr.fill(_view.getBoundsShape());
+            if (_view.getFill() != null && _view.getBoundsShape() instanceof RectBase boundsRect)
+                pdvr.fill(boundsRect);
             else paintAllView(pdvr);
         }
 
@@ -145,36 +146,26 @@ class ViewEffect {
     /**
      * Returns whether effect is shadow.
      */
-    public boolean isShadow()  { return _eff instanceof ShadowEffect; }
+    private boolean isShadow()  { return _effect instanceof ShadowEffect; }
 
     /**
      * Returns effect as shadow.
      */
-    public ShadowEffect getShadow()  { return (ShadowEffect)_eff; }
-
-    /**
-     * Returns whether view is parent.
-     */
-    public boolean isParentView()  { return _view instanceof ParentView; }
-
-    /**
-     * Returns view as parent.
-     */
-    public ParentView getParentView()  { return (ParentView)_view; }
+    private ShadowEffect getShadow()  { return (ShadowEffect) _effect; }
 
     /**
      * Paints the view to given painter with standard paintAll.
      */
-    protected void paintAllView(Painter aPntr)
+    private void paintAllView(Painter aPntr)
     {
         // Normal view paint
         _view.paintBack(aPntr);
         _view.paintFront(aPntr);
 
         // ParentView paint
-        if (isParentView()) { ParentView pv = getParentView();
-            pv.paintChildren(aPntr);
-            pv.paintAbove(aPntr);
+        if (_view instanceof ParentView parentView) {
+            parentView.paintChildren(aPntr);
+            parentView.paintAbove(aPntr);
         }
     }
 
@@ -183,22 +174,17 @@ class ViewEffect {
      */
     public static Effect getFocusEffect()
     {
-        if (_focEff!=null) return _focEff;
-        return _focEff = new ShadowEffect(5, FOCUSED_COLOR, 0, 0);
+        if (_focusEffect != null) return _focusEffect;
+        return _focusEffect = new ShadowEffect(5, ViewThemeUtils.getFocusColor(), 0, 0);
     }
 
     /**
-     * Returns the focus effect for given view.
+     * Returns the focus effect painter for given view.
      */
-    public static ViewEffect getFocusViewEffect(View aView)
+    public static ViewEffectPainter getFocusEffectPainterForView(View aView)
     {
-        if (_focVEff!=null && _focVEff._view==aView) return _focVEff;
-        return _focVEff = new ViewEffect(aView, getFocusEffect());
-    }
-
-    /** Convenience. */
-    private static final boolean isNeedsRepaintDeep(View aView)
-    {
-        return aView instanceof ParentView &&  ((ParentView)aView).isNeedsRepaintDeep();
+        if (_focusEffectPainter != null && _focusEffectPainter._view == aView)
+            return _focusEffectPainter;
+        return _focusEffectPainter = new ViewEffectPainter(aView, getFocusEffect());
     }
 }

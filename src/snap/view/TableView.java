@@ -722,15 +722,15 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     protected ImageBox getSelRectImage(Rect aRect)
     {
         // If already set and at right size, just return
-        if (_selImgBox!=null && _selImgBox.width==aRect.width && _selImgBox.height==aRect.height)
+        if (_selImgBox != null && _selImgBox.width == aRect.width && _selImgBox.height == aRect.height)
             return _selImgBox;
 
         // Create, set and return
         Shape shape = aRect.copyForBounds(0,0, aRect.width, aRect.height);
         ShapeView shpView = new ShapeView(shape);
         boolean focused = isFoc();
-        shpView.setBorder(focused ? ViewEffect.FOCUSED_COLOR.brighter() : Color.GRAY,1);
-        shpView.setEffect(focused ? ViewEffect.getFocusEffect() : new ShadowEffect(5, Color.GRAY, 0, 0));
+        shpView.setBorder(focused ? ViewThemeUtils.getFocusColor().brighter() : Color.GRAY,1);
+        shpView.setEffect(focused ? ViewEffectPainter.getFocusEffect() : new ShadowEffect(5, Color.GRAY, 0, 0));
         return _selImgBox = ViewUtils.getImageBoxForScale(shpView, -1);
     }
 
