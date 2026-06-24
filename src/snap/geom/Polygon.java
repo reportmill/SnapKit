@@ -298,24 +298,8 @@ public class Polygon extends Shape implements Cloneable {
     {
         // If not simple, get simples
         if (isSelfIntersecting()) {
-
-            // Complain
             System.err.println("Polygon.getConvexPolygonsWithMaxSideCount: Is self intersecting - shouldn't happen");
-
-            // Get simple polygons
-            Shape simpleShape = Shape.getNotSelfIntersectingShape(this);
-            PolygonPath polygonPath = new PolygonPath(simpleShape);
-            Polygon[] simplePolygons = polygonPath.getPolygons();
-
-            // Get convex polygons for simple polygons
-            List<Polygon> convexPolygons = new ArrayList<>();
-            for (Polygon polygon : simplePolygons) {
-                List<Polygon> convexPolygons2 = polygon.getConvexPolygonsWithMaxSideCount(aMax);
-                convexPolygons.addAll(convexPolygons2);
-            }
-
-            // Return
-            return convexPolygons;
+            return getConvexPolygonsWithMaxSideCount(this, aMax);
         }
 
         // Create list with clone of first poly
@@ -467,6 +451,17 @@ public class Polygon extends Shape implements Cloneable {
     public PathIter getPathIter(Transform aTrans)
     {
         return new PolygonIter(this, aTrans);
+    }
+
+    /**
+     * Returns a copy of this polygon transformed by given transform.
+     */
+    @Override
+    public Polygon copyForTransform(Transform aTrans)
+    {
+        Polygon copy = clone();
+        aTrans.transformXYArray(copy._pointArray, _pointCount);
+        return copy;
     }
 
     /**
