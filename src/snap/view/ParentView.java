@@ -379,7 +379,6 @@ public class ParentView extends View {
     /**
      * Paint children.
      */
-    @Override
     protected void paintChildren(Painter aPntr)
     {
         // Get painter clip
@@ -408,6 +407,11 @@ public class ParentView extends View {
             aPntr.restore();
         }
     }
+
+    /**
+     * Paints above children.
+     */
+    protected void paintAbove(Painter aPntr)  { }
 
     /**
      * Returns whether any children need repaint.

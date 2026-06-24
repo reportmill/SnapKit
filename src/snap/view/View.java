@@ -669,16 +669,6 @@ public class View extends PropObject {
     }
 
     /**
-     * Returns the combined opacity of this view and it's parents.
-     */
-    public double getOpacityAll()
-    {
-        double opacity = getOpacity();
-        ParentView par = getParent();
-        return par != null ? opacity * par.getOpacityAll() : opacity;
-    }
-
-    /**
      * Returns whether font has been explicitly set for this view.
      */
     public boolean isFontSet()  { return _style.isPropSet(View.Font_Prop); }
@@ -1367,34 +1357,22 @@ public class View extends PropObject {
     /**
      * Returns the root view.
      */
-    public RootView getRootView()
-    {
-        return _parent != null ? _parent.getRootView() : null;
-    }
+    public RootView getRootView()  { return _parent != null ? _parent.getRootView() : null; }
 
     /**
      * Returns the window.
      */
-    public WindowView getWindow()
-    {
-        return _parent != null ? _parent.getWindow() : null;
-    }
+    public WindowView getWindow()  { return _parent != null ? _parent.getWindow() : null; }
 
     /**
      * Returns the ViewUpdater.
      */
-    public ViewUpdater getUpdater()
-    {
-        return _parent != null ? _parent.getUpdater() : null;
-    }
+    public ViewUpdater getUpdater()  { return _parent != null ? _parent.getUpdater() : null; }
 
     /**
      * Returns the position this view would prefer to take when inside a pane.
      */
-    public Pos getLean()
-    {
-        return Pos.get(_leanX, _leanY);
-    }
+    public Pos getLean()  { return Pos.get(_leanX, _leanY); }
 
     /**
      * Sets the lean this view would prefer to take when inside a pane.
@@ -1956,10 +1934,10 @@ public class View extends PropObject {
         }
 
         // Set opacity
-        double opacity = getOpacityAll(), opacityOld = 0;
+        double opacity = getOpacity(), opacityOld = 0;
         if (opacity != 1) {
             opacityOld = aPntr.getOpacity();
-            aPntr.setOpacity(opacity);
+            aPntr.setOpacity(opacity * opacityOld);
         }
 
         // If view has effect or is focused, get effect painter and have it paint
@@ -1973,15 +1951,15 @@ public class View extends PropObject {
             paintFront(aPntr);
         }
 
+        // If parent view and no effect, paint children and paint above
+        if (this instanceof ParentView parentView && effectPainter == null) {
+            parentView.paintChildren(aPntr);
+            parentView.paintAbove(aPntr);
+        }
+
         // Restore opacity
         if (opacity != 1)
             aPntr.setOpacity(opacityOld);
-
-        // If no effect, paint children and paint above
-        if (effectPainter == null) {
-            paintChildren(aPntr);
-            paintAbove(aPntr);
-        }
 
         // If ClipToBounds, Restore original clip
         if (viewClip != null)
@@ -2023,16 +2001,6 @@ public class View extends PropObject {
         if (getClass() == View.class)
             paintRealClassName(aPntr);
     }
-
-    /**
-     * Paint children.
-     */
-    protected void paintChildren(Painter aPntr)  { }
-
-    /**
-     * Paints above children.
-     */
-    protected void paintAbove(Painter aPntr)  { }
 
     /**
      * Returns the tool tip text.
