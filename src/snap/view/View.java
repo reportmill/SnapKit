@@ -402,12 +402,12 @@ public class View extends PropObject {
     }
 
     /**
-     * Returns the bounds.
+     * Returns the simple bounds of this view in parent coords (ignores advanced transforms).
      */
-    public Rect getBounds()  { return new Rect(_x + _transX, _y + _transY, _width, _height); }
+    public Rect getBounds()  { return new Rect(_x, _y, _width, _height); }
 
     /**
-     * Sets the bounds.
+     * Sets the simple bounds of this view in parent coords (ignores advanced transforms).
      */
     public void setBounds(Rect aRect)
     {
@@ -415,7 +415,7 @@ public class View extends PropObject {
     }
 
     /**
-     * Sets the bounds.
+     * Sets the simple bounds of this view in parent coords (ignores advanced transforms).
      */
     public void setBounds(double aX, double aY, double aW, double aH)
     {
@@ -426,24 +426,25 @@ public class View extends PropObject {
     }
 
     /**
-     * Returns the bounds inside view.
+     * Returns the bounds inside this view (origin always at (0,0)).
      */
-    public Rect getBoundsLocal()
-    {
-        return new Rect(0, 0, getWidth(), getHeight());
-    }
+    public Rect getBoundsLocal()  { return new Rect(0, 0, getWidth(), getHeight()); }
 
     /**
      * Returns the bounds in parent coords.
      */
-    public Rect getBoundsParent()
+    public Rect getBoundsInParent()
     {
-        Shape boundsShapeInParent = getBoundsShapeParent();
+        if (isLocalToParentSimple())
+            return new Rect(_x + _transX, _y + _transY, _width, _height);
+        Shape boundsShape = getBoundsShape();
+        Shape boundsShapeInParent = localToParent(boundsShape);
         return boundsShapeInParent.getBounds();
     }
 
     /**
-     * Returns the bounds shape in view coords.
+     * Returns the bounds shape in this view coords. Returns round rect for non-zero border radius.
+     * Override to provide non-rectangular bounds.
      */
     public Shape getBoundsShape()
     {
@@ -454,15 +455,6 @@ public class View extends PropObject {
 
         // Return local bounds
         return getBoundsLocal();
-    }
-
-    /**
-     * Returns the bounds shape in parent coords.
-     */
-    public Shape getBoundsShapeParent()
-    {
-        Shape boundsShape = getBoundsShape();
-        return localToParent(boundsShape);
     }
 
     /**
