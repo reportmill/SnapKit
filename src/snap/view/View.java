@@ -388,20 +388,6 @@ public class View extends PropObject {
     }
 
     /**
-     * Returns the center point.
-     */
-    public Point getMidXY()  { return new Point(getMidX(), getMidY()); }
-
-    /**
-     * Sets the center point.
-     */
-    public void setMidXY(double aX, double aY)
-    {
-        setX(aX - _width / 2);
-        setY(aY - _height / 2);
-    }
-
-    /**
      * Returns the simple bounds of this view in parent coords (ignores advanced transforms).
      */
     public Rect getBounds()  { return new Rect(_x, _y, _width, _height); }
@@ -1131,15 +1117,6 @@ public class View extends PropObject {
         //if (!(0<=aX && aX<=getWidth() && 0<=aY && aY<=getHeight())) return false;
         //if (isPickBounds()) return getBoundsInside().contains(aX, aY);
         //return getBoundsShape().contains(aX, aY);
-    }
-
-    /**
-     * Returns whether view contains shape.
-     */
-    public boolean containsShape(Shape aShape)
-    {
-        Shape boundsShape = getBoundsShape();
-        return boundsShape.contains(aShape);
     }
 
     /**
@@ -2194,7 +2171,7 @@ public class View extends PropObject {
     }
 
     /**
-     * Called to repaint in parent for cases where transform might change.
+     * Called to repaint in parent for cases where transform or visibility might change.
      */
     protected void repaintInParent(Rect aRect)
     {
@@ -2204,56 +2181,37 @@ public class View extends PropObject {
             return;
 
         // Do normal repaint
-        if (aRect == null)
+        if (aRect == null) {
+            if (_repaintRect != null) // Calling with null rect is meant to be called before any other repaint
+                return;
             repaint(0, 0, getWidth(), getHeight());
+        }
         else repaint(aRect);
 
-        // Get expanded repaint rect and rect in parent, and have parent repaint
+        // Get repaint rect in parent, and have parent repaint
         Rect repaintRect = getRepaintRect();
-        if (repaintRect == null)
-            return;
-        Rect repaintRectInParent = localToParent(repaintRect).getBounds();
-        repaintRectInParent.snap();
-        repaintRectInParent.inset(-1); // Shouldn't need this unless someone paints out of bounds (lookin at U, Button)
-        parent.repaint(repaintRectInParent);
+        if (repaintRect != null) {
+            Rect repaintRectInParent = localToParent(repaintRect).getBounds();
+            repaintRectInParent.inset(-1); // Shouldn't need this unless someone paints out of bounds
+            parent.repaint(repaintRectInParent);
+        }
     }
 
     /**
-     * Returns the rect of view that has been registered for repaint, expanded for focus/effects.
+     * Returns the rect that has been registered for repaint (expanded for focus/effects, if applicable).
      */
-    public Rect getRepaintRect()
+    Rect getRepaintRect()
     {
         if (_repaintRect == null)
             return null;
-        return getRepaintRectExpanded(_repaintRect);
-    }
-
-    /**
-     * Returns the given repaint rect, expanded for focus/effects.
-     */
-    protected Rect getRepaintRectExpanded(Rect aRect)
-    {
-        // If focused, combine with focus bounds
-        Rect expandedRepaintRect = aRect;
-        if (isFocused() && isFocusPainted()) {
-            Effect focusEffect = ViewEffectPainter.getFocusEffect();
-            expandedRepaintRect = focusEffect.getBounds(expandedRepaintRect);
-        }
-
-        // If effect, combine effect bounds
-        else if (getEffect() != null) {
-            Effect effect = getEffect();
-            expandedRepaintRect = effect.getBounds(expandedRepaintRect);
-        }
-
-        // Return rect
-        return expandedRepaintRect;
+        Effect effect = isFocused() && isFocusPainted() ? ViewEffectPainter.getFocusEffect() : getEffect();
+        return effect != null ? effect.getBounds(_repaintRect) : _repaintRect;
     }
 
     /**
      * Returns whether needs repaint.
      */
-    public boolean isNeedsRepaint()  { return _repaintRect != null; }
+    boolean isNeedsRepaint()  { return _repaintRect != null; }
 
     /**
      * Returns whether this view is the RootView.FocusedView.
@@ -2511,7 +2469,7 @@ public class View extends PropObject {
     /**
      * Top level process event method (calls filters and handlers).
      */
-    protected void processEventAll(ViewEvent anEvent)
+    void processEventAll(ViewEvent anEvent)
     {
         // Forward to Filters - just return if consumed
         processEventFilters(anEvent);
@@ -2525,7 +2483,7 @@ public class View extends PropObject {
     /**
      * Process ViewEvent for View EventFilters.
      */
-    protected void processEventFilters(ViewEvent anEvent)
+    void processEventFilters(ViewEvent anEvent)
     {
         // Get event filters and event type
         EventAdapter eventAdapter = getEventAdapter();
@@ -2546,7 +2504,7 @@ public class View extends PropObject {
     /**
      * Process ViewEvent for View EventHandlers.
      */
-    protected void processEventHandlers(ViewEvent anEvent)
+    void processEventHandlers(ViewEvent anEvent)
     {
         // Process event
         processEvent(anEvent);
@@ -2598,7 +2556,7 @@ public class View extends PropObject {
     /**
      * Creates an Action event for given source event.
      */
-    protected ViewEvent createActionEvent(ViewEvent sourceEvent)
+    ViewEvent createActionEvent(ViewEvent sourceEvent)
     {
         ViewEvent actionEvent = ViewEvent.createEvent(this, null, Action, null);
         if (sourceEvent != null)

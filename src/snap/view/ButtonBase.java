@@ -305,7 +305,7 @@ public class ButtonBase extends ParentView {
      * Override to set SourceAction if set.
      */
     @Override
-    protected ViewEvent createActionEvent(ViewEvent sourceEvent)
+    ViewEvent createActionEvent(ViewEvent sourceEvent)
     {
         ViewEvent actionEvent = super.createActionEvent(sourceEvent);
         if (_sharedAction != null)

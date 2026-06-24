@@ -662,7 +662,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Override to catch KeyPress (tab or enter) for TableView or cells (when editing).
      */
-    protected void processEventFilters(ViewEvent anEvent)
+    @Override
+    void processEventFilters(ViewEvent anEvent)
     {
         // Do normal version
         super.processEventFilters(anEvent);
