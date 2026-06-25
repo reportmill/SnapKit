@@ -16,6 +16,7 @@ public class SharedAction {
     public static final String SelectAll_Action_Name = "SelectAll";
     public static final String Undo_Action_Name = "Undo";
     public static final String Redo_Action_Name = "Redo";
+    public static final String WindowClose_Action_Name = "WindowClose";
 
     // Common actions
     public static final SharedAction Cut_Action = new SharedAction(Cut_Action_Name);
@@ -25,6 +26,7 @@ public class SharedAction {
     public static final SharedAction SelectAll_Action = new SharedAction(SelectAll_Action_Name);
     public static final SharedAction Undo_Action = new SharedAction(Undo_Action_Name);
     public static final SharedAction Redo_Action = new SharedAction(Redo_Action_Name);
+    public static final SharedAction WindowClose_Action = new SharedAction(WindowClose_Action_Name);
 
     /**
      * Constructor.

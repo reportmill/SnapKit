@@ -362,12 +362,9 @@ public class SWWindowHpr extends WindowView.WindowHpr {
      */
     private void handleSwingWindowClosingEvent(WindowEvent anEvent)
     {
-        // If event type not used, just return
-        if (!_win.getEventAdapter().isEnabled(ViewEvent.Type.WinClose))
-            return;
-
-        // Create event and fire
-        ViewEvent event = ViewEvent.createEvent(_win, anEvent, ViewEvent.Type.WinClose, null);
+        // Create event and dispatch to window
+        ViewEvent event = ViewEvent.createEvent(_win, anEvent, ViewEvent.Type.Action, null);
+        ViewEvent.setEventSharedAction(event, SharedAction.WindowClose_Action);
         _win.dispatchEventToWindow(event);
 
         // If Window Close, update JFrame.DefaultCloseOperation

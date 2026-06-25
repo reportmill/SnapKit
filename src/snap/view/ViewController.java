@@ -67,7 +67,6 @@ public class ViewController extends PropObject {
     public static final ViewEvent.Type DragExit = ViewEvent.Type.DragExit;
     public static final ViewEvent.Type DragDrop = ViewEvent.Type.DragDrop;
     public static final ViewEvent.Type DragGesture = ViewEvent.Type.DragGesture;
-    public static final ViewEvent.Type WinClose = ViewEvent.Type.WinClose;
     public ViewEvent.Type[] KeyEvents = ViewEvent.Type.KeyEvents;
     public ViewEvent.Type[] MouseEvents = ViewEvent.Type.MouseEvents;
     public ViewEvent.Type[] DragEvents = ViewEvent.Type.DragEvents;

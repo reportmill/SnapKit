@@ -19,34 +19,34 @@ import snap.web.WebURL;
 public class WindowView extends ParentView {
     
     // The panel's window title
-    private String  _title;
+    private String _title;
     
     // The type
     private Type _type = Type.MAIN;
     
     // The root view
-    private RootView  _rootView;
+    private RootView _rootView;
 
     // The Active cursor
-    private Cursor  _activeCursor = Cursor.DEFAULT;
+    private Cursor _activeCursor = Cursor.DEFAULT;
 
     // Whether the panel's window is always on top
-    private boolean  _alwaysOnTop;
+    private boolean _alwaysOnTop;
     
     // The document file
-    private WebURL  _docURL;
+    private WebURL _docURL;
     
     // The window image
-    private Image  _image;
+    private Image _image;
     
     // Whether window hides on deativate
-    private boolean  _hideOnDeactivate;
+    private boolean _hideOnDeactivate;
     
     // Whether window is modal
-    private boolean  _modal = false;
+    private boolean _modal = false;
     
     // Whether window is resizable
-    private boolean  _resizable = true;
+    private boolean _resizable = true;
 
     // Whether to show window bar on top of window
     private boolean _showWindowBar;
@@ -55,19 +55,22 @@ public class WindowView extends ParentView {
     private WindowBar _windowBar;
     
     // Whether window is sized to maximum screen size
-    private boolean  _maximized;
+    private boolean _maximized;
     
     // The bounds for maximized window
-    private Rect  _maxBounds, _unmaxBounds;
+    private Rect _maxBounds, _unmaxBounds;
     
     // The Frame save name
-    private String  _saveName;
+    private String _saveName;
     
-    // Save frame size
-    private boolean  _saveSize;
+    // Whether to save frame size
+    private boolean _saveSize;
+
+    // The window close handler
+    private EventListener _closeHandler;
     
     // The focused view
-    private View  _focusedView;
+    private View _focusedView;
     
     // The previous focused view
     private View _lastFocusedView;
@@ -79,16 +82,16 @@ public class WindowView extends ParentView {
     private ViewUpdater  _updater;
     
     // The EventDispatcher
-    private EventDispatcher  _eventDispatcher = new EventDispatcher(this);
+    private EventDispatcher _eventDispatcher = new EventDispatcher(this);
     
     // The View that referenced on last show
-    private View  _clientView;
+    private View _clientView;
 
     // The native window object
     protected Object _native;
     
     // A list of all open windows
-    private static List <WindowView>  _openWins = new ArrayList<>();
+    private static List <WindowView> _openWins = new ArrayList<>();
     
     // Constants for window type
     public enum Type { PLAIN, MAIN, UTILITY }
@@ -275,6 +278,20 @@ public class WindowView extends ParentView {
         if (_saveSize)
             sb.append(' ').append(winW).append(' ').append(winH);
         Prefs.getDefaultPrefs().setValue(_saveName + "Loc", sb.toString());
+    }
+
+    /**
+     * Returns the window close handler.
+     */
+    public EventListener getCloseHandler()  { return _closeHandler; }
+
+    /**
+     * Sets the window close handler.
+     */
+    public void setCloseHandler(EventListener closeHandler)
+    {
+        if (closeHandler == getCloseHandler()) return;
+        _closeHandler = closeHandler;
     }
 
     /**

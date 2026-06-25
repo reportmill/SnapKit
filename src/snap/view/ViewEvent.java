@@ -659,6 +659,14 @@ public abstract class ViewEvent implements Cloneable {
     }
 
     /**
+     * Sets the shared action of given event.
+     */
+    public static void setEventSharedAction(ViewEvent anEvent, SharedAction sharedAction)
+    {
+        anEvent.setSharedAction(sharedAction);
+    }
+
+    /**
      * Types for events.
      */
     public enum Type {
@@ -679,10 +687,7 @@ public abstract class ViewEvent implements Cloneable {
         DragEnter, DragOver, DragExit, DragDrop,
 
         /** DragSource events. */
-        DragGesture, DragSourceEnter, DragSourceOver, DragSourceExit, DragSourceEnd,
-
-        /** Window close event. */
-        WinClose;
+        DragGesture, DragSourceEnter, DragSourceOver, DragSourceExit, DragSourceEnd;
 
         // Conveniences for common types
         public static final Type[] KeyEvents = { KeyPress, KeyRelease, KeyType };

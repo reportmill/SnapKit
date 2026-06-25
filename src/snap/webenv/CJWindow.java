@@ -285,10 +285,9 @@ public class CJWindow {
         _resizeLsnr = null;
 
         // Send WinClose event
-        if (_win.getEventAdapter().isEnabled(ViewEvent.Type.WinClose)) {
-            ViewEvent event = ViewEvent.createEvent(_win, null, ViewEvent.Type.WinClose, null);
-            _win.dispatchEventToWindow(event);
-        }
+        ViewEvent event = ViewEvent.createEvent(_win, null, ViewEvent.Type.Action, null);
+        ViewEvent.setEventSharedAction(event, SharedAction.WindowClose_Action);
+        _win.dispatchEventToWindow(event);
     }
 
     /**

@@ -407,9 +407,18 @@ public class EventDispatcher {
     public void dispatchActionEvent(ViewEvent anEvent)
     {
         // If not shared action, just send to view
-        if (anEvent.getSharedAction() == null) {
+        SharedAction sharedAction = anEvent.getSharedAction();
+        if (sharedAction == null) {
             View eventView = anEvent.getView();
             eventView.processEventAll(anEvent);
+            return;
+        }
+
+        // Handle WindowClose shared action
+        if (sharedAction == SharedAction.WindowClose_Action) {
+            EventListener closeHandler = _win.getCloseHandler();
+            if (closeHandler != null)
+                closeHandler.listenEvent(anEvent);
             return;
         }
 
