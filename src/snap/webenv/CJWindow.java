@@ -9,8 +9,6 @@ import snap.view.*;
 import snap.webapi.*;
 import snap.webapi.EventListener;
 
-import java.util.Objects;
-
 /**
  * A class to represent the WindowView in the browser page.
  */
@@ -287,7 +285,10 @@ public class CJWindow {
         _resizeLsnr = null;
 
         // Send WinClose event
-        sendWinEvent(ViewEvent.Type.WinClose);
+        if (_win.getEventAdapter().isEnabled(ViewEvent.Type.WinClose)) {
+            ViewEvent event = ViewEvent.createEvent(_win, null, ViewEvent.Type.WinClose, null);
+            _win.dispatchEventToWindow(event);
+        }
     }
 
     /**
@@ -481,19 +482,5 @@ public class CJWindow {
         if (aCursor == Cursor.SE_RESIZE) cstr = "se-resize";
         if (aCursor == Cursor.SW_RESIZE) cstr = "sw-resize";
         getCanvas().getStyle().setProperty("cursor", cstr);
-    }
-
-    /**
-     * Sends the given event.
-     */
-    private void sendWinEvent(ViewEvent.Type aType)
-    {
-        // If no listener for event type, just return
-        if (!_win.getEventAdapter().isEnabled(aType))
-            return;
-
-        // Create ViewEvent and dispatch
-        ViewEvent event = ViewEvent.createEvent(_win, null, aType, null);
-        _win.dispatchEventToWindow(event);
     }
 }

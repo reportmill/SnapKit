@@ -125,17 +125,6 @@ public abstract class ViewEvent implements Cloneable {
     protected void setParentEvent(ViewEvent anEvent)  { _parent = anEvent; }
 
     /**
-     * Sets the event that precipitated this event (optional).
-     */
-    public ViewEvent getRootEvent()
-    {
-        ViewEvent root = _parent;
-        while (root != null && root._parent != null)
-            root = root._parent;
-        return root;
-    }
-
-    /**
      * Returns the time the event was sent.
      */
     public long getWhen()
@@ -338,16 +327,6 @@ public abstract class ViewEvent implements Cloneable {
     public boolean isDragSourceEnd()  { return getType() == Type.DragSourceEnd; }
 
     /**
-     * Returns whether event is WinOpened.
-     */
-    public boolean isWinOpen()  { return getType() == Type.WinOpen; }
-
-    /**
-     * Returns whether event is WinClosing.
-     */
-    public boolean isWinClose()  { return getType() == Type.WinClose; }
-
-    /**
      * Returns the value encapsulated by the event widget.
      */
     public Object getValue()
@@ -407,19 +386,19 @@ public abstract class ViewEvent implements Cloneable {
     public Object getSelItem()  { return getView(Selectable.class).getSelItem(); }
 
     /** Returns whether shift key is down. */
-    public boolean isShiftDown()  { return false; }
+    public boolean isShiftDown()  { return ViewUtils.isShiftDown(); }
 
     /** Returns whether control key is down. */
-    public boolean isControlDown()  { return false; }
+    public boolean isControlDown()  { return ViewUtils.isControlDown(); }
 
     /** Returns whether alt key is down. */
-    public boolean isAltDown()  { return false; }
+    public boolean isAltDown()  { return ViewUtils.isAltDown(); }
 
     /** Returns whether "meta" key is down (the command key on Mac with no equivalent on Windows). */
-    public boolean isMetaDown()  { return false; }
+    public boolean isMetaDown()  { return ViewUtils.isMetaDown(); }
 
     /** Returns whether shortcut key is pressed. */
-    public boolean isShortcutDown()  { return false; }
+    public boolean isShortcutDown()  { return ViewUtils.isShortcutDown(); }
 
     /** Returns the key combo. */
     public KeyCombo getKeyCombo()
@@ -702,8 +681,8 @@ public abstract class ViewEvent implements Cloneable {
         /** DragSource events. */
         DragGesture, DragSourceEnter, DragSourceOver, DragSourceExit, DragSourceEnd,
 
-        /** Window events. */
-        WinOpen, WinClose;
+        /** Window close event. */
+        WinClose;
 
         // Conveniences for common types
         public static final Type[] KeyEvents = { KeyPress, KeyRelease, KeyType };

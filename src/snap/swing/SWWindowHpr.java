@@ -126,9 +126,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         _swingWindow.addWindowListener(new WindowAdapter() {
             public void windowActivated(WindowEvent anEvent)  { handleSwingWindowActiveChange(anEvent); }
             public void windowDeactivated(WindowEvent anEvent)  { handleSwingWindowActiveChange(anEvent); }
-            public void windowOpened(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinOpen); }
-            public void windowClosing(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinClose); }
-            public void windowClosed(WindowEvent anEvent)  { }
+            public void windowClosing(WindowEvent anEvent)  { handleSwingWindowClosingEvent(anEvent); }
         });
 
         // Sync Window bounds to WindowView
@@ -360,19 +358,20 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     private void setHeight(double aValue)  { _swingWindow.setSize(_swingWindow.getWidth(), (int) aValue); }
 
     /**
-     * Sends the given event.
+     * Called when swing window gets window closing event to forward to snap window.
      */
-    private void sendWinEvent(WindowEvent anEvent, ViewEvent.Type aType)
+    private void handleSwingWindowClosingEvent(WindowEvent anEvent)
     {
         // If event type not used, just return
-        if (!_win.getEventAdapter().isEnabled(aType)) return;
+        if (!_win.getEventAdapter().isEnabled(ViewEvent.Type.WinClose))
+            return;
 
         // Create event and fire
-        ViewEvent event = ViewEvent.createEvent(_win, anEvent, aType, null);
+        ViewEvent event = ViewEvent.createEvent(_win, anEvent, ViewEvent.Type.WinClose, null);
         _win.dispatchEventToWindow(event);
 
         // If Window Close, update JFrame.DefaultCloseOperation
-        if (aType == ViewEvent.Type.WinClose && _swingWindow instanceof JFrame jframe && event.isConsumed())
+        if (_swingWindow instanceof JFrame jframe && event.isConsumed())
             jframe.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     }
 
