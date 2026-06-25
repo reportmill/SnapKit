@@ -77,6 +77,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         super();
         setFocusable(true);
         setFocusWhenPressed(true);
+        setFocusKeysEnabled(false);
         enableEvents(MousePress, MouseDrag, MouseRelease, KeyPress);
 
         // Create/configure Columns SplitView and ScrollView and add
@@ -656,42 +657,59 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     protected void processEvent(ViewEvent anEvent)
     {
-        _selector.processEvent(anEvent);
+        // Handle MouseEvent
+        if (anEvent.isMouseEvent())
+            _selector.processMouseEvent(anEvent);
+
+        // Handle KeyPress
+        else if (anEvent.isKeyPress())
+            handleKeyPressEvent(anEvent);
     }
 
     /**
-     * Override to catch KeyPress (tab or enter) for TableView or cells (when editing).
+     * Handle key press event.
      */
-    @Override
-    void processEventFilters(ViewEvent anEvent)
+    private void handleKeyPressEvent(ViewEvent anEvent)
     {
-        // Do normal version
-        super.processEventFilters(anEvent);
+        // If shortcut key, just return
+        if (anEvent.isShortcutDown() || anEvent.isControlDown())
+            return;
 
-        // Handle KeyPress Tab
-        if (anEvent.isKeyPress()) {
-            int keyCode = anEvent.getKeyCode();
-            switch (keyCode) {
+        // Handle special keys
+        switch (anEvent.getKeyCode()) {
 
-                // Handle Tab
-                case KeyCode.TAB:
-                    if (anEvent.isShiftDown())
-                        selectLeft();
-                    else selectRight();
-                    fireActionEvent(anEvent);
-                    anEvent.consume();
-                    requestFocus();
-                    break;
+            // Handle arrows
+            case KeyCode.UP -> { selectUp(); fireActionEvent(anEvent); anEvent.consume(); }
+            case KeyCode.DOWN -> { selectDown(); fireActionEvent(anEvent); anEvent.consume(); }
+            case KeyCode.LEFT -> { selectLeft(); fireActionEvent(anEvent); anEvent.consume(); }
+            case KeyCode.RIGHT -> { selectRight(); fireActionEvent(anEvent); anEvent.consume(); }
 
-                // Handle Enter
-                case KeyCode.ENTER:
-                    if (anEvent.isShiftDown())
-                        selectUp();
-                    else selectDown();
-                    fireActionEvent(anEvent);
-                    anEvent.consume();
-                    requestFocus();
-                    break;
+            // Handle Tab
+            case KeyCode.TAB -> {
+                if (anEvent.isShiftDown())
+                    selectLeft();
+                else selectRight();
+                fireActionEvent(anEvent);
+                anEvent.consume();
+            }
+
+            // Handle Enter
+            case KeyCode.ENTER -> {
+                if (anEvent.isShiftDown())
+                    selectUp();
+                else selectDown();
+                fireActionEvent(anEvent);
+                anEvent.consume();
+            }
+
+            // Handle default
+            default -> {
+                char keyChar = anEvent.getKeyChar();
+                boolean printable = Character.isJavaIdentifierPart(keyChar); // Lame
+                if (isEditable() && printable) {
+                    ListCell<?> cell = getSelCell();
+                    editCell(cell);
+                }
             }
         }
     }

@@ -24,23 +24,9 @@ class TableViewSelector {
     /**
      * Constructor.
      */
-    public TableViewSelector(TableView<?> aTV)
+    public TableViewSelector(TableView<?> tableView)
     {
-        _table = aTV;
-    }
-
-    /**
-     * Handle events.
-     */
-    protected void processEvent(ViewEvent anEvent)
-    {
-        // Handle MouseEvent
-        if (anEvent.isMouseEvent())
-            processMouseEvent(anEvent);
-
-        // Handle KeyPress
-        else if (anEvent.isKeyPress())
-            processKeyEvent(anEvent);
+        _table = tableView;
     }
 
     /**
@@ -143,32 +129,5 @@ class TableViewSelector {
 
         // Otherwise, just fire action
         else _table.fireActionEvent(anEvent);
-    }
-
-    /**
-     * Handle events.
-     */
-    protected void processKeyEvent(ViewEvent anEvent)
-    {
-        // If shortcut key, just return
-        if (anEvent.isShortcutDown() || anEvent.isControlDown())
-            return;
-
-        // Handle special keys
-        int keyCode = anEvent.getKeyCode();
-        switch (keyCode) {
-            case KeyCode.UP: _table.selectUp(); _table.fireActionEvent(anEvent); anEvent.consume(); break;
-            case KeyCode.DOWN: _table.selectDown(); _table.fireActionEvent(anEvent); anEvent.consume(); break;
-            case KeyCode.LEFT: _table.selectLeft(); _table.fireActionEvent(anEvent); anEvent.consume(); break;
-            case KeyCode.RIGHT: _table.selectRight(); _table.fireActionEvent(anEvent); anEvent.consume(); break;
-            default: {
-                char keyChar = anEvent.getKeyChar();
-                boolean printable = Character.isJavaIdentifierPart(keyChar); // Lame
-                if (_table.isEditable() && printable) {
-                    ListCell<?> cell = _table.getSelCell();
-                    _table.editCell(cell);
-                }
-            }
-        }
     }
 }
