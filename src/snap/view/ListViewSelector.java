@@ -9,16 +9,13 @@ class ListViewSelector<T> {
     // This ListView
     private final ListView<T> _listView;
 
-    // Whether selection allowed on MouseDrag
-    protected boolean _dragSelect;
-
     // The Selection on MousePress
     private ListSel _mouseDownSel;
 
     // The new SelAnchor (index of MousePress)
-    protected int _newAnchor;
+    private int _newAnchor;
 
-    // Whether list previously wanted drag
+    // Whether list has drag gesture enabled
     private boolean _dragGestureEnabled;
 
     /**
@@ -34,28 +31,19 @@ class ListViewSelector<T> {
      */
     protected void processMouseEvent(ViewEvent anEvent)
     {
-        // Handle MousePress
-        if (anEvent.isMousePress())
-            mousePress(anEvent);
-
-        // Handle MouseDrag
-        else if (anEvent.isMouseDrag())
-            mouseDrag(anEvent);
-
-        // Handle MouseRelease
-        else if (anEvent.isMouseRelease())
-            mouseRelease(anEvent);
-
-        // Handle MouseExit
-        else if (anEvent.isMouseExit())
-            _listView.setTargetedIndex(-1);
-
-        // Handle MouseMove
-        else if (anEvent.isMouseMove() && _listView.isTargeting()) {
-            int index = _listView.getRowIndexForY(anEvent.getY());
-            if (index >= _listView.getItemCount())
-                index = -1;
-            _listView.setTargetedIndex(index);
+        switch (anEvent.getType()) {
+            case MousePress -> mousePress(anEvent);
+            case MouseDrag -> mouseDrag(anEvent);
+            case MouseRelease -> mouseRelease(anEvent);
+            case MouseExit -> _listView.setTargetedIndex(-1);
+            case MouseMove -> {
+                if (_listView.isTargeting()) {
+                    int index = _listView.getRowIndexForY(anEvent.getY());
+                    if (index >= _listView.getItemCount())
+                        index = -1;
+                    _listView.setTargetedIndex(index);
+                }
+            }
         }
 
         // Consume all mouse events
@@ -65,39 +53,28 @@ class ListViewSelector<T> {
     /**
      * MousePress.
      */
-    public void mousePress(ViewEvent anEvent)
+    private void mousePress(ViewEvent anEvent)
     {
-        // Cache MouseDown Selection
         _mouseDownSel = _listView.getSel();
-
-        // Get SelAnchor of MousePress
         _newAnchor = _listView.getRowIndexForY(anEvent.getY());
+        _dragGestureEnabled = _listView.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture);
 
-        // Set DragSelect
-        _dragSelect = !_listView.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture) || anEvent.getClickCount() > 1;
-
-        // Do basic Press or Drag selection
         mousePressOrDrag(anEvent);
-
-        // Set whether wants drag
-        _dragGestureEnabled = _dragSelect && _listView.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture);
-        if (_dragGestureEnabled)
-            _listView.getEventAdapter().setEnabled(ViewEvent.Type.DragGesture, false);
     }
 
     /**
      * MouseDrag.
      */
-    public void mouseDrag(ViewEvent anEvent)
+    private void mouseDrag(ViewEvent anEvent)
     {
-        if (_dragSelect)
+        if (!_dragGestureEnabled)
             mousePressOrDrag(anEvent);
     }
 
     /**
      * Basic Press or Drag selection.
      */
-    protected void mousePressOrDrag(ViewEvent anEvent)
+    private void mousePressOrDrag(ViewEvent anEvent)
     {
         // Get row-index/cell at mouse point (if no cell, just return)
         int newLead = _listView.getRowIndexForY(anEvent.getY());
@@ -127,17 +104,13 @@ class ListViewSelector<T> {
     /**
      * MouseRelease.
      */
-    public void mouseRelease(ViewEvent anEvent)
+    private void mouseRelease(ViewEvent anEvent)
     {
         // Fire action event
         _listView.fireActionEvent(anEvent);
 
-        // Re-instate DragGesture if needed
-        if (_dragGestureEnabled)
-            _listView.getEventAdapter().setEnabled(ViewEvent.Type.DragGesture, true);
-
         // Start editing if needed
-        if (anEvent.isMouseClick() && anEvent.getClickCount()>1 && _listView.isEditable()) {
+        if (anEvent.isMouseClick() && anEvent.getClickCount() > 1 && _listView.isEditable()) {
             ListCell<T> cell = _listView.getCellForY(anEvent.getY());
             if (cell != null)
                 _listView.editCell(cell);

@@ -7,19 +7,16 @@ import snap.util.ListSel2D;
 class TableViewSelector {
 
     // The TableView
-    private final TableView<?>  _table;
-
-    // Whether selection allowed on MouseDrag
-    protected boolean  _dragSelect;
+    private final TableView<?> _table;
 
     // The Selection on MousePress
-    private ListSel2D  _mouseDownSel;
+    private ListSel2D _mouseDownSel;
 
     // The new SelAnchor (index of MousePress)
-    protected int  _newAnchorX, _newAnchorY;
+    private int _newAnchorX, _newAnchorY;
 
-    // Whether list previously wanted drag
-    private boolean  _dragGestureEnabled;
+    // Whether table has drag gesture enabled
+    private boolean _dragGestureEnabled;
 
     /**
      * Constructor.
@@ -35,52 +32,40 @@ class TableViewSelector {
     protected void processMouseEvent(ViewEvent anEvent)
     {
         // Dispatch MousePress
-        if (anEvent.isMousePress())
-            mousePress(anEvent);
-        else if (anEvent.isMouseDrag())
-            mouseDrag(anEvent);
-        else if (anEvent.isMouseRelease())
-            mouseRelease(anEvent);
+        switch (anEvent.getType()) {
+            case MousePress -> mousePress(anEvent);
+            case MouseDrag -> mouseDrag(anEvent);
+            case MouseRelease -> mouseRelease(anEvent);
+        }
         anEvent.consume();
     }
 
     /**
      * MousePress.
      */
-    public void mousePress(ViewEvent anEvent)
+    private void mousePress(ViewEvent anEvent)
     {
-        // Cache MouseDown Selection
         _mouseDownSel = _table.getSel2D();
-
-        // Get SelAnchor of MousePress
         _newAnchorX = _table.getColIndexForX(anEvent.getX());
         _newAnchorY = _table.getRowIndexForY(anEvent.getY());
+        _dragGestureEnabled = _table.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture);
 
-        // Set DragSelect
-        _dragSelect = !_table.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture) || anEvent.getClickCount() > 1;
-
-        // Do basic Press or Drag selection
         mousePressOrDrag(anEvent);
-
-        // Set whether wants drag
-        _dragGestureEnabled = _dragSelect && _table.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture);
-        if (_dragGestureEnabled)
-            _table.getEventAdapter().setEnabled(ViewEvent.Type.DragGesture, false);
     }
 
     /**
      * MouseDrag.
      */
-    public void mouseDrag(ViewEvent anEvent)
+    private void mouseDrag(ViewEvent anEvent)
     {
-        if (_dragSelect)
+        if (!_dragGestureEnabled)
             mousePressOrDrag(anEvent);
     }
 
     /**
      * Basic Press or Drag selection.
      */
-    protected void mousePressOrDrag(ViewEvent anEvent)
+    private void mousePressOrDrag(ViewEvent anEvent)
     {
         // Get row-index/cell at mouse point (if no cell, just return)
         ListCell<?> cell = _table.getCellForXY(anEvent.getX(), anEvent.getY());
@@ -113,14 +98,10 @@ class TableViewSelector {
     /**
      * MouseRelease.
      */
-    public void mouseRelease(ViewEvent anEvent)
+    private void mouseRelease(ViewEvent anEvent)
     {
-        // Re-instate DragGesture if needed
-        if (_dragGestureEnabled)
-            _table.getEventAdapter().setEnabled(ViewEvent.Type.DragGesture, true);
-
         // Start editing if needed
-        if (anEvent.isMouseClick() && anEvent.getClickCount()>1 && _table.isEditable()) {
+        if (anEvent.isMouseClick() && anEvent.getClickCount() > 1 && _table.isEditable()) {
             ListCell<?> cell = _table.getCellForXY(anEvent.getX(), anEvent.getY());
             if (cell == null)
                 return;
