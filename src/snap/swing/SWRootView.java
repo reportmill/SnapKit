@@ -11,7 +11,7 @@ import snap.view.*;
 /**
  * A JComponent subclass to embed RootView.
  */
-public class SWRootView extends JComponent implements DragGestureListener {
+public class SWRootView extends JComponent {
 
     // The Window
     private WindowView _win;
@@ -48,7 +48,7 @@ public class SWRootView extends JComponent implements DragGestureListener {
 
         // Enable DragGestureRecognizer for RootView
         _dragSource = DragSource.getDefaultDragSource();
-        _dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY_OR_MOVE, this);
+        _dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY_OR_MOVE, this::handleDragGestureRecognized);
 
         // Create DropTargetListener
         DropTargetListener dropTargetListener = new DropTargetAdapter() {
@@ -204,7 +204,7 @@ public class SWRootView extends JComponent implements DragGestureListener {
     /**
      * Sends DragGestureEvent to RootView.
      */
-    public void dragGestureRecognized(DragGestureEvent anEvent)
+    private void handleDragGestureRecognized(DragGestureEvent anEvent)
     {
         ViewEvent event = ViewEvent.createEvent(_rootView, anEvent, ViewEvent.Type.DragGesture, null);
         _win.dispatchEventToWindow(event);
