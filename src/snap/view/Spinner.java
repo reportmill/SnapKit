@@ -114,7 +114,7 @@ public class Spinner <T> extends ParentView {
      */
     public void setMin(double aValue)
     {
-        if (aValue == _max) return;
+        if (aValue == _min) return;
         firePropChange(Min_Prop, _min, _min = aValue);
     }
 
