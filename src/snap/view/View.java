@@ -2482,7 +2482,7 @@ public class View extends PropObject {
 
         // Get event handlers and event type
         EventAdapter eventAdapter = getEventAdapter();
-        EventListener[] handlers = eventAdapter.getHandlers(); if (handlers.length == 0) return;
+        EventListener[] handlers = eventAdapter.getExternalHandlers(); if (handlers.length == 0) return;
         ViewEvent.Type eventType = anEvent.getType();
 
         // Iterate over handlers: If event type supported, send to handler

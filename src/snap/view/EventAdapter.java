@@ -33,7 +33,6 @@ public class EventAdapter {
     public EventAdapter()
     {
         super();
-        _externalHandlers = _handlers._listeners;
     }
 
     /**
@@ -44,7 +43,19 @@ public class EventAdapter {
     /**
      * Returns the handlers.
      */
-    public EventListener[] getHandlers()  { return _externalHandlers; }
+    private EventListener[] getHandlers()  { return _handlers._listeners; }
+
+    /**
+     * Returns the external handlers (handlers excluding view handler).
+     */
+    public EventListener[] getExternalHandlers()
+    {
+        if (_externalHandlers != null) return _externalHandlers;
+        _externalHandlers = getHandlers();
+        if (_externalHandlers.length > 0 && _externalHandlers[0] == _viewHandler)
+            _externalHandlers = Arrays.copyOfRange(_externalHandlers, 1, _externalHandlers.length);
+        return _externalHandlers;
+    }
 
     /**
      * Adds an event filter.
@@ -70,7 +81,7 @@ public class EventAdapter {
     {
         if (_handlers == EMPTY_LISTENER_LIST) _handlers = new EventListenerList();
         _handlers.addListener(aLsnr, theTypes);
-        resetExternalHandlers();
+        _externalHandlers = null;
     }
 
     /**
@@ -79,7 +90,7 @@ public class EventAdapter {
     public void removeHandler(EventListener aLsnr, Type ... theTypes)
     {
         _handlers.removeListener(aLsnr, theTypes);
-        resetExternalHandlers();
+        _externalHandlers = null;
     }
 
     /**
@@ -126,19 +137,6 @@ public class EventAdapter {
      * Returns whether given type is enabled for given filter.
      */
     public boolean isHandlerTypeEnabledForHandler(Type aType, EventListener aHandler)  { return _handlers.isTypeEnabledForListener(aType, aHandler); }
-
-    /**
-     * Resets external handlers.
-     */
-    private void resetExternalHandlers()
-    {
-        _externalHandlers = _handlers._listeners;
-        if (_externalHandlers.length > 0 && _externalHandlers[0] == _viewHandler) {
-            if (_externalHandlers.length == 1)
-                _externalHandlers = new EventListener[0];
-            else _externalHandlers = Arrays.copyOfRange(_externalHandlers, 1, _externalHandlers.length - 1);
-        }
-    }
 
     /**
      * This class manages a list of event listeners.
