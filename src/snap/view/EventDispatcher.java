@@ -191,7 +191,7 @@ public class EventDispatcher {
 
         // Forward event to View EventFilters (iterate from root to target)
         for (View view : targParents) {
-            if (view.getEventAdapter().isEnabled(anEvent.getType())) {
+            if (view.getEventAdapter().isTypeEnabled(anEvent.getType())) {
                 ViewEvent e2 = anEvent.copyForView(view);
                 view.processEventFilters(e2);
                 if (e2.isConsumed())
@@ -202,7 +202,7 @@ public class EventDispatcher {
         // Forward event to View EventHandlers: (iterate from target to root)
         for (int i = targParents.length - 1; i >= 0; i--) {
             View view = targParents[i];
-            if (view.getEventAdapter().isEnabled(anEvent.getType())) {
+            if (view.getEventAdapter().isTypeEnabled(anEvent.getType())) {
                 ViewEvent e2 = anEvent.copyForView(view);
                 view.processEventHandlers(e2);
                 if (e2.isConsumed())
@@ -249,7 +249,7 @@ public class EventDispatcher {
 
                 // If view accepts event, break
                 EventAdapter eventAdapter = view.getEventAdapter();
-                if (eventAdapter.isEnabled(MousePress) || eventAdapter.isEnabled(MouseRelease))
+                if (eventAdapter.isTypeEnabled(MousePress) || eventAdapter.isTypeEnabled(MouseRelease))
                     break;
             }
 
@@ -313,7 +313,7 @@ public class EventDispatcher {
             if (!ArrayUtils.containsId(deepParents, view)) {
                 _mouseOvers.remove(i);
                 _mouseOverView = i > 0 ? _mouseOvers.get(i - 1) : null;
-                if (!view.getEventAdapter().isEnabled(MouseExit)) continue;
+                if (!view.getEventAdapter().isTypeEnabled(MouseExit)) continue;
 
                 // Dispatch MouseExit event
                 ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseExit, null);
@@ -326,7 +326,7 @@ public class EventDispatcher {
             View view = deepParents[i];
             _mouseOvers.add(view);
             _mouseOverView = view;
-            if (!view.getEventAdapter().isEnabled(MouseEnter)) continue;
+            if (!view.getEventAdapter().isTypeEnabled(MouseEnter)) continue;
 
             // Dispatch MouseEnter event
             ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseEnter, null);
@@ -372,7 +372,7 @@ public class EventDispatcher {
 
         // Iterate down and see if any should filter
         for (View view : parentsArray) {
-            if (view.getEventAdapter().isEnabled(anEvent.getType())) {
+            if (view.getEventAdapter().isTypeEnabled(anEvent.getType())) {
                 ViewEvent e2 = anEvent.copyForView(view);
                 view.processEventFilters(e2);
                 if (e2.isConsumed())
@@ -392,7 +392,7 @@ public class EventDispatcher {
         // Iterate back up and see if any parents should handle
         for (int i = parentsArray.length - 1; i >= 0; i--) {
             View view = parentsArray[i];
-            if (view.getEventAdapter().isEnabled(anEvent.getType())) {
+            if (view.getEventAdapter().isTypeEnabled(anEvent.getType())) {
                 ViewEvent event = anEvent.copyForView(view);
                 view.processEventHandlers(event);
                 if (event.isConsumed())
@@ -439,7 +439,7 @@ public class EventDispatcher {
 
         // Iterate down and see if any should filter
         for (View view : parentsArray) {
-            if (view.getEventAdapter().isEnabled(anEvent.getType())) {
+            if (view.getEventAdapter().isTypeEnabled(anEvent.getType())) {
                 ViewEvent e2 = anEvent.copyForView(view);
                 view.processEventFilters(e2);
                 if (e2.isConsumed())
@@ -450,7 +450,7 @@ public class EventDispatcher {
         // Iterate back up and see if any parents should handle
         for (int i = parentsArray.length - 1; i >= 0; i--) {
             View view = parentsArray[i];
-            if (view.getEventAdapter().isEnabled(anEvent.getType())) {
+            if (view.getEventAdapter().isTypeEnabled(anEvent.getType())) {
                 ViewEvent event = anEvent.copyForView(view);
                 view.processEventHandlers(event);
                 if (event.isConsumed())
@@ -467,7 +467,7 @@ public class EventDispatcher {
         // Handle DragGesture
         if (anEvent.isDragGesture()) {
             for (View view = _mousePressView; view != null; view = view.getParent()) {
-                if (view.getEventAdapter().isEnabled(DragGesture)) {
+                if (view.getEventAdapter().isTypeEnabled(DragGesture)) {
                     _dragSourceView = view;
                     ViewEvent event = anEvent.copyForView(view);
                     view.processEventAll(event);
@@ -479,7 +479,7 @@ public class EventDispatcher {
 
         // Handle DragSource
         else if (_dragSourceView != null) {
-            if (_dragSourceView.getEventAdapter().isEnabled(anEvent.getType())) {
+            if (_dragSourceView.getEventAdapter().isTypeEnabled(anEvent.getType())) {
                 ViewEvent event = anEvent.copyForView(_dragSourceView);
                 _dragSourceView.processEventAll(event);
             }
@@ -502,7 +502,7 @@ public class EventDispatcher {
         for (View view = _dragOverView; view != null; view = view.getParent()) {
             if (!ArrayUtils.containsId(pars, view)) {
                 _dragOverView = view.getParent();
-                if (!view.getEventAdapter().isEnabled(DragExit))
+                if (!view.getEventAdapter().isTypeEnabled(DragExit))
                     continue;
                 ViewEvent e2 = anEvent.copyForView(view);
                 e2._type = DragExit;
@@ -516,7 +516,7 @@ public class EventDispatcher {
         for (int i = start; i < pars.length; i++) {
             View view = pars[i];
             _dragOverView = view;
-            if (!view.getEventAdapter().isEnabled(DragEnter))
+            if (!view.getEventAdapter().isTypeEnabled(DragEnter))
                 continue;
             ViewEvent e2 = anEvent.copyForView(view);
             e2._type = DragEnter;
@@ -527,7 +527,7 @@ public class EventDispatcher {
         // Handle DragOver, DragDrop
         if (anEvent.isDragOver() || anEvent.isDragDrop()) {
             for (View view = _dragOverView; view != null; view = view.getParent()) {
-                if (view.getEventAdapter().isEnabled(anEvent.getType())) {
+                if (view.getEventAdapter().isTypeEnabled(anEvent.getType())) {
                     ViewEvent e2 = anEvent.copyForView(view);
                     view.processEventAll(e2);
                     if (e2.isConsumed())

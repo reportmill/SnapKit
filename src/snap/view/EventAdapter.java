@@ -4,6 +4,7 @@
 package snap.view;
 import java.util.*;
 import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.view.ViewEvent.Type;
 
 /**
@@ -12,19 +13,19 @@ import snap.view.ViewEvent.Type;
 public class EventAdapter {
     
     // The event filters
-    protected EventListener[] _filters = EMPTY_LISTENER_ARRAY;
+    private EventListenerList _filters = EMPTY_LISTENER_LIST;
     
     // The event handlers
-    protected EventListener[] _handlers = EMPTY_LISTENER_ARRAY;
+    private EventListenerList _handlers = EMPTY_LISTENER_LIST;
 
-    // A map of listeners to types
-    protected Map <Object,Set<Type>> _types = new HashMap<>();
+    // The handler for view
+    private EventListener _viewHandler = e -> {};
 
-    // Bit set of enabled event types indexed by event Type.ordinal()
-    private BitSet _enabledTypesBitSet = new BitSet();
+    // Array of handlers minus view handler
+    private EventListener[] _externalHandlers;
 
-    // Shared empty list
-    private static final EventListener[] EMPTY_LISTENER_ARRAY = new EventListener[0];
+    // Shared empty listener list
+    private static final EventListenerList EMPTY_LISTENER_LIST = new EventListenerList();
 
     /**
      * Constructor.
@@ -32,122 +33,196 @@ public class EventAdapter {
     public EventAdapter()
     {
         super();
+        _externalHandlers = _handlers._listeners;
     }
+
+    /**
+     * Returns the filters.
+     */
+    public EventListener[] getFilters()  { return _filters._listeners; }
+
+    /**
+     * Returns the handlers.
+     */
+    public EventListener[] getHandlers()  { return _externalHandlers; }
 
     /**
      * Adds an event filter.
      */
-    public void addFilter(EventListener aLsnr, ViewEvent.Type ... theTypes)
+    public void addFilter(EventListener aLsnr, Type ... theTypes)
     {
-        _filters = ArrayUtils.addId(_filters, aLsnr);
-        enableEvents(aLsnr, theTypes);
+        if (_filters == EMPTY_LISTENER_LIST) _filters = new EventListenerList();
+        _filters.addListener(aLsnr, theTypes);
     }
 
     /**
      * Removes an event filter.
      */
-    public void removeFilter(EventListener aLsnr, ViewEvent.Type ... theTypes)
+    public void removeFilter(EventListener aLsnr, Type ... theTypes)
     {
-        disableEvents(aLsnr, theTypes);
-        if (_types.get(aLsnr) == null)
-            _filters = ArrayUtils.remove(_filters, aLsnr);
+        _filters.removeListener(aLsnr, theTypes);
     }
 
     /**
      * Adds an event handler.
      */
-    public void addHandler(EventListener aLsnr, ViewEvent.Type ... theTypes)
+    public void addHandler(EventListener aLsnr, Type ... theTypes)
     {
-        _handlers = ArrayUtils.addId(_handlers, aLsnr);
-        enableEvents(aLsnr, theTypes);
+        if (_handlers == EMPTY_LISTENER_LIST) _handlers = new EventListenerList();
+        _handlers.addListener(aLsnr, theTypes);
+        resetExternalHandlers();
     }
 
     /**
      * Removes an event handler.
      */
-    public void removeHandler(EventListener aLsnr, ViewEvent.Type ... theTypes)
+    public void removeHandler(EventListener aLsnr, Type ... theTypes)
     {
-        disableEvents(aLsnr, theTypes);
-        if (_types.get(aLsnr) == null)
-            _handlers = ArrayUtils.remove(_handlers, aLsnr);
+        _handlers.removeListener(aLsnr, theTypes);
+        resetExternalHandlers();
     }
 
     /**
      * Called to register types for a listener.
      */
-    public void enableEvents(Object aLsnr, Type ... theTypes)
+    public void enableEvents(Type ... theTypes)
     {
-        // Get Types for Listener
-        Set<Type> eventTypes = _types.get(aLsnr);
-        if (eventTypes == null)
-            _types.put(aLsnr, eventTypes = new HashSet<>());
+        // Make sure view handler is always first
+        if (_handlers._listeners.length > 0 && _handlers._listeners[0] != _viewHandler)
+            _handlers._listeners = ArrayUtils.addId(_handlers._listeners, _viewHandler, 0);
 
-        // Add new types and enable
-        Collections.addAll(eventTypes, theTypes);
-        for (Type eventType : theTypes)
-            setEnabled(eventType, true);
+        addHandler(_viewHandler, theTypes);
     }
 
     /**
      * Called to unregister types for a listener.
      */
-    public void disableEvents(Object aLsnr, Type ... theTypes)
+    public void disableEvents(Type ... theTypes)
     {
-        // Update types for given Listener removed types
-        Set<Type> eventTypes = _types.get(aLsnr);
-        if (eventTypes == null)
-            return;
-
-        // Update types from given types
-        if (theTypes == null || theTypes.length == 0)
-            eventTypes.clear();
-        else for (Type t : theTypes)
-            eventTypes.remove(t);
-
-        // If empty, remove types for listener
-        if (eventTypes.isEmpty())
-            _types.remove(aLsnr);
-
-        // Reset enabled types
-        resetEnabledTypes();
+        removeHandler(_viewHandler, theTypes);
     }
 
     /**
      * Returns whether given type is enabled.
      */
-    public boolean isEnabled(Type aType)
-    {
-        return _enabledTypesBitSet.get(aType.ordinal());
-    }
+    public boolean isTypeEnabled(Type aType)  { return isFilterTypeEnabled(aType) || isHandlerTypeEnabled(aType); }
 
     /**
-     * Sets whether a given type is enabled.
+     * Returns whether given type is enabled for any filter.
      */
-    public void setEnabled(Type aType, boolean aValue)
-    {
-        if (isEnabled(aType) == aValue) return;
-        _enabledTypesBitSet.set(aType.ordinal(), aValue);
-    }
+    public boolean isFilterTypeEnabled(Type aType)  { return _filters.isTypeEnabled(aType); }
 
     /**
-     * Resets the enabled types.
+     * Returns whether given type is enabled for given filter.
      */
-    private void resetEnabledTypes()
+    public boolean isFilterTypeEnabledForFilter(Type aType, EventListener aFilter)  { return _filters.isTypeEnabledForListener(aType, aFilter); }
+
+    /**
+     * Returns whether given type is enabled for any filter.
+     */
+    public boolean isHandlerTypeEnabled(Type aType)  { return _handlers.isTypeEnabled(aType); }
+
+    /**
+     * Returns whether given type is enabled for given filter.
+     */
+    public boolean isHandlerTypeEnabledForHandler(Type aType, EventListener aHandler)  { return _handlers.isTypeEnabledForListener(aType, aHandler); }
+
+    /**
+     * Resets external handlers.
+     */
+    private void resetExternalHandlers()
     {
-        _enabledTypesBitSet.clear();
-        for (Map.Entry <Object,Set<Type>> entry : _types.entrySet()) {
-            Set<Type> enabledTypes = entry.getValue();
-            enabledTypes.forEach(type -> setEnabled(type, true));
+        _externalHandlers = _handlers._listeners;
+        if (_externalHandlers.length > 0 && _externalHandlers[0] == _viewHandler) {
+            if (_externalHandlers.length == 1)
+                _externalHandlers = new EventListener[0];
+            else _externalHandlers = Arrays.copyOfRange(_externalHandlers, 1, _externalHandlers.length - 1);
         }
     }
 
     /**
-     * Clears the adapter.
+     * This class manages a list of event listeners.
      */
-    public void clear()
-    {
-        _types.clear();
-        _filters = _handlers = EMPTY_LISTENER_ARRAY;
-        _enabledTypesBitSet.clear();
+    private static class EventListenerList {
+
+        // The event filters
+        protected EventListener[] _listeners = EMPTY_LISTENER_ARRAY;
+
+        // A map of listeners to types
+        protected Map <Object,Set<Type>> _listenerTypes = new HashMap<>();
+
+        // Bit set of enabled event types indexed by event Type.ordinal()
+        private BitSet _enabledTypesBitSet = new BitSet();
+
+        // Shared empty list
+        private static final EventListener[] EMPTY_LISTENER_ARRAY = new EventListener[0];
+
+        /**
+         * Constructor.
+         */
+        public EventListenerList()
+        {
+            super();
+        }
+
+        /**
+         * Adds a given event listener for given types.
+         */
+        public void addListener(EventListener aLsnr, ViewEvent.Type ... theTypes)
+        {
+            _listeners = ArrayUtils.addId(_listeners, aLsnr);
+
+            // Add new types and enable
+            Set<Type> eventTypes = _listenerTypes.computeIfAbsent(aLsnr, k -> new HashSet<>());
+            for (Type eventType : theTypes) {
+                eventTypes.add(eventType);
+                _enabledTypesBitSet.set(eventType.ordinal(), true);
+            }
+        }
+
+        /**
+         * Removes given event listener.
+         */
+        public void removeListener(EventListener aLsnr, ViewEvent.Type ... theTypes)
+        {
+            disableEvents(aLsnr, theTypes);
+            if (_listenerTypes.get(aLsnr) == null)
+                _listeners = ArrayUtils.remove(_listeners, aLsnr);
+        }
+
+        /**
+         * Called to unregister types for a listener.
+         */
+        private void disableEvents(Object aLsnr, Type ... theTypes)
+        {
+            // Update types from given types
+            Set<Type> eventTypes = _listenerTypes.computeIfAbsent(aLsnr, k -> new HashSet<>());
+            for (Type eventType : theTypes)
+                eventTypes.remove(eventType);
+
+            // If empty, remove types for listener
+            if (eventTypes.isEmpty())
+                _listenerTypes.remove(aLsnr);
+
+            // Reset enabled types
+            for (Type eventType : theTypes) {
+                boolean enabled = ListUtils.hasMatch(_listenerTypes.values(), set -> set.contains(eventType));
+                _enabledTypesBitSet.set(eventType.ordinal(), enabled);
+            }
+        }
+
+        /**
+         * Returns whether given type is enabled.
+         */
+        public boolean isTypeEnabled(Type aType)  { return _enabledTypesBitSet.get(aType.ordinal()); }
+
+        /**
+         * Returns whether given type is enabled for given listener.
+         */
+        public boolean isTypeEnabledForListener(Type aType, EventListener aLsnr)
+        {
+            Set<Type> listenerTypes = _listenerTypes.get(aLsnr);
+            return listenerTypes != null && listenerTypes.contains(aType);
+        }
     }
 }

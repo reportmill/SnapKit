@@ -48,7 +48,7 @@ class TableViewSelector {
         _mouseDownSel = _table.getSel2D();
         _newAnchorX = _table.getColIndexForX(anEvent.getX());
         _newAnchorY = _table.getRowIndexForY(anEvent.getY());
-        _dragGestureEnabled = _table.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture);
+        _dragGestureEnabled = _table.getEventAdapter().isTypeEnabled(ViewEvent.Type.DragGesture);
 
         mousePressOrDrag(anEvent);
     }

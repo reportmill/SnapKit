@@ -2386,7 +2386,7 @@ public class View extends PropObject {
     protected void enableEvents(ViewEvent.Type... theTypes)
     {
         EventAdapter eventAdapter = getEventAdapter();
-        eventAdapter.enableEvents(this, theTypes);
+        eventAdapter.enableEvents(theTypes);
     }
 
     /**
@@ -2395,7 +2395,7 @@ public class View extends PropObject {
     protected void disableEvents(ViewEvent.Type... theTypes)
     {
         EventAdapter eventAdapter = getEventAdapter();
-        eventAdapter.disableEvents(this, theTypes);
+        eventAdapter.disableEvents(theTypes);
     }
 
     /**
@@ -2455,13 +2455,12 @@ public class View extends PropObject {
     {
         // Get event filters and event type
         EventAdapter eventAdapter = getEventAdapter();
-        EventListener[] filters = eventAdapter._filters; if (filters.length == 0) return;
+        EventListener[] filters = eventAdapter.getFilters(); if (filters.length == 0) return;
         ViewEvent.Type eventType = anEvent.getType();
 
         // Iterate over filters: If event type supported, send to filter
         for (EventListener lsnr : filters) {
-            Set<ViewEvent.Type> types = eventAdapter._types.get(lsnr);
-            if (types.contains(eventType)) {
+            if (eventAdapter.isFilterTypeEnabledForFilter(eventType, lsnr)) {
                 lsnr.listenEvent(anEvent);
                 if (anEvent.isConsumed())
                     break;
@@ -2483,13 +2482,12 @@ public class View extends PropObject {
 
         // Get event handlers and event type
         EventAdapter eventAdapter = getEventAdapter();
-        EventListener[] handlers = eventAdapter._handlers; if (handlers.length == 0) return;
+        EventListener[] handlers = eventAdapter.getHandlers(); if (handlers.length == 0) return;
         ViewEvent.Type eventType = anEvent.getType();
 
         // Iterate over handlers: If event type supported, send to handler
         for (EventListener lsnr : handlers) {
-            Set<ViewEvent.Type> types = eventAdapter._types.get(lsnr);
-            if (types.contains(eventType))
+            if (eventAdapter.isHandlerTypeEnabledForHandler(eventType, lsnr))
                 lsnr.listenEvent(anEvent);
         }
     }
