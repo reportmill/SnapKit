@@ -98,20 +98,17 @@ public class EventAdapter {
      */
     public void enableEvents(Type ... theTypes)
     {
+        addHandler(_viewHandler, theTypes);
+
         // Make sure view handler is always first
         if (_handlers._listeners.length > 0 && _handlers._listeners[0] != _viewHandler)
-            _handlers._listeners = ArrayUtils.addId(_handlers._listeners, _viewHandler, 0);
-
-        addHandler(_viewHandler, theTypes);
+            _handlers._listeners = ArrayUtils.moveToFront(_handlers._listeners, _viewHandler);
     }
 
     /**
      * Called to unregister types for a listener.
      */
-    public void disableEvents(Type ... theTypes)
-    {
-        removeHandler(_viewHandler, theTypes);
-    }
+    public void disableEvents(Type ... theTypes)  { removeHandler(_viewHandler, theTypes); }
 
     /**
      * Returns whether given type is enabled.

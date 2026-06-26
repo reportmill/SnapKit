@@ -504,6 +504,8 @@ public class ListView <T> extends ParentView implements Selectable<T> {
 
         // Get selection rect. If empty, outset by 1
         int selIndex = getSelIndex();
+        if (selIndex < 0)
+            return;
         Rect scrollBounds = getItemBounds(selIndex);
         if (scrollBounds.isEmpty())
             scrollBounds.inset(-1,-2);
