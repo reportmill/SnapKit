@@ -183,19 +183,15 @@ public class EventAdapter {
          */
         public void removeListener(EventListener aLsnr, ViewEvent.Type ... theTypes)
         {
-            disableEvents(aLsnr, theTypes);
-            if (_listenerTypes.get(aLsnr) == null)
-                _listeners = ArrayUtils.remove(_listeners, aLsnr);
-        }
-
-        /**
-         * Called to unregister types for a listener.
-         */
-        private void disableEvents(Object aLsnr, Type ... theTypes)
-        {
             // Update types from given types
-            Set<Type> eventTypes = _listenerTypes.computeIfAbsent(aLsnr, k -> new HashSet<>());
-            for (Type eventType : theTypes)
+            Set<Type> eventTypes = _listenerTypes.get(aLsnr);
+            if (eventTypes == null)
+                return;
+            if (theTypes.length == 0) {
+                theTypes = eventTypes.toArray(new Type[0]);
+                eventTypes.clear();
+            }
+            else for (Type eventType : theTypes)
                 eventTypes.remove(eventType);
 
             // If empty, remove types for listener
@@ -207,6 +203,10 @@ public class EventAdapter {
                 boolean enabled = ListUtils.hasMatch(_listenerTypes.values(), set -> set.contains(eventType));
                 _enabledTypesBitSet.set(eventType.ordinal(), enabled);
             }
+
+            // If no listener types left, remove listener
+            if (_listenerTypes.get(aLsnr) == null)
+                _listeners = ArrayUtils.remove(_listeners, aLsnr);
         }
 
         /**
