@@ -27,8 +27,8 @@ public class GradientAxisPicker extends View {
     public GradientAxisPicker()
     {
         super();
-        enableEvents(MousePress, MouseDrag, MouseRelease);
         setBorder(Border.createLoweredBevelBorder());
+        addEventHandler(this::handleMouseEvent, MousePress, MouseDrag, MouseRelease);
     }
 
     /**
@@ -112,7 +112,7 @@ public class GradientAxisPicker extends View {
     /**
      * Process events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
         // Handle MousePressed
         if (anEvent.isMousePress()) {

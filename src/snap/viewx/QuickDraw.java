@@ -59,7 +59,7 @@ public class QuickDraw extends View {
         setBorderRadius(4);
         setFill(Color.WHITE);
         setShowGrid(true);
-        enableEvents(MouseMove, MouseExit);
+        addEventHandler(this::handleMouseEvent, MouseMove, MouseExit);
     }
 
     /**
@@ -260,12 +260,12 @@ public class QuickDraw extends View {
     }
 
     /**
-     * Process event.
+     * Handle mouse events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
         // Handle MouseEvent
-        if(anEvent.isMouseEvent() && isShowGrid()) {
+        if(isShowGrid()) {
 
             // Handle MouseMove
             if(anEvent.isMouseMove()) {

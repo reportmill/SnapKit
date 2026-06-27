@@ -59,8 +59,8 @@ public class GradientStopPicker extends ParentView {
     public GradientStopPicker()
     {
         super();
-        enableEvents(MousePress, MouseDrag, MouseMove);
-        enableEvents(DragEvents);
+        addEventHandler(this::handleMouseEvent, MousePress, MouseDrag, MouseMove);
+        addEventHandler(this::handleDragEvent, DragEvents);
     }
 
     /**
@@ -291,9 +291,9 @@ public class GradientStopPicker extends ParentView {
     }
 
     /**
-     * Handle events.
+     * Handle mouse events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
         // Handle MousePressed
         if(anEvent.isMousePress()) {    if(_stops==null) return;
@@ -335,20 +335,36 @@ public class GradientStopPicker extends ParentView {
             boolean in = _gradientRect.contains(anEvent.getPoint()) && (getKnobIndex(anEvent.getPoint())==-1);
             setCursor(in? _addStopCursor : null);
         }
+    }
 
+    /**
+     * Handle drag events.
+     */
+    private void handleDragEvent(ViewEvent anEvent)
+    {
         // Handle DragEnger
-        else if(anEvent.isDragEnter()) { Clipboard db = anEvent.getClipboard();
-            if(db.hasColor()) anEvent.acceptDrag();
+        if(anEvent.isDragEnter()) {
+            Clipboard db = anEvent.getClipboard();
+            if(db.hasColor())
+                anEvent.acceptDrag();
             //else dtde.rejectDrag();
         }
 
         // Handle DragOver
-        else if(anEvent.isDragOver()) { Clipboard db = anEvent.getClipboard();
-            if(db.hasColor()) { anEvent.acceptDrag(); _dragPoint = anEvent.getPoint(); repaint(); }
+        else if(anEvent.isDragOver()) {
+            Clipboard db = anEvent.getClipboard();
+            if(db.hasColor()) {
+                anEvent.acceptDrag();
+                _dragPoint = anEvent.getPoint();
+                repaint();
+            }
         }
 
         // Handle DragExit
-        else if(anEvent.isDragExit()) { _dragPoint = null; repaint(); }
+        else if(anEvent.isDragExit()) {
+            _dragPoint = null;
+            repaint();
+        }
 
         // Handle DragDrop
         else if(anEvent.isDragDrop()) {

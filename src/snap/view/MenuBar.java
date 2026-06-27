@@ -201,21 +201,21 @@ public class MenuBar extends ParentView {
     public static ColView createMenuBarView(MenuBar aMenuBar, View aView)
     {
         // Create ColView that makes given MenuBar FillWidth and given View fill extra height
-        ColView colView = new ColView();
-        colView.setFillWidth(true);
-        colView.addChild(aMenuBar);
-        colView.addChild(aView);
+        ColView menuBarView = new ColView();
+        menuBarView.setFillWidth(true);
+        menuBarView.addChild(aMenuBar);
+        menuBarView.addChild(aView);
         aView.setGrowHeight(true);
 
         // Add EventListener (filter) to intercept any KeyPress + ShortCut events and run by MenuBar
-        colView.addEventHandler(e -> menuBarViewContentDidKeyPress(aMenuBar, e), KeyPress);
-        return colView;
+        menuBarView.addEventHandler(e -> handleMenuBarViewKeyPress(aMenuBar, e), KeyPress);
+        return menuBarView;
     }
 
     /** Forwards KeyPress + ShortCut events to MenuBar. */
-    private static void menuBarViewContentDidKeyPress(MenuBar aMenuBar, ViewEvent anEvent)
+    private static void handleMenuBarViewKeyPress(MenuBar aMenuBar, ViewEvent anEvent)
     {
         if (anEvent.isShortcutDown())
-            ViewUtils.processEvent(aMenuBar, anEvent);
+            aMenuBar.processEvent(anEvent);
     }
 }

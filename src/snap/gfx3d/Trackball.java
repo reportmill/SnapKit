@@ -102,7 +102,7 @@ public class Trackball extends ParentView {
         _camera.setPrefGimbalRadius(_camera.getFocalLength());
 
         // Enable mouse/action events
-        enableEvents(MousePress, MouseDrag, MouseRelease);
+        addEventHandler(this::handleMouseEvent, MousePress, MouseDrag, MouseRelease);
         _mouseHandler = new MouseHandler(_camera);
     }
 
@@ -202,20 +202,20 @@ public class Trackball extends ParentView {
     /**
      * Handle events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
         if (anEvent.isMousePress())
-            mousePressed(anEvent);
+            handleMousePressEvent(anEvent);
         else if (anEvent.isMouseDrag())
-            mouseDragged(anEvent);
+            handleMouseDragEvent(anEvent);
         else if (anEvent.isMouseRelease())
-            mouseReleased(anEvent);
+            handleMouseReleaseEvent(anEvent);
     }
 
     /**
      * Handle mouse press.
      */
-    protected void mousePressed(ViewEvent anEvent)
+    private void handleMousePressEvent(ViewEvent anEvent)
     {
         double scale = 1; //getZoomFactor(); ???
         Point point = anEvent.getPoint().divide(scale);
@@ -244,7 +244,7 @@ public class Trackball extends ParentView {
     /**
      * Handle mouse drag.
      */
-    protected void mouseDragged(ViewEvent anEvent)
+    private void handleMouseDragEvent(ViewEvent anEvent)
     {
         // If
         if (_hitPart == HIT_COLLAR) {
@@ -268,7 +268,7 @@ public class Trackball extends ParentView {
     /**
      * Handle mouse release.
      */
-    protected void mouseReleased(ViewEvent anEvent)
+    private void handleMouseReleaseEvent(ViewEvent anEvent)
     {
         if (_hitPart == HIT_TRACKBALL) {
             _mouseHandler.processEvent(anEvent);

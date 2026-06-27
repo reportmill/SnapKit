@@ -68,7 +68,7 @@ public class CubeView extends View {
         addCube();
 
         // Enable events for rotations
-        enableEvents(MousePress, MouseDrag, MouseRelease, MouseMove, MouseExit);
+        addEventHandler(this::handleMouseEvent, MousePress, MouseDrag, MouseRelease, MouseMove, MouseExit);
         _mouseHandler = new MouseHandler(_camera);
     }
 
@@ -207,12 +207,12 @@ public class CubeView extends View {
     }
 
     /**
-     * Viewer method.
+     * Handle mouse events.
      */
-    public void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
         if (anEvent.isMouseMove())
-            processMouseMove(anEvent);
+            handleMouseMoveEvent(anEvent);
 
         // Handle MousePress, MouseDrag, MouseRelease, Scroll
         else {
@@ -232,7 +232,7 @@ public class CubeView extends View {
     /**
      * Handle MouseMove.
      */
-    private void processMouseMove(ViewEvent anEvent)
+    private void handleMouseMoveEvent(ViewEvent anEvent)
     {
         // Recalculate HitSide/HitPos and reset CubeShape
         Side3D hitSide = getSideAtViewXY(anEvent.getX(), anEvent.getY());

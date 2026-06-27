@@ -86,13 +86,13 @@ public class ShadowEffectTool extends StylerOwner {
         public OffsetPanel()
         {
             super();
-            enableEvents(MousePress, MouseDrag, MouseRelease);
+            addEventHandler(this::handleMouseEvent, MousePress, MouseDrag, MouseRelease);
         }
 
         /**
          * Handle Events.
          */
-        protected void processEvent(ViewEvent e)
+        private void handleMouseEvent(ViewEvent e)
         {
             // Handle MousePressed
             if (e.isMousePress()) {

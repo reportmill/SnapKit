@@ -62,10 +62,11 @@ public class StageView extends ChildView {
         setPrefSize(width, height);
         setFill(Color.WHITE);
         setClipToBounds(true);
-        enableEvents(MouseEvents);
-        enableEvents(KeyEvents);
         setFocusable(true);
         setFocusWhenPressed(true);
+
+        addEventHandler(this::handleMouseEvent, MouseEvents);
+        addEventHandler(this::handleKeyEvent, KeyEvents);
 
         // Get default image for class and set
         Image defaultClassImage = Game.getImageForClass(getClass());
@@ -304,34 +305,34 @@ public class StageView extends ChildView {
     }
 
     /**
-     * Process event.
+     * Handle mouse events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
-        // Handle MouseEvent
-        if (anEvent.isMouseEvent()) {
-            if (anEvent.isMousePress())
-                _mouseDown = anEvent;
-            else if (anEvent.isMouseRelease())
-                _mouseDown = null;
-            else if (anEvent.isMouseClick())
-                _mouseClicked = anEvent;
-            else if (anEvent.isMouseMove() && isShowCoords())
-                repaint(Rect.getRectForPoints(anEvent.getPoint(), new Point(_mouseX, _mouseY)).getInsetRect(-80, -25));
-            _mouseX = anEvent.getX();
-            _mouseY = anEvent.getY();
-        }
+        if (anEvent.isMousePress())
+            _mouseDown = anEvent;
+        else if (anEvent.isMouseRelease())
+            _mouseDown = null;
+        else if (anEvent.isMouseClick())
+            _mouseClicked = anEvent;
+        else if (anEvent.isMouseMove() && isShowCoords())
+            repaint(Rect.getRectForPoints(anEvent.getPoint(), new Point(_mouseX, _mouseY)).getInsetRect(-80, -25));
+        _mouseX = anEvent.getX();
+        _mouseY = anEvent.getY();
+    }
 
-        // Handle KeyEvent: Update KeyDowns and KeyClicks for event
-        else if (anEvent.isKeyEvent()) {
-            int keyCode = anEvent.getKeyCode();
-            if (anEvent.isKeyPress()) {
-                _keyDowns.add(keyCode);
-                _keyClicks.add(keyCode);
-            }
-            else if (anEvent.isKeyRelease())
-                _keyDowns.remove(keyCode);
+    /**
+     * Handle key events: Update KeyDowns and KeyClicks for event.
+     */
+    protected void handleKeyEvent(ViewEvent anEvent)
+    {
+        int keyCode = anEvent.getKeyCode();
+        if (anEvent.isKeyPress()) {
+            _keyDowns.add(keyCode);
+            _keyClicks.add(keyCode);
         }
+        else if (anEvent.isKeyRelease())
+            _keyDowns.remove(keyCode);
     }
 
     /**

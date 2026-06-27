@@ -41,7 +41,7 @@ public class CameraView extends ParentView {
         _camera.addPropChangeListener(pce -> cameraDidPropChange(pce));
 
         // Enable events
-        enableEvents(MousePress, MouseDrag, MouseRelease, Scroll);
+        addEventHandler(_camera::processEvent, MousePress, MouseDrag, MouseRelease, Scroll);
     }
 
     /**
@@ -136,14 +136,6 @@ public class CameraView extends ParentView {
             aPntr.clipRect(0, 0, .1, .1);
             getCubeView().paintFront(aPntr);
         }
-    }
-
-    /**
-     * Viewer method.
-     */
-    public void processEvent(ViewEvent anEvent)
-    {
-        _camera.processEvent(anEvent);
     }
 
     /**
