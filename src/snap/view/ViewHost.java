@@ -97,32 +97,4 @@ public interface ViewHost {
         ViewHost host = getHost(aView);
         return indexOfGuest(host, aView);
     }
-
-    /**
-     * XML archival of ViewHost.Guests.
-     */
-    static void toXMLGuests(ViewHost aHost, XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Archive guests
-        for (int i=0, iMax=aHost.getGuestCount(); i<iMax; i++) {
-            View child = aHost.getGuest(i);
-            anElement.add(anArchiver.toXML(child, aHost));
-        }
-    }
-
-    /**
-     * XML unarchival of ViewHost.Guests.
-     */
-    static void fromXMLGuests(ViewHost aHost, XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Iterate over child elements and unarchive as child views
-        for (int i=0, iMax=anElement.size(); i<iMax; i++) {
-            XMLElement childXML = anElement.get(i);
-            Class cls = anArchiver.getClassForName(childXML.getName());
-            if (cls != null && View.class.isAssignableFrom(cls)) {
-                View view = (View) anArchiver.fromXML(childXML, aHost);
-                aHost.addGuest(view);
-            }
-        }
-    }
 }
