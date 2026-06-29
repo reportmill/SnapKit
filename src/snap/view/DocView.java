@@ -154,38 +154,4 @@ public class DocView extends ParentView {
      */
     @Override
     protected ViewLayout getViewLayoutImpl()  { return new BoxViewLayout(this, getPage(), false, false); }
-
-    /**
-     * XML archival deep.
-     */
-    public void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Archive children
-        View child = getPage(); if(child==null) return;
-        XMLElement cxml = anArchiver.toXML(child, this);
-        cxml.removeAttribute("x");
-        cxml.removeAttribute("y");
-        cxml.removeAttribute("asize");
-        anElement.add(cxml);
-    }
-
-    /**
-     * XML unarchival for shape children.
-     */
-    protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Iterate over child elements and unarchive shapes
-        for(int i=0, iMax=anElement.size(); i<iMax; i++) { XMLElement childXML = anElement.get(i);
-            Class childClass = anArchiver.getClassForName(childXML.getName());
-            if(childClass!=null && PageView.class.isAssignableFrom(childClass)) {
-                PageView child = (PageView)anArchiver.fromXML(childXML, this);
-                addPage(child);
-            }
-        }
-
-        // Size document to page
-        View page = getPage();
-        if(page!=null && getWidth()==0 && getHeight()==0)
-            setSize(page.getWidth(),page.getHeight());
-    }
 }

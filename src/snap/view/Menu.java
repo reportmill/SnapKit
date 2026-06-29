@@ -313,29 +313,4 @@ public class Menu extends MenuItem {
         // Do normal version
         else super.setPropValue(aPropName, aValue);
     }
-
-    /**
-     * XML archival of children.
-     */
-    protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        for (MenuItem child : getMenuItems())
-            anElement.add(anArchiver.toXML(child, this));
-    }
-
-    /**
-     * XML unarchival for shape children.
-     */
-    protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Iterate over child elements and unarchive MenuItems
-        for (int i = 0, iMax = anElement.size(); i < iMax; i++) {
-            XMLElement childXML = anElement.get(i);
-            Class<?> cls = anArchiver.getClassForName(childXML.getName());
-            if (cls != null && MenuItem.class.isAssignableFrom(cls)) {
-                MenuItem mi = (MenuItem) anArchiver.fromXML(childXML, this);
-                addItem(mi);
-            }
-        }
-    }
 }

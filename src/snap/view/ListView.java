@@ -835,7 +835,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Called when list gets KeyPress event.
      */
-    private void handleKeyPressEvent(ViewEvent anEvent)
+    protected void handleKeyPressEvent(ViewEvent anEvent)
     {
         int keyCode = anEvent.getKeyCode();
         switch (keyCode) {
