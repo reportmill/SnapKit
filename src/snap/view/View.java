@@ -2390,15 +2390,6 @@ public class View extends PropObject {
     }
 
     /**
-     * Sets an array of enabled events.
-     */
-    protected void disableEvents(ViewEvent.Type... theTypes)
-    {
-        EventAdapter eventAdapter = getEventAdapter();
-        eventAdapter.disableEvents(theTypes);
-    }
-
-    /**
      * Adds an event filter.
      */
     public void addEventFilter(EventListener aLsnr, ViewEvent.Type... theTypes)

@@ -40,7 +40,7 @@ public class TableCol <T> extends ListView <T> {
         _header.setPadding(4,4,4,4);
 
         // Events
-        disableEvents(MousePress, MouseDrag, MouseRelease);
+        removeEventHandler(_mouseEventHandler);
     }
 
     /**

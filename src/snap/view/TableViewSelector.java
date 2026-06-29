@@ -27,9 +27,9 @@ class TableViewSelector {
     }
 
     /**
-     * Process events.
+     * Handle mouse events.
      */
-    protected void processMouseEvent(ViewEvent anEvent)
+    protected void handleMouseEvent(ViewEvent anEvent)
     {
         // Dispatch MousePress
         switch (anEvent.getType()) {

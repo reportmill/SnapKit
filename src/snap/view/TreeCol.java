@@ -92,13 +92,14 @@ public class TreeCol <T> extends ListView <T> {
     /**
      * Override to set TreeView.SelCol.
      */
-    protected void processEvent(ViewEvent anEvent)
+    @Override
+    protected void handleMouseEvent(ViewEvent anEvent)
     {
         if (anEvent.isMousePress()) {
             int colIndex = ListUtils.indexOfId(getTree().getCols(), this);
             getTree().setSelCol(colIndex);
         }
-        super.processEvent(anEvent);
+        super.handleMouseEvent(anEvent);
     }
 
     /**

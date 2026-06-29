@@ -43,6 +43,7 @@ public class DrawerView extends ParentView {
     private Rect  _minBounds;
 
     // Some drag vars
+    private EventListener _mouseEventHandler;
     private boolean  _mouseDragged;
     private Point  _mouseDownPnt;
     private double  _mouseDownY, _mouseDownW, _mouseDownH;
@@ -146,7 +147,8 @@ public class DrawerView extends ParentView {
             _contentBox.setBorder(Border.createLoweredBevelBorder());
 
             // Enable events
-            enableEvents(MousePress, MouseDrag, MouseRelease, MouseEnter, MouseExit, MouseMove);
+            _mouseEventHandler = this::handleMouseEvent;
+            addEventHandler(_mouseEventHandler, MouseEvents);
         }
 
         // Configure plain
@@ -160,7 +162,8 @@ public class DrawerView extends ParentView {
             removeChild(getCloseBox());
             _contentBox.setPadding(Insets.EMPTY);
             _contentBox.setBorder(null);
-            disableEvents(MousePress, MouseDrag, MouseRelease, MouseEnter, MouseExit, MouseMove);
+            removeEventHandler(_mouseEventHandler);
+            _mouseEventHandler = null;
         }
     }
 
@@ -463,75 +466,74 @@ public class DrawerView extends ParentView {
     /**
      * ProcessEvent.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
-        // Handle MousePress
-        if (anEvent.isMousePress()) {
+        switch (anEvent.getType()) {
 
-            // Clear MouseDownPoint and if not in margin, just bail
-            _mouseDownPnt = null;
-            if (!inMargin(anEvent))
-                return;
+            // Handle MousePress
+            case MousePress -> {
 
-            // Set MouseDown vars
-            _mouseDownPnt = anEvent.getPoint(getParent());
-            _mouseDownY = getMargin().top;
-            _mouseDownW = getWidth();
-            _mouseDownH = getHeight();
-            _mouseDragged = false;
-            _resizingDrawer = inResizeCorner(anEvent);
-            _resizingDrawerTop = inResizeTopCorner(anEvent);
-        }
+                // Clear MouseDownPoint and if not in margin, just bail
+                _mouseDownPnt = null;
+                if (!inMargin(anEvent))
+                    return;
 
-        // Handle MouseDrag
-        else if (anEvent.isMouseDrag()) {
-
-            // If no MouseDownPoint, bail
-            if (_mouseDownPnt == null) return;
-
-            // Get new point and change
-            Point pnt = anEvent.getPoint(getParent());
-            double dx = pnt.x - _mouseDownPnt.x;
-            double dy = pnt.y - _mouseDownPnt.y;
-
-            // Either resize or reposition
-            if (_resizingDrawer)
-                setDrawerSize(_mouseDownW - dx, _mouseDownH + dy);
-            else if (_resizingDrawerTop) {
-                setDrawerSize(_mouseDownW - dx, _mouseDownH - dy);
-                setDrawerY(_mouseDownY + dy);
+                // Set MouseDown vars
+                _mouseDownPnt = anEvent.getPoint(getParent());
+                _mouseDownY = getMargin().top;
+                _mouseDownW = getWidth();
+                _mouseDownH = getHeight();
+                _mouseDragged = false;
+                _resizingDrawer = inResizeCorner(anEvent);
+                _resizingDrawerTop = inResizeTopCorner(anEvent);
             }
-            else setDrawerY(Math.max(_mouseDownY + dy, 0));
 
-            // If significant change, set MouseDragged
-            if (Math.abs(dx) > 2 || Math.abs(dy) > 2)
-                _mouseDragged = true;
+            // Handle MouseDrag
+            case MouseDrag -> {
+
+                // If no MouseDownPoint, bail
+                if (_mouseDownPnt == null) return;
+
+                // Get new point and change
+                Point pnt = anEvent.getPoint(getParent());
+                double dx = pnt.x - _mouseDownPnt.x;
+                double dy = pnt.y - _mouseDownPnt.y;
+
+                // Either resize or reposition
+                if (_resizingDrawer)
+                    setDrawerSize(_mouseDownW - dx, _mouseDownH + dy);
+                else if (_resizingDrawerTop) {
+                    setDrawerSize(_mouseDownW - dx, _mouseDownH - dy);
+                    setDrawerY(_mouseDownY + dy);
+                }
+                else setDrawerY(Math.max(_mouseDownY + dy, 0));
+
+                // If significant change, set MouseDragged
+                if (Math.abs(dx) > 2 || Math.abs(dy) > 2)
+                    _mouseDragged = true;
+            }
+
+            // Handle MouseRelease
+            case MouseRelease -> {
+
+                // Clear MouseDownPoint
+                _mouseDownPnt = null;
+
+                // If click was inside content, just return
+                if (_mouseDragged || !inMargin(anEvent))
+                    return;
+
+                // Toggle drawer
+                double explodeX = _closeBox.getMidX();
+                if (anEvent.getX() > explodeX)
+                    explode();
+                else toggleDrawer();
+            }
+
+            // Handle MouseEnter, MouseExit, MouseMove
+            case MouseEnter, MouseMove -> setCloseBoxHighlight(inMargin(anEvent));
+            case MouseExit -> setCloseBoxHighlight(false);
         }
-
-        // Handle MouseRelease
-        if (anEvent.isMouseRelease()) {
-
-            // Clear MouseDownPoint
-            _mouseDownPnt = null;
-
-            // If click was inside content, just return
-            if (_mouseDragged || !inMargin(anEvent))
-                return;
-
-            // Toggle drawer
-            double explodeX = _closeBox.getMidX();
-            if (anEvent.getX() > explodeX)
-                explode();
-            else toggleDrawer();
-        }
-
-        // Handle MouseEnter, MouseExit, MouseMove
-        else if (anEvent.isMouseEnter() || anEvent.isMouseMove())
-            setCloseBoxHighlight(inMargin(anEvent));
-
-            // Handle MouseExit
-        else if (anEvent.isMouseExit())
-            setCloseBoxHighlight(false);
     }
 
     /**

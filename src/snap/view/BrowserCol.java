@@ -48,14 +48,14 @@ public class BrowserCol <T> extends ListView <T> {
      * Override to have browser select this column on MouseRelease.
      */
     @Override
-    protected void processEvent(ViewEvent anEvent)
+    protected void handleMouseEvent(ViewEvent anEvent)
     {
         // Handle MouseRelease: Select browser column
         if (anEvent.isMouseRelease())
             _browser.setSelColIndex(_index);
 
         // Do normal version
-        super.processEvent(anEvent);
+        super.handleMouseEvent(anEvent);
     }
 
     /**

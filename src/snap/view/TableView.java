@@ -56,6 +56,12 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     // A helper to handle selection
     private TableViewSelector  _selector = new TableViewSelector(this);
 
+    // Mouse handler
+    private EventListener _mouseEventHandler;
+
+    // Key press handler
+    private EventListener _keyPressHandler;
+
     // Constants for properties
     public static final String ShowHeader_Prop = "ShowHeader";
     public static final String TableCols_Prop = "TableCols";
@@ -78,7 +84,10 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         setFocusable(true);
         setFocusWhenPressed(true);
         setFocusKeysEnabled(false);
-        enableEvents(MousePress, MouseDrag, MouseRelease, KeyPress);
+
+        // Add mouse and key press handlers
+        addEventHandler(_mouseEventHandler = this::handleMouseEvent, MousePress, MouseDrag, MouseRelease);
+        addEventHandler(_keyPressHandler = this::handleKeyPressEvent, KeyPress);
 
         // Create/configure Columns SplitView and ScrollView and add
         _splitView = new SplitView();
@@ -653,18 +662,9 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Handle events.
+     * Handle mouse events.
      */
-    protected void processEvent(ViewEvent anEvent)
-    {
-        // Handle MouseEvent
-        if (anEvent.isMouseEvent())
-            _selector.processMouseEvent(anEvent);
-
-        // Handle KeyPress
-        else if (anEvent.isKeyPress())
-            handleKeyPressEvent(anEvent);
-    }
+    private void handleMouseEvent(ViewEvent anEvent)  { _selector.handleMouseEvent(anEvent); }
 
     /**
      * Handle key press event.
@@ -782,9 +782,14 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         _editable = aValue;
 
         // Set value, fire prop change and enable MouseRelease events
-        if (aValue)
-            enableEvents(MouseRelease, KeyPress);
-        else disableEvents(MouseRelease, KeyPress);
+        if (aValue) {
+            addEventHandler(_mouseEventHandler, MouseRelease);
+            addEventHandler(_keyPressHandler, KeyPress);
+        }
+        else {
+            removeEventHandler(_mouseEventHandler, MouseRelease);
+            removeEventHandler(_keyPressHandler, KeyPress);
+        }
 
         firePropChange(Editable_Prop, !_editable, _editable);
     }

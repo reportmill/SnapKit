@@ -72,6 +72,9 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     // Whether list needs to scroll selection to visible after next layout or show
     private boolean _needsScrollSelToVisible;
 
+    // Mouse event handler
+    protected EventListener _mouseEventHandler;
+
     // Shared CellPadding default
     public static final Insets CELL_PAD_DEFAULT = new Insets(2);
 
@@ -97,7 +100,10 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         setFocusable(true);
         setFocusWhenPressed(true);
         setOverflow(Overflow.Scroll);
-        enableEvents(MousePress, MouseDrag, MouseRelease, KeyPress);
+
+        // Regsiter for mouse and key events
+        addEventHandler(_mouseEventHandler = this::handleMouseEvent, MousePress, MouseDrag, MouseRelease);
+        addEventHandler(this::handleKeyPressEvent, KeyPress);
 
         // Create/set PickList
         setPickList(new PickList<>());
@@ -364,8 +370,8 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         if (aValue == _targeting) return;
         _targeting = aValue;
         if (_targeting)
-            enableEvents(MouseMove, MouseExit);
-        else disableEvents(MouseMove, MouseExit);
+            addEventHandler(_mouseEventHandler, MouseMove, MouseExit);
+        else removeEventHandler(_mouseEventHandler, MouseMove, MouseExit);
     }
 
     /**
@@ -821,20 +827,21 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Process events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    protected void handleMouseEvent(ViewEvent anEvent)
     {
-        // Handle MouseEvent
-        if (anEvent.isMouseEvent())
-            _selector.processMouseEvent(anEvent);
+        _selector.processMouseEvent(anEvent);
+    }
 
-        // Handle KeyPress
-        else if (anEvent.isKeyPress()) {
-            int keyCode = anEvent.getKeyCode();
-            switch (keyCode) {
-                case KeyCode.UP -> { selectUp(); anEvent.consume(); }
-                case KeyCode.DOWN -> { selectDown(); anEvent.consume(); }
-                case KeyCode.ENTER -> processEnterAction(anEvent);
-            }
+    /**
+     * Called when list gets KeyPress event.
+     */
+    private void handleKeyPressEvent(ViewEvent anEvent)
+    {
+        int keyCode = anEvent.getKeyCode();
+        switch (keyCode) {
+            case KeyCode.UP -> { selectUp(); anEvent.consume(); }
+            case KeyCode.DOWN -> { selectDown(); anEvent.consume(); }
+            case KeyCode.ENTER -> processEnterAction(anEvent);
         }
     }
 
