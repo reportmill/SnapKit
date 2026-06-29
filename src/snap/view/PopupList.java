@@ -138,6 +138,6 @@ public class PopupList<T> extends ListView<T> {
     protected void handleClientViewKeyPressEvent(ViewEvent anEvent)
     {
         if (anEvent.isUpArrow() || anEvent.isDownArrow() || anEvent.isEnterKey())
-            processEvent(anEvent);
+            handleKeyPressEvent(anEvent);
     }
 }

@@ -805,14 +805,6 @@ public class ViewUtils {
     /**
      * Backdoor for protected View method.
      */
-    public static void processEvent(View aView, ViewEvent anEvent)
-    {
-        aView.processEvent(anEvent);
-    }
-
-    /**
-     * Backdoor for protected View method.
-     */
     public static void fireActionEvent(View aView, ViewEvent anEvent)
     {
         aView.fireActionEvent(anEvent);

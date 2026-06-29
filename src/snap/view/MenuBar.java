@@ -69,8 +69,11 @@ public class MenuBar extends ParentView {
     /**
      * Override to handle accelerators.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleKeyPressEvent(ViewEvent anEvent)
     {
+        if (!anEvent.isShortcutDown())
+            return;
+
         for (Menu menu : getMenus()) {
             MenuItem match = getMatchingMenuItem(menu, anEvent);
             if (match != null) {
@@ -130,15 +133,36 @@ public class MenuBar extends ParentView {
     }
 
     /**
+     * Override to handle menu bar short cut key actions.
+     */
+    @Override
+    protected void setShowing(boolean aValue)
+    {
+        if (aValue == isShowing()) return;
+        super.setShowing(aValue);
+        if (aValue) {
+            RootView rootView = getRootView();
+            if (rootView != null)
+                rootView.addEventHandler(_rootViewKeyPressListener);
+        }
+        else if (_lastRootView != null) {
+            _lastRootView.removeEventHandler(_rootViewKeyPressListener);
+            _lastRootView = null;
+        }
+
+    }
+
+    // RootView key press handler support
+    private EventListener _rootViewKeyPressListener = this::handleKeyPressEvent;
+    private RootView _lastRootView;
+
+    /**
      * Override to customize for this class.
      */
     @Override
     protected void initProps(PropSet aPropSet)
     {
-        // Do normal version
         super.initProps(aPropSet);
-
-        // Menus
         aPropSet.addPropNamed(Menus_Prop, List.class);
     }
 
@@ -148,11 +172,8 @@ public class MenuBar extends ParentView {
     @Override
     public Object getPropValue(String aPropName)
     {
-        // Menus
         if (aPropName.equals(Menus_Prop))
             return getMenus();
-
-        // Do normal version
         return super.getPropValue(aPropName);
     }
 
@@ -162,37 +183,9 @@ public class MenuBar extends ParentView {
     @Override
     public void setPropValue(String aPropName, Object aValue)
     {
-        // Menus
         if (aPropName.equals(Menus_Prop))
             setMenus((List<Menu>) aValue);
-
-            // Do normal version
         else super.setPropValue(aPropName, aValue);
-    }
-
-    /**
-     * XML archival of children.
-     */
-    protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Archive children
-        for (Menu childMenu : getMenus())
-            anElement.add(anArchiver.toXML(childMenu, this));
-    }
-
-    /**
-     * XML unarchival for shape children.
-     */
-    protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Iterate over child elements and unarchive MenuItems
-        for (int i = 0, iMax = anElement.size(); i < iMax; i++) { XMLElement childXML = anElement.get(i);
-            Class<?> cls = anArchiver.getClassForName(childXML.getName());
-            if (cls != null && Menu.class.isAssignableFrom(cls)) {
-                Menu menu = (Menu)anArchiver.fromXML(childXML, this);
-                addMenu(menu);
-            }
-        }
     }
 
     /**
@@ -206,16 +199,6 @@ public class MenuBar extends ParentView {
         menuBarView.addChild(aMenuBar);
         menuBarView.addChild(aView);
         aView.setGrowHeight(true);
-
-        // Add EventListener (filter) to intercept any KeyPress + ShortCut events and run by MenuBar
-        menuBarView.addEventHandler(e -> handleMenuBarViewKeyPress(aMenuBar, e), KeyPress);
         return menuBarView;
-    }
-
-    /** Forwards KeyPress + ShortCut events to MenuBar. */
-    private static void handleMenuBarViewKeyPress(MenuBar aMenuBar, ViewEvent anEvent)
-    {
-        if (anEvent.isShortcutDown())
-            aMenuBar.processEvent(anEvent);
     }
 }
