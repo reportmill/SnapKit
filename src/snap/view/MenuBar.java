@@ -141,9 +141,9 @@ public class MenuBar extends ParentView {
         if (aValue == isShowing()) return;
         super.setShowing(aValue);
         if (aValue) {
-            RootView rootView = getRootView();
-            if (rootView != null)
-                rootView.addEventHandler(_rootViewKeyPressListener);
+            _lastRootView = getRootView();
+            if (_lastRootView != null)
+                _lastRootView.addEventHandler(_rootViewKeyPressListener, KeyPress);
         }
         else if (_lastRootView != null) {
             _lastRootView.removeEventHandler(_rootViewKeyPressListener);
