@@ -36,7 +36,7 @@ public class Slider extends View {
     public Slider()
     {
         super();
-        enableEvents(MousePress, MouseDrag);
+        addEventHandler(this::handleMouseEvent, MousePress, MouseDrag);
     }
 
     /**
@@ -201,7 +201,7 @@ public class Slider extends View {
     /**
      * Handle Events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
         // Handle MouseDragged
         if (anEvent.isMouseDrag()) {

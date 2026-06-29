@@ -408,8 +408,8 @@ public class ColorPanel extends ViewController {
         public ImagePicker()
         {
             super();
-            enableEvents(MousePress, MouseDrag, MouseRelease);
             setCursor(Cursor.CROSSHAIR);
+            addEventHandler(this::handleMouseEvent, MousePress, MouseDrag, MouseRelease);
         }
 
         /**
@@ -448,21 +448,22 @@ public class ColorPanel extends ViewController {
         }
 
         /**
-         * Handle events.
+         * Handle mouse events.
          */
-        protected void processEvent(ViewEvent anEvent)
+        private void handleMouseEvent(ViewEvent anEvent)
         {
-            if (anEvent.isMouseEvent()) {
-                int dx = (int) Math.round(getWidth() - _image.getWidth()) / 2;
-                if (dx < 0) dx = 0;
-                int dy = (int) Math.round(getHeight() - _image.getHeight()) / 2;
-                if (dy < 0) dy = 0;
-                int mx = (int) anEvent.getX(), my = (int) anEvent.getY();
-                int x = mx - dx, y = my - dy;
-                if (x >= 0 && x < _image.getWidth() && y >= 0 && y < _image.getHeight())
-                    _color = new Color(_image.getRGB(x, y));
-                fireActionEvent(anEvent);
-            }
+            int dx = (int) Math.round(getWidth() - _image.getWidth()) / 2;
+            if (dx < 0)
+                dx = 0;
+            int dy = (int) Math.round(getHeight() - _image.getHeight()) / 2;
+            if (dy < 0)
+                dy = 0;
+            int mx = (int) anEvent.getX();
+            int my = (int) anEvent.getY();
+            int x = mx - dx, y = my - dy;
+            if (x >= 0 && x < _image.getWidth() && y >= 0 && y < _image.getHeight())
+                _color = new Color(_image.getRGB(x, y));
+            fireActionEvent(anEvent);
         }
 
         /**
@@ -495,9 +496,9 @@ public class ColorPanel extends ViewController {
         public SwatchPanel()
         {
             super();
-            enableEvents(MouseRelease);
             setName("SwatchPanel");
             setBounds(30, 10, WIDTH * SIZE, HEIGHT * SIZE);
+            addEventHandler(this::handleMouseReleaseEvent, MouseRelease);
         }
 
         /**
@@ -522,15 +523,13 @@ public class ColorPanel extends ViewController {
         }
 
         /**
-         * Handle Events.
+         * Handle mouse release event.
          */
-        public void processEvent(ViewEvent anEvent)
+        private void handleMouseReleaseEvent(ViewEvent anEvent)
         {
-            if (anEvent.isMouseEvent()) {
-                int x = (int) anEvent.getX() / SIZE, y = (int) anEvent.getY() / SIZE;
-                _color = new Color(_webColors[y * WIDTH + x].substring(2));
-                fireActionEvent(anEvent);
-            }
+            int x = (int) anEvent.getX() / SIZE, y = (int) anEvent.getY() / SIZE;
+            _color = new Color(_webColors[y * WIDTH + x].substring(2));
+            fireActionEvent(anEvent);
         }
     }
 

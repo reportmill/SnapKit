@@ -46,8 +46,8 @@ public class ScrollBar extends View {
     public ScrollBar()
     {
         super();
-        enableEvents(MouseEvents);
-        enableEvents(Scroll);
+        addEventHandler(this::handleMouseEvent, MouseEvents);
+        addEventHandler(this::handleScrollEvent, Scroll);
     }
 
     /**
@@ -177,65 +177,65 @@ public class ScrollBar extends View {
     }
 
     /**
-     * Handle events.
+     * Handle mouse events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
+        ViewEvent.Type type = anEvent.getType();
         boolean isHorizontal = isHorizontal();
 
-        // Handle MouseEnter
-        if (anEvent.isMouseEnter()) {
-            _targeted = true;
-            repaint();
-        }
+        switch (type) {
 
-        // Handle MouseExit
-        else if (anEvent.isMouseExit())  {
-            _targeted = false;
-            repaint();
-        }
+            // Handle MouseEnter, MouseExit
+            case MouseEnter -> { _targeted = true; repaint(); }
+            case MouseExit -> { _targeted = false; repaint(); }
 
-        // Handle MousePress
-        else if (anEvent.isMousePress())  {
-            double mouseX = anEvent.getX();
-            double mouseY = anEvent.getY();
-            Rect thumbBounds = getThumbBounds();
-            _pressed = true;
-            _dv = isHorizontal ? mouseX - thumbBounds.getMidX() : mouseY - thumbBounds.getMidY();
-            if (!thumbBounds.contains(mouseX, mouseY)) {
-                double offset = isHorizontal ? mouseX : mouseY;
+            // Handle MousePress
+            case MousePress -> {
+                double mouseX = anEvent.getX();
+                double mouseY = anEvent.getY();
+                Rect thumbBounds = getThumbBounds();
+                _pressed = true;
+                _dv = isHorizontal ? mouseX - thumbBounds.getMidX() : mouseY - thumbBounds.getMidY();
+                if (!thumbBounds.contains(mouseX, mouseY)) {
+                    double offset = isHorizontal ? mouseX : mouseY;
+                    double scrollRatioAtOffset = getScrollRatioAtOffset(offset);
+                    setScrollRatio(scrollRatioAtOffset);
+                    _dv = 0;
+                }
+            }
+
+            // Handle MouseDragged
+            case MouseDrag -> {
+                double offset = (isHorizontal ? anEvent.getX() : anEvent.getY()) - _dv;
                 double scrollRatioAtOffset = getScrollRatioAtOffset(offset);
                 setScrollRatio(scrollRatioAtOffset);
-                _dv = 0;
             }
+
+            // Handle MouseRelease
+            case MouseRelease -> { _pressed = false; repaint(); }
         }
 
-        // Handle MouseRelease
-        else if (anEvent.isMouseRelease())  {
-            _pressed = false;
-            repaint();
-        }
+        // Consume event
+        anEvent.consume();
+    }
 
-        // Handle MouseDragged
-        else if (anEvent.isMouseDrag()) {
-            double offset = (isHorizontal ? anEvent.getX() : anEvent.getY()) - _dv;
-            double scrollRatioAtOffset = getScrollRatioAtOffset(offset);
-            setScrollRatio(scrollRatioAtOffset);
-        }
-
+    /**
+     * Handle scroll event.
+     */
+    private void handleScrollEvent(ViewEvent anEvent)
+    {
         // Handle scroll
-        else if (anEvent.isScroll()) {
-            double units = isHorizontal ? anEvent.getScrollX() * 4 : anEvent.getScrollY() * 4;
-            double scrollerSize = getScrollerSize();
-            double thumbSize = getThumbSize();
-            double contentSize = scrollerSize * scrollerSize / thumbSize;
-            double dv = contentSize - scrollerSize;
-            if (dv > 0 && Math.abs(units) > 0) {
-                double newScrollRatio = getScrollRatio() + units / dv;
-                setScrollRatio(newScrollRatio);
-            }
-            else return;
+        double units = isHorizontal() ? anEvent.getScrollX() * 4 : anEvent.getScrollY() * 4;
+        double scrollerSize = getScrollerSize();
+        double thumbSize = getThumbSize();
+        double contentSize = scrollerSize * scrollerSize / thumbSize;
+        double dv = contentSize - scrollerSize;
+        if (dv > 0 && Math.abs(units) > 0) {
+            double newScrollRatio = getScrollRatio() + units / dv;
+            setScrollRatio(newScrollRatio);
         }
+        else return;
 
         // Consume event
         anEvent.consume();

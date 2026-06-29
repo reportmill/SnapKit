@@ -42,8 +42,9 @@ public class ColorDock extends View {
     public ColorDock()
     {
         super();
-        enableEvents(MousePress, MouseRelease);
-        enableEvents(ViewEvent.Type.DragGesture, ViewEvent.Type.DragSourceEnd); enableEvents(DragEvents);
+        addEventHandler(this::handleMouseEvent, MousePress, MouseRelease);
+        addEventHandler(this::handleDragEvent, DragEvents);
+        addEventHandler(this::handleDragGestureEvent, ViewEvent.Type.DragGesture, ViewEvent.Type.DragSourceEnd);
 
         // Create ColorWell
         _colorWell = new ColorWell();
@@ -313,9 +314,9 @@ public class ColorDock extends View {
     }
 
     /**
-     * Handle events.
+     * Handle mouse events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
         // Handle MousePress: Select swatch at event point
         if (anEvent.isMousePress()) {
@@ -330,9 +331,15 @@ public class ColorDock extends View {
                 setSelected(true);
             else fireActionEvent(anEvent);
         }
+    }
 
+    /**
+     * Handle drag events.
+     */
+    private void handleDragEvent(ViewEvent anEvent)
+    {
         // Handle DragEnter, DragOver
-        else if (anEvent.isDragEnter() || anEvent.isDragOver()) {
+        if (anEvent.isDragEnter() || anEvent.isDragOver()) {
             Clipboard dboard = anEvent.getClipboard();
             if (!_dragging && dboard.hasColor()) {
                 anEvent.acceptDrag();
@@ -347,9 +354,15 @@ public class ColorDock extends View {
         // Handle DragDrop
         else if (anEvent.isDragDrop())
             colorDropped(anEvent);
+    }
 
+    /**
+     * Handle drag gesture events.
+     */
+    private void handleDragGestureEvent(ViewEvent anEvent)
+    {
         // Handle DragGesture
-        else if (anEvent.isDragGesture())
+        if (anEvent.isDragGesture())
             startColorDrag(anEvent);
 
         // Handle DragSourceEnd

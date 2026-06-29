@@ -79,7 +79,7 @@ public class ThumbWheel extends View {
     public ThumbWheel()
     {
         super();
-        enableEvents(MousePress, MouseDrag, MouseRelease);
+        addEventHandler(this::handleMouseEvent, MousePress, MouseDrag, MouseRelease);
     }
 
     /**
@@ -181,9 +181,9 @@ public class ThumbWheel extends View {
     public void setAbsoluteMode(byte aValue) { _absoluteMode = aValue; }
 
     /**
-     * Forwards mouse events to mouse methods.
+     * Handles mouse events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
         // If disabled, just return
         if (!isEnabled()) return;

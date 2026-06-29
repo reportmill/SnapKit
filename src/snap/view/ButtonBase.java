@@ -58,8 +58,8 @@ public class ButtonBase extends ParentView {
     {
         super();
         setFocusable(true);
-        enableEvents(MouseEvents);
-        enableEvents(KeyPress);
+        addEventHandler(this::handleMouseEvent, MouseEvents);
+        addEventHandler(this::handleKeyPressEvent, KeyPress);
     }
 
     /**
@@ -244,9 +244,8 @@ public class ButtonBase extends ParentView {
     /**
      * Handle events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    protected void handleMouseEvent(ViewEvent anEvent)
     {
-        // If disabled, just return
         if (isDisabled()) return;
 
         // Handle MouseEnter
@@ -276,13 +275,19 @@ public class ButtonBase extends ParentView {
             _tracked = false;
             repaint();
         }
+    }
+
+    /**
+     * Handle events.
+     */
+    protected void handleKeyPressEvent(ViewEvent anEvent)
+    {
+        if (isDisabled()) return;
 
         // Handle KeyPress + Enter/Space
-        else if (anEvent.isKeyPress()) {
-            int keyCode = anEvent.getKeyCode();
-            if (keyCode == KeyCode.ENTER || keyCode == KeyCode.SPACE)
-                fireActionEvent(anEvent);
-        }
+        int keyCode = anEvent.getKeyCode();
+        if (keyCode == KeyCode.ENTER || keyCode == KeyCode.SPACE)
+            fireActionEvent(anEvent);
     }
 
     /**

@@ -50,7 +50,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     {
         super();
         setFocusable(true);
-        enableEvents(KeyPress);
+        addEventHandler(this::handleKeyPressEvent, KeyPress);
 
         // Create button and add
         _button = new Button();
@@ -340,6 +340,18 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     public String getTextForItem(T anItem)  { return _listView.getTextForItem(anItem);}
 
     /**
+     * Override to support key activation.
+     */
+    private void handleKeyPressEvent(ViewEvent anEvent)
+    {
+        int keyCode = anEvent.getKeyCode();
+        if (keyCode == KeyCode.ENTER || keyCode == KeyCode.SPACE || keyCode == KeyCode.UP || keyCode == KeyCode.DOWN) {
+            showPopup();
+            anEvent.consume();
+        }
+    }
+
+    /**
      * Called when TextField focus changed.
      */
     private void handleTextFieldFocusChange()
@@ -536,21 +548,6 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
      */
     @Override
     protected ViewLayout getViewLayoutImpl()  { return new RowViewLayout(this, true); }
-
-    /**
-     * Override to support key activation.
-     */
-    @Override
-    protected void processEvent(ViewEvent anEvent)
-    {
-        if (anEvent.isKeyPress()) {
-            int keyCode = anEvent.getKeyCode();
-            if (keyCode == KeyCode.ENTER || keyCode == KeyCode.SPACE || keyCode == KeyCode.UP || keyCode == KeyCode.DOWN) {
-                showPopup();
-                anEvent.consume();
-            }
-        }
-    }
 
     /**
      * Override to focus text or button.

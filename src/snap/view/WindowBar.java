@@ -40,7 +40,7 @@ public class WindowBar extends ParentView {
     {
         double titleBarH = window.getType() == WindowView.Type.MAIN ? 24 : 18;
         setTitlebarHeight(titleBarH);
-        enableEvents(MousePress, MouseDrag, MouseRelease);
+        addEventHandler(this::handleMouseEvent, MousePress, MouseDrag, MouseRelease);
     }
 
     /**
@@ -128,9 +128,9 @@ public class WindowBar extends ParentView {
     }
 
     /**
-     * Override to handle events.
+     * Handle mouse events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
         anEvent.consume();
 

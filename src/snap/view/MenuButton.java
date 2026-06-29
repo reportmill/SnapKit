@@ -201,10 +201,13 @@ public class MenuButton extends ButtonBase {
     }
 
     /**
-     * Handle events.
+     * Override to show menu.
      */
-    protected void processEvent(ViewEvent anEvent)
+    @Override
+    protected void handleMouseEvent(ViewEvent anEvent)
     {
+        if (isDisabled()) return;
+
         // Handle MouseEnter
         if (anEvent.isMouseEnter())
             setTargeted(true);
@@ -232,14 +235,21 @@ public class MenuButton extends ButtonBase {
             if (isPressed)
                 fireActionEvent(anEvent);
         }
+    }
+
+    /**
+     * Override to show menu.
+     */
+    @Override
+    protected void handleKeyPressEvent(ViewEvent anEvent)
+    {
+        if (isDisabled()) return;
 
         // Handle KeyPress + Enter/Space/Up/Down
-        else if (anEvent.isKeyPress()) {
-            int keyCode = anEvent.getKeyCode();
-            if (keyCode == KeyCode.ENTER || keyCode == KeyCode.SPACE || keyCode == KeyCode.UP || keyCode == KeyCode.DOWN) {
-                showMenu();
-                anEvent.consume();
-            }
+        int keyCode = anEvent.getKeyCode();
+        if (keyCode == KeyCode.ENTER || keyCode == KeyCode.SPACE || keyCode == KeyCode.UP || keyCode == KeyCode.DOWN) {
+            showMenu();
+            anEvent.consume();
         }
     }
 

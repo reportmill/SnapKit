@@ -43,8 +43,8 @@ public class Scroller extends ParentView implements ViewHost {
     public Scroller()
     {
         super();
-        enableEvents(Scroll);
         setClipToBounds(true);
+        addEventHandler(this::handleScrollEvent, Scroll);
     }
 
     /**
@@ -449,31 +449,27 @@ public class Scroller extends ParentView implements ViewHost {
     }
 
     /**
-     * Handle events.
+     * Handle scroll event.
      */
-    public void processEvent(ViewEvent anEvent)
+    private void handleScrollEvent(ViewEvent anEvent)
     {
-        // Handle Scroll event
-        if (anEvent.isScroll()) {
-
-            // Handle Horizontal scroll
-            double scrollX = anEvent.getScrollX();
-            if (scrollX != 0) {
-                double scroll2 = MathUtils.clamp(getScrollX() + scrollX * 4, 0, getScrollMaxX());
-                if (scroll2 != getScrollX()) {
-                    setScrollX(scroll2);
-                    anEvent.consume();
-                }
+        // Handle Horizontal scroll
+        double scrollX = anEvent.getScrollX();
+        if (scrollX != 0) {
+            double scroll2 = MathUtils.clamp(getScrollX() + scrollX * 4, 0, getScrollMaxX());
+            if (scroll2 != getScrollX()) {
+                setScrollX(scroll2);
+                anEvent.consume();
             }
+        }
 
-            // Handle vertical scroll
-            double scrollY = anEvent.getScrollY();
-            if (scrollY != 0 && getScrollMaxY() != 0) {
-                double scroll2 = MathUtils.clamp(getScrollY() + scrollY * 4, 0 , getScrollMaxY());
-                if (scroll2 != getScrollY()) {
-                    setScrollY(scroll2);
-                    anEvent.consume();
-                }
+        // Handle vertical scroll
+        double scrollY = anEvent.getScrollY();
+        if (scrollY != 0 && getScrollMaxY() != 0) {
+            double scroll2 = MathUtils.clamp(getScrollY() + scrollY * 4, 0 , getScrollMaxY());
+            if (scroll2 != getScrollY()) {
+                setScrollY(scroll2);
+                anEvent.consume();
             }
         }
     }
@@ -484,15 +480,15 @@ public class Scroller extends ParentView implements ViewHost {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // ScrollX, ScrollY
-            case ScrollX_Prop: return getScrollX();
-            case ScrollY_Prop: return getScrollY();
+            case ScrollX_Prop -> getScrollX();
+            case ScrollY_Prop -> getScrollY();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -503,11 +499,11 @@ public class Scroller extends ParentView implements ViewHost {
         switch (aPropName) {
 
             // ScrollX, ScrollY
-            case ScrollX_Prop: setScrollX(Convert.doubleValue(aValue)); break;
-            case ScrollY_Prop: setScrollY(Convert.doubleValue(aValue)); break;
+            case ScrollX_Prop -> setScrollX(Convert.doubleValue(aValue));
+            case ScrollY_Prop -> setScrollY(Convert.doubleValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 }

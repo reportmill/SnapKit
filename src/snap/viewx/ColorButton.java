@@ -49,8 +49,8 @@ public class ColorButton extends View {
     public ColorButton()
     {
         super();
-        enableEvents(MouseEvents);
         setPrefSize(32,22);
+        addEventHandler(this::handleMouseEvent, MouseEvents);
     }
 
     /**
@@ -165,9 +165,9 @@ public class ColorButton extends View {
     }
 
     /**
-     * Handle events.
+     * Handle mouse events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
         // Handle MouseEnter
         if (anEvent.isMouseEnter()) {
@@ -368,7 +368,7 @@ public class ColorButton extends View {
         public ColorBoxesPane()
         {
             setPrefSize(8*20,5*20);
-            enableEvents(MouseEvents);
+            addEventHandler(this::handleMouseEvent, MouseEvents);
         }
 
         /** Paint ColorBoxesPane. */
@@ -398,7 +398,7 @@ public class ColorButton extends View {
         }
 
         /** Handle Events. */
-        protected void processEvent(ViewEvent anEvent)
+        private void handleMouseEvent(ViewEvent anEvent)
         {
             if (anEvent.isMouseMove()) {
                 _mx = (int) anEvent.getX()/20;

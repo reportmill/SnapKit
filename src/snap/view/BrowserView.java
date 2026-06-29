@@ -66,7 +66,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         super();
         setFocusable(true);
         setFocusWhenPressed(true);
-        enableEvents(KeyEvents);
+        addEventHandler(this::handleKeyPressEvent, KeyPress);
 
         // Set default values
         _rowHeight = DEFAULT_ROW_HEIGHT;
@@ -469,24 +469,20 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Process events.
+     * Handle key press event.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleKeyPressEvent(ViewEvent anEvent)
     {
-        // Handle KeyPress
-        if (anEvent.isKeyPress()) {
+        // Get selected column (just return if none)
+        BrowserCol<T> selCol = getSelCol();
+        if (selCol == null)
+            return;
 
-            // Get selected column (just return if none)
-            BrowserCol<T> selCol = getSelCol();
-            if (selCol == null)
-                return;
-
-            // Handle keys
-            switch (anEvent.getKeyCode()) {
-                case KeyCode.UP -> { selCol.selectUp(); anEvent.consume(); }
-                case KeyCode.DOWN -> { selCol.selectDown(); anEvent.consume(); }
-                case KeyCode.ENTER -> selCol.processEnterAction(anEvent);
-            }
+        // Handle keys
+        switch (anEvent.getKeyCode()) {
+            case KeyCode.UP -> { selCol.selectUp(); anEvent.consume(); }
+            case KeyCode.DOWN -> { selCol.selectDown(); anEvent.consume(); }
+            case KeyCode.ENTER -> selCol.processEnterAction(anEvent);
         }
     }
 

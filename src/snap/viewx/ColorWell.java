@@ -38,8 +38,9 @@ public class ColorWell extends View {
     public ColorWell()
     {
         super();
-        enableEvents(MouseRelease, ViewEvent.Type.DragGesture, ViewEvent.Type.DragSourceEnd);
-        enableEvents(DragEvents);
+        addEventHandler(this::handleMouseReleaseEvent, MouseRelease);
+        addEventHandler(this::handleDragEvent, DragEvents);
+        addEventHandler(this::handleDragGestureEvent, ViewEvent.Type.DragGesture, ViewEvent.Type.DragSourceEnd);
     }
 
     /**
@@ -177,9 +178,9 @@ public class ColorWell extends View {
     }
 
     /**
-     * Calls mouse methods.
+     * Handle mouse release event.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseReleaseEvent(ViewEvent anEvent)
     {
         // If disabled, just return
         if (!isEnabled()) return;
@@ -191,8 +192,17 @@ public class ColorWell extends View {
             else showColorPanel();
         }
 
+        // Repaint
+        repaint();
+    }
+
+    /**
+     * Handle drag events.
+     */
+    private void handleDragEvent(ViewEvent anEvent)
+    {
         // Handle DragEnter, DragOver
-        else if (anEvent.isDragEnter() || anEvent.isDragOver()) {
+        if (anEvent.isDragEnter() || anEvent.isDragOver()) {
             Clipboard cb = anEvent.getClipboard();
             if (!_dragging && cb.hasColor())
                 anEvent.acceptDrag();
@@ -212,8 +222,17 @@ public class ColorWell extends View {
             fireActionEvent(anEvent);
         }
 
+        // Repaint
+        repaint();
+    }
+
+    /**
+     * Handle drag gesture events.
+     */
+    private void handleDragGestureEvent(ViewEvent anEvent)
+    {
         // Handle DragGesture
-        else if (anEvent.isDragGesture()) {
+        if (anEvent.isDragGesture()) {
             Color color = getColor();
             Image image = Image.getImageForSize(14,14,true);
             Painter pntr = image.getPainter();
