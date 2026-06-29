@@ -2381,15 +2381,6 @@ public class View extends PropObject {
     }
 
     /**
-     * Sets an array of enabled events.
-     */
-    protected void enableEvents(ViewEvent.Type... theTypes)
-    {
-        EventAdapter eventAdapter = getEventAdapter();
-        eventAdapter.enableEvents(theTypes);
-    }
-
-    /**
      * Adds an event filter.
      */
     public void addEventFilter(EventListener aLsnr, ViewEvent.Type... theTypes)
@@ -2464,16 +2455,13 @@ public class View extends PropObject {
      */
     void processEventHandlers(ViewEvent anEvent)
     {
-        // Process event
-        processEvent(anEvent);
-
         // If Action event, automatically forward to controller
-        if (anEvent.isActionEvent() && _controller != null && !anEvent.isConsumed())
+        if (anEvent.isActionEvent() && _controller != null)
             _controller.dispatchEventToController(anEvent);
 
         // Get event handlers and event type
         EventAdapter eventAdapter = getEventAdapter();
-        EventListener[] handlers = eventAdapter.getExternalHandlers(); if (handlers.length == 0) return;
+        EventListener[] handlers = eventAdapter.getHandlers(); if (handlers.length == 0) return;
         ViewEvent.Type eventType = anEvent.getType();
 
         // Iterate over handlers: If event type supported, send to handler
@@ -2482,11 +2470,6 @@ public class View extends PropObject {
                 lsnr.listenEvent(anEvent);
         }
     }
-
-    /**
-     * Process ViewEvent.
-     */
-    protected void processEvent(ViewEvent anEvent)  { }
 
     /**
      * Fires an action event for given source event (can be null).

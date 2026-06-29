@@ -18,12 +18,6 @@ public class EventAdapter {
     // The event handlers
     private EventListenerList _handlers = EMPTY_LISTENER_LIST;
 
-    // The handler for view
-    private EventListener _viewHandler = e -> {};
-
-    // Array of handlers minus view handler
-    private EventListener[] _externalHandlers;
-
     // Shared empty listener list
     private static final EventListenerList EMPTY_LISTENER_LIST = new EventListenerList();
 
@@ -43,19 +37,7 @@ public class EventAdapter {
     /**
      * Returns the handlers.
      */
-    private EventListener[] getHandlers()  { return _handlers._listeners; }
-
-    /**
-     * Returns the external handlers (handlers excluding view handler).
-     */
-    public EventListener[] getExternalHandlers()
-    {
-        if (_externalHandlers != null) return _externalHandlers;
-        _externalHandlers = getHandlers();
-        if (_externalHandlers.length > 0 && _externalHandlers[0] == _viewHandler)
-            _externalHandlers = Arrays.copyOfRange(_externalHandlers, 1, _externalHandlers.length);
-        return _externalHandlers;
-    }
+    public EventListener[] getHandlers()  { return _handlers._listeners; }
 
     /**
      * Adds an event filter.
@@ -81,7 +63,6 @@ public class EventAdapter {
     {
         if (_handlers == EMPTY_LISTENER_LIST) _handlers = new EventListenerList();
         _handlers.addListener(aLsnr, theTypes);
-        _externalHandlers = null;
     }
 
     /**
@@ -90,25 +71,7 @@ public class EventAdapter {
     public void removeHandler(EventListener aLsnr, Type ... theTypes)
     {
         _handlers.removeListener(aLsnr, theTypes);
-        _externalHandlers = null;
     }
-
-    /**
-     * Called to register types for a listener.
-     */
-    public void enableEvents(Type ... theTypes)
-    {
-        addHandler(_viewHandler, theTypes);
-
-        // Make sure view handler is always first
-        if (_handlers._listeners.length > 0 && _handlers._listeners[0] != _viewHandler)
-            _handlers._listeners = ArrayUtils.moveToFront(_handlers._listeners, _viewHandler);
-    }
-
-    /**
-     * Called to unregister types for a listener.
-     */
-    public void disableEvents(Type ... theTypes)  { removeHandler(_viewHandler, theTypes); }
 
     /**
      * Returns whether given type is enabled.
