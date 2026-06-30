@@ -744,11 +744,11 @@ public class ViewUtils {
      */
     public static void enableDragging(View aView)
     {
-        aView.addEventHandler(e -> handleDrag(e), View.MousePress, View.MouseDrag, View.MouseRelease);
+        aView.addEventHandler(ViewUtils::handleViewDragEvent, View.MousePress, View.MouseDrag, View.MouseRelease);
     }
 
     /** Helper for enableDragging. */
-    static void handleDrag(ViewEvent anEvent)
+    private static void handleViewDragEvent(ViewEvent anEvent)
     {
         View view = anEvent.getView();
         view.setManaged(false);

@@ -36,13 +36,13 @@ class ConsoleItemBox extends BoxView {
 
         // Register box for resize events
         if (getPrefWidth() > 100 && getPrefHeight() > 40)
-            addEventHandler(e -> boxViewDidMouseEvent(e), View.MouseEvents);
+            addEventHandler(ConsoleItemBox::handleConsoleItemBoxMouseEvent, View.MouseEvents);
     }
 
     /**
      * Handle Box mouse events to resize.
      */
-    private static void boxViewDidMouseEvent(ViewEvent anEvent)
+    private static void handleConsoleItemBoxMouseEvent(ViewEvent anEvent)
     {
         // Get event info
         View view = anEvent.getView();

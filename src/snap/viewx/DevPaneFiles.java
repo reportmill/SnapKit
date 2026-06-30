@@ -117,14 +117,14 @@ public class DevPaneFiles extends ViewController {
         _fileBrowser.setRowHeight(22);
         _fileBrowser.setResolver(new WebSitePaneUtils.FileResolver());
         //_fileBrowser.setCellConfigure(item -> configureFileBrowserCell(item));
-        _fileBrowser.addEventFilter(e -> runLater(() -> fileBrowserMouseReleased(e)), MouseRelease);
+        _fileBrowser.addEventFilter(this::handleFileBrowserMouseReleaseEvent, MouseRelease);
 
         // Config FileTextView.TextArea
         TextView textView = getView("FileTextView", TextView.class);
         textView.setPadding(4, 4, 4, 4);
 
         // Add drag listener to content view
-        getUI().addEventHandler(e -> handleDragEvent(e), DragEvents);
+        getUI().addEventHandler(this::handleDragEvent, DragEvents);
     }
 
     @Override
@@ -223,7 +223,12 @@ public class DevPaneFiles extends ViewController {
     /**
      * Called when FileBrowser gets mouse released.
      */
-    private void fileBrowserMouseReleased(ViewEvent anEvent)
+    private void handleFileBrowserMouseReleaseEvent(ViewEvent anEvent)  { runLater(() -> handleFileBrowserMouseReleaseEventImpl(anEvent)); }
+
+    /**
+     * Called when FileBrowser gets mouse released.
+     */
+    private void handleFileBrowserMouseReleaseEventImpl(ViewEvent anEvent)
     {
         // Handle double-click: Either show file text or change root
         if (anEvent.getClickCount() == 2) {

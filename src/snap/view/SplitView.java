@@ -47,7 +47,7 @@ public class SplitView extends ParentView implements ViewHost {
         super();
         _divSpan = Divider.DEFAULT_SPAN;
         setClipToBounds(true);
-        addEventFilter(e -> processDividerMouseEvent(e), MouseMove, MousePress, MouseDrag, MouseRelease);
+        addEventFilter(this::handleDividerMouseEvent, MouseMove, MousePress, MouseDrag, MouseRelease);
     }
 
     /**
@@ -327,7 +327,7 @@ public class SplitView extends ParentView implements ViewHost {
     /**
      * Handle MouseDrag event: Calculate and set new location.
      */
-    protected void processDividerMouseEvent(ViewEvent anEvent)
+    private void handleDividerMouseEvent(ViewEvent anEvent)
     {
         // Handle MouseMove: If over divider, update cursor
         if (anEvent.isMouseMove()) {

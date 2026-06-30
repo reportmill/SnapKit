@@ -110,7 +110,7 @@ public class CollapseView extends ParentView implements ViewHost {
         label.setBorderRadius(5);
 
         // Listen for Label MousePress to trigger expand
-        label.addEventHandler(e -> labelWasPressed(e), View.MousePress);
+        label.addEventHandler(this::handleLabelMousePressEvent, MousePress);
 
         // Set CollapseGraphic
         View graphic = getCollapseGraphic();
@@ -302,7 +302,7 @@ public class CollapseView extends ParentView implements ViewHost {
     /**
      * Called when Label is pressed.
      */
-    protected void labelWasPressed(ViewEvent anEvent)
+    protected void handleLabelMousePressEvent(ViewEvent anEvent)
     {
         toggleExpandedAnimated(anEvent);
     }
