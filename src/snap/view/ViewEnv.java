@@ -95,7 +95,7 @@ public abstract class ViewEnv {
     /**
      * Sends an event for a UI node.
      */
-    public abstract ViewEvent createEvent(View aView, Object anEvent, ViewEvent.Type aType, String aName);
+    public abstract ViewEvent createEvent(View aView, Object anEvent, EventType aType, String aName);
 
     /**
      * Returns the screen bounds inset to usable area.

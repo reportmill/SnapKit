@@ -52,10 +52,10 @@ public class SWRootView extends JComponent {
 
         // Create DropTargetListener
         DropTargetListener dropTargetListener = new DropTargetAdapter() {
-            public void dragEnter(DropTargetDragEvent anEvent)  { handleDropTargetEvent(anEvent, ViewEvent.Type.DragEnter); }
-            public void dragOver(DropTargetDragEvent anEvent)  { handleDropTargetEvent(anEvent, ViewEvent.Type.DragOver); }
-            public void dragExit(DropTargetEvent anEvent)  { handleDropTargetEvent(anEvent, ViewEvent.Type.DragExit); }
-            public void drop(DropTargetDropEvent anEvent)  { handleDropTargetEvent(anEvent, ViewEvent.Type.DragDrop); }
+            public void dragEnter(DropTargetDragEvent anEvent)  { handleDropTargetEvent(anEvent, EventType.DragEnter); }
+            public void dragOver(DropTargetDragEvent anEvent)  { handleDropTargetEvent(anEvent, EventType.DragOver); }
+            public void dragExit(DropTargetEvent anEvent)  { handleDropTargetEvent(anEvent, EventType.DragExit); }
+            public void drop(DropTargetDropEvent anEvent)  { handleDropTargetEvent(anEvent, EventType.DragDrop); }
         };
 
         // Enable DropTarget for RootView
@@ -206,14 +206,14 @@ public class SWRootView extends JComponent {
      */
     private void handleDragGestureRecognized(DragGestureEvent anEvent)
     {
-        ViewEvent event = ViewEvent.createEvent(_rootView, anEvent, ViewEvent.Type.DragGesture, null);
+        ViewEvent event = ViewEvent.createEvent(_rootView, anEvent, EventType.DragGesture, null);
         _win.dispatchEventToWindow(event);
     }
 
     /**
      * Called when this RootView gets DropTargetEvent.
      */
-    private void handleDropTargetEvent(DropTargetEvent anEvent, ViewEvent.Type aType)
+    private void handleDropTargetEvent(DropTargetEvent anEvent, EventType aType)
     {
         ViewEvent event = ViewEvent.createEvent(_rootView, anEvent, aType, null);
         _win.dispatchEventToWindow(event);

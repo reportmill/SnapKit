@@ -181,7 +181,7 @@ public class ScrollBar extends View {
      */
     private void handleMouseEvent(ViewEvent anEvent)
     {
-        ViewEvent.Type type = anEvent.getType();
+        EventType type = anEvent.getType();
         boolean isHorizontal = isHorizontal();
 
         switch (type) {

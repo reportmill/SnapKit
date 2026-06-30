@@ -81,7 +81,7 @@ public class SwingViewEnv extends ViewEnv {
     /**
      * Creates an event for a UI node.
      */
-    public ViewEvent createEvent(View aView, Object anEvent, ViewEvent.Type aType, String aName)
+    public ViewEvent createEvent(View aView, Object anEvent, EventType aType, String aName)
     {
         EventObject eventObject = anEvent instanceof EventObject ? (EventObject) anEvent : null;
 

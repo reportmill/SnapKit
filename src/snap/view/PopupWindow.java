@@ -24,7 +24,7 @@ public class PopupWindow extends WindowView {
         RootView rootView = getRootView();
         rootView.setFill(Color.WHITE);
         rootView.setBorder(Color.LIGHTGRAY, 1);
-        rootView.addEventHandler(this::handleRootViewKeyPressEvent, ViewEvent.Type.KeyPress);
+        rootView.addEventHandler(this::handleRootViewKeyPressEvent, EventType.KeyPress);
     }
 
     /**

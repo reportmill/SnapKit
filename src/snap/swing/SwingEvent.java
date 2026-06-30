@@ -184,27 +184,27 @@ public class SwingEvent extends ViewEvent {
      * Computes the event type from EventObject.
      */
     @Override
-    protected Type getTypeImpl()
+    protected EventType getTypeImpl()
     {
         Object event = getEvent();
         int id = event instanceof AWTEvent ? ((AWTEvent) event).getID() : 0;
         switch (id) {
-            case ActionEvent.ACTION_PERFORMED: return Type.Action;
-            case MouseEvent.MOUSE_PRESSED: return Type.MousePress;
-            case MouseEvent.MOUSE_DRAGGED: return Type.MouseDrag;
-            case MouseEvent.MOUSE_RELEASED: return Type.MouseRelease;
-            case MouseEvent.MOUSE_ENTERED: return Type.MouseEnter;
-            case MouseEvent.MOUSE_MOVED: return Type.MouseMove;
-            case MouseEvent.MOUSE_EXITED: return Type.MouseExit;
-            case MouseEvent.MOUSE_WHEEL: return Type.Scroll;
-            case KeyEvent.KEY_PRESSED: return Type.KeyPress;
-            case KeyEvent.KEY_RELEASED: return Type.KeyRelease;
-            case KeyEvent.KEY_TYPED: return Type.KeyType;
+            case ActionEvent.ACTION_PERFORMED: return EventType.Action;
+            case MouseEvent.MOUSE_PRESSED: return EventType.MousePress;
+            case MouseEvent.MOUSE_DRAGGED: return EventType.MouseDrag;
+            case MouseEvent.MOUSE_RELEASED: return EventType.MouseRelease;
+            case MouseEvent.MOUSE_ENTERED: return EventType.MouseEnter;
+            case MouseEvent.MOUSE_MOVED: return EventType.MouseMove;
+            case MouseEvent.MOUSE_EXITED: return EventType.MouseExit;
+            case MouseEvent.MOUSE_WHEEL: return EventType.Scroll;
+            case KeyEvent.KEY_PRESSED: return EventType.KeyPress;
+            case KeyEvent.KEY_RELEASED: return EventType.KeyRelease;
+            case KeyEvent.KEY_TYPED: return EventType.KeyType;
         }
         if (event instanceof DropTargetDropEvent)
-            return Type.DragDrop;
+            return EventType.DragDrop;
         if (event instanceof DragGestureEvent)
-            return Type.DragGesture;
+            return EventType.DragGesture;
         return null;
     }
 

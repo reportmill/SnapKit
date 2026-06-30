@@ -8,7 +8,7 @@ import java.util.*;
 import snap.util.ArrayUtils;
 import snap.viewx.DevPane;
 
-import static snap.view.ViewEvent.Type.*;
+import static snap.view.EventType.*;
 
 /**
  * A class to help RootView dispatch events to Views.

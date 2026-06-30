@@ -285,7 +285,7 @@ public class CJWindow {
         _resizeLsnr = null;
 
         // Send WinClose event
-        ViewEvent event = ViewEvent.createEvent(_win, null, ViewEvent.Type.Action, null);
+        ViewEvent event = ViewEvent.createEvent(_win, null, EventType.Action, null);
         ViewEvent.setEventSharedAction(event, SharedAction.WindowClose_Action);
         _win.dispatchEventToWindow(event);
     }

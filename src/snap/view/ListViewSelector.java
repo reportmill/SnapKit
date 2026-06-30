@@ -57,7 +57,7 @@ class ListViewSelector<T> {
     {
         _mouseDownSel = _listView.getSel();
         _newAnchor = _listView.getRowIndexForY(anEvent.getY());
-        _dragGestureEnabled = _listView.getEventAdapter().isTypeEnabled(ViewEvent.Type.DragGesture);
+        _dragGestureEnabled = _listView.getEventAdapter().isTypeEnabled(EventType.DragGesture);
 
         mousePressOrDrag(anEvent);
     }

@@ -52,24 +52,24 @@ public class ViewController extends PropObject {
     public static final String Showing_Prop = "Showing";
     
     // Convenience for common events
-    public static final ViewEvent.Type Action = ViewEvent.Type.Action;
-    public static final ViewEvent.Type KeyPress = ViewEvent.Type.KeyPress;
-    public static final ViewEvent.Type KeyRelease = ViewEvent.Type.KeyRelease;
-    public static final ViewEvent.Type KeyType = ViewEvent.Type.KeyType;
-    public static final ViewEvent.Type MousePress = ViewEvent.Type.MousePress;
-    public static final ViewEvent.Type MouseDrag = ViewEvent.Type.MouseDrag;
-    public static final ViewEvent.Type MouseRelease = ViewEvent.Type.MouseRelease;
-    public static final ViewEvent.Type MouseEnter = ViewEvent.Type.MouseEnter;
-    public static final ViewEvent.Type MouseMove = ViewEvent.Type.MouseMove;
-    public static final ViewEvent.Type MouseExit = ViewEvent.Type.MouseExit;
-    public static final ViewEvent.Type DragEnter = ViewEvent.Type.DragEnter;
-    public static final ViewEvent.Type DragOver = ViewEvent.Type.DragOver;
-    public static final ViewEvent.Type DragExit = ViewEvent.Type.DragExit;
-    public static final ViewEvent.Type DragDrop = ViewEvent.Type.DragDrop;
-    public static final ViewEvent.Type DragGesture = ViewEvent.Type.DragGesture;
-    public ViewEvent.Type[] KeyEvents = ViewEvent.Type.KeyEvents;
-    public ViewEvent.Type[] MouseEvents = ViewEvent.Type.MouseEvents;
-    public ViewEvent.Type[] DragEvents = ViewEvent.Type.DragEvents;
+    public static final EventType Action = EventType.Action;
+    public static final EventType KeyPress = EventType.KeyPress;
+    public static final EventType KeyRelease = EventType.KeyRelease;
+    public static final EventType KeyType = EventType.KeyType;
+    public static final EventType MousePress = EventType.MousePress;
+    public static final EventType MouseDrag = EventType.MouseDrag;
+    public static final EventType MouseRelease = EventType.MouseRelease;
+    public static final EventType MouseEnter = EventType.MouseEnter;
+    public static final EventType MouseMove = EventType.MouseMove;
+    public static final EventType MouseExit = EventType.MouseExit;
+    public static final EventType DragEnter = EventType.DragEnter;
+    public static final EventType DragOver = EventType.DragOver;
+    public static final EventType DragExit = EventType.DragExit;
+    public static final EventType DragDrop = EventType.DragDrop;
+    public static final EventType DragGesture = EventType.DragGesture;
+    public EventType[] KeyEvents = EventType.KeyEvents;
+    public EventType[] MouseEvents = EventType.MouseEvents;
+    public EventType[] DragEvents = EventType.DragEvents;
 
     /**
      * Constructor.
@@ -432,7 +432,7 @@ public class ViewController extends PropObject {
     /**
      * Adds an event handler (for given types) to view for given name or view.
      */
-    public void addViewEventHandler(Object anObj, EventListener aListener, ViewEvent.Type ... theTypes)
+    public void addViewEventHandler(Object anObj, EventListener aListener, EventType... theTypes)
     {
         View view = getView(anObj);
         if (view != null)

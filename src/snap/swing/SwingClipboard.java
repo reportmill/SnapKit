@@ -210,15 +210,15 @@ public class SwingClipboard extends Clipboard implements DragSourceListener, Dra
     /** DragSourceListener methods. */
     public void dragEnter(DragSourceDragEvent anEvent)
     {
-        dispatchToRootView(anEvent, ViewEvent.Type.DragSourceEnter);
+        dispatchToRootView(anEvent, EventType.DragSourceEnter);
     }
     public void dragOver(DragSourceDragEvent anEvent)
     {
-        dispatchToRootView(anEvent, ViewEvent.Type.DragSourceOver);
+        dispatchToRootView(anEvent, EventType.DragSourceOver);
     }
     public void dragExit(DragSourceEvent anEvent)
     {
-        dispatchToRootView(anEvent, ViewEvent.Type.DragSourceExit);
+        dispatchToRootView(anEvent, EventType.DragSourceExit);
     }
     public void dropActionChanged(DragSourceDragEvent anEvent)  { }
 
@@ -252,7 +252,7 @@ public class SwingClipboard extends Clipboard implements DragSourceListener, Dra
         }
 
         // Dispatch DragSourceEnd event
-        dispatchToRootView(anEvent, ViewEvent.Type.DragSourceEnd);
+        dispatchToRootView(anEvent, EventType.DragSourceEnd);
 
         // Stop listening to DragSource events.
         DragSource dragSource = _dge.getDragSource();
@@ -264,7 +264,7 @@ public class SwingClipboard extends Clipboard implements DragSourceListener, Dra
     /**
      * Sends an event to RootView.
      */
-    private void dispatchToRootView(Object anEvent, ViewEvent.Type aType)
+    private void dispatchToRootView(Object anEvent, EventType aType)
     {
         RootView rview = _view.getRootView();
         ViewEvent nevent = ViewEvent.createEvent(rview, anEvent, aType, null);

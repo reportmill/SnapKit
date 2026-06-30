@@ -193,20 +193,20 @@ public class View extends PropObject {
     private static final boolean DEFAULT_VERTICAL = false;
 
     // Convenience for common events
-    public static final ViewEvent.Type Action = ViewEvent.Type.Action;
-    public static final ViewEvent.Type KeyPress = ViewEvent.Type.KeyPress;
-    public static final ViewEvent.Type KeyRelease = ViewEvent.Type.KeyRelease;
-    public static final ViewEvent.Type KeyType = ViewEvent.Type.KeyType;
-    public static final ViewEvent.Type MousePress = ViewEvent.Type.MousePress;
-    public static final ViewEvent.Type MouseDrag = ViewEvent.Type.MouseDrag;
-    public static final ViewEvent.Type MouseRelease = ViewEvent.Type.MouseRelease;
-    public static final ViewEvent.Type MouseEnter = ViewEvent.Type.MouseEnter;
-    public static final ViewEvent.Type MouseMove = ViewEvent.Type.MouseMove;
-    public static final ViewEvent.Type MouseExit = ViewEvent.Type.MouseExit;
-    public static final ViewEvent.Type Scroll = ViewEvent.Type.Scroll;
-    public static final ViewEvent.Type[] KeyEvents = ViewEvent.Type.KeyEvents;
-    public static final ViewEvent.Type[] MouseEvents = ViewEvent.Type.MouseEvents;
-    public static final ViewEvent.Type[] DragEvents = ViewEvent.Type.DragEvents;
+    public static final EventType Action = EventType.Action;
+    public static final EventType KeyPress = EventType.KeyPress;
+    public static final EventType KeyRelease = EventType.KeyRelease;
+    public static final EventType KeyType = EventType.KeyType;
+    public static final EventType MousePress = EventType.MousePress;
+    public static final EventType MouseDrag = EventType.MouseDrag;
+    public static final EventType MouseRelease = EventType.MouseRelease;
+    public static final EventType MouseEnter = EventType.MouseEnter;
+    public static final EventType MouseMove = EventType.MouseMove;
+    public static final EventType MouseExit = EventType.MouseExit;
+    public static final EventType Scroll = EventType.Scroll;
+    public static final EventType[] KeyEvents = EventType.KeyEvents;
+    public static final EventType[] MouseEvents = EventType.MouseEvents;
+    public static final EventType[] DragEvents = EventType.DragEvents;
 
     /**
      * Constructor.
@@ -2383,7 +2383,7 @@ public class View extends PropObject {
     /**
      * Adds an event filter.
      */
-    public void addEventFilter(EventListener aLsnr, ViewEvent.Type... theTypes)
+    public void addEventFilter(EventListener aLsnr, EventType... theTypes)
     {
         EventAdapter eventAdapter = getEventAdapter();
         eventAdapter.addFilter(aLsnr, theTypes);
@@ -2392,7 +2392,7 @@ public class View extends PropObject {
     /**
      * Removes an event filter.
      */
-    public void removeEventFilter(EventListener aLsnr, ViewEvent.Type... theTypes)
+    public void removeEventFilter(EventListener aLsnr, EventType... theTypes)
     {
         EventAdapter eventAdapter = getEventAdapter();
         eventAdapter.removeFilter(aLsnr, theTypes);
@@ -2401,7 +2401,7 @@ public class View extends PropObject {
     /**
      * Adds an event handler.
      */
-    public void addEventHandler(EventListener aLsnr, ViewEvent.Type... theTypes)
+    public void addEventHandler(EventListener aLsnr, EventType... theTypes)
     {
         EventAdapter eventAdapter = getEventAdapter();
         eventAdapter.addHandler(aLsnr, theTypes);
@@ -2410,7 +2410,7 @@ public class View extends PropObject {
     /**
      * Removes an event handler.
      */
-    public void removeEventHandler(EventListener aLsnr, ViewEvent.Type... theTypes)
+    public void removeEventHandler(EventListener aLsnr, EventType... theTypes)
     {
         EventAdapter eventAdapter = getEventAdapter();
         eventAdapter.removeHandler(aLsnr, theTypes);
@@ -2438,7 +2438,7 @@ public class View extends PropObject {
         // Get event filters and event type
         EventAdapter eventAdapter = getEventAdapter();
         EventListener[] filters = eventAdapter.getFilters(); if (filters.length == 0) return;
-        ViewEvent.Type eventType = anEvent.getType();
+        EventType eventType = anEvent.getType();
 
         // Iterate over filters: If event type supported, send to filter
         for (EventListener lsnr : filters) {
@@ -2462,7 +2462,7 @@ public class View extends PropObject {
         // Get event handlers and event type
         EventAdapter eventAdapter = getEventAdapter();
         EventListener[] handlers = eventAdapter.getHandlers(); if (handlers.length == 0) return;
-        ViewEvent.Type eventType = anEvent.getType();
+        EventType eventType = anEvent.getType();
 
         // Iterate over handlers: If event type supported, send to handler
         for (EventListener lsnr : handlers) {

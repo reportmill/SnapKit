@@ -315,8 +315,8 @@ public class CJScreen {
 
         // If MousePressView wants DragGesture, go ahead and send event (start drag will just set cjdom._dragGestureDataTransfer)
         for (View mousePressV = mousePressView; mousePressV != null; mousePressV = mousePressV.getParent()) {
-            if (mousePressV.getEventAdapter().isTypeEnabled(ViewEvent.Type.DragGesture)) {
-                ViewEvent dragGestureEvent = createEvent(mouseDownWin, mouseDownEvent, ViewEvent.Type.DragGesture, null);
+            if (mousePressV.getEventAdapter().isTypeEnabled(EventType.DragGesture)) {
+                ViewEvent dragGestureEvent = createEvent(mouseDownWin, mouseDownEvent, EventType.DragGesture, null);
                 mouseDownWin.dispatchEventToWindow(dragGestureEvent);
                 break;
             }
@@ -531,7 +531,7 @@ public class CJScreen {
     /**
      * Creates an Event.
      */
-    ViewEvent createEvent(WindowView aWin, Object anEvent, ViewEvent.Type aType, String aName)
+    ViewEvent createEvent(WindowView aWin, Object anEvent, EventType aType, String aName)
     {
         View rootView = aWin.getRootView();
         ViewEvent event = ViewEvent.createEvent(rootView, anEvent, aType, aName);

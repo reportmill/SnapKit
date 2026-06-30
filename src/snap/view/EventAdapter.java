@@ -5,7 +5,6 @@ package snap.view;
 import java.util.*;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
-import snap.view.ViewEvent.Type;
 
 /**
  * This class manages which node events are sent to which targets.
@@ -42,7 +41,7 @@ public class EventAdapter {
     /**
      * Adds an event filter.
      */
-    public void addFilter(EventListener aLsnr, Type ... theTypes)
+    public void addFilter(EventListener aLsnr, EventType... theTypes)
     {
         if (_filters == EMPTY_LISTENER_LIST) _filters = new EventListenerList();
         _filters.addListener(aLsnr, theTypes);
@@ -51,7 +50,7 @@ public class EventAdapter {
     /**
      * Removes an event filter.
      */
-    public void removeFilter(EventListener aLsnr, Type ... theTypes)
+    public void removeFilter(EventListener aLsnr, EventType... theTypes)
     {
         _filters.removeListener(aLsnr, theTypes);
     }
@@ -59,7 +58,7 @@ public class EventAdapter {
     /**
      * Adds an event handler.
      */
-    public void addHandler(EventListener aLsnr, Type ... theTypes)
+    public void addHandler(EventListener aLsnr, EventType... theTypes)
     {
         if (_handlers == EMPTY_LISTENER_LIST) _handlers = new EventListenerList();
         _handlers.addListener(aLsnr, theTypes);
@@ -68,7 +67,7 @@ public class EventAdapter {
     /**
      * Removes an event handler.
      */
-    public void removeHandler(EventListener aLsnr, Type ... theTypes)
+    public void removeHandler(EventListener aLsnr, EventType... theTypes)
     {
         _handlers.removeListener(aLsnr, theTypes);
     }
@@ -76,27 +75,27 @@ public class EventAdapter {
     /**
      * Returns whether given type is enabled.
      */
-    public boolean isTypeEnabled(Type aType)  { return isFilterTypeEnabled(aType) || isHandlerTypeEnabled(aType); }
+    public boolean isTypeEnabled(EventType aType)  { return isFilterTypeEnabled(aType) || isHandlerTypeEnabled(aType); }
 
     /**
      * Returns whether given type is enabled for any filter.
      */
-    public boolean isFilterTypeEnabled(Type aType)  { return _filters.isTypeEnabled(aType); }
+    public boolean isFilterTypeEnabled(EventType aType)  { return _filters.isTypeEnabled(aType); }
 
     /**
      * Returns whether given type is enabled for given filter.
      */
-    public boolean isFilterTypeEnabledForFilter(Type aType, EventListener aFilter)  { return _filters.isTypeEnabledForListener(aType, aFilter); }
+    public boolean isFilterTypeEnabledForFilter(EventType aType, EventListener aFilter)  { return _filters.isTypeEnabledForListener(aType, aFilter); }
 
     /**
      * Returns whether given type is enabled for any filter.
      */
-    public boolean isHandlerTypeEnabled(Type aType)  { return _handlers.isTypeEnabled(aType); }
+    public boolean isHandlerTypeEnabled(EventType aType)  { return _handlers.isTypeEnabled(aType); }
 
     /**
      * Returns whether given type is enabled for given filter.
      */
-    public boolean isHandlerTypeEnabledForHandler(Type aType, EventListener aHandler)  { return _handlers.isTypeEnabledForListener(aType, aHandler); }
+    public boolean isHandlerTypeEnabledForHandler(EventType aType, EventListener aHandler)  { return _handlers.isTypeEnabledForListener(aType, aHandler); }
 
     /**
      * This class manages a list of event listeners.
@@ -107,7 +106,7 @@ public class EventAdapter {
         protected EventListener[] _listeners = EMPTY_LISTENER_ARRAY;
 
         // A map of listeners to types
-        protected Map <Object,Set<Type>> _listenerTypes = new HashMap<>();
+        protected Map <Object,Set<EventType>> _listenerTypes = new HashMap<>();
 
         // Bit set of enabled event types indexed by event Type.ordinal()
         private BitSet _enabledTypesBitSet = new BitSet();
@@ -126,13 +125,13 @@ public class EventAdapter {
         /**
          * Adds a given event listener for given types.
          */
-        public void addListener(EventListener aLsnr, ViewEvent.Type ... theTypes)
+        public void addListener(EventListener aLsnr, EventType... theTypes)
         {
             _listeners = ArrayUtils.addId(_listeners, aLsnr);
 
             // Add new types and enable
-            Set<Type> eventTypes = _listenerTypes.computeIfAbsent(aLsnr, k -> new HashSet<>());
-            for (Type eventType : theTypes) {
+            Set<EventType> eventTypes = _listenerTypes.computeIfAbsent(aLsnr, k -> new HashSet<>());
+            for (EventType eventType : theTypes) {
                 eventTypes.add(eventType);
                 _enabledTypesBitSet.set(eventType.ordinal(), true);
             }
@@ -141,17 +140,17 @@ public class EventAdapter {
         /**
          * Removes given event listener.
          */
-        public void removeListener(EventListener aLsnr, ViewEvent.Type ... theTypes)
+        public void removeListener(EventListener aLsnr, EventType... theTypes)
         {
             // Update types from given types
-            Set<Type> eventTypes = _listenerTypes.get(aLsnr);
+            Set<EventType> eventTypes = _listenerTypes.get(aLsnr);
             if (eventTypes == null)
                 return;
             if (theTypes.length == 0) {
-                theTypes = eventTypes.toArray(new Type[0]);
+                theTypes = eventTypes.toArray(new EventType[0]);
                 eventTypes.clear();
             }
-            else for (Type eventType : theTypes)
+            else for (EventType eventType : theTypes)
                 eventTypes.remove(eventType);
 
             // If empty, remove types for listener
@@ -159,7 +158,7 @@ public class EventAdapter {
                 _listenerTypes.remove(aLsnr);
 
             // Reset enabled types
-            for (Type eventType : theTypes) {
+            for (EventType eventType : theTypes) {
                 boolean enabled = ListUtils.hasMatch(_listenerTypes.values(), set -> set.contains(eventType));
                 _enabledTypesBitSet.set(eventType.ordinal(), enabled);
             }
@@ -172,14 +171,14 @@ public class EventAdapter {
         /**
          * Returns whether given type is enabled.
          */
-        public boolean isTypeEnabled(Type aType)  { return _enabledTypesBitSet.get(aType.ordinal()); }
+        public boolean isTypeEnabled(EventType aType)  { return _enabledTypesBitSet.get(aType.ordinal()); }
 
         /**
          * Returns whether given type is enabled for given listener.
          */
-        public boolean isTypeEnabledForListener(Type aType, EventListener aLsnr)
+        public boolean isTypeEnabledForListener(EventType aType, EventListener aLsnr)
         {
-            Set<Type> listenerTypes = _listenerTypes.get(aLsnr);
+            Set<EventType> listenerTypes = _listenerTypes.get(aLsnr);
             return listenerTypes != null && listenerTypes.contains(aType);
         }
     }

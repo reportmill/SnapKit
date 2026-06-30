@@ -262,17 +262,17 @@ public class CJEvent extends ViewEvent {
     /**
      * Returns the event type.
      */
-    protected Type getTypeImpl()
+    protected EventType getTypeImpl()
     {
         Event event = (Event) getEvent();
         String type = event.getType();
         return switch (type) {
-            case "dragstart" -> Type.DragGesture;
-            case "dragend" -> Type.DragSourceEnd;
-            case "dragenter" -> Type.DragEnter;
-            case "dragexit" -> Type.DragExit;
-            case "dragover" -> Type.DragOver;
-            case "drop" -> Type.DragDrop;
+            case "dragstart" -> EventType.DragGesture;
+            case "dragend" -> EventType.DragSourceEnd;
+            case "dragenter" -> EventType.DragEnter;
+            case "dragexit" -> EventType.DragExit;
+            case "dragover" -> EventType.DragOver;
+            case "drop" -> EventType.DragDrop;
             default -> null;
         };
     }

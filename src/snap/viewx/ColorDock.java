@@ -44,7 +44,7 @@ public class ColorDock extends View {
         super();
         addEventHandler(this::handleMouseEvent, MousePress, MouseRelease);
         addEventHandler(this::handleDragEvent, DragEvents);
-        addEventHandler(this::handleDragGestureEvent, ViewEvent.Type.DragGesture, ViewEvent.Type.DragSourceEnd);
+        addEventHandler(this::handleDragGestureEvent, EventType.DragGesture, EventType.DragSourceEnd);
 
         // Create ColorWell
         _colorWell = new ColorWell();

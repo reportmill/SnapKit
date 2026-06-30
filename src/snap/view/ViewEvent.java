@@ -21,7 +21,7 @@ public abstract class ViewEvent implements Cloneable {
     private String  _name = "";
     
     // The UI event type
-    protected Type  _type;
+    protected EventType _type;
     
     // When the event was sent
     private long  _when;
@@ -98,7 +98,7 @@ public abstract class ViewEvent implements Cloneable {
     /**
      * Returns the event type.
      */
-    public Type getType()
+    public EventType getType()
     {
         if (_type != null) return _type;
         return _type = getTypeImpl();
@@ -107,12 +107,12 @@ public abstract class ViewEvent implements Cloneable {
     /**
      * Returns the event type.
      */
-    protected abstract Type getTypeImpl();
+    protected abstract EventType getTypeImpl();
 
     /**
      * Sets the event type.
      */
-    public void setType(Type aType)  { _type = aType; }
+    public void setType(EventType aType)  { _type = aType; }
 
     /**
      * Sets the event that precipitated this event (optional).
@@ -136,7 +136,7 @@ public abstract class ViewEvent implements Cloneable {
     /**
      * Returns whether event is action event.
      */
-    public boolean isActionEvent()  { return getType() == Type.Action; }
+    public boolean isActionEvent()  { return getType() == EventType.Action; }
 
     /**
      * Returns the shared action, if set.
@@ -153,25 +153,25 @@ public abstract class ViewEvent implements Cloneable {
      */
     public boolean isMouseEvent()
     {
-        Type t = getType();
-        return t==Type.MouseEnter || t==Type.MouseMove || t==Type.MouseExit || t==Type.MousePress ||
-            t==Type.MouseDrag || t==Type.MouseRelease;
+        EventType t = getType();
+        return t== EventType.MouseEnter || t== EventType.MouseMove || t== EventType.MouseExit || t== EventType.MousePress ||
+            t== EventType.MouseDrag || t== EventType.MouseRelease;
     }
 
     /**
      * Returns whether event is mouse pressed.
      */
-    public boolean isMousePress()  { return getType()==Type.MousePress; }
+    public boolean isMousePress()  { return getType()== EventType.MousePress; }
 
     /**
      * Returns whether event is mouse dragged.
      */
-    public boolean isMouseDrag()  { return getType()==Type.MouseDrag; }
+    public boolean isMouseDrag()  { return getType()== EventType.MouseDrag; }
 
     /**
      * Returns whether event is mouse released.
      */
-    public boolean isMouseRelease()  { return getType()==Type.MouseRelease; }
+    public boolean isMouseRelease()  { return getType()== EventType.MouseRelease; }
 
     /**
      * Returns whether event is mouse clicked.
@@ -221,110 +221,110 @@ public abstract class ViewEvent implements Cloneable {
     /**
      * Returns whether event is mouse entered.
      */
-    public boolean isMouseEnter()  { return getType() == Type.MouseEnter; }
+    public boolean isMouseEnter()  { return getType() == EventType.MouseEnter; }
 
     /**
      * Returns whether event is mouse moved.
      */
-    public boolean isMouseMove()  { return getType() == Type.MouseMove; }
+    public boolean isMouseMove()  { return getType() == EventType.MouseMove; }
 
     /**
      * Returns whether event is mouse exited.
      */
-    public boolean isMouseExit()  { return getType() == Type.MouseExit; }
+    public boolean isMouseExit()  { return getType() == EventType.MouseExit; }
 
     /**
      * Returns whether event is key event.
      */
     public boolean isKeyEvent()
     {
-        Type type = getType();
-        return type == Type.KeyPress || type == Type.KeyType || type == Type.KeyRelease;
+        EventType type = getType();
+        return type == EventType.KeyPress || type == EventType.KeyType || type == EventType.KeyRelease;
     }
 
     /**
      * Returns whether event is key pressed.
      */
-    public boolean isKeyPress()  { return getType() == Type.KeyPress; }
+    public boolean isKeyPress()  { return getType() == EventType.KeyPress; }
 
     /**
      * Returns whether event is key released.
      */
-    public boolean isKeyRelease()  { return getType() == Type.KeyRelease; }
+    public boolean isKeyRelease()  { return getType() == EventType.KeyRelease; }
 
     /**
      * Returns whether event is key typed.
      */
-    public boolean isKeyType()  { return getType() == Type.KeyType; }
+    public boolean isKeyType()  { return getType() == EventType.KeyType; }
 
     /**
      * Returns whether event is scroll.
      */
-    public boolean isScroll()  { return getType() == Type.Scroll; }
+    public boolean isScroll()  { return getType() == EventType.Scroll; }
 
     /**
      * Returns whether event is any drag event.
      */
     public boolean isDragEvent()
     {
-        Type type = getType();
-        return type == Type.DragEnter || type == Type.DragOver || type == Type.DragExit || type == Type.DragDrop;
+        EventType type = getType();
+        return type == EventType.DragEnter || type == EventType.DragOver || type == EventType.DragExit || type == EventType.DragDrop;
     }
 
     /**
      * Returns whether event is drag enter.
      */
-    public boolean isDragEnter()  { return getType() == Type.DragEnter; }
+    public boolean isDragEnter()  { return getType() == EventType.DragEnter; }
 
     /**
      * Returns whether event is drag over.
      */
-    public boolean isDragOver()  { return getType() == Type.DragOver; }
+    public boolean isDragOver()  { return getType() == EventType.DragOver; }
 
     /**
      * Returns whether event is drag exit.
      */
-    public boolean isDragExit()  { return getType() == Type.DragExit; }
+    public boolean isDragExit()  { return getType() == EventType.DragExit; }
 
     /**
      * Returns whether event is drop event.
      */
-    public boolean isDragDrop()  { return getType() == Type.DragDrop; }
+    public boolean isDragDrop()  { return getType() == EventType.DragDrop; }
 
     /**
      * Returns whether event is drop event.
      */
-    public boolean isDragDropEvent()  { return getType() == Type.DragDrop; }
+    public boolean isDragDropEvent()  { return getType() == EventType.DragDrop; }
 
     /**
      * Returns whether event is drag source event.
      */
     public boolean isDragSourceEvent()
     {
-        Type type = getType();
-        return type == Type.DragGesture || type == Type.DragSourceEnter || type == Type.DragSourceOver ||
-            type == Type.DragSourceExit || type == Type.DragSourceEnd;
+        EventType type = getType();
+        return type == EventType.DragGesture || type == EventType.DragSourceEnter || type == EventType.DragSourceOver ||
+            type == EventType.DragSourceExit || type == EventType.DragSourceEnd;
     }
 
     /**
      * Returns whether event is DragGesture event.
      */
-    public boolean isDragGesture()  { return getType() == Type.DragGesture; }
+    public boolean isDragGesture()  { return getType() == EventType.DragGesture; }
 
     /**
      * Returns whether event is DragSourceEnter event.
      */
-    public boolean isDragSourceEnter()  { return getType() == Type.DragSourceEnter; }
+    public boolean isDragSourceEnter()  { return getType() == EventType.DragSourceEnter; }
 
     /**
      * Returns whether event is DragSourceExit event.
      */
-    public boolean isDragSourceExit()  { return getType() == Type.DragSourceExit; }
+    public boolean isDragSourceExit()  { return getType() == EventType.DragSourceExit; }
 
     /**
      * Returns whether event is DragSourceEnd event.
      */
-    public boolean isDragSourceEnd()  { return getType() == Type.DragSourceEnd; }
+    public boolean isDragSourceEnd()  { return getType() == EventType.DragSourceEnd; }
 
     /**
      * Returns the value encapsulated by the event widget.
@@ -652,7 +652,7 @@ public abstract class ViewEvent implements Cloneable {
     /**
      * Creates an Event.
      */
-    public static ViewEvent createEvent(View aView, Object anEvent, ViewEvent.Type aType, String aName)
+    public static ViewEvent createEvent(View aView, Object anEvent, EventType aType, String aName)
     {
         ViewEvent event = ViewEnv.getEnv().createEvent(aView, anEvent, aType, aName);
         return event;
@@ -664,35 +664,6 @@ public abstract class ViewEvent implements Cloneable {
     public static void setEventSharedAction(ViewEvent anEvent, SharedAction sharedAction)
     {
         anEvent.setSharedAction(sharedAction);
-    }
-
-    /**
-     * Types for events.
-     */
-    public enum Type {
-
-        /** Action event. */
-        Action,
-
-        /** Key events. */
-        KeyPress, KeyRelease, KeyType,
-
-        /** Mouse events.*/
-        MousePress, MouseDrag, MouseRelease, MouseEnter, MouseMove, MouseExit,
-
-        /** Scroll event. */
-        Scroll,
-
-        /** Drag events. */
-        DragEnter, DragOver, DragExit, DragDrop,
-
-        /** DragSource events. */
-        DragGesture, DragSourceEnter, DragSourceOver, DragSourceExit, DragSourceEnd;
-
-        // Conveniences for common types
-        public static final Type[] KeyEvents = { KeyPress, KeyRelease, KeyType };
-        public static final Type[] MouseEvents = { MousePress, MouseDrag, MouseRelease, MouseEnter, MouseMove, MouseExit };
-        public static final Type[] DragEvents = { DragEnter, DragExit, DragOver, DragDrop };
     }
 
     /** Prints "not implemented" for string (method name). */

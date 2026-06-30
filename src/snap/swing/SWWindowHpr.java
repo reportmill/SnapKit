@@ -362,7 +362,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     private void handleSwingWindowClosingEvent(WindowEvent anEvent)
     {
         // Create event and dispatch to window
-        ViewEvent event = ViewEvent.createEvent(_snapWindow, anEvent, ViewEvent.Type.Action, null);
+        ViewEvent event = ViewEvent.createEvent(_snapWindow, anEvent, EventType.Action, null);
         ViewEvent.setEventSharedAction(event, SharedAction.WindowClose_Action);
         _snapWindow.dispatchEventToWindow(event);
 
