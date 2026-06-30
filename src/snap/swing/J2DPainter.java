@@ -6,10 +6,7 @@ import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
-
-import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.geom.Transform;
 import snap.gfx.*;
@@ -18,6 +15,9 @@ import snap.gfx.*;
  * A Painter implementation that uses Java2D (Graphics2D).
  */
 public class J2DPainter extends Painter {
+
+    // The current paint
+    private Paint _paint = Color.BLACK;
 
     // The Stroke
     private Stroke  _stroke = Stroke.getStrokeRound(1);
@@ -53,12 +53,7 @@ public class J2DPainter extends Painter {
     /**
      * Returns the current paint.
      */
-    public Paint getPaint()
-    {
-        java.awt.Paint awtPaint = _gfx.getPaint();
-        Paint snapPaint = AWT.awtToSnapPaint(awtPaint);
-        return snapPaint;
-    }
+    public Paint getPaint()  { return _paint; }
 
     /**
      * Sets the paint in painter.
@@ -67,6 +62,7 @@ public class J2DPainter extends Painter {
     {
         java.awt.Paint awtPaint = AWT.snapToAwtPaint(aPaint);
         _gfx.setPaint(awtPaint);
+        _paint = aPaint;
     }
 
     /**
@@ -112,13 +108,13 @@ public class J2DPainter extends Painter {
     public Composite getComposite()
     {
         java.awt.Composite comp = _gfx.getComposite();
-        int rule = comp instanceof AlphaComposite ? ((AlphaComposite)comp).getRule() : AlphaComposite.SRC_OVER;
-        switch(rule) {
-            case AlphaComposite.SRC_IN: return Composite.SRC_IN;
-            case AlphaComposite.DST_IN: return Composite.DST_IN;
-            case AlphaComposite.DST_OUT: return Composite.DST_OUT;
-            default: return Composite.SRC_OVER;
-        }
+        int rule = comp instanceof AlphaComposite alphaComp ? alphaComp.getRule() : AlphaComposite.SRC_OVER;
+        return switch (rule) {
+            case AlphaComposite.SRC_IN -> Composite.SRC_IN;
+            case AlphaComposite.DST_IN -> Composite.DST_IN;
+            case AlphaComposite.DST_OUT -> Composite.DST_OUT;
+            default -> Composite.SRC_OVER;
+        };
     }
 
     /**
@@ -127,11 +123,11 @@ public class J2DPainter extends Painter {
     public void setComposite(Composite aComp)
     {
         float opac = (float)getOpacity();
-        switch(aComp) {
-            case SRC_OVER: _gfx.setComposite(AlphaComposite.SrcOver.derive(opac)); break;
-            case SRC_IN: _gfx.setComposite(AlphaComposite.SrcIn.derive(opac)); break;
-            case DST_IN: _gfx.setComposite(AlphaComposite.DstIn.derive(opac)); break;
-            case DST_OUT: _gfx.setComposite(AlphaComposite.DstOut.derive(opac)); break;
+        switch (aComp) {
+            case SRC_OVER -> _gfx.setComposite(AlphaComposite.SrcOver.derive(opac));
+            case SRC_IN -> _gfx.setComposite(AlphaComposite.SrcIn.derive(opac));
+            case DST_IN -> _gfx.setComposite(AlphaComposite.DstIn.derive(opac));
+            case DST_OUT -> _gfx.setComposite(AlphaComposite.DstOut.derive(opac));
         }
     }
 
@@ -167,6 +163,12 @@ public class J2DPainter extends Painter {
      */
     public void fill(Shape aShape)
     {
+        // If gradient is set, resize to given shape
+        if (getPaint() instanceof GradientPaint gradientPaint && !gradientPaint.isAbsolute()) {
+            GradientPaint gradientPaint2 = gradientPaint.copyForRect(aShape.getBounds());
+            setPaint(gradientPaint2);
+        }
+
         _gfx.fill(AWT.snapToAwtShape(aShape));
     }
 
@@ -228,15 +230,6 @@ public class J2DPainter extends Painter {
             // Return glyph vector
             g2d.drawGlyphVector(gv, (float)aX, (float)aY);
         }
-    }
-
-    /**
-     * Return string bounds.
-     */
-    public Rect getStringBounds(String aStr)
-    {
-        Rectangle2D r = _gfx.getFont().getStringBounds(aStr, _gfx.getFontRenderContext());
-        return new Rect(r.getX(), r.getY(), r.getWidth(), r.getHeight());
     }
 
     /**
@@ -310,13 +303,12 @@ public class J2DPainter extends Painter {
     /**
      * Sets whether antialiasing.
      */
-    public boolean setAntialiasingText(boolean aValue)
+    public void setAntialiasingText(boolean aValue)
     {
-        boolean old = isAntialiasingText();
+        if (aValue == isAntialiasingText()) return;
         if (aValue)
             _gfx.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         else _gfx.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-        return old;
     }
 
     /**
@@ -330,13 +322,12 @@ public class J2DPainter extends Painter {
     /**
      * Sets whether using fractional text metrics.
      */
-    public boolean setFractionalMetrics(boolean aValue)
+    public void setFractionalMetrics(boolean aValue)
     {
-        boolean old = isFractionalTextMetrics();
+        if (aValue == isFractionalTextMetrics()) return;
         if (aValue)
             _gfx.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
         else _gfx.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
-        return old;
     }
 
     /**
@@ -348,11 +339,11 @@ public class J2DPainter extends Painter {
         super.setImageQuality(aValue);
 
         // If above 2/3: BI-CUBIC interpolation
-        if (aValue>.67)
+        if (aValue > .67)
             _gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
         // If above 1/3: Bilinear
-        else if (aValue>.33)
+        else if (aValue > .33)
             _gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
         // Nearest neighbor
@@ -398,5 +389,5 @@ public class J2DPainter extends Painter {
     public Graphics2D getNative()  { return _gfx; }
 
     /** Rounds a value. */
-    private static final int rnd(double aVal)  { return (int)Math.round(aVal); }
+    private static int rnd(double aVal)  { return (int)Math.round(aVal); }
 }

@@ -18,7 +18,7 @@ import snap.web.WebURL;
 public class SWWindowHpr extends WindowView.WindowHpr {
 
     // The snap Window
-    private WindowView _win;
+    private WindowView _snapWindow;
 
     // The Swing Window
     private Window _swingWindow;
@@ -47,22 +47,21 @@ public class SWWindowHpr extends WindowView.WindowHpr {
      * Initializes helper for given window.
      */
     @Override
-    public void initForWindow(WindowView aWin)
+    public void initForWindow(WindowView snapWindow)
     {
-        // Set window
-        _win = aWin;
+        _snapWindow = snapWindow;
 
         // Create native
         _swingWindow = createSwingWindow();
-        ViewUtils.setNative(_win, _swingWindow);
+        ViewUtils.setNative(_snapWindow, _swingWindow);
 
         // Set RootView var and create native RootView
-        _rootView = aWin.getRootView();
-        _rootViewNative = new SWRootView(_win, _rootView);
+        _rootView = snapWindow.getRootView();
+        _rootViewNative = new SWRootView(_snapWindow, _rootView);
         ViewUtils.setNative(_rootView, _rootViewNative);
 
         // Add listener to handle window prop changes
-        _win.addPropChangeListener(this::handleSnapWindowPropChange);
+        _snapWindow.addPropChangeListener(this::handleSnapWindowPropChange);
     }
 
     /**
@@ -71,7 +70,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     private Window createSwingWindow()
     {
         // If standard TYPE_MAIN window, return new JFrame
-        if (_win.getType() == WindowView.Type.MAIN)
+        if (_snapWindow.getType() == WindowView.Type.MAIN)
             return new JFrame();
 
         // Get window client/owner (if requested by/for view in another window)
@@ -86,22 +85,22 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     public void initializeNativeWindow()
     {
         // Set title, resizeable
-        setTitle(_win.getTitle());
-        setResizable(_win.isResizable());
+        setTitle(_snapWindow.getTitle());
+        setResizable(_snapWindow.isResizable());
 
         // Configure JDialog: Title, Resizable, Modal
         if (_swingWindow instanceof JDialog jdialog) {
-            jdialog.setModal(_win.isModal());
-            switch (_win.getType()) {
+            jdialog.setModal(_snapWindow.isModal());
+            switch (_snapWindow.getType()) {
                 case UTILITY -> jdialog.getRootPane().putClientProperty("Window.style", "small");
                 case PLAIN -> jdialog.setUndecorated(true);
             }
         }
 
         // Set common attributes
-        _swingWindow.setFocusableWindowState(_win.isFocusable());
-        _swingWindow.setAlwaysOnTop(_win.isAlwaysOnTop());
-        _swingWindow.setOpacity((float) _win.getOpacity());
+        _swingWindow.setFocusableWindowState(_snapWindow.isFocusable());
+        _swingWindow.setAlwaysOnTop(_snapWindow.isAlwaysOnTop());
+        _swingWindow.setOpacity((float) _snapWindow.getOpacity());
 
         // Install RootView Native as ContentPane
         RootPaneContainer rootPaneContainer = (RootPaneContainer) _swingWindow;
@@ -112,7 +111,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
 
         // Set WindowView insets
         java.awt.Insets insAWT = _swingWindow.getInsets();
-        _win.setPadding(new Insets(insAWT.top, insAWT.right, insAWT.bottom, insAWT.left));
+        _snapWindow.setPadding(new Insets(insAWT.top, insAWT.right, insAWT.bottom, insAWT.left));
 
         // Add component listener to sync win bounds changes with WindowView/RootView
         _swingWindow.addComponentListener(new ComponentAdapter() {
@@ -140,8 +139,8 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     public void show()
     {
         // Set native window location, make visible and notify ShowingChanged (so change is reflected immediately)
-        int winX = (int) Math.round(_win.getX());
-        int winY = (int) Math.round(_win.getY());
+        int winX = (int) Math.round(_snapWindow.getX());
+        int winY = (int) Math.round(_snapWindow.getY());
 
         // Set WinNtv location and make visible
         _swingWindow.setLocation(winX, winY);
@@ -149,13 +148,13 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         handleSwingWindowShowingChange();
 
         // If window is modal, just return
-        if (_win.isModal())
+        if (_snapWindow.isModal())
             return;
 
         // If window has frame save name, set listener
-        if (_win.getSaveName() != null && _win.getMetadataForKey("FrameSaveListener") == null) {
-            FrameSaveListener fsl = new FrameSaveListener(_win);
-            _win.setMetadataForKey("FrameSaveListener", fsl);
+        if (_snapWindow.getSaveName() != null && _snapWindow.getMetadataForKey("FrameSaveListener") == null) {
+            FrameSaveListener fsl = new FrameSaveListener(_snapWindow);
+            _snapWindow.setMetadataForKey("FrameSaveListener", fsl);
             _swingWindow.addComponentListener(fsl);
         }
     }
@@ -238,7 +237,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     private void handleSwingWindowShowingChange()
     {
         boolean showing = _swingWindow.isShowing();
-        ViewUtils.setShowing(_win, showing);
+        ViewUtils.setShowing(_snapWindow, showing);
     }
 
     /**
@@ -250,11 +249,11 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         int swingY = _swingWindow.getY();
         int swingW = _swingWindow.getWidth();
         int swingH = _swingWindow.getHeight();
-        _win.setBounds(swingX, swingY, swingW, swingH);
+        _snapWindow.setBounds(swingX, swingY, swingW, swingH);
 
         // If window deactivated and it has Popup, hide popup
-        if (_win.getPopup() != null)
-            _win.getPopup().hide();
+        if (_snapWindow.getPopup() != null)
+            _snapWindow.getPopup().hide();
     }
 
     /**
@@ -264,14 +263,14 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     {
         // Update Window.Focused from SwingWindow.Active
         boolean active = _swingWindow.isActive();
-        if (_win.isFocusable())
-            ViewUtils.setFocused(_win, active);
+        if (_snapWindow.isFocusable())
+            ViewUtils.setFocused(_snapWindow, active);
 
         // If window deactivated and it has Popup and popup isn't new active window, hide popup
-        if (!active && _win.getPopup() != null) {
-            PopupWindow popupWindow = _win.getPopup();
+        if (!active && _snapWindow.getPopup() != null) {
+            PopupWindow popupWindow = _snapWindow.getPopup();
             if (popupWindow.getNative() != anEvent.getOppositeWindow())
-                _win.getPopup().hide();
+                _snapWindow.getPopup().hide();
         }
     }
 
@@ -307,7 +306,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
      */
     private void handleSnapWindowImageChange()
     {
-        Image windowImage = _win.getImage();
+        Image windowImage = _snapWindow.getImage();
         _swingWindow.setIconImage(AWT.snapToAwtImage(windowImage));
     }
 
@@ -317,7 +316,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     private void handleSnapWindowDocumentUrlChange()
     {
         // Get Java file
-        WebURL documentUrl = _win.getDocumentUrl();
+        WebURL documentUrl = _snapWindow.getDocumentUrl();
         File documentFile = documentUrl != null ? documentUrl.getJavaFile() : null;
 
         // Install in RootPane
@@ -334,7 +333,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
      */
     private void handleSnapWindowActiveCursorChange()
     {
-        _cursor = _win.getActiveCursor();
+        _cursor = _snapWindow.getActiveCursor();
         if (_setRootViewNativeCursorRun == null)
             SwingUtilities.invokeLater(_setRootViewNativeCursorRun = this::setRootViewNativeCursor);
     }
@@ -344,7 +343,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
      */
     private void setRootViewNativeCursor()
     {
-        java.awt.Cursor cursor = AWT.get(_cursor);
+        java.awt.Cursor cursor = AWT.snapToAwtCursor(_cursor);
         _rootViewNative.setCursor(cursor);
         _setRootViewNativeCursorRun = null;
     }
@@ -363,9 +362,9 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     private void handleSwingWindowClosingEvent(WindowEvent anEvent)
     {
         // Create event and dispatch to window
-        ViewEvent event = ViewEvent.createEvent(_win, anEvent, ViewEvent.Type.Action, null);
+        ViewEvent event = ViewEvent.createEvent(_snapWindow, anEvent, ViewEvent.Type.Action, null);
         ViewEvent.setEventSharedAction(event, SharedAction.WindowClose_Action);
-        _win.dispatchEventToWindow(event);
+        _snapWindow.dispatchEventToWindow(event);
 
         // If Window Close, update JFrame.DefaultCloseOperation
         if (_swingWindow instanceof JFrame jframe && event.isConsumed())
@@ -378,7 +377,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
     private Window getClientWindow()
     {
         // Get window ClientView.Window.Helper.Native (just return if ClientView is null)
-        View clientView = _win.getClientView(); if (clientView == null) return null;
+        View clientView = _snapWindow.getClientView(); if (clientView == null) return null;
         WindowView clientWindow = clientView.getWindow(); if (clientWindow == null) return null; // Shouldn't be possible
 
         // If ClientView in window that's not showing, get win from RootView.Native instead

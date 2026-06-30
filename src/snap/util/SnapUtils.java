@@ -304,12 +304,4 @@ public class SnapUtils {
         if (doOnce(aString))
             aStream.println(aString);
     }
-
-    /**
-     * Returns a "not implemented" exception for string (method name).
-     */
-    public static RuntimeException notImpl(Object anObj, String aStr)
-    {
-        return new RuntimeException(anObj.getClass().getName() + ": Not implemented: " + aStr);
-    }
 }
