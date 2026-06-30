@@ -13,7 +13,7 @@ import snap.util.*;
  * A standard view implementation to show graphics and handle events and form the basis of all views (buttons, sliders,
  * text fields, etc.).
  */
-public class View extends PropObject {
+public class View extends PropObject implements EventType.AllTypes {
 
     // The parent of this view
     private ParentView  _parent;
@@ -191,22 +191,6 @@ public class View extends PropObject {
 
     // Constants for property defaults
     private static final boolean DEFAULT_VERTICAL = false;
-
-    // Convenience for common events
-    public static final EventType Action = EventType.Action;
-    public static final EventType KeyPress = EventType.KeyPress;
-    public static final EventType KeyRelease = EventType.KeyRelease;
-    public static final EventType KeyType = EventType.KeyType;
-    public static final EventType MousePress = EventType.MousePress;
-    public static final EventType MouseDrag = EventType.MouseDrag;
-    public static final EventType MouseRelease = EventType.MouseRelease;
-    public static final EventType MouseEnter = EventType.MouseEnter;
-    public static final EventType MouseMove = EventType.MouseMove;
-    public static final EventType MouseExit = EventType.MouseExit;
-    public static final EventType Scroll = EventType.Scroll;
-    public static final EventType[] KeyEvents = EventType.KeyEvents;
-    public static final EventType[] MouseEvents = EventType.MouseEvents;
-    public static final EventType[] DragEvents = EventType.DragEvents;
 
     /**
      * Constructor.

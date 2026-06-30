@@ -226,7 +226,7 @@ public class TextAdapter extends PropObject {
         if (_textArea != null) {
             if (aValue) {
                 _textArea.addEventHandler(_textAreaEventLsnr, View.MousePress, View.MouseDrag, View.MouseRelease, View.MouseMove);
-                _textArea.addEventHandler(_textAreaEventLsnr, View.KeyEvents);
+                _textArea.addEventHandler(_textAreaEventLsnr, EventType.KeyEvents);
             }
             else _textArea.removeEventHandler(_textAreaEventLsnr);
         }

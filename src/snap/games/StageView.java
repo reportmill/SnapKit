@@ -65,8 +65,8 @@ public class StageView extends ChildView {
         setFocusable(true);
         setFocusWhenPressed(true);
 
-        addEventHandler(this::handleMouseEvent, MouseEvents);
-        addEventHandler(this::handleKeyEvent, KeyEvents);
+        addEventHandler(this::handleMouseEvent, EventType.MouseEvents);
+        addEventHandler(this::handleKeyEvent, EventType.KeyEvents);
 
         // Get default image for class and set
         Image defaultClassImage = Game.getImageForClass(getClass());

@@ -40,7 +40,7 @@ public class ColorWell extends View {
         super();
         addEventHandler(this::handleMouseReleaseEvent, MouseRelease);
         addEventHandler(this::handleDragEvent, DragEvents);
-        addEventHandler(this::handleDragGestureEvent, EventType.DragGesture, EventType.DragSourceEnd);
+        addEventHandler(this::handleDragGestureEvent, DragGesture, DragSourceEnd);
     }
 
     /**

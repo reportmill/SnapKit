@@ -10,7 +10,7 @@ import snap.util.*;
 /**
  * A base controller class that manages a UI View (usually loaded from a snp UI file).
  */
-public class ViewController extends PropObject {
+public class ViewController extends PropObject implements EventType.AllTypes {
 
     // The UI View
     private View  _ui;
@@ -50,26 +50,6 @@ public class ViewController extends PropObject {
 
     // Constants for properties
     public static final String Showing_Prop = "Showing";
-    
-    // Convenience for common events
-    public static final EventType Action = EventType.Action;
-    public static final EventType KeyPress = EventType.KeyPress;
-    public static final EventType KeyRelease = EventType.KeyRelease;
-    public static final EventType KeyType = EventType.KeyType;
-    public static final EventType MousePress = EventType.MousePress;
-    public static final EventType MouseDrag = EventType.MouseDrag;
-    public static final EventType MouseRelease = EventType.MouseRelease;
-    public static final EventType MouseEnter = EventType.MouseEnter;
-    public static final EventType MouseMove = EventType.MouseMove;
-    public static final EventType MouseExit = EventType.MouseExit;
-    public static final EventType DragEnter = EventType.DragEnter;
-    public static final EventType DragOver = EventType.DragOver;
-    public static final EventType DragExit = EventType.DragExit;
-    public static final EventType DragDrop = EventType.DragDrop;
-    public static final EventType DragGesture = EventType.DragGesture;
-    public EventType[] KeyEvents = EventType.KeyEvents;
-    public EventType[] MouseEvents = EventType.MouseEvents;
-    public EventType[] DragEvents = EventType.DragEvents;
 
     /**
      * Constructor.
