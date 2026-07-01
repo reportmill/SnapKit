@@ -3,12 +3,11 @@
  */
 package snap.gfx;
 import snap.geom.Rect;
-import snap.util.*;
 
 /**
  * A paint implementation to fill shapes with an image pattern.
  */
-public class ImagePaint implements Paint, XMLArchiver.Archivable {
+public class ImagePaint implements Paint {
 
     // The image
     private Image  _image;
@@ -174,81 +173,6 @@ public class ImagePaint implements Paint, XMLArchiver.Archivable {
         if (other._abs != _abs) return false;
         if (other._x != _x || other._y != _y || other._w != _w || other._h != _h) return false;
         return true;
-    }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        // Archive basic fill attributes and set type
-        XMLElement e = new XMLElement(getClass().getSimpleName());
-
-        // Archive ImageData
-        if (_image.getBytes() != null) {
-            String resName = anArchiver.addResource(_image.getBytes(), "" + System.identityHashCode(_image));
-            e.add("resource", resName);
-        }
-
-        // Archive Tile
-        if (!isAbsolute())
-            e.add("Tile", false);
-
-        // Archive bounds
-        if (_x != 0)
-            e.add("x", _x);
-        if (_y != 0)
-            e.add("y", _y);
-        if (_w != _image.getWidth())
-            e.add("w", _w);
-        if (_h != _image.getHeight())
-            e.add("h", _h);
-
-        // Return element
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive ImageName: get resource bytes, page and set ImageData
-        String iname = anElement.getAttributeValue("resource");
-        if (iname!=null) {
-            byte[] bytes = anArchiver.getResource(iname); // Get resource bytes
-            _image = Image.getImageForSource(bytes); // Create new image data
-            _w = _image.getWidth();
-            _h = _image.getHeight();
-        }
-
-        // Unarchive Tile, legacy FillStyle (Stretch=0, Tile=1, Fit=2, FitIfNeeded=3)
-        if (anElement.hasAttribute("Tile") && !anElement.getAttributeBoolValue("Tile") ||
-            (anElement.hasAttribute("fillstyle") && anElement.getAttributeIntValue("fillstyle")!=1)) {
-            _abs = false;
-            _w = _h = 1;
-        }
-
-        // Unarchive bounds
-        if (anElement.hasAttribute("x"))
-            _x = anElement.getAttributeFloatValue("x");
-        if (anElement.hasAttribute("y"))
-            _y = anElement.getAttributeFloatValue("y");
-        if (anElement.hasAttribute("w"))
-            _w = anElement.getAttributeFloatValue("w");
-        if (anElement.hasAttribute("h"))
-            _h = anElement.getAttributeFloatValue("h");
-
-        // Unarchive ScaleX, ScaleY
-        double sx = anElement.getAttributeFloatValue("scale-x", 1);
-        double sy = anElement.getAttributeFloatValue("scale-y", 1);
-        if (sx != 1 || sy != 1) {
-            _w = _abs ? _w*sx : sx;
-            _h = _abs ? _h*sy : sy;
-        }
-
-        // Return this image fill
-        return this;
     }
 
     /**

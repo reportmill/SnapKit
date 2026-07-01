@@ -3,8 +3,6 @@
  */
 package snap.gfx;
 import java.util.Arrays;
-import java.util.Objects;
-
 import snap.geom.Point;
 import snap.geom.Rect;
 import snap.geom.Transform;
@@ -13,7 +11,7 @@ import snap.util.*;
 /**
  * A Paint subclass to represent a gradient.
  */
-public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
+public class GradientPaint implements Paint, Cloneable {
     
     // The start points
     private double  _sx, _sy = .5;
@@ -192,12 +190,12 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
     /**
      * Returns the stop color at given index.
      */
-    public Color getStopColor(int anIndex)  { return _stops[anIndex].getColor(); }
+    public Color getStopColor(int anIndex)  { return _stops[anIndex].color(); }
 
     /**
      * Returns the stop offset at given index.
      */
-    public double getStopOffset(int anIndex)  { return _stops[anIndex].getOffset(); }
+    public double getStopOffset(int anIndex)  { return _stops[anIndex].offset(); }
 
     /**
      * Returns whether paint is defined in terms independent of primitive to be filled.
@@ -210,7 +208,7 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
     public boolean isOpaque()
     {
         for (int i=0, iMax=getStopCount(); i<iMax; i++)
-            if (!getStop(i).getColor().isOpaque())
+            if (!getStop(i).color().isOpaque())
                 return false;
         return true;
     }
@@ -330,94 +328,6 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
     }
 
     /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        // Archive basic fill attributes
-        String name = getClass().getSimpleName(); // "fill"
-        XMLElement e = new XMLElement(name);
-
-        // Archive Type
-        if (isRadial())
-            e.add("type", "radial");
-
-        // Archive Points/Roll
-        if (isRadial()) {
-            e.add("x0", _sx); e.add("y0", _sy);
-            e.add("x1", _ex); e.add("y1", _ey);
-        }
-        else if (getRoll() != 0)
-            e.add("roll", _roll);
-
-        // Archive first color
-        if (!getStopColor(0).equals(Color.BLACK))
-            e.add("color", "#" + getStopColor(0).toHexString());
-
-        // Archive all colors beyond the first one as color2,color3 (for compatibility)
-        for (int i=1, iMax=getStopCount(); i<iMax; ++i) {
-            Color c = getStopColor(i);
-            if (!c.equals(Color.BLACK))
-                e.add("color"+(i+1), "#" + c.toHexString());
-        }
-
-        // Archive stop positions (stop 0 defaults to 0.0, and last stop defaults to 1.0)
-        for (int i=0, iMax=getStopCount(); i<iMax; ++i) {
-            double offset = getStopOffset(i);
-            if (i == 0 && MathUtils.equalsZero(offset)) continue;
-            if (i == iMax-1 && MathUtils.equals(offset, 1)) continue;
-            e.add("stop"+(i==0 ? "" : (i+1)), offset);
-        }
-
-        // Archive the number of stops, since the defaults in the above lists make it possibly indeterminate
-        if (getStopCount() != 2)
-            e.add("nstops", getStopCount());
-
-        // Return element
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive type
-        String type = anElement.getAttributeValue("type", "linear");
-        if (type.equals("radial")) _type = Type.RADIAL;
-
-        // Unarchive points
-        _sx = anElement.getAttributeDoubleValue("x0", _sx);
-        _sy = anElement.getAttributeDoubleValue("y0", _sy);
-        _ex = anElement.getAttributeDoubleValue("x1", _ex);
-        _ey = anElement.getAttributeDoubleValue("y1", _ey);
-
-        // Unarchive roll
-        double roll = anElement.getAttributeFloatValue("roll");
-        if (roll != 0)
-            setRoll(roll, new Rect(0,0,1,1));
-
-        // Unarchive stops
-        int nstops = anElement.getAttributeIntValue("nstops", 2); _stops = new Stop[nstops];
-        for (int i=0; i<nstops; i++) {
-            String cstring = anElement.getAttributeValue("color" + (i==0 ? "" : (i+1))); // unarchive color,color2...
-            Color c = cstring==null ? Color.BLACK : new Color(cstring);
-            double offset;
-            XMLAttribute stopAttr = anElement.getAttribute("stop" + (i==0 ? "" : (i+1))); // unarchive stop,stop2...
-            if (stopAttr==null) {
-                if (i == 0) offset = 0;
-                else if (i == nstops-1) offset = 1;
-                else continue;
-            }
-            else offset = stopAttr.getFloatValue();
-            _stops[i] = new Stop(offset, c);
-        }
-
-        // Return this gradient paint
-        return this;
-    }
-
-    /**
      * Standard to string implementation.
      */
     public String toString()
@@ -431,37 +341,7 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
     /**
      * A class to describe gradient paint stops.
      */
-    public static class Stop {
-
-        // The offset of stop (0..1)
-        double   _offset;
-
-        // The color of stop
-        Color    _color;
-
-        /** Returns a new stop. */
-        public Stop(double anOffset, Color aColor)  { _offset = anOffset; _color = aColor; }
-
-        /** Returns the offset. */
-        public double getOffset()  { return _offset; }
-
-        /** Returns the color. */
-        public Color getColor()  { return _color; }
-
-        /** Standard equals implementation. */
-        public boolean equals(Object anObj)
-        {
-            if (anObj==this) return true;
-            Stop other = anObj instanceof Stop ? (Stop)anObj : null; if (other == null) return false;
-            return Objects.equals(_color, other._color) && MathUtils.equals(_offset, other._offset);
-        }
-
-        /** Standard to string implementation. */
-        public String toString()
-        {
-            return "ColorStop { Color=" + getColor().toHexString() + ", Offset=" + getOffset() + "}";
-        }
-    }
+    public record Stop(double offset, Color color)  { }
 
     /**
      * Returns true if any of the colors in the gradient have alpha
@@ -469,7 +349,7 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
     public static boolean getStopsHaveAlpha(Stop[] theStops)
     {
         for (Stop theStop : theStops)
-            if (theStop.getColor().getAlphaInt() != 255)
+            if (theStop.color().getAlphaInt() != 255)
                 return true;
         return false;
     }

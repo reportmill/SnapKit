@@ -14,7 +14,7 @@ import java.util.Arrays;
  * This class represents a font for use in rich text. Currently this is necessary because Java fonts are missing
  * so much basic typographic information.
  */
-public class Font extends PropObject implements XMLArchiver.Archivable, StringCodec.Codeable {
+public class Font extends PropObject implements StringCodec.Codeable {
     
     // This font's base font file
     private FontFile  _fontFile;
@@ -371,15 +371,15 @@ public class Font extends PropObject implements XMLArchiver.Archivable, StringCo
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Name, Size
-            case Name_Prop: return getNameEnglish();
-            case Size_Prop: return getSize();
+            case Name_Prop -> getNameEnglish();
+            case Size_Prop -> getSize();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -398,28 +398,6 @@ public class Font extends PropObject implements XMLArchiver.Archivable, StringCo
     public StringCodec.Codeable decodeString(String aString)
     {
         return of(aString);
-    }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        XMLElement e = new XMLElement("font");
-        e.add("name", getNameEnglish());
-        e.add("size", _size);
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        String name = anElement.getAttributeValue("name");
-        _fontFile = FontFile.getFontFile(name);
-        _size = anElement.getAttributeFloatValue("size");
-        return this;
     }
 
     /**
@@ -517,8 +495,7 @@ public class Font extends PropObject implements XMLArchiver.Archivable, StringCo
             return (Font) anObj;
 
         // Handle string: try to pick off size
-        if (anObj instanceof String) {
-            String str = (String) anObj;
+        if (anObj instanceof String str) {
             if (str.equals("null"))
                 return null;
             String[] parts = str.split("\\s");

@@ -76,12 +76,12 @@ public class GradientStopPicker extends ParentView {
     /**
      * Returns the color of the stop at the given index.
      */
-    public Color getStopColor(int index)  { return getStop(index).getColor(); }
+    public Color getStopColor(int index)  { return getStop(index).color(); }
 
     /**
      * Returns the position (in the range {0-1}) for the given stop index.
      */
-    public double getStopOffset(int index)  { return getStop(index).getOffset(); }
+    public double getStopOffset(int index)  { return getStop(index).offset(); }
 
     /**
      * Returns the list of color stops.
@@ -111,7 +111,7 @@ public class GradientStopPicker extends ParentView {
 
         // Find location within sorted list for new stop
         for(i=0; i<nstops; i++) {
-            double listPos = getStop(i).getOffset();
+            double listPos = getStop(i).offset();
 
             // inserting one exactly where one already exists just replaces the old one
             if(MathUtils.equals(listPos, anOffset)) {
@@ -159,8 +159,8 @@ public class GradientStopPicker extends ParentView {
         int nstops = getStopCount();
         if(index<0 || index>=nstops) throw new IndexOutOfBoundsException("Invalid color index ("+index+")");
 
-        double pmin = index==0? 0 : getStop(index-1).getOffset()+1e-4;
-        double pmax = index==nstops-1? 1 : getStop(index+1).getOffset()-1e-4;
+        double pmin = index==0? 0 : getStop(index-1).offset()+1e-4;
+        double pmax = index==nstops-1? 1 : getStop(index+1).offset()-1e-4;
 
         if (anOffset<pmin) anOffset = pmin;
         else if (anOffset>pmax) anOffset = pmax;

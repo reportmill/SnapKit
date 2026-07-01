@@ -13,7 +13,7 @@ import java.util.Objects;
 /**
  * This class is the basic text storage class, holding a list of TextLine.
  */
-public abstract class TextModel extends TextLayout implements XMLArchiver.Archivable {
+public abstract class TextModel extends TextLayout {
 
     // The default text style for this text
     protected TextStyle _defaultTextStyle = TextStyle.DEFAULT;
@@ -477,22 +477,6 @@ public abstract class TextModel extends TextLayout implements XMLArchiver.Archiv
     protected TextToken[] createTokensForTextLine(TextLine aTextLine)
     {
         return TextModelUtils.createTokensForTextLine(aTextLine);
-    }
-
-    /**
-     * XMLArchiver.Archivable archival.
-     */
-    @Override
-    public XMLElement toXML(XMLArchiver anArchiver)  { return TextModelUtils.toXML(this, anArchiver); }
-
-    /**
-     * XMLArchiver.Archivable unarchival.
-     */
-    @Override
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        TextModelUtils.fromXML(this, anArchiver, anElement);
-        return this;
     }
 
     /**

@@ -4,12 +4,11 @@
 package snap.gfx;
 import snap.geom.Rect;
 import snap.props.StringCodec;
-import snap.util.XMLArchiver;
 
 /**
  * A class to represent a fill for a Shape or text (Color, GradientPaint, ImagePaint).
  */
-public interface Paint extends XMLArchiver.Archivable, StringCodec.Codeable {
+public interface Paint extends StringCodec.Codeable {
 
     /**
      * Returns whether paint is defined in terms independent of primitive to be filled.

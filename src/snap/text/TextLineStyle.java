@@ -11,7 +11,7 @@ import snap.util.*;
 /**
  * A class to represent a line of text (for each newline) in RichText.
  */
-public class TextLineStyle extends PropObject implements Cloneable, XMLArchiver.Archivable {
+public class TextLineStyle extends PropObject implements Cloneable {
 
     // Horizontal text alignment
     private HPos _align;
@@ -378,68 +378,5 @@ public class TextLineStyle extends PropObject implements Cloneable, XMLArchiver.
         if (_rightIndent != 0) str += ", RightIndent=" + StringUtils.toString(_rightIndent);
         if (_spacing != 0) str += ", Spacing=" + StringUtils.toString(_spacing);
         return str + " }";
-    }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        // Get new element named pgraph
-        XMLElement e = new XMLElement("pgraph");
-
-        // Archive AlignX, FirstIndent, LeftIndent, RightIndent
-        String astr = _justify ? "full" : _align.toString().toLowerCase();
-        if (!astr.equals("left")) e.add("align", astr);
-        if (_firstIndent != _leftIndent) {
-            e.add("FirstIndent", _firstIndent);
-            e.add("left-indent-0", _firstIndent);
-        }
-        if (_leftIndent != 0) e.add("left-indent", _leftIndent);
-        if (_rightIndent != 0) e.add("right-indent", _rightIndent);
-
-        // Archive Spacing, SpacingFactor, LineHeightMin, LineHeightMax, ParagraphSpacing
-        if (_spacing != 0) e.add("line-gap", _spacingFactor);
-        if (_spacingFactor != 1) e.add("line-space", _spacingFactor);
-        if (_minHeight != 0) e.add("min-line-ht", _minHeight);
-        if (_maxHeight != Float.MAX_VALUE) e.add("max-line-ht", _maxHeight);
-        if (_newlineSpacing != 0) e.add("pgraph-space", _newlineSpacing);
-
-        // Archive Tabs
-        if (!Arrays.equals(_tabs, DEFAULT_TABS) || !Arrays.equals(_tabTypes, DEFAULT_TAB_TYPES))
-            e.add("tabs", getTabsString());
-
-        // Return element
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public TextLineStyle fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive AlignX, FirstIndent, LeftIndent, RightIndent
-        String astr = anElement.getAttributeValue("align", "left");
-        if (astr.equals("full")) _justify = true;
-        else _align = HPos.get(astr);
-        if (anElement.hasAttribute("FirstIndent")) _firstIndent = anElement.getAttributeDoubleValue("FirstIndent");
-        else if (anElement.hasAttribute("left-indent-0"))
-            _firstIndent = anElement.getAttributeFloatValue("left-indent-0");
-        _leftIndent = anElement.getAttributeFloatValue("left-indent");
-        _rightIndent = anElement.getAttributeFloatValue("right-indent");
-
-        // Archive Spacing, SpacingFactor, LineHeightMin, LineHeightMax, ParagraphSpacing
-        _spacing = anElement.getAttributeFloatValue("line-gap");
-        _spacingFactor = anElement.getAttributeFloatValue("line-space", 1);
-        _minHeight = anElement.getAttributeFloatValue("min-line-ht");
-        _maxHeight = anElement.getAttributeFloatValue("max-line-ht", Float.MAX_VALUE);
-        _newlineSpacing = anElement.getAttributeFloatValue("pgraph-space");
-
-        // Unarchive Tabs
-        if (anElement.hasAttribute("tabs"))
-            setTabsString(anElement.getAttributeValue("tabs"));
-
-        // Return paragraph
-        return this;
     }
 }

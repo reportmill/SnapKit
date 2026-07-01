@@ -145,18 +145,11 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
      */
     public String format(double aValue)
     {
-        // Handle ExpStyle
-        switch (_expStyle) {
-
-            // Handle Financial
-            case Financial: return formatFinancial(aValue);
-
-            // Handle Scientific
-            case Scientific: return formatScientific(aValue);
-
-            // Handle None
-            default: return formatBasicDecimal(aValue);
-        }
+        return switch (_expStyle) {
+            case Financial -> formatFinancial(aValue);
+            case Scientific -> formatScientific(aValue);
+            default -> formatBasicDecimal(aValue);
+        };
     }
 
     /**
@@ -170,13 +163,11 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
 
         // Return formatted value
         DecimalFormat format = getFormat();
-        try {
-            return format.format(aValue);
-        }
+        try { return format.format(aValue); }
 
         // TeaVM 0.6.0 threw an exception here
         catch (RuntimeException e) {
-            System.err.println("Failed to format with: " + format.toPattern() + ", value: " + aValue);
+            System.err.println("NumberFormat.formatBasicDecimal: Failed to format with: " + format.toPattern() + ", value: " + aValue);
             return FormatUtils.formatNum(aValue);
         }
     }
@@ -343,15 +334,18 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
     public Object getPropValue(String aPropName)
     {
         // Handle properties
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Pattern, ExpStyle
-            case Pattern_Prop: return getPattern();
-            case ExpStyle_Prop: return getExpStyle();
+            case Pattern_Prop -> getPattern();
+            case ExpStyle_Prop -> getExpStyle();
 
             // Handle super class properties (or unknown)
-            default: System.err.println("NumberFormat.getPropValue: Unknown prop: " + aPropName); return null;
-        }
+            default -> {
+                System.err.println("NumberFormat.getPropValue: Unknown prop: " + aPropName);
+                yield null;
+            }
+        };
     }
 
     /**
@@ -364,19 +358,18 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
         switch (aPropName) {
 
             // Pattern, ExpStyle
-            case Pattern_Prop: setPattern(Convert.stringValue(aValue)); break;
-            case ExpStyle_Prop: setExpStyle((ExpStyle) aValue); break;
+            case Pattern_Prop -> setPattern(Convert.stringValue(aValue));
+            case ExpStyle_Prop -> setExpStyle((ExpStyle) aValue);
 
             // Handle super class properties (or unknown)
-            default: System.err.println("NumberFormat.setPropValue: Unknown prop: " + aPropName);
+            default -> System.err.println("NumberFormat.setPropValue: Unknown prop: " + aPropName);
         }
     }
 
     /**
      * Archival.
      */
-    @Override
-    public XMLElement toXML(XMLArchiver anArchiver)
+    public XMLElement toXML()
     {
         // Create element
         XMLElement e = new XMLElement("NumberFormat");
@@ -394,8 +387,7 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
     /**
      * Unarchival.
      */
-    @Override
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
+    public Object fromXML(XMLElement anElement)
     {
         // Unarchive Pattern, ExpStyle
         if (anElement.hasAttribute(Pattern_Prop))

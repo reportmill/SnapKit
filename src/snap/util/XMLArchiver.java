@@ -208,7 +208,7 @@ public class XMLArchiver {
         XMLElement xml = toXML(anObj);
 
         // Archive resources
-        for (XMLArchiver.Resource resource : getResources()) {
+        for (Resource resource : getResources()) {
             XMLElement resourceXML = new XMLElement("resource");
             resourceXML.add("name", resource.name());
             resourceXML.setValueBytes(resource.bytes());
@@ -217,15 +217,6 @@ public class XMLArchiver {
 
         // Return xml
         return xml;
-    }
-
-    /**
-     * Writes given object to XML and returns the XML bytes.
-     */
-    public byte[] writeToXMLBytes(Object anObj)
-    {
-        XMLElement xml = writeToXML(anObj);
-        return xml.getBytes();
     }
 
     /**
@@ -577,9 +568,7 @@ public class XMLArchiver {
     private static Object newInstance(Class<?> aClass)
     {
         try { return aClass.newInstance(); }
-        catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        catch (InstantiationException | IllegalAccessException e) { throw new RuntimeException(e); }
     }
 
     /**

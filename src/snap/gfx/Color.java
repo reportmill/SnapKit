@@ -3,12 +3,12 @@
  */
 package snap.gfx;
 import snap.geom.Rect;
-import snap.util.*;
+import snap.util.MathUtils;
 
 /**
  * This class represents an RGBA color.
  */
-public class Color implements Paint, XMLArchiver.Archivable {
+public class Color implements Paint {
     
     // Red component
     private double  _red;
@@ -455,34 +455,6 @@ public class Color implements Paint, XMLArchiver.Archivable {
     public static Color getRandom()
     {
         return new Color(Math.random(), Math.random(), Math.random());
-    }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        XMLElement e = new XMLElement("color");
-        e.add("value", "#" + toHexString());
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        String color = anElement.getAttributeValue("color");
-        if (color!=null) return new Color(color);
-
-        String hex = anElement.getAttributeValue("value");
-        int start = hex.charAt(0)=='#' ? 1 : 0;
-        _red = Integer.decode("0x" + hex.substring(start, start + 2))/255f;
-        _green = Integer.decode("0x" + hex.substring(start + 2, start + 4))/255f;
-        _blue = Integer.decode("0x" + hex.substring(start + 4, start + 6))/255f;
-        if (hex.length()>=start+8)
-            _alpha = Integer.decode("0x" + hex.substring(start + 6, start + 8))/255f;
-        return this;
     }
 
     // Some colors:

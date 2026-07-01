@@ -145,8 +145,8 @@ public class AWT {
         float[] fractions = new float[stops.length];
         java.awt.Color[] colors = new java.awt.Color[stops.length];
         for (int i = 0; i < stops.length; i++) {
-            fractions[i] = (float) stops[i].getOffset();
-            snap.gfx.Color c = stops[i].getColor();
+            fractions[i] = (float) stops[i].offset();
+            snap.gfx.Color c = stops[i].color();
             colors[i] = new java.awt.Color(c.getRedInt(), c.getGreenInt(), c.getBlueInt(), c.getAlphaInt());
         }
 
