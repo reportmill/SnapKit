@@ -50,17 +50,17 @@ public class BlurEffect extends Effect {
     /**
      * Apply the effect from given DVR to painter.
      */
-    public void applyEffect(PainterDVR aPDVR, Painter aPntr, Rect aRect)
+    public void applyEffect(PainterDVR dvrPntr, Painter aPntr, Rect aRect)
     {
         // If radius is less than 1, do default drawing and return
         int radius = (int) getRadius();
         if (radius < 1) {
-            aPDVR.exec(aPntr);
+            dvrPntr.exec(aPntr);
             return;
         }
 
         // Get effect image for shape and draw at offset (blur effect draws as a complete replacement for shape drawing)
-        Image blurImage = getBlurImage(aPDVR, aRect);
+        Image blurImage = getBlurImage(dvrPntr, aRect);
         aPntr.drawImage(blurImage, -radius * 2, -radius * 2, blurImage.getWidth(), blurImage.getHeight());
     }
 
@@ -126,26 +126,6 @@ public class BlurEffect extends Effect {
 
         // Do normal version
         else super.setPropValue(aPropName, aValue);
-    }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        XMLElement e = super.toXML(anArchiver);
-        if (!isPropDefault(Radius_Prop)) e.add(Radius_Prop, _radius);
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        super.fromXML(anArchiver, anElement);
-        if (anElement.hasAttribute(Radius_Prop)) _radius = anElement.getAttributeIntValue(Radius_Prop);
-        return this;
     }
 
     /**

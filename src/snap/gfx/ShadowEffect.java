@@ -12,16 +12,16 @@ import snap.util.*;
 public class ShadowEffect extends Effect {
 
     // The shadow radius
-    private double  _radius;
+    private double _radius;
     
     // The shadow offset
-    private double  _dx, _dy;
+    private double _dx, _dy;
     
     // Fill color
-    private Color  _color;
+    private Color _color;
     
     // Whether effect is simple
-    private boolean  _simple;
+    private boolean _simple;
 
     // Constants for properties
     public static final String Radius_Prop = "Radius";
@@ -32,6 +32,9 @@ public class ShadowEffect extends Effect {
     // Constants for defaults
     public static final double DEFAULT_RADIUS = 10d;
     public static final Color DEFAULT_COLOR = Color.BLACK;
+
+    // The default shadow effect
+    public static final Effect DEFAULT = new ShadowEffect();
 
     /**
      * Constructor.
@@ -93,18 +96,10 @@ public class ShadowEffect extends Effect {
     /**
      * Performs the ShadowEffect with given PainterDVR.
      */
-    public void applyEffect(PainterDVR aPDVR, Painter aPntr, Rect aRect)
+    public void applyEffect(PainterDVR dvrPntr, Painter aPntr, Rect aRect)
     {
-        int radius = (int) getRadius();
-        int dx = (int) getDX();
-        int dy = (int) getDY();
-        Image shadowImage = getShadowImage(aPDVR, aRect);
-        double drawX = -radius * 2 + dx;
-        double drawY = -radius * 2 + dy;
-        aPntr.drawImage(shadowImage, drawX, drawY);
-
-        // Draw contents of PainterDVR
-        aPDVR.exec(aPntr);
+        applyEffectShadowOnly(dvrPntr, aPntr, aRect);
+        dvrPntr.exec(aPntr);
     }
 
     /**
@@ -116,9 +111,9 @@ public class ShadowEffect extends Effect {
         int dx = (int) getDX();
         int dy = (int) getDY();
         Image shadowImage = getShadowImage(aPDVR, aRect);
-        double drawX = -radius * 2 + dx;
-        double drawY = -radius * 2 + dy;
-        aPntr.drawImage(shadowImage, drawX, drawY);
+        double imageX = -radius * 2 + dx;
+        double imageY = -radius * 2 + dy;
+        aPntr.drawImage(shadowImage, imageX, imageY);
     }
 
     /**
@@ -212,74 +207,38 @@ public class ShadowEffect extends Effect {
      * Override to support props for this class.
      */
     @Override
-    public Object getPropValue(String aPropName)
+    public Object getPropValue(String propName)
     {
-        switch (aPropName) {
+        return switch (propName) {
 
             // Radius, DX, DY, Color
-            case Radius_Prop: return getRadius();
-            case DX_Prop: return getDX();
-            case DY_Prop: return getDY();
-            case Color_Prop: return getColor();
+            case Radius_Prop -> getRadius();
+            case DX_Prop -> getDX();
+            case DY_Prop -> getDY();
+            case Color_Prop -> getColor();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(propName);
+        };
     }
 
     /**
      * Override to support props for this class.
      */
     @Override
-    public void setPropValue(String aPropName, Object aValue)
+    public void setPropValue(String propName, Object aValue)
     {
-        switch (aPropName) {
+        switch (propName) {
 
             // Radius, DX, DY, Color
-            case Radius_Prop: _radius = Convert.doubleValue(aValue); break;
-            case DX_Prop: _dx = Convert.doubleValue(aValue); break;
-            case DY_Prop: _dy = Convert.doubleValue(aValue); break;
-            case Color_Prop: _color = (Color) aValue;
+            case Radius_Prop -> _radius = Convert.doubleValue(aValue);
+            case DX_Prop -> _dx = Convert.doubleValue(aValue);
+            case DY_Prop -> _dy = Convert.doubleValue(aValue);
+            case Color_Prop -> _color = (Color) aValue;
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(propName, aValue);
         }
-    }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        // Archive basic effect attributes and set type
-        XMLElement e = super.toXML(anArchiver);
-
-        // Archive Radius, DX, DY, Color
-        if (!isPropDefault(Radius_Prop)) e.add(Radius_Prop, _radius);
-        if (!isPropDefault(DX_Prop)) e.add(DX_Prop, _dx);
-        if (!isPropDefault(DY_Prop)) e.add(DY_Prop, _dy);
-        if (!isPropDefault(Color_Prop)) e.add(Color_Prop, '#' + _color.toHexString());
-
-        // Return element
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic effect attributes
-        super.fromXML(anArchiver, anElement);
-
-        // Unarchive Radius, DX, DY, Color
-        if (anElement.hasAttribute(Radius_Prop)) _radius = anElement.getAttributeIntValue(Radius_Prop);
-        if (anElement.hasAttribute(DX_Prop)) _dx = anElement.getAttributeIntValue(DX_Prop);
-        if (anElement.hasAttribute(DY_Prop)) _dy = anElement.getAttributeIntValue(DY_Prop);
-        if (anElement.hasAttribute(Color_Prop)) _color = Color.get(anElement.getAttributeValue(Color_Prop));
-
-        // Return this effect
-        return this;
     }
 
     /**

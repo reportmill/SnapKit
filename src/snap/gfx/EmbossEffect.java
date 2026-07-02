@@ -31,7 +31,7 @@ public class EmbossEffect extends Effect {
     public static final double DEFAULT_RADIUS = 10;
 
     /**
-     * Creates an emboss effect.
+     * Constructor.
      */
     public EmbossEffect()
     {
@@ -41,7 +41,7 @@ public class EmbossEffect extends Effect {
     }
 
     /**
-     * Creates an emboss effect for given altitude, azimuth and radius.
+     * Constructor for given altitude, azimuth and radius.
      */
     public EmbossEffect(double anAlt, double anAzi, double aRad)
     {
@@ -78,9 +78,9 @@ public class EmbossEffect extends Effect {
     /**
      * Performs the ShadowEffect with given PainterDVR.
      */
-    public void applyEffect(PainterDVR aPDVR, Painter aPntr, Rect aRect)
+    public void applyEffect(PainterDVR dvrPntr, Painter aPntr, Rect aRect)
     {
-        Image embossImage = getEmbossImage(aPDVR, aRect);
+        Image embossImage = getEmbossImage(dvrPntr, aRect);
         aPntr.drawImage(embossImage, 0, 0);
     }
 
@@ -123,7 +123,7 @@ public class EmbossEffect extends Effect {
      */
     public boolean equals(Object anObj)
     {
-        if (anObj==this) return true;
+        if (anObj == this) return true;
         EmbossEffect other = anObj instanceof EmbossEffect ? (EmbossEffect) anObj : null;
         if (other == null) return false;
         if (other._radius != _radius) return false;
@@ -153,16 +153,16 @@ public class EmbossEffect extends Effect {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Altitude, Azimuth, Radius
-            case Altitude_Prop: return getAltitude();
-            case Azimuth_Prop: return getAzimuth();
-            case Radius_Prop: return getRadius();
+            case Altitude_Prop -> getAltitude();
+            case Azimuth_Prop -> getAzimuth();
+            case Radius_Prop -> getRadius();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -174,49 +174,14 @@ public class EmbossEffect extends Effect {
         switch (aPropName) {
 
             // Altitude, Azimuth, Radius
-            case Altitude_Prop: _altitude = Convert.doubleValue(aValue); break;
-            case Azimuth_Prop: _azimuth = Convert.doubleValue(aValue); break;
-            case Radius_Prop: _radius = Convert.doubleValue(aValue); break;
+            case Altitude_Prop -> _altitude = Convert.doubleValue(aValue);
+            case Azimuth_Prop -> _azimuth = Convert.doubleValue(aValue);
+            case Radius_Prop -> _radius = Convert.doubleValue(aValue);
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        // Archive basic attributes and set type
-        XMLElement e = super.toXML(anArchiver);
-
-        // Archive Radius, Altitude, Azimuth
-        if (!isPropDefault(Radius_Prop)) e.add(Radius_Prop, getRadius());
-        if (!isPropDefault(Azimuth_Prop)) e.add(Azimuth_Prop, getAzimuth());
-        if (!isPropDefault(Altitude_Prop)) e.add(Altitude_Prop, getAltitude());
-
-        // Return element
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic attributes
-        super.fromXML(anArchiver, anElement);
-
-        // Uanrchive Radius, Altitude, Azimuth
-        if (anElement.hasAttribute(Radius_Prop)) _radius = anElement.getAttributeIntValue(Radius_Prop);
-        if (anElement.hasAttribute(Azimuth_Prop)) _azimuth = anElement.getAttributeFloatValue(Azimuth_Prop);
-        if (anElement.hasAttribute(Altitude_Prop)) _altitude = anElement.getAttributeFloatValue(Altitude_Prop);
-
-        // Return
-        return this;
-    }
-
 
     /**
      * Returns a string encoding of this effect.
@@ -232,7 +197,7 @@ public class EmbossEffect extends Effect {
     }
 
     /**
-     * Returns a emboss effect for given coded string.
+     * Returns an emboss effect for given coded string.
      */
     public static EmbossEffect of(Object anObj)
     {

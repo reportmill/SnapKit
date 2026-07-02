@@ -10,10 +10,7 @@ import snap.util.*;
 /**
  * A class to represent a visual effect that can be applied to drawing done in a Painter (like blur, shadow, etc.).
  */
-public abstract class Effect extends PropObject implements StringCodec.Codeable, XMLArchiver.Archivable {
-
-    // The default shadow effect
-    public static final Effect DEFAULT_SHADOW = new ShadowEffect();
+public abstract class Effect extends PropObject implements StringCodec.Codeable {
 
     /**
      * Constructor.
@@ -35,30 +32,12 @@ public abstract class Effect extends PropObject implements StringCodec.Codeable,
     /**
      * Returns the bounds required to render this effect applied to given rect.
      */
-    public Rect getBounds(Rect aRect)
-    {
-        return aRect;
-    }
+    public Rect getBounds(Rect aRect)  { return aRect; }
 
     /**
      * Apply the effect from given DVR to painter.
      */
-    public abstract void applyEffect(PainterDVR aPDVR, Painter aPntr, Rect aRect);
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        String name = getClass().getSimpleName();
-        XMLElement e = new XMLElement(name);
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)  { return this; }
+    public abstract void applyEffect(PainterDVR dvrPntr, Painter aPntr, Rect aRect);
 
     /**
      * Returns a string encoding of this effect.
@@ -86,13 +65,16 @@ public abstract class Effect extends PropObject implements StringCodec.Codeable,
         String effectName = parts.length > 0 ? parts[0] : "";
 
         // Parse effect
-        switch (effectName) {
-            case "shadow": return ShadowEffect.of(str);
-            case "blur": return BlurEffect.of(str);
-            case "emboss": return EmbossEffect.of(str);
-            case "reflect": return ReflectEffect.of(str);
-            case "null": return null;
-            default: System.err.println("Effect.of: Invalid effect string: " + anObj); return null;
-        }
+        return switch (effectName) {
+            case "shadow" -> ShadowEffect.of(str);
+            case "blur" -> BlurEffect.of(str);
+            case "emboss" -> EmbossEffect.of(str);
+            case "reflect" -> ReflectEffect.of(str);
+            case "null" -> null;
+            default -> {
+                System.err.println("Effect.of: Invalid effect string: " + anObj);
+                yield null;
+            }
+        };
     }
 }

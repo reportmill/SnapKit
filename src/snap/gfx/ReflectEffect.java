@@ -31,7 +31,7 @@ public class ReflectEffect extends Effect {
     public static final double DEFAULT_GAP = 0d;
 
     /**
-     * Creates a new ReflectEffect.
+     * Constructor.
      */
     public ReflectEffect()
     {
@@ -41,7 +41,7 @@ public class ReflectEffect extends Effect {
     }
 
     /**
-     * Creates a new ReflectEffect for given reflect height, fade height and gap.
+     * Constructor for given reflect height, fade height and gap.
      */
     public ReflectEffect(double aRefHt, double aFadeHt, double aGap)
     {
@@ -94,11 +94,11 @@ public class ReflectEffect extends Effect {
     /**
      * Performs the ReflectEffect with given PainterDVR.
      */
-    public void applyEffect(PainterDVR aPDVR, Painter aPntr, Rect aRect)
+    public void applyEffect(PainterDVR dvrPntr, Painter aPntr, Rect aRect)
     {
         // If valid reflection and fade heights, get reflection image for shape and draw at offset
         if (getReflectHeight() > 0 && getFadeHeight() > 0) {
-            Image reflectImage = getReflectImage(aPDVR, aRect);
+            Image reflectImage = getReflectImage(dvrPntr, aRect);
             double drawX = aRect.x;
             double drawY = aRect.getMaxY() + getGap();
             double drawW = reflectImage.getWidth();
@@ -107,7 +107,7 @@ public class ReflectEffect extends Effect {
         }
 
         // Do normal effect paint
-        aPDVR.exec(aPntr);
+        dvrPntr.exec(aPntr);
     }
 
     /**
@@ -148,26 +148,17 @@ public class ReflectEffect extends Effect {
     /**
      * Returns a reflection for given reflect height.
      */
-    public ReflectEffect copyForReflectHeight(double aRH)
-    {
-        return new ReflectEffect(aRH, _fadeHeight, _gap);
-    }
+    public ReflectEffect copyForReflectHeight(double reflectHeight)  { return new ReflectEffect(reflectHeight, _fadeHeight, _gap); }
 
     /**
      * Returns a reflection for given fade height.
      */
-    public ReflectEffect copyForFadeHeight(double aFH)
-    {
-        return new ReflectEffect(_refHeight, aFH, _gap);
-    }
+    public ReflectEffect copyForFadeHeight(double fadeHeight)  { return new ReflectEffect(_refHeight, fadeHeight, _gap); }
 
     /**
      * Returns a reflection for given gap.
      */
-    public ReflectEffect copyForGap(double aGap)
-    {
-        return new ReflectEffect(_refHeight, _fadeHeight, aGap);
-    }
+    public ReflectEffect copyForGap(double aGap)  { return new ReflectEffect(_refHeight, _fadeHeight, aGap); }
 
     /**
      * Standard equals implementation.
@@ -204,16 +195,16 @@ public class ReflectEffect extends Effect {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // ReflectHeight, FadeHeight, Gap
-            case ReflectHeight_Prop: return getReflectHeight();
-            case FadeHeight_Prop: return getFadeHeight();
-            case Gap_Prop: return getGap();
+            case ReflectHeight_Prop -> getReflectHeight();
+            case FadeHeight_Prop -> getFadeHeight();
+            case Gap_Prop -> getGap();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -232,33 +223,6 @@ public class ReflectEffect extends Effect {
             // Do normal version
             default: super.setPropValue(aPropName, aValue);
         }
-    }
-
-    /**
-     * XML archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        XMLElement e = super.toXML(anArchiver);
-        if (!isPropDefault(ReflectHeight_Prop)) e.add(ReflectHeight_Prop, getReflectHeight());
-        if (!isPropDefault(FadeHeight_Prop)) e.add(FadeHeight_Prop, getFadeHeight());
-        if (!isPropDefault(Gap_Prop)) e.add(Gap_Prop, getGap());
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic attributes
-        super.fromXML(anArchiver, anElement);
-
-        // Unarchive ReflectHeight, FadeHeight, Gap
-        if (anElement.hasAttribute(ReflectHeight_Prop)) setReflectHeight(anElement.getAttributeFloatValue(ReflectHeight_Prop));
-        if (anElement.hasAttribute(FadeHeight_Prop)) setFadeHeight(anElement.getAttributeFloatValue(FadeHeight_Prop));
-        if (anElement.hasAttribute(Gap_Prop)) setGap(anElement.getAttributeFloatValue(Gap_Prop));
-        return this;
     }
 
     /**

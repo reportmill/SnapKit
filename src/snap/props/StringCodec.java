@@ -9,108 +9,17 @@ import snap.util.EnumUtils;
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A class to convert common types to/from Strings.
  */
 public class StringCodec {
 
-    // The Set of codeable classes
-    private Set<Class<?>>  _codeableClasses;
-
     // The Shared instance
     public static StringCodec SHARED = new StringCodec();
 
     // A formatter to format double without exponent
     private static DecimalFormat  _doubleFmt = new DecimalFormat("0.#########");
-
-    /**
-     * Returns whether given object can be converted to/from String.
-     */
-    public boolean isCodeable(Object anObj)
-    {
-        // Null is inherently codeable
-        if (anObj == null) return true;
-
-        // Empty arrays are codeable
-        if (isEmptyArray(anObj))
-            return true;
-
-        // Otherwise get object class and check
-        Class<?> objClass = anObj.getClass();
-        return isCodeableClass(objClass);
-    }
-
-    /**
-     * Returns whether given object can be converted to/from String.
-     */
-    public boolean isCodeableClass(Class<?> aClass)
-    {
-        // Enums are inherently codeable
-        if (aClass.isEnum()) return true;
-
-        // Codeable
-        if (Codeable.class.isAssignableFrom(aClass))
-            return true;
-
-        // If array, check to see if component type is supported
-        if (aClass.isArray()) {
-            Class<?> compClass = aClass.getComponentType();
-            return isCodeableClass(compClass);
-        }
-
-        // Otherwise get CodeableClasses and check
-        Set<Class<?>> codeableClasses = getCodeableClasses();
-        return codeableClasses.contains(aClass);
-    }
-
-    /**
-     * Returns set of classes that can be converted to/from String.
-     */
-    public Set<Class<?>> getCodeableClasses()
-    {
-        // If already set, just return
-        if (_codeableClasses != null) return _codeableClasses;
-
-        // Create CodeableClasses HashSet, set and return
-        Set<Class<?>> codeableClasses = getCodeableClassesImpl();
-        return _codeableClasses = codeableClasses;
-    }
-
-    /**
-     * Returns set of classes that can be converted to/from String.
-     */
-    protected Set<Class<?>> getCodeableClassesImpl()
-    {
-        Set<Class<?>> set = new HashSet<>();
-
-        // Handle String
-        set.add(String.class);
-
-        // Handle boolean, int, float, double
-        set.add(boolean.class);
-        set.add(Boolean.class);
-        set.add(int.class);
-        set.add(float.class);
-        set.add(double.class);
-        set.add(Integer.class);
-        set.add(Float.class);
-        set.add(Double.class);
-        set.add(Number.class);
-
-        // Handle String[], double[]
-        set.add(String[].class);
-        set.add(double[].class);
-
-        // Color, Insets
-        set.add(Color.class);
-        set.add(Insets.class);
-
-        // Return
-        return set;
-    }
 
     /**
      * Returns a String for given object.
@@ -218,7 +127,7 @@ public class StringCodec {
         if (aClass == Paint.class)
             return (T) Color.BLACK.decodeString(aString);
         if (aClass == Effect.class)
-            return (T) Effect.DEFAULT_SHADOW.decodeString(aString);
+            return (T) ShadowEffect.DEFAULT.decodeString(aString);
 
         // Handle Codeable
         if (Codeable.class.isAssignableFrom(aClass)) {
@@ -345,18 +254,6 @@ public class StringCodec {
     {
         char c = aStr.charAt(anIndex);
         return Character.isDigit(c) || c == '.' || c == '-';
-    }
-
-    /**
-     * Returns whether given object is an empty array.
-     */
-    private static boolean isEmptyArray(Object anObj)
-    {
-        Class<?> objClass = anObj.getClass();
-        if (!objClass.isArray()) return false;
-        if (objClass.getComponentType().isPrimitive()) return false;
-        Object[] array = (Object[]) anObj;
-        return array.length == 0;
     }
 
     /**
