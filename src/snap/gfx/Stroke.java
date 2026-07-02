@@ -9,7 +9,7 @@ import snap.util.*;
 /**
  * A class to describe strokes.
  */
-public class Stroke extends PropObject implements Cloneable, XMLArchiver.Archivable {
+public class Stroke extends PropObject implements Cloneable {
     
     // The stroke width
     private double  _width = DEFAULT_WIDTH;
@@ -263,71 +263,19 @@ public class Stroke extends PropObject implements Cloneable, XMLArchiver.Archiva
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Width, Cap, Join, MiterLimit, DashArray, DashOffset
-            case Width_Prop: return getWidth();
-            case Cap_Prop: return getCap();
-            case Join_Prop: return getJoin();
-            case MiterLimit_Prop: return getMiterLimit();
-            case DashArray_Prop: return getDashArray();
-            case DashOffset_Prop: return getDashOffset();
+            case Width_Prop -> getWidth();
+            case Cap_Prop -> getCap();
+            case Join_Prop -> getJoin();
+            case MiterLimit_Prop -> getMiterLimit();
+            case DashArray_Prop -> getDashArray();
+            case DashOffset_Prop -> getDashOffset();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
-    }
-
-    /**
-     * XML Archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        // Create xml element
-        XMLElement e = new XMLElement("Stroke");
-
-        // Archive Width, Cap, Join, MiterLimit
-        e.add(Width_Prop, getWidth());
-        if (getCap() != DEFAULT_CAP)
-            e.add(Cap_Prop, getCap());
-        if (getJoin() != DEFAULT_JOIN)
-            e.add(Join_Prop, getJoin());
-        if (getMiterLimit() != DEFAULT_MITER_LIMIT)
-            e.add(Join_Prop, getJoin());
-
-        // Archive DashArray, DashOffset
-        if (!ArrayUtils.equals(getDashArray(), DEFAULT_DASH_ARRAY))
-            e.add(DashArray_Prop, getDashArrayString(this));
-        if (getDashOffset() != DEFAULT_DASH_OFFSET)
-            e.add(DashOffset_Prop, getDashOffset());
-
-        // Return xml
-        return e;
-    }
-
-    /**
-     * XML Unarchival.
-     */
-    public Stroke fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive Width, Cap, Join, MiterLimit
-        if(anElement.hasAttribute(Width_Prop))
-            _width = anElement.getAttributeDoubleValue(Width_Prop);
-        if(anElement.hasAttribute(Cap_Prop))
-            _cap = Cap.valueOf(anElement.getAttributeValue(Cap_Prop));
-        if(anElement.hasAttribute(Join_Prop))
-            _join = Join.valueOf(anElement.getAttributeValue(Join_Prop));
-        if(anElement.hasAttribute(MiterLimit_Prop))
-            _miterLimit = anElement.getAttributeDoubleValue(MiterLimit_Prop);
-
-        // Unarchive DashArray, DashOffset
-        if(anElement.hasAttribute(DashArray_Prop))
-            _dashArray = getDashArray(anElement.getAttributeValue(DashArray_Prop));
-        if(anElement.hasAttribute(DashOffset_Prop))
-            _dashOffset = anElement.getAttributeDoubleValue(DashOffset_Prop);
-
-        // Return this stroke
-        return this;
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**
@@ -376,12 +324,12 @@ public class Stroke extends PropObject implements Cloneable, XMLArchiver.Archiva
         if (dashArray == null || dashArray.length == 0) return null;
 
         // Build dash array string
-        String str = Convert.stringValue(dashArray[0]);
+        StringBuilder sb = new StringBuilder(Convert.stringValue(dashArray[0]));
         for (int i = 1; i < dashArray.length; i++)
-            str += aDelimiter + Convert.stringValue(dashArray[i]);
+            sb.append(aDelimiter).append(Convert.stringValue(dashArray[i]));
 
         // Return dash array string
-        return str;
+        return sb.toString();
     }
 
     /**
@@ -390,7 +338,7 @@ public class Stroke extends PropObject implements Cloneable, XMLArchiver.Archiva
     public static double[] getDashArray(String aString)
     {
         // Just return null if empty
-        if (aString == null || aString.length() == 0) return null;
+        if (aString == null || aString.isEmpty()) return null;
 
         // If string matches known name, return that
         int index = ArrayUtils.indexOf(DASHES_ALL_NAMES, aString);

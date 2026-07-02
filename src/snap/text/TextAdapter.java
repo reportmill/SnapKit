@@ -1491,7 +1491,7 @@ public class TextAdapter extends PropObject {
                 TextModel richText = TextModel.createDefaultTextModel(true);
                 XMLArchiver archiver = new XMLArchiver();
                 archiver.setRootObject(richText);
-                archiver.readXmlFromBytes(bytes);
+                archiver.readObjectFromXmlBytes(bytes);
                 return  richText;
             }
         }

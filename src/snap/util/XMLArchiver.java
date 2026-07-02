@@ -144,7 +144,7 @@ public class XMLArchiver {
     /**
      * Returns a root object unarchived from a generic input source (a File, String path, InputStream, URL, byte[], etc.).
      */
-    public Object readXmlFromUrl(WebURL sourceUrl)
+    public Object readObjectFromXmlUrl(WebURL sourceUrl)
     {
         // Set source URL
         if (getSourceURL() == null)
@@ -154,32 +154,32 @@ public class XMLArchiver {
         String xmlStr = sourceUrl.getText();
         if (xmlStr == null)
             throw new RuntimeException("XMLArchiver.readXmlFromUrl: Cannot read url: " + sourceUrl);
-        return readXmlFromString(xmlStr);
+        return readObjectFromXmlString(xmlStr);
     }
 
     /**
      * Returns a root object unarchived from a generic XML source (File, String path, InputStream, URL, byte[], etc.).
      */
-    public Object readXmlFromString(String xmlString)
+    public Object readObjectFromXmlString(String xmlString)
     {
         XMLElement xml = XMLElement.readXmlFromString(xmlString);
-        return readXml(xml);
+        return readObjectFromXml(xml);
     }
 
     /**
      * Returns a root object unarchived from an RMByteSource.
      */
-    public Object readXmlFromBytes(byte[] theBytes)
+    public Object readObjectFromXmlBytes(byte[] theBytes)
     {
         XMLElement xml = XMLElement.readXmlFromBytes(theBytes);
-        return readXml(xml);
+        return readObjectFromXml(xml);
     }
 
     /**
      * Returns a root object unarchived from the XML source (a File, String path, InputStream, URL, byte[], etc.).
      * You can also provide a root object to be read "into", and an owner that the object is being read "for".
      */
-    public Object readXml(XMLElement theXML)
+    public Object readObjectFromXml(XMLElement theXML)
     {
         // Set IgnoreCase property
         if (isIgnoreCase())
@@ -202,7 +202,7 @@ public class XMLArchiver {
      * Returns an xml element for a given object.
      * This top level method encodes resources, in addition to doing the basic toXML stuff.
      */
-    public XMLElement writeToXML(Object anObj)
+    public XMLElement writeObjectToXml(Object anObj)
     {
         // Write object
         XMLElement xml = toXML(anObj);
