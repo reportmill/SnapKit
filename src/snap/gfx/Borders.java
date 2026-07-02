@@ -1,8 +1,5 @@
 package snap.gfx;
 import snap.geom.*;
-import snap.util.XMLArchiver;
-import snap.util.XMLElement;
-
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -66,10 +63,9 @@ public class Borders {
             aPntr.setStroke(stroke);
 
             // Handle Rect special: Paint border just inside rect (if thinner/shorter than border stroke, don't go negative)
-            if (aShape instanceof Rect) {
+            if (aShape instanceof Rect rect) {
 
                 // Get shape rect inset by half stroke width to keep border inside bounds
-                Rect rect = (Rect) aShape;
                 double borderW = getWidth();
                 double insX = rect.width >= borderW ? borderW / 2 : rect.width / 2;
                 double insY = rect.height >= borderW ? borderW / 2 : rect.height / 2;
@@ -140,29 +136,6 @@ public class Borders {
             return other._stroke.equals(_stroke);
         }
 
-        /** XML Archival. */
-        public XMLElement toXML(XMLArchiver anArchiver)
-        {
-            XMLElement e = super.toXML(anArchiver);
-            if (!_color.equals(Color.BLACK))
-                e.add("Color", '#' + _color.toHexString());
-            if (getWidth() != 1)
-                e.add("Width", getWidth());
-            return e;
-        }
-
-        /** XML Unarchival. */
-        public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)
-        {
-            if (anElement.hasAttribute("Color"))
-                _color = new Color(anElement.getAttributeValue("Color"));
-            if (anElement.hasAttribute("line-color"))
-                _color = new Color(anElement.getAttributeValue("line-color"));
-            if (anElement.hasAttribute("Width"))
-                _stroke = _stroke.copyForWidth(anElement.getAttributeFloatValue("Width"));
-            return this;
-        }
-
         /** Standard toString implementation. */
         public String toString()
         {
@@ -176,8 +149,9 @@ public class Borders {
     public static class BevelBorder extends Border {
 
         // The type
-        int _type = LOWERED;
-        public static final int LOWERED = 0, RAISED = 1;
+        private int _type = LOWERED;
+        public static final int LOWERED = 0;
+        public static final int RAISED = 1;
 
         /** Creates new border. */
         public BevelBorder() { }
@@ -225,24 +199,6 @@ public class Borders {
                 aPntr.drawLine(boundsX + 1.5,boundsY + boundsH - 1.5,boundsX + boundsW - 3,boundsY + boundsH - 1.5);
                 aPntr.drawLine(boundsX + boundsW - 1.5,boundsY + 1.5,boundsX + boundsW - 1.5,boundsY + boundsH - 3);
             }
-        }
-
-        /** XML Archival. */
-        public XMLElement toXML(XMLArchiver anArchiver)
-        {
-            XMLElement e = super.toXML(anArchiver);
-            if (_type == RAISED)
-                e.add("Type", "RAISED");
-            return e;
-        }
-
-        /** XML Unarchival. */
-        public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)
-        {
-            String type = anElement.getAttributeValue("Type", "lowered");
-            if (type.equals("RAISED") || type.equals("raised"))
-                _type = RAISED;
-            return this;
         }
 
         @Override
@@ -400,47 +356,6 @@ public class Borders {
             if (other._showTop != _showTop) return false;
             if (other._showBottom != _showBottom) return false;
             return true; // Return true since all checks passed
-        }
-
-        /**
-         * XML archival.
-         */
-        public XMLElement toXML(XMLArchiver anArchiver)
-        {
-            // Archive basic stroke attributes
-            XMLElement e = super.toXML(anArchiver);
-            e.add("type", "border");
-
-            // Archive ShowLeft, ShowRight, ShowTop, ShowBottom
-            if (!isShowLeft())
-                e.add("show-left", false);
-            if (!isShowRight())
-                e.add("show-right", false);
-            if (!isShowTop())
-                e.add("show-top", false);
-            if (!isShowBottom())
-                e.add("show-bottom", false);
-            return e;
-        }
-
-        /**
-         * XML unarchival.
-         */
-        public EdgeBorder fromXML(XMLArchiver anArchiver, XMLElement anElement)
-        {
-            // Unarchive basic stroke attributes
-            super.fromXML(anArchiver, anElement);
-
-            // Unarchive ShowLeft, ShowRight, ShowTop, ShowBottom
-            if (anElement.hasAttribute("show-left"))
-                _showLeft = anElement.getAttributeBoolValue("show-left");
-            if (anElement.hasAttribute("show-right"))
-                _showRight = anElement.getAttributeBoolValue("show-right");
-            if (anElement.hasAttribute("show-top"))
-                _showTop = anElement.getAttributeBoolValue("show-top");
-            if (anElement.hasAttribute("show-bottom"))
-                _showBottom = anElement.getAttributeBoolValue("show-bottom");
-            return this;
         }
     }
 }

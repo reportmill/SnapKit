@@ -1448,12 +1448,12 @@ public class TextAdapter extends PropObject {
         int selEnd = getSelEnd();
 
         // Add rich text
-        if (_textModel.isRichText()) {
-            TextModel textForRange = _textModel.copyForRange(selStart, selEnd);
-            XMLElement xml = new XMLArchiver().toXML(textForRange);
-            String xmlStr = xml.getString();
-            clipboard.addData(SNAP_RICHTEXT_TYPE, xmlStr);
-        }
+//        if (_textModel.isRichText()) {
+//            TextModel textForRange = _textModel.copyForRange(selStart, selEnd);
+//            XMLElement xml = new XMLArchiver().toXML(textForRange);
+//            String xmlStr = xml.getString();
+//            clipboard.addData(SNAP_RICHTEXT_TYPE, xmlStr);
+//        }
 
         // Add plain text (text/plain)
         String textString = _textModel.subSequence(selStart, selEnd).toString();
@@ -1485,16 +1485,16 @@ public class TextAdapter extends PropObject {
     private Object getClipboardContent(Clipboard clipboard)
     {
         // If Clipboard has RICHTEXT_TYPE, paste it
-        if (clipboard.hasData(SNAP_RICHTEXT_TYPE)) {
-            byte[] bytes = clipboard.getDataBytes(SNAP_RICHTEXT_TYPE);
-            if (bytes != null && bytes.length > 0) {  // Shouldn't need this - Happens when pasting content from prior instance
-                TextModel richText = TextModel.createDefaultTextModel(true);
-                XMLArchiver archiver = new XMLArchiver();
-                archiver.setRootObject(richText);
-                archiver.readObjectFromXmlBytes(bytes);
-                return  richText;
-            }
-        }
+//        if (clipboard.hasData(SNAP_RICHTEXT_TYPE)) {
+//            byte[] bytes = clipboard.getDataBytes(SNAP_RICHTEXT_TYPE);
+//            if (bytes != null && bytes.length > 0) {  // Shouldn't need this - Happens when pasting content from prior instance
+//                TextModel richText = TextModel.createDefaultTextModel(true);
+//                XMLArchiver archiver = new XMLArchiver();
+//                archiver.setRootObject(richText);
+//                archiver.readObjectFromXmlBytes(bytes);
+//                return  richText;
+//            }
+//        }
 
         // If Clipboard has String, paste it
         if (clipboard.hasString()) {

@@ -12,7 +12,7 @@ import snap.util.*;
 /**
  * A class to represent a painted stroke.
  */
-public abstract class Border extends PropObject implements Cloneable, StringCodec.Codeable, XMLArchiver.Archivable {
+public abstract class Border extends PropObject implements Cloneable, StringCodec.Codeable {
     
     // Cached version of insets
     private Insets  _insets;
@@ -98,15 +98,15 @@ public abstract class Border extends PropObject implements Cloneable, StringCode
      */
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Stroke, Color
-            case Stroke_Prop: return getStroke();
-            case Color_Prop: return getColor();
+            case Stroke_Prop -> getStroke();
+            case Color_Prop -> getColor();
 
             // Do normal version
-            default: throw new RuntimeException("Border.getPropValue: Unknown key: " + aPropName);
-        }
+            default -> throw new RuntimeException("Border.getPropValue: Unknown key: " + aPropName);
+        };
     }
 
     /**
@@ -178,24 +178,6 @@ public abstract class Border extends PropObject implements Cloneable, StringCode
     public Border decodeString(String aString)
     {
         return Border.of(aString);
-    }
-
-    /**
-     * XML Archival.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        String className = getClass().getSimpleName();
-        XMLElement e = new XMLElement(className);
-        return e;
-    }
-
-    /**
-     * XML Unarchival.
-     */
-    public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        return this;
     }
 
     /**
