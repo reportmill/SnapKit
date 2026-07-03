@@ -74,13 +74,13 @@ public class TextAdapter extends PropObject {
     // The PropChangeListener to catch TextModel PropChanges.
     private PropChangeListener _textModelPropChangeLsnr = this::handleTextModelPropChange;
 
-    // An event listener to catch text area mouse events
-    private EventListener _textAreaEventLsnr = this::processEvent;
+    // An event listener to catch text area mouse and key events
+    private EventListener _textAreaMouseAndKeyEventLsnr = this::handleTextAreaMouseAndKeyEvents;
 
     // A PropChangeListener to enable/disable caret when window loses focus
-    private PropChangeListener  _windowFocusedChangedLsnr;
+    private PropChangeListener _windowFocusedChangeLsnr;
 
-    // A pointer to window that text is showing in so we can remove WindowFocusChangedLsnr
+    // A pointer to window that text is showing in so we can remove WindowFocusChangeLsnr
     private WindowView _showingWindow;
 
     // The MIME type for SnapKit RichText
@@ -117,7 +117,7 @@ public class TextAdapter extends PropObject {
     {
         if (textArea == getTextArea()) return;
         _textArea = textArea;
-        _textArea.addPropChangeListener(this::handleTextAreaPropChange);
+        _textArea.addPropChangeListener(this::handleTextAreaPropChange, View.Showing_Prop, View.Focused_Prop);
         _textArea.addEventHandler(this::handleTextAreaActionEvent, View.Action);
     }
 
@@ -225,10 +225,10 @@ public class TextAdapter extends PropObject {
 
         if (_textArea != null) {
             if (aValue) {
-                _textArea.addEventHandler(_textAreaEventLsnr, View.MousePress, View.MouseDrag, View.MouseRelease, View.MouseMove);
-                _textArea.addEventHandler(_textAreaEventLsnr, EventType.KeyEvents);
+                _textArea.addEventHandler(_textAreaMouseAndKeyEventLsnr, View.MousePress, View.MouseDrag, View.MouseRelease, View.MouseMove);
+                _textArea.addEventHandler(_textAreaMouseAndKeyEventLsnr, EventType.KeyEvents);
             }
-            else _textArea.removeEventHandler(_textAreaEventLsnr);
+            else _textArea.removeEventHandler(_textAreaMouseAndKeyEventLsnr);
         }
     }
 
@@ -1028,9 +1028,9 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Process event.
+     * Handle text area mouse and key events.
      */
-    public void processEvent(ViewEvent anEvent)
+    public void handleTextAreaMouseAndKeyEvents(ViewEvent anEvent)
     {
         switch (anEvent.getType()) {
             case MousePress -> handleMousePressEvent(anEvent);
@@ -1043,7 +1043,8 @@ public class TextAdapter extends PropObject {
         }
 
         // Consume all mouse events
-        if (anEvent.isMouseEvent()) anEvent.consume();
+        if (anEvent.isMouseEvent())
+            anEvent.consume();
     }
 
     /**
@@ -1628,20 +1629,9 @@ public class TextAdapter extends PropObject {
     private void handleTextAreaPropChange(PropChange propChange)
     {
         switch (propChange.getPropName()) {
-            case View.Focusable_Prop -> handleTextAreaFocusableChange();
             case View.Showing_Prop -> handleTextAreaShowingChange();
             case View.Focused_Prop -> handleTextAreaFocusedChange();
         }
-    }
-
-    /**
-     * Called when text area focusable property changes.
-     */
-    private void handleTextAreaFocusableChange()
-    {
-        if (_textArea.isFocusable())
-            _textArea.addEventHandler(_textAreaEventLsnr, View.MousePress, View.MouseDrag, View.MouseRelease, View.MouseMove);
-        else _textArea.removeEventHandler(_textAreaEventLsnr);
     }
 
     /**
@@ -1659,29 +1649,29 @@ public class TextAdapter extends PropObject {
         }
 
         // Manage listener for Window.Focus changes
-        updateWindowFocusChangedLsnr();
+        updateWindowFocusChangeLsnr();
     }
 
     /**
-     * Updates WindowFocusChangedLsnr when Showing prop changes to update caret showing.
+     * Updates WindowFocusChangeLsnr when Showing prop changes to update caret showing.
      */
-    private void updateWindowFocusChangedLsnr()
+    private void updateWindowFocusChangeLsnr()
     {
-        // Handle Showing: Set ShowingWindow, add WindowFocusChangedLsnr and reset caret
+        // Handle Showing: Set ShowingWindow, add WindowFocusChangeLsnr and reset caret
         if (_textArea.isShowing()) {
             _showingWindow = _textArea.getWindow();
             if (_showingWindow != null) {
-                _windowFocusedChangedLsnr = pc -> handleTextAreaWindowFocusedChange();
-                _showingWindow.addPropChangeListener(_windowFocusedChangedLsnr, View.Focused_Prop);
+                _windowFocusedChangeLsnr = pc -> handleTextAreaWindowFocusedChange();
+                _showingWindow.addPropChangeListener(_windowFocusedChangeLsnr, View.Focused_Prop);
             }
         }
 
-        // Handle not Showing: Remove WindowFocusChangedLsnr and clear
+        // Handle not Showing: Remove WindowFocusChangeLsnr and clear
         else {
             if (_showingWindow != null)
-                _showingWindow.removePropChangeListener(_windowFocusedChangedLsnr);
+                _showingWindow.removePropChangeListener(_windowFocusedChangeLsnr);
             _showingWindow = null;
-            _windowFocusedChangedLsnr = null;
+            _windowFocusedChangeLsnr = null;
         }
     }
 
