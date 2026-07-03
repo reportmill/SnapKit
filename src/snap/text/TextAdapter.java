@@ -1489,8 +1489,7 @@ public class TextAdapter extends PropObject {
             byte[] bytes = clipboard.getDataBytes(SNAP_RICHTEXT_TYPE);
             if (bytes != null && bytes.length > 0) {
                 XMLElement xml = XMLElement.readXmlFromBytes(bytes);
-                TextModel richText = TextModelUtils.textModelFromXML(xml);
-                return  richText;
+                return TextModelUtils.textModelFromXML(xml);
             }
         }
 

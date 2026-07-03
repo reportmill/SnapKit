@@ -214,7 +214,7 @@ public class TextModelUtils {
     /**
      * TextModel unarchival.
      */
-    public static void textModelFromXML(XMLElement anElement)
+    public static TextModel textModelFromXML(XMLElement anElement)
     {
         TextModel textModel = TextModel.createDefaultTextModel(true);
         TextStyle textStyle = textModel.getDefaultTextStyle();
@@ -250,7 +250,10 @@ public class TextModelUtils {
         }
 
         // If no string was read, apply attributes anyway
-        // if (textModel.isEmpty()) textModel.getLine(0).getRun(0).setTextStyle(style);
+        if (textModel.isEmpty())
+            textModel.getLine(0).getRun(0).setTextStyle(textStyle);
+
+        return textModel;
     }
 
     /**
