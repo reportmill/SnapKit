@@ -1,7 +1,12 @@
 package snap.text;
+import snap.geom.HPos;
 import snap.geom.Path2D;
 import snap.geom.Shape;
+import snap.gfx.Color;
+import snap.gfx.Font;
 import snap.props.PropChange;
+import snap.util.XMLAttribute;
+import snap.util.XMLElement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -167,6 +172,191 @@ public class TextModelUtils {
 
         // Return null since range not found
         return null;
+    }
+
+    /**
+     * TextModel archival.
+     */
+    public static XMLElement textModelToXML(TextModel textModel)
+    {
+        XMLElement xml = new XMLElement("TextModel");
+        TextStyle lastTextStyle = textModel.getDefaultTextStyle();
+        TextLineStyle lastLineStyle = textModel.getDefaultLineStyle();
+
+        // Iterate over runs
+        for (TextLine line : textModel.getLines()) {
+            for (TextRun run : line.getRuns()) {
+
+                // If text style changed, write style element
+                TextStyle textStyle = run.getTextStyle();
+                if (!textStyle.equals(lastTextStyle)) {
+                    xml.add(textStyleToXML(textStyle, lastTextStyle));
+                    lastTextStyle = textStyle;
+                }
+
+                // If line style changed, write line style
+                TextLineStyle lineStyle = line.getLineStyle();
+                if (!lineStyle.equals(lastLineStyle)) {
+                    xml.add(lineStyleToXML(lineStyle, lastLineStyle));
+                    lastLineStyle = lineStyle;
+                }
+
+                // Write run string
+                if (!run.isEmpty())
+                    xml.add(new XMLElement("String", run.getString()));
+            }
+        }
+
+        // Return
+        return xml;
+    }
+
+    /**
+     * TextModel unarchival.
+     */
+    public static void textModelFromXML(XMLElement anElement)
+    {
+        TextModel textModel = TextModel.createDefaultTextModel(true);
+        TextStyle textStyle = textModel.getDefaultTextStyle();
+        TextLineStyle lineStyle = textModel.getDefaultLineStyle();
+        boolean lineStyleChanged = false;
+
+        // Iterate over child elements to snag common attributes
+        for (XMLElement e : anElement.getElements()) {
+
+            switch (e.getName()) {
+
+                // Unarchive string
+                case "String" -> {
+                    String str = e.getValue();
+                    if (str == null || str.isEmpty()) continue;
+                    int len = textModel.length();
+                    textModel.addCharsWithStyle(str, textStyle);
+                    if (lineStyleChanged) {
+                        textModel.setLineStyle(lineStyle, len, len + str.length());
+                        lineStyleChanged = false;
+                    }
+                }
+
+                // Unarchive text style element
+                case "Style" -> textStyle = textStyleFromXML(e, textStyle);
+
+                // Unarchive line style element
+                case "LineStyle" -> {
+                    lineStyle = lineStyleFromXML(e, lineStyle);
+                    lineStyleChanged = true;
+                }
+            }
+        }
+
+        // If no string was read, apply attributes anyway
+        // if (textModel.isEmpty()) textModel.getLine(0).getRun(0).setTextStyle(style);
+    }
+
+    /**
+     * TextStyle archival (Font, Color, Underline, CharSpacing, Scripting, Format, Border, Link).
+     */
+    private static XMLElement textStyleToXML(TextStyle textStyle, TextStyle referenceStyle)
+    {
+        XMLElement xml = new XMLElement("Style");
+        if (!textStyle.getFont().equals(referenceStyle.getFont()))
+            xml.add("Font", textStyle.getFont().codeString());
+        if (!textStyle.getColor().equals(referenceStyle.getColor()))
+            xml.add("TextColor", textStyle.getColor().codeString());
+        if (textStyle.isUnderlined() != referenceStyle.isUnderlined())
+            xml.add("Underline", Boolean.toString(textStyle.isUnderlined()));
+        if (textStyle.getCharSpacing() != referenceStyle.getCharSpacing())
+            xml.add("CharSpacing", textStyle.getCharSpacing());
+        if (textStyle.getScripting() != referenceStyle.getScripting())
+            xml.add("Scripting", textStyle.getScripting());
+        return xml;
+    }
+
+    /**
+     * TextStyle unarchival.
+     */
+    private static TextStyle textStyleFromXML(XMLElement xml, TextStyle referenceStyle)
+    {
+        TextStyle textStyle = referenceStyle;
+        for (XMLAttribute attribute : xml.getAttributes()) {
+            switch (attribute.getName()) {
+                case "Font" -> {
+                    Font font = Font.of(attribute.getValue());
+                    textStyle = textStyle.copyForStyleKeyValue(TextStyle.Font_Prop, font);
+                }
+                case "TextColor" -> {
+                    Color color = Color.get(attribute.getValue());
+                    textStyle = textStyle.copyForStyleKeyValue(TextStyle.Color_Prop, color);
+                }
+                case "Underline" -> {
+                    boolean underline = attribute.getValue().equals("true");
+                    textStyle = textStyle.copyForStyleKeyValue(TextStyle.Underline_Prop, underline ? 1 : 0);
+                }
+                case "CharSpacing" -> {
+                    double charSpacing = attribute.getDoubleValue();
+                    textStyle = textStyle.copyForStyleKeyValue(TextStyle.CharSpacing_Prop, charSpacing);
+                }
+                case "Scripting" -> {
+                    double scripting = attribute.getDoubleValue();
+                    textStyle = textStyle.copyForStyleKeyValue(TextStyle.Scripting_Prop, scripting);
+                }
+            }
+        }
+        return textStyle;
+    }
+
+    /**
+     * TextLineStyle archival (Align, Justify, FirstIndent, LeftIndent, RightIndent, Spacing, SpacingFactor,
+     * NewlineSpacing, MinHeight, MaxHeight).
+     */
+    private static XMLElement lineStyleToXML(TextLineStyle textStyle, TextLineStyle referenceStyle)
+    {
+        XMLElement xml = new XMLElement("LineStyle");
+        if (textStyle.getAlign() != referenceStyle.getAlign())
+            xml.add("Align", textStyle.getAlign().toString());
+        if (textStyle.isJustify() != referenceStyle.isJustify())
+            xml.add("Justify", Boolean.toString(textStyle.isJustify()));
+        if (textStyle.getFirstIndent() != referenceStyle.getFirstIndent())
+            xml.add("FirstIndent", textStyle.getFirstIndent());
+        if (textStyle.getLeftIndent() != referenceStyle.getLeftIndent())
+            xml.add("LeftIndent", textStyle.getLeftIndent());
+        if (textStyle.getRightIndent() != referenceStyle.getRightIndent())
+            xml.add("RightIndent", textStyle.getRightIndent());
+        if (textStyle.getSpacing() != referenceStyle.getSpacing())
+            xml.add("Spacing", textStyle.getSpacing());
+        if (textStyle.getSpacingFactor() != referenceStyle.getSpacingFactor())
+            xml.add("SpacingFactor", textStyle.getSpacingFactor());
+        if (textStyle.getNewlineSpacing() != referenceStyle.getNewlineSpacing())
+            xml.add("NewlineSpacing", textStyle.getNewlineSpacing());
+        if (textStyle.getMinHeight() != referenceStyle.getMinHeight())
+            xml.add("MinHeight", textStyle.getMinHeight());
+        if (textStyle.getMaxHeight() != referenceStyle.getMaxHeight())
+            xml.add("MaxHeight", textStyle.getMaxHeight());
+        return xml;
+    }
+
+    /**
+     * TextLineStyle unarchival.
+     */
+    private static TextLineStyle lineStyleFromXML(XMLElement xml, TextLineStyle referenceStyle)
+    {
+        TextLineStyle lineStyle = referenceStyle;
+        for (XMLAttribute attribute : xml.getAttributes()) {
+            lineStyle = switch (attribute.getName()) {
+                case "Align" -> lineStyle.copyForPropKeyValue(TextLineStyle.Align_Prop, HPos.valueOf(attribute.getValue()));
+                case "Justify" -> lineStyle.copyForPropKeyValue(TextLineStyle.Justify_Prop, attribute.getValue().equals("true"));
+                case "FirstIndent" -> lineStyle.copyForPropKeyValue(TextLineStyle.FirstIndent_Prop, attribute.getDoubleValue());
+                case "LeftIndent" -> lineStyle.copyForPropKeyValue(TextLineStyle.LeftIndent_Prop, attribute.getDoubleValue());
+                case "RightIndent" -> lineStyle.copyForPropKeyValue(TextLineStyle.RightIndent_Prop, attribute.getDoubleValue());
+                case "Spacing" -> lineStyle.copyForPropKeyValue(TextLineStyle.Spacing_Prop, attribute.getDoubleValue());
+                case "SpacingFactor" -> lineStyle.copyForPropKeyValue(TextLineStyle.SpacingFactor_Prop, attribute.getDoubleValue());
+                case "NewlineSpacing" -> lineStyle.copyForPropKeyValue(TextLineStyle.NewlineSpacing_Prop, attribute.getDoubleValue());
+                case "MinHeight" -> lineStyle.copyForPropKeyValue(TextLineStyle.MinHeight_Prop, attribute.getDoubleValue());
+                case "MaxHeight" -> lineStyle.copyForPropKeyValue(TextLineStyle.MaxHeight_Prop, attribute.getDoubleValue());
+                default -> lineStyle;
+            };
+        }
+        return lineStyle;
     }
 
     /**
