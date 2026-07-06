@@ -36,9 +36,6 @@ public class ViewUpdater {
     // The timer for animated views
     private ViewTimer  _timer = new ViewTimer(this::updateLater, 25);
     
-    // The ViewUpdater.Lister that is notified on certain update actions
-    private ViewUpdater.Listener  _lsnr;
-    
     // Whether currently painting
     private boolean  _painting;
 
@@ -180,8 +177,7 @@ public class ViewUpdater {
 
         // Clear RepaintViews, reset runnable, update PaintCount and set Painting false
         finally {
-            for (View v : _repaintViews)
-                v._repaintRect = null;
+            //_repaintViews.forEach(view -> view._repaintRect = null);
             _repaintViews.clear();
             _painting = false;
 
@@ -218,8 +214,7 @@ public class ViewUpdater {
 
             // If paint was called outside of paintLater (maybe Window.show() or resize), repaint all
             if (!_painting) {
-                for (View v : _repaintViews)
-                    v._repaintRect = null;
+                _repaintViews.forEach(v -> v._repaintRect = null);
                 _repaintViews.clear();
                 _rootView.repaint();
             }
@@ -264,64 +259,60 @@ public class ViewUpdater {
      */
     public Rect getRepaintRect()
     {
-        // Get array of RepaintViews (just return if none)
-        int count = _repaintViews.size(); if (count == 0)  return null;
-        View[] views = _repaintViews.toArray(new View[count]);
+        if (_repaintViews.isEmpty())  return null;
+        View[] repaintViews = _repaintViews.toArray(new View[0]);
+        Rect repaintRect = null;
 
         // Iterate over RepaintViews to calculate composite repaint rect from all views
-        Rect totalRect = null;
-        for (View view : views) {
+        for (View view : repaintViews) {
 
             // If view no longer in hierarchy or has no Repaint rect, just continue
             if (view.getRootView() != _rootView || !view.isVisible())
                 continue;
 
             // Get view repaint rect - just continue if not set
-            Rect viewPaintRect = view.getRepaintRect();
-            if (viewPaintRect == null)
+            Rect viewRepaintRect = view.getRepaintRect();
+            view._repaintRect = null;
+            if (viewRepaintRect == null)
                 continue;
 
             // Get view paint rect cliped to any ancestor view clips
-            Rect viewPaintRectClipped = viewPaintRect;
+            Rect viewRepaintRectClipped = viewRepaintRect;
             Rect clipBoundsAll = view.getClipBoundsAll();
             if (clipBoundsAll != null) {
-                viewPaintRectClipped = viewPaintRectClipped.getIntersectRect(clipBoundsAll);
-                viewPaintRectClipped.snap();
+                viewRepaintRectClipped = viewRepaintRectClipped.getIntersectRect(clipBoundsAll);
+                viewRepaintRectClipped.snap();
             }
 
             // If view paint rect is empty just continue
-            if (viewPaintRectClipped.isEmpty())
+            if (viewRepaintRectClipped.isEmpty())
                 continue;
 
             // Transform to root coords
             if (view != _rootView)
-                viewPaintRectClipped = view.localToParent(viewPaintRectClipped, _rootView).getBounds();
+                viewRepaintRectClipped = view.localToParent(viewRepaintRectClipped, _rootView).getBounds();
 
             // Combine
-            if (totalRect == null)
-                totalRect = viewPaintRectClipped;
-            else totalRect.union(viewPaintRectClipped);
+            if (repaintRect == null)
+                repaintRect = viewRepaintRectClipped;
+            else repaintRect.union(viewRepaintRectClipped);
         }
 
         // Round rect and constrain to root bounds
-        if (totalRect == null)
+        if (repaintRect == null)
             return null;
-        totalRect.snap();
-        if (totalRect.x < 0)
-            totalRect.x = 0;
-        if (totalRect.y < 0)
-            totalRect.y = 0;
-        if (totalRect.width > _rootView.getWidth())
-            totalRect.width = _rootView.getWidth();
-        if (totalRect.height > _rootView.getHeight())
-            totalRect.height = _rootView.getHeight();
+        repaintRect.snap();
+        if (repaintRect.x < 0)
+            repaintRect.x = 0;
+        if (repaintRect.y < 0)
+            repaintRect.y = 0;
+        if (repaintRect.width > _rootView.getWidth())
+            repaintRect.width = _rootView.getWidth();
+        if (repaintRect.height > _rootView.getHeight())
+            repaintRect.height = _rootView.getHeight();
 
-        // Give listener a chance to modify rect
-        if (_lsnr != null)
-            totalRect = _lsnr.updaterWillPaint(_rootView, totalRect);
-
-        // Return rect
-        return totalRect;
+        // Return
+        return repaintRect;
     }
 
     /**
@@ -360,25 +351,6 @@ public class ViewUpdater {
                 return true;
         }
         return false;
-    }
-
-    /**
-     * Adds a ViewUpdater listener.
-     */
-    public void addListener(ViewUpdater.Listener aLsnr)
-    {
-        if (_lsnr != null)
-            System.err.println("ViewUpdater.addListener: Multiple listeners not yet supported");
-        _lsnr = aLsnr;
-    }
-
-    /**
-     * Removes a ViewUpdater listener.
-     */
-    public void removeListener(ViewUpdater.Listener aLsnr)
-    {
-        if (_lsnr == aLsnr)
-            _lsnr = null;
     }
 
     /**
@@ -437,14 +409,5 @@ public class ViewUpdater {
         double averageFrameTime = totalFramesTime / (double) _frameRates.length;
         int averageFrameRate = (int) Math.round(1000 / averageFrameTime);
         _frameRateLabel.setText(averageFrameRate + " fps");
-    }
-
-    /**
-     * An interface to listen to ViewUpdater events.
-     */
-    public interface Listener {
-
-        /** Called before paint request. */
-        Rect updaterWillPaint(RootView aRV, Rect aRect);
     }
 }

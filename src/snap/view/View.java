@@ -127,7 +127,7 @@ public class View extends PropObject implements EventType.AllTypes {
     private ViewAnim  _anim;
 
     // The current rect that needs to be repainted in this view
-    protected Rect  _repaintRect;
+    Rect _repaintRect;
 
     // Provides information for physics simulations
     private ViewPhysics _physics;
