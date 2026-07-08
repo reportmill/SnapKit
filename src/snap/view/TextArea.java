@@ -203,11 +203,6 @@ public class TextArea extends ParentView {
     public boolean isSelEmpty()  { return _textAdapter.isSelEmpty(); }
 
     /**
-     * Returns the final character index of the selection (usually SelEnd).
-     */
-    public int getSelIndex()  { return _textAdapter.getSelIndex(); }
-
-    /**
      * Returns the character index of the start of the text selection.
      */
     public int getSelStart()  { return _textAdapter.getSelStart(); }

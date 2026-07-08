@@ -44,11 +44,11 @@ public class TextAdapter extends PropObject {
     // A consumer to handle link clicks
     private BiConsumer<ViewEvent,String> _linkHandler;
 
-    // The char index of carat
-    private int  _selIndex;
+    // The initial character index of the selection (usually SelStart).
+    private int _selHead;
 
-    // The char index of last char selection
-    private int  _selAnchor;
+    // The final character index of the selection (usually SelEnd).
+    private int _selTail;
 
     // The char index of current selection start/end
     private int  _selStart, _selEnd;
@@ -433,12 +433,12 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the initial character index of the selection (usually SelStart).
      */
-    public int getSelAnchor()  { return Math.min(_selAnchor, length()); }
+    public int getSelHead()  { return Math.min(_selHead, length()); }
 
     /**
      * Returns the final character index of the selection (usually SelEnd).
      */
-    public int getSelIndex()  { return Math.min(_selIndex, length()); }
+    public int getSelTail()  { return Math.min(_selTail, length()); }
 
     /**
      * Returns the character index of the start of the text selection.
@@ -456,7 +456,7 @@ public class TextAdapter extends PropObject {
     public TextSel getSel()
     {
         if (_sel != null) return _sel;
-        return _sel = new TextSel(_textLayout, _selAnchor, _selIndex);
+        return _sel = new TextSel(_textLayout, _selHead, _selTail);
     }
 
     /**
@@ -471,9 +471,9 @@ public class TextAdapter extends PropObject {
     {
         // If already set, just return
         int len = length();
-        int anchor = Math.min(aStart, len);
-        int index = Math.min(aEnd, len);
-        if (anchor == _selAnchor && index == _selIndex)
+        int selHead = Math.min(aStart, len);
+        int selTail = Math.min(aEnd, len);
+        if (selHead == _selHead && selTail == _selTail)
             return;
 
         // Repaint old selection
@@ -481,8 +481,8 @@ public class TextAdapter extends PropObject {
             repaintSel();
 
         // Set new values
-        _selAnchor = aStart;
-        _selIndex = aEnd;
+        _selHead = aStart;
+        _selTail = aEnd;
         _selStart = Math.min(aStart, aEnd);
         _selEnd = Math.max(aStart, aEnd);
 
@@ -556,24 +556,18 @@ public class TextAdapter extends PropObject {
         if (visibleBounds.isEmpty() || visibleBounds.width == viewW && visibleBounds.height == viewH)
             return;
 
-        // Get selection rect with healthy margin, constrained to bounds
-        TextSel textSel = getSel();
-        Rect selRect = textSel.getPath().getBounds();
-        selRect.inset(-72);
-        selRect.x = Math.max(selRect.x, 0);
-        selRect.y = Math.max(selRect.y, 0);
-        if (selRect.getMaxX() > viewW) selRect.width = viewW - selRect.x;
-        if (selRect.getMaxY() > viewH) selRect.height = viewH - selRect.y;
+        // Get bounds of selection tail with healthy margin (quarter inch)
+        int selTail = getSelTail();
+        Rect selTailBounds = _textLayout.getPathForCharRange(selTail, selTail).getBounds();
+        selTailBounds.inset(-18);
 
-        // If sel rect covers whole width, cancel horizontal scroll
-        if (selRect.x == 0 && selRect.width == viewW) {
-            selRect.x = visibleBounds.x;
-            selRect.width = visibleBounds.width;
-        }
+        // Make sure to show left margin whenever possible
+        if (selTailBounds.getMaxX() <= visibleBounds.width)
+            selTailBounds.x = 0;
 
         // If selection rect not fully contained in visible bounds, scrollRectToVisible
-        if (!visibleBounds.contains(selRect))
-            _textArea.scrollToVisible(selRect);
+        if (!visibleBounds.contains(selTailBounds))
+            _textArea.scrollToVisible(selTailBounds);
     }
 
     /**
