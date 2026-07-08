@@ -278,8 +278,7 @@ public class Scroller extends ParentView implements ViewHost {
     public void scrollToVisible(Shape aShape)
     {
         // If animating, just skip
-        ViewUpdater viewUpdater = getUpdater();
-        if (viewUpdater != null && viewUpdater.isViewAnimating(this))
+        if (ViewAnimUtils.isViewAnimating(this))
             return;
 
         // Get Scroller scroll and size

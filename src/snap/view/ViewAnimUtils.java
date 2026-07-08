@@ -8,6 +8,24 @@ import snap.util.Interpolator;
 public class ViewAnimUtils {
 
     /**
+     * Returns whether view is animating or inside animating view.
+     */
+    public static boolean isViewAnimating(View aView)
+    {
+        ViewUpdater viewUpdater = aView.getUpdater(); if (viewUpdater == null) return false;
+        return viewUpdater._viewAnims.stream().map(ViewAnim::getView).anyMatch(view -> aView == view);
+    }
+
+    /**
+     * Returns whether view is animating or inside animating view.
+     */
+    public static boolean isViewOrAncestorAnimating(View aView)
+    {
+        ViewUpdater viewUpdater = aView.getUpdater(); if (viewUpdater == null) return false;
+        return viewUpdater._viewAnims.stream().map(ViewAnim::getView).anyMatch(view -> aView == view || aView.isAncestor(view));
+    }
+
+    /**
      * Sets a view to be visible/not-visible with anim.
      */
     public static ViewAnim setVisible(View aView, boolean aValue, boolean doWidth, boolean doHeight)
@@ -132,7 +150,7 @@ public class ViewAnimUtils {
     /**
      * Adds a item with animation.
      */
-    protected static void addSplitViewItemWithAnim(SplitView aSplitView, View aView, double aSize, int anIndex)
+    static void addSplitViewItemWithAnim(SplitView aSplitView, View aView, double aSize, int anIndex)
     {
         // Add view as item
         aSplitView.addItem(aView, anIndex);
@@ -156,7 +174,7 @@ public class ViewAnimUtils {
     /**
      * Removes a item with animation.
      */
-    protected static void removeSplitViewItemWithAnim(SplitView aSplitView, View aView)
+    static void removeSplitViewItemWithAnim(SplitView aSplitView, View aView)
     {
         // Get index, divider and Location/Remainder for given view
         int index = aSplitView.indexOfItem(aView);
@@ -183,7 +201,7 @@ public class ViewAnimUtils {
     /**
      * Sets a child visible with animation.
      */
-    protected static void setSplitViewItemVisibleWithAnim(SplitView aSplitView, View aView, boolean aValue)
+    static void setSplitViewItemVisibleWithAnim(SplitView aSplitView, View aView, boolean aValue)
     {
         // If already set, just return
         if (aValue == aView.isVisible()) return;

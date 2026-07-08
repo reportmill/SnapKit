@@ -321,7 +321,7 @@ public class TextField extends TextArea {
         // Promote to WrapLines if text is long
         if (!_textAdapter.isWrapLines()) {
             double prefW = _textAdapter.getPrefWidth();
-            if (prefW > getTextLayout().getWidth() && !isAnimActive())
+            if (prefW > getTextLayout().getWidth() && !ViewAnimUtils.isViewOrAncestorAnimating(this))
                 runLater(() -> _textAdapter.setWrapLines(true));
         }
 

@@ -19,7 +19,7 @@ public class ViewUpdater {
     private Set <Runnable>  _runBefores = Collections.synchronizedSet(new HashSet<>());
 
     // A set of ViewAnims with active animations
-    private Set <ViewAnim>  _viewAnims = Collections.synchronizedSet(new HashSet<>());
+    Set <ViewAnim> _viewAnims = Collections.synchronizedSet(new HashSet<>());
 
     // A set of ViewControllers that want to be reset on next UI update call
     private Set <ViewController> _resetLaters = Collections.synchronizedSet(new HashSet<>());
@@ -338,19 +338,6 @@ public class ViewUpdater {
             return;
         if (_viewAnims.isEmpty())
             _timer.stop();
-    }
-
-    /**
-     * Returns whether view is animating or inside animating view.
-     */
-    public boolean isViewAnimating(View aView)
-    {
-        for (ViewAnim viewAnim : _viewAnims) {
-            View view = viewAnim.getView();
-            if (aView == view || aView.isAncestor(view))
-                return true;
-        }
-        return false;
     }
 
     /**

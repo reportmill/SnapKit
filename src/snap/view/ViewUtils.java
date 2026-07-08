@@ -613,7 +613,7 @@ public class ViewUtils {
             return;
 
         // If animating, just return
-        if (aView.isAnimActive())
+        if (ViewAnimUtils.isViewOrAncestorAnimating(aView))
             return;
 
         // If size less than preferred, replace with scroll view
