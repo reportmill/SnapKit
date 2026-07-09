@@ -2481,26 +2481,6 @@ public class View extends PropObject implements EventType.AllTypes {
     }
 
     /**
-     * Standard clone implementation.
-     */
-    @Override
-    protected PropObject clone() throws CloneNotSupportedException
-    {
-        // Do normal version
-        View clone;
-        try { clone = (View) super.clone(); }
-        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
-
-        // Clear Parent, EventAdapter, Controller
-        clone._parent = null;
-        clone._eventAdapter = null;
-        clone._controller = null;
-
-        // Return
-        return clone;
-    }
-
-    /**
      * Sets style properties for given string, e.g., "Margin:20; Fill:Red; Border:#00 1;".
      */
     public void setStyleString(String styleString)  { PropUtils.setPropsString(this, styleString); }

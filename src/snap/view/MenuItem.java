@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * A ButtonBaseNode for MenuItem.
  */
-public class MenuItem extends ButtonBase implements Cloneable {
+public class MenuItem extends ButtonBase {
 
     // The accelerator string
     private String _shortcut;
@@ -192,15 +192,15 @@ public class MenuItem extends ButtonBase implements Cloneable {
     }
 
     /**
-     * Copies a menu item.
+     * Copies this menu item.
      */
-    public MenuItem clone()
+    public MenuItem copyMenuItem()
     {
         MenuItem clone;
         if (this instanceof Menu) {
             clone = new Menu();
             List<MenuItem> menuItems = ((Menu) this).getMenuItems();
-            List<MenuItem> menuItemsCopy = ListUtils.map(menuItems, item -> item.clone());
+            List<MenuItem> menuItemsCopy = menuItems.stream().map(MenuItem::copyMenuItem).toList();
             ((Menu) clone).setMenuItems(menuItemsCopy);
         }
         else if (this instanceof CheckBoxMenuItem)

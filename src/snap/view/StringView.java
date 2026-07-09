@@ -13,7 +13,7 @@ import java.util.Objects;
 /**
  * A view subclass to display a text string in a single style.
  */
-public class StringView extends View implements Cloneable {
+public class StringView extends View {
 
     // TextRun
     private StyledString _styledString;
@@ -350,11 +350,18 @@ public class StringView extends View implements Cloneable {
             return _copyThatFits = this;
 
         // Clone box, setFontToFit() and set/return
-        StringView clone = clone();
+        StringView clone = new StringView(this);
         clone.setXY(0, 0);
         clone.setShrinkToFit(false);
         clone.setFontToFit();
         return _copyThatFits = clone;
+    }
+
+    private StringView(StringView stringView)
+    {
+        _styledString = stringView._styledString;
+        setWidth(stringView.getWidth());
+        setHeight(stringView.getHeight());
     }
 
     /**
@@ -466,17 +473,5 @@ public class StringView extends View implements Cloneable {
         if (aValue == getHeight()) return;
         super.setHeight(aValue);
         _needsResize = false;
-    }
-
-    /**
-     * Returns a copy of this StringView.
-     */
-    public StringView clone()
-    {
-        StringView copy;
-        try { copy = (StringView) super.clone(); }
-        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
-        copy._styledString = _styledString.clone();
-        return copy;
     }
 }
