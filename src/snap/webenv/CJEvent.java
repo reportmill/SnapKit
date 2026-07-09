@@ -10,7 +10,7 @@ import snap.webapi.*;
 public class CJEvent extends ViewEvent {
 
     // Whether platform is windows
-    private static boolean _isWindows = Navigator.isWindows();
+    private static boolean _shortcutIsControlKey = !(Navigator.isMac() || Navigator.isIOS());
 
     /**
      * Returns the event point from browser mouse event.
@@ -135,9 +135,7 @@ public class CJEvent extends ViewEvent {
     public boolean isShiftDown()
     {
         UIEvent uiEvent = getUIEvent();
-        if (uiEvent != null)
-            return uiEvent.isShiftKey();
-        return false;
+        return uiEvent != null && uiEvent.isShiftKey();
     }
 
     /**
@@ -146,9 +144,7 @@ public class CJEvent extends ViewEvent {
     public boolean isControlDown()
     {
         UIEvent uiEvent = getUIEvent();
-        if (uiEvent != null)
-            return uiEvent.isCtrlKey();
-        return false;
+        return uiEvent != null && uiEvent.isCtrlKey();
     }
 
     /**
@@ -157,9 +153,7 @@ public class CJEvent extends ViewEvent {
     public boolean isAltDown()
     {
         UIEvent uiEvent = getUIEvent();
-        if (uiEvent != null)
-            return uiEvent.isAltKey();
-        return false;
+        return uiEvent != null && uiEvent.isAltKey();
     }
 
     /**
@@ -176,23 +170,7 @@ public class CJEvent extends ViewEvent {
     /**
      * Returns whether shortcut key is pressed.
      */
-    public boolean isShortcutDown()
-    {
-        KeyboardEvent keyEvent = getKeyEvent();
-        if (keyEvent != null) {
-            if (_isWindows)
-                return keyEvent.isCtrlKey();
-            return keyEvent.isMetaKey();
-        }
-
-        UIEvent uiEvent = getUIEvent();
-        if (uiEvent != null) {
-            if (_isWindows)
-                return isControlDown();
-            return isMetaDown();
-        }
-        return false;
-    }
+    public boolean isShortcutDown()  { return _shortcutIsControlKey ? isControlDown() : isMetaDown(); }
 
     /**
      * Returns whether popup trigger is down.
@@ -208,12 +186,9 @@ public class CJEvent extends ViewEvent {
      */
     private UIEvent getUIEvent()
     {
-        for (ViewEvent viewEvent = this; viewEvent != null; viewEvent = viewEvent.getParentEvent()) {
-            Object eventObj = viewEvent.getEvent();
-            if (eventObj instanceof UIEvent)
-                return (UIEvent) eventObj;
-        }
-
+        for (ViewEvent viewEvent = this; viewEvent != null; viewEvent = viewEvent.getParentEvent())
+            if (viewEvent.getEvent() instanceof UIEvent uiEvent)
+                return uiEvent;
         return null;
     }
 
@@ -222,12 +197,9 @@ public class CJEvent extends ViewEvent {
      */
     private KeyboardEvent getKeyEvent()
     {
-        for (ViewEvent viewEvent = this; viewEvent != null; viewEvent = viewEvent.getParentEvent()) {
-            Object eventObj = viewEvent.getEvent();
-            if (eventObj instanceof KeyboardEvent)
-                return (KeyboardEvent) eventObj;
-        }
-
+        for (ViewEvent viewEvent = this; viewEvent != null; viewEvent = viewEvent.getParentEvent())
+            if (viewEvent.getEvent() instanceof KeyboardEvent keyboardEvent)
+                return keyboardEvent;
         return null;
     }
 
@@ -236,12 +208,9 @@ public class CJEvent extends ViewEvent {
      */
     private MouseEvent getMouseEvent()
     {
-        for (ViewEvent viewEvent = this; viewEvent != null; viewEvent = viewEvent.getParentEvent()) {
-            Object eventObj = viewEvent.getEvent();
-            if (eventObj instanceof MouseEvent)
-                return (MouseEvent) eventObj;
-        }
-
+        for (ViewEvent viewEvent = this; viewEvent != null; viewEvent = viewEvent.getParentEvent())
+            if (viewEvent.getEvent() instanceof MouseEvent mouseEvent)
+                return mouseEvent;
         return null;
     }
 
@@ -250,12 +219,9 @@ public class CJEvent extends ViewEvent {
      */
     private TouchEvent getTouchEvent()
     {
-        for (ViewEvent ve = this; ve != null; ve = ve.getParentEvent()) {
-            Object eventObj = ve.getEvent();
-            if (eventObj instanceof TouchEvent)
-                return (TouchEvent) getEvent();
-        }
-
+        for (ViewEvent viewEvent = this; viewEvent != null; viewEvent = viewEvent.getParentEvent())
+            if (viewEvent.getEvent() instanceof TouchEvent touchEvent)
+                return touchEvent;
         return null;
     }
 

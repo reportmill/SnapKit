@@ -17,6 +17,9 @@ public class Navigator {
     // Returns whether platform is mac
     private static Boolean _isMac;
 
+    // Returns whether platform is linux
+    private static Boolean _isLinux;
+
     // Returns whether platform is iOS
     private static Boolean _isIOS;
 
@@ -51,6 +54,16 @@ public class Navigator {
         if (_isMac != null) return _isMac;
         String userAgent = getUserAgent();
         return _isMac = userAgent.contains("Mac");
+    }
+
+    /**
+     * Returns whether platform is Linux.
+     */
+    public static boolean isLinux()
+    {
+        if (_isLinux != null) return _isLinux;
+        String userAgent = getUserAgent();
+        return _isLinux = userAgent.toLowerCase().contains("linux");
     }
 
     /**
