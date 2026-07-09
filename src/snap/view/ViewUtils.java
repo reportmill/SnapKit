@@ -100,6 +100,87 @@ public class ViewUtils {
     }
 
     /**
+     * Returns the visible bounds for a view based on ancestor clips (just bound local if no clipping found).
+     */
+    public static Rect getVisibleBounds(View aView)
+    {
+        if (!aView.isVisible())
+            return new Rect();
+
+        // Get view bounds and clip bounds - if no clip, just return view bounds
+        Rect viewBounds = aView.getBoundsLocal();
+        Rect clipBounds = getClipBoundsAllForViewInView(aView, null);
+        if (clipBounds == null || clipBounds.contains(viewBounds))
+            return viewBounds;
+
+        // Return intersection of view and clip bounds
+        Rect visibleBounds = viewBounds.getIntersectRect(clipBounds);
+        visibleBounds.snap();
+        return visibleBounds;
+    }
+
+    /**
+     * Returns the bounds of given view that are visible in any parent scroller.
+     */
+    public static Rect getVisibleBoundsForViewInScroller(View aView)
+    {
+        if (!aView.isVisible())
+            return new Rect();
+
+        // Get view bounds and clip bounds - if no clip, just return view bounds
+        Rect viewBounds = aView.getBoundsLocal();
+        Scroller scroller = aView.getParent(Scroller.class);
+        if (scroller == null)
+            return viewBounds;
+        Rect clipBounds = getClipBoundsAllForViewInView(aView, scroller);
+        if (clipBounds == null || clipBounds.contains(viewBounds))
+            return viewBounds;
+
+        // Return intersection of view and clip bounds
+        Rect visibleBounds = viewBounds.getIntersectRect(clipBounds);
+        visibleBounds.snap();
+        return visibleBounds;
+    }
+
+    /**
+     * Returns the clip bounds due to all parents.
+     */
+    static Rect getClipBoundsAllForViewInView(View aView, View clipView)
+    {
+        Shape clipAll = getClipAllForViewInView(aView, clipView);
+        return clipAll != null ? clipAll.getBounds() : null;
+    }
+
+    /**
+     * Returns the clip of this view due to all parents.
+     */
+    static Shape getClipAllForViewInView(View aView, View clipView)
+    {
+        // If given view is also clip view, just return view clip
+        if (aView == clipView)
+            return aView.getClip();
+
+        // Get view clip and parent clip - if no parent clip, return view clip
+        Shape viewClip = aView.getClip();
+        View parentView = aView.getParent();
+        Shape parentClip = parentView != null ? getClipAllForViewInView(parentView, clipView) : null;
+        if (parentClip == null)
+            return viewClip;
+
+        // Get parent clip in local coords - if no view clip, return parent clip
+        Shape parentClipLocal = aView.parentToLocal(parentClip);
+        if (viewClip == null)
+            return parentClipLocal;
+
+        // If parent clip contains view clip, return view clip
+        if (parentClipLocal.contains(viewClip))
+            return viewClip;
+
+        // Return intersection of view clip and parent clip in local coords
+        return Shape.intersectShapes(viewClip, parentClipLocal);
+    }
+
+    /**
      * Returns whether current thread is event dispatch thread.
      */
     public static boolean isEventThread()

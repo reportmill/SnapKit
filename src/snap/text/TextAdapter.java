@@ -550,7 +550,7 @@ public class TextAdapter extends PropObject {
     protected void scrollSelToVisible()
     {
         // Get visible bounds - if no reason to scroll, just return
-        Rect visibleBounds = _textArea.getVisibleBounds();
+        Rect visibleBounds = ViewUtils.getVisibleBoundsForViewInScroller(_textArea);
         double viewW = _textArea.getWidth();
         double viewH = _textArea.getHeight();
         if (visibleBounds.isEmpty() || visibleBounds.width == viewW && visibleBounds.height == viewH)

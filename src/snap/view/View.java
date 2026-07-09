@@ -782,22 +782,14 @@ public class View extends PropObject implements EventType.AllTypes {
     public void setOverflow(Overflow aValue)
     {
         if (aValue == _overflow) return;
-        _overflow = aValue;
+        firePropChange(Overflow_Prop, _overflow, _overflow = aValue);
     }
-
-    /**
-     * Returns whether view should clip to bounds.
-     */
-    public boolean isClipToBounds()  { return _overflow == Overflow.Clip; }
 
     /**
      * Sets whether view should clip to bounds.
      */
-    public void setClipToBounds(boolean aValue)
-    {
-        if (aValue == isClipToBounds()) return;
-        setOverflow(aValue ? Overflow.Clip : Overflow.Visible);
-    }
+    @Deprecated
+    public void setClipToBounds(boolean aValue)  { setOverflow(aValue ? Overflow.Clip : Overflow.Visible); }
 
     /**
      * Returns the clip shape.
@@ -810,62 +802,9 @@ public class View extends PropObject implements EventType.AllTypes {
     }
 
     /**
-     * Returns the clip bounds.
-     */
-    public Rect getClipBounds()
-    {
-        Shape clip = getClip();
-        return clip != null ? clip.getBounds() : null;
-    }
-
-    /**
-     * Returns the clip of this view due to all parents.
-     */
-    public Shape getClipAll()
-    {
-        // Get view clip and parent clip - if no parent clip, return view clip
-        Shape viewClip = getClip();
-        Shape parentClip = _parent != null ? _parent.getClipAll() : null;
-        if (parentClip == null)
-            return viewClip;
-
-        // Get parent clip in local coords - if no view clip, return parent clip
-        Shape parentClipLocal = parentToLocal(parentClip);
-        if (viewClip == null)
-            return parentClipLocal;
-
-        // Return intersection of view clip and parent clip in local coords
-        return Shape.intersectShapes(viewClip, parentClipLocal);
-    }
-
-    /**
-     * Returns the clip bounds due to all parents.
-     */
-    public Rect getClipBoundsAll()
-    {
-        Shape clipAll = getClipAll();
-        return clipAll != null ? clipAll.getBounds() : null;
-    }
-
-    /**
      * Returns the visible bounds for a view based on ancestor clips (just bound local if no clipping found).
      */
-    public Rect getVisibleBounds()
-    {
-        if (!isVisible())
-            return new Rect();
-
-        // Get view bounds and clip bounds - if no clip, just return view bounds
-        Rect viewBounds = getBoundsLocal();
-        Rect clipBounds = getClipBoundsAll();
-        if (clipBounds == null)
-            return viewBounds;
-
-        // Return intersection of view and clip bounds
-        Rect visibleBounds = viewBounds.getIntersectRect(clipBounds);
-        visibleBounds.snap();
-        return visibleBounds;
-    }
+    public Rect getVisibleBounds()  { return ViewUtils.getVisibleBounds(this); }
 
     /**
      * Called to scroll the given shape in this view coords to visible.
@@ -1135,16 +1074,6 @@ public class View extends PropObject implements EventType.AllTypes {
     }
 
     /**
-     * Returns the number of ancestors of this view.
-     */
-    public int getParentCount()
-    {
-        int pc = 0;
-        for (View n = getParent(); n != null; n = n.getParent()) pc++;
-        return pc;
-    }
-
-    /**
      * Returns whether given view is an ancestor of this view.
      */
     public boolean isAncestor(View aView)
@@ -1166,26 +1095,17 @@ public class View extends PropObject implements EventType.AllTypes {
     /**
      * Returns the ViewHost if this view is guest view of parent ViewHost.
      */
-    public ViewHost getHost()
-    {
-        return isGuest() ? (ViewHost) getParent() : null;
-    }
+    public ViewHost getHost()  { return isGuest() ? (ViewHost) getParent() : null; }
 
     /**
      * Returns whether view is a "guest" child of a ViewHost.
      */
-    public boolean isGuest()
-    {
-        return indexInHost() >= 0;
-    }
+    public boolean isGuest()  { return indexInHost() >= 0; }
 
     /**
      * Returns the index of this view in ViewHost parent (or -1 if parent isn't host).
      */
-    public int indexInHost()
-    {
-        return ViewHost.indexInHost(this);
-    }
+    public int indexInHost()  { return ViewHost.indexInHost(this); }
 
     /**
      * Returns whether this view is visible.
@@ -1781,34 +1701,22 @@ public class View extends PropObject implements EventType.AllTypes {
     /**
      * Returns the horizontal alignment.
      */
-    public HPos getAlignX()
-    {
-        return getAlign().getHPos();
-    }
+    public HPos getAlignX()  { return getAlign().getHPos(); }
 
     /**
      * Sets the horizontal alignment.
      */
-    public void setAlignX(HPos aPos)
-    {
-        setAlign(Pos.get(aPos, getAlignY()));
-    }
+    public void setAlignX(HPos aPos)  { setAlign(Pos.get(aPos, getAlignY())); }
 
     /**
      * Returns the vertical alignment.
      */
-    public VPos getAlignY()
-    {
-        return getAlign().getVPos();
-    }
+    public VPos getAlignY()  { return getAlign().getVPos(); }
 
     /**
      * Sets the vertical alignment.
      */
-    public void setAlignY(VPos aPos)
-    {
-        setAlign(Pos.get(getAlignX(), aPos));
-    }
+    public void setAlignY(VPos aPos)  { setAlign(Pos.get(getAlignX(), aPos)); }
 
     /**
      * Returns the spacing insets requested between parent/neighbors and the border of this view.
@@ -2025,12 +1933,12 @@ public class View extends PropObject implements EventType.AllTypes {
     /**
      * Returns the substitution class name.
      */
-    public String getRuntimeClassName()  { return _runtimeClassName; }
+    String getRuntimeClassName()  { return _runtimeClassName; }
 
     /**
      * Sets the substitution class string.
      */
-    public void setRuntimeClassName(String aName)
+    void setRuntimeClassName(String aName)
     {
         if (Objects.equals(aName, getRuntimeClassName()) || getClass().getName().equals(aName)) return;
         firePropChange(RuntimeClassName_Prop, _runtimeClassName, _runtimeClassName = aName);

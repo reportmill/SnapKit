@@ -278,8 +278,8 @@ public class ViewUpdater {
 
             // Get view paint rect cliped to any ancestor view clips
             Rect viewRepaintRectClipped = viewRepaintRect;
-            Rect clipBoundsAll = view.getClipBoundsAll();
-            if (clipBoundsAll != null) {
+            Rect clipBoundsAll = ViewUtils.getClipBoundsAllForViewInView(view, _rootView);
+            if (clipBoundsAll != null && !clipBoundsAll.contains(viewRepaintRectClipped)) {
                 viewRepaintRectClipped = viewRepaintRectClipped.getIntersectRect(clipBoundsAll);
                 viewRepaintRectClipped.snap();
             }
