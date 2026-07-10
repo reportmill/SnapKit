@@ -232,32 +232,42 @@ function Java_snap_webenv_CJWebEnv_newClipboardItemForBlobImpl(lib, blob)
     return new ClipboardItem(entry);
 }
 
-// Clipboard.read() ClipboardItems - read upon meta+v key press, write() upon meta-c
-var clipboardReadItems;
-var clipboardWriteItems;
+// Clipboard read items - read immediately upon meta+v key press for Safari
+var eagerClipboardReadItems;
 
 /**
  * CJWebEnv: readClipboardItemsImpl()
  */
 async function Java_snap_webenv_CJWebEnv_readClipboardItemsImpl(lib)
 {
-    // If clipboardReadItems set, clear and return
-    if (clipboardReadItems != null) {
-        var temp = clipboardReadItems;
-        clipboardReadItems = null;
-        return temp;
-    }
-
     // Try to read items
     try {
-        var clipboardReadPromise = navigator.clipboard.read()
-            .catch((e) => { console.log("Clipboard.readClipboardItemsImpl: Ignoring error: " + e); return [ ]; });
-        return await clipboardReadPromise;
+        if (eagerClipboardReadItems != null)
+            return eagerClipboardReadItems;
+        return await navigator.clipboard.read();
     }
 
     // Can happen on Safari iOS with localhost
-    catch (e) { console.log("Clipboard.readClipboardItemsImpl:" + e); return [ ]; }
+    catch (e) {
+        console.log("Clipboard.readClipboardItems: " + e);
+        return [ ];
+    }
+
+    // Make sure cached read items are reset
+    finally { eagerClipboardReadItems = null; }
 }
+
+/**
+ * eagerClipboardRead(): Called on shortcut+V (paste) to try to read items on safari.
+ */
+async function eagerClipboardRead()
+{
+    try { eagerClipboardReadItems = await navigator.clipboard.read(); }
+    catch (e) { console.log("eagerClipboardRead:" + e); }
+}
+
+// Clipboard write items - read after delay upon shortcut+c/shortcut-x (cut/copy) to write items on safari
+var delayedClipboardWriteItems;
 
 /**
  * CJWebEnv: writeClipboardItemsImpl().
@@ -266,24 +276,25 @@ async function Java_snap_webenv_CJWebEnv_writeClipboardItemsImpl(lib, clipboardI
 {
     // Will fail on Safari because this is not directly triggered from user event
     try {
-        navigator.clipboard.write(clipboardItems).catch((e) => clipboardWriteItems = clipboardItems);
-        clipboardReadItems = clipboardItems;
+        await navigator.clipboard.write(clipboardItems);
     }
 
     // Can happen on Safari iOS with localhost
-    catch (e) { console.log("Clipboard.writeClipboardItemsImpl:" + e); }
+    catch (e) {
+        console.log("Clipboard.writeClipboardItemsImpl:" + e);
+        delayedClipboardWriteItems = clipboardItems;
+    }
 }
 
 /**
  * delayedClipboardWrite(): Called a moment after meta+C to try to write lingering clipboard items.
  */
-function delayedClipboardWrite()
+async function delayedClipboardWrite()
 {
-    if (clipboardWriteItems != null) {
-        try { navigator.clipboard.write(clipboardWriteItems); }
+    if (delayedClipboardWriteItems != null) {
+        try { await navigator.clipboard.write(delayedClipboardWriteItems); }
         catch (e) { console.log("delayedClipboardWrite:" + e); }
-        clipboardReadItems = clipboardWriteItems;
-        clipboardWriteItems = null;
+        delayedClipboardWriteItems = null;
     }
 
     // If NeedsClickElement is set, tell it to click (Safari)
@@ -291,19 +302,6 @@ function delayedClipboardWrite()
         _needsClickElement.click();
         _needsClickElement = null;
     }
-}
-
-/**
- * eagerClipboardRead(): Called on meta+V (paste) to try to read items.
- */
-async function eagerClipboardRead()
-{
-    try {
-        clipboardReadItems = await navigator.clipboard.read().catch((e) => console.log("Ignoring: " + e));
-    }
-
-    // Can happen on Safari iOS with localhost
-    catch (e) { console.log("eagerClipboardRead:" + e); }
 }
 
 /**
@@ -416,18 +414,18 @@ async function fireEvent(name, callback, arg1, arg2)
 
         // If KeyboardEvent, suppress some browser keys and do some copy/paste
         if (arg1 instanceof KeyboardEvent) {
-            if (arg1.metaKey) {
+            if (arg1.ctrlKey || arg1.metaKey) {
                 var key = arg1.key;
 
                 // Ignore meta+l (select address bar) and meta+alt+i (show dev tools)
                 if (key === "l" || arg1.altKey)
                     return;
 
-                // If meta+C (copy) or meta+X (cut), write clipboardWriteItems
+                // If meta+C (copy) or meta+X (cut), add callback to write clipboard items (for Safari)
                 if (key === 'c' || key ==='x')
                     setTimeout(delayedClipboardWrite, 100);
 
-                // If meta+V (paste), read and set clipboardReadItems
+                // If meta+V (paste), try to pre-emptively read clipboard items (for Safari)
                 else if (key === 'v')
                     eagerClipboardRead();
             }

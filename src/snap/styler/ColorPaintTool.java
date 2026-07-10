@@ -47,7 +47,7 @@ public class ColorPaintTool extends StylerOwner {
             Color color = fillColorWell.getColor();
 
             // If command-click, set gradient fill
-            if (anEvent.isMetaDown()) {
+            if (anEvent.isShortcutDown()) {
                 Color color1 = styler.getFill() != null ? styler.getFillColor() : Color.CLEARWHITE;
                 GradientPaint gradientPaint = new GradientPaint(color1, color, 0);
                 styler.setFill(gradientPaint);
