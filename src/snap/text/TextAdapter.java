@@ -1449,7 +1449,7 @@ public class TextAdapter extends PropObject {
             TextModel textForRange = _textModel.copyForRange(selStart, selEnd);
             XMLElement xml = TextModelUtils.textModelToXML(textForRange);
             String xmlStr = xml.getString();
-            clipboard.addData(SNAP_RICHTEXT_TYPE, xmlStr);
+            clipboard.addDataForMimeType(xmlStr, SNAP_RICHTEXT_TYPE);
         }
 
         // Add plain text (text/plain)
@@ -1467,7 +1467,7 @@ public class TextAdapter extends PropObject {
         // Get clipboard - if not loaded, come back loaded
         Clipboard clipboard = Clipboard.get();
         if (!clipboard.isLoaded()) {
-            clipboard.addLoadListener(() -> paste());
+            clipboard.addLoadListener(this::paste);
             return;
         }
 
@@ -1482,7 +1482,7 @@ public class TextAdapter extends PropObject {
     private Object getClipboardContent(Clipboard clipboard)
     {
         // If Clipboard has RICHTEXT_TYPE, paste it
-        if (clipboard.hasData(SNAP_RICHTEXT_TYPE)) {
+        if (clipboard.hasDataForMimeType(SNAP_RICHTEXT_TYPE)) {
             byte[] bytes = clipboard.getDataBytes(SNAP_RICHTEXT_TYPE);
             if (bytes != null && bytes.length > 0) {
                 XMLElement xml = XMLElement.readXmlFromBytes(bytes);

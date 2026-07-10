@@ -25,10 +25,10 @@ public abstract class Clipboard implements Loadable {
     private Map <String,ClipboardData> _clipboardDatas = new TreeMap<>();
     
     // Constants for clipboard types
-    public static String  STRING = "text/plain";
-    public static String  FILE_LIST = "snap/files";
-    public static String  IMAGE = "snap/image";
-    public static String  COLOR = "snap/color";
+    public static final String STRING = "text/plain";
+    public static final String FILE_LIST = "snap/files";
+    public static final String IMAGE = "snap/image";
+    public static final String COLOR = "snap/color";
 
     // Constant for Image MimeTypes
     private static final String[] IMAGE_MIME_TYPES = { MIMEType.PNG, MIMEType.JPEG, MIMEType.GIF };
@@ -44,22 +44,15 @@ public abstract class Clipboard implements Loadable {
     /**
      * Returns the clipboard content.
      */
-    public boolean hasData(String aMimeType)  { return hasDataImpl(aMimeType); }
+    public boolean hasDataForMimeType(String aMimeType)
+    {
+        return _clipboardDatas.containsKey(aMimeType);
+    }
 
     /**
      * Returns the clipboard content.
      */
-    protected boolean hasDataImpl(String aMimeType)  { return _clipboardDatas.containsKey(aMimeType); }
-
-    /**
-     * Returns the clipboard content.
-     */
-    public ClipboardData getData(String aMimeType)  { return getDataImpl(aMimeType); }
-
-    /**
-     * Returns the clipboard content.
-     */
-    protected ClipboardData getDataImpl(String aMimeType)
+    public ClipboardData getDataForMimeType(String aMimeType)
     {
         return _clipboardDatas.get(aMimeType);
     }
@@ -71,13 +64,13 @@ public abstract class Clipboard implements Loadable {
     {
         ClipboardData clipboardData = ClipboardData.getClipboardDataForObject(theData);
         if (clipboardData != null)
-            addData(clipboardData.getMIMEType(), clipboardData);
+            addDataForMimeType(clipboardData, clipboardData.getMimeType());
     }
 
     /**
      * Adds clipboard content.
      */
-    public void addData(String aMimeType, Object theData)
+    public void addDataForMimeType(Object theData, String aMimeType)
     {
         // Sanity check MIMEType should have / char
         if (aMimeType.indexOf('/') < 0) {
@@ -85,16 +78,16 @@ public abstract class Clipboard implements Loadable {
 
         // Get ClipboardData for given MIME type and data
         ClipboardData clipboardData = theData instanceof ClipboardData ? (ClipboardData) theData :
-            new ClipboardData(aMimeType, theData);
+            new ClipboardData(theData, aMimeType);
 
         // Call real addData() implementation
-        addDataImpl(aMimeType, clipboardData);
+        addDataForMimeTypeImpl(clipboardData, aMimeType);
     }
 
     /**
      * Adds clipboard content.
      */
-    protected void addDataImpl(String aMimeType, ClipboardData theData)
+    protected void addDataForMimeTypeImpl(ClipboardData theData, String aMimeType)
     {
         _clipboardDatas.put(aMimeType, theData);
     }
@@ -102,7 +95,7 @@ public abstract class Clipboard implements Loadable {
     /**
      * Clears the data in the clipboard.
      */
-    public void clearData()  { _clipboardDatas.clear(); }
+    protected void clearData()  { _clipboardDatas.clear(); }
 
     /**
      * Returns the ClipboardDatas managed by this default implementation.
@@ -114,7 +107,7 @@ public abstract class Clipboard implements Loadable {
      */
     public String getDataString(String aMimeType)
     {
-        ClipboardData clipboardData = getData(aMimeType);
+        ClipboardData clipboardData = getDataForMimeType(aMimeType);
         return clipboardData != null ? clipboardData.getString() : null;
     }
 
@@ -123,14 +116,14 @@ public abstract class Clipboard implements Loadable {
      */
     public byte[] getDataBytes(String aMimeType)
     {
-        ClipboardData clipboardData = getData(aMimeType);
+        ClipboardData clipboardData = getDataForMimeType(aMimeType);
         return clipboardData != null ? clipboardData.getBytes() : null;
     }
 
     /**
      * Returns the clipboard content.
      */
-    public boolean hasString()  { return hasData(STRING); }
+    public boolean hasString()  { return hasDataForMimeType(STRING); }
 
     /**
      * Returns the clipboard content.
@@ -140,14 +133,14 @@ public abstract class Clipboard implements Loadable {
     /**
      * Returns the clipboard content.
      */
-    public boolean hasFiles()  { return hasData(FILE_LIST); }
+    public boolean hasFiles()  { return hasDataForMimeType(FILE_LIST); }
 
     /**
      * Returns the clipboard content.
      */
     public List <ClipboardData> getFiles()
     {
-        ClipboardData clipboardData = getData(FILE_LIST);
+        ClipboardData clipboardData = getDataForMimeType(FILE_LIST);
         return clipboardData != null ? clipboardData.getFiles() : null;
     }
 
@@ -156,7 +149,7 @@ public abstract class Clipboard implements Loadable {
      */
     public List <File> getJavaFiles()
     {
-        ClipboardData clipboardData = getData(FILE_LIST);
+        ClipboardData clipboardData = getDataForMimeType(FILE_LIST);
         return clipboardData != null ? clipboardData.getJavaFiles() : null;
     }
 
@@ -166,11 +159,11 @@ public abstract class Clipboard implements Loadable {
     public boolean hasImage()
     {
         // If Clipboard is image, return true
-        if (hasData(IMAGE))
+        if (hasDataForMimeType(IMAGE))
             return true;
 
         // Iterate over common image types and return true if any supported
-        return ArrayUtils.hasMatch(IMAGE_MIME_TYPES, this::hasData);
+        return ArrayUtils.hasMatch(IMAGE_MIME_TYPES, this::hasDataForMimeType);
     }
 
     /**
@@ -179,7 +172,7 @@ public abstract class Clipboard implements Loadable {
     public Image getImage()
     {
         // If Clipboard is image, return true
-        ClipboardData clipboardData = getData(IMAGE);
+        ClipboardData clipboardData = getDataForMimeType(IMAGE);
         if (clipboardData != null)
             return clipboardData.getImage();
 
@@ -193,7 +186,7 @@ public abstract class Clipboard implements Loadable {
      */
     private String getImageType()
     {
-        return ArrayUtils.findMatch(IMAGE_MIME_TYPES, this::hasData);
+        return ArrayUtils.findMatch(IMAGE_MIME_TYPES, this::hasDataForMimeType);
     }
 
     /**
@@ -201,7 +194,7 @@ public abstract class Clipboard implements Loadable {
      */
     public Image getImage(String aMimeType)
     {
-        ClipboardData clipboardData = getData(aMimeType);
+        ClipboardData clipboardData = getDataForMimeType(aMimeType);
         byte[] imageBytes = clipboardData.getBytes();
         return Image.getImageForSource(imageBytes);
     }
@@ -212,13 +205,13 @@ public abstract class Clipboard implements Loadable {
     public ClipboardData getImageData()
     {
         String imageType = getImageType();
-        return imageType != null ? getData(imageType) : null;
+        return imageType != null ? getDataForMimeType(imageType) : null;
     }
 
     /**
      * Returns the clipboard content.
      */
-    public boolean hasColor()  { return hasData(COLOR); }
+    public boolean hasColor()  { return hasDataForMimeType(COLOR); }
 
     /**
      * Returns the clipboard content.

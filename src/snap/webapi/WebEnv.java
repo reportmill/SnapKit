@@ -21,10 +21,9 @@ public abstract class WebEnv<T> {
      */
     private static WebEnv<?> createEnv()
     {
-        String javaVendor = System.getProperty("java.vendor");
-        if (javaVendor.contains("Leaning"))
+        //String javaVendor = System.getProperty("java.vendor");
+        //if (javaVendor.contains("Leaning"))
             return new snap.webenv.CJWebEnv();
-        return null; //new JxWebEnv();
     }
 
     /**

@@ -1,4 +1,7 @@
 
+// Constants
+const userAgent = navigator.userAgent;
+const isSafari = userAgent.includes("Safari") && !userAgent.includes("Chrome") && !userAgent.includes("CriOS") && !userAgent.includes("Edg");
 
 /**
  * CJWebEnv method: getMemberImpl()
@@ -426,7 +429,7 @@ async function fireEvent(name, callback, arg1, arg2)
                     setTimeout(delayedClipboardWrite, 100);
 
                 // If meta+V (paste), try to pre-emptively read clipboard items (for Safari)
-                else if (key === 'v')
+                else if (key === 'v' && isSafari)
                     eagerClipboardRead();
             }
         }

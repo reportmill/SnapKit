@@ -37,7 +37,7 @@ public class ClipboardData {
     private Consumer <ClipboardData> _loadLsnr;
 
     /**
-     * Creates a ClipboardData from source.
+     * Constructor for given source.
      */
     public ClipboardData(Object aSource)
     {
@@ -49,12 +49,12 @@ public class ClipboardData {
     }
 
     /**
-     * Creates a ClipboardData from source.
+     * Constructor for given source and mime type.
      */
-    public ClipboardData(String aMimeType, Object aSource)
+    public ClipboardData(Object aSource, String mimeType)
     {
         _source = aSource;
-        _mimeType = aMimeType;
+        _mimeType = mimeType;
         if (_mimeType == null)
             _mimeType = MIMEType.UNKNOWN;
         if (_source instanceof String)
@@ -132,7 +132,7 @@ public class ClipboardData {
     /**
      * Returns the file content type.
      */
-    public String getMIMEType()  { return _mimeType; }
+    public String getMimeType()  { return _mimeType; }
 
     /**
      * Returns whether data is loaded.
@@ -236,51 +236,30 @@ public class ClipboardData {
      */
     public List <ClipboardData> getFiles()
     {
-        List <ClipboardData> files = new ArrayList<>();
-        if (_source instanceof List) {
-            List<?> list = (List<?>) _source;
-            for (Object file : list)
-                files.add(ClipboardData.getClipboardDataForObject(file));
-        }
-
-        // Return
-        return files;
+        if (_source instanceof List<?> list)
+            return list.stream().map(ClipboardData::getClipboardDataForObject).toList();
+        return Collections.emptyList();
     }
 
     /**
      * Returns a conventional Java file, if available.
      */
-    public File getJavaFile()
-    {
-        if (_source instanceof File)
-            return (File) _source;
-        return null;
-    }
+    public File getJavaFile()  { return _source instanceof File ? (File) _source : null; }
 
     /**
      * Returns the data as list of Java files.
      */
-    public List <File> getJavaFiles()
-    {
-        if (_source instanceof List)
-            return (List<File>) _source;
-        return null;
-    }
+    public List <File> getJavaFiles()  { return _source instanceof List ? (List<File>) _source : null; }
 
     /**
      * Returns the data as image.
      */
-    public Image getImage()
-    {
-        if (_source instanceof Image)
-            return (Image) _source;
-        return null;
-    }
+    public Image getImage()  { return _source instanceof Image ? (Image) _source : null; }
 
     /**
      * Returns a ClipboardData for given object.
      */
-    public static ClipboardData getClipboardDataForObject(Object theData)
+    static ClipboardData getClipboardDataForObject(Object theData)
     {
         // Handle ClipboardData
         if (theData instanceof ClipboardData)
@@ -288,47 +267,35 @@ public class ClipboardData {
 
         // Handle String
         if (theData instanceof String)
-            return new ClipboardData(Clipboard.STRING, theData);
+            return new ClipboardData(theData, Clipboard.STRING);
 
         // Handle File
-        if (theData instanceof File) {
-            File file = (File) theData;
+        if (theData instanceof File file) {
             String mimeType = MIMEType.getMimeTypeForPath(file.getPath());
-            return new ClipboardData(mimeType, file);
+            return new ClipboardData(file, mimeType);
         }
 
         // Handle File List
-        if (theData instanceof List) {
-            List<?> list = (List<?>) theData;
-            Object item0 = list.size() > 0? list.get(0) : null;
+        if (theData instanceof List<?> list) {
+            Object item0 = !list.isEmpty() ? list.get(0) : null;
             if (item0 instanceof File || item0 instanceof WebURL)
-                return new ClipboardData(Clipboard.FILE_LIST, list);
+                return new ClipboardData(list, Clipboard.FILE_LIST);
         }
 
         // Handle File array
-        if (theData instanceof File[]) {
-            File[] files = (File[]) theData;
-            return new ClipboardData(Clipboard.FILE_LIST, Arrays.asList(files)); }
+        if (theData instanceof File[] files)
+            return new ClipboardData(Arrays.asList(files), Clipboard.FILE_LIST);
 
         // Handle Image
-        if (theData instanceof Image) {
-            Image image = (Image) theData;
-            return new ClipboardData(Clipboard.IMAGE, image);
-
-//            // Get image type and bytes
-//            byte bytes[] = image.getBytes();
-//            String mimeType = MIMEType.getType(image.getType());
-//            return new ClipboardData(mimeType, bytes);
-        }
+        if (theData instanceof Image image)
+            return new ClipboardData(image, Clipboard.IMAGE);
 
         // Handle Color
-        if (theData instanceof Color) {
-            Color color = (Color) theData;
-            return new ClipboardData(Clipboard.COLOR, color.toHexString());
-        }
+        if (theData instanceof Color color)
+            return new ClipboardData(color.toHexString(), Clipboard.COLOR);
 
         // Complain
-        System.err.println("ClipboardData.get: Unknown data type " + theData);
+        System.err.println("ClipboardData.getClipboardDataForObject: Unknown data type " + theData);
         return null;
     }
 }

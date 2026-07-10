@@ -8,11 +8,11 @@ import snap.webapi.*;
 class CJClipboardData extends ClipboardData {
 
     /**
-     * Creates ClipboardData for given JS File and starts loading.
+     * Constructor for given JS File and starts loading.
      */
     public CJClipboardData(File aFile)
     {
-        super(aFile.getType(), null);
+        super(null, aFile.getType());
         setName(aFile.getName());
         setLoaded(false);
 

@@ -21,7 +21,7 @@ public class Clipboard extends JSProxy {
     public static List<ClipboardItem> readClipboardItems()
     {
         Object[] clipboardItemsJS = WebEnv.get().readClipboardItemsJS();
-        return Stream.of(clipboardItemsJS).map(item -> new ClipboardItem(item)).toList();
+        return Stream.of(clipboardItemsJS).map(ClipboardItem::new).toList();
     }
 
     /**

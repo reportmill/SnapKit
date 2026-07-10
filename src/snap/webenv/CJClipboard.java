@@ -17,17 +17,14 @@ public class CJClipboard extends Clipboard {
     // The DataTransfer
     protected DataTransfer _dataTrans;
 
-    // The runnable to call addAllDatas()
-    private Runnable  _addAllDatasRun;
+    // The runnable to call writeToSystemClipboard()
+    private Runnable _writeToSystemClipboardRun;
 
     // Whether clipboard is loaded
-    private boolean  _loaded;
-
-    // A LoadListener to handle async browser clipboard
-    private static Runnable  _loadListener;
+    private boolean _loaded;
 
     // The shared clipboard for system copy/paste
-    private static CJClipboard  _shared;
+    private static CJClipboard _shared;
 
     /**
      * Constructor.
@@ -40,31 +37,33 @@ public class CJClipboard extends Clipboard {
     /**
      * Returns the clipboard content.
      */
-    protected boolean hasDataImpl(String aMimeType)
+    @Override
+    public boolean hasDataForMimeType(String mimeType)
     {
         // If no DataTransfer, just return normal version
         if (_dataTrans == null)
-            return super.hasDataImpl(aMimeType);
+            return super.hasDataForMimeType(mimeType);
 
         // Handle FILE_LIST: Return true if at least one file
-        if (aMimeType == FILE_LIST)
+        if (mimeType == FILE_LIST)
             return _dataTrans.getFileCount() > 0;
 
         // Forward to DataTrans
-        return _dataTrans.hasType(aMimeType);
+        return _dataTrans.hasType(mimeType);
     }
 
     /**
      * Returns the clipboard content.
      */
-    protected ClipboardData getDataImpl(String aMimeType)
+    @Override
+    public ClipboardData getDataForMimeType(String mimeType)
     {
         // If no DataTransfer, just return normal version
         if (_dataTrans == null)
-            return super.getDataImpl(aMimeType);
+            return super.getDataForMimeType(mimeType);
 
         // Handle Files
-        if (aMimeType == FILE_LIST) {
+        if (mimeType == FILE_LIST) {
 
             // Get files
             List<File> jsfiles = _dataTrans.getFiles();
@@ -75,55 +74,51 @@ public class CJClipboard extends Clipboard {
             List<ClipboardData> cfiles = ListUtils.map(jsfiles, CJClipboardData::new);
 
             // Return ClipboardData for files array
-            return new ClipboardData(aMimeType, cfiles);
+            return new ClipboardData(cfiles, mimeType);
         }
 
         // Handle anything else (String data)
-        Object data = _dataTrans.getData(aMimeType);
-        return new ClipboardData(aMimeType, data);
+        Object data = _dataTrans.getData(mimeType);
+        return new ClipboardData(data, mimeType);
     }
 
     /**
      * Adds clipboard content.
      */
-    protected void addDataImpl(String aMimeType, ClipboardData aData)
+    @Override
+    protected void addDataForMimeTypeImpl(ClipboardData aData, String aMimeType)
     {
         // Do normal implementation to populate ClipboardDatas map
-        super.addDataImpl(aMimeType, aData);
+        super.addDataForMimeTypeImpl(aData, aMimeType);
 
         // Handle DragDrop case
         if (_dataTrans != null) {
-
-            // Handle string data
             if (aData.isString())
                 _dataTrans.setData(aMimeType, aData.getString());
             else _dataTrans.setData(aMimeType, aData.getBytes());
-
-            // Otherwise complain
-            //else System.err.println("CJClipboard.addDataImpl: Unsupported data type: " + aMimeType + ", " + aData.getSource());
         }
 
         // Handle system clipboard copy: Wait till all types added, then update clipboard
         else {
-            if (_addAllDatasRun == null)
-                ViewUtils.runLater(_addAllDatasRun = this::addAllDataToClipboard);
+            if (_writeToSystemClipboardRun == null)
+                ViewUtils.runLater(_writeToSystemClipboardRun = this::writeToSystemClipboard);
         }
     }
 
     /**
-     * Load datas into system clipboard
+     * Writes this clipboard to system clipboard
      */
-    private void addAllDataToClipboard()
+    private void writeToSystemClipboard()
     {
         // Clear run
-        _addAllDatasRun = null;
+        _writeToSystemClipboardRun = null;
 
         // Get list of ClipbardData
-        Map<String,ClipboardData> clipDataMap = getClipboardDatas();
-        Collection<ClipboardData> clipboardDatas = clipDataMap.values();
+        Map<String,ClipboardData> clipboardDatasMap = getClipboardDatas();
+        Collection<ClipboardData> clipboardDatas = clipboardDatasMap.values();
 
-        // Convert to JSArray of ClipboardItem
-        List<ClipboardItem> clipboardItems = ListUtils.mapNonNull(clipboardDatas, CJClipboard::getClipboardItemForData);
+        // Convert to list of ClipboardItem
+        List<ClipboardItem> clipboardItems = ListUtils.mapNonNull(clipboardDatas, CJClipboard::convertClipboardDataToClipboardItem);
 
         // Try to write items to clipboard
         try { snap.webapi.Clipboard.writeClipboardItems(clipboardItems); }
@@ -136,39 +131,35 @@ public class CJClipboard extends Clipboard {
     /**
      * Returns a ClipboardItem for given ClipboardData.
      */
-    private static ClipboardItem getClipboardItemForData(ClipboardData aData)
+    private static ClipboardItem convertClipboardDataToClipboardItem(ClipboardData clipboardData)
     {
-        // Handle string
-        if (aData.isString()) {
-            String type = aData.getMIMEType();
-            String string = aData.getString();
-            return new ClipboardItem(type, string);
+        // Handle string: Return clipboard item of string
+        if (clipboardData.isString()) {
+            String mimeType = clipboardData.getMimeType();
+            String string = clipboardData.getString();
+            return new ClipboardItem(mimeType, string);
         }
 
-        // Handle image
-        if (aData.isImage()) {
-
-            // Get image as PNG blob
-            Image image = aData.getImage();
+        // Handle image: Return clipboard item of image as PNG blob
+        if (clipboardData.isImage()) {
+            Image image = clipboardData.getImage();
             byte[] bytes = image.getBytesPNG();
             Blob blob = new Blob(bytes, "image/png");
-
-            // Get ClipboardItem array for blob
             return new ClipboardItem(blob);
         }
 
         // Handle anything else: Get type and bytes
-        String type = aData.getMIMEType();
-        byte[] bytes = aData.getBytes();
+        String mimeType = clipboardData.getMimeType();
+        byte[] dataBytes = clipboardData.getBytes();
 
         // If valid, just wrap in ClipboardItem
-        if (type != null && bytes != null && bytes.length > 0) {
-            Blob blob = new Blob(bytes, type);
+        if (mimeType != null && dataBytes != null && dataBytes.length > 0) {
+            Blob blob = new Blob(dataBytes, mimeType);
             return new ClipboardItem(blob);
         }
 
         // Complain and return null
-        System.err.println("CJClipboard.getClipboardItemForClipboardData: Had problem with " + aData);
+        System.err.println("CJClipboard.convertClipboardDataToClipboardItem: Had problem with " + clipboardData);
         return null;
     }
 
@@ -187,7 +178,7 @@ public class CJClipboard extends Clipboard {
      * Override to clear DataTrans.
      */
     @Override
-    public void clearData()
+    protected void clearData()
     {
         super.clearData();
         _dataTrans = null;
@@ -211,12 +202,26 @@ public class CJClipboard extends Clipboard {
      * Adds a callback to be triggered when resources loaded.
      * If Clipboard needs to be 'approved', get approved and call given load listener.
      */
-    public void addLoadListener(Runnable aRun)
+    @Override
+    public void addLoadListener(Runnable loadLsnr)
     {
-        // Set LoadListener
-        _loadListener = aRun;
-
         // Create new data transfer
+        _dataTrans = getDataTransferForSystemClipboard();
+
+        // Call load listener
+        ViewUtils.runLater(() -> {
+            _loaded = true;
+            loadLsnr.run();
+            _loaded = false;
+            _dataTrans = null;
+        });
+    }
+
+    /**
+     * Returns the data transfer for system clipboard.
+     */
+    private static DataTransfer getDataTransferForSystemClipboard()
+    {
         DataTransfer dataTransfer = WebEnv.get().newDataTransfer();
 
         // Read clipboard items
@@ -236,21 +241,6 @@ public class CJClipboard extends Clipboard {
             }
         }
 
-        // Set DataTransfer and trigger LoadListener
-        _dataTrans = dataTransfer;
-        notifyLoaded();
-    }
-
-    /**
-     * Notify loaded.
-     */
-    private void notifyLoaded()
-    {
-        ViewUtils.runLater(() -> {
-            _loaded = true;
-            _loadListener.run();
-            _loaded = false;
-            _loadListener = null;
-        });
+        return dataTransfer;
     }
 }
