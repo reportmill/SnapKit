@@ -18,7 +18,7 @@ public class CJClipboard extends Clipboard {
     protected DataTransfer _dataTrans;
 
     // The runnable to call addAllDatas()
-    private Runnable  _addAllDatasRun, ADD_ALL_DATAS_RUN = () -> addAllDataToClipboard();
+    private Runnable  _addAllDatasRun;
 
     // Whether clipboard is loaded
     private boolean  _loaded;
@@ -72,7 +72,7 @@ public class CJClipboard extends Clipboard {
                 return null;
 
             // Iterate over jsFiles and create clipbard data
-            List<ClipboardData> cfiles = ListUtils.map(jsfiles, jsfile -> new CJClipboardData(jsfile));
+            List<ClipboardData> cfiles = ListUtils.map(jsfiles, CJClipboardData::new);
 
             // Return ClipboardData for files array
             return new ClipboardData(aMimeType, cfiles);
@@ -106,7 +106,7 @@ public class CJClipboard extends Clipboard {
         // Handle system clipboard copy: Wait till all types added, then update clipboard
         else {
             if (_addAllDatasRun == null)
-                ViewUtils.runLater(_addAllDatasRun = ADD_ALL_DATAS_RUN);
+                ViewUtils.runLater(_addAllDatasRun = this::addAllDataToClipboard);
         }
     }
 
@@ -123,7 +123,7 @@ public class CJClipboard extends Clipboard {
         Collection<ClipboardData> clipboardDatas = clipDataMap.values();
 
         // Convert to JSArray of ClipboardItem
-        ClipboardItem[] clipboardItems = ListUtils.mapNonNullToArray(clipboardDatas, cdata -> getClipboardItemForData(cdata), ClipboardItem.class);
+        List<ClipboardItem> clipboardItems = ListUtils.mapNonNull(clipboardDatas, CJClipboard::getClipboardItemForData);
 
         // Try to write items to clipboard
         try { snap.webapi.Clipboard.writeClipboardItems(clipboardItems); }
@@ -136,7 +136,7 @@ public class CJClipboard extends Clipboard {
     /**
      * Returns a ClipboardItem for given ClipboardData.
      */
-    private ClipboardItem getClipboardItemForData(ClipboardData aData)
+    private static ClipboardItem getClipboardItemForData(ClipboardData aData)
     {
         // Handle string
         if (aData.isString()) {
@@ -178,10 +178,10 @@ public class CJClipboard extends Clipboard {
     public void startDrag()  { System.err.println("CJClipboard.startDrag: Not implemented"); }
 
     /** Called to indicate that drop is accepted. */
-    public void acceptDrag()  { System.err.println("CJClipboard.startDrag: Not implemented"); }
+    public void acceptDrag()  { }
 
     /** Called to indicate that drop is complete. */
-    public void dropComplete()  { System.err.println("CJClipboard.startDrag: Not implemented");  }
+    public void dropComplete()  { }
 
     /**
      * Override to clear DataTrans.
@@ -220,7 +220,7 @@ public class CJClipboard extends Clipboard {
         DataTransfer dataTransfer = WebEnv.get().newDataTransfer();
 
         // Read clipboard items
-        ClipboardItem[] clipboardItems = snap.webapi.Clipboard.readClipboardItems();
+        List<ClipboardItem> clipboardItems = snap.webapi.Clipboard.readClipboardItems();
 
         // Iterate over clipboard items and add to data transfer
         for (ClipboardItem clipboardItem : clipboardItems) {

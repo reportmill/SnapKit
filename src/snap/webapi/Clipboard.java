@@ -1,4 +1,5 @@
 package snap.webapi;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -17,18 +18,18 @@ public class Clipboard extends JSProxy {
     /**
      * Reads clipboard and returns an array of ClipboardItem.
      */
-    public static ClipboardItem[] readClipboardItems()
+    public static List<ClipboardItem> readClipboardItems()
     {
         Object[] clipboardItemsJS = WebEnv.get().readClipboardItemsJS();
-        return Stream.of(clipboardItemsJS).map(item -> new ClipboardItem(item)).toArray(size -> new ClipboardItem[size]);
+        return Stream.of(clipboardItemsJS).map(item -> new ClipboardItem(item)).toList();
     }
 
     /**
      * Writes array of ClipboardItem to clipboard.
      */
-    public static void writeClipboardItems(ClipboardItem[] clipboardItems)
+    public static void writeClipboardItems(List<ClipboardItem> clipboardItems)
     {
-        Array<ClipboardItem> clipboardItemsArray = new Array<>(clipboardItems);
+        Array<ClipboardItem> clipboardItemsArray = new Array<>(clipboardItems.toArray(new ClipboardItem[0]));
         WebEnv.get().writeClipboardItemsJS(clipboardItemsArray._jsObj);
     }
 }

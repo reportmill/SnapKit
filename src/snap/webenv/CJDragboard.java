@@ -47,12 +47,6 @@ public class CJDragboard extends CJClipboard {
         _dataTrans.startDrag(img, dx, dy);
     }
 
-    /** Called to indicate that drop is accepted. */
-    public void acceptDrag()  { }
-
-    /** Called to indicate that drop is complete. */
-    public void dropComplete()  { }
-
     /**
      * Sets the current event.
      */
