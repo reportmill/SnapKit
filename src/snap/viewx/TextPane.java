@@ -17,6 +17,7 @@ import snap.view.*;
 import snap.web.WebFile;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +46,9 @@ public class TextPane extends ViewController {
 
     // The separator view
     private View _separatorView;
+
+    // The current find string
+    private String _findString;
 
     // The current string matches
     private List<StringMatch> _stringMatches;
@@ -318,7 +322,7 @@ public class TextPane extends ViewController {
         _findTextField = (TextField) _findPanel.getChildForName("FindText");
         _findTextField.setFireActionOnFocusLost(false);
         _findTextField.getLabel().setImage(Image.getImageForClassResource(TextPane.class, "Find.png"));
-        _findTextField.addEventFilter(e -> runLater(() -> handleFindTextFieldKeyPressEvent()), KeyPress);
+        _findTextField.addEventHandler(e -> handleFindTextFieldKeyTypeEvent(), KeyType);
 
         // Move MatchCaseButton to textfield
         View matchCaseButton = getView("MatchCaseButton");
@@ -440,7 +444,10 @@ public class TextPane extends ViewController {
      */
     public void findMatchesAndSelectFirst(String findString, boolean matchCase)
     {
+        if (Objects.equals(findString, _findString)) return;
+
         // Get new string matches
+        _findString = findString;
         _stringMatches = getMatchesForString(findString, matchCase);
 
         // Select next match
@@ -454,7 +461,10 @@ public class TextPane extends ViewController {
      */
     public void findMatchesAndSelectNext(String findString, boolean matchCase)
     {
+        if (Objects.equals(findString, _findString)) return;
+
         // Get new string matches
+        _findString = findString;
         _stringMatches = getMatchesForString(findString, matchCase);
 
         // Select next match
@@ -608,12 +618,15 @@ public class TextPane extends ViewController {
     /**
      * Called when FindTextField gets KeyPress event.
      */
-    private void handleFindTextFieldKeyPressEvent()
+    private void handleFindTextFieldKeyTypeEvent()
     {
         String findString = getViewStringValue("FindText");
         if (findString != null && !findString.isEmpty())
             findMatchesAndSelectNext(findString, getViewBoolValue("MatchCaseButton"));
-        else _stringMatches = null;
+        else {
+            _findString = null;
+            _stringMatches = null;
+        }
     }
 
     /**
@@ -621,17 +634,22 @@ public class TextPane extends ViewController {
      */
     protected Menu createContextMenu()
     {
-        // Create MenuItems
-        ViewBuilder<MenuItem> viewBuilder = new ViewBuilder<>(MenuItem.class);
-        String toolBarMenuText = (_toolBar.isShowing() ? "Hide" : "Show") + " ToolBar";
-        viewBuilder.name("ToggleToolBarMenuItem").text(toolBarMenuText).save();
-        String findPanelMenuText = (_findPanel.isShowing() ? "Hide" : "Show") + " Find Panel";
-        viewBuilder.name("ToggleFindPanelMenuItem").text(findPanelMenuText).save();
-        String statusBarMenuText = (isStatusBarShowing() ? "Hide" : "Show") + " StatusBar";
-        viewBuilder.name("ToggleStatusBarMenuItem").text(statusBarMenuText).save();
+        String CONTEXT_MENU_UI = """
+                <Menu>
+                  <MenuItem Name="ToggleToolBarMenuItem" Text="Show ToolBar" />
+                  <MenuItem Name="ToggleFindPanelMenuItem" Text="Show Find Panel" />
+                  <MenuItem Name="ToggleStatusBarMenuItem" Text="Show StatusBar" />
+                </Menu>
+                """;
+        Menu contextMenu = (Menu) UILoader.loadViewForString(CONTEXT_MENU_UI);
+        if (_toolBar.isShowing())
+            contextMenu.getChildForName("ToggleToolBarMenuItem").setText("Hide ToolBar");
+        if (_findPanel.isShowing())
+            contextMenu.getChildForName("ToggleFindPanelMenuItem").setText("Hide Find Panel");
+        if (isStatusBarShowing())
+            contextMenu.getChildForName("ToggleStatusBarMenuItem").setText("Hide StatusBar");
 
-        // Create and return menu
-        return viewBuilder.buildMenu("ContextMenu", null);
+        return contextMenu;
     }
 
     /**

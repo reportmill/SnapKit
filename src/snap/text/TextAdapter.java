@@ -1240,12 +1240,12 @@ public class TextAdapter extends PropObject {
         String keyChars = anEvent.getKeyString();
         char keyChar = !keyChars.isEmpty() ? keyChars.charAt(0) : 0;
         boolean charDefined = keyChar != KeyCode.CHAR_UNDEFINED && !Character.isISOControl(keyChar);
-        boolean commandDown = anEvent.isShortcutDown();
+        boolean metaDown = anEvent.isMetaDown();
         boolean controlDown = anEvent.isControlDown();
         boolean emacsDown = SnapEnv.isWindows ? anEvent.isAltDown() : controlDown;
 
         // If actual text entered, replace
-        if (charDefined && !commandDown && !controlDown && !emacsDown) {
+        if (charDefined && !metaDown && !controlDown && !emacsDown) {
             replaceChars(keyChars);
             hideCursor(); //anEvent.consume();
         }
