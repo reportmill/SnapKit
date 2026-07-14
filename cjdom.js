@@ -420,15 +420,15 @@ async function fireEvent(name, callback, arg1, arg2)
             if (arg1.ctrlKey || arg1.metaKey) {
                 var key = arg1.key;
 
-                // Ignore meta+l (select address bar) and meta+alt+i (show dev tools)
-                if (key === "l" || arg1.altKey)
+                // Ignore shortcut+l (select address bar), shortcut-h (hide) and shortcut+alt+i (show dev tools)
+                if (key === "l" || key === "h" || arg1.altKey)
                     return;
 
-                // If meta+C (copy) or meta+X (cut), add callback to write clipboard items (for Safari)
+                // If shortcut+C (copy) or shortcut+X (cut), add callback to write clipboard items (for Safari)
                 if (key === 'c' || key ==='x')
                     setTimeout(delayedClipboardWrite, 100);
 
-                // If meta+V (paste), try to pre-emptively read clipboard items (for Safari)
+                // If shortcut+V (paste), try to pre-emptively read clipboard items (for Safari)
                 else if (key === 'v' && isSafari)
                     eagerClipboardRead();
             }
