@@ -25,7 +25,7 @@ import snap.util.Convert;
 public class AWT {
 
     // The Hide Cursor
-    private static java.awt.Cursor _hcursor;
+    private static java.awt.Cursor _hideCursor;
 
     /**
      * Converts snap rect to awt.
@@ -290,18 +290,17 @@ public class AWT {
      */
     public static java.awt.Cursor snapToAwtCursor(snap.view.Cursor snapCursor)
     {
-        // If null, return null
+        // Handle null and NONE
         if (snapCursor == null) return null;
+        if (snapCursor == snap.view.Cursor.NONE)
+            return getHideCursor();
 
         // Get AWT name for Snap name
-        String name = snapCursor.getName();
-        name = name + "_CURSOR";
-        if (name.equals("NONE_CURSOR"))
-            return getHideCursor();
+        String awtName = snapCursor.getName() + "_CURSOR";
 
         // Get AWT id for name and cursor for id
         try {
-            Field field = java.awt.Cursor.class.getField(name);
+            Field field = java.awt.Cursor.class.getField(awtName);
             int cursorId = (Integer) field.get(null);
             java.awt.Cursor cursor = java.awt.Cursor.getPredefinedCursor(cursorId);
             return cursor;
@@ -309,39 +308,8 @@ public class AWT {
 
         // If not found, return default
         catch (Exception e) {
-            System.err.println("AWT.snapToAwtCursor: Cursor not found for name: " + name);
+            System.err.println("AWT.snapToAwtCursor: Cursor not found for name: " + awtName);
             return java.awt.Cursor.getDefaultCursor();
-        }
-    }
-
-    /**
-     * Returns snap Cursor awt snap cursor.
-     */
-    public static snap.view.Cursor awtToSnapCursor(java.awt.Cursor awtCursor)
-    {
-        // If null, return null
-        if (awtCursor == null) return snap.view.Cursor.NONE;
-
-        // Get Snap name for AWT name
-        String name = awtCursor.getName();
-        name = name.toUpperCase();
-        if (name.equals("NONE"))
-            return snap.view.Cursor.NONE;
-        name = name.replace(" ", "_");
-        name = name.replace("_CURSOR", "");
-
-        // Get Snap cursor
-        try {
-            Field field = snap.view.Cursor.class.getField(name);
-            snap.view.Cursor cursor = (snap.view.Cursor) field.get(null);
-            return cursor;
-        }
-
-        // If not found, return default
-        catch (Exception e)
-        {
-            System.err.println("AWT.awtToSnapCursor: Cursor not found for name: " + name);
-            return snap.view.Cursor.DEFAULT;
         }
     }
 
@@ -350,76 +318,86 @@ public class AWT {
      */
     private static java.awt.Cursor getHideCursor()
     {
-        if (_hcursor != null) return _hcursor;
+        if (_hideCursor != null) return _hideCursor;
         BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-        return _hcursor = Toolkit.getDefaultToolkit().createCustomCursor(img, new java.awt.Point(0, 0), "NONE");
+        return _hideCursor = Toolkit.getDefaultToolkit().createCustomCursor(img, new java.awt.Point(0, 0), "NONE");
     }
 
     /**
-         * A Shape wrapper to provide snap shape as AWT.
+     * Returns the first parent of given component which is window.
+     */
+    static Window getWindowForComponent(Component aComponent)
+    {
+        while (aComponent != null && !(aComponent instanceof Window))
+            aComponent = aComponent.getParent();
+        return (Window) aComponent;
+    }
+
+    /**
+     * A Shape wrapper to provide snap shape as AWT.
+     */
+    private record AWTShape(Shape _snapShape) implements java.awt.Shape {
+
+        /**
+         * Returns whether shape contains x/y.
          */
-        private record AWTShape(Shape _snapShape) implements java.awt.Shape {
+        public boolean contains(double x, double y)  { return _snapShape.contains(x, y); }
 
-            /**
-             * Returns whether shape contains x/y.
-             */
-            public boolean contains(double x, double y)  { return _snapShape.contains(x, y); }
+        /**
+         * Returns whether shape contains x/y/w/h.
+         */
+        public boolean contains(double x, double y, double w, double h)  { return _snapShape.contains(new Rect(x, y, w, h)); }
 
-            /**
-             * Returns whether shape contains x/y/w/h.
-             */
-            public boolean contains(double x, double y, double w, double h)  { return _snapShape.contains(new Rect(x, y, w, h)); }
+        /**
+         * Returns whether shape contains point.
+         */
+        public boolean contains(Point2D aPnt)  { return _snapShape.contains(aPnt.getX(), aPnt.getY()); }
 
-            /**
-             * Returns whether shape contains point.
-             */
-            public boolean contains(Point2D aPnt)  { return _snapShape.contains(aPnt.getX(), aPnt.getY()); }
+        /**
+         * Returns whether shape contains rect.
+         */
+        public boolean contains(Rectangle2D rect)  { return _snapShape.contains(awtToSnapRect(rect)); }
 
-            /**
-             * Returns whether shape contains rect.
-             */
-            public boolean contains(Rectangle2D rect)  { return _snapShape.contains(awtToSnapRect(rect)); }
-
-            /**
-             * Returns whether shape intersects x/y/w/h.
-             */
-            public boolean intersects(double x, double y, double w, double h)
-            {
-                return _snapShape.intersectsShape(new Rect(x, y, w, h));
-            }
-
-            /**
-             * Returns whether shape intersects rect.
-             */
-            public boolean intersects(Rectangle2D rect)  { return _snapShape.intersectsShape(awtToSnapRect(rect)); }
-
-            /**
-             * Returns whether shape contains rect.
-             */
-            public Rectangle getBounds()  { return snapToAwtRect(_snapShape.getBounds()).getBounds(); }
-
-            /**
-             * Returns whether shape contains rect.
-             */
-            public Rectangle2D getBounds2D()  { return snapToAwtRect(_snapShape.getBounds()); }
-
-            /**
-             * Returns whether shape contains rect.
-             */
-            public PathIterator getPathIterator(AffineTransform aTrans)
-            {
-                Transform snapTrans = aTrans != null ? awtToSnapTrans(aTrans) : null;
-                return snapToAwtPathIter(_snapShape.getPathIter(snapTrans));
-            }
-
-            /**
-             * Returns whether shape contains rect.
-             */
-            public PathIterator getPathIterator(AffineTransform aT, double f)
-            {
-                return new FlatteningPathIterator(getPathIterator(aT), f);
-            }
+        /**
+         * Returns whether shape intersects x/y/w/h.
+         */
+        public boolean intersects(double x, double y, double w, double h)
+        {
+            return _snapShape.intersectsShape(new Rect(x, y, w, h));
         }
+
+        /**
+         * Returns whether shape intersects rect.
+         */
+        public boolean intersects(Rectangle2D rect)  { return _snapShape.intersectsShape(awtToSnapRect(rect)); }
+
+        /**
+         * Returns whether shape contains rect.
+         */
+        public Rectangle getBounds()  { return snapToAwtRect(_snapShape.getBounds()).getBounds(); }
+
+        /**
+         * Returns whether shape contains rect.
+         */
+        public Rectangle2D getBounds2D()  { return snapToAwtRect(_snapShape.getBounds()); }
+
+        /**
+         * Returns whether shape contains rect.
+         */
+        public PathIterator getPathIterator(AffineTransform aTrans)
+        {
+            Transform snapTrans = aTrans != null ? awtToSnapTrans(aTrans) : null;
+            return snapToAwtPathIter(_snapShape.getPathIter(snapTrans));
+        }
+
+        /**
+         * Returns whether shape contains rect.
+         */
+        public PathIterator getPathIterator(AffineTransform aT, double f)
+        {
+            return new FlatteningPathIterator(getPathIterator(aT), f);
+        }
+    }
 
     /**
      * A Shape wrapper to provide AWT shape as snap.

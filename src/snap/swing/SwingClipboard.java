@@ -242,7 +242,7 @@ public class SwingClipboard extends Clipboard implements DragSourceListener, Dra
     {
         // Get drag image and the source window (if source is component)
         Image dragImage = getDragImage();
-        Window sourceWindow = SwingUtils.getWindow(_dge.getComponent());
+        Window sourceWindow = AWT.getWindowForComponent(_dge.getComponent());
 
         // Create window for drag image
         _dragWindow = new JWindow(sourceWindow);

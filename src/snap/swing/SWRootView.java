@@ -77,7 +77,7 @@ public class SWRootView extends JComponent {
         super.setBounds(aX, aY, aW, aH);
 
         // Correct X/Y for RootView in Window
-        Window winNtv = SwingUtils.getParent(this, Window.class);
+        Window winNtv = AWT.getWindowForComponent(this);
         for (Component parentComp = getParent(); parentComp != winNtv; parentComp = parentComp.getParent()) {
             aX += parentComp.getX();
             aY += parentComp.getY();
@@ -226,7 +226,7 @@ public class SWRootView extends JComponent {
     private void handleSwingRootViewShowingChange()
     {
         // Get native window and just return if it is Snap Window native
-        Window swingWindow = SwingUtils.getParent(this, Window.class);
+        Window swingWindow = AWT.getWindowForComponent(this);
         if (swingWindow == _win.getNative())
             return;
 

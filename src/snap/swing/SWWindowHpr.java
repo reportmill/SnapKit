@@ -384,7 +384,7 @@ public class SWWindowHpr extends WindowView.WindowHpr {
         // Might have been installed manually in JComponent hierarchy
         if (!clientWindow.isShowing()) {
             SWWindowHpr clientWindowHpr = (SWWindowHpr) clientWindow.getHelper();
-            return SwingUtils.getParent(clientWindowHpr._rootViewNative, Window.class);
+            return AWT.getWindowForComponent(clientWindowHpr._rootViewNative);
         }
 
         // Return
