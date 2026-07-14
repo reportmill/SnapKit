@@ -39,6 +39,9 @@ public class SnapEnv {
     // Whether app is currently running on desktop
     public static boolean isDesktop = !isWebVM && !isTeaVM;
 
+    // Whether short cut key is control key
+    public static boolean isShortcutControlKey = !isMac;
+
     // Constants for platform
     public enum Platform { WINDOWS, MAC, CHEERP, TEAVM, JxBrowser, UNKNOWN }
 

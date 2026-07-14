@@ -1132,7 +1132,7 @@ public class TextAdapter extends PropObject {
     protected void handleKeyPressEvent(ViewEvent anEvent)
     {
         // Get event info
-        boolean emacsDown = SnapEnv.isWindows ? anEvent.isAltDown() : anEvent.isControlDown();
+        boolean emacsDown = anEvent.isEmacsKeyDown();
 
         // Reset caret
         setCaretAnim(false);
@@ -1242,7 +1242,7 @@ public class TextAdapter extends PropObject {
         boolean charDefined = keyChar != KeyCode.CHAR_UNDEFINED && !Character.isISOControl(keyChar);
         boolean metaDown = anEvent.isMetaDown();
         boolean controlDown = anEvent.isControlDown();
-        boolean emacsDown = SnapEnv.isWindows ? anEvent.isAltDown() : controlDown;
+        boolean emacsDown = anEvent.isEmacsKeyDown();
 
         // If actual text entered, replace
         if (charDefined && !metaDown && !controlDown && !emacsDown) {

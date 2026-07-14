@@ -398,7 +398,10 @@ public abstract class ViewEvent implements Cloneable {
     public boolean isMetaDown()  { return ViewUtils.isMetaDown(); }
 
     /** Returns whether shortcut key is pressed. */
-    public boolean isShortcutDown()  { return ViewUtils.isShortcutDown(); }
+    public boolean isShortcutDown()  { return SnapEnv.isShortcutControlKey ? isControlDown() : isMetaDown(); }
+
+    /** Returns whether emacs key is pressed. */
+    public boolean isEmacsKeyDown()  { return !SnapEnv.isShortcutControlKey && isControlDown(); }
 
     /** Returns the key combo. */
     public KeyCombo getKeyCombo()

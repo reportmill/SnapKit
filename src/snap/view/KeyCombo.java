@@ -5,144 +5,148 @@ package snap.view;
 import snap.util.SnapEnv;
 
 /**
- * A class to model specific key strokes, including the key code and modifiers (shift, alt, etc.).
+ * A class to model a key stroke, including the key code and modifiers (shift, alt, control, meta).
  */
 public class KeyCombo {
 
     // Key code
-    private int _kcode;
+    private int _keyCode;
 
-    // Modifiers
-    private boolean _shift, _control, _alt, _command, _shortcut;
+    // Whether shift key is down
+    private boolean _shiftDown;
+
+    // Whether control key is down
+    private boolean _controlDown;
+
+    // Whether alt key is down
+    private boolean _altDown;
+
+    // Whether meta key is down ('command' key on Mac, 'windows' key on Windows/Linux)
+    private boolean _metaDown;
+
+    // Whether shortcut key is down
+    private boolean _shortcut;
 
     /**
-     * Creates a new KeyCombo.
+     * Constructor for key code and modifiers.
      */
-    protected KeyCombo()
+    protected KeyCombo(int keyCode, boolean shiftDown, boolean controlDown, boolean altDown, boolean metaDown)
     {
+        _keyCode = keyCode;
+        _shiftDown = shiftDown;
+        _controlDown = controlDown;
+        _altDown = altDown;
+        _metaDown = metaDown;
+        _shortcut = SnapEnv.isShortcutControlKey ? controlDown : metaDown;
     }
 
     /**
-     * Creates a new KeyCombo for key code and modifiers.
+     * Creates a new KeyCombo for given key combo string.
      */
-    protected KeyCombo(int aKC, boolean isShift, boolean isCntr, boolean isAlt, boolean isCmd)
+    public static KeyCombo get(String keyComboString)
     {
-        _kcode = aKC;
-        _shift = isShift;
-        _control = isCntr;
-        _alt = isAlt;
-        _command = isCmd;
-        _shortcut = SnapEnv.isWindows || SnapEnv.isWebVM_Windows ? isCntr : isCmd;
-    }
+        int keyCode = 0;
+        boolean shiftDown = false;
+        boolean controlDown = false;
+        boolean altDown = false;
+        boolean metaDown = false;
 
-    /**
-     * Creates a new KeyCombo for given string.
-     */
-    public static KeyCombo get(String aStr)
-    {
-        String[] parts = aStr.replace("+", " ").split("\\s");
-        KeyCombo keyCombo = new KeyCombo();
-
-        for (String part : parts) {
-            part = getPart(part);
-            int kcode = KeyCode.get(part);
-            switch (kcode) {
-                case KeyCode.ALT: keyCombo._alt = true; break;
-                case KeyCode.COMMAND: keyCombo._command = true; break;
-                case KeyCode.CONTROL: keyCombo._control = true; break;
-                case KeyCode.SHIFT: keyCombo._shift = true; break;
-                default: keyCombo._kcode = kcode;
+        // Get key combo string parts and process to find modifiers and key code
+        String[] keyComboStrParts = keyComboString.split("[\\s+]");
+        for (String partName : keyComboStrParts) {
+            String partNameNormalized = getPartNameNormalized(partName);
+            int partKeyCode = KeyCode.getKeyCodeForName(partNameNormalized);
+            switch (partKeyCode) {
+                case KeyCode.SHIFT -> shiftDown = true;
+                case KeyCode.CONTROL -> controlDown = true;
+                case KeyCode.ALT -> altDown = true;
+                case KeyCode.META -> metaDown = true;
+                default -> keyCode = partKeyCode;
             }
         }
 
-        // Set Shortcut
-        if (keyCombo.isCommandDown() && SnapEnv.isMac)
-            keyCombo._shortcut = true;
-        if (keyCombo.isControlDown() && SnapEnv.isWindows)
-            keyCombo._shortcut = true;
-        if (aStr.contains("Shortcut"))
-            keyCombo._shortcut = true;
-
         // Return
-        return keyCombo;
+        return new KeyCombo(keyCode, shiftDown, controlDown, altDown, metaDown);
     }
 
     /**
      * Returns the KeyCode.
      */
-    public int getKeyCode()  { return _kcode; }
+    public int getKeyCode()  { return _keyCode; }
 
     /**
      * Returns the name.
      */
     public String getName()
     {
-        String str = KeyCode.getName(_kcode);
-        String mod = (_alt ? "Alt " : "") + (_shortcut ? "Shortcut " : "") + (_shift ? "Shift " : "");
-        return mod + str;
+        String modStr = (_altDown ? "Alt " : "") + (_shortcut ? "Shortcut " : "") + (_shiftDown ? "Shift " : "");
+        return modStr + KeyCode.getNameForKeyCode(_keyCode);
     }
 
     /**
-     * Returns whether alt is down.
+     * Returns whether shift key is down.
      */
-    public boolean isShiftDown()  { return _shift; }
+    public boolean isShiftDown()  { return _shiftDown; }
 
     /**
-     * Returns whether control is down.
+     * Returns whether control key is down.
      */
-    public boolean isControlDown()  { return _control; }
+    public boolean isControlDown()  { return _controlDown; }
 
     /**
-     * Returns whether alt is down.
+     * Returns whether alt key is down.
      */
-    public boolean isAltDown()  { return _alt; }
+    public boolean isAltDown()  { return _altDown; }
 
     /**
-     * Returns whether command is down.
+     * Returns whether meta key is down ('command' key on Mac, 'windows' key on Windows/Linux).
      */
-    public boolean isCommandDown()  { return _command; }
+    public boolean isMetaDown()  { return _metaDown; }
 
     /**
-     * Returns whether shortcut is down.
+     * Returns whether shortcut key is down.
      */
     public boolean isShortcutDown()  { return _shortcut; }
 
     /**
      * Standard hashCode implementation.
      */
+    @Override
     public int hashCode()
     {
-        return _kcode + (_alt ? 9001 : 0) + (_shift ? 9002 : 0) + (_shortcut ? 9003 : 0);
+        return _keyCode + (_shiftDown ? 1024 : 0) + (_controlDown ? 2048 : 0) + (_altDown ? 4096 : 0) + (_metaDown ? 8192 : 0);
     }
 
     /**
      * Standard equals implementation.
      */
+    @Override
     public boolean equals(Object anObj)
     {
-        KeyCombo other = anObj instanceof KeyCombo ? (KeyCombo) anObj : null;
-        if (other == null) return false;
-        return other._kcode == _kcode && other._shift == _shift &&
-                other._alt == _alt && (other._command == _command && other._control == _control || other._shortcut == _shortcut);
+        return anObj instanceof KeyCombo other && other._keyCode == _keyCode && other._shiftDown == _shiftDown &&
+            other._controlDown == _controlDown && other._altDown == _altDown && other._metaDown == _metaDown;
     }
 
     /**
      * Standard toString implementation.
      */
+    @Override
     public String toString()
     {
-        String mod = (_alt ? "Alt " : "") + (_shortcut ? "Shortcut " : "") + (_shift ? "Shift " : "");
-        return "KeyCombo " + mod + _kcode;
+        String mod = (_altDown ? "Alt " : "") + (_shortcut ? "Shortcut " : "") + (_shiftDown ? "Shift " : "");
+        return "KeyCombo " + mod + _keyCode;
     }
 
     /**
-     * Returns mapping for part.
+     * Returns the normalized name for given key combo part name.
      */
-    private static String getPart(String part)
+    private static String getPartNameNormalized(String partName)
     {
-        if (part.equals("Shortcut")) return SnapEnv.isWindows ? "CONTROL" : "COMMAND";
-        if (part.equals("meta")) return SnapEnv.isWindows ? "CONTROL" : "COMMAND";
-        if (part.equals("shift")) return "SHIFT";
-        return part;
+        return switch (partName) {
+            case "Shortcut" -> SnapEnv.isShortcutControlKey ? "CONTROL" : "META";
+            case "meta" -> "META";
+            case "shift" -> "SHIFT";
+            default -> partName;
+        };
     }
 }

@@ -61,7 +61,7 @@ public class StageView extends ChildView {
         super();
         setPrefSize(width, height);
         setFill(Color.WHITE);
-        setClipToBounds(true);
+        setOverflow(Overflow.Clip);
         setFocusable(true);
         setFocusWhenPressed(true);
 
@@ -212,7 +212,7 @@ public class StageView extends ChildView {
      */
     public boolean isKeyDown(String aKey)
     {
-        int keyCode = KeyCode.get(aKey.toUpperCase());
+        int keyCode = KeyCode.getKeyCodeForName(aKey.toUpperCase());
         return _keyDowns.contains(keyCode);
     }
 
@@ -221,7 +221,7 @@ public class StageView extends ChildView {
      */
     public boolean isKeyClicked(String aKey)
     {
-        int keyCode = KeyCode.get(aKey.toUpperCase());
+        int keyCode = KeyCode.getKeyCodeForName(aKey.toUpperCase());
         return _keyClicks.contains(keyCode);
     }
 

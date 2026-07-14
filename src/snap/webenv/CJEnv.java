@@ -43,6 +43,7 @@ public class CJEnv extends GFXEnv {
         if (Navigator.isWindows()) SnapEnv.isWebVM_Windows = true;
         else if (Navigator.isMac()) SnapEnv.isWebVM_Mac = true;
         else if (Navigator.isIOS()) SnapEnv.isWebVM_iOS = true;
+        SnapEnv.isShortcutControlKey = !(SnapEnv.isWebVM_Mac || SnapEnv.isWebVM_iOS);
     }
 
     /**

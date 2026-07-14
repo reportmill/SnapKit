@@ -1,5 +1,6 @@
 package snap.webenv;
 import snap.geom.Point;
+import snap.util.SnapEnv;
 import snap.view.*;
 import snap.view.Clipboard;
 import snap.webapi.*;
@@ -8,9 +9,6 @@ import snap.webapi.*;
  * A ViewEvent implementation for CheerpJ.
  */
 public class CJEvent extends ViewEvent {
-
-    // Whether platform is windows
-    private static boolean _shortcutIsControlKey = !(Navigator.isMac() || Navigator.isIOS());
 
     /**
      * Returns the event point from browser mouse event.
@@ -92,7 +90,7 @@ public class CJEvent extends ViewEvent {
         // Remap some codes
         return switch (keyCode) {
             case 13 -> KeyCode.ENTER;
-            case 91 -> KeyCode.COMMAND;
+            case 91 -> KeyCode.META;
             case 46 -> KeyCode.DELETE;
             default -> keyCode;
         };
@@ -166,11 +164,6 @@ public class CJEvent extends ViewEvent {
             return uiEvent.isMetaKey();
         return false;
     }
-
-    /**
-     * Returns whether shortcut key is pressed.
-     */
-    public boolean isShortcutDown()  { return _shortcutIsControlKey ? isControlDown() : isMetaDown(); }
 
     /**
      * Returns whether popup trigger is down.

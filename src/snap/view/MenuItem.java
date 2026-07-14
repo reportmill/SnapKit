@@ -68,9 +68,11 @@ public class MenuItem extends ButtonBase {
 
         // Set graphic
         if (aValue == null) { setGraphicAfter(null); return; }
-        String str = getShortcutText();
-        StringView text = new StringView(); text.setText(str); text.setLeanX(HPos.RIGHT);
-        setGraphicAfter(text); getLabel().setSpacing(12);
+        StringView text = new StringView();
+        text.setText(getShortcutText());
+        text.setLeanX(HPos.RIGHT);
+        setGraphicAfter(text);
+        getLabel().setSpacing(12);
         getLabel().setGrowWidth(true);
     }
 
@@ -79,7 +81,8 @@ public class MenuItem extends ButtonBase {
      */
     public KeyCombo getShortcutCombo()
     {
-        return _keyCombo != null || _shortcut == null ? _keyCombo : (_keyCombo = KeyCombo.get(_shortcut));
+        if (_keyCombo != null || _shortcut == null) return _keyCombo;
+        return _keyCombo = KeyCombo.get(_shortcut);
     }
 
     /**
@@ -88,11 +91,11 @@ public class MenuItem extends ButtonBase {
     public String getShortcutText()
     {
         KeyCombo keyCombo = getShortcutCombo();
-        String key = Character.toString((char) keyCombo.getKeyCode());
-        String str = (SnapEnv.isMac ? Character.toString((char)8984) : "^") + key;
+        String keyString = Character.toString((char) keyCombo.getKeyCode());
+        String shortcutText = (SnapEnv.isMac ? Character.toString((char) 8984) : "^") + keyString;
         if (keyCombo.isShiftDown())
-            str = (char) 8679 + str;
-        return str;
+            shortcutText = (char) 8679 + shortcutText;
+        return shortcutText;
     }
 
     /**
