@@ -364,7 +364,7 @@ public class DialogBox extends FormBuilder {
 
         // Listen for InputText KeyRelease events to update ConfirmEnabled
         setConfirmEnabled(aDefault != null && !aDefault.isEmpty());
-        textField.addEventFilter(e -> runLater(() -> setConfirmEnabled(!textField.getText().isEmpty())), KeyRelease);
+        textField.addEventHandler(e -> setConfirmEnabled(!textField.getText().isEmpty()), KeyRelease);
 
         // Show panel
         if (!showPanel(aView))

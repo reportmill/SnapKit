@@ -99,7 +99,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         _textField.setGrowWidth(true);
         _textField.setColCount(0);
         _textField.addEventFilter(this::handleTextFieldKeyPressEvent, KeyPress);
-        _textField.addEventFilter(this::handleTextFieldKeyTypeEvent, KeyType);
+        _textField.addEventHandler(this::handleTextFieldKeyTypeEvent, KeyType);
         _textField.addEventHandler(this::handleTextFieldActionEvent, Action);
         _textField.addPropChangeListener(pc -> handleTextFieldFocusChange(), Focused_Prop);
         return _textField;
@@ -416,12 +416,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Called when TextField gets KeyType event.
      */
-    private void handleTextFieldKeyTypeEvent(ViewEvent anEvent)  { runLater(this::handleTextFieldTextChange); }
-
-    /**
-     * Called after TextField text has changed.
-     */
-    private void handleTextFieldTextChange()
+    private void handleTextFieldKeyTypeEvent(ViewEvent anEvent)
     {
         // Get prefix text and current selection
         String text = _textField.getText();
