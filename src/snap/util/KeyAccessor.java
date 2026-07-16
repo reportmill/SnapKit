@@ -92,7 +92,7 @@ class KeyAccessor {
                 _type = Type.Field;
                 return;
             }
-            catch (Exception e) { }
+            catch (Exception ignore) { }
         }
 
         // Since nothing else panned out, set type to Unknown
@@ -165,17 +165,14 @@ class KeyAccessor {
                 // Handle TYPE_ENUM
             case Enum: {
                 Enum<?> enum1 = (Enum<?>) anObj;
-                if (_rawKey.equals("ordinal"))
-                    return enum1.ordinal();
-                if (_rawKey.equals("name"))
-                    return enum1.name();
-                if (_rawKey.equals("toString"))
-                    return enum1.toString();
-                Enum<?> enum2 = null;
-                try {
-                    enum2 = Enum.valueOf(enum1.getClass(), _rawKey);
+                switch (_rawKey) {
+                    case "ordinal" -> { return enum1.ordinal(); }
+                    case "name" -> { return enum1.name(); }
+                    case "toString" -> { return enum1.toString(); }
                 }
-                catch (Exception e) { }
+                Enum<?> enum2 = null;
+                try { enum2 = Enum.valueOf(enum1.getClass(), _rawKey); }
+                catch (Exception ignore) { }
                 return enum1.equals(enum2);
             }
 
@@ -201,6 +198,10 @@ class KeyAccessor {
         // Look for method as given by raw key
         if (_getMethod == null)
             _getMethod = getMethod(_class, _rawKey);
+
+        // Look for method with initial lower case letter
+        if (_getMethod == null && Character.isUpperCase(_key.charAt(0)))
+            _getMethod = getMethod(_class, Character.toLowerCase(_key.charAt(0)) + _key.substring(1));
 
         // If method was found, set type to Method (3) and return
         if (_getMethod != null) {
@@ -238,8 +239,8 @@ class KeyAccessor {
 
         // Get Value (if list, use first item)
         Object value = aValue;
-        if (value instanceof List && ((List<?>) value).size() > 0)
-            value = ((List<?>) value).get(0);
+        if (value instanceof List<?> list && !list.isEmpty())
+            value = list.get(0);
 
         // Do type conversion for number types
         if (methodClass == int.class || methodClass == Integer.class)
