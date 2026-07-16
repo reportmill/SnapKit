@@ -312,7 +312,7 @@ public class DrawerView extends ParentView {
         setOpacity(1);
 
         // Get attach view and add this DrawerView
-        parentView.setClipToBounds(true);
+        parentView.setOverflow(Overflow.Clip);
         ViewUtils.addChild(parentView, this);
 
         // Adjust DrawerY if needed
@@ -479,7 +479,7 @@ public class DrawerView extends ParentView {
                     return;
 
                 // Set MouseDown vars
-                _mouseDownPnt = anEvent.getPoint(getParent());
+                _mouseDownPnt = anEvent.getPointForView(getParent());
                 _mouseDownY = getMargin().top;
                 _mouseDownW = getWidth();
                 _mouseDownH = getHeight();
@@ -495,7 +495,7 @@ public class DrawerView extends ParentView {
                 if (_mouseDownPnt == null) return;
 
                 // Get new point and change
-                Point pnt = anEvent.getPoint(getParent());
+                Point pnt = anEvent.getPointForView(getParent());
                 double dx = pnt.x - _mouseDownPnt.x;
                 double dy = pnt.y - _mouseDownPnt.y;
 

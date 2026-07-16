@@ -550,7 +550,7 @@ public class EventDispatcher {
     public void dispatchMouseMoveOutsideWindow()
     {
         ViewEvent event = ViewEvent.createEvent(_win, null, MouseMove, null);
-        event = event.copyForViewPoint(_win, _win.getWidth() + 100, 0, 0);
+        event = event.copyForViewAndPoint(_win, _win.getWidth() + 100, 0);
         dispatchEvent(event);
     }
 

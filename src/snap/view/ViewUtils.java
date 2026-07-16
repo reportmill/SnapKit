@@ -835,7 +835,7 @@ public class ViewUtils {
         view.setManaged(false);
         anEvent.consume();
         Point mpt = _mpt;
-        _mpt = anEvent.getPoint(view.getParent());
+        _mpt = anEvent.getPointForView(view.getParent());
 
         if (anEvent.isMousePress()) return;
 

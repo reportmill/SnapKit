@@ -201,7 +201,7 @@ public abstract class ViewEvent implements Cloneable {
             return false;
 
         // If event not within 1 point of last mouse, return false
-        Point lastPoint = getView() == last.getView() ? last.getPoint() : last.getPoint(getView());
+        Point lastPoint = getView() == last.getView() ? last.getPoint() : last.getPointForView(getView());
         double dist = lastPoint.getDistance(getX(), getY());
         if (dist > aDist)
             return false;
@@ -472,16 +472,20 @@ public abstract class ViewEvent implements Cloneable {
     /**
      * Returns the event location in coords of given view.
      */
-    public Point getPoint(View aView)
+    public Point getPointForView(View aView)
     {
-        Point pt = getPoint(); View view0 = getView();
-        View ancestor = ViewUtils.getCommonAncetor(view0,aView);
-        if (ancestor != view0)
-            pt = view0.localToParent(pt.x, pt.y, ancestor);
+        Point pointForView = getPoint();
+        View thisView = getView();
+        View ancestor = ViewUtils.getCommonAncetor(thisView, aView);
+        if (ancestor != thisView)
+            pointForView = thisView.localToParent(pointForView.x, pointForView.y, ancestor);
         if (ancestor != aView)
-            pt = aView.parentToLocal(pt.x, pt.y, ancestor);
-        return pt;
+            pointForView = aView.parentToLocal(pointForView.x, pointForView.y, ancestor);
+        return pointForView;
     }
+
+    @Deprecated
+    public Point getPoint(View aView)  { return getPointForView(aView); }
 
     /** Returns the scroll amount X. */
     public double getScrollX()  { complain("getScrollAmountX"); return 0; }
@@ -503,37 +507,37 @@ public abstract class ViewEvent implements Cloneable {
     public String getKeyString()  { return String.valueOf(getKeyChar()); }
 
     /** Returns whether key is left arrow. */
-    public boolean isLeftArrow()  { return getKeyCode()==KeyCode.LEFT; }
+    public boolean isLeftArrow()  { return getKeyCode() == KeyCode.LEFT; }
 
     /** Returns whether key is right arrow. */
-    public boolean isRightArrow()  { return getKeyCode()==KeyCode.RIGHT; }
+    public boolean isRightArrow()  { return getKeyCode() == KeyCode.RIGHT; }
 
     /** Returns whether key is up arrow. */
-    public boolean isUpArrow()  { return getKeyCode()==KeyCode.UP; }
+    public boolean isUpArrow()  { return getKeyCode() == KeyCode.UP; }
 
     /** Returns whether key is down arrow. */
-    public boolean isDownArrow()  { return getKeyCode()==KeyCode.DOWN; }
+    public boolean isDownArrow()  { return getKeyCode() == KeyCode.DOWN; }
 
     /** Returns whether key is delete key. */
-    public boolean isBackSpaceKey()  { return getKeyCode()==KeyCode.BACK_SPACE || getKeyChar()=='\b'; }
+    public boolean isBackSpaceKey()  { return getKeyCode() == KeyCode.BACK_SPACE || getKeyChar() == '\b'; }
 
     /** Returns whether key is delete key. */
-    public boolean isDeleteKey()  { return getKeyCode()==KeyCode.DELETE; }
+    public boolean isDeleteKey()  { return getKeyCode() == KeyCode.DELETE; }
 
     /** Returns whether key is enter key. */
-    public boolean isEnterKey()  { return getKeyCode()==KeyCode.ENTER || getKeyChar()=='\n'; }
+    public boolean isEnterKey()  { return getKeyCode() == KeyCode.ENTER || getKeyChar() == '\n'; }
 
     /** Returns whether key is tab key. */
-    public boolean isTabKey()  { return getKeyCode()==KeyCode.TAB || getKeyChar()=='\t'; }
+    public boolean isTabKey()  { return getKeyCode() == KeyCode.TAB || getKeyChar() == '\t'; }
 
     /** Returns whether key is escape key. */
-    public boolean isEscapeKey()  { return getKeyCode()==KeyCode.ESCAPE; }
+    public boolean isEscapeKey()  { return getKeyCode() == KeyCode.ESCAPE; }
 
     /** Returns whether key is escape key. */
-    public boolean isSpaceKey()  { return getKeyCode()==KeyCode.SPACE || getKeyChar()==' '; }
+    public boolean isSpaceKey()  { return getKeyCode() == KeyCode.SPACE || getKeyChar() == ' '; }
 
     /** Returns whether key is ISO control character. */
-    public boolean isControlChar()  { char c = getKeyChar(); return Character.isISOControl(c); }
+    public boolean isControlChar()  { return Character.isISOControl(getKeyChar()); }
 
     /** Returns the Drag Clipboard for this event, if appropriate. */
     public Clipboard getClipboard()  { complain("getDragboard"); return null; }
@@ -563,7 +567,7 @@ public abstract class ViewEvent implements Cloneable {
         View thisView = getView(); double x = getX(), y = getY(); if (aView == thisView) return this;
         View par = ViewUtils.getCommonAncetor(thisView, aView);
         Point point = par == thisView ? aView.parentToLocal(x,y,par) : thisView.localToParent(x,y,par);
-        return copyForViewPoint(aView, point.x, point.y, -1);
+        return copyForViewAndPoint(aView, point.x, point.y);
     }
 
     /**
@@ -571,7 +575,7 @@ public abstract class ViewEvent implements Cloneable {
      */
     public ViewEvent copyForPoint(double aX, double aY)
     {
-        return copyForViewPoint(getView(), aX, aY, -1);
+        return copyForViewAndPoint(getView(), aX, aY);
     }
 
     /**
@@ -579,13 +583,23 @@ public abstract class ViewEvent implements Cloneable {
      */
     public ViewEvent copyForClickCount(int aClickCount)
     {
-        return copyForViewPoint(getView(), getX(), getY(), aClickCount);
+        ViewEvent copy = copyForViewAndPoint(getView(), getX(), getY());
+        copy.setClickCount(aClickCount);
+        return copy;
     }
 
     /**
      * Returns a ViewEvent at new point.
      */
-    public ViewEvent copyForViewPoint(View aView, double aX, double aY, int aClickCount)
+    public ViewEvent copyForViewAndPoint(View aView, double aX, double aY)
+    {
+        return copyForViewAndPointAndType(aView, aX, aY, null);
+    }
+
+    /**
+     * Returns a ViewEvent at new point.
+     */
+    public ViewEvent copyForViewAndPointAndType(View aView, double aX, double aY, EventType eventType)
     {
         ViewEvent copy = clone(); //getEnv().createEvent(aView, getEvent(), getType(), name);
         copy.setView(aView);
@@ -594,8 +608,8 @@ public abstract class ViewEvent implements Cloneable {
             eventName = aView.getName();
         copy.setName(eventName);
         copy.setXY(aX, aY);
-        if (aClickCount > 0)
-            copy.setClickCount(aClickCount);
+        if (eventType != null)
+            copy.setType(eventType);
         return copy;
     }
 
@@ -605,7 +619,7 @@ public abstract class ViewEvent implements Cloneable {
     public ViewEvent clone()
     {
         ViewEvent copy;
-        try { copy = (ViewEvent)super.clone(); }
+        try { copy = (ViewEvent) super.clone(); }
         catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
         copy.setParentEvent(this);
         return copy;

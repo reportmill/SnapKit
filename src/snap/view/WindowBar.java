@@ -136,7 +136,7 @@ public class WindowBar extends ParentView {
 
         // Handle MousePress: Update MousePoint
         if (anEvent.isMousePress()) {
-            _mousePoint = anEvent.getY() <= _titleBarHeight ? anEvent.getPoint(null) : null;
+            _mousePoint = anEvent.getY() <= _titleBarHeight ? anEvent.getPointForView(null) : null;
             return;
         }
 
@@ -162,7 +162,7 @@ public class WindowBar extends ParentView {
         // Update MousePoint
         Point mousePoint = _mousePoint;
         if (mousePoint == null) return;
-        _mousePoint = anEvent.getPoint(null);
+        _mousePoint = anEvent.getPointForView(null);
 
         // Update Window XY
         double x2 = win.getX() + (_mousePoint.x - mousePoint.x);
