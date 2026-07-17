@@ -175,7 +175,6 @@ public class Path2DUtils {
      */
     public static Path2D addPathPointAtPoint(Shape aPath, Point aPoint)
     {
-        // Get old path and new path
         Path2D newPath = new Path2D();
 
         // Create small horizontal and vertical lines around mouse point
@@ -193,12 +192,10 @@ public class Path2DUtils {
             switch (pathIter.getNext(points)) {
 
                 // Handle MoveTo
-                case MoveTo:
-                    newPath.moveTo(moveX = lineX = points[0], moveY = lineY = points[1]);
-                    break;
+                case MoveTo -> newPath.moveTo(moveX = lineX = points[0], moveY = lineY = points[1]);
 
                 // Handle LineTo
-                case LineTo: {
+                case LineTo -> {
                     Line seg = new Line(lineX, lineY, lineX = points[0], lineY = points[1]);
                     Line seg2 = null;
                     double ix = seg.getHitPoint(hor);
@@ -211,10 +208,9 @@ public class Path2DUtils {
                     if (seg2 != null)
                         newPath.appendSegment(seg2);
                 }
-                break;
 
                 // Handle QuadTo
-                case QuadTo: {
+                case QuadTo -> {
                     Quad seg = new Quad(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3]);
                     Quad seg2 = null;
                     double ix = seg.getHitPoint(hor);
@@ -227,10 +223,9 @@ public class Path2DUtils {
                     if (seg2 != null)
                         newPath.appendSegment(seg2);
                 }
-                break;
 
                 // Handle CubicTo
-                case CubicTo: {
+                case CubicTo -> {
                     Cubic seg = new Cubic(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
                     Cubic seg2 = null;
                     double ix = seg.getHitPoint(hor);
@@ -243,10 +238,9 @@ public class Path2DUtils {
                     if (seg2 != null)
                         newPath.appendSegment(seg2);
                 }
-                break;
 
                 // Handle Close
-                case Close: {
+                case Close -> {
                     Line seg = new Line(lineX, lineY, lineX = moveX, lineY = moveY);
                     Line seg2 = null;
                     double ix = seg.getHitPoint(hor);
@@ -259,11 +253,9 @@ public class Path2DUtils {
                         newPath.appendSegment(seg);
                     newPath.close();
                 }
-                break;
             }
         }
 
-        // Return
         return newPath;
     }
 
@@ -272,23 +264,16 @@ public class Path2DUtils {
      */
     public static Path2D removePointAtIndexSmoothly(Shape aPath, int pointIndex)
     {
-        // Make changes to a clone of the path so deletions can be undone
         Path2D newPath = new Path2D(aPath);
-
-        // get the index of the path segment corresponding to the selected control point
         int selPointIndex = newPath.getSegIndexForPointIndex(pointIndex);
-
-        // Delete the point from path in parent coords
         removeSegAtIndexSmoothly(newPath, selPointIndex);
-
-        // Return
         return newPath;
     }
 
     /**
      * Removes the seg at given index, reconnecting the segs on either side of deleted seg.
      */
-    public static void removeSegAtIndexSmoothly(Path2D aPath, int anIndex)
+    private static void removeSegAtIndexSmoothly(Path2D aPath, int anIndex)
     {
         // If index is last seg, just remove and return (but don't leave dangling moveto)
         int segCount = aPath.getSegCount();
@@ -353,20 +338,14 @@ public class Path2DUtils {
         for (int i = 0; pathIter.hasNext(); i++)
             switch (pathIter.getNext(points)) {
 
-                // Handle MoveTo
-                case MoveTo:
-
-                // Handle LineTo
-                case LineTo: {
+                case MoveTo, LineTo -> {
                     p1x = Math.min(p1x, points[0]);
                     p1y = Math.min(p1y, points[1]);
                     p2x = Math.max(p2x, points[0]);
                     p2y = Math.max(p2y, points[1]);
                 }
-                break;
 
-                // Handle CubicTo
-                case CubicTo: {
+                case CubicTo -> {
                     if ((i - 1) == mouseDownIndex) {
                         p1x = Math.min(p1x, points[0]);
                         p1y = Math.min(p1y, points[1]);
@@ -384,17 +363,14 @@ public class Path2DUtils {
                     p2x = Math.max(p2x, points[4]);
                     p2y = Math.max(p2y, points[5]);
                 }
-                break;
 
                 // Handle default
-                default: break;
+                default -> { }
             }
 
         // Create control point bounds rect, union with path bounds and return
         Rect controlPointBounds = new Rect(p1x, p1y, Math.max(1, p2x - p1x), Math.max(1, p2y - p1y));
         controlPointBounds.union(aPath.getBounds());
-
-        // Return
         return controlPointBounds;
     }
 

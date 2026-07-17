@@ -50,31 +50,14 @@ class SegmentLengths {
     }
 
     /**
-     * Returns a set of polynomials to approximate the arclength->parameter curve
-     */
-    public List<RMCurveFit.Piece> getInverseArcLengthCurve(Segment aSeg)
-    {
-        // 'inverse' now represents a function where f(x) returns bezier parameter t for given length along curve.
-        // The length is in the range 0-1 and can be thought of as percentage of the entire curve.
-        RMFunc inverse = getInverseArcLengthFunction(aSeg);
-
-        // Fit one or more polynomials to this curve
-        return RMCurveFit.nevilleFit(inverse, 0, 1, null);
-    }
-
-    /**
      * Returns the arc length of the segment up to parametric value t
      */
     private static RMFunc getArcLengthFunction(Segment aSeg)
     {
-        if (aSeg instanceof Cubic) {
-            Cubic c = (Cubic) aSeg;
-            return getArcLengthFunctionCubic(c.x0, c.y0, c.cp0x, c.cp0y, c.cp1x, c.cp1y, c.x1, c.y1);
-        }
-        if (aSeg instanceof Quad) {
-            Quad q = (Quad) aSeg;
-            return getArcLengthFunctionQuad(q.x0, q.y0, q.cpx, q.cpy, q.x1, q.y1);
-        }
+        if (aSeg instanceof Cubic cub)
+            return getArcLengthFunctionCubic(cub.x0, cub.y0, cub.cp0x, cub.cp0y, cub.cp1x, cub.cp1y, cub.x1, cub.y1);
+        if (aSeg instanceof Quad quad)
+            return getArcLengthFunctionQuad(quad.x0, quad.y0, quad.cpx, quad.cpy, quad.x1, quad.y1);
         throw new RuntimeException("SegmentLength.getArcLengthFunction: Unsupported Segment Class: " + aSeg);
     }
 
@@ -83,13 +66,8 @@ class SegmentLengths {
      */
     private static RMFunc getInverseArcLengthFunction(Segment aSeg)
     {
-        // Get the arclength function
         RMFunc alen = getArcLengthFunction(aSeg);
-
-        // Scale it to the range 0-1
         RMFunc scaled = new RMCurveFit.ScaledFunc(alen);
-
-        // return the inverse of the scaled function
         return new RMCurveFit.InverseFunc(scaled);
     }
 
@@ -248,6 +226,17 @@ class SegmentLengths {
     }
 
     /**
+     * Returns a set of polynomials to approximate the arclength->parameter curve
+     */
+    public List<RMCurveFit.Piece> getInverseArcLengthCurve(Segment aSeg)
+    {
+        // 'inverse' now represents a function where f(x) returns bezier parameter t for given length along curve.
+        // The length is in the range 0-1 and can be thought of as percentage of the entire curve.
+        RMFunc inverse = getInverseArcLengthFunction(aSeg);
+        return RMCurveFit.nevilleFit(inverse, 0, 1, new ArrayList<>());
+    }
+
+    /**
      * This class creates an approximating polygon for a given RMFunction.
      * The polygon is expressed as a series of sample points that can be interpolated between using Neville's method
      * to quickly obtain the value of any function.
@@ -262,19 +251,7 @@ class SegmentLengths {
 
         // An individual polynomial which covers the curve in the range start-end.
         // The output of NevilleFit() routine is a list of these objects.
-        public static class Piece {
-            public double start;
-            public double end;
-            public double[] xsamples;
-            public double[] ysamples;
-
-            public Piece(double s, double e, double[] x, double[] y)
-            {
-                start = s; end = e;
-                xsamples = x;
-                ysamples = y;
-            }
-        }
+        public record Piece(double start, double end, double[] xsamples, double[] ysamples) { }
 
         /**
          * A function whose value is determined by interpolating through a set
@@ -391,11 +368,11 @@ class SegmentLengths {
          * <p>
          * The final result is a piecewise list of polynomials, expressed as sample points.
          */
-        public static List<Piece> nevilleFit(RMFunc func, double start, double end, List<Piece> pieceList)
+        private static List<Piece> nevilleFit(RMFunc func, double start, double end, List<Piece> pieceList)
         {
             int i, samples = 2;
             int outsamples = 64;
-            double maxerr = 0;
+            double maxerr;
             double maxerrpt = -1;
             double[] x;
             double[] y;
@@ -406,43 +383,33 @@ class SegmentLengths {
             if (end <= start)
                 return pieceList;
 
-            if (pieceList == null)
-                pieceList = new ArrayList<>();
-
             // try 2-6 nodes (linear to quintic polygon)
             do {
                 // Get the nodes (interpolation points) for the new polygon
                 x = cheby(samples);
                 y = new double[samples];
+
                 // calculate y value at each node
                 for (i = 0; i < samples; ++i) {
-                    // map Chebychev nodes to the domain (cheby() routine maps them to 0-1)
-                    x[i] = start + (end - start) * x[i];
-                    // get the sample for the given node
-                    y[i] = func.f(x[i]);
+                    x[i] = start + (end - start) * x[i]; // map Chebychev nodes to domain (cheby() routine maps to 0-1)
+                    y[i] = func.f(x[i]); // get the sample for the given node
                 }
 
                 // initialize Neville interpolation function with the samples
                 interp.setSamples(x, y);
 
-                double xx = 0;
-                double yy;
-                double avgerr = 0;
                 maxerr = 0;
 
                 // Now that we have a polygon, see how good a fit it is
                 for (int outi = 0; outi < outsamples; ++outi) {
-                    // x value in range
-                    xx = start + (end - start) * ((double) outi) / (outsamples - 1);
-                    // do the interpolation
-                    yy = interp.f(xx);
+                    double xx = start + (end - start) * ((double) outi) / (outsamples - 1); // x value in range
+                    double yy = interp.f(xx);
 
                     // get the actual value
                     double actual = func.f(xx);
 
                     // calculate squared error and keep track of worst fit point
                     double esq = (yy - actual) * (yy - actual);
-                    avgerr += esq;
                     if (esq > maxerr) {
                         maxerr = esq;
                         maxerrpt = xx;

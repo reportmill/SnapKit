@@ -3,11 +3,12 @@
  */
 package snap.geom;
 import java.util.Arrays;
+import java.util.Scanner;
 
 /**
  * A standard path shape that can be built/modified by standard moveTo/lineTo/curveTo methods.
  */
-public class Path2D extends ShapeBuilder implements Cloneable {
+public class Path2D extends Shape implements Cloneable {
 
     // The array of segments
     protected Seg[] _segs = new Seg[8];
@@ -204,6 +205,143 @@ public class Path2D extends ShapeBuilder implements Cloneable {
     {
         _segCount = _pointCount = 0;
         shapeChanged();
+    }
+
+    /**
+     * ArcTo: Adds a Cubic using the corner point as a guide.
+     */
+    public void arcTo(double cx, double cy, double endX, double endY)
+    {
+        double magic = .5523f; // I calculated this in mathematica one time - probably only valid for 90 deg corner.
+        double lastX = getLastPointX();
+        double lastY = getLastPointY();
+        double cpx1 = lastX + (cx - lastX) * magic;
+        double cpy1 = lastY + (cy - lastY) * magic;
+        double cpx2 = endX + (cx - endX) * magic;
+        double cpy2 = endY + (cy - endY) * magic;
+        curveTo(cpx1, cpy1, cpx2, cpy2, endX, endY);
+    }
+
+    /**
+     * LineTo.
+     */
+    public void lineBy(double aX, double aY)
+    {
+        double lastX = getLastPointX();
+        double lastY = getLastPointY();
+        lineTo(lastX + aX, lastY + aY);
+    }
+
+    /**
+     * Horizontal LineTo.
+     */
+    public void hlineTo(double aX)
+    {
+        double lastY = getLastPointY();
+        lineTo(aX, lastY);
+    }
+
+    /**
+     * Vertical LineTo.
+     */
+    public void vlineTo(double aY)
+    {
+        double lastX = getLastPointX();
+        lineTo(lastX, aY);
+    }
+
+    /**
+     * Appends given shape to this polygon path.
+     */
+    public void appendShape(Shape aShape)
+    {
+        PathIter pathIter = aShape.getPathIter(null);
+        appendPathIter(pathIter);
+    }
+
+    /**
+     * Appends given PathIter to this polygon path.
+     */
+    public void appendPathIter(PathIter pathIter)
+    {
+        double[] points = new double[6];
+
+        while (pathIter.hasNext()) {
+            switch (pathIter.getNext(points)) {
+                case MoveTo -> moveTo(points[0], points[1]);
+                case LineTo -> lineTo(points[0], points[1]);
+                case QuadTo -> quadTo(points[0], points[1], points[2], points[3]);
+                case CubicTo -> curveTo(points[0], points[1], points[2], points[3], points[4], points[5]);
+                case Close -> close();
+            }
+        }
+    }
+
+    /**
+     * Appends a path segment.
+     */
+    public void appendSegment(Segment aSegment)
+    {
+        if (aSegment instanceof Cubic seg)
+            curveTo(seg.cp0x, seg.cp0y, seg.cp1x, seg.cp1y, aSegment.x1, aSegment.y1);
+        else if (aSegment instanceof Quad seg)
+            quadTo(seg.cpx, seg.cpy, aSegment.x1, aSegment.y1);
+        else lineTo(aSegment.x1, aSegment.y1);
+    }
+
+    /**
+     * Appends a path from an SVG path string.
+     */
+    public void appendSvgString(String svgString)
+    {
+        Scanner scan = new Scanner(svgString);
+
+        // Iterate over scanner tokens
+        while (scan.hasNext()) {
+            String svgOp = scan.next();
+            switch (svgOp) {
+
+                // Handle MoveTo
+                case "M" -> {
+                    double endX = scan.nextDouble();
+                    double endY = scan.nextDouble();
+                    moveTo(endX, endY);
+                }
+
+                // Handle LineTo
+                case "L" -> {
+                    double endX = scan.nextDouble();
+                    double endY = scan.nextDouble();
+                    lineTo(endX, endY);
+                }
+
+                // Handle QuadTo
+                case "Q" -> {
+                    double cp0x = scan.nextDouble();
+                    double cp0y = scan.nextDouble();
+                    double endX = scan.nextDouble();
+                    double endY = scan.nextDouble();
+                    quadTo(cp0x, cp0y, endX, endY);
+                }
+
+                // Handle CubicTo
+                case "C" -> {
+                    double cp0x = scan.nextDouble();
+                    double cp0y = scan.nextDouble();
+                    double cp1x = scan.nextDouble();
+                    double cp1y = scan.nextDouble();
+                    double endX = scan.nextDouble();
+                    double endY = scan.nextDouble();
+                    curveTo(cp0x, cp0y, cp1x, cp1y, endX, endY);
+                }
+
+                // Handle close
+                case "Z" -> close();
+
+                // Handle invalid
+                default -> System.err.println("ShapeBuilder.appendSVGString: Invalid op: " + svgOp);
+            }
+        }
     }
 
     /**

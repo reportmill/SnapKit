@@ -9,7 +9,7 @@ import java.util.*;
  * A Shape containing a list of Segment shapes (Line, Quad, Cubic) to facilitate complex shape operations like
  * constructive area geometry (CAG) operations (add, subtract, intersect paths).
  */
-public class SegmentPath extends Shape {
+class SegmentPath extends Shape {
     
     // The list of segments
     private List<Segment> _segs;

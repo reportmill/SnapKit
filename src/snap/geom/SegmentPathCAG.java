@@ -9,7 +9,7 @@ import java.util.List;
  * This class provides SegmentPath utility methods to do Constructive Area Geometry (CAG) operations,
  * like add, subtract, intersect shapes.
  */
-public class SegmentPathCAG {
+class SegmentPathCAG {
 
     /**
      * Returns the intersection shape of two shapes.
