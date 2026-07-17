@@ -211,27 +211,16 @@ public class PolygonPath extends Shape {
     {
         double[] points = new double[6];
 
-        // Iterate over PathIter
         while (aPathIter.hasNext()) {
 
             // Get next segment and handle
             Seg pathSeg = aPathIter.getNext(points);
             switch (pathSeg) {
-
-                // Handle MoveTo
-                case MoveTo: moveTo(points[0], points[1]); break;
-
-                // Handle LineTo
-                case LineTo: lineTo(points[0], points[1]); break;
-
-                // Handle QuadTo
-                case QuadTo: quadTo(points[0], points[1], points[2], points[3]); break;
-
-                // Handle CubicTo
-                case CubicTo: curveTo(points[0], points[1], points[2], points[3], points[4], points[5]); break;
-
-                // Handle Close
-                case Close: close(); break;
+                case MoveTo -> moveTo(points[0], points[1]);
+                case LineTo -> lineTo(points[0], points[1]);
+                case QuadTo -> quadTo(points[0], points[1], points[2], points[3]);
+                case CubicTo -> curveTo(points[0], points[1], points[2], points[3], points[4], points[5]);
+                case Close -> close();
             }
         }
     }
@@ -239,6 +228,7 @@ public class PolygonPath extends Shape {
     /**
      * Returns the shape bounds.
      */
+    @Override
     protected Rect getBoundsImpl()
     {
         // If no polys, return empty rect
@@ -256,11 +246,41 @@ public class PolygonPath extends Shape {
     /**
      * Returns the path iterator.
      */
+    @Override
     public PathIter getPathIter(Transform aTransform)
     {
-        // Array of Polygon.PathIters
         Polygon[] polygons = getPolygons();
         PathIter[] pathIters = ArrayUtils.map(polygons, poly -> poly.getPathIter(aTransform), PathIter.class);
-        return PathIter.getPathIterForPathIterArray(pathIters);
+        return new ArrayPathIter(pathIters);
+    }
+
+    /**
+     * PathIter for an array of PathIters.
+     */
+    private static class ArrayPathIter extends PathIter {
+
+        // Ivars
+        private PathIter[] _pathIters;
+        private PathIter _pathIter;
+        private int _polyIndex;
+
+        private ArrayPathIter(PathIter[] pathIters)
+        {
+            super(null);
+            _pathIters = pathIters;
+            _pathIter = _pathIters.length > 0 ? _pathIters[0] : null;
+        }
+
+        @Override
+        public boolean hasNext()  { return _pathIter != null && _pathIter.hasNext(); }
+
+        @Override
+        public Seg getNext(double[] coords)
+        {
+            Seg seg = _pathIter.getNext(coords);
+            while (!_pathIter.hasNext() && _polyIndex < _pathIters.length)
+                _pathIter = _pathIters[_polyIndex++];
+            return seg;
+        }
     }
 }

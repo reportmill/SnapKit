@@ -134,7 +134,7 @@ public class SwingViewEnv extends ViewEnv {
         java.awt.Robot robot;
         try { robot = new java.awt.Robot(); }
         catch (Exception e) { throw new RuntimeException(e); }
-        robot.mouseMove((int) point2.getX(), (int) point2.getY());
+        robot.mouseMove((int) point2.x, (int) point2.y);
         robot.mousePress(java.awt.event.InputEvent.BUTTON1_MASK);
         robot.delay(20);
         robot.mouseRelease(java.awt.event.InputEvent.BUTTON1_MASK);

@@ -81,31 +81,33 @@ public class GradientAxisPicker extends View {
         if (_stops == null) return;
 
         // Scale gradient points from unit square into this component's drawing area
-        Rect r = getBoundsInset();
-        Point sp = convertToBounds(_startPoint), ep = convertToBounds(_endPoint);
-        double sx = sp.getX(), sy = sp.getY(), ex = ep.getX(), ey = ep.getY();
+        Rect bounds = getBoundsInset();
+        Point startPoint = convertToBounds(_startPoint);
+        Point endPoint = convertToBounds(_endPoint);
+        double startX = startPoint.x, startY = startPoint.y;
+        double endX = endPoint.x, endY = endPoint.y;
 
         // Draw a background under gradients with alpha
         if (GradientPaint.getStopsHaveAlpha(_stops)) {
             aPntr.setPaint(getBackgroundTexture());
-            aPntr.fill(r);
+            aPntr.fill(bounds);
         }
 
         // Create/set awt Paint class to draw the gradient and fill
-        aPntr.setPaint(new GradientPaint(GradientPaint.Type.RADIAL, sx, sy, ex, ey, getStops()));
-        aPntr.fill(r);
+        aPntr.setPaint(new GradientPaint(GradientPaint.Type.RADIAL, startX, startY, endX, endY, getStops()));
+        aPntr.fill(bounds);
 
         // If dragging, draw axis line
         if (_dragging) {
             int xsz = 3;
             aPntr.setPaint(Color.BLACK);
-            aPntr.drawLine(sx, sy, ex, ey);
+            aPntr.drawLine(startX, startY, endX, endY);
             aPntr.setPaint(Color.GREEN);
-            aPntr.drawLine(sx - xsz, sy, sx + xsz, sy);
-            aPntr.drawLine(sx, sy - xsz, sx, sy + xsz);
+            aPntr.drawLine(startX - xsz, startY, startX + xsz, startY);
+            aPntr.drawLine(startX, startY - xsz, startX, startY + xsz);
             aPntr.setPaint(Color.RED);
-            aPntr.drawLine(ex - xsz, ey, ex + xsz, ey);
-            aPntr.drawLine(ex, ey - xsz, ex, ey + xsz);
+            aPntr.drawLine(endX - xsz, endY, endX + xsz, endY);
+            aPntr.drawLine(endX, endY - xsz, endX, endY + xsz);
         }
     }
 
@@ -147,15 +149,15 @@ public class GradientAxisPicker extends View {
     // Converts a point in unit coords to bounds.
     private Point convertToBounds(Point aPoint)
     {
-        Rect r = getBoundsInset();
-        return new Point(r.getX() + aPoint.getX() * r.getWidth(), r.getY() + aPoint.getY() * r.getHeight());
+        Rect bounds = getBoundsInset();
+        return new Point(bounds.x + aPoint.x * bounds.width, bounds.y + aPoint.y * bounds.height);
     }
 
     // Converts a point in bounds coords unit coords.
     private Point convertToProportional(Point aPoint)
     {
-        Rect r = getBoundsInset();
-        return new Point((aPoint.getX() - r.getMinX()) / r.getWidth(), (aPoint.getY() - r.getMinY()) / r.getHeight());
+        Rect bounds = getBoundsInset();
+        return new Point((aPoint.x - bounds.x) / bounds.width, (aPoint.y - bounds.y) / bounds.height);
     }
 
     /**

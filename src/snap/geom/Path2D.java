@@ -3,7 +3,6 @@
  */
 package snap.geom;
 import java.util.Arrays;
-import java.util.Scanner;
 
 /**
  * A standard path shape that can be built/modified by standard moveTo/lineTo/curveTo methods.
@@ -292,57 +291,7 @@ public class Path2D extends Shape implements Cloneable {
     /**
      * Appends a path from an SVG path string.
      */
-    public void appendSvgString(String svgString)
-    {
-        Scanner scan = new Scanner(svgString);
-
-        // Iterate over scanner tokens
-        while (scan.hasNext()) {
-            String svgOp = scan.next();
-            switch (svgOp) {
-
-                // Handle MoveTo
-                case "M" -> {
-                    double endX = scan.nextDouble();
-                    double endY = scan.nextDouble();
-                    moveTo(endX, endY);
-                }
-
-                // Handle LineTo
-                case "L" -> {
-                    double endX = scan.nextDouble();
-                    double endY = scan.nextDouble();
-                    lineTo(endX, endY);
-                }
-
-                // Handle QuadTo
-                case "Q" -> {
-                    double cp0x = scan.nextDouble();
-                    double cp0y = scan.nextDouble();
-                    double endX = scan.nextDouble();
-                    double endY = scan.nextDouble();
-                    quadTo(cp0x, cp0y, endX, endY);
-                }
-
-                // Handle CubicTo
-                case "C" -> {
-                    double cp0x = scan.nextDouble();
-                    double cp0y = scan.nextDouble();
-                    double cp1x = scan.nextDouble();
-                    double cp1y = scan.nextDouble();
-                    double endX = scan.nextDouble();
-                    double endY = scan.nextDouble();
-                    curveTo(cp0x, cp0y, cp1x, cp1y, endX, endY);
-                }
-
-                // Handle close
-                case "Z" -> close();
-
-                // Handle invalid
-                default -> System.err.println("ShapeBuilder.appendSVGString: Invalid op: " + svgOp);
-            }
-        }
-    }
+    public void appendSvgString(String svgString)  { Path2DUtils.appendSvgString(this, svgString); }
 
     /**
      * Returns the last seg.

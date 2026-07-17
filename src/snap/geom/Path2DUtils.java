@@ -6,6 +6,8 @@ import snap.gfx.Color;
 import snap.gfx.Painter;
 import snap.gfx.Stroke;
 
+import java.util.Scanner;
+
 /**
  * Utility methods for Path2D.
  */
@@ -498,5 +500,60 @@ public class Path2DUtils {
         // Update count
         int deleteCount = endIndex - startIndex;
         aPath._pointCount -= deleteCount;
+    }
+
+    /**
+     * Appends a path from an SVG path string.
+     */
+    static void appendSvgString(Path2D path, String svgString)
+    {
+        Scanner scan = new Scanner(svgString);
+
+        // Iterate over scanner tokens
+        while (scan.hasNext()) {
+            String svgOp = scan.next();
+            switch (svgOp) {
+
+                // Handle MoveTo
+                case "M" -> {
+                    double endX = scan.nextDouble();
+                    double endY = scan.nextDouble();
+                    path.moveTo(endX, endY);
+                }
+
+                // Handle LineTo
+                case "L" -> {
+                    double endX = scan.nextDouble();
+                    double endY = scan.nextDouble();
+                    path.lineTo(endX, endY);
+                }
+
+                // Handle QuadTo
+                case "Q" -> {
+                    double cp0x = scan.nextDouble();
+                    double cp0y = scan.nextDouble();
+                    double endX = scan.nextDouble();
+                    double endY = scan.nextDouble();
+                    path.quadTo(cp0x, cp0y, endX, endY);
+                }
+
+                // Handle CubicTo
+                case "C" -> {
+                    double cp0x = scan.nextDouble();
+                    double cp0y = scan.nextDouble();
+                    double cp1x = scan.nextDouble();
+                    double cp1y = scan.nextDouble();
+                    double endX = scan.nextDouble();
+                    double endY = scan.nextDouble();
+                    path.curveTo(cp0x, cp0y, cp1x, cp1y, endX, endY);
+                }
+
+                // Handle close
+                case "Z" -> path.close();
+
+                // Handle invalid
+                default -> System.err.println("Path2D.appendSVGString: Invalid op: " + svgOp);
+            }
+        }
     }
 }

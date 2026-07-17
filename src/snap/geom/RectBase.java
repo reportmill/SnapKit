@@ -121,24 +121,14 @@ public abstract class RectBase extends Shape implements Cloneable {
     }
 
     /**
-     * Returns the max x.
-     */
-    public double getMinX()  { return x; }
-
-    /**
-     * Returns the max y.
-     */
-    public double getMinY()  { return y; }
-
-    /**
      * Returns the x mid-point of the rect.
      */
-    public double getMidX()  { return x + width/2; }
+    public double getMidX()  { return x + width / 2; }
 
     /**
      * Returns the y mid-point of the rect.
      */
-    public double getMidY()  { return y + height/2; }
+    public double getMidY()  { return y + height / 2; }
 
     /**
      * Returns the max x.
@@ -155,8 +145,8 @@ public abstract class RectBase extends Shape implements Cloneable {
      */
     public void setCenteredXY(double aX, double aY)
     {
-        int x2 = (int) Math.round(aX - width/2d);
-        int y2 = (int) Math.round(aY - height/2d);
+        int x2 = (int) Math.round(aX - width / 2d);
+        int y2 = (int) Math.round(aY - height / 2d);
         setXY(x2, y2);
     }
 
@@ -165,7 +155,7 @@ public abstract class RectBase extends Shape implements Cloneable {
      */
     protected Rect getBoundsImpl()
     {
-        Rect rect = new Rect(x,y,width,height);
+        Rect rect = new Rect(x, y, width, height);
         if (width<0) { rect.x += width; rect.width = -width; }
         if (height<0) { rect.y += height; rect.height = -height; }
         return rect;
@@ -174,15 +164,12 @@ public abstract class RectBase extends Shape implements Cloneable {
     /**
      * Returns whether rect is empty.
      */
-    public boolean isEmpty()  { return width<=0 || height<=0; }
+    public boolean isEmpty()  { return width <= 0 || height <= 0; }
 
     /**
      * Insets the receiver rect by the given amount.
      */
-    public void inset(double anInset)
-    {
-        inset(anInset, anInset);
-    }
+    public void inset(double anInset)  { inset(anInset, anInset); }
 
     /**
      * Insets the receiver rect by the given amount.
@@ -197,7 +184,7 @@ public abstract class RectBase extends Shape implements Cloneable {
      */
     public void inset(Insets anIns)
     {
-        if (anIns==null) return;
+        if (anIns == null) return;
         setRect(x + anIns.left,y + anIns.top,width - anIns.getWidth(),height - anIns.getHeight());
     }
 

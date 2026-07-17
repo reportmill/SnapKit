@@ -234,9 +234,9 @@ public class Rect extends RectBase {
      */
     public void add(double newx, double newy)
     {
-        double x1 = Math.min(getMinX(), newx);
+        double x1 = Math.min(x, newx);
         double x2 = Math.max(getMaxX(), newx);
-        double y1 = Math.min(getMinY(), newy);
+        double y1 = Math.min(y, newy);
         double y2 = Math.max(getMaxY(), newy);
         setRect(x1, y1, x2 - x1, y2 - y1);
     }
@@ -246,7 +246,7 @@ public class Rect extends RectBase {
      */
     public void addX(double newx)
     {
-        double x1 = Math.min(getMinX(), newx);
+        double x1 = Math.min(x, newx);
         double x2 = Math.max(getMaxX(), newx);
         setRect(x1, y, x2 - x1, height);
     }
@@ -256,7 +256,7 @@ public class Rect extends RectBase {
      */
     public void addY(double newy)
     {
-        double y1 = Math.min(getMinY(), newy);
+        double y1 = Math.min(y, newy);
         double y2 = Math.max(getMaxY(), newy);
         setRect(x, y1, width, y2 - y1);
     }
@@ -268,8 +268,8 @@ public class Rect extends RectBase {
     {
         double x2 = Math.floor(x);
         double y2 = Math.floor(y);
-        double w2 = Math.ceil(x+width) - x2;
-        double h2 = Math.ceil(y+height) - y2;
+        double w2 = Math.ceil(x + width) - x2;
+        double h2 = Math.ceil(y + height) - y2;
         setRect(x2, y2, w2, h2);
     }
 
