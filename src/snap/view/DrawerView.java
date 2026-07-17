@@ -549,11 +549,10 @@ public class DrawerView extends ParentView {
         }
 
         // Get margin, adjust and update (just return if already at Y)
-        Insets margin = getMargin().clone();
+        Insets margin = getMargin();
         if (margin.top == marginTop)
             return;
-        margin.top = marginTop;
-        setMargin(margin);
+        setMargin(margin.withTop(marginTop));
     }
 
     /**

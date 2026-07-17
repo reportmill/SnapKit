@@ -1,4 +1,4 @@
-package snap.geom;
+package snap.gfx3d;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;

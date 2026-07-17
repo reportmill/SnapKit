@@ -15,23 +15,21 @@ public enum Side {
      */
     public Pos getPos()
     {
-        switch (this)
-        {
-            case LEFT: return Pos.CENTER_LEFT;
-            case RIGHT: return Pos.CENTER_RIGHT;
-            case TOP: return Pos.TOP_CENTER;
-            case BOTTOM: return Pos.BOTTOM_CENTER;
-            default: throw new RuntimeException("Side: Unknown side: " + this);
-        }
+        return switch (this) {
+            case LEFT -> Pos.CENTER_LEFT;
+            case RIGHT -> Pos.CENTER_RIGHT;
+            case TOP -> Pos.TOP_CENTER;
+            case BOTTOM -> Pos.BOTTOM_CENTER;
+        };
     }
 
     /**
      * Returns whether side is LEFT or RIGHT.
      */
-    public boolean isLeftOrRight()  { return this==LEFT || this==RIGHT; }
+    public boolean isLeftOrRight()  { return this == LEFT || this == RIGHT; }
 
     /**
      * Returns whether side is TOP or BOTTOM.
      */
-    public boolean isTopOrBottom()  { return this==TOP || this==BOTTOM; }
+    public boolean isTopOrBottom()  { return this == TOP || this == BOTTOM; }
 }

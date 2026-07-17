@@ -122,32 +122,22 @@ public class Line extends Segment {
     /**
      * Returns the minimum distance from the given point to this line.
      */
-    public double getDistance(double aX, double aY)
-    {
-        return Math.sqrt(getDistanceSquared(aX, aY));
-    }
+    public double getDistance(double aX, double aY)  { return Math.sqrt(getDistanceSquared(aX, aY)); }
 
     /**
      * Returns the minimum distance from the given point to this line, squared.
      */
-    public double getDistanceSquared(double aX, double aY)
-    {
-        return getDistanceSquared(x0, y0, x1, y1, aX, aY);
-    }
+    public double getDistanceSquared(double aX, double aY)  { return getDistanceSquared(x0, y0, x1, y1, aX, aY); }
 
     /**
      * Returns the hit for given segment.
      */
     public SegHit getHit(Segment aSeg)
     {
-        if (aSeg instanceof Cubic) {
-            Cubic s2 = (Cubic) aSeg;
+        if (aSeg instanceof Cubic s2)
             return SegHit.getHitLineCubic(x0, y0, x1, y1, s2.x0, s2.y0, s2.cp0x, s2.cp0y, s2.cp1x, s2.cp1y, s2.x1, s2.y1);
-        }
-        if (aSeg instanceof Quad) {
-            Quad s2 = (Quad) aSeg;
+        if (aSeg instanceof Quad s2)
             return SegHit.getHitLineQuad(x0, y0, x1, y1, s2.x0, s2.y0, s2.cpx, s2.cpy, s2.x1, s2.y1);
-        }
         return SegHit.getHitLineLine(x0, y0, x1, y1, aSeg.x0, aSeg.y0, aSeg.x1, aSeg.y1);
     }
 
@@ -204,9 +194,9 @@ public class Line extends Segment {
         r = r >= 1 ? 1 : r < 0 ? 0 : r;
 
         // Calculate x/y of parametric location and return distance squared to point
-        double x = x0 + r * (x1 - x0), y = y0 + r * (y1 - y0);
-        double dx = aX - x, dy = aY - y;
-        return dx * dx + dy * dy;
+        double x = x0 + r * (x1 - x0);
+        double y = y0 + r * (y1 - y0);
+        return Point.getDistanceSquared(x, y, aX, aY);
     }
 
     /**
@@ -274,11 +264,11 @@ public class Line extends Segment {
         /** Returns the coordinates and type of the current path segment in the iteration. */
         public Seg getNext(double[] coords)
         {
-            switch (index++) {
-                case 0: return moveTo(x0, y0, coords);
-                case 1: return lineTo(x1, y1, coords);
-                default: throw new RuntimeException("line iterator out of bounds");
-            }
+            return switch (index++) {
+                case 0 -> moveTo(x0, y0, coords);
+                case 1 -> lineTo(x1, y1, coords);
+                default -> throw new RuntimeException("line iterator out of bounds");
+            };
         }
     }
 }

@@ -141,17 +141,11 @@ public class Cubic extends Segment {
      */
     public SegHit getHit(Segment aSeg)
     {
-        if (aSeg instanceof Cubic) {
-            Cubic s2 = (Cubic) aSeg;
+        if (aSeg instanceof Cubic s2)
             return SegHit.getHitCubicCubic(x0, y0, cp0x, cp0y, cp1x, cp1y, x1, y1,
                     s2.x0, s2.y0, s2.cp0x, s2.cp0y, s2.cp1x, s2.cp1y, s2.x1, s2.y1);
-        }
-
-        if (aSeg instanceof Quad) {
-            Quad s2 = (Quad) aSeg;
+        if (aSeg instanceof Quad s2)
             return SegHit.getHitCubicQuad(x0, y0, cp0x, cp0y, cp1x, cp1y, x1, y1, s2.x0, s2.y0, s2.cpx, s2.cpy, s2.x1, s2.y1);
-        }
-
         return SegHit.getHitCubicLine(x0, y0, cp0x, cp0y, cp1x, cp1y, x1, y1, aSeg.x0, aSeg.y0, aSeg.x1, aSeg.y1);
     }
 
@@ -467,11 +461,11 @@ public class Cubic extends Segment {
         /** Returns the coordinates and type of the current path segment in the iteration. */
         public Seg getNext(double[] coords)
         {
-            switch (index++) {
-                case 0: return moveTo(x0, y0, coords);
-                case 1: return cubicTo(cp0x, cp0y, cp1x, cp1y, x1, y1, coords);
-                default: throw new RuntimeException("line iterator out of bounds");
-            }
+            return switch (index++) {
+                case 0 -> moveTo(x0, y0, coords);
+                case 1 -> cubicTo(cp0x, cp0y, cp1x, cp1y, x1, y1, coords);
+                default -> throw new RuntimeException("line iterator out of bounds");
+            };
         }
     }
 }

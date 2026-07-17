@@ -10,31 +10,28 @@ import java.util.Objects;
 /**
  * This class represents a margin inset.
  */
-public class Insets implements Cloneable {
+public class Insets {
 
     // Insets
-    public double top, right, bottom, left;
+    public final double top, right, bottom, left;
 
-    // Shared emtpy insets
+    // Shared empty insets
     public static final Insets EMPTY = new Insets(0);
 
     /**
-     * Create new Insets.
+     * Constructor.
      */
-    public Insets(double aVal)
-    {
-        this(aVal, aVal, aVal, aVal);
-    }
+    public Insets(double aVal)  { this(aVal, aVal, aVal, aVal); }
 
     /**
-     * Create new Insets.
+     * Constructor.
      */
-    public Insets(double aTop, double aRight, double aBottom, double aLeft)
+    public Insets(double top, double right, double bottom, double left)
     {
-        top = aTop;
-        right = aRight;
-        bottom = aBottom;
-        left = aLeft;
+        this.top = top;
+        this.right = right;
+        this.bottom = bottom;
+        this.left = left;
     }
 
     /**
@@ -60,10 +57,7 @@ public class Insets implements Cloneable {
     /**
      * Returns whether insets are empty.
      */
-    public boolean isEmpty()
-    {
-        return top == 0 && right == 0 && bottom == 0 && left == 0;
-    }
+    public boolean isEmpty()  { return top == 0 && right == 0 && bottom == 0 && left == 0; }
 
     /**
      * Returns the width of the insets (left + right).
@@ -94,13 +88,24 @@ public class Insets implements Cloneable {
     }
 
     /**
-     * Returns a copy of this gradient paint.
+     * Returns a copy with given top value.
      */
-    public Insets clone()
-    {
-        try { return (Insets) super.clone(); }
-        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
-    }
+    public Insets withTop(double top)  { return new Insets(top, right, bottom, left); }
+
+    /**
+     * Returns a copy with given right value.
+     */
+    public Insets withRight(double right)  { return new Insets(top, right, bottom, left); }
+
+    /**
+     * Returns a copy with given bottom value.
+     */
+    public Insets withBottom(double bottom)  { return new Insets(top, right, bottom, left); }
+
+    /**
+     * Returns a copy with given left value.
+     */
+    public Insets withLeft(double left)  { return new Insets(top, right, bottom, left); }
 
     /**
      * Standard equals method.
@@ -163,7 +168,7 @@ public class Insets implements Cloneable {
      */
     public static Insets get(String aString)
     {
-        if (aString == null || aString.length() == 0) return null;
+        if (aString == null || aString.isEmpty()) return null;
         String[] margins = aString.split("\\,");
         int top = margins.length > 0 ? StringUtils.intValue(margins[0]) : 0;
         int right = margins.length > 1 ? StringUtils.intValue(margins[1]) : 0;
