@@ -24,26 +24,6 @@ public class Point {
     public Point(double aX, double aY)  { x = aX; y = aY; }
 
     /**
-     * Return point x.
-     */
-    public final double getX()  { return x; }
-
-    /**
-     * Return point y.
-     */
-    public final double getY()  { return y; }
-
-    /**
-     * Returns the rounded x value (as int).
-     */
-    public int getRoundX()  { return (int) Math.round(x); }
-
-    /**
-     * Returns the rounded y value (as int).
-     */
-    public int getRoundY()  { return (int) Math.round(y); }
-
-    /**
      * Returns the point resulting from this point adding given point.
      */
     public Point add(Point aPoint)  { return new Point(x + aPoint.x, y + aPoint.y); }
@@ -99,15 +79,13 @@ public class Point {
     }
 
     /**
-     * Rounds a point to neared integers.
+     * Returns this point XY rounded to nearest integers.
      */
     public Point round()
     {
         double roundX = Math.round(x);
         double roundY = Math.round(y);
-        if (roundX == x && roundY == y)
-            return this;
-        return new Point(roundX, roundY);
+        return roundX != x || roundY != y ? new Point(roundX, roundY) : this;
     }
 
     /**
@@ -123,15 +101,13 @@ public class Point {
     /**
      * Standard equals implementation.
      */
-    public boolean equals(Object anObj)
-    {
-        Point other = anObj instanceof Point ? (Point) anObj : null; if (other == null) return false;
-        return equals(x, y, other.x, other.y);
-    }
+    @Override
+    public boolean equals(Object anObj)  { return anObj instanceof Point other && equals(x, y, other.x, other.y); }
 
     /**
      * Returns a string representation of the receiver in the form "[x y]".
      */
+    @Override
     public String toString()  { return "[" + x + " " + y + "]"; }
 
     /**
@@ -147,7 +123,7 @@ public class Point {
      */
     public static double getDistance(double x0, double y0, double x1, double y1)
     {
-        return Math.sqrt(getDistanceSquared(x0,y0,x1,y1));
+        return Math.sqrt(getDistanceSquared(x0, y0, x1, y1));
     }
 
     /**
@@ -155,7 +131,7 @@ public class Point {
      */
     public static double getDistanceSquared(double x0, double y0, double x1, double y1)
     {
-        double dx = x1 - x0, dy = y1 - y0; return dx*dx + dy*dy;
+        double dx = x1 - x0, dy = y1 - y0; return dx * dx + dy * dy;
     }
 
     /**
