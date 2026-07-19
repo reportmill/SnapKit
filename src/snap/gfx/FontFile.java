@@ -411,15 +411,7 @@ public abstract class FontFile {
     protected static FontFile getArialFontFile()
     {
         if (_arialFontFile != null) return _arialFontFile;
-
-        // Get default
         FontFile fontFile = FontFile.getFontFile("Arial");
-        if (fontFile == null) {
-            fontFile = FontFile.getFontFile("Dialog");
-            System.err.println("Font.init: Can't find arial, using: " + fontFile);
-        }
-
-        // Set and return
         return _arialFontFile = fontFile;
     }
 }

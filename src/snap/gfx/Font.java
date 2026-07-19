@@ -421,7 +421,7 @@ public class Font extends PropObject implements StringCodec.Codeable {
     public static Font getFont(String aName, double aSize)
     {
         FontFile fontFile = FontFile.getFontFile(aName);
-        return fontFile != null ? new Font(fontFile, aSize) : null;
+        return new Font(fontFile, aSize);
     }
 
     /**
