@@ -368,9 +368,11 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Sets the line style.
      */
-    public void setLineStyle(TextLineStyle aLineStyle)
+    void setLineStyle(TextLineStyle aLineStyle)
     {
         _lineStyle = aLineStyle;
+        updateLineStyle();
+        updateAlignmentAndJustify();
     }
 
     /**
@@ -752,15 +754,6 @@ public class TextLine implements CharSequenceX, Cloneable {
     public HPos getAlignX()  { return _lineStyle.getAlign(); }
 
     /**
-     * Sets the alignment associated with this line.
-     */
-    public void setAlignX(HPos anAlign)
-    {
-        TextLineStyle lineStyle = getLineStyle().copyForAlign(anAlign);
-        setLineStyle(lineStyle);
-    }
-
-    /**
      * Returns whether line contains an underlined run.
      */
     public boolean isUnderlined()
@@ -805,7 +798,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Updates length due to change in given run.
      */
-    protected void updateRuns(int aRunIndex)
+    void updateRuns(int aRunIndex)
     {
         // Get BaseRun and Length at end of BaseRun
         TextRun baseRun = aRunIndex >= 0 ? getRun(aRunIndex) : null;
@@ -827,7 +820,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Updates line style.
      */
-    protected void updateLineStyle()
+    void updateLineStyle()
     {
         // Clear Width, Tokens
         _width = _height = -1;
@@ -843,7 +836,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Updates text.
      */
-    protected void updateText()
+    void updateText()
     {
         // Clear Width, Tokens
         _width = _height = -1;
@@ -859,7 +852,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Update line/token x for center/right alignment or justify.
      */
-    protected void updateAlignmentAndJustify()
+    void updateAlignmentAndJustify()
     {
         TextLineStyle lineStyle = getLineStyle();
         _x = 0;

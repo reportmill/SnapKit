@@ -464,8 +464,10 @@ public abstract class TextModel extends TextLayout {
 
         // Add chars for range
         TextRunIter runIter = getRunIterForCharRange(aStart, anEnd);
-        for (TextRun textRun : runIter)
+        for (TextRun textRun : runIter) {
             textCopy.addCharsWithStyle(textRun.getString(), textRun.getTextStyle());
+            textCopy.getLineForCharIndex(textCopy.length()).setLineStyle(textRun.getLine().getLineStyle());
+        }
 
         // Return
         return textCopy;
