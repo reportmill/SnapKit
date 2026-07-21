@@ -171,7 +171,7 @@ public class TextLine implements CharSequenceX, Cloneable {
 
         // If charIndex at run end and next run has same style, return it instead
         if (charIndex == run.getEndCharIndex()) {
-            TextRun nextRun = run.getNext();
+            TextRun nextRun = run.getNextInLine();
             if (nextRun != null && aStyle.equals(nextRun.getTextStyle()))
                 return nextRun;
         }
@@ -331,7 +331,7 @@ public class TextLine implements CharSequenceX, Cloneable {
         if (endIndex > startIndex) {
             int runEnd = textRun.getEndCharIndex();
             if (startIndex == runEnd) {
-                TextRun nextRun = textRun.getNext();
+                TextRun nextRun = textRun.getNextInLine();
                 if (nextRun != null)
                     textRun = nextRun;
             }
@@ -534,7 +534,7 @@ public class TextLine implements CharSequenceX, Cloneable {
 
             // If beyond run end, get next run/text-style/charSpacing
             if (i >= run.getEndCharIndex()) {
-                run = run.getNext();
+                run = run.getNextInLine();
                 textStyle = run.getTextStyle();
                 charSpacing = textStyle.getCharSpacing();
             }

@@ -114,7 +114,7 @@ public class TextModelUtils {
 
             // If at RunEnd but not LineEnd, update Run info with next run
             if (tokenStart == textRunEnd && tokenStart < lineLength) {
-                textRun = textRun.getNext();
+                textRun = textRun.getNextInLine();
                 textRunEnd = textRun.getEndCharIndex();
             }
         }

@@ -94,7 +94,7 @@ public class TextRunIter implements Iterable<TextRun>, Iterator<TextRun> {
     {
         // If current text run has next, return it
         if (_textRun != null) {
-            TextRun nextRun = _textRun.getNext();
+            TextRun nextRun = _textRun.getNextInLine();
             if (nextRun != null)
                 return nextRun;
         }

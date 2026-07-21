@@ -30,12 +30,12 @@ public class TextMetrics {
         _leading = run.getLeading();
 
         // Update for successive runs
-        run = run.getNext();
+        run = run.getNextInLine();
         while (run != null) {
             _ascent = Math.max(_ascent, run.getAscent());
             _descent = Math.max(_descent, run.getDescent());
             _leading = Math.max(_leading, run.getLeading());
-            run = run.getNext();
+            run = run.getNextInLine();
         }
 
         // Calculate LineAdvance

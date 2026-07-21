@@ -200,7 +200,7 @@ public class TextBlock extends TextModel {
             addCharsToLine(moveChars, textStyle, nextLineStartCharIndex, nextLine, charsHaveNewline);
 
             // Get previous run
-            lastRun = lastRun.getPrevious();
+            lastRun = lastRun.getPreviousInLine();
         }
     }
 

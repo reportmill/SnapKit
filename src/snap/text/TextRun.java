@@ -8,6 +8,8 @@ import snap.gfx.Font;
 import snap.util.CharSequenceUtils;
 import snap.util.CharSequenceX;
 
+import java.util.Objects;
+
 /**
  * This is class represents a range of characters in a TextLine that share the same style.
  */
@@ -56,7 +58,7 @@ public class TextRun implements CharSequenceX, Cloneable {
     /**
      * Returns the end char index for this run.
      */
-    public int getEndCharIndex()  { return _startCharIndex + length(); }
+    public int getEndCharIndex()  { return _startCharIndex + _length; }
 
     /**
      * Returns the run text style.
@@ -242,21 +244,36 @@ public class TextRun implements CharSequenceX, Cloneable {
     public double getLeading()  { return getFont().getLeading(); }
 
     /**
-     * Returns the next run, if available.
+     * Returns the next run in line, if available.
      */
-    public TextRun getNext()
+    public TextRun getNextInLine()
     {
         int nextIndex = _index + 1;
         return _textLine != null && nextIndex < _textLine.getRunCount() ? _textLine.getRun(nextIndex) : null;
     }
 
     /**
-     * Returns the previous run, if available.
+     * Returns the previous run in line, if available.
      */
-    public TextRun getPrevious()
+    public TextRun getPreviousInLine()
     {
         int prevIndex = _index - 1;
         return _textLine != null && prevIndex >= 0 ? _textLine.getRun(prevIndex) : null;
+    }
+
+    /**
+     * Returns the next run in text model, if available.
+     */
+    public TextRun getNextInModel()
+    {
+        TextRun nextRun = getNextInLine();
+        if (nextRun != null)
+            return nextRun;
+
+        // Return next run in model
+        TextModel textModel = _textLine.getTextModel();
+        int endCharIndexInModel = _textLine.getStartCharIndex() + getEndCharIndex();
+        return endCharIndexInModel < textModel.length() ? textModel.getRunForCharRange(endCharIndexInModel, endCharIndexInModel + 1) : null;
     }
 
     /**
@@ -265,28 +282,16 @@ public class TextRun implements CharSequenceX, Cloneable {
     @Override
     public boolean equals(Object anObj)
     {
-        // Check identity and get other
         if (anObj == this) return true;
-        TextRun other = anObj instanceof TextRun ? (TextRun) anObj : null;
-        if (other == null) return false;
-
-        // Check Start, Length, Style
-        if (other.getStartCharIndex() != getStartCharIndex()) return false;
-        if (other.length() != length()) return false;
-        if (!other._textStyle.equals(_textStyle)) return false;
-
-        // Return equal
-        return true;
+        return anObj instanceof TextRun other && other._startCharIndex == _startCharIndex &&
+            other._length == _length && other._textStyle.equals(_textStyle);
     }
 
     /**
      * Standard hashCode implementation.
      */
     @Override
-    public int hashCode()
-    {
-        return length();
-    }
+    public int hashCode()  { return Objects.hash(_startCharIndex, _length, _textStyle); }
 
     /**
      * Returns a copy of this line for given char range.
