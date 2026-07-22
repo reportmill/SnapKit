@@ -3,6 +3,7 @@
  */
 package snap.text;
 import snap.geom.*;
+import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.props.*;
@@ -35,6 +36,33 @@ public class TextAdapter extends PropObject {
     // Whether text is scrollable
     private boolean _scrollable;
 
+    // The initial character index of the selection (usually SelStart).
+    private int _selHead;
+
+    // The final character index of the selection (usually SelEnd).
+    private int _selTail;
+
+    // The char index of current selection start/end
+    private int _selStart, _selEnd;
+
+    // The text selection
+    private TextSel _sel;
+
+    // Whether the editor is word selecting (double click) or paragraph selecting (triple click)
+    private boolean _wordSel, _pgraphSel;
+
+    // The current TextStyle for the cursor or selection
+    private TextStyle  _selStyle;
+
+    // The mouse down point
+    private double _downX, _downY;
+
+    // The runnable for caret flashing
+    private Runnable _caretRun;
+
+    // Whether to show text insertion point caret
+    private boolean _showCaret;
+
     // The text undoer
     private Undoer _undoer = Undoer.DISABLED_UNDOER;
 
@@ -43,33 +71,6 @@ public class TextAdapter extends PropObject {
 
     // A consumer to handle link clicks
     private BiConsumer<ViewEvent,String> _linkHandler;
-
-    // The initial character index of the selection (usually SelStart).
-    private int _selHead;
-
-    // The final character index of the selection (usually SelEnd).
-    private int _selTail;
-
-    // The char index of current selection start/end
-    private int  _selStart, _selEnd;
-
-    // The text selection
-    private TextSel  _sel;
-
-    // Whether the editor is word selecting (double click) or paragraph selecting (triple click)
-    private boolean  _wordSel, _pgraphSel;
-
-    // The current TextStyle for the cursor or selection
-    private TextStyle  _selStyle;
-
-    // The mouse down point
-    private double  _downX, _downY;
-
-    // The runnable for caret flashing
-    private Runnable _caretRun;
-
-    // Whether to show text insertion point caret
-    private boolean  _showCaret;
 
     // The PropChangeListener to catch TextModel PropChanges.
     private PropChangeListener _textModelPropChangeLsnr = this::handleTextModelPropChange;
@@ -533,207 +534,6 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Repaint the selection.
-     */
-    protected void repaintSel()
-    {
-        TextSel sel = getSel();
-        Shape selPath = sel.getPath();
-        Rect rect = selPath.getBounds();
-        rect.inset(-1);
-        _textArea.repaint(rect);
-    }
-
-    /**
-     * Scrolls Selection to visible.
-     */
-    protected void scrollSelToVisible()
-    {
-        if (getSelStart() == 0 && getSelEnd() == length()) return;
-
-        // Get visible bounds - if no reason to scroll, just return
-        Rect visibleBounds = ViewUtils.getVisibleBoundsForViewInScroller(_textArea);
-        double viewW = _textArea.getWidth();
-        double viewH = _textArea.getHeight();
-        if (visibleBounds.isEmpty() || visibleBounds.width == viewW && visibleBounds.height == viewH)
-            return;
-
-        // Get bounds of selection tail with healthy margin (quarter inch)
-        int selTail = getSelTail();
-        Rect selTailBounds = _textLayout.getPathForCharRange(selTail, selTail).getBounds();
-        selTailBounds.inset(-18);
-
-        // Make sure to show left margin whenever possible
-        if (selTailBounds.getMaxX() <= visibleBounds.width)
-            selTailBounds.x = 0;
-
-        // If selection rect not fully contained in visible bounds, scrollRectToVisible
-        if (!visibleBounds.contains(selTailBounds))
-            _textArea.scrollToVisible(selTailBounds);
-    }
-
-    /**
-     * Returns the font of current selection.
-     */
-    public Font getTextFont()
-    {
-        if (isRichText()) {
-            TextStyle selStyle = getSelTextStyle();
-            return selStyle.getFont();
-        }
-        return _textModel.getDefaultFont();
-    }
-
-    /**
-     * Sets the font of current selection.
-     */
-    public void setTextFont(Font aFont)
-    {
-        if (isRichText())
-            setSelTextStyleValue(TextStyle.Font_Prop, aFont);
-        else _textModel.setDefaultFont(aFont);
-    }
-
-    /**
-     * Returns the color of the current selection or cursor.
-     */
-    public Color getTextColor()
-    {
-        if (isRichText())
-            return getSelTextStyle().getColor();
-        return _textModel.getDefaultTextColor();
-    }
-
-    /**
-     * Sets the color of the current selection or cursor.
-     */
-    public void setTextColor(Color aColor)
-    {
-        if (isRichText())
-            setSelTextStyleValue(TextStyle.Color_Prop, aColor != null ? aColor : Color.BLACK);
-        else _textModel.setDefaultTextColor(aColor);
-    }
-
-    /**
-     * Returns the format of the current selection or cursor.
-     */
-    public TextFormat getFormat()
-    {
-        TextStyle selStyle = getSelTextStyle();
-        return selStyle.getFormat();
-    }
-
-    /**
-     * Sets the format of the current selection or cursor, after trying to expand the selection to encompass currently
-     * selected, @-sign delineated key.
-     */
-    public void setFormat(TextFormat aFormat)
-    {
-        // Get format selection range and select it (if non-null)
-        int selStart = getSelStart();
-        int selEnd = getSelEnd();
-        TextSel sel = TextModelUtils.smartFindFormatRange(_textModel, selStart, selEnd);
-        if (sel != null)
-            setSel(sel.getStart(), sel.getEnd());
-
-        // Return if we are at end of string (this should never happen)
-        if (getSelStart() >= length())
-            return;
-
-        // If there is a format, add it to current attributes and set for selected text
-        setSelTextStyleValue(TextStyle.Font_Prop, aFormat);
-    }
-
-    /**
-     * Returns whether TextView is underlined.
-     */
-    public boolean isUnderlined()
-    {
-        TextStyle selStyle = getSelTextStyle();
-        return selStyle.isUnderlined();
-    }
-
-    /**
-     * Sets whether TextView is underlined.
-     */
-    public void setUnderlined(boolean aValue)
-    {
-        setSelTextStyleValue(TextStyle.Underline_Prop, aValue ? 1 : 0);
-    }
-
-    /**
-     * Sets current selection to superscript.
-     */
-    public void setSuperscript()
-    {
-        TextStyle selStyle = getSelTextStyle();
-        int state = selStyle.getScripting();
-        setSelTextStyleValue(TextStyle.Scripting_Prop, state == 0 ? 1 : 0);
-    }
-
-    /**
-     * Sets current selection to subscript.
-     */
-    public void setSubscript()
-    {
-        TextStyle selStyle = getSelTextStyle();
-        int state = selStyle.getScripting();
-        setSelTextStyleValue(TextStyle.Scripting_Prop, state == 0 ? -1 : 0);
-    }
-
-    /**
-     * Set the alignment of text.
-     */
-    public void setAlign(Pos aPos)
-    {
-        TextModel textLayout = (TextModel) getTextLayout();
-        if (aPos.getHPos() != textLayout.getDefaultLineStyle().getAlign())
-            textLayout.setDefaultLineStyle(textLayout.getDefaultLineStyle().copyForAlign(aPos.getHPos()));
-        textLayout.setAlignY(aPos.getVPos());
-    }
-
-    /**
-     * Returns the TextStyle for the current selection and/or input characters.
-     */
-    public TextStyle getSelTextStyle()
-    {
-        // If already set, just return
-        if (_selStyle != null) return _selStyle;
-
-        // If not rich text, just return default style
-        if (!isRichText())
-            return _selStyle = getDefaultTextStyle();
-
-        // Get style for sel range
-        int selStart = getSelStart();
-        int selEnd = getSelEnd();
-        TextStyle selStyle = _textModel.getTextStyleForCharRange(selStart, selEnd);
-
-        // Set/return
-        return _selStyle = selStyle;
-    }
-
-    /**
-     * Sets the attributes that are applied to current selection or newly typed chars.
-     */
-    public void setSelTextStyleValue(String aKey, Object aValue)
-    {
-        // If selection is zero length, just modify input style
-        if (isSelEmpty() && isRichText()) {
-            TextStyle selStyle = getSelTextStyle();
-            _selStyle = selStyle.copyForStyleKeyValue(aKey, aValue);
-        }
-
-        // If selection is multiple chars, apply attribute to text and reset SelStyle
-        else {
-            _textModel.setTextStyleValue(aKey, aValue, getSelStart(), getSelEnd());
-            _selStyle = null;
-            if (_textArea != null)
-                _textArea.repaint();
-        }
-    }
-
-    /**
      * Adds the given chars to end of text.
      */
     public void addChars(CharSequence theChars)  { addCharsWithStyle(theChars, null, length()); }
@@ -830,6 +630,250 @@ public class TextAdapter extends PropObject {
         int selEnd = getSelEnd();
         removeChars(selStart, selEnd);
     }
+
+    /**
+     * Returns the TextStyle for the current selection and/or input characters.
+     */
+    public TextStyle getSelTextStyle()
+    {
+        // If already set, just return
+        if (_selStyle != null) return _selStyle;
+
+        // If not rich text, just return default style
+        if (!isRichText())
+            return _selStyle = getDefaultTextStyle();
+
+        // Get style for sel range
+        int selStart = getSelStart();
+        int selEnd = getSelEnd();
+        TextStyle selStyle = _textModel.getTextStyleForCharRange(selStart, selEnd);
+
+        // Set/return
+        return _selStyle = selStyle;
+    }
+
+    /**
+     * Sets the given text style attribute to the current selection or to be applied to newly typed chars.
+     */
+    public void setSelTextStyleValue(String aKey, Object aValue)
+    {
+        // If selection is zero length, just modify input style
+        if (isSelEmpty() && isRichText()) {
+            TextStyle selStyle = getSelTextStyle();
+            _selStyle = selStyle.copyForStyleKeyValue(aKey, aValue);
+        }
+
+        // If selection is multiple chars, apply attribute to text and reset SelStyle
+        else {
+            _textModel.setTextStyleValue(aKey, aValue, getSelStart(), getSelEnd());
+            _selStyle = null;
+            if (_textArea != null)
+                _textArea.repaint();
+        }
+    }
+
+    /**
+     * Returns the line style of the current selection.
+     */
+    public TextLineStyle getSelLineStyle()
+    {
+        int selStart = getSelStart();
+        return getLineForCharIndex(selStart).getLineStyle();
+    }
+
+    /**
+     * Sets the line style of the current selection.
+     */
+    public void setSelLineStyle(TextLineStyle lineStyle)
+    {
+        _textModel.setLineStyle(lineStyle, getSelStart(), getSelEnd());
+    }
+
+    /**
+     * Sets the given line style attribute to the current selection or to be applied to newly typed chars.
+     */
+    public void setSelLineStyleValue(String aKey, Object aValue)
+    {
+        TextLineStyle newLineStyle = getSelLineStyle().copyForPropKeyValue(aKey, aValue);
+        setSelLineStyle(newLineStyle);
+    }
+
+    /**
+     * Returns the font of current selection.
+     */
+    public Font getTextFont()
+    {
+        if (isRichText())
+            return getSelTextStyle().getFont();
+        return _textModel.getDefaultFont();
+    }
+
+    /**
+     * Sets the font of current selection.
+     */
+    public void setTextFont(Font aFont)
+    {
+        if (isRichText())
+            setSelTextStyleValue(TextStyle.Font_Prop, aFont);
+        else _textModel.setDefaultFont(aFont);
+    }
+
+    /**
+     * Returns the color of the current selection or cursor.
+     */
+    public Color getTextColor()
+    {
+        if (isRichText())
+            return getSelTextStyle().getColor();
+        return _textModel.getDefaultTextColor();
+    }
+
+    /**
+     * Sets the color of the current selection or cursor.
+     */
+    public void setTextColor(Color aColor)
+    {
+        if (isRichText())
+            setSelTextStyleValue(TextStyle.Color_Prop, aColor != null ? aColor : Color.BLACK);
+        else _textModel.setDefaultTextColor(aColor);
+    }
+
+    /**
+     * Returns outline border of current selection.
+     */
+    public Border getTextBorder()  { return getSelTextStyle().getBorder(); }
+
+    /**
+     * Sets outline border of current selection.
+     */
+    public void setTextBorder(Border aBorder)  { setSelTextStyleValue(TextStyle.Border_Prop, aBorder); }
+
+    /**
+     * Returns the format of the current selection or cursor.
+     */
+    public TextFormat getFormat()  { return getSelTextStyle().getFormat(); }
+
+    /**
+     * Sets the format of the current selection or cursor, after trying to expand the selection to encompass currently
+     * selected, @-sign delineated key.
+     */
+    public void setFormat(TextFormat aFormat)
+    {
+        // Get format selection range and select it (if non-null)
+        int selStart = getSelStart();
+        int selEnd = getSelEnd();
+        TextSel sel = TextModelUtils.smartFindFormatRange(_textModel, selStart, selEnd);
+        if (sel != null)
+            setSel(sel.getStart(), sel.getEnd());
+
+        // Return if we are at end of string (this should never happen)
+        if (getSelStart() >= length())
+            return;
+
+        // If there is a format, add it to current attributes and set for selected text
+        setSelTextStyleValue(TextStyle.Format_Prop, aFormat);
+    }
+
+    /**
+     * Returns whether TextView is underlined.
+     */
+    public boolean isUnderlined()  { return getSelTextStyle().isUnderlined(); }
+
+    /**
+     * Sets whether TextView is underlined.
+     */
+    public void setUnderlined(boolean aValue)  { setSelTextStyleValue(TextStyle.Underline_Prop, aValue ? 1 : 0); }
+
+    /**
+     * Returns the character spacing of the current selection or cursor.
+     */
+    public double getCharSpacing()  { return getSelTextStyle().getCharSpacing(); }
+
+    /**
+     * Returns the character spacing of the current selection or cursor.
+     */
+    public void setCharSpacing(double aValue)  { setSelTextStyleValue(TextStyle.CharSpacing_Prop, aValue); }
+
+    /**
+     * Sets current selection to superscript.
+     */
+    public void setSuperscript()
+    {
+        TextStyle selStyle = getSelTextStyle();
+        int state = selStyle.getScripting();
+        setSelTextStyleValue(TextStyle.Scripting_Prop, state == 0 ? 1 : 0);
+    }
+
+    /**
+     * Sets current selection to subscript.
+     */
+    public void setSubscript()
+    {
+        TextStyle selStyle = getSelTextStyle();
+        int state = selStyle.getScripting();
+        setSelTextStyleValue(TextStyle.Scripting_Prop, state == 0 ? -1 : 0);
+    }
+
+    /**
+     * Set the alignment of text.
+     */
+    public void setAlign(Pos aPos)
+    {
+        TextModel textLayout = (TextModel) getTextLayout();
+        if (aPos.getHPos() != textLayout.getDefaultLineStyle().getAlign())
+            textLayout.setDefaultLineStyle(textLayout.getDefaultLineStyle().copyForAlign(aPos.getHPos()));
+        textLayout.setAlignY(aPos.getVPos());
+    }
+
+    /**
+     * Returns the alignment for current selection.
+     */
+    public HPos getAlignX()  { return getSelLineStyle().getAlign(); }
+
+    /**
+     * Sets the alignment for current selection.
+     */
+    public void setAlignX(HPos alignX)  { setSelLineStyleValue(TextLineStyle.Align_Prop, alignX); }
+
+    /**
+     * Returns the line spacing for current selection.
+     */
+    public double getLineSpacingFactor()  { return getSelLineStyle().getSpacingFactor(); }
+
+    /**
+     * Sets the line spacing for current selection.
+     */
+    public void setLineSpacingFactor(double aHeight)  { setSelLineStyleValue(TextLineStyle.SpacingFactor_Prop, aHeight); }
+
+    /**
+     * Returns the line gap for current selection.
+     */
+    public double getLineSpacing()  { return getSelLineStyle().getSpacing(); }
+
+    /**
+     * Sets the line gap for current selection.
+     */
+    public void setLineSpacing(double aHeight)  { setSelLineStyleValue(TextLineStyle.Spacing_Prop, aHeight); }
+
+    /**
+     * Returns the min line height for current selection.
+     */
+    public double getLineMinHeight()  { return getSelLineStyle().getMinHeight(); }
+
+    /**
+     * Sets the min line height for current selection.
+     */
+    public void setLineMinHeight(double aHeight)  { setSelLineStyleValue(TextLineStyle.MinHeight_Prop, aHeight); }
+
+    /**
+     * Returns the maximum line height for a line of text (even if font size would dictate higher).
+     */
+    public double getLineMaxHeight()  { return getSelLineStyle().getMaxHeight(); }
+
+    /**
+     * Sets the maximum line height for a line of text (even if font size would dictate higher).
+     */
+    public void setLineMaxHeight(double aHeight)  { setSelLineStyleValue(TextLineStyle.MaxHeight_Prop, aHeight); }
 
     /**
      * Replaces the current selection with the given contents (TextModel or String).
@@ -1021,6 +1065,46 @@ public class TextAdapter extends PropObject {
         int charIndex = getCharIndexForXY(aX, aY);
         TextStyle textStyle = _textLayout.getTextStyleForCharIndex(charIndex);
         return textStyle.getLink();
+    }
+
+    /**
+     * Scrolls Selection to visible.
+     */
+    protected void scrollSelToVisible()
+    {
+        if (getSelStart() == 0 && getSelEnd() == length()) return;
+
+        // Get visible bounds - if no reason to scroll, just return
+        Rect visibleBounds = ViewUtils.getVisibleBoundsForViewInScroller(_textArea);
+        double viewW = _textArea.getWidth();
+        double viewH = _textArea.getHeight();
+        if (visibleBounds.isEmpty() || visibleBounds.width == viewW && visibleBounds.height == viewH)
+            return;
+
+        // Get bounds of selection tail with healthy margin (quarter inch)
+        int selTail = getSelTail();
+        Rect selTailBounds = _textLayout.getPathForCharRange(selTail, selTail).getBounds();
+        selTailBounds.inset(-18);
+
+        // Make sure to show left margin whenever possible
+        if (selTailBounds.getMaxX() <= visibleBounds.width)
+            selTailBounds.x = 0;
+
+        // If selection rect not fully contained in visible bounds, scrollRectToVisible
+        if (!visibleBounds.contains(selTailBounds))
+            _textArea.scrollToVisible(selTailBounds);
+    }
+
+    /**
+     * Repaint the selection.
+     */
+    protected void repaintSel()
+    {
+        TextSel sel = getSel();
+        Shape selPath = sel.getPath();
+        Rect rect = selPath.getBounds();
+        rect.inset(-1);
+        _textArea.repaint(rect);
     }
 
     /**
