@@ -73,7 +73,7 @@ public class TextArea extends ParentView {
         // Create TextAdapter
         _textAdapter = createTextAdapter(_textModel);
         _textAdapter.setTextArea(this);
-        _textAdapter.setTextColor(getTextColor());
+        _textAdapter.setSelColor(getTextColor());
         _textAdapter.addPropChangeListener(this::handleTextAdapterPropChange);
         _textAdapter.addTextModelPropChangeListener(this::handleTextModelPropChange);
 
@@ -235,12 +235,12 @@ public class TextArea extends ParentView {
     /**
      * Returns the font of current selection.
      */
-    public Font getTextFont()  { return _textAdapter.getTextFont(); }
+    public Font getTextFont()  { return _textAdapter.getSelFont(); }
 
     /**
      * Sets the font of current selection.
      */
-    public void setTextFont(Font aFont)  { _textAdapter.setTextFont(aFont); }
+    public void setTextFont(Font aFont)  { _textAdapter.setSelFont(aFont); }
 
     /**
      * Sets the color of the current selection or cursor.
@@ -250,29 +250,29 @@ public class TextArea extends ParentView {
     {
         if (Objects.equals(aColor, getTextColor())) return;
         super.setTextColor(aColor);
-        _textAdapter.setTextColor(aColor);
+        _textAdapter.setSelColor(aColor);
     }
 
     /**
      * Returns the format of the current selection or cursor.
      */
-    public TextFormat getFormat()  { return _textAdapter.getFormat(); }
+    public TextFormat getFormat()  { return _textAdapter.getSelFormat(); }
 
     /**
      * Sets the format of the current selection or cursor, after trying to expand the selection to encompass currently
      * selected, @-sign delineated key.
      */
-    public void setFormat(TextFormat aFormat)  { _textAdapter.setFormat(aFormat); }
+    public void setFormat(TextFormat aFormat)  { _textAdapter.setSelFormat(aFormat); }
 
     /**
      * Returns whether TextView is underlined.
      */
-    public boolean isUnderlined()  { return _textAdapter.isUnderlined(); }
+    public boolean isUnderlined()  { return _textAdapter.isSelUnderlined(); }
 
     /**
      * Sets whether TextView is underlined.
      */
-    public void setUnderlined(boolean aValue)  { _textAdapter.setUnderlined(aValue); }
+    public void setUnderlined(boolean aValue)  { _textAdapter.setSelUnderlined(aValue); }
 
     /**
      * Adds the given chars to end of text.
@@ -343,11 +343,6 @@ public class TextArea extends ParentView {
      * Deletes the current selection.
      */
     public void delete()  { _textAdapter.delete(); }
-
-    /**
-     * Replaces the current selection with the given contents (TextModel or String).
-     */
-    public void replaceCharsWithContent(Object theContent)  { _textAdapter.replaceCharsWithContent(theContent); }
 
     /**
      * Clears the text.
@@ -493,7 +488,7 @@ public class TextArea extends ParentView {
     public void setAlign(Pos aPos)
     {
         super.setAlign(aPos);
-        _textAdapter.setAlign(aPos);
+        _textAdapter.setSelAlign(aPos);
     }
 
     /**

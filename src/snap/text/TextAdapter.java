@@ -701,7 +701,7 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the font of current selection.
      */
-    public Font getTextFont()
+    public Font getSelFont()
     {
         if (isRichText())
             return getSelTextStyle().getFont();
@@ -711,7 +711,7 @@ public class TextAdapter extends PropObject {
     /**
      * Sets the font of current selection.
      */
-    public void setTextFont(Font aFont)
+    public void setSelFont(Font aFont)
     {
         if (isRichText())
             setSelTextStyleValue(TextStyle.Font_Prop, aFont);
@@ -721,7 +721,7 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the color of the current selection or cursor.
      */
-    public Color getTextColor()
+    public Color getSelColor()
     {
         if (isRichText())
             return getSelTextStyle().getColor();
@@ -731,7 +731,7 @@ public class TextAdapter extends PropObject {
     /**
      * Sets the color of the current selection or cursor.
      */
-    public void setTextColor(Color aColor)
+    public void setSelColor(Color aColor)
     {
         if (isRichText())
             setSelTextStyleValue(TextStyle.Color_Prop, aColor != null ? aColor : Color.BLACK);
@@ -741,23 +741,23 @@ public class TextAdapter extends PropObject {
     /**
      * Returns outline border of current selection.
      */
-    public Border getTextBorder()  { return getSelTextStyle().getBorder(); }
+    public Border getSelBorder()  { return getSelTextStyle().getBorder(); }
 
     /**
      * Sets outline border of current selection.
      */
-    public void setTextBorder(Border aBorder)  { setSelTextStyleValue(TextStyle.Border_Prop, aBorder); }
+    public void setSelBorder(Border aBorder)  { setSelTextStyleValue(TextStyle.Border_Prop, aBorder); }
 
     /**
      * Returns the format of the current selection or cursor.
      */
-    public TextFormat getFormat()  { return getSelTextStyle().getFormat(); }
+    public TextFormat getSelFormat()  { return getSelTextStyle().getFormat(); }
 
     /**
      * Sets the format of the current selection or cursor, after trying to expand the selection to encompass currently
      * selected, @-sign delineated key.
      */
-    public void setFormat(TextFormat aFormat)
+    public void setSelFormat(TextFormat aFormat)
     {
         // Get format selection range and select it (if non-null)
         int selStart = getSelStart();
@@ -775,29 +775,29 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Returns whether TextView is underlined.
+     * Returns whether text selection is underlined.
      */
-    public boolean isUnderlined()  { return getSelTextStyle().isUnderlined(); }
+    public boolean isSelUnderlined()  { return getSelTextStyle().isUnderlined(); }
 
     /**
-     * Sets whether TextView is underlined.
+     * Sets whether text selection is underlined.
      */
-    public void setUnderlined(boolean aValue)  { setSelTextStyleValue(TextStyle.Underline_Prop, aValue ? 1 : 0); }
-
-    /**
-     * Returns the character spacing of the current selection or cursor.
-     */
-    public double getCharSpacing()  { return getSelTextStyle().getCharSpacing(); }
+    public void setSelUnderlined(boolean aValue)  { setSelTextStyleValue(TextStyle.Underline_Prop, aValue ? 1 : 0); }
 
     /**
      * Returns the character spacing of the current selection or cursor.
      */
-    public void setCharSpacing(double aValue)  { setSelTextStyleValue(TextStyle.CharSpacing_Prop, aValue); }
+    public double getSelCharSpacing()  { return getSelTextStyle().getCharSpacing(); }
+
+    /**
+     * Returns the character spacing of the current selection or cursor.
+     */
+    public void setSelCharSpacing(double aValue)  { setSelTextStyleValue(TextStyle.CharSpacing_Prop, aValue); }
 
     /**
      * Sets current selection to superscript.
      */
-    public void setSuperscript()
+    public void setSelSuperscript()
     {
         TextStyle selStyle = getSelTextStyle();
         int state = selStyle.getScripting();
@@ -807,7 +807,7 @@ public class TextAdapter extends PropObject {
     /**
      * Sets current selection to subscript.
      */
-    public void setSubscript()
+    public void setSelSubscript()
     {
         TextStyle selStyle = getSelTextStyle();
         int state = selStyle.getScripting();
@@ -817,7 +817,7 @@ public class TextAdapter extends PropObject {
     /**
      * Set the alignment of text.
      */
-    public void setAlign(Pos aPos)
+    public void setSelAlign(Pos aPos)
     {
         TextModel textLayout = (TextModel) getTextLayout();
         if (aPos.getHPos() != textLayout.getDefaultLineStyle().getAlign())
@@ -828,73 +828,73 @@ public class TextAdapter extends PropObject {
     /**
      * Returns the alignment for current selection.
      */
-    public HPos getAlignX()  { return getSelLineStyle().getAlign(); }
+    public HPos getSelAlignX()  { return getSelLineStyle().getAlign(); }
 
     /**
      * Sets the alignment for current selection.
      */
-    public void setAlignX(HPos alignX)  { setSelLineStyleValue(TextLineStyle.Align_Prop, alignX); }
+    public void setSelAlignX(HPos alignX)  { setSelLineStyleValue(TextLineStyle.Align_Prop, alignX); }
 
     /**
      * Returns the line spacing for current selection.
      */
-    public double getLineSpacingFactor()  { return getSelLineStyle().getSpacingFactor(); }
+    public double getSelLineSpacingFactor()  { return getSelLineStyle().getSpacingFactor(); }
 
     /**
      * Sets the line spacing for current selection.
      */
-    public void setLineSpacingFactor(double aHeight)  { setSelLineStyleValue(TextLineStyle.SpacingFactor_Prop, aHeight); }
+    public void setSelLineSpacingFactor(double aHeight)  { setSelLineStyleValue(TextLineStyle.SpacingFactor_Prop, aHeight); }
 
     /**
      * Returns the line gap for current selection.
      */
-    public double getLineSpacing()  { return getSelLineStyle().getSpacing(); }
+    public double getSelLineSpacing()  { return getSelLineStyle().getSpacing(); }
 
     /**
      * Sets the line gap for current selection.
      */
-    public void setLineSpacing(double aHeight)  { setSelLineStyleValue(TextLineStyle.Spacing_Prop, aHeight); }
+    public void setSelLineSpacing(double aHeight)  { setSelLineStyleValue(TextLineStyle.Spacing_Prop, aHeight); }
 
     /**
      * Returns the min line height for current selection.
      */
-    public double getLineMinHeight()  { return getSelLineStyle().getMinHeight(); }
+    public double getSelLineMinHeight()  { return getSelLineStyle().getMinHeight(); }
 
     /**
      * Sets the min line height for current selection.
      */
-    public void setLineMinHeight(double aHeight)  { setSelLineStyleValue(TextLineStyle.MinHeight_Prop, aHeight); }
+    public void setSelLineMinHeight(double aHeight)  { setSelLineStyleValue(TextLineStyle.MinHeight_Prop, aHeight); }
 
     /**
      * Returns the maximum line height for a line of text (even if font size would dictate higher).
      */
-    public double getLineMaxHeight()  { return getSelLineStyle().getMaxHeight(); }
+    public double getSelLineMaxHeight()  { return getSelLineStyle().getMaxHeight(); }
 
     /**
      * Sets the maximum line height for a line of text (even if font size would dictate higher).
      */
-    public void setLineMaxHeight(double aHeight)  { setSelLineStyleValue(TextLineStyle.MaxHeight_Prop, aHeight); }
+    public void setSelLineMaxHeight(double aHeight)  { setSelLineStyleValue(TextLineStyle.MaxHeight_Prop, aHeight); }
 
     /**
-     * Replaces the current selection with the given contents (TextModel or String).
+     * Replaces the current selection with given pasted String (allows for subclass processing).
      */
-    public void replaceCharsWithContent(Object theContent)
+    public void pasteString(String pasteString)  { replaceChars(pasteString); }
+
+    /**
+     * Replaces the current selection with the given pasted text (allows for subclass processing).
+     */
+    public void pasteText(TextModel textModel)
     {
-        // If Clipboard has TextModel, paste it
-        if (theContent instanceof TextModel textModel) {
-            int selStart = getSelStart();
-            int selEnd = getSelEnd();
-            _textModel.removeChars(selStart, selEnd);
-            _textModel.addCharsForTextModel(textModel, selStart);
-            setSel(selStart + textModel.length());
+        if (!isRichText()) {
+            pasteString(textModel.getString());
+            return;
         }
 
-        // If Clipboard has String, paste it
-        else if (theContent instanceof String str)
-            replaceChars(str);
-
-        // Complain about the unknown
-        else System.out.println("TextAdapter.replaceCharsWithContent: Unknown content: " + theContent);
+        int selStart = getSelStart();
+        int selEnd = getSelEnd();
+        _textModel.removeChars(selStart, selEnd);
+        _textModel.addCharsForTextModel(textModel, selStart);
+        setSel(selStart + textModel.length());
     }
 
     /**
@@ -1557,7 +1557,10 @@ public class TextAdapter extends PropObject {
 
         // Get clipboard content and replace chars
         Object content = getClipboardContent(clipboard);
-        replaceCharsWithContent(content);
+        if (content instanceof TextModel textModel)
+            pasteText(textModel);
+        else if (content instanceof String)
+            pasteString((String) content);
     }
 
     /**
