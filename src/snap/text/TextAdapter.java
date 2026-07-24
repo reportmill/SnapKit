@@ -10,6 +10,7 @@ import snap.props.*;
 import snap.util.*;
 import snap.view.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
@@ -636,20 +637,29 @@ public class TextAdapter extends PropObject {
      */
     public TextStyle getSelTextStyle()
     {
-        // If already set, just return
         if (_selStyle != null) return _selStyle;
+        if (isRichText())
+            return _selStyle = _textModel.getTextStyleForCharRange(getSelStart(), getSelEnd());
+        return _selStyle = getDefaultTextStyle();
+    }
 
-        // If not rich text, just return default style
-        if (!isRichText())
-            return _selStyle = getDefaultTextStyle();
+    /**
+     * Sets the text style for current selection.
+     */
+    public void setSelTextStyle(TextStyle textStyle)
+    {
+        // Handle rich text: If empty selection set sel style, otherwise set value in model for selection
+        if (isRichText()) {
+            if (isSelEmpty())
+                _selStyle = textStyle;
+            else {
+                _textModel.setTextStyle(textStyle, getSelStart(), getSelEnd());
+                _selStyle = null;
+            }
+        }
 
-        // Get style for sel range
-        int selStart = getSelStart();
-        int selEnd = getSelEnd();
-        TextStyle selStyle = _textModel.getTextStyleForCharRange(selStart, selEnd);
-
-        // Set/return
-        return _selStyle = selStyle;
+        // Handle plain text: Set default text style to given style
+        else setDefaultTextStyle(textStyle);
     }
 
     /**
@@ -657,19 +667,9 @@ public class TextAdapter extends PropObject {
      */
     public void setSelTextStyleValue(String aKey, Object aValue)
     {
-        // If selection is zero length, just modify input style
-        if (isSelEmpty() && isRichText()) {
-            TextStyle selStyle = getSelTextStyle();
-            _selStyle = selStyle.copyForStyleKeyValue(aKey, aValue);
-        }
-
-        // If selection is multiple chars, apply attribute to text and reset SelStyle
-        else {
-            _textModel.setTextStyleValue(aKey, aValue, getSelStart(), getSelEnd());
-            _selStyle = null;
-            if (_textArea != null)
-                _textArea.repaint();
-        }
+        TextStyle selTextStyle = getSelTextStyle();
+        if (!Objects.equals(aValue, selTextStyle.getPropValue(aKey)))
+            setSelTextStyle(selTextStyle.copyForStyleKeyValue(aKey, aValue));
     }
 
     /**
@@ -677,8 +677,9 @@ public class TextAdapter extends PropObject {
      */
     public TextLineStyle getSelLineStyle()
     {
-        int selStart = getSelStart();
-        return getLineForCharIndex(selStart).getLineStyle();
+        if (isRichText())
+            return getLineForCharIndex(getSelStart()).getLineStyle();
+        return getDefaultLineStyle();
     }
 
     /**
@@ -686,7 +687,9 @@ public class TextAdapter extends PropObject {
      */
     public void setSelLineStyle(TextLineStyle lineStyle)
     {
-        _textModel.setLineStyle(lineStyle, getSelStart(), getSelEnd());
+        if (isRichText())
+            _textModel.setLineStyle(lineStyle, getSelStart(), getSelEnd());
+        else setDefaultLineStyle(lineStyle);
     }
 
     /**
@@ -694,49 +697,30 @@ public class TextAdapter extends PropObject {
      */
     public void setSelLineStyleValue(String aKey, Object aValue)
     {
-        TextLineStyle newLineStyle = getSelLineStyle().copyForPropKeyValue(aKey, aValue);
-        setSelLineStyle(newLineStyle);
+        TextLineStyle selLineStyle = getSelLineStyle();
+        if (!Objects.equals(aValue, selLineStyle.getPropValue(aKey)))
+            setSelLineStyle(selLineStyle.copyForPropKeyValue(aKey, aValue));
     }
 
     /**
      * Returns the font of current selection.
      */
-    public Font getSelFont()
-    {
-        if (isRichText())
-            return getSelTextStyle().getFont();
-        return _textModel.getDefaultFont();
-    }
+    public Font getSelFont()  { return getSelTextStyle().getFont(); }
 
     /**
      * Sets the font of current selection.
      */
-    public void setSelFont(Font aFont)
-    {
-        if (isRichText())
-            setSelTextStyleValue(TextStyle.Font_Prop, aFont);
-        else _textModel.setDefaultFont(aFont);
-    }
+    public void setSelFont(Font aFont)  { setSelTextStyleValue(TextStyle.Font_Prop, aFont); }
 
     /**
      * Returns the color of the current selection or cursor.
      */
-    public Color getSelColor()
-    {
-        if (isRichText())
-            return getSelTextStyle().getColor();
-        return _textModel.getDefaultTextColor();
-    }
+    public Color getSelColor()  { return getSelTextStyle().getColor(); }
 
     /**
      * Sets the color of the current selection or cursor.
      */
-    public void setSelColor(Color aColor)
-    {
-        if (isRichText())
-            setSelTextStyleValue(TextStyle.Color_Prop, aColor != null ? aColor : Color.BLACK);
-        else _textModel.setDefaultTextColor(aColor);
-    }
+    public void setSelColor(Color aColor)  { setSelTextStyleValue(TextStyle.Color_Prop, aColor); }
 
     /**
      * Returns outline border of current selection.
@@ -747,32 +731,6 @@ public class TextAdapter extends PropObject {
      * Sets outline border of current selection.
      */
     public void setSelBorder(Border aBorder)  { setSelTextStyleValue(TextStyle.Border_Prop, aBorder); }
-
-    /**
-     * Returns the format of the current selection or cursor.
-     */
-    public TextFormat getSelFormat()  { return getSelTextStyle().getFormat(); }
-
-    /**
-     * Sets the format of the current selection or cursor, after trying to expand the selection to encompass currently
-     * selected, @-sign delineated key.
-     */
-    public void setSelFormat(TextFormat aFormat)
-    {
-        // Get format selection range and select it (if non-null)
-        int selStart = getSelStart();
-        int selEnd = getSelEnd();
-        TextSel sel = TextModelUtils.smartFindFormatRange(_textModel, selStart, selEnd);
-        if (sel != null)
-            setSel(sel.getStart(), sel.getEnd());
-
-        // Return if we are at end of string (this should never happen)
-        if (getSelStart() >= length())
-            return;
-
-        // If there is a format, add it to current attributes and set for selected text
-        setSelTextStyleValue(TextStyle.Format_Prop, aFormat);
-    }
 
     /**
      * Returns whether text selection is underlined.
@@ -795,33 +753,13 @@ public class TextAdapter extends PropObject {
     public void setSelCharSpacing(double aValue)  { setSelTextStyleValue(TextStyle.CharSpacing_Prop, aValue); }
 
     /**
-     * Sets current selection to superscript.
-     */
-    public void setSelSuperscript()
-    {
-        TextStyle selStyle = getSelTextStyle();
-        int state = selStyle.getScripting();
-        setSelTextStyleValue(TextStyle.Scripting_Prop, state == 0 ? 1 : 0);
-    }
-
-    /**
-     * Sets current selection to subscript.
-     */
-    public void setSelSubscript()
-    {
-        TextStyle selStyle = getSelTextStyle();
-        int state = selStyle.getScripting();
-        setSelTextStyleValue(TextStyle.Scripting_Prop, state == 0 ? -1 : 0);
-    }
-
-    /**
      * Set the alignment of text.
      */
     public void setSelAlign(Pos aPos)
     {
+        if (aPos.getHPos() != getSelLineStyle().getAlign())
+            setSelLineStyle(getSelLineStyle().copyForPropKeyValue(TextLineStyle.Align_Prop, aPos.getHPos()));
         TextModel textLayout = (TextModel) getTextLayout();
-        if (aPos.getHPos() != textLayout.getDefaultLineStyle().getAlign())
-            textLayout.setDefaultLineStyle(textLayout.getDefaultLineStyle().copyForAlign(aPos.getHPos()));
         textLayout.setAlignY(aPos.getVPos());
     }
 

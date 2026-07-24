@@ -254,17 +254,6 @@ public class TextArea extends ParentView {
     }
 
     /**
-     * Returns the format of the current selection or cursor.
-     */
-    public TextFormat getFormat()  { return _textAdapter.getSelFormat(); }
-
-    /**
-     * Sets the format of the current selection or cursor, after trying to expand the selection to encompass currently
-     * selected, @-sign delineated key.
-     */
-    public void setFormat(TextFormat aFormat)  { _textAdapter.setSelFormat(aFormat); }
-
-    /**
      * Returns whether TextView is underlined.
      */
     public boolean isUnderlined()  { return _textAdapter.isSelUnderlined(); }

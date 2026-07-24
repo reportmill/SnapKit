@@ -18,7 +18,7 @@ public class TextModelUtils {
     /**
      * Returns a path for two char indexes - it will be a simple box with extensions for first/last lines.
      */
-    public static Shape getPathForCharRange(TextLayout textLayout, int aStartCharIndex, int aEndCharIndex)
+    static Shape getPathForCharRange(TextLayout textLayout, int aStartCharIndex, int aEndCharIndex)
     {
         // Create new path for return
         Path2D path = new Path2D();
@@ -82,7 +82,7 @@ public class TextModelUtils {
     /**
      * Returns the tokens.
      */
-    public static TextToken[] createTokensForTextLine(TextLine aTextLine)
+    static TextToken[] createTokensForTextLine(TextLine aTextLine)
     {
         // Loop vars
         List<TextToken> tokens = new ArrayList<>();
@@ -126,58 +126,16 @@ public class TextModelUtils {
     /**
      * Sets the Mouse Y for given text model to assist in caret placement (can be ambiguous for start/end of line).
      */
-    public static void setMouseY(TextLayout textLayout, double aY)
+    static void setMouseY(TextLayout textLayout, double aY)
     {
         TextModel textModel = textLayout.getTextModel();
         textModel._mouseY = aY;
     }
 
     /**
-     * This method returns the range of the @-sign delinated key closest to the current selection (or null if not found).
-     */
-    public static TextSel smartFindFormatRange(TextLayout textLayout, int selStart, int selEnd)
-    {
-        String string = textLayout.getString();
-        int prevAtSignIndex = -1;
-        int nextAtSignIndex = -1;
-
-        // See if selection contains an '@'
-        if (selEnd > selStart)
-            prevAtSignIndex = string.indexOf("@", selStart);
-        if (prevAtSignIndex >= selEnd)
-            prevAtSignIndex = -1;
-
-        // If there wasn't an '@' in selection, see if there is one before the selected range
-        if (prevAtSignIndex < 0)
-            prevAtSignIndex = string.lastIndexOf("@", selStart - 1);
-
-        // If there wasn't an '@' in or before selection, see if there is one after the selected range
-        if (prevAtSignIndex < 0)
-            prevAtSignIndex = string.indexOf("@", selEnd);
-
-        // If there is a '@' in, before or after selection, see if there is another after it
-        if (prevAtSignIndex >= 0)
-            nextAtSignIndex = string.indexOf("@", prevAtSignIndex + 1);
-
-        // If there is a '@' in, before or after selection, but not one after it, see if there is one before that
-        if (prevAtSignIndex >= 0 && nextAtSignIndex < 0)
-            nextAtSignIndex = string.lastIndexOf("@", prevAtSignIndex - 1);
-
-        // If both a previous and next '@', select the chars inbetween
-        if (prevAtSignIndex >= 0 && nextAtSignIndex >= 0 && prevAtSignIndex != nextAtSignIndex) {
-            int start = Math.min(prevAtSignIndex, nextAtSignIndex);
-            int end = Math.max(prevAtSignIndex, nextAtSignIndex);
-            return new TextSel(textLayout, start, end + 1);
-        }
-
-        // Return null since range not found
-        return null;
-    }
-
-    /**
      * TextModel archival.
      */
-    public static XMLElement textModelToXML(TextModel textModel)
+    static XMLElement textModelToXML(TextModel textModel)
     {
         XMLElement xml = new XMLElement("TextModel");
         TextStyle lastTextStyle = textModel.getDefaultTextStyle();
@@ -214,7 +172,7 @@ public class TextModelUtils {
     /**
      * TextModel unarchival.
      */
-    public static TextModel textModelFromXML(XMLElement anElement)
+    static TextModel textModelFromXML(XMLElement anElement)
     {
         TextModel textModel = TextModel.createDefaultTextModel(true);
         TextStyle textStyle = textModel.getDefaultTextStyle();
