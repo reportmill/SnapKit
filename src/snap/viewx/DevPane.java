@@ -266,8 +266,8 @@ public class DevPane extends ViewController {
      */
     public static View getDefaultDevPaneView()
     {
-        WindowView[] windows = WindowView.getOpenWindows();
-        return windows.length > 0 ? windows[0].getRootView() : null;
+        List<WindowView> windows = WindowView.getOpenWindows();
+        return !windows.isEmpty() ? windows.get(0).getRootView() : null;
     }
 
     /**

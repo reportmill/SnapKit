@@ -806,7 +806,7 @@ public class WindowView extends ParentView {
     /**
      * Returns an array of all open windows.
      */
-    public static WindowView[] getOpenWindows()  { return _openWins.toArray(new WindowView[0]); }
+    public static List<WindowView> getOpenWindows()  { return _openWins; }
 
     /**
      * Returns an array of all open windows.

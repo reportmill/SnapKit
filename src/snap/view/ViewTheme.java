@@ -345,8 +345,7 @@ public class ViewTheme {
         _theme = newTheme;
 
         // Update windows
-        WindowView[] openWindows = WindowView.getOpenWindows();
-        for (WindowView openWindow : openWindows) {
+        for (WindowView openWindow : WindowView.getOpenWindows()) {
 
             // Notify all views
             RootView rootView = openWindow.getRootView();
