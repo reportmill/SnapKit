@@ -218,16 +218,24 @@ public class TextPane extends ViewController {
     }
 
     /**
+     * Returns the font of the current selection.
+     */
+    public Font getSelFont()  { return _textArea.getTextAdapter().getSelFont(); }
+
+    /**
+     * Sets the font of the current selection.
+     */
+    public void setSelFont(Font aFont)  { _textArea.getTextAdapter().setSelFont(aFont); }
+
+    /**
      * Sets font size.
      */
     public void setFontSize(double fontSize)
     {
         if (fontSize < 1) return;
-        TextArea textArea = getTextArea();
-        Font font = textArea.getTextFont();
-        Font font2 = new Font(font.getName(), fontSize);
-        textArea.setTextFont(font2);
-        requestFocus(textArea);
+        Font selFont = getSelFont();
+        setSelFont(selFont.copyForSize(fontSize));
+        requestFocus(getTextArea());
     }
 
     /**
@@ -235,10 +243,8 @@ public class TextPane extends ViewController {
      */
     public void increaseFontSize()
     {
-        TextArea textArea = getTextArea();
-        Font font = textArea.getTextFont();
-        Font font2 = new Font(font.getName(), font.getSize() + 1);
-        textArea.setTextFont(font2);
+        Font selFont = getSelFont();
+        setSelFont(selFont.copyForSize(selFont.getSize() + 1));
     }
 
     /**
@@ -246,10 +252,8 @@ public class TextPane extends ViewController {
      */
     public void decreaseFontSize()
     {
-        TextArea textArea = getTextArea();
-        Font font = textArea.getTextFont();
-        Font font2 = new Font(font.getName(), font.getSize() - 1);
-        textArea.setTextFont(font2);
+        Font selFont = getSelFont();
+        setSelFont(selFont.copyForSize(selFont.getSize() - 1));
     }
 
     /**
@@ -354,7 +358,7 @@ public class TextPane extends ViewController {
         _separatorView.setVisible(_toolBar.isVisible() && _findPanel.isVisible());
 
         // Reset FontSizeText
-        setViewValue("FontSizeText", _textArea.getTextFont().getSize());
+        setViewValue("FontSizeText", getSelFont().getSize());
 
         // Update UndoButton, RedoButton
         Undoer undoer = _textArea.getUndoer();

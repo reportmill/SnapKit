@@ -703,12 +703,12 @@ public class TextAdapter extends PropObject {
     }
 
     /**
-     * Returns the font of current selection.
+     * Returns the font of the current selection.
      */
     public Font getSelFont()  { return getSelTextStyle().getFont(); }
 
     /**
-     * Sets the font of current selection.
+     * Sets the font of the current selection.
      */
     public void setSelFont(Font aFont)  { setSelTextStyleValue(TextStyle.Font_Prop, aFont); }
 
@@ -723,12 +723,12 @@ public class TextAdapter extends PropObject {
     public void setSelColor(Color aColor)  { setSelTextStyleValue(TextStyle.Color_Prop, aColor); }
 
     /**
-     * Returns outline border of current selection.
+     * Returns outline border of the current selection.
      */
     public Border getSelBorder()  { return getSelTextStyle().getBorder(); }
 
     /**
-     * Sets outline border of current selection.
+     * Sets outline border of the current selection.
      */
     public void setSelBorder(Border aBorder)  { setSelTextStyleValue(TextStyle.Border_Prop, aBorder); }
 

@@ -94,7 +94,7 @@ public class TextArea extends ParentView {
     public TextAdapter getTextAdapter()  { return _textAdapter; }
 
     /**
-     * Override to create TextAreaKeys.
+     * Returns a default text adapter.
      */
     protected TextAdapter createTextAdapter(TextModel textModel)  { return new TextAdapter(textModel); }
 
@@ -231,16 +231,6 @@ public class TextArea extends ParentView {
      * Selects all the characters in the text editor.
      */
     public void selectAll()  { _textAdapter.selectAll(); }
-
-    /**
-     * Returns the font of current selection.
-     */
-    public Font getTextFont()  { return _textAdapter.getSelFont(); }
-
-    /**
-     * Sets the font of current selection.
-     */
-    public void setTextFont(Font aFont)  { _textAdapter.setSelFont(aFont); }
 
     /**
      * Sets the color of the current selection or cursor.
