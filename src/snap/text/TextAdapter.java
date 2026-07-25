@@ -659,7 +659,7 @@ public class TextAdapter extends PropObject {
         }
 
         // Handle plain text: Set default text style to given style
-        else setDefaultTextStyle(textStyle);
+        else setDefaultTextStyle(_selStyle = textStyle);
     }
 
     /**

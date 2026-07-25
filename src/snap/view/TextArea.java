@@ -233,17 +233,6 @@ public class TextArea extends ParentView {
     public void selectAll()  { _textAdapter.selectAll(); }
 
     /**
-     * Sets the color of the current selection or cursor.
-     */
-    @Override
-    public void setTextColor(Color aColor)
-    {
-        if (Objects.equals(aColor, getTextColor())) return;
-        super.setTextColor(aColor);
-        _textAdapter.setSelColor(aColor);
-    }
-
-    /**
      * Returns whether TextView is underlined.
      */
     public boolean isUnderlined()  { return _textAdapter.isSelUnderlined(); }
@@ -471,24 +460,35 @@ public class TextArea extends ParentView {
     }
 
     /**
-     * Override to update text model default font.
+     * Override to forward to text model.
      */
     @Override
     public void setFont(Font aFont)
     {
         if (isFontSet() && Objects.equals(aFont, getFont())) return;
         super.setFont(aFont);
-        _textModel.setDefaultFont(getFont());
+        _textAdapter.setSelFont(getFont());
     }
 
     /**
-     * Override to update text model default font.
+     * Override to forward to text model.
      */
     @Override
     protected void handleParentFontChange()
     {
         super.handleParentFontChange();
-        _textModel.setDefaultFont(getFont());
+        _textAdapter.setSelFont(getFont());
+    }
+
+    /**
+     * Override to forward to text model.
+     */
+    @Override
+    public void setTextColor(Color aColor)
+    {
+        if (Objects.equals(aColor, getTextColor())) return;
+        super.setTextColor(aColor);
+        _textAdapter.setSelColor(aColor);
     }
 
     /**

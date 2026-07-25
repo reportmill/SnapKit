@@ -119,7 +119,7 @@ public class Label extends ParentView {
     }
 
     /**
-     * Sets the text color.
+     * Override to forward to text area.
      */
     @Override
     public void setTextColor(Color aColor)
