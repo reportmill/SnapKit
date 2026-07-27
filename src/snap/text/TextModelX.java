@@ -83,6 +83,7 @@ public class TextModelX extends TextBlock {
 
         // Set value
         _sourceText = sourceText;
+        _rich = sourceText.isRichText();
 
         // Listen for prop changes
         _sourceText.addPropChangeListener(_sourceTextModelPropChangeLsnr);

@@ -15,6 +15,9 @@ import java.util.Objects;
  */
 public abstract class TextModel extends TextLayout {
 
+    // Whether text is rich
+    protected boolean _rich;
+
     // The default text style for this text
     protected TextStyle _defaultTextStyle = TextStyle.DEFAULT;
 
@@ -50,6 +53,12 @@ public abstract class TextModel extends TextLayout {
         super();
         _rich = isRich;
     }
+
+    /**
+     * Returns whether text supports multiple styles.
+     */
+    @Override
+    public boolean isRichText()  { return _rich; }
 
     /**
      * Sets whether text supports multiple styles.

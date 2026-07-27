@@ -15,9 +15,6 @@ import java.util.List;
  */
 public abstract class TextLayout extends PropObject {
 
-    // Whether text is rich
-    protected boolean _rich;
-
     // The X/Y of the text model
     protected double _x, _y;
 
@@ -41,16 +38,7 @@ public abstract class TextLayout extends PropObject {
      */
     public TextLayout()
     {
-        this(false);
-    }
-
-    /**
-     * Constructor with option to make rich text.
-     */
-    public TextLayout(boolean isRich)
-    {
         super();
-        _rich = isRich;
     }
 
     /**
@@ -61,7 +49,7 @@ public abstract class TextLayout extends PropObject {
     /**
      * Whether this text supports multiple styles (font, color, etc.).
      */
-    public boolean isRichText()  { return _rich; }
+    public boolean isRichText()  { return getTextModel().isRichText(); }
 
     /**
      * Returns whether to wrap lines that overrun bounds.

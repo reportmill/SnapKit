@@ -128,6 +128,16 @@ public class TextArea extends ParentView {
     }
 
     /**
+     * Returns whether text supports multiple styles.
+     */
+    public boolean isRichText()  { return _textAdapter.isRichText(); }
+
+    /**
+     * Sets whether text supports multiple styles.
+     */
+    public void setRichText(boolean aValue)  { _textAdapter.setRichText(aValue); }
+
+    /**
      * Returns whether to wrap lines that overrun bounds.
      */
     public boolean isWrapLines()  { return _textAdapter.isWrapLines(); }
@@ -146,21 +156,6 @@ public class TextArea extends ParentView {
      * Called to activate undo.
      */
     public void setUndoActivated(boolean aValue)  { _textAdapter.setUndoActivated(aValue); }
-
-    /**
-     * Returns whether editor is doing check-as-you-type spelling.
-     */
-    public boolean isSpellChecking()  { return _textAdapter.isSpellChecking(); }
-
-    /**
-     * Returns whether text supports multiple styles.
-     */
-    public boolean isRichText()  { return _textAdapter.isRichText(); }
-
-    /**
-     * Sets whether text supports multiple styles.
-     */
-    public void setRichText(boolean aValue)  { _textAdapter.setRichText(aValue); }
 
     /**
      * Returns the default text style for text.
@@ -231,16 +226,6 @@ public class TextArea extends ParentView {
      * Selects all the characters in the text editor.
      */
     public void selectAll()  { _textAdapter.selectAll(); }
-
-    /**
-     * Returns whether TextView is underlined.
-     */
-    public boolean isUnderlined()  { return _textAdapter.isSelUnderlined(); }
-
-    /**
-     * Sets whether TextView is underlined.
-     */
-    public void setUnderlined(boolean aValue)  { _textAdapter.setSelUnderlined(aValue); }
 
     /**
      * Adds the given chars to end of text.
@@ -343,13 +328,9 @@ public class TextArea extends ParentView {
     public int getCharIndexForXY(double anX, double aY)  { return _textAdapter.getCharIndexForXY(anX, aY); }
 
     /**
-     * Paint text.
+     * Returns whether editor is doing check-as-you-type spelling.
      */
-    @Override
-    protected void paintFront(Painter aPntr)
-    {
-        TextPainter.DEFAULT.paintTextAdapter(aPntr, _textAdapter);
-    }
+    public boolean isSpellChecking()  { return _textAdapter.isSpellChecking(); }
 
     /**
      * Returns the font scale of the text.
@@ -400,6 +381,15 @@ public class TextArea extends ParentView {
      * Called to redo the last text change.
      */
     public void redo()  { _textAdapter.redo(); }
+
+    /**
+     * Paint text.
+     */
+    @Override
+    protected void paintFront(Painter aPntr)
+    {
+        TextPainter.DEFAULT.paintTextAdapter(aPntr, _textAdapter);
+    }
 
     /**
      * Returns the width needed to display all characters.
