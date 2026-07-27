@@ -61,6 +61,31 @@ public class TextModelX extends TextBlock {
     }
 
     /**
+     * Returns whether to wrap lines that overrun bounds.
+     */
+    public boolean isWrapLines()  { return _wrapLines; }
+
+    /**
+     * Sets whether to wrap lines that overrun bounds.
+     */
+    public void setWrapLines(boolean aValue)  { _wrapLines = aValue; }
+
+    /**
+     * Returns whether layout tries to hyphenate wrapped words.
+     */
+    public boolean isHyphenate()  { return _hyphenate; }
+
+    /**
+     * Sets whether layout tries to hyphenate wrapped words.
+     */
+    public void setHyphenate(boolean aValue)
+    {
+        if (aValue == _hyphenate) return;
+        _hyphenate = aValue;
+        reloadTextFromSourceText();
+    }
+
+    /**
      * Returns the text model that is being displayed.
      */
     @Override
@@ -147,7 +172,7 @@ public class TextModelX extends TextBlock {
     /**
      * Wraps given line if needed by moving chars from last token(s) to next line.
      */
-    protected void wrapLineIfNeeded(TextLine textLine)
+    private void wrapLineIfNeeded(TextLine textLine)
     {
         // If no chars or line is beyond bounds, just return
         if (textLine.getTokenCount() <= 0 || textLine.getMaxY() >= getHeight())
@@ -207,28 +232,16 @@ public class TextModelX extends TextBlock {
     }
 
     /**
-     * Returns whether to wrap lines that overrun bounds.
+     * Override to make sure lines wrap when style changes.
      */
-    public boolean isWrapLines()  { return _wrapLines; }
-
-    /**
-     * Sets whether to wrap lines that overrun bounds.
-     */
-    public void setWrapLines(boolean aValue)  { _wrapLines = aValue; }
-
-    /**
-     * Returns whether layout tries to hyphenate wrapped words.
-     */
-    public boolean isHyphenate()  { return _hyphenate; }
-
-    /**
-     * Sets whether layout tries to hyphenate wrapped words.
-     */
-    public void setHyphenate(boolean aValue)
+    @Override
+    public void setTextStyle(TextStyle textStyle, int startCharIndex, int endCharIndex)
     {
-        if (aValue == _hyphenate) return;
-        _hyphenate = aValue;
-        reloadTextFromSourceText();
+        super.setTextStyle(textStyle, startCharIndex, endCharIndex);
+        if (isWrapLines()) {
+            TextLine textLine = getLineForCharIndex(startCharIndex);
+            wrapLineIfNeeded(textLine);
+        }
     }
 
     /**
@@ -479,7 +492,7 @@ public class TextModelX extends TextBlock {
 
                 // Add or remove chars to this model
                 if (addChars != null) {
-                    TextStyle textStyle = _sourceText.getTextStyleForCharIndex(charIndex);
+                    TextStyle textStyle = _sourceText.getTextStyleForCharRange(charIndex, charIndex + 1);
                     addCharsWithStyle(addChars, textStyle, charIndex);
                 }
                 else removeChars(charIndex, charIndex + removeChars.length());
@@ -514,7 +527,7 @@ public class TextModelX extends TextBlock {
     /**
      * Reloads text from SourceText.
      */
-    protected void reloadTextFromSourceText()
+    private void reloadTextFromSourceText()
     {
         // Skip if no text
         if (length() == 0 && _sourceText.isEmpty()) return;

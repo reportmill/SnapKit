@@ -41,6 +41,7 @@ public class TextBlock extends TextModel {
     /**
      * Returns the string for the text.
      */
+    @Override
     public String getString()
     {
         if (getLineCount() == 1)
@@ -53,22 +54,25 @@ public class TextBlock extends TextModel {
     /**
      * Returns the number of block in this doc.
      */
+    @Override
     public int getLineCount()  { return _lines.size(); }
 
     /**
      * Returns the individual block in this doc.
      */
+    @Override
     public TextLine getLine(int anIndex)  { return _lines.get(anIndex); }
 
     /**
      * Returns the list of blocks.
      */
+    @Override
     public List<TextLine> getLines()  { return _lines; }
 
     /**
      * Adds a block at given index.
      */
-    protected void addLine(TextLine aLine, int anIndex)
+    void addLine(TextLine aLine, int anIndex)
     {
         _lines.add(anIndex, aLine);
         aLine._textModel = this;
@@ -78,7 +82,7 @@ public class TextBlock extends TextModel {
     /**
      * Removes the block at given index.
      */
-    protected void removeLine(int anIndex)
+    void removeLine(int anIndex)
     {
         TextLine line = _lines.remove(anIndex);
         line._textModel = null;
@@ -88,6 +92,7 @@ public class TextBlock extends TextModel {
     /**
      * Adds characters with given style to this text at given index.
      */
+    @Override
     public void addCharsWithStyle(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
         // If no chars, just return
@@ -162,7 +167,7 @@ public class TextBlock extends TextModel {
     /**
      * Called after chars added to line to do further processing, like horizontal alignment or wrapping.
      */
-    protected void addCharsToLineFinished(TextLine textLine)
+    void addCharsToLineFinished(TextLine textLine)
     {
         textLine.updateAlignmentAndJustify();
     }
@@ -170,7 +175,7 @@ public class TextBlock extends TextModel {
     /**
      * Move line chars from given start char index to line end to next line.
      */
-    protected void moveLineCharsToNextLine(TextLine textLine, int startCharIndex)
+    void moveLineCharsToNextLine(TextLine textLine, int startCharIndex)
     {
         // Get next line to move chars to
         TextLine nextLine = textLine.getNext();
@@ -242,7 +247,7 @@ public class TextBlock extends TextModel {
     /**
      * Remove chars from line.
      */
-    protected void removeCharsFromLine(int startCharIndex, int endCharIndex, TextLine textLine)
+    private void removeCharsFromLine(int startCharIndex, int endCharIndex, TextLine textLine)
     {
         // Simple case: If range is whole line, can just remove line if more than one line ...
         int lineStartCharIndex = textLine.getStartCharIndex();
@@ -269,7 +274,7 @@ public class TextBlock extends TextModel {
     /**
      * Joins given line with next line.
      */
-    protected void joinLineWithNextLine(TextLine textLine)
+    void joinLineWithNextLine(TextLine textLine)
     {
         TextLine nextLine = textLine.getNext();
         if (nextLine == null)
@@ -291,7 +296,7 @@ public class TextBlock extends TextModel {
     /**
      * Resets Line Y positions for lines after given line index.
      */
-    protected void resetLineYForLinesAfterIndex(int lineIndex)
+    void resetLineYForLinesAfterIndex(int lineIndex)
     {
         // Iterate over lines beyond given lineIndex and reset Y (stop if line is already reset)
         for (int i = lineIndex + 1, iMax = getLineCount(); i < iMax; i++) {
@@ -305,7 +310,7 @@ public class TextBlock extends TextModel {
     /**
      * Updates Lines (Index, Start) from index line to text end.
      */
-    protected void updateLines(int anIndex)
+    void updateLines(int anIndex)
     {
         // Get BaseLine and length at end of BaseLine
         TextLine baseLine = anIndex >= 0 ? getLine(anIndex) : null;
@@ -325,7 +330,7 @@ public class TextBlock extends TextModel {
     /**
      * Updates an individual line for new index and start char index.
      */
-    protected void updateLine(TextLine textLine, int newIndex, int newStartCharIndex)
+    void updateLine(TextLine textLine, int newIndex, int newStartCharIndex)
     {
         textLine._lineIndex = newIndex;
         textLine._startCharIndex = newStartCharIndex;
