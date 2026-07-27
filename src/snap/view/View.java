@@ -1059,7 +1059,7 @@ public class View extends PropObject implements EventType.AllTypes {
         setShowing(showing);
 
         // If inherit font, propagate to children
-        if (!isFontSet())
+        if (aPar != null && !isFontSet())
             handleParentFontChange();
     }
 

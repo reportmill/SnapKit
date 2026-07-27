@@ -467,7 +467,8 @@ public class TextArea extends ParentView {
     protected void handleParentFontChange()
     {
         super.handleParentFontChange();
-        _textAdapter.setSelFont(getFont());
+        if (!isRichText())
+            _textAdapter.setSelFont(getFont());
     }
 
     /**
