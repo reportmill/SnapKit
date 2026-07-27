@@ -81,7 +81,7 @@ public class Tab extends PropObject {
         if (_button != null) {
             if (aValue)
                 addCloseBoxToButton(_button);
-            else _button.setGraphicAfter(null);
+            else _button.setTailGraphic(null);
         }
     }
 
@@ -203,7 +203,7 @@ public class Tab extends PropObject {
         closeBox.addEventHandler(this::handleTabCloseBoxActionEvent, View.Action);
 
         // Add to FileTab
-        tabButton.setGraphicAfter(closeBox);
+        tabButton.setTailGraphic(closeBox);
     }
 
     /**

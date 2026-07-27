@@ -67,11 +67,11 @@ public class MenuItem extends ButtonBase {
         firePropChange(Shortcut_Prop, _shortcut, _shortcut = aValue);
 
         // Set graphic
-        if (aValue == null) { setGraphicAfter(null); return; }
+        if (aValue == null) { setTailGraphic(null); return; }
         StringView text = new StringView();
         text.setText(getShortcutText());
         text.setLeanX(HPos.RIGHT);
-        setGraphicAfter(text);
+        setTailGraphic(text);
         getLabel().setSpacing(12);
         getLabel().setGrowWidth(true);
     }

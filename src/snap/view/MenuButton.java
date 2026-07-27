@@ -96,7 +96,7 @@ public class MenuButton extends ButtonBase {
             ImageView arrowView = new ImageView(ComboBox.getArrowImage());
             arrowView.setPadding(0, 2, 0, 2);
             arrowView.setLeanX(HPos.RIGHT);
-            setGraphicAfter(arrowView);
+            setTailGraphic(arrowView);
 
             // Configure label
             Label label = getLabel();
@@ -106,7 +106,7 @@ public class MenuButton extends ButtonBase {
         }
 
         // Otherwise, remove
-        else setGraphicAfter(null);
+        else setTailGraphic(null);
 
         // Set value and firePropChange
         firePropChange(ShowArrow_Prop, _showArrow, _showArrow = aValue);

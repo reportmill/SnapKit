@@ -40,7 +40,7 @@ public class Menu extends MenuItem {
     public boolean isShowArrow()
     {
         Label label = getLabel();
-        return label.getGraphicAfter() != null;
+        return label.getTailGraphic() != null;
     }
 
     /**
@@ -53,7 +53,7 @@ public class Menu extends MenuItem {
 
         // If off, remove graphic and return
         if (!aVal) {
-            setGraphicAfter(null);
+            setTailGraphic(null);
             return;
         }
 
@@ -61,7 +61,7 @@ public class Menu extends MenuItem {
         ShapeView arrowView = new ShapeView(_arrow);
         arrowView.setFill(Color.DARKGRAY);
         arrowView.setLean(Pos.CENTER_RIGHT);
-        setGraphicAfter(arrowView);
+        setTailGraphic(arrowView);
 
         // Adjust label
         getLabel().setSpacing(12);

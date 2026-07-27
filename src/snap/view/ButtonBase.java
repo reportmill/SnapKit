@@ -97,32 +97,32 @@ public class ButtonBase extends ParentView {
     /**
      * Returns the image after text.
      */
-    public Image getImageAfter()  { return getLabel().getImageAfter(); }
+    public Image getTailImage()  { return getLabel().getImageAfter(); }
 
     /**
      * Sets the image after text.
      */
-    public void setImageAfter(Image anImage)  { getLabel().setImageAfter(anImage); }
+    public void setTailImage(Image anImage)  { getLabel().setImageAfter(anImage); }
 
     /**
-     * Returns the graphic node.
+     * Returns the graphic view.
      */
     public View getGraphic()  { return getLabel().getGraphic(); }
 
     /**
-     * Sets the graphic node.
+     * Sets the graphic view.
      */
     public void setGraphic(View aGraphic)  { getLabel().setGraphic(aGraphic); }
 
     /**
-     * Returns the graphic node after text.
+     * Returns the graphic view after text.
      */
-    public View getGraphicAfter()  { return getLabel().getGraphicAfter(); }
+    public View getTailGraphic()  { return getLabel().getTailGraphic(); }
 
     /**
-     * Sets the graphic node after text.
+     * Sets the graphic view after text.
      */
-    public void setGraphicAfter(View aGraphic)  { getLabel().setGraphicAfter(aGraphic); }
+    public void setTailGraphic(View aGraphic)  { getLabel().setTailGraphic(aGraphic); }
 
     /**
      * Sets the text color.

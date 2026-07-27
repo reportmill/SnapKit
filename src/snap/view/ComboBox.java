@@ -199,7 +199,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
             _button.setPrefSize(14,20);
             _button.setGrowWidth(false);
             _button.setImage(getArrowImage());
-            _button.setGraphicAfter(null);
+            _button.setTailGraphic(null);
         }
 
         // Otherwise, configure wide popup button
@@ -208,8 +208,8 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
             _button.setGrowWidth(true);
             _button.getLabel().setGrowWidth(true);
             _button.getLabel().setPadding(0,2,0,4);
-            _button.setImageAfter(getArrowImage());
-            _button.getGraphicAfter().setLean(Pos.CENTER_RIGHT);
+            _button.setTailImage(getArrowImage());
+            _button.getTailGraphic().setLean(Pos.CENTER_RIGHT);
         }
     }
 

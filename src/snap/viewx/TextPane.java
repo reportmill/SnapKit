@@ -330,7 +330,7 @@ public class TextPane extends ViewController {
 
         // Move MatchCaseButton to textfield
         View matchCaseButton = getView("MatchCaseButton");
-        _findTextField.getLabel().setGraphicAfter(matchCaseButton);
+        _findTextField.getLabel().setTailGraphic(matchCaseButton);
         _findTextField.getLabel().setPickable(true);
         matchCaseButton.setLeanX(HPos.RIGHT);
 

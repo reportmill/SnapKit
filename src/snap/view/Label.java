@@ -22,7 +22,7 @@ public class Label extends ParentView {
     protected View _graphic;
     
     // The graphics view after text
-    private View _graphicAfter;
+    private View _tailGraphic;
     
     // The image name, if loaded from local resource
     private String _imageName;
@@ -30,7 +30,7 @@ public class Label extends ParentView {
     // Constants for properties
     public static final String ImageName_Prop = "ImageName";
     public static final String Graphic_Prop = "Graphic";
-    public static final String GraphicAfter_Prop = "GraphicAfter";
+    public static final String TailGraphic_Prop = "TailGraphic";
     public static final String Editing_Prop = "Editing";
 
     /**
@@ -104,7 +104,7 @@ public class Label extends ParentView {
      */
     public Image getImageAfter()
     {
-        return _graphicAfter instanceof ImageView ? ((ImageView)_graphicAfter).getImage() : null;
+        return _tailGraphic instanceof ImageView ? ((ImageView) _tailGraphic).getImage() : null;
     }
 
     /**
@@ -113,9 +113,9 @@ public class Label extends ParentView {
     public void setImageAfter(Image anImage)
     {
         Image image = getImage(); if (anImage == image) return;
-        if (_graphicAfter instanceof ImageView)
-            ((ImageView)_graphicAfter).setImage(anImage);
-        else setGraphicAfter(new ImageView(anImage)); //firePropChange("Image", image, anImage); delete soon
+        if (_tailGraphic instanceof ImageView)
+            ((ImageView) _tailGraphic).setImage(anImage);
+        else setTailGraphic(new ImageView(anImage)); //firePropChange("Image", image, anImage); delete soon
     }
 
     /**
@@ -174,29 +174,29 @@ public class Label extends ParentView {
     /**
      * Returns the graphic node after the text.
      */
-    public View getGraphicAfter()  { return _graphicAfter; }
+    public View getTailGraphic()  { return _tailGraphic; }
 
     /**
      * Sets the graphic node after the text.
      */
-    public void setGraphicAfter(View aGraphic)
+    public void setTailGraphic(View aGraphic)
     {
         // If already set, just return
-        View old = getGraphicAfter(); if (aGraphic == old) return;
+        View old = getTailGraphic(); if (aGraphic == old) return;
 
         // Remove old
-        if (_graphicAfter != null && _graphicAfter.getParent() != null)
-            removeChild(_graphicAfter);
+        if (_tailGraphic != null && _tailGraphic.getParent() != null)
+            removeChild(_tailGraphic);
 
-        // Set new
-        _graphicAfter = aGraphic;
+        // Set new with prop change
+        batchPropChange(TailGraphic_Prop, _tailGraphic, _tailGraphic = aGraphic);
 
         // Add new
-        if (_graphicAfter != null)
-            addChild(_graphicAfter);
+        if (_tailGraphic != null)
+            addChild(_tailGraphic);
 
         // Fire prop change
-        firePropChange(GraphicAfter_Prop, old, _graphicAfter);
+        fireBatchPropChanges();
     }
 
     /**
@@ -276,10 +276,10 @@ public class Label extends ParentView {
         // Do normal version
         super.initProps(aPropSet);
 
-        // ImageName, Graphic, GraphicAfter
+        // ImageName, Graphic, TailGraphic
         aPropSet.addPropNamed(ImageName_Prop, String.class, EMPTY_OBJECT);
         //aPropSet.addPropNamed(Graphic_Prop, View.class);
-        //aPropSet.addPropNamed(GraphicAfter_Prop, View.class);
+        //aPropSet.addPropNamed(TailGraphic_Prop, View.class);
     }
 
     /**
@@ -290,10 +290,10 @@ public class Label extends ParentView {
     {
         return switch (aPropName) {
 
-            // ImageName, Graphic, GraphicAfter
+            // ImageName, Graphic, TailGraphic
             case ImageName_Prop -> getImageName();
             case Graphic_Prop -> getGraphic();
-            case GraphicAfter_Prop -> getGraphicAfter();
+            case TailGraphic_Prop -> getTailGraphic();
 
             // Do normal version
             default -> super.getPropValue(aPropName);
@@ -308,10 +308,10 @@ public class Label extends ParentView {
     {
         switch (aPropName) {
 
-            // ImageName, Graphic, GraphicAfter
+            // ImageName, Graphic, TailGraphic
             case ImageName_Prop -> setImageName(Convert.stringValue(aValue));
             case Graphic_Prop -> setGraphic((View) aValue);
-            case GraphicAfter_Prop -> setGraphicAfter(((View) aValue));
+            case TailGraphic_Prop -> setTailGraphic(((View) aValue));
 
             // Do normal version
             default -> super.setPropValue(aPropName, aValue);

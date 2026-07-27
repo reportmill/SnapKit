@@ -586,7 +586,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
                 branchImage = getBranchImage();
             if (branchImage != null) {
                 aCell.setImageAfter(branchImage);
-                aCell.getGraphicAfter().setLeanX(HPos.RIGHT);
+                aCell.getTailGraphic().setLeanX(HPos.RIGHT);
             }
         }
 
