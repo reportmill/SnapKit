@@ -15,7 +15,7 @@ public class Interpolator {
     public enum Direction { In, Out, Both }
 
     /**
-     * Creates a new interpolator with given direction.
+     * Constructor with given direction.
      */
     protected Interpolator(Direction aDir)
     {
@@ -25,35 +25,24 @@ public class Interpolator {
     /**
      * Returns the name of this interpolator.
      */
-    public String getName()
-    {
-        return "Linear";
-    }
+    public String getName()  { return "Linear"; }
 
     /**
      * Returns a value given a ratio and start/end values.
      */
     public double getValue(double aRatio, double aStart, double anEnd)
     {
-        switch (_dir) {
-            case In:
-                return interp(aRatio, aStart, anEnd);
-            case Out:
-                return interpOut(aRatio, aStart, anEnd);
-            case Both:
-                return interpBoth(aRatio, aStart, anEnd);
-            default:
-                throw new RuntimeException("Unsupported Direction " + _dir);
-        }
+        return switch (_dir) {
+            case In -> interp(aRatio, aStart, anEnd);
+            case Out -> interpOut(aRatio, aStart, anEnd);
+            case Both -> interpBoth(aRatio, aStart, anEnd);
+        };
     }
 
     /**
      * Returns a new ratio given normal ratio.
      */
-    protected double getRatio(double aRatio)
-    {
-        return aRatio;
-    }
+    protected double getRatio(double aRatio)  { return aRatio; }
 
     /**
      * Direction In interpolation.
@@ -84,10 +73,7 @@ public class Interpolator {
     /**
      * Returns a string representation of this interpolator.
      */
-    public String toString()
-    {
-        return "RMInterpolator: " + getName();
-    }
+    public String toString()  { return "Interpolator: " + getName(); }
 
     /**
      * Linear interpolator.
@@ -98,70 +84,43 @@ public class Interpolator {
      * Ease In interpolator.
      */
     public static Interpolator EASE_IN = new Interpolator(Direction.In) {
-        public String getName()
-        {
-            return "Ease In";
-        }
-
-        protected double getRatio(double aRatio)
-        {
-            return Math.pow(aRatio, 2);
-        }
+        public String getName()  { return "Ease In"; }
+        protected double getRatio(double aRatio)  { return Math.pow(aRatio, 2); }
     };
 
     /**
      * Ease Out interpolator.
      */
     public static Interpolator EASE_OUT = new Interpolator(Direction.Out) {
-        public String getName()
-        {
-            return "Ease Out";
-        }
-
-        protected double getRatio(double aRatio)
-        {
-            return Math.pow(aRatio, 2);
-        }
+        public String getName()  { return "Ease Out"; }
+        protected double getRatio(double aRatio)  { return Math.pow(aRatio, 2); }
     };
 
     /**
      * Ease Both interpolator.
      */
     public static Interpolator EASE_BOTH = new Interpolator(Direction.Both) {
-        public String getName()
-        {
-            return "Ease Both";
-        }
-
-        protected double getRatio(double aRatio)
-        {
-            return Math.pow(aRatio, 2);
-        }
+        public String getName()  { return "Ease Both"; }
+        protected double getRatio(double aRatio)  { return Math.pow(aRatio, 2); }
     };
 
     // Some common named interpolators
-    static Interpolator _interps[] = {LINEAR, EASE_IN, EASE_OUT, EASE_BOTH};
+    static Interpolator[] _interps = {LINEAR, EASE_IN, EASE_OUT, EASE_BOTH};
 
     /**
      * Returns number of shared common interpolators.
      */
-    public static int getInterpolatorCount()
-    {
-        return _interps.length;
-    }
+    public static int getInterpolatorCount()  { return _interps.length; }
 
     /**
      * Returns the individual common interpolator at given index.
      */
-    public static Interpolator getInterpolator(int anIndex)
-    {
-        return _interps[anIndex];
-    }
+    public static Interpolator getInterpolator(int anIndex)  { return _interps[anIndex]; }
 
     /**
      * Returns a shared interpolator for given name.
      */
-    public static Interpolator getInterpolator(String aName)
+    public static Interpolator getInterpolatorForName(String aName)
     {
         for (int i = 0, iMax = getInterpolatorCount(); i < iMax; i++)
             if (getInterpolator(i).getName().equalsIgnoreCase(aName))
@@ -169,5 +128,4 @@ public class Interpolator {
         System.err.println("Interpolator: interpolator not found for name " + aName);
         return getInterpolator(0);
     }
-
 }

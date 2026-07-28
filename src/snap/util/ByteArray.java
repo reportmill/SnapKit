@@ -15,7 +15,7 @@ import java.util.zip.*;
 public class ByteArray implements Cloneable, Serializable {
 
     // The simple byte array
-    byte _bytes[] = null;
+    byte[] _bytes = null;
 
     // The offset into the byte array
     int _offset = 0;
@@ -42,7 +42,7 @@ public class ByteArray implements Cloneable, Serializable {
     /**
      * Creates an ByteArray with the given byte array.
      */
-    public ByteArray(byte theBytes[])
+    public ByteArray(byte[] theBytes)
     {
         _bytes = theBytes;
         _length = theBytes.length;
@@ -51,7 +51,7 @@ public class ByteArray implements Cloneable, Serializable {
     /**
      * Creates an ByteArray with the given byte array (only to the given length).
      */
-    public ByteArray(byte theBytes[], int aLength)
+    public ByteArray(byte[] theBytes, int aLength)
     {
         _bytes = theBytes;
         _length = aLength;
@@ -84,7 +84,7 @@ public class ByteArray implements Cloneable, Serializable {
     /**
      * Copies the bytes from this data to the given byte array.
      */
-    public void getBytes(int srcBegin, int srcEnd, byte destBytes[])
+    public void getBytes(int srcBegin, int srcEnd, byte[] destBytes)
     {
         getBytes(srcBegin, srcEnd, destBytes, 0);
     }
@@ -92,7 +92,7 @@ public class ByteArray implements Cloneable, Serializable {
     /**
      * Copies the bytes from this data to the given byte array.
      */
-    public void getBytes(int srcBegin, int srcEnd, byte destBytes[], int destBegin)
+    public void getBytes(int srcBegin, int srcEnd, byte[] destBytes, int destBegin)
     {
         System.arraycopy(_bytes, srcBegin, destBytes, destBegin, srcEnd - srcBegin);
     }
@@ -123,7 +123,7 @@ public class ByteArray implements Cloneable, Serializable {
     /**
      * Append the given char array.
      */
-    public ByteArray append(char str[])
+    public ByteArray append(char[] str)
     {
         return append(str, 0, str.length);
     }
@@ -131,7 +131,7 @@ public class ByteArray implements Cloneable, Serializable {
     /**
      * Appends the given char array.
      */
-    public ByteArray append(char str[], int offset, int length)
+    public ByteArray append(char[] str, int offset, int length)
     {
         for (int i = offset, iMax = offset + length; i < iMax; i++) append(str[i]);
         return this;
@@ -226,7 +226,7 @@ public class ByteArray implements Cloneable, Serializable {
     /**
      * Appends raw binary from byte array to data.
      */
-    public ByteArray append(byte bytes[])
+    public ByteArray append(byte[] bytes)
     {
         return append(bytes, 0, bytes.length);
     }
@@ -234,7 +234,7 @@ public class ByteArray implements Cloneable, Serializable {
     /**
      * Appends raw binary from byte array to data.
      */
-    public ByteArray append(byte bytes[], int offset, int length)
+    public ByteArray append(byte[] bytes, int offset, int length)
     {
         setCapacity(_length + length);
         System.arraycopy(bytes, offset, _bytes, _length, length);
@@ -253,7 +253,7 @@ public class ByteArray implements Cloneable, Serializable {
     /**
      * Inserts raw binary from byte array to data.
      */
-    public void insert(int index, byte bytes[])
+    public void insert(int index, byte[] bytes)
     {
         insert(index, bytes, 0, bytes.length);
     }
@@ -261,7 +261,7 @@ public class ByteArray implements Cloneable, Serializable {
     /**
      * Inserts raw binary from byte array to data.
      */
-    public void insert(int index, byte bytes[], int offset, int length)
+    public void insert(int index, byte[] bytes, int offset, int length)
     {
         replace(index, index, bytes, offset, length);
     }
@@ -269,7 +269,7 @@ public class ByteArray implements Cloneable, Serializable {
     /**
      * Replace raw binary from byte array in data.
      */
-    public void replace(int start, int end, byte bytes[], int offset, int length)
+    public void replace(int start, int end, byte[] bytes, int offset, int length)
     {
         int rangeLength = end - start;
         int newLength = _length - rangeLength + length;
@@ -419,7 +419,7 @@ public class ByteArray implements Cloneable, Serializable {
     public void insertLittleUIntAtIndex(long aUInt, int byteIndex)
     {
         int anInt = (int) aUInt;
-        byte newBytes[] = new byte[4];
+        byte[] newBytes = new byte[4];
         newBytes[0] = (byte) anInt;
         newBytes[1] = (byte) ((anInt & 0xff00) >>> 8);
         newBytes[2] = (byte) ((anInt & 0xff0000) >>> 16);
@@ -495,7 +495,7 @@ public class ByteArray implements Cloneable, Serializable {
      */
     public char[] charArrayAt(int index, int len)
     {
-        char values[] = new char[len];
+        char[] values = new char[len];
         for (int i = 0; i < len; i++) values[i] = (char) bigUShortAtIndex(index + i * 2);
         return values;
     }
@@ -505,7 +505,7 @@ public class ByteArray implements Cloneable, Serializable {
      */
     public short[] bigShortArrayAt(int index, int len)
     {
-        short values[] = new short[len];
+        short[] values = new short[len];
         for (int i = 0; i < len; i++) values[i] = bigShortAtIndex(index + i * 2);
         return values;
     }
@@ -515,7 +515,7 @@ public class ByteArray implements Cloneable, Serializable {
      */
     public int[] bigUShortArrayAt(int index, int len)
     {
-        int values[] = new int[len];
+        int[] values = new int[len];
         for (int i = 0; i < len; i++) values[i] = bigUShortAtIndex(index + i * 2);
         return values;
     }
@@ -537,7 +537,7 @@ public class ByteArray implements Cloneable, Serializable {
             int powerOfTwoLength = 8;
             while (aMinimumCapacity > powerOfTwoLength)
                 powerOfTwoLength *= 2;
-            byte newBytes[] = new byte[powerOfTwoLength];
+            byte[] newBytes = new byte[powerOfTwoLength];
             System.arraycopy(_bytes, 0, newBytes, 0, _bytes.length);
             _bytes = newBytes;
         }
@@ -580,7 +580,7 @@ public class ByteArray implements Cloneable, Serializable {
     }
 
     // A scratch character buffer for constructing number strings
-    char _charbuffer[];
+    char[] _charbuffer;
 
     /**
      * Standard equals implementation.
@@ -655,7 +655,7 @@ public class ByteArray implements Cloneable, Serializable {
      */
     public byte[] toByteArray(int start, int end)
     {
-        byte bytes[] = new byte[end - start];
+        byte[] bytes = new byte[end - start];
         getBytes(start, end, bytes);
         return bytes;
     }
@@ -678,5 +678,4 @@ public class ByteArray implements Cloneable, Serializable {
             throw new RuntimeException("Error occurred durring Deflating" + e);
         }
     }
-
 }

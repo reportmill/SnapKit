@@ -20,18 +20,13 @@ public class KeyChain {
     private static KeyChainParser  _parser = new KeyChainParser();
 
     // A shared map of previously encountered key chains
-    private static Map<Object, KeyChain>  _keyChains = new Hashtable();
+    private static Map<Object, KeyChain>  _keyChains = new Hashtable<>();
 
     // The function handler
-    private static FunctionHandler  _functionHandler;
+    private static FunctionHandler _functionHandler;
 
     // A thread local to vend per assignment maps
-    private static ThreadLocal<Map>  _assTL = new ThreadLocal() {
-        public Object initialValue()
-        {
-            return new HashMap();
-        }
-    };
+    private static ThreadLocal<Map> _assTL = ThreadLocal.withInitial(() -> new HashMap<>());
 
     // KeyChain Operators
     public enum Op {
@@ -56,7 +51,7 @@ public class KeyChain {
 
         // Misc
         Chain, Conditional, Assignment
-    };
+    }
 
     /**
      * This is interface is implemented by objects that can get key chain values themselves.
@@ -83,7 +78,7 @@ public class KeyChain {
             return (KeyChain) aSource;
 
         // If not passed string, return Null KeyChain
-        if (!(aSource instanceof String) || ((String) aSource).length() == 0)
+        if (!(aSource instanceof String) || ((String) aSource).isEmpty())
             return new KeyChain(Op.Literal);
 
         // Get KeyChain (create and cache if needed) and return
@@ -104,10 +99,7 @@ public class KeyChain {
     /**
      * Returns a thread-local assignments map.
      */
-    public static Map getAssignments()
-    {
-        return _assTL.get();
-    }
+    public static Map getAssignments()  { return _assTL.get(); }
 
     /**
      * Constructor.
@@ -171,7 +163,7 @@ public class KeyChain {
      */
     public int getChildCount()
     {
-        return _children instanceof List ? ((List) _children).size() : _children != null ? 1 : 0;
+        return _children instanceof List<?> ? ((List<?>) _children).size() : _children != null ? 1 : 0;
     }
 
     /**
@@ -179,8 +171,8 @@ public class KeyChain {
      */
     public Object getChild(int anIndex)
     {
-        if (_children instanceof List)
-            return ((List) _children).get(anIndex);
+        if (_children instanceof List<?> list)
+            return list.get(anIndex);
         if (anIndex == 0)
             return _children;
         return null;
@@ -196,12 +188,12 @@ public class KeyChain {
             _children = child;
 
             // If Children already list, just add child
-        else if (_children instanceof List)
-            ((List) _children).add(child);
+        else if (_children instanceof List list)
+            list.add(child);
 
             // Else, create list and add
         else {
-            List c = new ArrayList(4);
+            List<Object> c = new ArrayList<>(4);
             c.add(_children);
             c.add(child);
             _children = c;
@@ -265,10 +257,9 @@ public class KeyChain {
         if (anObj == null) return null;
 
         // If list, use aggregator
-        if (anObj instanceof List) {
-            List list = (List) anObj;
+        if (anObj instanceof List<?> list) {
             Object val = getValueImpl(aRoot, anObj, aKeyChain);
-            if (val == null && list.size() > 0)
+            if (val == null && !list.isEmpty())
                 val = getValueImpl(aRoot, list.get(0), aKeyChain);
             return val;
         }
@@ -284,85 +275,69 @@ public class KeyChain {
     public static Object getValueImpl(Object aRoot, Object anObj, KeyChain aKeyChain)
     {
         // Evaluate key chain based on operator type
-        switch (aKeyChain.getOp()) {
+        return switch (aKeyChain.getOp()) {
 
             // Handle Literals: String, Number, Null
-            case Literal:
-                return aKeyChain.getValue();
+            case Literal -> aKeyChain.getValue();
 
             // Handle binary math ops: Add, Subtract, Multiply, Divide, Mod
-            case Add:
-            case Subtract:
-            case Multiply:
-            case Divide:
-            case Mod:
-                return getValueBinaryMathOp(aRoot, anObj, aKeyChain);
+            case Add, Subtract, Multiply, Divide, Mod -> getValueBinaryMathOp(aRoot, anObj, aKeyChain);
 
             // Handle Negate
-            case Negate: {
+            case Negate -> {
                 Object o1 = getValue(aRoot, anObj, aKeyChain.getChildKeyChain(0));
-                return o1 instanceof Number ? MathUtils.negate((Number) o1) : null;
+                yield o1 instanceof Number ? MathUtils.negate((Number) o1) : null;
             }
 
             // Handle binary compare ops: GreaterThan, LessThan, Equal, NotEqual, GreaterThanOrEqual, LessThanOrEqual
-            case GreaterThan:
-            case LessThan:
-            case Equal:
-            case NotEqual:
-            case GreaterThanOrEqual:
-            case LessThanOrEqual:
-                return getValueBinaryCompareOp(aRoot, anObj, aKeyChain);
+            case GreaterThan, LessThan, Equal, NotEqual, GreaterThanOrEqual, LessThanOrEqual ->
+                    getValueBinaryCompareOp(aRoot, anObj, aKeyChain);
 
             // Handle Not
-            case Not:
-                return !getBoolValue(aRoot, anObj, aKeyChain.getChildKeyChain(0));
+            case Not -> !getBoolValue(aRoot, anObj, aKeyChain.getChildKeyChain(0));
 
             // Handle binary logical ops: And, Or
-            case And:
-            case Or: {
+            case And, Or -> {
                 boolean b1 = getBoolValue(aRoot, anObj, aKeyChain.getChildKeyChain(0));
                 boolean b2 = getBoolValue(aRoot, anObj, aKeyChain.getChildKeyChain(1));
-                return aKeyChain.getOp() == Op.And ? (b1 && b2) : (b1 || b2);
+                yield aKeyChain.getOp() == Op.And ? (b1 && b2) : (b1 || b2);
             }
 
             // Handle basic Key
-            case Key: {
+            case Key -> {
                 Object value = Key.getValue(anObj, aKeyChain.getValueString());
                 if (value == null)
                     value = getAssignments().get(aKeyChain.getValue());
-                return value;
+                yield value;
             }
 
             // Handle ArrayIndex
-            case ArrayIndex:
-                return getValueArrayIndex(aRoot, anObj, aKeyChain);
+            case ArrayIndex -> getValueArrayIndex(aRoot, anObj, aKeyChain);
 
             // Handle FunctionCall
-            case FunctionCall:
-                return getValueFunctionCall(aRoot, anObj, aKeyChain);
+            case FunctionCall -> getValueFunctionCall(aRoot, anObj, aKeyChain);
 
             // Handle Chain
-            case Chain:
-                return getValueChain(aRoot, anObj, aKeyChain);
+            case Chain -> getValueChain(aRoot, anObj, aKeyChain);
 
             // Handle Conditional
-            case Conditional: {
+            case Conditional -> {
                 boolean result = getBoolValue(aRoot, anObj, aKeyChain.getChildKeyChain(0));
                 if (result)
-                    return getValue(aRoot, anObj, aKeyChain.getChildKeyChain(1));
-                return aKeyChain.getChildCount() == 3 ? getValue(aRoot, anObj, aKeyChain.getChildKeyChain(2)) : null;
+                    yield getValue(aRoot, anObj, aKeyChain.getChildKeyChain(1));
+                yield aKeyChain.getChildCount() == 3 ? getValue(aRoot, anObj, aKeyChain.getChildKeyChain(2)) : null;
             }
 
             // Handle Assignment
-            case Assignment: {
+            case Assignment -> {
                 Object value = getValue(aRoot, anObj, aKeyChain.getChildKeyChain(1));
                 getAssignments().put(aKeyChain.getChildString(0), value);
-                return "";
+                yield "";
             }
 
             // Handle the impossible
-            default: throw new RuntimeException("KeyChain.getValueImpl: Invalid op " + aKeyChain.getOp());
-        }
+            default -> throw new RuntimeException("KeyChain.getValueImpl: Invalid op " + aKeyChain.getOp());
+        };
     }
 
     /**
@@ -387,14 +362,14 @@ public class KeyChain {
         if (!(o1 instanceof Number && o2 instanceof Number) && aKeyChain.getOp() != Op.Add) return null;
 
         // Handle Math ops: Add, Subtract, Multiply, Divide, Mod
-        switch (aKeyChain.getOp()) {
-            case Add: return add(o1, o2);
-            case Subtract: return MathUtils.subtract((Number)o1, (Number)o2);
-            case Multiply: return MathUtils.multiply((Number)o1, (Number)o2);
-            case Divide: return MathUtils.divide((Number)o1, (Number)o2);
-            case Mod: return MathUtils.mod(Convert.doubleValue(o1), Convert.doubleValue(o2));
-            default: throw new RuntimeException("KeyChain.getValueBinaryMathOp: Not a math op.");
-        }
+        return switch (aKeyChain.getOp()) {
+            case Add -> add(o1, o2);
+            case Subtract -> MathUtils.subtract((Number) o1, (Number) o2);
+            case Multiply -> MathUtils.multiply((Number) o1, (Number) o2);
+            case Divide -> MathUtils.divide((Number) o1, (Number) o2);
+            case Mod -> MathUtils.mod(Convert.doubleValue(o1), Convert.doubleValue(o2));
+            default -> throw new RuntimeException("KeyChain.getValueBinaryMathOp: Not a math op.");
+        };
     }
 
     /**
@@ -429,15 +404,15 @@ public class KeyChain {
         Object o2 = getValue(aRoot, anObj, aKeyChain.getChildKeyChain(1));
 
         // Handle binary compare ops: GreaterThan, LessThan, Equal, NotEqual, GreaterThanOrEqual, LessThanOrEqual
-        switch (aKeyChain.getOp()) {
-            case GreaterThan: return Sort.Compare(o1, o2)==Sort.ORDER_DESCEND;
-            case LessThan: return Sort.Compare(o1, o2)==Sort.ORDER_ASCEND;
-            case Equal: return Sort.Compare(o1, o2)==Sort.ORDER_SAME;
-            case NotEqual: return Sort.Compare(o1, o2)!=Sort.ORDER_SAME;
-            case GreaterThanOrEqual: return Sort.Compare(o1, o2)!=Sort.ORDER_ASCEND;
-            case LessThanOrEqual: return Sort.Compare(o1, o2)!=Sort.ORDER_DESCEND;
-            default: throw new RuntimeException("KeyChain.getValueBinaryCompareOp: Not a compare op.");
-        }
+        return switch (aKeyChain.getOp()) {
+            case GreaterThan -> Sort.Compare(o1, o2) == Sort.ORDER_DESCEND;
+            case LessThan -> Sort.Compare(o1, o2) == Sort.ORDER_ASCEND;
+            case Equal -> Sort.Compare(o1, o2) == Sort.ORDER_SAME;
+            case NotEqual -> Sort.Compare(o1, o2) != Sort.ORDER_SAME;
+            case GreaterThanOrEqual -> Sort.Compare(o1, o2) != Sort.ORDER_ASCEND;
+            case LessThanOrEqual -> Sort.Compare(o1, o2) != Sort.ORDER_DESCEND;
+            default -> throw new RuntimeException("KeyChain.getValueBinaryCompareOp: Not a compare op.");
+        };
     }
 
     /**
@@ -450,7 +425,7 @@ public class KeyChain {
         if (!(o1 instanceof List)) return null;
         KeyChain indexKeyChain = aKeyChain.getChildKeyChain(1);
         int index = getIntValue(aRoot, indexKeyChain);
-        return ListUtils.get((List) o1, index);
+        return ListUtils.get((List<?>) o1, index);
     }
 
     /**
@@ -536,18 +511,12 @@ public class KeyChain {
     /**
      * Returns the last error encountered by the key chain parser (or null).
      */
-    public static String getError()
-    {
-        return _parser.getError();
-    }
+    public static String getError()  { return _parser.getError(); }
 
     /**
      * Returns the last error encountered by the key chain parser and resets parser.
      */
-    public static String getAndResetError()
-    {
-        return _parser.getAndResetError();
-    }
+    public static String getAndResetError()  { return _parser.getAndResetError(); }
 
     /**
      * Sets the given value for the given key chain + property.
@@ -586,11 +555,8 @@ public class KeyChain {
 
         // Get key and set
         String key = kchain.getChildString(0);
-        try {
-            Key.setValue(obj, key, aValue);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        try { Key.setValue(obj, key, aValue); }
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**
@@ -598,10 +564,9 @@ public class KeyChain {
      */
     public static void setValueSafe(Object anObj, String aKey, Object aValue)
     {
-        try {
-            setValue(anObj, aKey, aValue);
-        } catch (Exception e) {
-            Class cls = ClassUtils.getClass(anObj);
+        try { setValue(anObj, aKey, aValue); }
+        catch (Exception e) {
+            Class<?> cls = ClassUtils.getClass(anObj);
             String msg = (cls != null ? cls.getSimpleName() : "null") + " " + aKey + " " + aValue;
             System.err.println("KeyChain.setValue (" + msg + ") failed: " + e);
         }
@@ -612,10 +577,8 @@ public class KeyChain {
      */
     public static void setValueSilent(Object anObj, String aKey, Object aValue)
     {
-        try {
-            setValue(anObj, aKey, aValue);
-        } catch (Exception e) {
-        }
+        try { setValue(anObj, aKey, aValue); }
+        catch (Exception ignore) { }
     }
 
     /**
@@ -623,31 +586,43 @@ public class KeyChain {
      */
     public String toString()
     {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int cc = getChildCount();
         switch (getOp()) {
-            case Key: case Literal: sb.append(getValue()); break;
-            case Add: sb.append(getChild(0)).append('+').append(getChild(1)); break;
-            case Subtract: sb.append(getChild(0)).append('-').append(getChild(1)); break;
-            case Multiply: sb.append(getChild(0)).append('*').append(getChild(1)); break;
-            case Divide: sb.append(getChild(0)).append('/').append(getChild(1)); break;
-            case Mod: sb.append(getChild(0)).append('%').append(getChild(1)); break;
-            case Negate: sb.append('-').append(getChild(0)); break;
-            case GreaterThan: sb.append(getChild(0)).append('>').append(getChild(1)); break;
-            case LessThan: sb.append(getChild(0)).append('<').append(getChild(1)); break;
-            case GreaterThanOrEqual: sb.append(getChild(0)).append(">=").append(getChild(1)); break;
-            case LessThanOrEqual: sb.append(getChild(0)).append("<=").append(getChild(1)); break;
-            case Equal: sb.append(getChild(0)).append("==").append(getChild(1)); break;
-            case NotEqual: sb.append(getChild(0)).append("!=").append(getChild(1)); break;
-            case Not: sb.append('!').append(getChild(0)); break;
-            case And: sb.append(getChild(0)).append(" && ").append(getChild(1)); break;
-            case Or: sb.append(getChild(0)).append(" || ").append(getChild(1)); break;
-            case ArrayIndex: sb.append(getChild(0)).append('[').append(getChild(1)).append(']'); break;
-            case FunctionCall: sb.append(getChild(0)).append('(').append(getChild(1)).append(')'); break;
-            case ArgList: for (int i=0,iMax=cc;i<iMax;i++) { if (i>0) sb.append(','); sb.append(getChild(i)); } break;
-            case Conditional: sb.append(getChild(0)).append('?').append(getChild(1));
-                if (cc>2) sb.append(':').append(getChild(2)); break;
-            case Chain: for (int i=0,iMax=cc;i<iMax; i++) { if (i>0) sb.append('.'); sb.append(getChild(i)); } break;
+            case Key, Literal -> sb.append(getValue());
+            case Add -> sb.append(getChild(0)).append('+').append(getChild(1));
+            case Subtract -> sb.append(getChild(0)).append('-').append(getChild(1));
+            case Multiply -> sb.append(getChild(0)).append('*').append(getChild(1));
+            case Divide -> sb.append(getChild(0)).append('/').append(getChild(1));
+            case Mod -> sb.append(getChild(0)).append('%').append(getChild(1));
+            case Negate -> sb.append('-').append(getChild(0));
+            case GreaterThan -> sb.append(getChild(0)).append('>').append(getChild(1));
+            case LessThan -> sb.append(getChild(0)).append('<').append(getChild(1));
+            case GreaterThanOrEqual -> sb.append(getChild(0)).append(">=").append(getChild(1));
+            case LessThanOrEqual -> sb.append(getChild(0)).append("<=").append(getChild(1));
+            case Equal -> sb.append(getChild(0)).append("==").append(getChild(1));
+            case NotEqual -> sb.append(getChild(0)).append("!=").append(getChild(1));
+            case Not -> sb.append('!').append(getChild(0));
+            case And -> sb.append(getChild(0)).append(" && ").append(getChild(1));
+            case Or -> sb.append(getChild(0)).append(" || ").append(getChild(1));
+            case ArrayIndex -> sb.append(getChild(0)).append('[').append(getChild(1)).append(']');
+            case FunctionCall -> sb.append(getChild(0)).append('(').append(getChild(1)).append(')');
+            case ArgList -> {
+                for (int i = 0, iMax = cc; i < iMax; i++) {
+                    if (i > 0) sb.append(',');
+                    sb.append(getChild(i));
+                }
+            }
+            case Conditional -> {
+                sb.append(getChild(0)).append('?').append(getChild(1));
+                if (cc > 2) sb.append(':').append(getChild(2));
+            }
+            case Chain -> {
+                for (int i = 0, iMax = cc; i < iMax; i++) {
+                    if (i > 0) sb.append('.');
+                    sb.append(getChild(i));
+                }
+            }
         }
         return sb.toString();
     }
@@ -655,13 +630,14 @@ public class KeyChain {
     /**
      * Simple main implementation, so RM's expressions can be used for simple math.
      */
-    public static void main(String args[]) throws IOException
+    public static void main(String[] args) throws IOException
     {
         // If there is an arg, evaluate it, otherwise if no args, read from standard in until control-d
-        if (args.length > 0 && args[0].length() > 0) {
+        if (args.length > 0 && !args[0].isEmpty()) {
             Object value = KeyChain.getValue(new Object(), args[0]);
             System.out.println(value instanceof Number ? Convert.getBigDecimal(value) : value);
-        } else {
+        }
+        else {
             BufferedReader rdr = new BufferedReader(new InputStreamReader(System.in));
             for (String ln = rdr.readLine(); ln != null; ln = rdr.readLine())
                 main(new String[]{ln});

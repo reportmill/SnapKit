@@ -54,7 +54,7 @@ public class LineBorderTool extends StylerOwner {
 
         // Handle DashArrayText
         if (anEvent.equals("DashArrayText")) {
-            double darray[] = Stroke.getDashArray(anEvent.getStringValue());
+            double[] darray = Stroke.getDashArray(anEvent.getStringValue());
             styler.setBorderStrokeDashArray(darray);
         }
 

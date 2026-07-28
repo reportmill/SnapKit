@@ -1,8 +1,6 @@
 package snap.swing;
-
 import java.awt.print.*;
 import javax.print.*;
-
 import snap.gfx.Painter;
 import snap.geom.Size;
 import snap.viewx.*;
@@ -13,21 +11,18 @@ import snap.viewx.*;
 public class SwingPrinter extends Printer {
 
     // The Printable
-    Printable _printable;
+    private Printable _printable;
 
     // The number of pages
-    int _pageCount;
+    private int _pageCount;
 
     // The Painter
-    Painter _painter;
+    private Painter _painter;
 
     /**
      * Returns the Painter.
      */
-    public Painter getPainter()
-    {
-        return _painter;
-    }
+    public Painter getPainter()  { return _painter; }
 
     /**
      * This method creates a java.awt.print.PrintJob with a java.awt.print.Book.
@@ -45,22 +40,19 @@ public class SwingPrinter extends Printer {
 
         // If PrinterName provided, try to find service with that name
         if (aPrinterName != null) {
-            PrintService services[] = PrinterJob.lookupPrintServices(), service = null;
-            for (int i = 0; i < services.length; i++)
-                if (aPrinterName.equals(services[i].getName()))
-                    service = services[i];
-            if (service != null)
-                try {
-                    job.setPrintService(service);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    service = null;
-                }
+            PrintService[] services = PrinterJob.lookupPrintServices();
+            PrintService service = null;
+            for (PrintService printService : services)
+                if (aPrinterName.equals(printService.getName()))
+                    service = printService;
+            if (service != null) {
+                try { job.setPrintService(service); }
+                catch (Exception e) { e.printStackTrace(); service = null; }
+            }
             if (service == null) {
                 System.err.println("RMViewer:Print: Couldn't find printer named " + aPrinterName);
                 System.err.println("Available Services:");
-                for (int i = 0; i < services.length; i++)
-                    System.err.println("\t- " + services[i].getName());
+                for (PrintService printService : services) System.err.println("\t- " + printService.getName());
                 return;
             }
         }
@@ -77,10 +69,9 @@ public class SwingPrinter extends Printer {
 
         // Run printDialog, and if successful, execute print
         boolean shouldPrint = !showPanel || job.printDialog();
-        try {
-            if (shouldPrint) job.print();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (shouldPrint) {
+            try { job.print(); }
+            catch (Exception e) { e.printStackTrace(); }
         }
     }
 
@@ -97,13 +88,13 @@ public class SwingPrinter extends Printer {
         for (int i = 0, iMax = _pageCount; i < iMax; i++) {
 
             // Get doc width, height and orientation
-            Size psize = _printable.getPageSize(this, i);
-            double width = psize.width, height = psize.height;
+            Size pageSize = _printable.getPageSize(this, i);
+            double width = pageSize.width, height = pageSize.height;
             int orientation = PageFormat.PORTRAIT;
             if (width > height) {
                 orientation = PageFormat.LANDSCAPE;
                 width = height;
-                height = psize.width;
+                height = pageSize.width;
             }
 
             // Get paper and configure with appropriate paper size and imageable area
@@ -148,9 +139,5 @@ public class SwingPrinter extends Printer {
     /**
      * Sets a SwingPrinter to be Printer.Master.
      */
-    public static void set()
-    {
-        _master = new SwingPrinter();
-    }
-
+    public static void set()  { _master = new SwingPrinter(); }
 }

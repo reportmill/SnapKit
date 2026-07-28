@@ -15,13 +15,13 @@ public class ASCIICodec {
     /**
      * Returns a hex string for given byte array.
      */
-    public static String encodeHex(byte theBytes[])
+    public static String encodeHex(byte[] theBytes)
     {
         // Declare array of hex chars
-        char hexChars[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        char[] hexChars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
         // Create char buffer
-        char buffer[] = new char[theBytes.length * 2];
+        char[] buffer = new char[theBytes.length * 2];
 
         // Iterate over bytes
         for (int i = 0, j = 0, iMax = theBytes.length; i < iMax; i++) {
@@ -43,7 +43,7 @@ public class ASCIICodec {
         if (aString.charAt(0) == '<') aString = aString.substring(1, aString.length() - 1);
 
         // Create byte array
-        byte bytes[] = new byte[aString.length() / 2];
+        byte[] bytes = new byte[aString.length() / 2];
 
         // Iterate over chars
         for (int i = 0, iMax = aString.length() / 2; i < iMax; i++) {
@@ -60,7 +60,7 @@ public class ASCIICodec {
     /**
      * Returns a base64 string for given byte array.
      */
-    public static String encodeBase64(byte theBytes[])
+    public static String encodeBase64(byte[] theBytes)
     {
         // Create buffer
         StringBuffer buffer = new StringBuffer((theBytes.length / 3 + 1) * 4);
@@ -132,7 +132,7 @@ public class ASCIICodec {
         }
 
         // Create byte array for chars
-        byte bytes[] = new byte[buffer.length()];
+        byte[] bytes = new byte[buffer.length()];
         for (int i = 0; i < bytes.length; i++)
             bytes[i] = (byte) buffer.charAt(i);
 
@@ -143,10 +143,10 @@ public class ASCIICodec {
     /**
      * Returns an ASCII85 string for given byte array.
      */
-    public static String encodeASCII85(byte theBytes[])
+    public static String encodeASCII85(byte[] theBytes)
     {
         int len = theBytes.length, blen = 0;
-        byte buffer[] = new byte[(len + 3) / 4 * 5 + 2];
+        byte[] buffer = new byte[(len + 3) / 4 * 5 + 2];
 
         for (int i = 0; i < len; i += 4) {
             byte b1 = theBytes[i];

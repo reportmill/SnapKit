@@ -13,13 +13,13 @@ import snap.view.ViewEvent;
 public class EffectTool extends StylerOwner {
 
     // Map of tool instances by shape class
-    private Map<Class,StylerOwner>  _tools = new HashMap<>();
+    private Map<Class,StylerOwner> _tools = new HashMap<>();
     
     // List of known effects
-    static Effect  _effects[] = { new ShadowEffect(), new ReflectEffect(), new BlurEffect(), new EmbossEffect() };
+    static Effect[] _effects = { new ShadowEffect(), new ReflectEffect(), new BlurEffect(), new EmbossEffect() };
     
     /**
-     * Creates EffectTool.
+     * Constructor.
      */
     public EffectTool()
     {
@@ -60,7 +60,7 @@ public class EffectTool extends StylerOwner {
     {
         // Initialize EffectComboBox
         int ecount = getEffectCount();
-        Object enames[] = new String[ecount];
+        Object[] enames = new String[ecount];
         for (int i=0;i<ecount;i++) enames[i] = getEffect(i).getName();
         setViewItems("EffectComboBox", enames);
     }
@@ -113,9 +113,9 @@ public class EffectTool extends StylerOwner {
     public StylerOwner getTool(Object anObj)
     {
         // Get tool from tools map - just return if present
-        Class cls = anObj instanceof Class? (Class)anObj : anObj.getClass();
+        Class<?> cls = anObj instanceof Class ? (Class) anObj : anObj.getClass();
         StylerOwner tool = _tools.get(cls);
-        if (tool==null) {
+        if (tool == null) {
             _tools.put(cls, tool=getToolImpl(cls));
             tool.setStyler(getStyler());
         }
@@ -125,12 +125,12 @@ public class EffectTool extends StylerOwner {
     /**
      * Returns the specific tool for a given effect.
      */
-    private static StylerOwner getToolImpl(Class aClass)
+    private static StylerOwner getToolImpl(Class<?> aClass)
     {
-        if (aClass==ShadowEffect.class) return new ShadowEffectTool();
-        if (aClass==ReflectEffect.class) return new ReflectEffectTool();
-        if (aClass==BlurEffect.class) return new BlurEffectTool();
-        if (aClass==EmbossEffect.class) return new EmbossEffectTool();
+        if (aClass == ShadowEffect.class) return new ShadowEffectTool();
+        if (aClass == ReflectEffect.class) return new ReflectEffectTool();
+        if (aClass == BlurEffect.class) return new BlurEffectTool();
+        if (aClass == EmbossEffect.class) return new EmbossEffectTool();
         System.err.println("EffectTool.getToolImpl: Can't find tool for: " + aClass);
         return new ShadowEffectTool();
     }

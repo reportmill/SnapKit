@@ -13,9 +13,6 @@ import snap.viewx.ColorButton;
  */
 public class FontTool extends StylerOwner {
 
-    // The TitleView
-    private TitleView _titleView;
-
     // The font face ComboBox
     private ComboBox <String> _fontFaceComboBox;
 
@@ -34,12 +31,9 @@ public class FontTool extends StylerOwner {
 
         // Get/configure FontSizeComboBox
         _fontSizeComboBox = getView("FontSizeComboBox", ComboBox.class);
-        Number sizes[] = { 6, 8, 9, 10, 11, 12, 14, 16, 18, 22, 24, 36, 48, 64, 72, 96, 128, 144 };
+        Number[] sizes = { 6, 8, 9, 10, 11, 12, 14, 16, 18, 22, 24, 36, 48, 64, 72, 96, 128, 144 };
         _fontSizeComboBox.setItems(sizes);
         _fontSizeComboBox.setItemTextFunction(i -> Convert.stringValue(i) + " pt");
-
-        _titleView = getView("TextTitleView", TitleView.class);
-        //textTitleView.setContent(_fontPanel.getUI());
     }
 
     /**

@@ -20,7 +20,7 @@ public class ListSel implements Cloneable {
     private ListSel  _next;
 
     // Cached array of selected indexes
-    private int  _indexes[];
+    private int[]  _indexes;
 
     // Cached ListSel representing entire range
     private ListSel  _selAll;
@@ -132,7 +132,7 @@ public class ListSel implements Cloneable {
         int max = selAll.getMax();
         int len = max - min + 1;
         int len2 = 0;
-        int indexes[] = new int[len];
+        int[] indexes = new int[len];
         for (int i=0; i<len; i++)
             if (isSel(min + i))
                 indexes[len2++] = min + i;
@@ -261,8 +261,7 @@ public class ListSel implements Cloneable {
         ListSel clone;
         try { clone = (ListSel)super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
-        if (_next!=null)
-            clone._next = _next.clone();
+        clone._next = _next != null ? _next.clone() : null;
         return clone;
     }
 
@@ -299,10 +298,10 @@ public class ListSel implements Cloneable {
     /**
      * Returns a ListSel for array of indexes.
      */
-    public static ListSel getSelForIndexArray(int theIndexes[])
+    public static ListSel getSelForIndexArray(int[] theIndexes)
     {
         // Get indexes sorted
-        int indexes[] = Arrays.copyOf(theIndexes, theIndexes.length);
+        int[] indexes = Arrays.copyOf(theIndexes, theIndexes.length);
         Arrays.sort(indexes);
 
         // Iterate over intervals
@@ -329,17 +328,17 @@ public class ListSel implements Cloneable {
     public static int[] getChangedIndexes(ListSel aSel1, ListSel aSel2)
     {
         // If either is null or empty, return contents of other
-        if (aSel1==null || aSel1.isEmpty())
-            return aSel2!=null ? aSel2.getIndexes() : EMPTY_INDEXES;
-        if (aSel2==null || aSel2.isEmpty())
-            return aSel1!=null ? aSel1.getIndexes() : EMPTY_INDEXES;
+        if (aSel1 == null || aSel1.isEmpty())
+            return aSel2 != null ? aSel2.getIndexes() : EMPTY_INDEXES;
+        if (aSel2 == null || aSel2.isEmpty())
+            return aSel1.getIndexes();
 
         // Get contents and length of each
-        int ind1[] = aSel1.getIndexes();
-        int ind2[] = aSel2.getIndexes();
+        int[] ind1 = aSel1.getIndexes();
+        int[] ind2 = aSel2.getIndexes();
         int len1 = ind1.length;
         int len2 = ind2.length;
-        int changed[] = new int[len1+len2];
+        int[] changed = new int[len1+len2];
         int len3 = 0;
 
         // Add indexes from Sel1 not found in Sel2

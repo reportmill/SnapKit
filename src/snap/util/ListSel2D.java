@@ -22,9 +22,6 @@ public class ListSel2D implements Cloneable {
     // Shared empty selection
     public static final ListSel2D EMPTY = new ListSel2D(-1, -1, -1, -1);
 
-    // Shared empty indexes
-    private static final int[] EMPTY_INDEXES = new int[0];
-
     /**
      * Constructor.
      */
@@ -139,7 +136,7 @@ public class ListSel2D implements Cloneable {
         int maxY = selAll.getMaxY();
         int len = maxY - minY + 1;
         int len2 = 0;
-        int indexes[] = new int[len];
+        int[] indexes = new int[len];
         for (int i=0; i<len; i++)
             if (isSel(aX, minY + i))
                 indexes[len2++] = minY + i;
@@ -251,8 +248,7 @@ public class ListSel2D implements Cloneable {
         ListSel2D clone;
         try { clone = (ListSel2D)super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
-        if (_next!=null)
-            clone._next = _next.clone();
+        clone._next = _next != null ? _next.clone() : null;
         return clone;
     }
 

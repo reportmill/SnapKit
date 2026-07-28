@@ -26,12 +26,14 @@ import snap.web.WebURL;
 public class TextHyphenDict {
     
     // Current array of states
-    ArrayList            _states = new ArrayList();
+    private List<HyphenState> _states = new ArrayList<>();
     
     // Shared instance
-    static TextHyphenDict    _shared;
+    private static TextHyphenDict _shared;
     
-    /** Create an instance based on the given filename. Reads and parses the given file into internal storage. */
+    /**
+     * Constructor based on the given filename. Reads and parses the given file into internal storage.
+     * */
     public TextHyphenDict()
     {
         try { loadHyphenDict(); }
@@ -126,7 +128,7 @@ public class TextHyphenDict {
         
         StringBuffer hyphens = mkBuffer(nulen,'0');
         
-        HyphenState state = (HyphenState)_states.get(0);
+        HyphenState state = _states.get(0);
         
         // Iterate over word characters
         NEXT_LETTER: for(int i=0;i<prepWord.length();i++) {
@@ -139,7 +141,7 @@ public class TextHyphenDict {
                 
                 // Null state?
                 if(state == null) {
-                    state = (HyphenState)_states.get(0);
+                    state = _states.get(0);
                     continue NEXT_LETTER;
                 }
                 
@@ -192,11 +194,11 @@ public class TextHyphenDict {
     private void loadHyphenDict() throws IOException
     {
         // Get bytes for aSource
-        byte bytes[] = SnapUtils.getBytes(WebURL.getResourceUrl(getClass(), "TextHyphenDict_US.dic"));
+        byte[] bytes = SnapUtils.getBytes(WebURL.getResourceUrl(getClass(), "TextHyphenDict_US.dic"));
         
         // Get Charset
         String charset = null;
-        for(int i=0; i<bytes.length; i++) {
+        for(int i = 0; i < bytes.length; i++) {
             
             if(bytes[i]=='\n') {
                 charset = new String(bytes, 0, i);
@@ -213,7 +215,7 @@ public class TextHyphenDict {
         bufferedReader.readLine(); // skip encoding line
         
         // this hashmap points to the states, keyed by word
-        HashMap hashmap = new HashMap();
+        Map<String,HyphenState> hashmap = new HashMap<>();
         
         // create the first one.
         HyphenState hs = new HyphenState();
@@ -247,7 +249,7 @@ public class TextHyphenDict {
             while(pattern.charAt(0) == '0') pattern.deleteCharAt(0);
 
             // find or add state
-            HyphenState found = (HyphenState)hashmap.get(word.toString());
+            HyphenState found = hashmap.get(word.toString());
             HyphenState state = found;
             if (found == null) {
                 state = new HyphenState();
@@ -261,7 +263,7 @@ public class TextHyphenDict {
                 HyphenState lastState = state;
                 char ch = word.charAt(j - 1);
                 word.setLength(j - 1);
-                found = (HyphenState)hashmap.get(word.toString());
+                found = hashmap.get(word.toString());
                 state = found;
                 if(found == null) {
                     state = new HyphenState();
@@ -276,14 +278,13 @@ public class TextHyphenDict {
         }
         
         // put in fallback states
-        for (Object obj : hashmap.keySet()) {
-            String key = (String) obj;
-            HyphenState e = (HyphenState) hashmap.get(key);
+        for (String key : hashmap.keySet()) {
+            HyphenState e = hashmap.get(key);
             for (int j = 1; true; j++) {
                 if (j > key.length()) {
                     break;
                 }
-                HyphenState state = (HyphenState) hashmap.get(key.substring(j));
+                HyphenState state = hashmap.get(key.substring(j));
                 if (state != null) {
                     e.fallbackState = state;
                     break;
@@ -297,8 +298,7 @@ public class TextHyphenDict {
     private static StringBuffer mkBuffer(int len, char filler)
     {
         StringBuffer ret = new StringBuffer(len);
-        for(int i=0;i<len;i++)
-            ret.append(filler);
+        ret.append(String.valueOf(filler).repeat(Math.max(0, len)));
         return ret;
     }
     
@@ -312,7 +312,7 @@ public class TextHyphenDict {
         HyphenState fallbackState = null;
         
         // trans list
-        private ArrayList trans = new ArrayList();
+        private List<HyphenTrans> trans = new ArrayList<>();
         
         /** Getter for property match. */
         public String getMatch() { return match; }
@@ -328,7 +328,7 @@ public class TextHyphenDict {
         
         public void addTrans(HyphenTrans trans) { this.trans.add(trans); }
         
-        public HyphenTrans getTrans(int index) { return (HyphenTrans)trans.get(index); }
+        public HyphenTrans getTrans(int index) { return trans.get(index); }
         
         public int getNumTrans() { return trans.size(); }
     }

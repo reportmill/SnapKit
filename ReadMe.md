@@ -262,7 +262,7 @@ Separating the grammar from the handler code makes the parser much easier to rea
 Several parsers are included in SnapKit to parse JSON, XML and Java expressions. Other parsers based on this
 package to parse PDF and Java are available in separate SnapKit dependent projects.
 
-See [SnapCode](https://github.com/reportmill/SnapCode) and [SnapPDF](https://github.com/reportmill/SnapPDF).
+See [SnapCode](https://github.com/reportmill/SnapCode) and [ReportMill](https://github.com/reportmill/RM16).
 
 ## The Properties Package
 
