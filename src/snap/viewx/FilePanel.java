@@ -56,7 +56,7 @@ public class FilePanel extends ViewController {
     private Map<WebSite, WebSitePane> _sitePanes = new HashMap<>();
 
     // Listener for WebSitePane prop changes
-    private PropChangeListener _sitePanePropChangeLsnr = pc -> sitePaneDidPropChange();
+    private PropChangeListener _sitePanePropChangeLsnr = pc -> handleSitePanePropChange();
 
     // The sites
     private static List<WebSite>  _defaultSites;
@@ -432,13 +432,13 @@ public class FilePanel extends ViewController {
         _transitionPane.setContent(sitePaneUI);
 
         // Update
-        sitePaneDidPropChange();
+        handleSitePanePropChange();
     }
 
     /**
      * Called when SitePane does prop change.
      */
-    private void sitePaneDidPropChange()
+    private void handleSitePanePropChange()
     {
         WebFile selOrTargFile = _sitePane.getValidSelOrTargFile();
         setSelFile(selOrTargFile);

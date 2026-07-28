@@ -72,7 +72,7 @@ public class RootView extends ParentView {
     /**
      * Override to register for layout.
      */
-    protected void setNeedsLayoutDeep(boolean aVal)
+    void setNeedsLayoutDeep(boolean aVal)
     {
         if (aVal == isNeedsLayoutDeep()) return;
         super.setNeedsLayoutDeep(aVal);

@@ -400,7 +400,7 @@ public class Renderer2D extends Renderer {
      * Override to rebuild FacetShapes for camera changes.
      */
     @Override
-    protected void cameraDidPropChange(PropChange aPC)
+    protected void handleCameraPropChange(PropChange aPC)
     {
         String propName = aPC.getPropName();
         switch (propName) {
@@ -413,7 +413,7 @@ public class Renderer2D extends Renderer {
             case Camera.PrefGimbalRadius_Prop:
                 rebuildFacetShapes();
         }
-        super.cameraDidPropChange(aPC);
+        super.handleCameraPropChange(aPC);
     }
 
     /**

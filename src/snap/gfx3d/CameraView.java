@@ -34,11 +34,11 @@ public class CameraView extends ParentView {
     {
         // Create/configure scene
         _scene = new Scene3D();
-        _scene.addPropChangeListener(pc -> sceneDidPropChange(pc));
+        _scene.addPropChangeListener(this::handleScenePropChange);
 
         // Create/configure camera
         _camera = _scene.getCamera();
-        _camera.addPropChangeListener(pce -> cameraDidPropChange(pce));
+        _camera.addPropChangeListener(this::handleCameraPropChange);
 
         // Enable events
         addEventHandler(_camera::processEvent, MousePress, MouseDrag, MouseRelease, Scroll);
@@ -187,17 +187,17 @@ public class CameraView extends ParentView {
     /**
      * Called when camera does prop change.
      */
-    protected void cameraDidPropChange(PropChange aPC)
+    protected void handleCameraPropChange(PropChange propChange)
     {
         // Forward on basic Camera prop changes
-        String propName = aPC.getPropName();
+        String propName = propChange.getPropName();
         if (propName == Yaw_Prop || propName == Pitch_Prop || propName == Roll_Prop) {
-            _pcs.firePropChange(aPC);
+            _pcs.firePropChange(propChange);
             if (_cubeView != null)
-                _cubeView.setPropValue(propName, aPC.getNewValue());
+                _cubeView.setPropValue(propName, propChange.getNewValue());
         }
         else if (propName == PrefGimbalRadius_Prop)
-            _pcs.firePropChange(aPC);
+            _pcs.firePropChange(propChange);
 
         // Repaint
         repaint();
@@ -206,9 +206,9 @@ public class CameraView extends ParentView {
     /**
      * Called when Scene does prop change.
      */
-    protected void sceneDidPropChange(PropChange aPC)
+    protected void handleScenePropChange(PropChange propChange)
     {
-        String propName = aPC.getPropName();
+        String propName = propChange.getPropName();
 
         // Handle NeedsRepaint
         if (propName == ParentShape.NeedsRepaint_Prop) {

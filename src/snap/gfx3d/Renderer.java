@@ -25,7 +25,7 @@ public abstract class Renderer {
         _camera = aCamera;
         _scene = _camera.getScene();
 
-        _camera.addPropChangeListener(pc -> cameraDidPropChange(pc));
+        _camera.addPropChangeListener(this::handleCameraPropChange);
     }
 
     /**
@@ -61,12 +61,12 @@ public abstract class Renderer {
     public abstract void renderAndPaint(Painter aPainter);
 
     /**
-     * Called when camera changes.
+     * Called when camera has prop change.
      */
-    protected void cameraDidPropChange(PropChange aPC)  { }
+    protected void handleCameraPropChange(PropChange propChange)  { }
 
     /**
-     * Called when scene changes.
+     * Called when scene has prop change.
      */
     protected void sceneDidChange()  { }
 

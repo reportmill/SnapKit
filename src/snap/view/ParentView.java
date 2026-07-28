@@ -450,12 +450,12 @@ public class ParentView extends View {
     /**
      * Returns whether any children need layout.
      */
-    public boolean isNeedsLayoutDeep()  { return _needsLayoutDeep; }
+    boolean isNeedsLayoutDeep()  { return _needsLayoutDeep; }
 
     /**
      * Sets whether any children need layout.
      */
-    protected void setNeedsLayoutDeep(boolean aVal)
+    void setNeedsLayoutDeep(boolean aVal)
     {
         if (_needsLayoutDeep) return;
         _needsLayoutDeep = true;
@@ -469,7 +469,7 @@ public class ParentView extends View {
     /**
      * Lays out children deep.
      */
-    protected void layoutDeep()
+    void layoutDeep()
     {
         // Set InLayoutDeep
         _inLayoutDeep = true;
@@ -536,7 +536,7 @@ public class ParentView extends View {
     /**
      * Called to layout floating children (those unmanaged with lean) according to their Lean, Grow and Margin.
      */
-    protected void layoutFloatingViews()
+    private void layoutFloatingViews()
     {
         if (getChildrenManaged().length == getChildCount()) return;
 
@@ -611,8 +611,8 @@ public class ParentView extends View {
 
         // If child listeners not yet set, create/add for children
         if (_childPCL == null) {
-            _childPCL = pc -> childDidPropChange(pc);
-            _childDCL = (lsnr,pc) -> childDidDeepChange(lsnr,pc);
+            _childPCL = this::handleChildPropChange;
+            _childDCL = this::handleChildDeepChange;
             for (View child : getChildren()) {
                 child.addPropChangeListener(_childPCL);
                 child.addDeepChangeListener(_childDCL);
@@ -640,20 +640,14 @@ public class ParentView extends View {
     }
 
     /**
-     * Property change listener implementation to forward changes on to deep listeners.
+     * Called when child has prop change to forward changes on to deep listeners.
      */
-    protected void childDidPropChange(PropChange aPC)
-    {
-        _pcs.fireDeepChange(this, aPC);
-    }
+    private void handleChildPropChange(PropChange propChange)  { _pcs.fireDeepChange(this, propChange); }
 
     /**
-     * Deep property change listener implementation to forward to this View's deep listeners.
+     * Called when child has deep prop change to forward to this View's deep listeners.
      */
-    protected void childDidDeepChange(Object aLsnr, PropChange aPC)
-    {
-        _pcs.fireDeepChange(aLsnr, aPC);
-    }
+    private void handleChildDeepChange(Object aLsnr, PropChange propChange)  { _pcs.fireDeepChange(aLsnr, propChange); }
 
     /**
      * Called when ViewTheme changes.
