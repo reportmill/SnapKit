@@ -104,7 +104,4 @@ public class Window extends JSProxy implements EventTarget {
         Object documentJS = window.getMember("document");
         return _document = new HTMLDocument(documentJS);
     }
-
-    @Deprecated
-    public static Window current() { return get(); }
 }

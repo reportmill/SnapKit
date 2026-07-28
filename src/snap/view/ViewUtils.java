@@ -361,12 +361,6 @@ public class ViewUtils {
     }
 
     /**
-     * Deprecated - use paintView().
-     */
-    @Deprecated
-    public static void paintAll(View aView, Painter aPntr)  { paintView(aView, aPntr); }
-
-    /**
      * Paints given view.
      */
     public static void paintView(View aView, Painter aPntr)

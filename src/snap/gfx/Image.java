@@ -611,21 +611,10 @@ public abstract class Image implements Loadable {
     /**
      * Returns whether given extension is supported.
      */
-    public static boolean canRead(String anExt)
-    {
-        return StringUtils.containsIC(_types, anExt.toLowerCase());
-    }
+    public static boolean canReadImageType(String imageType)  { return StringUtils.containsIC(_types, imageType.toLowerCase()); }
 
     /**
      * Returns whether image reader can read the file provided in the byte array.
      */
-    public static boolean canRead(byte[] bytes)
-    {
-        return ImageUtils.getImageType(bytes) != null;
-    }
-
-    @Deprecated
-    public Image cloneForSize(double newW, double newH) { return copyForSize(newW, newH); }
-    @Deprecated
-    public Image cloneForCropRect(double aX, double aY, double newW, double newH) { return copyForCropRect(aX, aY, newW, newH); }
+    public static boolean canReadImageBytes(byte[] imageBytes)  { return ImageUtils.getImageType(imageBytes) != null; }
 }
