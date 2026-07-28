@@ -46,7 +46,7 @@ public class SplitView extends ParentView implements ViewHost {
     {
         super();
         _divSpan = Divider.DEFAULT_SPAN;
-        setClipToBounds(true);
+        setOverflow(Overflow.Clip);
         addEventFilter(this::handleDividerMouseEvent, MouseMove, MousePress, MouseDrag, MouseRelease);
     }
 

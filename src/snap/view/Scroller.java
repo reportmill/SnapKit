@@ -43,7 +43,7 @@ public class Scroller extends ParentView implements ViewHost {
     public Scroller()
     {
         super();
-        setClipToBounds(true);
+        setOverflow(Overflow.Clip);
         addEventHandler(this::handleScrollEvent, Scroll);
     }
 

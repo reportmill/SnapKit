@@ -61,7 +61,7 @@ public class DialogSheet extends DialogBox {
         _hostView = aView instanceof ParentView ? (ParentView) aView : null;
         if (_hostView == null)
             return super.showPanel(aView);
-        _hostView.setClipToBounds(true);
+        _hostView.setOverflow(View.Overflow.Clip);
 
         // Make current HostView.Children invisible to mouse clicks
         _hostChildren = _hostView.getChildrenArray().clone();

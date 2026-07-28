@@ -161,7 +161,7 @@ public class BoxView extends ParentView implements ViewHost {
         double viewW = getWidth();
         double viewH = getHeight();
         setPrefSize(viewW, viewH);
-        setClipToBounds(true);
+        setOverflow(Overflow.Clip);
 
         // Get anim - finished/cleared in case it was running
         ViewAnim anim = getAnim(0).finish().clear();
@@ -179,9 +179,7 @@ public class BoxView extends ParentView implements ViewHost {
         }
 
         // Handle hiding: Config anim and play
-        else {
-            anim500.setPrefSize(0, 0);
-        }
+        else anim500.setPrefSize(0, 0);
 
         // Start anim
         anim.play();

@@ -522,11 +522,6 @@ public class View extends PropObject implements EventType.AllTypes {
     public ViewStyle getClassStyle()  { return ViewTheme.get().getStyleForClass(getClass()); }
 
     /**
-     * Returns the class style for this view and given state.
-     */
-    public ViewStyle getClassStyleForState(PseudoClass pseudoClass)  { return getClassStyle().getStyleForState(pseudoClass); }
-
-    /**
      * Returns the style for this view.
      */
     public ViewStyle getStyle()  { return _style; }
@@ -784,12 +779,6 @@ public class View extends PropObject implements EventType.AllTypes {
         if (aValue == _overflow) return;
         firePropChange(Overflow_Prop, _overflow, _overflow = aValue);
     }
-
-    /**
-     * Sets whether view should clip to bounds.
-     */
-    @Deprecated
-    public void setClipToBounds(boolean aValue)  { setOverflow(aValue ? Overflow.Clip : Overflow.Visible); }
 
     /**
      * Returns the clip shape.
@@ -2824,4 +2813,7 @@ public class View extends PropObject implements EventType.AllTypes {
         // Return
         return sb.toString();
     }
+
+    @Deprecated
+    public void setClipToBounds(boolean aValue)  { setOverflow(aValue ? Overflow.Clip : Overflow.Visible); }
 }

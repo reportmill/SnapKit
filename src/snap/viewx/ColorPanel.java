@@ -188,7 +188,7 @@ public class ColorPanel extends ViewController {
 
         // Configure SwatchPicker
         getView("SwatchPicker", ChildView.class).addChild(new SwatchPanel());
-        getUI().setClipToBounds(true);
+        getUI().setOverflow(View.Overflow.Clip);
     }
 
     /**

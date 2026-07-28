@@ -21,7 +21,11 @@ public class TransitionPane extends ParentView {
     /**
      * Constructor.
      */
-    public TransitionPane()  { setClipToBounds(true); }
+    public TransitionPane()
+    {
+        super();
+        setOverflow(Overflow.Clip);
+    }
 
     /**
      * Returns the content view.

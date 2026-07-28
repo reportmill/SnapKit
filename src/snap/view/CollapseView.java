@@ -222,7 +222,7 @@ public class CollapseView extends ParentView implements ViewHost {
         _content.setPrefHeight(viewH);
 
         // Clip View to bounds? (was TitleView.Content)
-        _content.setClipToBounds(true);
+        _content.setOverflow(Overflow.Clip);
 
         // Configure anim to new size
         ViewAnim anim = _content.getAnim(0).clear();

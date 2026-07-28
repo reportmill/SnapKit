@@ -242,7 +242,7 @@ public class TitleView extends ParentView implements ViewHost {
         View content = getContent();
         Overflow contentOverflow = content != null ? content.getOverflow() : null;
         if (content != null)
-            content.setClipToBounds(true);
+            content.setOverflow(Overflow.Clip);
 
         // Configure anim to new size
         ViewAnim anim = getAnim(0).clear();
