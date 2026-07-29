@@ -52,13 +52,14 @@ public class Line extends Segment {
     /**
      * Returns the shape in rect.
      */
-    public Shape copyForBounds(Rect aRect)
+    @Override
+    public Shape copyForBounds(double aX, double aY, double aW, double aH)
     {
         double x = Math.min(x0, x1), y = Math.min(y0, y1);
         double w = Math.max(x0, x1) - x, h = Math.max(y0, y1) - y;
-        double dx = aRect.getX() - x, dy = aRect.getY() - y;
-        double sx = w != 0 ? aRect.getWidth() / w : 0;
-        double sy = h != 0 ? aRect.getHeight() / h : 0;
+        double dx = aX - x, dy = aY - y;
+        double sx = w != 0 ? aW / w : 0;
+        double sy = h != 0 ? aH / h : 0;
         double nx1 = x0 * sx + dx, ny1 = y0 * sy + dy;
         double nx2 = x1 * sx + dx, ny2 = y1 * sy + dy;
         return new Line(nx1, ny1, nx2, ny2);

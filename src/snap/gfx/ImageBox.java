@@ -1,33 +1,18 @@
 package snap.gfx;
 import snap.geom.Rect;
+import snap.geom.RectBase;
 import snap.geom.RoundRect;
 
 /**
  * A class to manage an image rendered in a rectangular area.
  */
-public class ImageBox extends RoundRect {
+public class ImageBox extends Rect {
 
     // The image
-    private Image  _image;
+    private Image _image;
 
     // The image bounds
-    private Rect  _imageBounds;
-
-    /**
-     * Constructor.
-     */
-    public ImageBox(Image anImage)
-    {
-        this(anImage, 0, 0, anImage.getWidth(), anImage.getHeight());
-    }
-
-    /**
-     * Constructor.
-     */
-    public ImageBox(Image anImage, Rect theBounds)
-    {
-        this(anImage, theBounds.x, theBounds.y, theBounds.width, theBounds.height);
-    }
+    private Rect _imageBounds;
 
     /**
      * Constructor.
@@ -42,8 +27,8 @@ public class ImageBox extends RoundRect {
      */
     public ImageBox(Image anImage, double aX, double aY, double aW, double aH)
     {
+        super(aX, aY, aW, aH);
         _image = anImage;
-        setRect(aX, aY, aW, aH);
     }
 
     /**
@@ -56,19 +41,8 @@ public class ImageBox extends RoundRect {
      */
     public Rect getImageBounds()
     {
-        // If explicitly set, just return
         if (_imageBounds != null) return _imageBounds;
-
-        // Otherwise calculate
         return getBounds();
-    }
-
-    /**
-     * Sets the image bounds.
-     */
-    public void setImageBounds(Rect aRect)
-    {
-        setImageBounds(aRect.x, aRect.y, aRect.width, aRect.height);
     }
 
     /**
@@ -84,9 +58,9 @@ public class ImageBox extends RoundRect {
      */
     public void paintImageBox(Painter aPntr, double aX, double aY)
     {
-        Rect imgBnds = getImageBounds();
-        double imgX = imgBnds.x + aX;
-        double imgY = imgBnds.y + aY;
-        aPntr.drawImage(_image, imgX, imgY, imgBnds.width, imgBnds.height);
+        Rect imageBounds = getImageBounds();
+        double imageX = imageBounds.x + aX;
+        double imageY = imageBounds.y + aY;
+        aPntr.drawImage(_image, imageX, imageY, imageBounds.width, imageBounds.height);
     }
 }

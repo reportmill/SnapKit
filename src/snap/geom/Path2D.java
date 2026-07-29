@@ -382,9 +382,9 @@ public class Path2D extends Shape implements Cloneable {
     /**
      * Override to return as path.
      */
-    public Path2D copyForBounds(Rect aRect)
+    public Path2D copyForBounds(double aX, double aY, double aW, double aH)
     {
-        return (Path2D) super.copyForBounds(aRect);
+        return (Path2D) super.copyForBounds(aX, aY, aW, aH);
     }
 
     /**

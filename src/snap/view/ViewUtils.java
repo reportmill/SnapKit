@@ -798,15 +798,15 @@ public class ViewUtils {
         }
 
         // Create image, paint view and return
-        Image img = Image.getImageForSizeAndDpiScale(imageW, imageH, true, aScale);
-        Painter pntr = img.getPainter();
+        Image image = Image.getImageForSizeAndDpiScale(imageW, imageH, true, aScale);
+        Painter pntr = image.getPainter();
         pntr.translate(-imageX, -imageY);
         paintView(aView, pntr);
 
         // Create ImageBox for image and image bounds
-        ImageBox imgBox = new ImageBox(img, viewW, viewH);
-        imgBox.setImageBounds(imageX, imageY, imageW, imageH);
-        return imgBox;
+        ImageBox imageBox = new ImageBox(image, viewW, viewH);
+        imageBox.setImageBounds(imageX, imageY, imageW, imageH);
+        return imageBox;
     }
 
     /**

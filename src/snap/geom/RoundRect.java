@@ -44,14 +44,9 @@ public class RoundRect extends RectBase {
     public double getRadius()  { return _radius; }
 
     /**
-     * Sets the radius of the round.
-     */
-    public void setRadius(double aValue)  { _radius = aValue;  }
-
-    /**
      * Returns a copy with given radius.
      */
-    public RoundRect copyForRadius(double aRad)
+    public RoundRect withRadius(double aRad)
     {
         RoundRect copy = (RoundRect) clone();
         copy._radius = aRad;
@@ -76,18 +71,17 @@ public class RoundRect extends RectBase {
     {
         if (aPos == null)
             return this;
-        switch(aPos) {
-            case CENTER_LEFT: return copyForCorners(true, false, false, true);
-            case CENTER: return copyForCorners(false, false, false, false);
-            case CENTER_RIGHT: return copyForCorners(false, true, true, false);
-            case TOP_CENTER: return copyForCorners(true, true, false, false);
-            case BOTTOM_CENTER: return copyForCorners(false, false, true, true);
-            case TOP_LEFT: return copyForCorners(true, false, false, false);
-            case TOP_RIGHT: return copyForCorners(false, true, false, false);
-            case BOTTOM_LEFT: return copyForCorners(false, false, false, true);
-            case BOTTOM_RIGHT: return copyForCorners(false, false, true, false);
-            default: return this;
-        }
+        return switch (aPos) {
+            case CENTER_LEFT -> copyForCorners(true, false, false, true);
+            case CENTER -> copyForCorners(false, false, false, false);
+            case CENTER_RIGHT -> copyForCorners(false, true, true, false);
+            case TOP_CENTER -> copyForCorners(true, true, false, false);
+            case BOTTOM_CENTER -> copyForCorners(false, false, true, true);
+            case TOP_LEFT -> copyForCorners(true, false, false, false);
+            case TOP_RIGHT -> copyForCorners(false, true, false, false);
+            case BOTTOM_LEFT -> copyForCorners(false, false, false, true);
+            case BOTTOM_RIGHT -> copyForCorners(false, false, true, false);
+        };
     }
 
     /**

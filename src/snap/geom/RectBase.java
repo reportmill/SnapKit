@@ -107,14 +107,6 @@ public abstract class RectBase extends Shape implements Cloneable {
     /**
      * Sets the rect.
      */
-    public void setRect(Rect r)
-    {
-        setRect(r.x,r.y,r.width,r.height);
-    }
-
-    /**
-     * Sets the rect.
-     */
     public void setRect(double x, double y, double w, double h)
     {
         setX(x); setY(y); setWidth(w); setHeight(h);
@@ -197,10 +189,10 @@ public abstract class RectBase extends Shape implements Cloneable {
      * Returns the shape in rect.
      */
     @Override
-    public Shape copyForBounds(Rect aRect)
+    public RectBase copyForBounds(double aX, double aY, double aW, double aH)
     {
         RectBase clone = clone();
-        clone.setRect(aRect);
+        clone.setRect(aX, aY, aW, aH);
         return clone;
     }
 

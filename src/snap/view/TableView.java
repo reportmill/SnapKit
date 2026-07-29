@@ -731,30 +731,33 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         // Get fuzzy border image for selected cell bounds
         Rect cellBounds = cell.getBoundsLocal();
         Rect cellBoundsInTable = cell.localToParent(cellBounds, this).getBounds();
-        ImageBox imgBox = getSelRectImage(cellBoundsInTable);
-        imgBox.paintImageBox(aPntr, cellBoundsInTable.x, cellBoundsInTable.y);
+        ImageBox imageBox = getSelectionRectImageForSelBounds(cellBoundsInTable);
+        imageBox.paintImageBox(aPntr, cellBoundsInTable.x, cellBoundsInTable.y);
     }
 
     /**
      * A fuzzy cell border image to highlight cell.
      */
-    protected ImageBox getSelRectImage(Rect aRect)
+    private ImageBox getSelectionRectImageForSelBounds(Rect selBounds)
     {
         // If already set and at right size, just return
-        if (_selImgBox != null && _selImgBox.width == aRect.width && _selImgBox.height == aRect.height)
-            return _selImgBox;
+        if (_selectionRectImageBox != null && _selectionRectImageBox.width == selBounds.width &&
+            _selectionRectImageBox.height == selBounds.height)
+            return _selectionRectImageBox;
 
-        // Create, set and return
-        Shape shape = aRect.copyForBounds(0,0, aRect.width, aRect.height);
-        ShapeView shpView = new ShapeView(shape);
+        // Create a view for selection to generate selection image
+        ShapeView selRectView = new ShapeView(new Rect(0,0, selBounds.width, selBounds.height));
         boolean focused = isFoc();
-        shpView.setBorder(focused ? ViewThemeUtils.getFocusColor().brighter() : Color.GRAY,1);
-        shpView.setEffect(focused ? ViewEffectPainter.getFocusEffect() : new ShadowEffect(5, Color.GRAY, 0, 0));
-        return _selImgBox = ViewUtils.getImageBoxForScale(shpView, -1);
+        selRectView.setBorder(focused ? ViewThemeUtils.getFocusColor().brighter() : Color.GRAY,1);
+        selRectView.setEffect(focused ? ViewEffectPainter.getFocusEffect() : SELECTION_RECT_SHADOW);
+
+        // Create sel rect image and return
+        return _selectionRectImageBox = ViewUtils.getImageBoxForScale(selRectView, -1);
     }
 
     // A fuzzy cell border image to highlight cell
-    private ImageBox _selImgBox;
+    private ImageBox _selectionRectImageBox;
+    private static ShadowEffect SELECTION_RECT_SHADOW = new ShadowEffect(5, Color.GRAY, 0, 0);
 
     /** Returns whether this view or child view has focus. */
     private boolean isFoc()
@@ -913,7 +916,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     {
         if (aValue == isFocused()) return;
         super.setFocused(aValue);
-        _selImgBox = null;
+        _selectionRectImageBox = null;
     }
 
     /**

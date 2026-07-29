@@ -646,7 +646,7 @@ public abstract class Shape {
     /**
      * Returns the shape in rect.
      */
-    public Shape copyForBounds(Rect aRect)
+    public final Shape copyForBounds(Rect aRect)
     {
         return copyForBounds(aRect.x, aRect.y, aRect.width, aRect.height);
     }

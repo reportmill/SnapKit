@@ -115,9 +115,10 @@ public class Arc extends RectBase {
     /**
      * Returns the shape in rect.
      */
-    public Shape copyForBounds(Rect aRect)
+    @Override
+    public Arc copyForBounds(double aX, double aY, double aW, double aH)
     {
-        return new Arc(aRect.x, aRect.y, aRect.width, aRect.height, _start, _sweep, _holeRatio);
+        return new Arc(aX, aY, aW, aH, _start, _sweep, _holeRatio);
     }
 
     /**
