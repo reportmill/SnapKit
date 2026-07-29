@@ -260,7 +260,7 @@ public class CubeShape extends ParentShape {
         stringView.setSize(120, 120);
 
         // Get image
-        Image image = ViewUtils.getImageForScale(stringView, 1);
+        Image image = ViewUtils.getImageForDpiScale(stringView, 1);
 
         // Create texture and return
         Texture texture = new Texture(image);

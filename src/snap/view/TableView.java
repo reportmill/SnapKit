@@ -741,8 +741,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     private ImageBox getSelectionRectImageForSelBounds(Rect selBounds)
     {
         // If already set and at right size, just return
-        if (_selectionRectImageBox != null && _selectionRectImageBox.width == selBounds.width &&
-            _selectionRectImageBox.height == selBounds.height)
+        if (_selectionRectImageBox != null && _selectionRectImageBox.getWidth() == selBounds.width &&
+            _selectionRectImageBox.getHeight() == selBounds.height)
             return _selectionRectImageBox;
 
         // Create a view for selection to generate selection image
@@ -752,7 +752,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         selRectView.setEffect(focused ? ViewEffectPainter.getFocusEffect() : SELECTION_RECT_SHADOW);
 
         // Create sel rect image and return
-        return _selectionRectImageBox = ViewUtils.getImageBoxForScale(selRectView, -1);
+        return _selectionRectImageBox = ImageBox.getImageBoxForView(selRectView);
     }
 
     // A fuzzy cell border image to highlight cell

@@ -78,19 +78,19 @@ public class ViewUtils {
     /**
      * Returns the bounds of a given view list.
      */
-    public static Rect getBoundsOfViews(View aPar, List <? extends View> aList)
+    public static Rect getBoundsOfViews(View parentView, List <? extends View> viewList)
     {
         // If list is null or empty, return this shape's bounds inside
-        if (aList == null || aList.isEmpty())
-            return aPar.getBoundsLocal();
+        if (viewList == null || viewList.isEmpty())
+            return parentView.getBoundsLocal();
 
         // Declare and initialize a rect to frame of first shape in list
-        View child0 = aList.get(0);
+        View child0 = viewList.get(0);
         Rect rect = child0.localToParent(child0.getBoundsLocal()).getBounds();
 
         // Iterate over successive shapes in list and union their frames
-        for (int i = 1, iMax = aList.size(); i < iMax; i++) {
-            View child = aList.get(i);
+        for (int i = 1, iMax = viewList.size(); i < iMax; i++) {
+            View child = viewList.get(i);
             Rect bnds = child.localToParent(child.getBoundsLocal()).getBounds();
             rect.unionEvenIfEmpty(bnds);
         }
@@ -761,22 +761,13 @@ public class ViewUtils {
      */
     public static Image getImage(View aView)
     {
-        return getImageForScale(aView, 0);
+        return getImageForDpiScale(aView, 0);
     }
 
     /**
-     * Returns an image for a View (1 = 72 dpi, 2 = 144 dpi, 0 = device dpi).
+     * Returns an image for a View and DPI scale (1 = 72 dpi, 2 = 144 dpi, 0 = device dpi).
      */
-    public static Image getImageForScale(View aView, double aScale)
-    {
-        ImageBox imgBox = getImageBoxForScale(aView, aScale);
-        return imgBox.getImage();
-    }
-
-    /**
-     * Returns an image box for a View (1 = 72 dpi, 2 = 144 dpi, 0 = device dpi).
-     */
-    public static ImageBox getImageBoxForScale(View aView, double aScale)
+    public static Image getImageForDpiScale(View aView, double dpiScale)
     {
         // Get size of view and image and offset of view in image (if effect)
         double viewW = aView.getWidth();
@@ -787,26 +778,22 @@ public class ViewUtils {
         int imageY = 0;
 
         // If View has effect, image will likely be larger and not positioned at view origin
-        Effect effect = aView.getEffect();
-        if (effect != null) {
-            Rect viewBnds = aView.getBoundsLocal();
-            Rect effBnds = effect.getBounds(viewBnds);
-            imageX = (int) Math.round(effBnds.x - viewBnds.x);
-            imageY = (int) Math.round(effBnds.y - viewBnds.y);
-            imageW = (int) Math.ceil(effBnds.width);
-            imageH = (int) Math.ceil(effBnds.height);
+        Effect viewEffect = aView.getEffect();
+        if (viewEffect != null) {
+            Rect effectBounds = viewEffect.getBounds(aView.getBoundsLocal());
+            imageX = (int) Math.round(effectBounds.x);
+            imageY = (int) Math.round(effectBounds.y);
+            imageW = (int) Math.ceil(effectBounds.width);
+            imageH = (int) Math.ceil(effectBounds.height);
         }
 
         // Create image, paint view and return
-        Image image = Image.getImageForSizeAndDpiScale(imageW, imageH, true, aScale);
+        Image image = Image.getImageForSizeAndDpiScale(imageW, imageH, true, dpiScale);
         Painter pntr = image.getPainter();
         pntr.translate(-imageX, -imageY);
         paintView(aView, pntr);
 
-        // Create ImageBox for image and image bounds
-        ImageBox imageBox = new ImageBox(image, viewW, viewH);
-        imageBox.setImageBounds(imageX, imageY, imageW, imageH);
-        return imageBox;
+        return image;
     }
 
     /**

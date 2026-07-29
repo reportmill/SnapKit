@@ -170,7 +170,7 @@ public class Explode {
         // Create image if needed
         if (_image == null) {
             _clientView.setOpacity(1);
-            _image = ViewUtils.getImageForScale(_clientView, 1);
+            _image = ViewUtils.getImageForDpiScale(_clientView, 1);
         }
 
         // Set sizes for image/view pieces
