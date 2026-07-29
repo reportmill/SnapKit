@@ -346,7 +346,7 @@ public class TextPane extends ViewController {
         addKeyActionHandler("FindText", "Shortcut+G");
         addKeyActionHandler("FindTextPrevious", "Shortcut+Shift+G");
         addKeyActionHandler("LineNumberPanelAction", "Shortcut+L");
-        addKeyActionHandler("EscapeAction", "ESC");
+        addKeyActionFilter("EscapeAction", "ESC");
     }
 
     /**
@@ -427,7 +427,7 @@ public class TextPane extends ViewController {
             case "LineNumberPanelAction" -> runLater(() -> showLineNumberPanel());
 
             // Handle EscapeAction
-            case "EscapeAction" -> hideFindPanel();
+            case "EscapeAction" -> handleEscapeActionEvent(anEvent);
         }
     }
 
@@ -630,6 +630,17 @@ public class TextPane extends ViewController {
         else {
             _findString = null;
             _stringMatches = null;
+        }
+    }
+
+    /**
+     * Called when escape action is fired to hide panel if showing.
+     */
+    private void handleEscapeActionEvent(ViewEvent anEvent)
+    {
+        if (_findPanel.isShowing()) {
+            hideFindPanel();
+            anEvent.consume();
         }
     }
 

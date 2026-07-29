@@ -420,8 +420,8 @@ async function fireEvent(name, callback, arg1, arg2)
             if (arg1.ctrlKey || arg1.metaKey) {
                 var key = arg1.key;
 
-                // Ignore shortcut+l (select address bar), shortcut-h (hide) and shortcut+alt+i (show dev tools)
-                if (key === "l" || key === "h" || arg1.altKey)
+                // Ignore shortcut+l (select address bar), shortcut-h/w/q (hide/close/quit) and shortcut+alt+i (show dev tools)
+                if (key === "l" || key === "h" || key ==="w" || key ==="q" || arg1.altKey)
                     return;
 
                 // If shortcut+C (copy) or shortcut+X (cut), add callback to write clipboard items (for Safari)
