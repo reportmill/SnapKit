@@ -3,6 +3,7 @@
  */
 package snap.gfx3d;
 import snap.geom.Point;
+import java.util.List;
 
 /**
  * Hit detection between Ray and Shape/VertexArray/Triangle.
@@ -10,28 +11,28 @@ import snap.geom.Point;
 public class HitDetector {
 
     // Whether to only find first hit
-    private boolean  _findFirstHit;
+    private boolean _findFirstHit;
 
     // The current shape
-    private Shape3D  _hitShape;
+    private Shape3D _hitShape;
 
     // The current triangle VertexArray
-    private VertexArray  _hitTriangleArray;
+    private VertexArray _hitTriangleArray;
 
     // The hit indexes
-    private int[]  _hitTriangleIndexArray = new int[3];
+    private int[] _hitTriangleIndexArray = new int[3];
 
     // The current hit point
-    private Point3D  _hitPoint = new Point3D();
+    private Point3D _hitPoint = new Point3D();
 
     // The current barycentric point
-    private Point3D  _baryPoint = new Point3D();
+    private Point3D _baryPoint = new Point3D();
 
     // The hit distance parameter
-    private double  _hitT;
+    private double _hitT;
 
     // The current triangle points
-    private Point3D  _vertex0 = new Point3D(), _vertex1 = new Point3D(), _vertex2 = new Point3D();
+    private Point3D _vertex0 = new Point3D(), _vertex1 = new Point3D(), _vertex2 = new Point3D();
 
     // Constant for hit detection
     private static final double EPSILON = 0.0000001;
@@ -114,9 +115,8 @@ public class HitDetector {
     public boolean isRayHitShape(Point3D rayOrigin, Vector3D rayDir, Shape3D aShape)
     {
         // Handle ParentShape
-        if (aShape instanceof ParentShape) {
-            ParentShape parentShape = (ParentShape) aShape;
-            Shape3D[] children = parentShape.getChildren();
+        if (aShape instanceof ParentShape parentShape) {
+            List<Shape3D> children = parentShape.getChildren();
             for (Shape3D child : children)
                 if (child.isVisible())
                     isRayHitShape(rayOrigin, rayDir, child);
@@ -124,10 +124,9 @@ public class HitDetector {
         }
 
         // Handle FacetShape
-        if (aShape instanceof FacetShape) {
+        if (aShape instanceof FacetShape facetShape) {
 
             // If single sided and shape.Normal is same dir as ray, return null
-            FacetShape facetShape = (FacetShape) aShape;
             if (!facetShape.isDoubleSided()) {
                 Vector3D normal = facetShape.getNormal();
                 if (rayDir.isAligned(normal, true))
@@ -152,8 +151,7 @@ public class HitDetector {
         }
 
         // Handle VertexArrayShape
-        if (aShape instanceof VertexArrayShape) {
-            VertexArrayShape vertexArrayShape = (VertexArrayShape) aShape;
+        if (aShape instanceof VertexArrayShape vertexArrayShape) {
             VertexArray triangleArray = vertexArrayShape.getTriangleArray();
             boolean isHit = isRayHitTriangleArray(rayOrigin, rayDir, triangleArray);
             if (isHit) {

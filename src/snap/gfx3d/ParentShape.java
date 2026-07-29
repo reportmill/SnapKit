@@ -2,7 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx3d;
-import snap.util.ArrayUtils;
+import snap.util.ListUtils;
+import java.util.*;
 
 /**
  * This Shape3D subclass holds child shapes.
@@ -10,19 +11,16 @@ import snap.util.ArrayUtils;
 public class ParentShape extends Shape3D {
 
     // The child shape array
-    private Shape3D[]  _children = EMPTY_SHAPE_ARRAY;
+    private List<Shape3D> _children = new ArrayList<>();
 
     // Whether parent shape needs to rebuild children
-    private boolean  _needsRebuildShape;
+    private boolean _needsRebuildShape;
 
     // Whether parent shape needs to be repainted
-    private boolean  _needsRepaint;
+    private boolean _needsRepaint;
 
     // Constants for properties
     public static final String NeedsRepaint_Prop = "NeedsRepaint";
-
-    // Constants
-    private static final Shape3D[] EMPTY_SHAPE_ARRAY = new Shape3D[0];
 
     /**
      * Constructor.
@@ -35,17 +33,17 @@ public class ParentShape extends Shape3D {
     /**
      * Returns the number of children.
      */
-    public int getChildCount()  { return getChildren().length; }
+    public int getChildCount()  { return getChildren().size(); }
 
     /**
      * Returns the child at given index.
      */
-    public Shape3D getChild(int anIndex)  { return _children[anIndex]; }
+    public Shape3D getChild(int anIndex)  { return _children.get(anIndex); }
 
     /**
      * Returns the children.
      */
-    public Shape3D[] getChildren()
+    public List<Shape3D> getChildren()
     {
         buildShape();
         return _children;
@@ -57,8 +55,8 @@ public class ParentShape extends Shape3D {
     public void setChildren(Shape3D ... theChildren)
     {
         // Cache old, set new
-        Shape3D[] oldChildren = _children;
-        _children = theChildren;
+        List<Shape3D> oldChildren = _children;
+        _children = new ArrayList<>(List.of(theChildren));
 
         // Set children parents
         for (Shape3D child : _children)
@@ -66,7 +64,7 @@ public class ParentShape extends Shape3D {
 
         // Clear others
         for (Shape3D child : oldChildren)
-            if (!ArrayUtils.containsId(_children, child))
+            if (!ListUtils.containsId(_children, child))
                 child.setParent(null);
 
         // Clear cached values
@@ -86,7 +84,7 @@ public class ParentShape extends Shape3D {
      */
     public void addChild(Shape3D aShape, int anIndex)
     {
-        _children = ArrayUtils.add(_children, aShape, anIndex);
+        _children.add(anIndex, aShape);
         aShape.setParent(this);
         clearCachedValues();
     }
@@ -96,8 +94,8 @@ public class ParentShape extends Shape3D {
      */
     public Shape3D removeChild(int anIndex)
     {
-        Shape3D child = _children[anIndex];
-        _children = ArrayUtils.remove(_children, anIndex);
+        Shape3D child = _children.get(anIndex);
+        _children.remove(anIndex);
         child.setParent(null);
         clearCachedValues();
         return child;
@@ -108,7 +106,7 @@ public class ParentShape extends Shape3D {
      */
     public void removeChild(Shape3D aShape)
     {
-        int index = ArrayUtils.indexOfId(_children, aShape);
+        int index = ListUtils.indexOfId(_children, aShape);
         if (index >= 0)
             removeChild(index);
     }
@@ -118,7 +116,7 @@ public class ParentShape extends Shape3D {
      */
     public void removeChildren()
     {
-        setChildren(EMPTY_SHAPE_ARRAY);
+        setChildren();
     }
 
     /**
@@ -128,8 +126,8 @@ public class ParentShape extends Shape3D {
     protected Bounds3D createBounds3D()
     {
         // Get all shapes and first shape
-        Shape3D[] shapes = getChildren();
-        Shape3D shape0 = shapes.length > 0 ? shapes[0] : null;
+        List<Shape3D> shapes = getChildren();
+        Shape3D shape0 = !shapes.isEmpty() ? shapes.get(0) : null;
 
         // Create new Box3D from first shape
         Bounds3D bounds0 = shape0 != null ? shape0.getBounds3D() : null;
@@ -151,7 +149,6 @@ public class ParentShape extends Shape3D {
     public void rebuildShape()
     {
         if (_needsRebuildShape) return;
-
         _needsRebuildShape = true;
     }
 

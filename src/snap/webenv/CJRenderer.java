@@ -9,6 +9,7 @@ import snap.gfx3d.*;
 import snap.util.SnapUtils;
 import snap.webapi.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -154,11 +155,9 @@ public class CJRenderer extends Renderer {
             return;
 
         // Handle Parent: Iterate over children and recurse
-        if (aShape3D instanceof ParentShape) {
-            ParentShape parentShape = (ParentShape) aShape3D;
-            Shape3D[] children = parentShape.getChildren();
-            for (Shape3D child : children)
-                renderShape3D(child);
+        if (aShape3D instanceof ParentShape parentShape) {
+            List<Shape3D> children = parentShape.getChildren();
+            children.forEach(this::renderShape3D);
         }
 
         // Handle child: Get VertexArray and render
@@ -448,7 +447,7 @@ public class CJRenderer extends Renderer {
     {
         String sourcePath = "shaders/" + getSourceName(aType, aName);
         String sourceText = SnapUtils.getText(getClass(), sourcePath);
-        if (sourceText == null || sourceText.length() == 0)
+        if (sourceText == null || sourceText.isEmpty())
             System.err.println("CJRenderer.getSourceText: shader source not found: " + sourcePath);
         return sourceText;
     }

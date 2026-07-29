@@ -113,27 +113,23 @@ public class Renderer2D extends Renderer {
             return;
 
         // Handle ParentShape: Get children and recurse
-        if (aShape instanceof ParentShape) {
-            ParentShape parentShape = (ParentShape) aShape;
-            Shape3D[] children = parentShape.getChildren();
+        if (aShape instanceof ParentShape parentShape) {
+            List<Shape3D> children = parentShape.getChildren();
             for (Shape3D child : children)
                 addFacetShapesInCameraCoords(child, facetShapeList);
         }
 
         // Handle FacetShape
-        else if (aShape instanceof FacetShape) {
-            FacetShape facetShape = (FacetShape) aShape;
+        else if (aShape instanceof FacetShape facetShape)
             addFacetShapeInCameraCoords(facetShape, facetShapeList);
-        }
 
         // Handle VertexArrayShape
-        else if (aShape instanceof VertexArrayShape) {
-            VertexArrayShape vertexArrayShape = (VertexArrayShape) aShape;
+        else if (aShape instanceof VertexArrayShape vertexArrayShape) {
             VertexArray triangleArray = vertexArrayShape.getTriangleArray();
             float[] pointsArray = triangleArray.getPointArray();
             float[] colorsArray = triangleArray.isColorArraySet() ? triangleArray.getColorArray() : null;
             Color color = triangleArray.getColor();
-            boolean textureSet = triangleArray.isTextureSetAndReady();;
+            boolean textureSet = triangleArray.isTextureSetAndReady();
             Image textureImage = textureSet ? triangleArray.getTexture().getImage() : null;
             float[] textureCoords = textureSet ? triangleArray.getTexCoordArray() : null;
             int textImageW = textureImage != null ? textureImage.getPixWidth() - 1 : 0;
