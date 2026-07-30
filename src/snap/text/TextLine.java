@@ -107,7 +107,11 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Returns the string for the line.
      */
-    public String getString()  { return _chars.toString(); }
+    public String getString()
+    {
+        if (_chars instanceof StringBuilder) _chars = _chars.toString();
+        return (String) _chars;
+    }
 
     /**
      * Returns the start char index of this line in text.
