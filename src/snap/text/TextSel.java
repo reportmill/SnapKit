@@ -28,6 +28,9 @@ public class TextSel {
     // The start/end
     private int  _end;
 
+    // The start line
+    private TextLine _startLine;
+
     /**
      * Constructor.
      */
@@ -217,7 +220,8 @@ public class TextSel {
      */
     public TextLine getStartLine()
     {
-        return _textLayout.getLineForCharIndex(getStart());
+        if (_startLine != null) return _startLine;
+        return _startLine = _textLayout.getLineForCharIndex(getStart());
     }
 
     /**
