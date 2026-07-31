@@ -1633,6 +1633,9 @@ public class TextAdapter extends PropObject {
         // Add prop change to undoer
         addTextModelPropChangeToUndoer(propChange);
 
+        // Clear sel text style
+        _selStyle = null;
+
         // Forward on to listeners
         for (PropChangeListener propChangeLsnr : _textModelPropChangeLsnrs)
             propChangeLsnr.handlePropChange(propChange);
