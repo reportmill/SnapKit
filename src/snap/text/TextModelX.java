@@ -11,7 +11,7 @@ import snap.props.PropChangeListener;
  * This TextModel subclass adds support for advanced features like text wrapping, font scaling, linking multiple
  * text models and more.
  */
-public class TextModelX extends TextBlock {
+public class TextModelX extends TextModel {
 
     // The source text model
     protected TextModel _sourceText;
@@ -145,7 +145,7 @@ public class TextModelX extends TextBlock {
      * Override to do wrapping.
      */
     @Override
-    protected void addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, boolean charsHaveNewline)
+    void addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, boolean charsHaveNewline)
     {
         // If updating text from source text, update line style
         if (_updateTextLineStyle != null)
@@ -159,7 +159,7 @@ public class TextModelX extends TextBlock {
      * Override to handle wrap lines.
      */
     @Override
-    protected void addCharsToLineFinished(TextLine textLine)
+    void addCharsToLineFinished(TextLine textLine)
     {
         // Wrap line
         if (isWrapLines())

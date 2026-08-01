@@ -15,23 +15,29 @@ import java.util.List;
  */
 public abstract class TextLayout extends PropObject {
 
+    // The length of this text
+    int _length;
+
+    // The TextLines in this text
+    List<TextLine> _lines = new ArrayList<>(1);
+
     // The X/Y of the text model
-    protected double _x, _y;
+    double _x, _y;
 
     // The width/height of the text model
-    protected double _width = Float.MAX_VALUE, _height;
+    double _width = Float.MAX_VALUE, _height;
 
     // The pref width of the text model
-    protected double _prefW = -1;
+    double _prefW = -1;
 
     // They y alignment
-    protected VPos _alignY = VPos.TOP;
+    VPos _alignY = VPos.TOP;
 
     // The y alignment amount
-    protected double _alignedY = -1;
+    double _alignedY = -1;
 
     // A version of this layout as a CharSequenceX
-    protected CharSequenceX _charsX;
+    private CharSequenceX _charsX;
 
     /**
      * Constructor.
@@ -59,7 +65,7 @@ public abstract class TextLayout extends PropObject {
     /**
      * Returns the number of characters in the text.
      */
-    public abstract int length();
+    public int length()  { return _length; }
 
     /**
      * Returns whether text is empty.
@@ -101,7 +107,14 @@ public abstract class TextLayout extends PropObject {
     /**
      * Returns the string for the text.
      */
-    public abstract String getString();
+    public String getString()
+    {
+        if (getLineCount() == 1)
+            return getLine(0).getString();
+        StringBuilder sb = new StringBuilder(length());
+        getLines().forEach(line -> sb.append(line.getChars()));
+        return sb.toString();
+    }
 
     /**
      * Returns a char sequence for layout.
@@ -130,17 +143,17 @@ public abstract class TextLayout extends PropObject {
     /**
      * Returns the number of block in this doc.
      */
-    public abstract int getLineCount();
+    public int getLineCount()  { return _lines.size(); }
 
     /**
      * Returns the individual block in this doc.
      */
-    public abstract TextLine getLine(int anIndex);
+    public TextLine getLine(int anIndex)  { return _lines.get(anIndex); }
 
     /**
      * Returns the list of blocks.
      */
-    public abstract List<TextLine> getLines();
+    public List<TextLine> getLines()  { return _lines; }
 
     /**
      * Returns the block at the given char index.
@@ -190,7 +203,7 @@ public abstract class TextLayout extends PropObject {
     /**
      * Returns the longest line.
      */
-    public TextLine getLineLongest()
+    public TextLine getLongestLine()
     {
         TextLine longLine = null;
         double longW = 0;
@@ -201,7 +214,6 @@ public abstract class TextLayout extends PropObject {
             }
         }
 
-        // Return
         return longLine;
     }
 
@@ -537,7 +549,7 @@ public abstract class TextLayout extends PropObject {
 
         // If not WrapLines, check X
         if (!isWrapLines()) {
-            TextLine line = getLineLongest();
+            TextLine line = getLongestLine();
             double lineW = line != null ? line.getWidth() : 0;
             double textW = getWidth();
             if (lineW > textW)
@@ -557,7 +569,7 @@ public abstract class TextLayout extends PropObject {
         if (_prefW >= 0) return _prefW;
 
         // Calc, set, return
-        TextLine longestLine = getLineLongest();
+        TextLine longestLine = getLongestLine();
         double longestLineW = longestLine != null ? longestLine.getWidth() : 0;
         double prefW = Math.ceil(longestLineW);
         return _prefW = prefW;

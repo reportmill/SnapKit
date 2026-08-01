@@ -634,24 +634,14 @@ public class TextLine implements CharSequenceX, Cloneable {
      */
     public TextToken[] getTokens()
     {
-        // If already set, just return
         if (_tokens != null) return _tokens;
 
         // Create Tokens and set index for each
-        TextToken[] tokens = createTokens();
+        TextToken[] tokens = _textModel.createTokensForTextLine(this);
         for (int i = 0; i < tokens.length; i++)
             tokens[i]._index = i;
 
-        // Set, return
         return _tokens = tokens;
-    }
-
-    /**
-     * Creates the tokens (via TextModel.createTokensForTextLine() to provide another hook).
-     */
-    protected TextToken[] createTokens()
-    {
-        return _textModel.createTokensForTextLine(this);
     }
 
     /**
@@ -833,8 +823,8 @@ public class TextLine implements CharSequenceX, Cloneable {
         _textMetrics = null;
 
         // Update Lines
-        if (_textModel instanceof TextBlock textBlock)
-            textBlock.resetLineYForLinesAfterIndex(getLineIndex());
+        if (_textModel != null)
+            _textModel.resetLineYForLinesAfterIndex(getLineIndex());
     }
 
     /**
@@ -849,8 +839,8 @@ public class TextLine implements CharSequenceX, Cloneable {
         _textMetrics = null;
 
         // Update Lines
-        if (_textModel instanceof TextBlock textBlock)
-            textBlock.updateLines(getLineIndex());
+        if (_textModel != null)
+            _textModel.updateLines(getLineIndex());
     }
 
     /**
@@ -951,6 +941,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Standard toString implementation.
      */
+    @Override
     public String toString()
     {
         // Get props string for props: Start, End, Length, Index, String
