@@ -5,12 +5,12 @@ package snap.text;
 import java.util.Iterator;
 
 /**
- * This class iterates over TextModel TextRuns.
+ * This class iterates over TextLayout TextRuns.
  */
 public class TextRunIter implements Iterable<TextRun>, Iterator<TextRun> {
 
-    // The TextModel
-    private TextModel _textModel;
+    // The TextLayout
+    private TextLayout _textLayout;
 
     // The start char index
     private int _startCharIndex;
@@ -33,15 +33,15 @@ public class TextRunIter implements Iterable<TextRun>, Iterator<TextRun> {
     /**
      * Constructor.
      */
-    public TextRunIter(TextModel textModel, int startCharIndex, int endCharIndex, boolean trimEndRuns)
+    public TextRunIter(TextLayout textLayout, int startCharIndex, int endCharIndex, boolean trimEndRuns)
     {
-        _textModel = textModel;
+        this._textLayout = textLayout;
         _startCharIndex = startCharIndex;
         _endCharIndex = endCharIndex;
         _trimEndRuns = trimEndRuns;
 
         // Get starting line
-        _textLine = textModel.getLineForCharIndex(startCharIndex);
+        _textLine = textLayout.getLineForCharIndex(startCharIndex);
 
         // Get/set starting next run
         int startCharIndexInLine = startCharIndex - _textLine.getStartCharIndex();
@@ -135,7 +135,7 @@ public class TextRunIter implements Iterable<TextRun>, Iterator<TextRun> {
         }
 
         // If end run ends after end char index, split at end char index
-        TextRun endRun = _textModel.getRunForCharIndex(_endCharIndex);
+        TextRun endRun = _textLayout.getRunForCharIndex(_endCharIndex);
         TextLine endLine = endRun.getLine();
         int endIndexInLine = _endCharIndex - endLine.getStartCharIndex();
         if (endIndexInLine < endRun.getEndCharIndex()) {

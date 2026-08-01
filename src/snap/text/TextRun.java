@@ -16,25 +16,25 @@ import java.util.Objects;
 public class TextRun implements CharSequenceX, Cloneable {
 
     // The line that contains this run
-    protected TextLine  _textLine;
+    TextLine _textLine;
 
     // The start char index of this run in line
-    protected int  _startCharIndex;
+    int _startCharIndex;
 
     // The char length of this run
-    protected int  _length;
+    private int _length;
 
     // The attributes of the Run
-    protected TextStyle _textStyle = TextStyle.DEFAULT;
+    private TextStyle _textStyle = TextStyle.DEFAULT;
 
     // The index of this run in line
-    protected int  _index;
+    int  _index;
 
     // The run x
-    protected double _x = -1;
+    double _x = -1;
 
     // The width of run
-    protected double  _width = -1;
+    private double _width = -1;
 
     /**
      * Constructor.
@@ -68,7 +68,7 @@ public class TextRun implements CharSequenceX, Cloneable {
     /**
      * Sets the run text style.
      */
-    protected void setTextStyle(TextStyle textStyle)
+    void setTextStyle(TextStyle textStyle)
     {
         _textStyle = textStyle;
         _width = -1;
@@ -182,7 +182,7 @@ public class TextRun implements CharSequenceX, Cloneable {
     /**
      * Sets length to given char length.
      */
-    protected void setLength(int aLength)
+    void setLength(int aLength)
     {
         _length = aLength; assert (_length >= 0);
         _width = -1;
@@ -191,7 +191,7 @@ public class TextRun implements CharSequenceX, Cloneable {
     /**
      * Adds length to grow this run (negative value reduces it).
      */
-    protected void addLength(int aLength)  { setLength(_length + aLength);}
+    void addLength(int aLength)  { setLength(_length + aLength);}
 
     /**
      * Returns the font for this run.

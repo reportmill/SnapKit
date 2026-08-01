@@ -16,19 +16,19 @@ import java.util.Objects;
 public class TextModel extends TextLayout {
 
     // Whether text is rich
-    protected boolean _rich;
+    boolean _rich;
 
     // The default text style for this text
-    protected TextStyle _defaultTextStyle = TextStyle.DEFAULT;
+    private TextStyle _defaultTextStyle = TextStyle.DEFAULT;
 
     // The default line style for this text
-    protected TextLineStyle _defaultLineStyle = TextLineStyle.DEFAULT;
+    private TextLineStyle _defaultLineStyle = TextLineStyle.DEFAULT;
 
     // Whether property change is enabled
-    protected boolean _propChangeEnabled = true;
+    private boolean _propChangeEnabled = true;
 
     // The last mouse Y, to help in caret placement (can be ambiguous for start/end of line)
-    protected double _mouseY;
+    double _mouseY;
 
     // Constants for properties
     public static final String Chars_Prop = "Chars";
@@ -645,14 +645,6 @@ public class TextModel extends TextLayout {
     }
 
     /**
-     * Returns a TextRunIter to easily traverse the runs for a given range of chars.
-     */
-    public TextRunIter getRunIterForCharRange(int startCharIndex, int endCharIndex)
-    {
-        return new TextRunIter(this, startCharIndex, endCharIndex, true);
-    }
-
-    /**
      * Sets text to be underlined.
      */
     public void setUnderlined(boolean aFlag)
@@ -710,27 +702,6 @@ public class TextModel extends TextLayout {
                 setLineStyle(line.getLineStyle(), index, index + run.length());
             }
         }
-    }
-
-    /**
-     * Returns a copy of this text for given char range.
-     */
-    public TextModel copyForRange(int aStart, int anEnd)
-    {
-        // Get empty copy
-        TextModel textCopy = TextModel.createDefaultTextModel(isRichText());
-        textCopy.setDefaultTextStyle(getDefaultTextStyle());
-        textCopy.setDefaultLineStyle(getDefaultLineStyle());
-
-        // Add chars for range
-        TextRunIter runIter = getRunIterForCharRange(aStart, anEnd);
-        for (TextRun textRun : runIter) {
-            textCopy.addCharsWithStyle(textRun.getString(), textRun.getTextStyle());
-            textCopy.getLineForCharIndex(textCopy.length()).setLineStyle(textRun.getLine().getLineStyle());
-        }
-
-        // Return
-        return textCopy;
     }
 
     /**

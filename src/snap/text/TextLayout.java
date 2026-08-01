@@ -129,7 +129,7 @@ public abstract class TextLayout extends PropObject {
     /**
      * Returns a char sequence for layout.
      */
-    public CharSequenceX getCharsX()
+    CharSequenceX getCharsX()
     {
         if (_charsX != null) return _charsX;
         return _charsX = new CharSequenceX() {
@@ -634,6 +634,36 @@ public abstract class TextLayout extends PropObject {
 
         // Return normal version
         return getPrefHeight();
+    }
+
+    /**
+     * Returns a copy of this text for given char range.
+     */
+    public TextModel copyForRange(int aStart, int anEnd)
+    {
+        // Get empty copy
+        TextModel textCopy = TextModel.createDefaultTextModel(isRichText());
+        if (this instanceof TextModel textModel) {
+            textCopy.setDefaultTextStyle(textModel.getDefaultTextStyle());
+            textCopy.setDefaultLineStyle(textModel.getDefaultLineStyle());
+        }
+
+        // Add chars for range
+        TextRunIter runIter = getRunIterForCharRange(aStart, anEnd);
+        for (TextRun textRun : runIter) {
+            textCopy.addCharsWithStyle(textRun.getString(), textRun.getTextStyle());
+            textCopy.getLineForCharIndex(textCopy.length()).setLineStyle(textRun.getLine().getLineStyle());
+        }
+
+        return textCopy;
+    }
+
+    /**
+     * Returns a TextRunIter to easily traverse the runs for a given range of chars.
+     */
+    public TextRunIter getRunIterForCharRange(int startCharIndex, int endCharIndex)
+    {
+        return new TextRunIter(this, startCharIndex, endCharIndex, true);
     }
 
     /**

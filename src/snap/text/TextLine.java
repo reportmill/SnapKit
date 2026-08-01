@@ -13,37 +13,37 @@ import java.util.Arrays;
 public class TextLine implements CharSequenceX, Cloneable {
 
     // The TextModel that contains this line
-    protected TextModel _textModel;
+    TextModel _textModel;
 
     // The line chars (either String or StringBuilder)
-    protected CharSequence _chars = "";
+    private CharSequence _chars = "";
 
     // The X offsets for line chars
     private float[] _charXs;
 
     // The char index of the start of this line in text
-    protected int  _startCharIndex;
+    int _startCharIndex;
 
     // The run for this line
-    protected TextRun[]  _runs = EMPTY_RUNS;
+    private TextRun[] _runs = EMPTY_RUNS;
 
     // The TextTokens for this line
-    protected TextToken[]  _tokens;
+    private TextToken[] _tokens;
 
     // The line style
-    protected TextLineStyle  _lineStyle;
+    private TextLineStyle _lineStyle;
 
     // The index of this line in text
-    protected int _lineIndex;
+    int _lineIndex;
 
     // The line bounds
-    protected double _x, _y, _width, _height;
+    double _x, _y, _width, _height;
 
     // The TextMetrics
     private TextMetrics _textMetrics;
 
     // Constants
-    protected static final TextRun[] EMPTY_RUNS = new TextRun[0];
+    private static final TextRun[] EMPTY_RUNS = new TextRun[0];
 
     /**
      * Constructor.
@@ -282,7 +282,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Adds a run to line.
      */
-    protected void addRun(TextRun aRun, int anIndex)
+    private void addRun(TextRun aRun, int anIndex)
     {
         _runs = ArrayUtils.add(_runs, aRun, anIndex);
         updateRuns(anIndex - 1);
@@ -291,7 +291,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Removes the run at given index.
      */
-    protected void removeRun(int anIndex)
+    private void removeRun(int anIndex)
     {
         _runs = ArrayUtils.remove(_runs, anIndex);
         updateRuns(anIndex - 1);
@@ -300,7 +300,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Creates a new run.
      */
-    protected TextRun createRun()  { return new TextRun(this); }
+    private TextRun createRun()  { return new TextRun(this); }
 
     /**
      * Returns the head run for the line.
@@ -357,7 +357,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Sets the style for the line (propagates to runs).
      */
-    protected void setTextStyle(TextStyle textStyle)
+    void setTextStyle(TextStyle textStyle)
     {
         for (TextRun run : getRuns())
             run.setTextStyle(textStyle);
@@ -580,7 +580,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Returns the x for tab at given x.
      */
-    protected double getXForTabAtIndexAndX(int charIndex, double aX)
+    double getXForTabAtIndexAndX(int charIndex, double aX)
     {
         // Get tab position and type. If beyond stops, just bump by 4 spaces
         TextLineStyle lineStyle = getLineStyle();
@@ -888,7 +888,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Splits given run at given char index and returns the run containing the remaining chars (and identical attributes).
      */
-    protected TextRun splitRunForCharIndex(TextRun aRun, int anIndex)
+    TextRun splitRunForCharIndex(TextRun aRun, int anIndex)
     {
         // Sanity check
         if (!_textModel.isRichText())
@@ -907,7 +907,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Splits this line at given character index and adds remainder to text and returns it.
      */
-    protected TextLine splitLineAtIndex(int anIndex)
+    TextLine splitLineAtIndex(int anIndex)
     {
         TextLine remainderLine = clone();
         removeChars(anIndex, length());
