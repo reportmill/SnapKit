@@ -177,7 +177,7 @@ public class CJProcess extends Process {
         String script = """
               async function myInit() {
                 await cheerpjInit({ {INIT_ARGS} });{CREATE_DISPLAY}
-                await cheerpjRunMain('{MAIN_CLASS}', '{CLASS_PATH}');
+                await cheerpjRunMain('{MAIN_CLASS}', '{CLASS_PATH}', '--enable-preview');
                 document.getElementById('console').appendChild(new Text('Process exited'));
               }
               myInit();
