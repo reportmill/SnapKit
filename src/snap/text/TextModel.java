@@ -5,7 +5,6 @@ package snap.text;
 import snap.geom.HPos;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.props.PropChange;
 import snap.util.*;
 import java.util.List;
 import java.util.Objects;
@@ -418,8 +417,7 @@ public class TextModel extends TextLayout {
                 int lineStartCharIndex = textRun.getLine().getStartCharIndex();
                 int runStart = textRun.getStartCharIndex() + lineStartCharIndex;
                 int runEnd = textRun.getEndCharIndex() + lineStartCharIndex;
-                PropChange pc = new TextModelUtils.StyleChange(this, oldStyle, textStyle, runStart, runEnd);
-                firePropChange(pc);
+                firePropChange(new TextModelUtils.StyleChange(this, oldStyle, textStyle, runStart, runEnd));
             }
         }
 
@@ -563,6 +561,7 @@ public class TextModel extends TextLayout {
         // Set
         TextStyle oldStyle = _defaultTextStyle;
         _defaultTextStyle = textStyle;
+        _prefW = -1;
 
         // Update existing lines
         if (!isRichText() || length() == 0) {
@@ -601,6 +600,7 @@ public class TextModel extends TextLayout {
         // Set
         TextLineStyle oldStyle = _defaultLineStyle;
         _defaultLineStyle = lineStyle;
+        _prefW = -1;
 
         // Upgrade existing lines
         if (!isRichText() || length() == 0) {
