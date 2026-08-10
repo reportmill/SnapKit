@@ -1635,6 +1635,7 @@ public class TextAdapter extends PropObject {
 
         // Clear sel text style
         _selStyle = null;
+        _sel = null;
 
         // Forward on to listeners
         for (PropChangeListener propChangeLsnr : _textModelPropChangeLsnrs)
