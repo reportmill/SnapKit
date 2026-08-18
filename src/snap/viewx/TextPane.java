@@ -16,6 +16,7 @@ import snap.util.ListUtils;
 import snap.view.*;
 import snap.web.WebFile;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -152,10 +153,11 @@ public class TextPane extends ViewController {
     {
         // Update FindText, select all and focus
         TextArea textArea = getTextArea();
-        if (!textArea.getSel().isEmpty())
-            _findTextField.setText(textArea.getSel().getString());
+        String findString = textArea.getSel().getString();
+        _findTextField.setText(findString);
         _findTextField.selectAll();
         requestFocus(_findTextField);
+        findMatchesAndSelectNext(findString, getViewBoolValue("MatchCaseButton"));
 
         // Make visible
         if (_findPanel.isShowing()) return;
@@ -482,6 +484,9 @@ public class TextPane extends ViewController {
      */
     public List<StringMatch> getMatchesForString(String findString, boolean matchCase)
     {
+        // If empty string, return empty list
+        if (findString.isEmpty()) return Collections.emptyList();
+
         // Compile pattern
         Pattern pattern = Pattern.compile(Pattern.quote(findString), matchCase ? 0 : Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(_textArea.getText());
@@ -625,12 +630,7 @@ public class TextPane extends ViewController {
     private void handleFindTextFieldKeyTypeEvent()
     {
         String findString = getViewStringValue("FindText");
-        if (findString != null && !findString.isEmpty())
-            findMatchesAndSelectNext(findString, getViewBoolValue("MatchCaseButton"));
-        else {
-            _findString = null;
-            _stringMatches = null;
-        }
+        findMatchesAndSelectNext(findString, getViewBoolValue("MatchCaseButton"));
     }
 
     /**
