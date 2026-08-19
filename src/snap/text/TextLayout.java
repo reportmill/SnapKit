@@ -651,8 +651,8 @@ public abstract class TextLayout extends PropObject {
         // Add chars for range
         TextRunIter runIter = getRunIterForCharRange(aStart, anEnd);
         for (TextRun textRun : runIter) {
+            textCopy.getLastLine().setLineStyle(textRun.getLine().getLineStyle());
             textCopy.addCharsWithStyle(textRun.getString(), textRun.getTextStyle());
-            textCopy.getLineForCharIndex(textCopy.length()).setLineStyle(textRun.getLine().getLineStyle());
         }
 
         return textCopy;

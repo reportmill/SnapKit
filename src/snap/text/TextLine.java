@@ -374,6 +374,7 @@ public class TextLine implements CharSequenceX, Cloneable {
      */
     void setLineStyle(TextLineStyle aLineStyle)
     {
+        if (aLineStyle.equals(_lineStyle)) return;
         _lineStyle = aLineStyle;
         updateLineStyle();
         updateAlignmentAndJustify();
