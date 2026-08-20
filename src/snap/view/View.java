@@ -244,11 +244,7 @@ public class View extends PropObject implements EventType.AllTypes {
     public void setX(double aValue)
     {
         if (aValue == _x) return;
-
-        // Repaint in parent to mark old bounds
-        repaintInParent(null);
-
-        // Set value and fire prop change
+        repaintInParent();
         firePropChange(X_Prop, _x, _x = aValue);
     }
 
@@ -263,11 +259,7 @@ public class View extends PropObject implements EventType.AllTypes {
     public void setY(double aValue)
     {
         if (aValue == _y) return;
-
-        // Repaint in parent to mark old bounds
-        repaintInParent(null);
-
-        // Set value and fire prop change
+        repaintInParent();
         firePropChange(Y_Prop, _y, _y = aValue);
     }
 
@@ -438,7 +430,7 @@ public class View extends PropObject implements EventType.AllTypes {
     public void setTransX(double aValue)
     {
         if (aValue == _transX) return;
-        repaintInParent(null);
+        repaintInParent();
         firePropChange(TransX_Prop, _transX, _transX = aValue);
     }
 
@@ -453,7 +445,7 @@ public class View extends PropObject implements EventType.AllTypes {
     public void setTransY(double aValue)
     {
         if (aValue == _transY) return;
-        repaintInParent(null);
+        repaintInParent();
         firePropChange(TransY_Prop, _transY, _transY = aValue);
     }
 
@@ -468,7 +460,7 @@ public class View extends PropObject implements EventType.AllTypes {
     public void setRotate(double theDegrees)
     {
         if (theDegrees == _rotate) return;
-        repaintInParent(null);
+        repaintInParent();
         firePropChange(Rotate_Prop, _rotate, _rotate = theDegrees);
     }
 
@@ -483,7 +475,7 @@ public class View extends PropObject implements EventType.AllTypes {
     public void setScaleX(double aValue)
     {
         if (aValue == _scaleX) return;
-        repaintInParent(null);
+        repaintInParent();
         firePropChange(ScaleX_Prop, _scaleX, _scaleX = aValue);
     }
 
@@ -498,7 +490,7 @@ public class View extends PropObject implements EventType.AllTypes {
     public void setScaleY(double aValue)
     {
         if (aValue == _scaleY) return;
-        repaintInParent(null);
+        repaintInParent();
         firePropChange(ScaleY_Prop, _scaleY, _scaleY = aValue);
     }
 
@@ -622,12 +614,11 @@ public class View extends PropObject implements EventType.AllTypes {
      */
     public void setEffect(Effect anEffect)
     {
-        // If already set, just return
         Effect old = getEffect();
         if (Objects.equals(anEffect, getEffect())) return;
 
         // Set new ViewEffect, fire prop change and repaint
-        repaintInParent(null);
+        repaintInParent();
         _effectPainter = anEffect != null ? new ViewEffectPainter(this, anEffect) : null;
         firePropChange(Effect_Prop, old, anEffect);
     }
@@ -1111,7 +1102,7 @@ public class View extends PropObject implements EventType.AllTypes {
 
         // If setting not visible, repaint area of parent
         if (!aValue)
-            repaintInParent(null);
+            repaintInParent();
 
         // Set value and fire prop change
         firePropChange(Visible_Prop, _visible, _visible = aValue);
@@ -1121,7 +1112,7 @@ public class View extends PropObject implements EventType.AllTypes {
 
         // If setting visible, repaint area of parent
         if (aValue)
-            repaintInParent(null);
+            repaintInParent();
 
         // Trigger Parent relayout
         ParentView parent = getParent();
@@ -2022,27 +2013,20 @@ public class View extends PropObject implements EventType.AllTypes {
     /**
      * Called to repaint in parent for cases where transform or visibility might change.
      */
-    protected void repaintInParent(Rect aRect)
+    void repaintInParent()
     {
-        // Get parent (just return if not set)
-        ParentView parent = getParent();
-        if (parent == null)
+        // If no parent or repaint has already been called, just return
+        if (_parent == null || _repaintRect != null)
             return;
 
         // Do normal repaint
-        if (aRect == null) {
-            if (_repaintRect != null) // Calling with null rect is meant to be called before any other repaint
-                return;
-            repaint(0, 0, getWidth(), getHeight());
-        }
-        else repaint(aRect);
+        repaint(0, 0, getWidth(), getHeight());
 
         // Get repaint rect in parent, and have parent repaint
         Rect repaintRect = getRepaintRect();
         if (repaintRect != null) {
             Rect repaintRectInParent = localToParent(repaintRect).getBounds();
-            repaintRectInParent.inset(-1); // Shouldn't need this unless someone paints out of bounds
-            parent.repaint(repaintRectInParent);
+            _parent.repaint(repaintRectInParent);
         }
     }
 

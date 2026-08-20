@@ -157,31 +157,16 @@ public class CameraView extends ParentView {
     }
 
     /**
-     * Override to account for Scene3D bounds.
+     * Override to extend repaint bounds if scene is outside view.
      */
     public void repaint()
     {
-        Rect bnds = getBoundsMarked();
-        repaintInParent(bnds);
-    }
+        super.repaint();
 
-    /**
-     * Override to account for Scene3D bounds.
-     */
-    public Rect getBoundsMarked()
-    {
-        Rect bounds = getBoundsLocal();
-        Rect camBnds = _camera.getSceneBounds2D();
-        if (camBnds.x < bounds.x)
-            bounds.x = camBnds.x;
-        if (camBnds.y < bounds.y)
-            bounds.y = camBnds.y;
-        if (camBnds.getMaxX() > bounds.getMaxX())
-            bounds.width = camBnds.getMaxX() - bounds.x;
-        if (camBnds.getMaxY() > bounds.getMaxY())
-            bounds.height = camBnds.getMaxY() - bounds.y;
-        bounds.inset(-2);
-        return bounds;
+        // If scene outside of bounds, call repaint for scene bounds
+        Rect sceneBounds = _camera.getSceneBounds2D();
+        if (!getBoundsLocal().contains(sceneBounds))
+            repaint(sceneBounds);
     }
 
     /**

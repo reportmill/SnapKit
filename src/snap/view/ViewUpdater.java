@@ -301,6 +301,7 @@ public class ViewUpdater {
         // Round rect and constrain to root bounds
         if (repaintRect == null)
             return null;
+        repaintRect.inset(-1); // In case a view painted slightly out of bounds
         repaintRect.snap();
         if (repaintRect.x < 0)
             repaintRect.x = 0;

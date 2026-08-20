@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.geom.Rect;
 import snap.gfx.Painter;
 import snap.gfx.RoughPainter;
 
@@ -99,7 +98,8 @@ public class RootView extends ParentView {
     /**
      * Override to actually paint in this RootView.
      */
-    protected void repaintInParent(Rect aRect)  { repaint(); }
+    @Override
+    void repaintInParent()  { repaint(); }
 
     /**
      * Override to return Box layout.
