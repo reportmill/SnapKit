@@ -48,12 +48,6 @@ public class WindowView extends ParentView {
     // Whether window is resizable
     private boolean _resizable = true;
 
-    // Whether to show window bar on top of window
-    private boolean _showWindowBar;
-
-    // The window bar
-    private WindowBar _windowBar;
-    
     // Whether window is sized to maximum screen size
     private boolean _maximized;
     
@@ -108,7 +102,6 @@ public class WindowView extends ParentView {
     public static final String Title_Prop = "Title";
     public static final String FocusView_Prop = "FocusView";
     public static final String DocumentUrl_Prop = "DocumentUrl";
-    public static final String ShowWindowBar_Prop = "ShowWindowBar";
 
     /**
      * Constructor.
@@ -159,34 +152,6 @@ public class WindowView extends ParentView {
     {
         if (aValue == _resizable) return;
         firePropChange(Resizable_Prop, _resizable, _resizable = aValue);
-    }
-
-    /**
-     * Returns whether to show the window bar.
-     */
-    public boolean isShowWindowBar()  { return _showWindowBar; }
-
-    /**
-     * Sets whether to show the window bar.
-     */
-    public void setShowWindowBar(boolean aValue)
-    {
-        if (aValue == isShowWindowBar()) return;
-        batchPropChange(ShowWindowBar_Prop, _showWindowBar, _showWindowBar = aValue);
-
-        if (aValue)
-            WindowBar.attachWindowBar(this);
-        else WindowBar.detachWindowBar(this);
-        fireBatchPropChanges();
-    }
-
-    /**
-     * Returns the window bar.
-     */
-    public WindowBar getWindowBar()
-    {
-        if (_windowBar != null) return _windowBar;
-        return _windowBar = new WindowBar(this);
     }
 
     /**
@@ -463,7 +428,7 @@ public class WindowView extends ParentView {
 
         // If in browser and not plain, install window bar
         if (SnapEnv.isWebVM && getType() != Type.PLAIN)
-            setShowWindowBar(true);
+            WindowBar.attachWindowBarToWindow(this);
 
         // Create helper
         _helper = getEnv().createHelper(this);

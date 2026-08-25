@@ -8,22 +8,25 @@ import snap.gfx.Stroke;
 /**
  * A View to paint a window bar.
  */
-public class WindowBar extends ParentView {
+class WindowBar extends ParentView {
+
+    // The title bar view
+    private TitleBarView _titleBarView;
 
     // The content
-    private View  _content;
+    private View _content;
     
     // The title bar height
-    private double  _titleBarHeight;
+    private double _titleBarHeight;
     
     // The buttons
-    private Shape  _closeButton, _minButton, _maxButton;
+    private Shape _closeButton, _minButton, _maxButton;
     
     // The title bar font
-    private Font  _font;
+    private Font _font;
     
     // For dragging
-    private Point  _mousePoint;
+    private Point _mousePoint;
     
     // Colors
     private static final Color CLOSE_COLOR = new Color("#ED6B5F");
@@ -38,8 +41,8 @@ public class WindowBar extends ParentView {
      */
     public WindowBar(WindowView window)
     {
-        double titleBarH = window.getType() == WindowView.Type.MAIN ? 24 : 18;
-        setTitlebarHeight(titleBarH);
+        super();
+        addTitleBarView(window);
         addEventHandler(this::handleMouseEvent, MousePress, MouseDrag, MouseRelease);
     }
 
@@ -58,12 +61,14 @@ public class WindowBar extends ParentView {
     }
 
     /**
-     * Sets the title bar height.
+     * Adds the title bar view.
      */
-    public void setTitlebarHeight(double aValue)
+    private void addTitleBarView(WindowView window)
     {
-        _titleBarHeight = aValue;
-        setPadding(_titleBarHeight,0,0,0);
+        _titleBarHeight = window.getType() == WindowView.Type.MAIN ? 24 : 18;
+        _titleBarView = new TitleBarView();
+        _titleBarView.setPrefHeight(_titleBarHeight);
+        addChild(_titleBarView);
 
         // Create buttons
         double buttonY = 6;
@@ -186,15 +191,15 @@ public class WindowBar extends ParentView {
     }
 
     /**
-     * Override to return box layout.
+     * Override to return column layout.
      */
     @Override
-    protected ViewLayout getViewLayoutImpl()  { return new BoxViewLayout(this, getContent(), true, true); }
+    protected ViewLayout getViewLayoutImpl()  { return new ColViewLayout(this, true); }
 
     /**
-     * Attaches a WindowBar to a view.
+     * Attaches a WindowBar to a window.
      */
-    protected static void attachWindowBar(WindowView window)
+    public static void attachWindowBarToWindow(WindowView window)
     {
         if (window.getContent() instanceof WindowBar)
             return;
@@ -206,7 +211,7 @@ public class WindowBar extends ParentView {
         boolean needsResize = size.equals(prefSize);
 
         // Install window bar
-        WindowBar windowBar = window.getWindowBar();
+        WindowBar windowBar = new WindowBar(window);
         windowBar.setContent(rootView.getContent());
         rootView.setContent(windowBar);
 
@@ -219,13 +224,17 @@ public class WindowBar extends ParentView {
     }
 
     /**
-     * Detaches a WindowBar to a view.
+     * The title bar view.
      */
-    protected static void detachWindowBar(WindowView window)
-    {
-        View content = window.getContent();
-        WindowBar windowBar = content instanceof WindowBar ? (WindowBar) content : null;
-        if (windowBar != null)
-            window.setContent(windowBar.getContent());
+    private static class TitleBarView extends View {
+
+        /**
+         * Constructor.
+         */
+        public TitleBarView()
+        {
+            super();
+            setPickable(false);
+        }
     }
 }
