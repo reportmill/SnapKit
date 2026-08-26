@@ -131,11 +131,17 @@ public class MarkdownView extends ChildView {
      */
     public MarkdownNode getSelCodeBlockNode()
     {
-        if (_selCodeBlockNode != null)
-            return _selCodeBlockNode;
-
+        if (_selCodeBlockNode != null) return _selCodeBlockNode;
         List<MarkdownNode> docNodes = _documentNode.getChildNodes();
         return ListUtils.findMatch(docNodes, node -> node.getNodeType() == MarkdownNode.NodeType.CodeBlock);
+    }
+
+    /**
+     * Sets the selected code block node.
+     */
+    public void setSelCodeBlockNode(MarkdownNode codeBlockNode)
+    {
+        _selCodeBlockNode = codeBlockNode;
     }
 
     /**
@@ -410,7 +416,7 @@ public class MarkdownView extends ChildView {
         textModel.addChars(codeNode.getText());
 
         // Add listener to select code block
-        textArea.addEventFilter(e -> _selCodeBlockNode = codeNode, MousePress);
+        textArea.addEventFilter(e -> setSelCodeBlockNode(codeNode), MousePress);
 
         // Return
         return textArea;
