@@ -1,6 +1,5 @@
 package snap.webenv;
 import snap.util.ListUtils;
-import snap.util.SnapEnv;
 import snap.view.*;
 import snap.webapi.*;
 import snap.webapi.EventListener;
@@ -13,23 +12,20 @@ import java.util.Set;
  */
 public class CJScreen {
 
-    // The Window hit by last MouseDown
-    private WindowView  _mousePressWin;
-
     // The Window hit by last MouseMove (if mouse still down)
-    private WindowView  _mouseDownWin;
+    private WindowView _mouseDownWin;
 
     // Time of last mouse release
-    private long  _lastReleaseTime;
+    private long _lastReleaseTime;
 
     // Last number of clicks
-    private int  _clicks;
+    private int _clicks;
 
-    // The list of open windows
-    private List <WindowView>  _windows = new ArrayList<>();
+    // The open windows
+    private List<WindowView> _openWindows = new ArrayList<>();
 
-    // The current main window
-    private WindowView  _win;
+    // The current active window
+    private WindowView _activeWindow;
 
     // The shared screen object
     private static CJScreen _screen;
@@ -81,7 +77,7 @@ public class CJScreen {
         _focusEnabler.focus();
 
         // Add Mouse listeners
-        EventListener<?> lsnr = e -> handleEvent(e);
+        EventListener<?> lsnr = this::handleEvent;
         _screenDiv.addEventListener("mousedown", lsnr);
         _screenDiv.addEventListener("mousemove", lsnr);
         _screenDiv.addEventListener("mouseup", lsnr);
@@ -118,101 +114,9 @@ public class CJScreen {
     }
 
     /**
-     * Handles an event.
-     */
-    void handleEvent(Event e)
-    {
-        // Vars
-        Runnable run = null;
-
-        // Handle event types
-        switch(e.getType()) {
-
-            // Handle MouseDown
-            case "mousedown":
-                run = () -> mouseDown((MouseEvent) e);
-                _mousePressWin = _mouseDownWin = getWindow((MouseEvent) e);
-                if (_mousePressWin == null) return;
-                break;
-
-            // Handle MouseMove
-            case "mousemove":
-                if (_mouseDownWin != null)
-                    run = () -> mouseDrag((MouseEvent) e);
-                else run = () -> mouseMove((MouseEvent) e);
-                break;
-
-            // Handle MouseUp
-            case "mouseup":
-                run = () -> mouseUp((MouseEvent) e);
-                if (_mousePressWin == null) return; //stopProp = prevDefault = true;
-                break;
-
-            // Handle Wheel
-            case "wheel":
-                if (getWindow((WheelEvent) e) == null) return;
-                run = () -> mouseWheel((WheelEvent) e);
-                break;
-
-            // Handle KeyDown
-            case "keydown":
-                if (_mousePressWin == null) return;
-                run = () -> keyDown((KeyboardEvent) e);
-                break;
-
-            // Handle KeyUp
-            case "keyup":
-                if (_mousePressWin == null) return;
-                run = () -> keyUp((KeyboardEvent) e);
-                break;
-
-            // Handle TouchStart
-            case "touchstart":
-                run = () -> touchStart((TouchEvent) e);
-                _mousePressWin = _mouseDownWin = getWindow((TouchEvent) e);
-                if (_mousePressWin == null) return;
-                break;
-
-            // Handle TouchMove
-            case "touchmove":
-                if (_mousePressWin == null) return;
-                run = () -> touchMove((TouchEvent) e);
-                break;
-
-            // Handle TouchEnd
-            case "touchend":
-                if (_mousePressWin == null) return;
-                run = () -> touchEnd((TouchEvent) e);
-                break;
-
-            // Handle pointerDown
-            case "pointerdown":
-                setPointerCapture(e);
-                break;
-
-            // Unknown
-            default: System.err.println("CJScreen.handleEvent: Not handled: " + e.getType()); return;
-        }
-
-        // Run event
-        if (run != null)
-            run.run();
-    }
-
-    /**
-     * This is used to keep getting events even when mousedown goes outside window.
-     */
-    public void setPointerCapture(Event pointerEvent)
-    {
-        HTMLElement screenDiv = CJScreen.getScreenDiv();
-        int id = pointerEvent.getMemberInt("pointerId");
-        screenDiv.setPointerCapture(id);
-    }
-
-    /**
      * Returns the list of visible windows.
      */
-    public List <WindowView> getWindows()  { return _windows; }
+    public List <WindowView> getWindows()  { return _openWindows; }
 
     /**
      * Called when a window is ordered onscreen.
@@ -220,20 +124,18 @@ public class CJScreen {
     public void addWindowToScreen(WindowView aWin)
     {
         // If first window, see if 'snap_loader' needs to be removed
-        if (_windows.isEmpty())
+        if (_openWindows.isEmpty())
             removeSnapLoader();
 
         // Add to list
-        _windows.add(aWin);
+        _openWindows.add(aWin);
 
         // Set Window showing
         ViewUtils.setShowing(aWin, true);
 
-        // Make window main window
-        if (aWin.isFocusable()) {
-            _mousePressWin = aWin;
+        // Activate window
+        if (aWin.isFocusable())
             activateWindow(aWin);
-        }
     }
 
     /**
@@ -246,10 +148,10 @@ public class CJScreen {
         ViewUtils.setFocused(aWin, false);
 
         // Remove window from list
-        _windows.remove(aWin);
+        _openWindows.remove(aWin);
 
         // Activate top focusable window
-        WindowView topFocusableWindow = ListUtils.findLastMatch(_windows, WindowView::isFocusable);
+        WindowView topFocusableWindow = ListUtils.findLastMatch(_openWindows, WindowView::isFocusable);
         activateWindow(topFocusableWindow);
     }
 
@@ -258,33 +160,42 @@ public class CJScreen {
      */
     private void activateWindow(WindowView aWin)
     {
-        _win = aWin;
-        _windows.forEach(win -> ViewUtils.setFocused(win, false));
-        if (_win != null)
+        _activeWindow = aWin;
+        _openWindows.forEach(win -> ViewUtils.setFocused(win, false));
+        if (_activeWindow != null)
             ViewUtils.setFocused(aWin, true);
     }
 
     /**
-     * Called when body gets mouseMove.
+     * Handles an event.
      */
-    public void mouseMove(MouseEvent anEvent)
+    private void handleEvent(Event e)
     {
-        // Get window for MouseEvent
-        WindowView win = getWindow(anEvent);
-        if (win == null) win = _win;
-        if (win == null) return;
-
-        // Dispatch MouseMove event
-        ViewEvent event = createEvent(win, anEvent, View.MouseMove, null);
-        event.setClickCount(_clicks);
-        win.dispatchEventToWindow(event);
+        switch (e.getType()) {
+            case "mousedown" -> mouseDown((MouseEvent) e);
+            case "mousemove" -> mouseMove((MouseEvent) e);
+            case "mouseup" -> mouseUp((MouseEvent) e);
+            case "wheel" -> mouseWheel((WheelEvent) e);
+            case "keydown" -> keyDown((KeyboardEvent) e);
+            case "keyup" -> keyUp((KeyboardEvent) e);
+            case "touchstart" -> touchStart((TouchEvent) e);
+            case "touchmove" -> touchMove((TouchEvent) e);
+            case "touchend" -> touchEnd((TouchEvent) e);
+            case "pointerdown" -> setPointerCapture(e);
+            default -> System.err.println("Screen.handleEvent: Not handled: " + e.getType());
+        }
     }
 
     /**
      * Called when body gets MouseDown.
      */
-    public void mouseDown(MouseEvent anEvent)
+    private void mouseDown(MouseEvent anEvent)
     {
+        // Get MouseDownWin for event
+        _mouseDownWin = getWindow(anEvent);
+        if (_mouseDownWin == null)
+            return;
+
         // Restore focus if need be
         _focusEnabler.focus();
 
@@ -293,63 +204,77 @@ public class CJScreen {
         _clicks = time - _lastReleaseTime < 400 ? (_clicks + 1) : 1;
         _lastReleaseTime = time;
 
-        // Get MouseDownWin for event
-        WindowView mouseDownWin = getWindow(anEvent);
-        if (mouseDownWin == null)
-            return;
-
         // If not active window, either return if active is modal or make active window
-        if (mouseDownWin != _win) {
-             if (_win != null && _win.isModal())
-                return;
-             if (mouseDownWin.isFocusable())
-                 activateWindow(mouseDownWin);
+        if (_mouseDownWin != _activeWindow) {
+             if (_activeWindow != null && _activeWindow.isModal()) {
+                 _mouseDownWin = null;
+                 return;
+             }
+             if (_mouseDownWin.isFocusable())
+                 activateWindow(_mouseDownWin);
         }
-        _mouseDownWin = mouseDownWin;
 
         // Dispatch MousePress event
-        ViewEvent event = createEvent(mouseDownWin, anEvent, View.MousePress, null);
+        ViewEvent event = createEvent(_mouseDownWin, anEvent, View.MousePress);
         event.setClickCount(_clicks);
-        mouseDownWin.dispatchEventToWindow(event);
+        _mouseDownWin.dispatchEventToWindow(event);
+
+        // If modal window activated, just return
+        if (_mouseDownWin != _activeWindow) {
+            _mouseDownWin = null;
+            return;
+        }
 
         // If any draggable views under mouse press, preemptively dispatch drag gesture event to configure things in CJDom.js
-        if (!SnapEnv.isJxBrowser)
-            preemptiveDispatchDragGestureForMouseEvent(anEvent, mouseDownWin);
+        preemptiveDispatchDragGestureForMouseEvent(anEvent);
     }
 
     /**
      * Checks for any views under mouse press that handle DragGesture and sends event so they can configure things in CJDom.js.
      */
-    private void preemptiveDispatchDragGestureForMouseEvent(MouseEvent mouseDownEvent, WindowView mouseDownWin)
+    private void preemptiveDispatchDragGestureForMouseEvent(MouseEvent mouseDownEvent)
     {
-        // If MouseDownWin changed, just return. Modal window started new event loop - maybe should eat next drag/up events.
-        // There really should be more code to prevent mouse loop straddling event queues
-        if (mouseDownWin != _mouseDownWin)
-            return;
-
         // Get MousePressView
-        EventDispatcher eventDispatcher = mouseDownWin.getDispatcher();
+        EventDispatcher eventDispatcher = _mouseDownWin.getDispatcher();
         View mousePressView = eventDispatcher.getMousePressView();
 
         // If MousePressView wants DragGesture, go ahead and send event (start drag will just set cjdom._dragGestureDataTransfer)
         for (View mousePressV = mousePressView; mousePressV != null; mousePressV = mousePressV.getParent()) {
             if (mousePressV.getEventAdapter().isTypeEnabled(EventType.DragGesture)) {
-                ViewEvent dragGestureEvent = createEvent(mouseDownWin, mouseDownEvent, EventType.DragGesture, null);
-                mouseDownWin.dispatchEventToWindow(dragGestureEvent);
+                ViewEvent dragGestureEvent = createEvent(_mouseDownWin, mouseDownEvent, EventType.DragGesture);
+                _mouseDownWin.dispatchEventToWindow(dragGestureEvent);
                 break;
             }
         }
     }
 
     /**
+     * Called when body gets mouseMove.
+     */
+    private void mouseMove(MouseEvent anEvent)
+    {
+        if (_mouseDownWin != null) {
+            mouseDrag(anEvent);
+            return;
+        }
+
+        // Get window for MouseEvent
+        WindowView win = getWindow(anEvent);
+        if (win == null) win = _activeWindow;
+        if (win == null) return;
+
+        // Dispatch MouseMove event
+        ViewEvent event = createEvent(win, anEvent, View.MouseMove);
+        event.setClickCount(_clicks);
+        win.dispatchEventToWindow(event);
+    }
+
+    /**
      * Called when body gets mouseMove with MouseDown.
      */
-    public void mouseDrag(MouseEvent anEvent)
+    private void mouseDrag(MouseEvent anEvent)
     {
-        if (_mouseDownWin == null) return;
-
-        // Create and dispatch MouseDrag event
-        ViewEvent event = createEvent(_mouseDownWin, anEvent, View.MouseDrag, null);
+        ViewEvent event = createEvent(_mouseDownWin, anEvent, View.MouseDrag);
         event.setClickCount(_clicks);
         _mouseDownWin.dispatchEventToWindow(event);
     }
@@ -357,56 +282,62 @@ public class CJScreen {
     /**
      * Called when body gets mouseUp.
      */
-    public void mouseUp(MouseEvent anEvent)
+    private void mouseUp(MouseEvent anEvent)
     {
         if (_mouseDownWin == null) return;
         WindowView mouseDownWin = _mouseDownWin;
         _mouseDownWin = null;
 
         // Create and dispatch MouseRelease event
-        ViewEvent event = createEvent(mouseDownWin, anEvent, View.MouseRelease, null);
+        ViewEvent event = createEvent(mouseDownWin, anEvent, View.MouseRelease);
         event.setClickCount(_clicks);
         mouseDownWin.dispatchEventToWindow(event);
     }
 
     /* Only Y Axis Scrolling has been implemented */
-    public void mouseWheel(WheelEvent anEvent)
+    private void mouseWheel(WheelEvent anEvent)
     {
-        // Get window for WheelEvent and dispatch WheelEvent event
         WindowView win = getWindow(anEvent); if (win == null) return;
-        ViewEvent event = createEvent(win, anEvent, View.Scroll, null);
+        ViewEvent event = createEvent(win, anEvent, View.Scroll);
         win.dispatchEventToWindow(event);
     }
 
     /**
      * Called when body gets keyDown.
      */
-    public void keyDown(KeyboardEvent keyboardEvent)
+    private void keyDown(KeyboardEvent keyboardEvent)
     {
-        ViewEvent keyPressEvent = createEvent(_win, keyboardEvent, View.KeyPress, null);
-        _win.dispatchEventToWindow(keyPressEvent);
+        if (_activeWindow == null) return;
+        ViewEvent keyPressEvent = createEvent(_activeWindow, keyboardEvent, View.KeyPress);
+        _activeWindow.dispatchEventToWindow(keyPressEvent);
 
         // If event is typeable, send as KeyType too
         if (isTypeableKeyboardEvent(keyboardEvent)) {
-            ViewEvent keyTypeEvent = createEvent(_win, keyboardEvent, View.KeyType, null);
-            _win.dispatchEventToWindow(keyTypeEvent);
+            ViewEvent keyTypeEvent = createEvent(_activeWindow, keyboardEvent, View.KeyType);
+            _activeWindow.dispatchEventToWindow(keyTypeEvent);
         }
     }
 
     /**
      * Called when body gets keyUp.
      */
-    public void keyUp(KeyboardEvent keyboardEvent)
+    private void keyUp(KeyboardEvent keyboardEvent)
     {
-        ViewEvent event = createEvent(_win, keyboardEvent, View.KeyRelease, null);
-        _win.dispatchEventToWindow(event);
+        if (_activeWindow == null) return;
+        ViewEvent event = createEvent(_activeWindow, keyboardEvent, View.KeyRelease);
+        _activeWindow.dispatchEventToWindow(event);
     }
 
     /**
      * Called when body gets TouchStart.
      */
-    public void touchStart(TouchEvent anEvent)
+    private void touchStart(TouchEvent anEvent)
     {
+        // Get MouseDownWin for event
+        _mouseDownWin = getWindow(anEvent);
+        if (_mouseDownWin == null)
+            return;
+
         // Restore focus if need be
         _focusEnabler.focus();
 
@@ -417,21 +348,30 @@ public class CJScreen {
         long time = System.currentTimeMillis();
         _clicks = time - _lastReleaseTime < 400 ? (_clicks + 1) : 1; _lastReleaseTime = time;
 
-        // Get MouseDownWin for event
-        _mouseDownWin = getWindow(anEvent);
-        if (_mouseDownWin == null)
-            return;
+        // If not active window, either return if active is modal or make active window
+        if (_mouseDownWin != _activeWindow) {
+            if (_activeWindow != null && _activeWindow.isModal()) {
+                _mouseDownWin = null;
+                return;
+            }
+            if (_mouseDownWin.isFocusable())
+                activateWindow(_mouseDownWin);
+        }
 
         // Create and dispatch MousePress event
-        ViewEvent event = createEvent(_mouseDownWin, anEvent, View.MousePress, null);
+        ViewEvent event = createEvent(_mouseDownWin, anEvent, View.MousePress);
         event.setClickCount(_clicks);
         _mouseDownWin.dispatchEventToWindow(event);
+
+        // If modal window activated, just return
+        if (_mouseDownWin != _activeWindow)
+            _mouseDownWin = null;
     }
 
     /**
      * Called when body gets touchMove.
      */
-    public void touchMove(TouchEvent anEvent)
+    private void touchMove(TouchEvent anEvent)
     {
         if (_mouseDownWin == null) return;
 
@@ -439,7 +379,7 @@ public class CJScreen {
         if (anEvent.getTouch() == null) return;
 
         // Create and dispatch MouseDrag event
-        ViewEvent event = createEvent(_mouseDownWin, anEvent, View.MouseDrag, null);
+        ViewEvent event = createEvent(_mouseDownWin, anEvent, View.MouseDrag);
         event.setClickCount(_clicks);
         _mouseDownWin.dispatchEventToWindow(event);
     }
@@ -447,7 +387,7 @@ public class CJScreen {
     /**
      * Called when body gets touchEnd.
      */
-    public void touchEnd(TouchEvent anEvent)
+    private void touchEnd(TouchEvent anEvent)
     {
         if (_mouseDownWin == null) return;
 
@@ -458,100 +398,81 @@ public class CJScreen {
         _mouseDownWin = null;
 
         // Create and dispatch MouseDrag event
-        ViewEvent event = createEvent(mouseDownWin, anEvent, View.MouseRelease, null);
+        ViewEvent event = createEvent(mouseDownWin, anEvent, View.MouseRelease);
         event.setClickCount(_clicks);
         mouseDownWin.dispatchEventToWindow(event);
     }
 
     /**
-     * Called when body gets cut/copy/paste.
+     * This is used to keep getting events even when mousedown goes outside window.
      */
-    /*public void cutCopyPaste(ClipboardEvent anEvent)
+    private void setPointerCapture(Event pointerEvent)
     {
-        String type = anEvent.getType();
-        CJClipboard cb = (CJClipboard)Clipboard.get();
-        DataTransfer dtrans = anEvent.getClipboardData();
-
-        // Handle cut/copy: Load DataTransfer from Clipboard.ClipboardDatas
-        if (type.equals("cut") || type.equals("copy")) {
-            dtrans.clearData(null);
-            for (ClipboardData cdata : cb.getClipboardDatas().values())
-                if (cdata.isString())
-                    dtrans.setData(cdata.getMIMEType(), cdata.getString());
-        }
-
-        // Handle paste: Update Clipboard.ClipboardDatas from DataTransfer
-        else if (type.equals("paste")) {
-            cb.clearData();
-            for (String typ : dtrans.getTypes())
-                cb.addData(typ,dtrans.getData(typ));
-        }
-
-        // Needed to push changes to system clipboard
-        anEvent.preventDefault();
-    }*/
+        HTMLElement screenDiv = CJScreen.getScreenDiv();
+        int id = pointerEvent.getMemberInt("pointerId");
+        screenDiv.setPointerCapture(id);
+    }
 
     /**
      * Called when browser document gets focus.
      */
-    protected void handleDocumentGainedFocus(Event anEvent)
+    private void handleDocumentGainedFocus(Event anEvent)
     {
         // If no active window, activate top focusable window
-        if (_win == null) {
-            WindowView topFocusableWindow = ListUtils.findLastMatch(_windows, WindowView::isFocusable);
+        if (_activeWindow == null) {
+            WindowView topFocusableWindow = ListUtils.findLastMatch(_openWindows, WindowView::isFocusable);
             if (topFocusableWindow != null)
                 activateWindow(topFocusableWindow);
         }
 
         // Otherwise, focus active window
-        else if (_win.isFocusable())
-            ViewUtils.setFocused(_win, true);
+        else if (_activeWindow.isFocusable())
+            ViewUtils.setFocused(_activeWindow, true);
     }
 
     /**
      * Called when browser document loses focus.
      */
-    protected void handleDocumentLostFocus(Event anEvent)
+    private void handleDocumentLostFocus(Event anEvent)
     {
-        _windows.forEach(win -> ViewUtils.setFocused(win, false));
+        _openWindows.forEach(win -> ViewUtils.setFocused(win, false));
     }
 
     /**
      * Returns the WindowView for an event.
      */
-    public WindowView getWindow(MouseEvent anEvent)
+    private WindowView getWindow(MouseEvent anEvent)
     {
         int x = anEvent.getPageX();
         int y = anEvent.getPageY();
-        return getWindow(x, y);
+        return getWindowForXY(x, y);
     }
 
     /**
      * Returns the WindowView for an event.
      */
-    public WindowView getWindow(TouchEvent anEvent)
+    private WindowView getWindow(TouchEvent anEvent)
     {
         int x = anEvent.getPageX();
         int y = anEvent.getPageY();
-        return getWindow(x, y);
+        return getWindowForXY(x, y);
     }
 
     /**
      * Returns the WindowView for an event.
      */
-    public WindowView getWindow(int aX, int aY)
+    private WindowView getWindowForXY(int aX, int aY)
     {
-        return ListUtils.findLastMatch(_windows, win -> win.isMaximized() || win.contains(aX - win.getX(), aY - win.getY()));
+        return ListUtils.findLastMatch(_openWindows, win -> win.isMaximized() || win.contains(aX - win.getX(), aY - win.getY()));
     }
 
     /**
      * Creates an Event.
      */
-    ViewEvent createEvent(WindowView aWin, Object anEvent, EventType aType, String aName)
+    private ViewEvent createEvent(WindowView aWin, Object anEvent, EventType aType)
     {
         View rootView = aWin.getRootView();
-        ViewEvent event = ViewEvent.createEvent(rootView, anEvent, aType, aName);
-        return event;
+        return ViewEvent.createEvent(rootView, anEvent, aType, null);
     }
 
     /**
