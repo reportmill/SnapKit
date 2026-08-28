@@ -508,6 +508,7 @@ public class DialogBox extends FormBuilder {
         // If image provided, reset pane to RowView containing image and original root pane
         Image dialogImage = getImage();
         if (dialogImage != null) {
+            dialogImage.waitForImageLoad(); // Otherwise window might layout to placeholder size
             ImageView dialogImageView = new ImageView(dialogImage);
             RowView rowView = new RowView();
             rowView.setStyleString("Padding:15,0,0,20; Spacing:20; Align:TOP_CENTER;");
