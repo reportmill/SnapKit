@@ -231,9 +231,8 @@ public class CJScreen {
 
         // Make window main window
         if (aWin.isFocusable()) {
-            _win = _mousePressWin = aWin;
-            _windows.forEach(win -> ViewUtils.setFocused(win, false));
-            ViewUtils.setFocused(aWin, true);
+            _mousePressWin = aWin;
+            activateWindow(aWin);
         }
     }
 
@@ -249,10 +248,20 @@ public class CJScreen {
         // Remove window from list
         _windows.remove(aWin);
 
-        // Make next window in list main window
-        _win = ListUtils.findLastMatch(_windows, win -> win.isFocusable());
+        // Activate top focusable window
+        WindowView topFocusableWindow = ListUtils.findLastMatch(_windows, WindowView::isFocusable);
+        activateWindow(topFocusableWindow);
+    }
+
+    /**
+     * Activates the given window.
+     */
+    private void activateWindow(WindowView aWin)
+    {
+        _win = aWin;
+        _windows.forEach(win -> ViewUtils.setFocused(win, false));
         if (_win != null)
-            ViewUtils.setFocused(_win, true);
+            ViewUtils.setFocused(aWin, true);
     }
 
     /**
@@ -285,9 +294,18 @@ public class CJScreen {
         _lastReleaseTime = time;
 
         // Get MouseDownWin for event
-        WindowView mouseDownWin = _mouseDownWin = getWindow(anEvent);
+        WindowView mouseDownWin = getWindow(anEvent);
         if (mouseDownWin == null)
             return;
+
+        // If not active window, either return if active is modal or make active window
+        if (mouseDownWin != _win) {
+             if (_win != null && _win.isModal())
+                return;
+             if (mouseDownWin.isFocusable())
+                 activateWindow(mouseDownWin);
+        }
+        _mouseDownWin = mouseDownWin;
 
         // Dispatch MousePress event
         ViewEvent event = createEvent(mouseDownWin, anEvent, View.MousePress, null);
@@ -478,9 +496,16 @@ public class CJScreen {
      */
     protected void handleDocumentGainedFocus(Event anEvent)
     {
-        WindowView lastFocusableWin = ListUtils.findLastMatch(_windows, win -> win.isFocusable());
-        if (lastFocusableWin != null)
-            ViewUtils.setFocused(lastFocusableWin, true);
+        // If no active window, activate top focusable window
+        if (_win == null) {
+            WindowView topFocusableWindow = ListUtils.findLastMatch(_windows, WindowView::isFocusable);
+            if (topFocusableWindow != null)
+                activateWindow(topFocusableWindow);
+        }
+
+        // Otherwise, focus active window
+        else if (_win.isFocusable())
+            ViewUtils.setFocused(_win, true);
     }
 
     /**
@@ -488,11 +513,7 @@ public class CJScreen {
      */
     protected void handleDocumentLostFocus(Event anEvent)
     {
-        // This bogus - but needed for now
-        if (SnapEnv.isJxBrowser) return;
-
-        for (WindowView win : _windows)
-            ViewUtils.setFocused(win, false);
+        _windows.forEach(win -> ViewUtils.setFocused(win, false));
     }
 
     /**
@@ -520,12 +541,7 @@ public class CJScreen {
      */
     public WindowView getWindow(int aX, int aY)
     {
-        for (int i = _windows.size() - 1; i >= 0; i--) {
-            WindowView win = _windows.get(i);
-            if (win.isMaximized() || win.contains(aX - win.getX(), aY - win.getY()))
-                return win;
-        }
-        return null;
+        return ListUtils.findLastMatch(_windows, win -> win.isMaximized() || win.contains(aX - win.getX(), aY - win.getY()));
     }
 
     /**
