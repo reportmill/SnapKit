@@ -405,6 +405,7 @@ public class MarkdownView extends ChildView {
         textArea.setBorderRadius(8);
         textArea.setMargin(GENERAL_MARGIN);
         textArea.setPadding(GENERAL_PADDING);
+        textArea.setOverflow(Overflow.Scroll);
         textArea.getTextAdapter().setSelectable(true);
 
         // Reset style

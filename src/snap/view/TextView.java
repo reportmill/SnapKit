@@ -76,18 +76,6 @@ public class TextView extends TextArea {
     }
 
     /**
-     * Override to check for Overflow scroll.
-     */
-    @Override
-    protected void layoutImpl()
-    {
-        super.layoutImpl();
-
-        if (getOverflow() == View.Overflow.Scroll)
-            ViewUtils.checkWantsScrollView(this);
-    }
-
-    /**
      * Override to set ScrollView.FillWidth.
      */
     @Override

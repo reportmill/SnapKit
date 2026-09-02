@@ -420,6 +420,8 @@ public class TextArea extends ParentView {
     {
         Rect textBounds = getTextBounds();
         _textAdapter.setTextBounds(textBounds);
+        if (getOverflow() == View.Overflow.Scroll)
+            ViewUtils.checkWantsScrollView(this);
     }
 
     /**
