@@ -10,9 +10,6 @@ import snap.gfx.Stroke;
  */
 class WindowBar extends ParentView {
 
-    // The title bar view
-    private TitleBarView _titleBarView;
-
     // The content
     private View _content;
     
@@ -42,7 +39,7 @@ class WindowBar extends ParentView {
     public WindowBar(WindowView window)
     {
         super();
-        addTitleBarView(window);
+        setTitleBarHeight(window);
         addEventHandler(this::handleMouseEvent, MousePress, MouseDrag, MouseRelease);
     }
 
@@ -61,14 +58,11 @@ class WindowBar extends ParentView {
     }
 
     /**
-     * Adds the title bar view.
+     * Sets the title bar height.
      */
-    private void addTitleBarView(WindowView window)
+    private void setTitleBarHeight(WindowView window)
     {
         _titleBarHeight = window.getType() == WindowView.Type.MAIN ? 24 : 18;
-        _titleBarView = new TitleBarView();
-        _titleBarView.setPrefHeight(_titleBarHeight);
-        addChild(_titleBarView);
 
         // Create buttons
         double buttonY = 6;
@@ -191,10 +185,39 @@ class WindowBar extends ParentView {
     }
 
     /**
-     * Override to return column layout.
+     * Override to use content.
      */
     @Override
-    protected ViewLayout getViewLayoutImpl()  { return new ColViewLayout(this, true); }
+    protected double computePrefWidth(double aH)
+    {
+        View content = getContent(); if (content == null) return 0;
+        return content.getPrefWidth(aH) + content.getMargin().getWidth();
+    }
+
+    /**
+     * Override to use content and title bar height.
+     */
+    @Override
+    protected double computePrefHeight(double aW)
+    {
+        View content = getContent(); if (content == null) return 0;
+        return content.getPrefHeight(aW) + content.getMargin().getHeight() + _titleBarHeight;
+    }
+
+    /**
+     * Override to layout content.
+     */
+    @Override
+    protected void layoutImpl()
+    {
+        View content = getContent(); if (content == null) return;
+        Insets contentMargin = content.getMargin();
+        double contentX = contentMargin.left;
+        double contentY = contentMargin.top + _titleBarHeight;
+        double contentW = Math.max(getWidth() - contentMargin.right - contentX, 0);
+        double contentH = Math.max(getHeight() - contentMargin.bottom - contentY, 0);
+        content.setBounds(contentX, contentY, contentW, contentH);
+    }
 
     /**
      * Attaches a WindowBar to a window.
@@ -221,20 +244,5 @@ class WindowBar extends ParentView {
 
         // Register to repaint when Title changes
         window.addPropChangeListener(pc -> windowBar.repaint(), WindowView.Title_Prop);
-    }
-
-    /**
-     * The title bar view.
-     */
-    private static class TitleBarView extends View {
-
-        /**
-         * Constructor.
-         */
-        public TitleBarView()
-        {
-            super();
-            setPickable(false);
-        }
     }
 }

@@ -460,6 +460,6 @@ repositories {
 dependencies {
 
     // Latest release: https://github.com/reportmill/SnapKit/releases
-    implementation 'com.reportmill:snapkit:2026.03'
+    implementation 'com.reportmill:snapkit:2026.09'
 }
 ```
