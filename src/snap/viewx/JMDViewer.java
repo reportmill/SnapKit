@@ -3,6 +3,8 @@ import snap.view.*;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -63,17 +65,35 @@ public class JMDViewer {
         _markdownView.setGrowWidth(true);
 
         // Iterate over markdown view runnables and run methods
-        ViewList children = _markdownView.getChildren();
-        int runnableCount = 0;
-        for (View child : children) {
-            if (Objects.equals(child.getName(), "Runnable"))
-                runMethodForRunnableViewAtIndex((BoxView) child, runnableCount++);
-        }
+        List<BoxView> runnableViews = getRunnableViews();
+        for (BoxView runnableView : runnableViews)
+            runMethodForRunnableViewAtIndex(runnableView, runnableViews.indexOf(runnableView));
 
         // Set DoneConsole and run old create handler
         Console.setShared(new JMDDoneConsole());
         if (oldConsoleCreatedHandler != null)
             oldConsoleCreatedHandler.run();
+    }
+
+    /**
+     * Returns the runnable child views.
+     */
+    private List<BoxView> getRunnableViews()
+    {
+        List<BoxView> runnableViews = new ArrayList<>();
+        findRunnableViews(_markdownView, runnableViews);
+        return runnableViews;
+    }
+
+    /**
+     * Finds runnable views and adds to list.
+     */
+    private void findRunnableViews(View aView, List<BoxView> runnableViews)
+    {
+        if (Objects.equals(aView.getName(), "Runnable") && aView instanceof BoxView boxView)
+            runnableViews.add(boxView);
+        else if (aView instanceof ParentView parentView)
+            parentView.getChildren().forEach(view -> findRunnableViews(view, runnableViews));
     }
 
     /**
