@@ -179,6 +179,15 @@ public class TextAgent {
     }
 
     /**
+     * Standard toString implementation.
+     */
+    @Override
+    public String toString()
+    {
+        return getClass().getSimpleName() + ": " + _textFile.getUrlAddress();
+    }
+
+    /**
      * Returns the TextAgent for given file.
      */
     public static TextAgent getAgentForFile(WebFile aFile)
