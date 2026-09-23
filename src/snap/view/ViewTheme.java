@@ -173,12 +173,12 @@ public class ViewTheme {
     
             SplitView { Border: #C0 }
     
-            TableView { Fill: WHITE; Border: #C0 }
+            TableView { Fill: WHITE; Border: #C0; BorderRadius: 4 }
             TableCol { Fill: null; Border: null }
             TableCol:Active { Fill: #DA }
             TableCol:Hover { Fill: #E6; TextColor: WHITE }
     
-            TreeView { Fill: WHITE; Border: #C0 }
+            TreeView { Fill: WHITE; Border: #C0; BorderRadius: 4 }
             TreeCol { Fill: null; Border: null }
             TreeCol:Active { Fill: #DA }
             TreeCol:Hover { Fill: #E6; TextColor: WHITE }
