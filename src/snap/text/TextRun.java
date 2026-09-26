@@ -7,7 +7,7 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.util.CharSequenceUtils;
 import snap.util.CharSequenceX;
-
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -35,6 +35,12 @@ public class TextRun implements CharSequenceX, Cloneable {
 
     // The width of run
     private double _width = -1;
+
+    // Array of tab char indexes
+    private int[] _tabCharIndexes;
+
+    // Shared empty tab char index array
+    private static int[] EMPTY_TAB_CHAR_INDEX_ARRAY = new int[0];
 
     /**
      * Constructor.
@@ -186,6 +192,7 @@ public class TextRun implements CharSequenceX, Cloneable {
     {
         _length = aLength; assert (_length >= 0);
         _width = -1;
+        _tabCharIndexes = null;
     }
 
     /**
@@ -244,6 +251,29 @@ public class TextRun implements CharSequenceX, Cloneable {
     public double getLeading()  { return getFont().getLeading(); }
 
     /**
+     * Returns the tab char indexes.
+     */
+    public int[] getTabCharIndexes()
+    {
+        if (_tabCharIndexes != null) return _tabCharIndexes;
+
+        int[] tabCharIndexes = EMPTY_TAB_CHAR_INDEX_ARRAY;
+        for (int i = 0; i < length(); i++) {
+            if (charAt(i) == '\t') {
+                tabCharIndexes = Arrays.copyOf(tabCharIndexes, tabCharIndexes.length + 1);
+                tabCharIndexes[tabCharIndexes.length - 1] = i;
+            }
+        }
+
+        return tabCharIndexes;
+    }
+
+    /**
+     * Returns the X coord for given char index.
+     */
+    public double getXForCharIndex(int anIndex)  { return _textLine.getXForCharIndex(_startCharIndex + anIndex); }
+
+    /**
      * Returns the next run in line, if available.
      */
     public TextRun getNextInLine()
@@ -298,15 +328,11 @@ public class TextRun implements CharSequenceX, Cloneable {
      */
     public TextRun copyForRange(int aStart, int aEnd)
     {
-        // Do normal clone
         TextRun clone = clone();
-
-        // Reset values for range
         clone._startCharIndex += aStart;
         clone._length = aEnd - aStart;
         clone._x = clone._width = -1;
-
-        // Return
+        clone._tabCharIndexes = null;
         return clone;
     }
 
@@ -316,13 +342,8 @@ public class TextRun implements CharSequenceX, Cloneable {
     @Override
     public TextRun clone()
     {
-        // Do normal version
-        TextRun clone;
-        try { clone = (TextRun) super.clone(); }
+        try { return (TextRun) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
-
-        // Return
-        return clone;
     }
 
     /**

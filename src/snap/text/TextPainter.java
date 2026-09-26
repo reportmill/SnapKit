@@ -97,22 +97,52 @@ public class TextPainter {
 
             // Paint line run
             String runStr = lineRun.getString();
-            double runX = textLine.getTextX() + lineRun.getX();
             double charSpacing = lineRun.getTextStyle().getCharSpacing();
-            aPntr.drawString(runStr, runX, lineY, charSpacing);
 
-            // Handle TextBorder: Get outline and stroke
+            // Paint run split on tabs, so each segment lands at its own tab stop (loop is a no-op when no tabs)
+            int[] tabCharIndexes = lineRun.getTabCharIndexes();
+            paintRunSegments(aPntr, textLine, lineRun, runStr, tabCharIndexes, lineY, charSpacing, false);
+
+            // Handle TextBorder: stroke each segment with border color/stroke
             Border border = lineRun.getTextStyle().getBorder();
             if (border != null) {
                 aPntr.setPaint(border.getColor());
                 aPntr.setStroke(border.getStroke());
-                aPntr.strokeString(runStr, runX, lineY, charSpacing);
+                paintRunSegments(aPntr, textLine, lineRun, runStr, tabCharIndexes, lineY, charSpacing, true);
             }
         }
 
         // If underlined, paint underlines
         if (textLine.isUnderlined())
             paintTextLineUnderlines(aPntr, textLine);
+    }
+
+    /**
+     * Paints (or strokes) a run's substrings between tab chars, each at its own tab-stop X.
+     */
+    private void paintRunSegments(Painter aPntr, TextLine textLine, TextRun lineRun, String runStr,
+                                  int[] tabCharIndexes, double lineY, double charSpacing, boolean isStroke)
+    {
+        int segStart = 0;
+        for (int tabCharIndex : tabCharIndexes) {
+            paintRunSegment(aPntr, textLine, lineRun, runStr, segStart, tabCharIndex, lineY, charSpacing, isStroke);
+            segStart = tabCharIndex + 1;
+        }
+        paintRunSegment(aPntr, textLine, lineRun, runStr, segStart, runStr.length(), lineY, charSpacing, isStroke);
+    }
+
+    /**
+     * Paints (or strokes) run substring [start, end) at its char-index X (skips empty segments).
+     */
+    private void paintRunSegment(Painter aPntr, TextLine textLine, TextRun lineRun, String runStr,
+                     int runSegStart, int runSegEnd, double lineY, double charSpacing, boolean isStroke)
+    {
+        if (runSegEnd <= runSegStart) return;
+        String segStr = runStr.substring(runSegStart, runSegEnd);
+        double segX = textLine.getTextX() + lineRun.getXForCharIndex(runSegStart);
+        if (isStroke)
+            aPntr.strokeString(segStr, segX, lineY, charSpacing);
+        else aPntr.drawString(segStr, segX, lineY, charSpacing);
     }
 
     /**
