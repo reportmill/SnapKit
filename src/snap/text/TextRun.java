@@ -7,8 +7,7 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.util.CharSequenceUtils;
 import snap.util.CharSequenceX;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * This is class represents a range of characters in a TextLine that share the same style.
@@ -36,11 +35,8 @@ public class TextRun implements CharSequenceX, Cloneable {
     // The width of run
     private double _width = -1;
 
-    // Array of tab char indexes
-    private int[] _tabCharIndexes;
-
-    // Shared empty tab char index array
-    private static int[] EMPTY_TAB_CHAR_INDEX_ARRAY = new int[0];
+    // List of sub-runs for each tab char in this run
+    private List<TextRun> _tabRuns;
 
     /**
      * Constructor.
@@ -192,7 +188,7 @@ public class TextRun implements CharSequenceX, Cloneable {
     {
         _length = aLength; assert (_length >= 0);
         _width = -1;
-        _tabCharIndexes = null;
+        _tabRuns = null;
     }
 
     /**
@@ -251,27 +247,32 @@ public class TextRun implements CharSequenceX, Cloneable {
     public double getLeading()  { return getFont().getLeading(); }
 
     /**
-     * Returns the tab char indexes.
+     * Returns whether this run has tabs anywhere except the last character.
      */
-    public int[] getTabCharIndexes()
-    {
-        if (_tabCharIndexes != null) return _tabCharIndexes;
-
-        int[] tabCharIndexes = EMPTY_TAB_CHAR_INDEX_ARRAY;
-        for (int i = 0; i < length(); i++) {
-            if (charAt(i) == '\t') {
-                tabCharIndexes = Arrays.copyOf(tabCharIndexes, tabCharIndexes.length + 1);
-                tabCharIndexes[tabCharIndexes.length - 1] = i;
-            }
-        }
-
-        return tabCharIndexes;
-    }
+    public boolean hasInnerTabs()  { return !getTabRuns().isEmpty(); }
 
     /**
-     * Returns the X coord for given char index.
+     * Returns a list of sub-runs for each tab char in this run.
      */
-    public double getXForCharIndex(int anIndex)  { return _textLine.getXForCharIndex(_startCharIndex + anIndex); }
+    public List<TextRun> getTabRuns()
+    {
+        if (_tabRuns != null) return _tabRuns;
+
+        List<TextRun> tabRuns = Collections.emptyList();
+        int lastTabCharIndex = 0;
+
+        for (int i = 0; i < length() - 1; i++) {
+            if (charAt(i) == '\t') {
+                if (tabRuns.isEmpty()) tabRuns = new ArrayList<>();
+                tabRuns.add(copyForRange(lastTabCharIndex, i + 1));
+                lastTabCharIndex = i + 1;
+            }
+        }
+        if (!tabRuns.isEmpty() && lastTabCharIndex < length())
+            tabRuns.add(copyForRange(lastTabCharIndex, length()));
+
+        return _tabRuns = tabRuns;
+    }
 
     /**
      * Returns the next run in line, if available.
@@ -332,7 +333,7 @@ public class TextRun implements CharSequenceX, Cloneable {
         clone._startCharIndex += aStart;
         clone._length = aEnd - aStart;
         clone._x = clone._width = -1;
-        clone._tabCharIndexes = null;
+        clone._tabRuns = null;
         return clone;
     }
 

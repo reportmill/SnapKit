@@ -88,28 +88,11 @@ public class TextPainter {
         TextRun[] lineRuns = textLine.getRuns();
         double lineY = textLine.getBaseline() + textLayout.getAlignedY();
 
-        // Iterate over line runs
+        // Iterate over line runs and paint each (or tab-runs, if run has tab(s))
         for (TextRun lineRun : lineRuns) {
-
-            // Set lineRun font and color
-            aPntr.setFont(lineRun.getFont());
-            aPntr.setPaint(lineRun.getColor());
-
-            // Paint line run
-            String runStr = lineRun.getString();
-            double charSpacing = lineRun.getTextStyle().getCharSpacing();
-
-            // Paint run split on tabs, so each segment lands at its own tab stop (loop is a no-op when no tabs)
-            int[] tabCharIndexes = lineRun.getTabCharIndexes();
-            paintRunSegments(aPntr, textLine, lineRun, runStr, tabCharIndexes, lineY, charSpacing, false);
-
-            // Handle TextBorder: stroke each segment with border color/stroke
-            Border border = lineRun.getTextStyle().getBorder();
-            if (border != null) {
-                aPntr.setPaint(border.getColor());
-                aPntr.setStroke(border.getStroke());
-                paintRunSegments(aPntr, textLine, lineRun, runStr, tabCharIndexes, lineY, charSpacing, true);
-            }
+            if (lineRun.hasInnerTabs())
+                lineRun.getTabRuns().forEach(run -> paintTextRun(aPntr, run, lineY));
+            else paintTextRun(aPntr, lineRun, lineY);
         }
 
         // If underlined, paint underlines
@@ -118,31 +101,25 @@ public class TextPainter {
     }
 
     /**
-     * Paints (or strokes) a run's substrings between tab chars, each at its own tab-stop X.
+     * Paints the given run.
      */
-    private void paintRunSegments(Painter aPntr, TextLine textLine, TextRun lineRun, String runStr,
-                                  int[] tabCharIndexes, double lineY, double charSpacing, boolean isStroke)
+    private void paintTextRun(Painter aPntr, TextRun textRun, double lineY)
     {
-        int segStart = 0;
-        for (int tabCharIndex : tabCharIndexes) {
-            paintRunSegment(aPntr, textLine, lineRun, runStr, segStart, tabCharIndex, lineY, charSpacing, isStroke);
-            segStart = tabCharIndex + 1;
-        }
-        paintRunSegment(aPntr, textLine, lineRun, runStr, segStart, runStr.length(), lineY, charSpacing, isStroke);
-    }
+        aPntr.setFont(textRun.getFont());
+        aPntr.setPaint(textRun.getColor());
 
-    /**
-     * Paints (or strokes) run substring [start, end) at its char-index X (skips empty segments).
-     */
-    private void paintRunSegment(Painter aPntr, TextLine textLine, TextRun lineRun, String runStr,
-                     int runSegStart, int runSegEnd, double lineY, double charSpacing, boolean isStroke)
-    {
-        if (runSegEnd <= runSegStart) return;
-        String segStr = runStr.substring(runSegStart, runSegEnd);
-        double segX = textLine.getTextX() + lineRun.getXForCharIndex(runSegStart);
-        if (isStroke)
-            aPntr.strokeString(segStr, segX, lineY, charSpacing);
-        else aPntr.drawString(segStr, segX, lineY, charSpacing);
+        // Get run string and x and draw string
+        String runStr = textRun.getString();
+        double runX = textRun.getLine().getTextX() + textRun.getX();
+        aPntr.drawString(runStr, runX, lineY, textRun.getCharSpacing());
+
+        // Handle TextBorder: stroke each segment with border color/stroke
+        Border border = textRun.getBorder();
+        if (border != null) {
+            aPntr.setPaint(border.getColor());
+            aPntr.setStroke(border.getStroke());
+            aPntr.strokeString(runStr, runX, lineY, textRun.getCharSpacing());
+        }
     }
 
     /**
