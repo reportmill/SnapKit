@@ -220,7 +220,7 @@ public class CJScreen {
         _mouseDownWin.dispatchEventToWindow(event);
 
         // If modal window activated, just return
-        if (_mouseDownWin != _activeWindow) {
+        if (_mouseDownWin != _activeWindow && !(_mouseDownWin instanceof PopupWindow)) {
             _mouseDownWin = null;
             return;
         }
