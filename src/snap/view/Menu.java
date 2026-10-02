@@ -87,7 +87,6 @@ public class Menu extends MenuItem {
      */
     public void addItem(MenuItem aMenuItem)
     {
-        // Add item
         _items.add(aMenuItem);
         aMenuItem._parentMenu = this;
 
@@ -99,11 +98,7 @@ public class Menu extends MenuItem {
     /**
      * Adds a separator.
      */
-    public void addSeparator()
-    {
-        MenuItem seperator = new MenuItem();
-        addItem(seperator);
-    }
+    public void addSeparator()  { addItem(new MenuItem()); }
 
     /**
      * Returns a popup node for this menu.
@@ -157,13 +152,8 @@ public class Menu extends MenuItem {
      */
     public void hide()
     {
-        // If already set, just return
         if (_popupWindow == null) return;
-
-        // Hide PopupWindow
         _popupWindow.hide();
-
-        // Clear PopupWindow
         _popupWindow = null;
     }
 
@@ -175,7 +165,7 @@ public class Menu extends MenuItem {
     /**
      * Hides this menu and parent menus.
      */
-    protected void hideAll()
+    void hideAll()
     {
         if (_parentMenu != null)
             _parentMenu.hideAll();
@@ -185,7 +175,7 @@ public class Menu extends MenuItem {
     /**
      * Hides child menu popup windows.
      */
-    protected void hideChildPopupWindows()
+    void hideChildPopupWindows()
     {
         PopupWindow popupWindow = getPopup();
         if (popupWindow != null) {
@@ -196,21 +186,14 @@ public class Menu extends MenuItem {
     }
 
     /**
-     * Called when child MenuItem fires action.
-     */
-    protected void itemFiredActionEvent()
-    {
-        hideAll();
-    }
-
-    /**
      * Override to show popup.
      */
     @Override
     protected void fireActionEvent(ViewEvent anEvent)
     {
-        // Show menu
-        showMenu();
+        if (isPopupShowing())
+            hide();
+        else showMenu();
     }
 
     /**

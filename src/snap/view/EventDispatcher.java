@@ -2,9 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-
 import java.util.*;
-
 import snap.util.ArrayUtils;
 import snap.viewx.DevPane;
 
@@ -577,8 +575,15 @@ public class EventDispatcher {
     private void checkIfPopupNeedsClose(ViewEvent anEvent)
     {
         // Any MousePress in main window should hide popup
-        if (anEvent.isMousePress())
+        if (anEvent.isMousePress()) {
+
+            // If mousedown in popup client view, just return
+            View clientView = _popup.getClientView();
+            if (clientView != null && clientView.contains(anEvent.getPointForView(clientView)))
+                return;
+
             _popup.hide();
+        }
 
         // Any KeyPress in main window should hide popup
         else if (anEvent.isKeyPress() && anEvent.isEscapeKey())

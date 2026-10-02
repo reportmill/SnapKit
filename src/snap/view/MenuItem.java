@@ -191,7 +191,7 @@ public class MenuItem extends ButtonBase {
 
         // Notify ParentMenu that action fired
         if (_parentMenu != null)
-            _parentMenu.itemFiredActionEvent();
+            _parentMenu.hideAll();
     }
 
     /**
