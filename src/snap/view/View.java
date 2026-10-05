@@ -682,7 +682,7 @@ public class View extends PropObject implements EventType.AllTypes {
 
         // Otherwise, return parent or hard coded default
         View par = getParent();
-        return par != null ? par.getFont() : Font.Arial11;
+        return par != null ? par.getFont() : Font.Arial12;
     }
 
     /**
