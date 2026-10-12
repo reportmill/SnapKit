@@ -173,12 +173,6 @@ public class PainterDVR extends PainterImpl {
         add(new Restore());
     }
 
-    /** Override to forward to real painter. */
-    public Props getProps()
-    {
-        return _pntr != null ? _pntr.getProps() : null;
-    }
-
     /**
      * Adds an instruction.
      */

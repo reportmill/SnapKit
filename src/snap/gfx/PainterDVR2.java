@@ -42,7 +42,7 @@ public class PainterDVR2 extends PainterImpl {
     protected int _nativeStackSize = 0;
 
     // The Painter (for EffectPntr)
-    protected Painter  _pntr;
+    protected Painter _pntr;
 
     // Constants for operations
     public static final int SET_FONT = 1;
@@ -64,12 +64,7 @@ public class PainterDVR2 extends PainterImpl {
     public static final int SET_IMAGE_QUALITY = 17;
 
     /**
-     * Constructor.
-     */
-    public PainterDVR2()  { }
-
-    /**
-     * Constructor for given painter (which supports applyEffect()).
+     * Constructor for given painter.
      */
     public PainterDVR2(Painter aPntr)
     {
@@ -368,22 +363,6 @@ public class PainterDVR2 extends PainterImpl {
         addDouble(aValue);
     }
 
-    /** Override to forward to real painter. */
-    public Props getProps()
-    {
-        return _pntr != null ? _pntr.getProps() : null;
-    }
-
-    /**
-     * Standard equals implementation.
-     */
-    public boolean equals(Object anObj)
-    {
-        if (anObj == this) return true;
-        System.err.println("PainterDVR2: equals not implemented");
-        return true;
-    }
-
     /**
      * Adds a transform.
      */
@@ -492,7 +471,7 @@ public class PainterDVR2 extends PainterImpl {
             _painter.setPaint(paint);
         }
 
-        public void setStroke()
+        private Stroke getStroke()
         {
             // Get line width
             double lineWidth = getDouble();
@@ -515,8 +494,12 @@ public class PainterDVR2 extends PainterImpl {
             Stroke.Join join = joinInt == 0 ? Stroke.Join.Round : joinInt == 1 ? Stroke.Join.Bevel : Stroke.Join.Miter;
             double miterLimit = joinInt == 2 ? getDouble() : 0;
 
-            // Create/set stroke
-            Stroke stroke = new Stroke(lineWidth, cap, join, miterLimit, dashArray, dashOffset);
+            return new Stroke(lineWidth, cap, join, miterLimit, dashArray, dashOffset);
+        }
+
+        public void setStroke()
+        {
+            Stroke stroke = getStroke();
             _painter.setStroke(stroke);
         }
 
@@ -547,8 +530,7 @@ public class PainterDVR2 extends PainterImpl {
         public void drawImage2()
         {
             Image image = (Image) getNative();
-            Transform xfm = null;
-            _painter.drawImage(image, xfm);
+            _painter.drawImage(image, null);
         }
 
         public void drawImage()

@@ -12,36 +12,38 @@ import java.util.*;
 public abstract class Painter {
     
     // The image quality
-    private double  _imageQuality = .5;
+    private double _imageQuality = .5;
     
     // Whether stroked path is used as is (otherwise, points might be rounded)
     private boolean _strokePure;
 
     // The composite mode
-    private Composite  _composite = Composite.SRC_OVER;
+    private Composite _composite = Composite.SRC_OVER;
 
     // Whether painting is being done for static output
-    private boolean  _printing;
+    private boolean _printing;
     
     // A shared rect for draw/fill/clipRect calls
-    private Rect  _rect = new Rect();
+    private Rect _rect = new Rect();
     
     // A shared line for drawLine calls
-    private Line  _line = new Line(0, 0, 0, 0);
+    private Line _line = new Line(0, 0, 0, 0);
     
     // Constants for composite
     public enum Composite { SRC_OVER, SRC_IN, DST_IN, DST_OUT }
 
     /**
+     * Constructor.
+     */
+    public Painter()
+    {
+        super();
+    }
+
+    /**
      * Returns the current color.
      */
-    public Color getColor()
-    {
-        Paint paint = getPaint();
-        if (paint instanceof Color)
-            return (Color) paint;
-        return null;
-    }
+    public Color getColor()  { return getPaint() instanceof Color color ? color : null; }
 
     /**
      * Sets the current color.
@@ -413,16 +415,6 @@ public abstract class Painter {
     public void setPrinting(boolean aValue)  { _printing = aValue; }
 
     /**
-     * Returns the object that provides extra painter properties.
-     */
-    public Props getProps()  { return _props; } Props _props;
-
-    /**
-     * Sets the object that provides extra painter properties.
-     */
-    public void setProps(Props theProps)  { _props = theProps; }
-
-    /**
      * Saves the graphics state.
      */
     public abstract void save();
@@ -496,24 +488,6 @@ public abstract class Painter {
     }
 
     /**
-     * Standard toString implementation.
-     */
-    public String toString()
-    {
-        return getClass().getName() + " { font=" + getFont() + ", color=" + getColor() + " }";
-    }
-
-    /**
-     * A class that provide extra painter properties.
-     */
-    public static class Props {
-
-        Map<String,Object> _map = new HashMap<>();
-        public Object getProp(String aKey)  { return _map.get(aKey); }
-        public Object setProp(String aKey, Object aVal)  { return _map.put(aKey, aVal); }
-    }
-
-    /**
      * Draws an oval.
      */
     public void drawOval(double x, double y, double width, double height)  { draw(new Ellipse(x, y, width, height)); }
@@ -539,19 +513,27 @@ public abstract class Painter {
         fill(new RoundRect(x, y, width, height, roundRadius));
     }
 
-//public void draw/fillArc(int x, int y, int width, int height, int startAngle, int arcAngle);
-//public void drawPolyline(int xPoints[], int yPoints[], int nPoints);
-//public void draw/fillPolygon(int xPoints[], int yPoints[], int nPoints);
-//public void fillPolygon(Polygon p);
-//public void shear(double shx, double shy);
-//public void setBackground(Color color);
-//public void setPaintMode();
-//public void setXORMode(Color c1);
-//public Graphics create(int x, int y, int width, int height) { }
-//public void copyArea(int x, int y, int width, int height, int dx, int dy);
-//public boolean hit(Rectangle rect, Shape s, boolean onStroke);
-//public boolean hitClip(int x, int y, int width, int height);
-//public GraphicsConfiguration getDeviceConfiguration();
-//public FontMetrics getFontMetrics(), getFontRenderContext();
+    /**
+     * Standard toString implementation.
+     */
+    @Override
+    public String toString()
+    {
+        return getClass().getName() + " { font=" + getFont() + ", color=" + getColor() + " }";
+    }
 
+    //public void draw/fillArc(int x, int y, int width, int height, int startAngle, int arcAngle);
+    //public void drawPolyline(int xPoints[], int yPoints[], int nPoints);
+    //public void draw/fillPolygon(int xPoints[], int yPoints[], int nPoints);
+    //public void fillPolygon(Polygon p);
+    //public void shear(double shx, double shy);
+    //public void setBackground(Color color);
+    //public void setPaintMode();
+    //public void setXORMode(Color c1);
+    //public Graphics create(int x, int y, int width, int height) { }
+    //public void copyArea(int x, int y, int width, int height, int dx, int dy);
+    //public boolean hit(Rectangle rect, Shape s, boolean onStroke);
+    //public boolean hitClip(int x, int y, int width, int height);
+    //public GraphicsConfiguration getDeviceConfiguration();
+    //public FontMetrics getFontMetrics(), getFontRenderContext();
 }
