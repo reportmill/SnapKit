@@ -105,11 +105,6 @@ public class TextField extends TextArea {
     }
 
     /**
-     * Returns the total column width.
-     */
-    private double getTotalColWidth()  { return Math.ceil(_colCount * getFont().charAdvance('X')); }
-
-    /**
      * Returns the prompt text.
      */
     public String getPromptText()  { return _promptText; }
@@ -281,11 +276,12 @@ public class TextField extends TextArea {
     @Override
     protected double computePrefWidth(double aH)
     {
-        Insets ins = getInsetsAll();
-        double prefW1 = getColCount() > 0 ? getTotalColWidth() : _textAdapter.getPrefWidth();
-        double prefW2 = _promptLabel.getPrefWidth();
-        double prefW3 = Math.max(prefW1, prefW2);
-        return prefW3 + ins.getWidth();
+        double textPrefW = _textAdapter.getPrefWidth();
+        if (!isPrefWidthSet() && !isMinWidthSet() && !isGrowWidth() && getColCount() > 0)
+            textPrefW = Math.ceil(getColCount() * getFont().charAdvance('W'));
+        double promptLabelPrefW = _promptLabel.getPrefWidth();
+        double contentPrefW = Math.max(textPrefW, promptLabelPrefW);
+        return contentPrefW + getInsetsAll().getWidth();
     }
 
     /**
